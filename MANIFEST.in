@@ -1,0 +1,2 @@
+include versioneer.py
+include pvfactors/_version.py

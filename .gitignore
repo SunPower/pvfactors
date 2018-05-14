@@ -1,0 +1,21 @@
+# ide
+*.project
+*.pydevproject
+*.ipynb_checkpoints
+.cache/
+.idea/
+
+# files
+*.pyc
+
+.settings/
+
+# build
+pvfactors.egg-info/
+
+# docs
+pvfactors/docs/_build/
+
+# tests
+*__pycache__/
+.pytest_cache/
