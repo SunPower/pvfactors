@@ -1,0 +1,24 @@
+.. _whatsnew_0100:
+
+v0.1.0 (May 14, 2018)
+======================
+
+This is the first release of pvfactors.
+We hope this package will help answer some important questions on irradiance
+calculation for the PV industry.
+
+* Use shapely and geodataframes to create 2D PV array geometries and record them
+* Add ability to discretize ''pvrow'' surfaces in order to calculate irradiance distributions (eg diffuse shading)
+* Use Perez diffuse light model
+* Add multiprocessing and improve computational speed
+* Create extensive documentation including a Jupyter notebook tutorial
+* Implement circumsolar and horizon band shading to improve diffuse shading calculations
+* Created tools functions for running timeseries simulations
+* Make package compatible with Python3
+* Add continuous integration with CircleCI
+* Add versioneer for "auto-versioning" of package
+
+Contributors
+------------
+
+* Marc Anoma
