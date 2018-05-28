@@ -1,0 +1,1838 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>VF Model: Jupyter notebook guide &#8212; pvfactors 3.0.0 documentation</title>
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" src="../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Details on classes and modules" href="class_details.html" />
+    <link rel="prev" title="How to use the model for single-point calculation" href="how_to.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  <div class="document">
+    
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<p class="logo">
+  <a href="../index.html">
+    <img class="logo" src="../_static/sp_2014_logo_black_orange_rgb.png" alt="Logo"/>
+    
+  </a>
+</p>
+
+
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=SunPower&repo=pvfactors&type=watch&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../theory/index.html">Theory</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Developer docs</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="how_to.html">How to use the model for single-point calculation</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">VF Model: Jupyter notebook guide</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#Create-PV-Array-of-3-rows">Create PV Array of 3 rows</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Direct-shading:-still-in-development">Direct shading: still in development</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Surface-Registry">Surface Registry</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#View-factor-matrix">View factor matrix</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Calculate-radiosities-for-single-time-point-and-using-isotropic-diffuse-sky-dome">Calculate radiosities for single time point and using isotropic diffuse sky dome</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Timeseries-calculation-of-radiosity-terms">Timeseries calculation of radiosity terms</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#For-simple-continuous-surfaces">For simple continuous surfaces</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#For-discretized-surfaces">For discretized surfaces</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="class_details.html">Details on classes and modules</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../whatsnew.html">What’s New</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="index.html">Developer docs</a><ul>
+      <li>Previous: <a href="how_to.html" title="previous chapter">How to use the model for single-point calculation</a></li>
+      <li>Next: <a href="class_details.html" title="next chapter">Details on classes and modules</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  
+<style>
+/* CSS for nbsphinx extension */
+
+/* remove conflicting styling from Sphinx themes */
+div.nbinput,
+div.nbinput div.prompt,
+div.nbinput div.input_area,
+div.nbinput div[class*=highlight],
+div.nbinput div[class*=highlight] pre,
+div.nboutput,
+div.nbinput div.prompt,
+div.nbinput div.output_area,
+div.nboutput div[class*=highlight],
+div.nboutput div[class*=highlight] pre {
+    background: none;
+    border: none;
+    padding: 0 0;
+    margin: 0;
+    box-shadow: none;
+}
+
+/* avoid gaps between output lines */
+div.nboutput div[class*=highlight] pre {
+    line-height: normal;
+}
+
+/* input/output containers */
+div.nbinput,
+div.nboutput {
+    display: -webkit-flex;
+    display: flex;
+    align-items: flex-start;
+    margin: 0;
+    width: 100%;
+}
+@media (max-width: 540px) {
+    div.nbinput,
+    div.nboutput {
+        flex-direction: column;
+    }
+}
+
+/* input container */
+div.nbinput {
+    padding-top: 5px;
+}
+
+/* last container */
+div.nblast {
+    padding-bottom: 5px;
+}
+
+/* input prompt */
+div.nbinput div.prompt pre {
+    color: #303F9F;
+}
+
+/* output prompt */
+div.nboutput div.prompt pre {
+    color: #D84315;
+}
+
+/* all prompts */
+div.nbinput div.prompt,
+div.nboutput div.prompt {
+    min-width: 8ex;
+    padding-top: 0.4em;
+    padding-right: 0.4em;
+    text-align: right;
+    flex: 0;
+}
+@media (max-width: 540px) {
+    div.nbinput div.prompt,
+    div.nboutput div.prompt {
+        text-align: left;
+        padding: 0.4em;
+    }
+    div.nboutput div.prompt.empty {
+        padding: 0;
+    }
+}
+
+/* disable scrollbars on prompts */
+div.nbinput div.prompt pre,
+div.nboutput div.prompt pre {
+    overflow: hidden;
+}
+
+/* input/output area */
+div.nbinput div.input_area,
+div.nboutput div.output_area {
+    padding: 0.4em;
+    -webkit-flex: 1;
+    flex: 1;
+    overflow: auto;
+}
+@media (max-width: 540px) {
+    div.nbinput div.input_area,
+    div.nboutput div.output_area {
+        width: 100%;
+    }
+}
+
+/* input area */
+div.nbinput div.input_area {
+    border: 1px solid #cfcfcf;
+    border-radius: 2px;
+    background: #f7f7f7;
+}
+
+/* override MathJax center alignment in output cells */
+div.nboutput div[class*=MathJax] {
+    text-align: left !important;
+}
+
+/* override sphinx.ext.pngmath center alignment in output cells */
+div.nboutput div.math p {
+    text-align: left;
+}
+
+/* standard error */
+div.nboutput div.output_area.stderr {
+    background: #fdd;
+}
+
+/* ANSI colors */
+.ansi-black-fg { color: #3E424D; }
+.ansi-black-bg { background-color: #3E424D; }
+.ansi-black-intense-fg { color: #282C36; }
+.ansi-black-intense-bg { background-color: #282C36; }
+.ansi-red-fg { color: #E75C58; }
+.ansi-red-bg { background-color: #E75C58; }
+.ansi-red-intense-fg { color: #B22B31; }
+.ansi-red-intense-bg { background-color: #B22B31; }
+.ansi-green-fg { color: #00A250; }
+.ansi-green-bg { background-color: #00A250; }
+.ansi-green-intense-fg { color: #007427; }
+.ansi-green-intense-bg { background-color: #007427; }
+.ansi-yellow-fg { color: #DDB62B; }
+.ansi-yellow-bg { background-color: #DDB62B; }
+.ansi-yellow-intense-fg { color: #B27D12; }
+.ansi-yellow-intense-bg { background-color: #B27D12; }
+.ansi-blue-fg { color: #208FFB; }
+.ansi-blue-bg { background-color: #208FFB; }
+.ansi-blue-intense-fg { color: #0065CA; }
+.ansi-blue-intense-bg { background-color: #0065CA; }
+.ansi-magenta-fg { color: #D160C4; }
+.ansi-magenta-bg { background-color: #D160C4; }
+.ansi-magenta-intense-fg { color: #A03196; }
+.ansi-magenta-intense-bg { background-color: #A03196; }
+.ansi-cyan-fg { color: #60C6C8; }
+.ansi-cyan-bg { background-color: #60C6C8; }
+.ansi-cyan-intense-fg { color: #258F8F; }
+.ansi-cyan-intense-bg { background-color: #258F8F; }
+.ansi-white-fg { color: #C5C1B4; }
+.ansi-white-bg { background-color: #C5C1B4; }
+.ansi-white-intense-fg { color: #A1A6B2; }
+.ansi-white-intense-bg { background-color: #A1A6B2; }
+
+.ansi-default-inverse-fg { color: #FFFFFF; }
+.ansi-default-inverse-bg { background-color: #000000; }
+
+.ansi-bold { font-weight: bold; }
+.ansi-underline { text-decoration: underline; }
+</style>
+<div class="section" id="VF-Model:-Jupyter-notebook-guide">
+<h1>VF Model: Jupyter notebook guide<a class="headerlink" href="#VF-Model:-Jupyter-notebook-guide" title="Permalink to this headline">¶</a></h1>
+<p>Updated on 1/23/2018 by Marc Anoma</p>
+<p>This Jupyter notebook demonstrates how to use the package for irradiance
+calculations.</p>
+<h3><p>Imports and settings</p>
+</h3><div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython2 notranslate"><div class="highlight"><pre>
+<span></span><span class="c1"># Import external libraries</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="kn">as</span> <span class="nn">plt</span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="kn">as</span> <span class="nn">pd</span>
+
+<span class="c1"># Import class from package</span>
+<span class="kn">from</span> <span class="nn">pvfactors.pvarray</span> <span class="kn">import</span> <span class="n">Array</span>
+<span class="kn">from</span> <span class="nn">pvfactors.tools</span> <span class="kn">import</span> <span class="p">(</span><span class="n">plot_surface_registry</span><span class="p">,</span>
+                            <span class="n">calculate_radiosities_serially_perez</span><span class="p">)</span>
+
+<span class="c1"># Settings</span>
+<span class="o">%</span> <span class="n">matplotlib</span> <span class="n">inline</span>
+<span class="n">np</span><span class="o">.</span><span class="n">set_printoptions</span><span class="p">(</span><span class="n">precision</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">300</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="stderr output_area docutils container">
+<div class="highlight"><pre>
+WARNING:Fiona:PROJ data files not located, PROJ_LIB not set
+</pre></div></div>
+</div>
+<div class="section" id="Create-PV-Array-of-3-rows">
+<h2>Create PV Array of 3 rows<a class="headerlink" href="#Create-PV-Array-of-3-rows" title="Permalink to this headline">¶</a></h2>
+<p>We provide 2 examples for creating PV arrays.</p>
+<ul class="simple">
+<li>one where the PV array is created with continuous array surfaces</li>
+<li>and one where we discretize the front surface of the middle PV row</li>
+</ul>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython2 notranslate"><div class="highlight"><pre>
+<span></span><span class="c1"># Arguments</span>
+<span class="n">arguments</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;n_pvrows&#39;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>
+    <span class="s1">&#39;pvrow_height&#39;</span><span class="p">:</span> <span class="mf">1.75</span><span class="p">,</span>
+    <span class="s1">&#39;pvrow_width&#39;</span><span class="p">:</span> <span class="mf">2.44</span><span class="p">,</span>
+    <span class="s1">&#39;array_azimuth&#39;</span><span class="p">:</span> <span class="mf">90.</span><span class="p">,</span>  <span class="c1"># south-north oriented torque-tubes</span>
+    <span class="s1">&#39;array_tilt&#39;</span><span class="p">:</span> <span class="mf">20.</span><span class="p">,</span>  <span class="c1"># positive rotation angles in the east</span>
+    <span class="s1">&#39;gcr&#39;</span><span class="p">:</span> <span class="mf">0.4</span><span class="p">,</span>
+    <span class="s1">&#39;solar_zenith&#39;</span><span class="p">:</span> <span class="mf">20.</span><span class="p">,</span>
+    <span class="s1">&#39;solar_azimuth&#39;</span><span class="p">:</span> <span class="mf">90.</span><span class="p">,</span>  <span class="c1"># sun located in the east</span>
+    <span class="s1">&#39;rho_ground&#39;</span><span class="p">:</span> <span class="mf">0.2</span><span class="p">,</span>
+    <span class="s1">&#39;rho_front_pvrow&#39;</span><span class="p">:</span> <span class="mf">0.01</span><span class="p">,</span>
+    <span class="s1">&#39;rho_back_pvrow&#39;</span><span class="p">:</span> <span class="mf">0.03</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython2 notranslate"><div class="highlight"><pre>
+<span></span><span class="c1"># Create array object</span>
+<span class="n">array_simple</span> <span class="o">=</span> <span class="n">Array</span><span class="p">(</span><span class="o">**</span><span class="n">arguments</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython2 notranslate"><div class="highlight"><pre>
+<span></span><span class="c1"># Plot the PV array geometry</span>
+<span class="n">f</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">17</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span>
+<span class="n">plot_surface_registry</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="n">array_simple</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/developer_pvfactors_demo_8_0.png" src="../_images/developer_pvfactors_demo_8_0.png" />
+</div>
+</div>
+<p>Discretize the front surface of middle tracker into 5 segments</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython2 notranslate"><div class="highlight"><pre>
+<span></span><span class="c1"># Add discretization option into arguments</span>
+<span class="n">arguments_discretize</span> <span class="o">=</span> <span class="n">arguments</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+<span class="n">arguments_discretize</span><span class="p">[</span><span class="s1">&#39;cut&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="s1">&#39;front&#39;</span><span class="p">)]</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython2 notranslate"><div class="highlight"><pre>
+<span></span><span class="c1"># Create array object</span>
+<span class="n">array_discretized</span> <span class="o">=</span> <span class="n">Array</span><span class="p">(</span><span class="o">**</span><span class="n">arguments_discretize</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython2 notranslate"><div class="highlight"><pre>
+<span></span><span class="c1"># Plot the PV array geometry</span>
+<span class="n">f</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">17</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span>
+<span class="n">plot_surface_registry</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="n">array_discretized</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/developer_pvfactors_demo_12_0.png" src="../_images/developer_pvfactors_demo_12_0.png" />
+</div>
+</div>
+<p>The PV array and solar angles can be updated as follows: For example, we
+can rotate the array to -20 degrees</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [8]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython2 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">solar_zenith</span> <span class="o">=</span> <span class="mf">20.</span>
+<span class="n">solar_azimuth</span> <span class="o">=</span> <span class="mf">90.</span>
+<span class="n">array_tilt</span> <span class="o">=</span> <span class="o">-</span><span class="mf">20.</span>
+<span class="n">array_azimuth</span> <span class="o">=</span> <span class="mf">90.</span>
+<span class="n">array_discretized</span><span class="o">.</span><span class="n">update_view_factors</span><span class="p">(</span><span class="n">solar_zenith</span><span class="p">,</span> <span class="n">solar_azimuth</span><span class="p">,</span>
+                                      <span class="n">array_tilt</span><span class="p">,</span> <span class="n">array_azimuth</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [9]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython2 notranslate"><div class="highlight"><pre>
+<span></span><span class="c1"># Plot the PV array geometry</span>
+<span class="n">f</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">17</span><span class="p">,</span><span class="mi">5</span><span class="p">))</span>
+<span class="n">plot_surface_registry</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="n">array_discretized</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/developer_pvfactors_demo_15_0.png" src="../_images/developer_pvfactors_demo_15_0.png" />
+</div>
+</div>
+</div>
+<div class="section" id="Direct-shading:-still-in-development">
+<h2>Direct shading: still in development<a class="headerlink" href="#Direct-shading:-still-in-development" title="Permalink to this headline">¶</a></h2>
+<p>We can also look at cases of direct shading, but that part needs more
+development.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [10]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython2 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">solar_zenith</span> <span class="o">=</span> <span class="mf">80.</span>
+<span class="n">solar_azimuth</span> <span class="o">=</span> <span class="mf">90.</span>
+<span class="n">array_tilt</span> <span class="o">=</span> <span class="mf">70.</span>
+<span class="n">array_azimuth</span> <span class="o">=</span> <span class="mf">90.</span>
+<span class="n">array_simple</span><span class="o">.</span><span class="n">update_view_factors</span><span class="p">(</span><span class="n">solar_zenith</span><span class="p">,</span> <span class="n">solar_azimuth</span><span class="p">,</span>
+                                 <span class="n">array_tilt</span><span class="p">,</span> <span class="n">array_azimuth</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [11]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython2 notranslate"><div class="highlight"><pre>
+<span></span><span class="c1"># Plot the PV array geometry</span>
+<span class="n">f</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">17</span><span class="p">,</span><span class="mi">5</span><span class="p">))</span>
+<span class="n">plot_surface_registry</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="n">array_simple</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/developer_pvfactors_demo_19_0.png" src="../_images/developer_pvfactors_demo_19_0.png" />
+</div>
+</div>
+<p>We can see in the figure above that the middle and the right trackers
+are undergoing some row-to-row shading</p>
+</div>
+<div class="section" id="Surface-Registry">
+<h2>Surface Registry<a class="headerlink" href="#Surface-Registry" title="Permalink to this headline">¶</a></h2>
+<p>The surface registry of the array contains all the info necessary for
+the calculations, including the <code class="docutils literal notranslate"><span class="pre">shapely</span></code> geometries. The user can for
+instance select elements of the PV array by filtering on “line_type”
+(PV row or ground surface), “shaded” (is the surface shaded?),
+“surface_side” (which side of the surface), etc.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [12]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython2 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">array_simple</span><span class="o">.</span><span class="n">surface_registry</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>Out[12]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div>
+<style>
+    .dataframe thead tr:only-child th {
+        text-align: right;
+    }
+
+    .dataframe thead th {
+        text-align: left;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>line_registry_index</th>
+      <th>pvrow_index</th>
+      <th>geometry</th>
+      <th>style</th>
+      <th>shaded</th>
+      <th>line_type</th>
+      <th>edge_point</th>
+      <th>surface_side</th>
+      <th>irradiance_term</th>
+      <th>reflectivity</th>
+      <th>q0</th>
+      <th>qinc</th>
+      <th>area</th>
+      <th>index_pvrow_neighbor</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>0</td>
+      <td>0</td>
+      <td>LINESTRING (-0.4172645748573156 0.603575002641...</td>
+      <td>-</td>
+      <td>False</td>
+      <td>pvrow</td>
+      <td>POINT (-0.6369479099658538 0)</td>
+      <td>front</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>2.440000</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>1</td>
+      <td>1</td>
+      <td>LINESTRING (6.149389561651357 1.88569670539386...</td>
+      <td>-</td>
+      <td>False</td>
+      <td>pvrow</td>
+      <td>POINT (5.463052090034146 0)</td>
+      <td>front</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>1.075595</td>
+      <td>0.0</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>2</td>
+      <td>2</td>
+      <td>LINESTRING (12.24938956165136 1.88569670539386...</td>
+      <td>-</td>
+      <td>False</td>
+      <td>pvrow</td>
+      <td>POINT (11.56305209003415 0)</td>
+      <td>front</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>1.075595</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>3</td>
+      <td>None</td>
+      <td>LINESTRING (3.005779364397384 0, 5.46305209003...</td>
+      <td>-</td>
+      <td>True</td>
+      <td>ground</td>
+      <td>NaN</td>
+      <td>front</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>2.457273</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>4</td>
+      <td>None</td>
+      <td>LINESTRING (-100 0, -0.6369479099658548 0)</td>
+      <td>-</td>
+      <td>False</td>
+      <td>ground</td>
+      <td>NaN</td>
+      <td>front</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>99.363052</td>
+      <td>NaN</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+</div>
+<div class="section" id="View-factor-matrix">
+<h2>View factor matrix<a class="headerlink" href="#View-factor-matrix" title="Permalink to this headline">¶</a></h2>
+<p>The view factor matrix of the array is automatically calculated when the
+array is created or updated.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [13]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython2 notranslate"><div class="highlight"><pre>
+<span></span><span class="c1"># Calculate matrix</span>
+<span class="n">array_simple</span><span class="o">.</span><span class="n">vf_matrix</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>Out[13]:
+</pre></div>
+</div>
+<div class="output_area highlight-none notranslate"><div class="highlight"><pre>
+<span></span>array([[ 0.   ,  0.   ,  0.   ,  0.   ,  0.321,  0.   ,  0.   ,  0.   ,  0.   ,  0.   ,  0.   ,  0.   ,  0.   ,  0.   ,  0.   ,  0.   ,  0.679],
+       [ 0.   ,  0.   ,  0.   ,  0.088,  0.029,  0.   ,  0.098,  0.   ,  0.   ,  0.   ,  0.   ,  0.155,  0.   ,  0.   ,  0.   ,  0.   ,  0.63 ],
+       [ 0.   ,  0.   ,  0.   ,  0.028,  0.   ,  0.   ,  0.   ,  0.186,  0.   ,  0.   ,  0.   ,  0.   ,  0.078,  0.   ,  0.078,  0.   ,  0.63 ],
+       [ 0.   ,  0.039,  0.012,  0.   ,  0.   ,  0.   ,  0.   ,  0.   ,  0.   ,  0.09 ,  0.012,  0.102,  0.   ,  0.   ,  0.   ,  0.   ,  0.745],
+       [ 0.008,  0.   ,  0.   ,  0.   ,  0.   ,  0.   ,  0.   ,  0.   ,  0.   ,  0.001,  0.   ,  0.   ,  0.   ,  0.   ,  0.   ,  0.   ,  0.991],
+       [ 0.   ,  0.   ,  0.   ,  0.   ,  0.   ,  0.   ,  0.   ,  0.   ,  0.   ,  0.   ,  0.   ,  0.   ,  0.   ,  0.001,  0.   ,  0.001,  0.999],
+       [ 0.   ,  0.029,  0.   ,  0.   ,  0.   ,  0.   ,  0.   ,  0.   ,  0.   ,  0.031,  0.004,  0.279,  0.   ,  0.   ,  0.   ,  0.   ,  0.657],
+       [ 0.   ,  0.   ,  0.033,  0.   ,  0.   ,  0.   ,  0.   ,  0.   ,  0.   ,  0.   ,  0.055,  0.02 ,  0.081,  0.   ,  0.126,  0.   ,  0.684],
+       [ 0.   ,  0.   ,  0.   ,  0.   ,  0.   ,  0.   ,  0.   ,  0.   ,  0.   ,  0.   ,  0.   ,  0.   ,  0.003,  0.037,  0.004,  0.05 ,  0.905],
+       [ 0.   ,  0.   ,  0.   ,  0.162,  0.038,  0.   ,  0.083,  0.   ,  0.   ,  0.   ,  0.   ,  0.188,  0.   ,  0.   ,  0.   ,  0.   ,  0.528],
+       [ 0.   ,  0.   ,  0.   ,  0.022,  0.005,  0.   ,  0.012,  0.245,  0.   ,  0.   ,  0.   ,  0.   ,  0.09 ,  0.   ,  0.098,  0.   ,  0.528],
+       [ 0.   ,  0.068,  0.   ,  0.103,  0.   ,  0.   ,  0.416,  0.051,  0.003,  0.105,  0.   ,  0.   ,  0.   ,  0.   ,  0.   ,  0.   ,  0.253],
+       [ 0.   ,  0.   ,  0.078,  0.   ,  0.   ,  0.   ,  0.   ,  0.46 ,  0.056,  0.   ,  0.114,  0.   ,  0.   ,  0.   ,  0.   ,  0.   ,  0.293],
+       [ 0.   ,  0.   ,  0.   ,  0.   ,  0.   ,  0.056,  0.   ,  0.   ,  0.602,  0.   ,  0.   ,  0.   ,  0.   ,  0.   ,  0.   ,  0.   ,  0.342],
+       [ 0.   ,  0.   ,  0.061,  0.   ,  0.   ,  0.001,  0.   ,  0.565,  0.052,  0.   ,  0.098,  0.   ,  0.   ,  0.   ,  0.   ,  0.   ,  0.222],
+       [ 0.   ,  0.   ,  0.   ,  0.   ,  0.   ,  0.028,  0.   ,  0.   ,  0.636,  0.   ,  0.   ,  0.   ,  0.   ,  0.   ,  0.   ,  0.   ,  0.336],
+       [ 0.   ,  0.   ,  0.   ,  0.   ,  0.   ,  0.   ,  0.   ,  0.   ,  0.   ,  0.   ,  0.   ,  0.   ,  0.   ,  0.   ,  0.   ,  0.   ,  0.   ]])
+</pre></div>
+</div>
+</div>
+<p>The view matrix lines and columns can be labeled using the surface
+registry</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [14]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython2 notranslate"><div class="highlight"><pre>
+<span></span><span class="c1"># Create labels for the matrix</span>
+<span class="n">registry</span> <span class="o">=</span> <span class="n">array_simple</span><span class="o">.</span><span class="n">surface_registry</span>
+<span class="n">registry</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">registry</span><span class="o">.</span><span class="n">line_type</span> <span class="o">==</span> <span class="s1">&#39;ground&#39;</span><span class="p">,</span> <span class="s1">&#39;pvrow_index&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span>
+    <span class="n">registry</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">registry</span><span class="o">.</span><span class="n">line_type</span> <span class="o">==</span> <span class="s1">&#39;ground&#39;</span><span class="p">,</span> <span class="p">:]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+<span class="n">labels</span> <span class="o">=</span> <span class="p">(</span><span class="n">registry</span><span class="o">.</span><span class="n">line_type</span><span class="o">.</span><span class="n">values</span> <span class="o">+</span> <span class="s2">&quot;_&quot;</span> <span class="o">+</span>
+          <span class="n">registry</span><span class="o">.</span><span class="n">pvrow_index</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;_&quot;</span> <span class="o">+</span>
+          <span class="n">registry</span><span class="o">.</span><span class="n">surface_side</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
+
+<span class="c1"># Show the matrix with labels</span>
+<span class="n">labeled_vf_matrix</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">array_simple</span><span class="o">.</span><span class="n">vf_matrix</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span>
+                                 <span class="n">index</span><span class="o">=</span><span class="n">labels</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="n">labels</span><span class="p">)</span>
+<span class="n">labeled_vf_matrix</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>Out[14]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div>
+<style>
+    .dataframe thead tr:only-child th {
+        text-align: right;
+    }
+
+    .dataframe thead th {
+        text-align: left;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>pvrow_0_front</th>
+      <th>pvrow_1_front</th>
+      <th>pvrow_2_front</th>
+      <th>ground_0_front</th>
+      <th>ground_1_front</th>
+      <th>ground_2_front</th>
+      <th>ground_3_front</th>
+      <th>ground_4_front</th>
+      <th>ground_5_front</th>
+      <th>pvrow_1_front</th>
+      <th>pvrow_2_front</th>
+      <th>pvrow_0_back</th>
+      <th>pvrow_1_back</th>
+      <th>pvrow_2_back</th>
+      <th>pvrow_1_back</th>
+      <th>pvrow_2_back</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>pvrow_0_front</th>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.320807</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+    </tr>
+    <tr>
+      <th>pvrow_1_front</th>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.088091</td>
+      <td>0.028697</td>
+      <td>0.000000</td>
+      <td>0.098204</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.155105</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+    </tr>
+    <tr>
+      <th>pvrow_2_front</th>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.028318</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000379</td>
+      <td>0.186295</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.077596</td>
+      <td>0.000000</td>
+      <td>0.077509</td>
+      <td>0.000000</td>
+    </tr>
+    <tr>
+      <th>ground_0_front</th>
+      <td>0.000000</td>
+      <td>0.038559</td>
+      <td>0.012395</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.090091</td>
+      <td>0.011945</td>
+      <td>0.102125</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+    </tr>
+    <tr>
+      <th>ground_1_front</th>
+      <td>0.007878</td>
+      <td>0.000311</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000525</td>
+      <td>0.000070</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+    </tr>
+    <tr>
+      <th>ground_2_front</th>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000011</td>
+      <td>0.000000</td>
+      <td>0.000847</td>
+      <td>0.000018</td>
+      <td>0.000541</td>
+    </tr>
+    <tr>
+      <th>ground_3_front</th>
+      <td>0.000000</td>
+      <td>0.028997</td>
+      <td>0.000112</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.031108</td>
+      <td>0.004332</td>
+      <td>0.278817</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+    </tr>
+    <tr>
+      <th>ground_4_front</th>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.032849</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.054868</td>
+      <td>0.020334</td>
+      <td>0.081169</td>
+      <td>0.000000</td>
+      <td>0.126470</td>
+      <td>0.000000</td>
+    </tr>
+    <tr>
+      <th>ground_5_front</th>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000403</td>
+      <td>0.003424</td>
+      <td>0.037058</td>
+      <td>0.004042</td>
+      <td>0.049657</td>
+    </tr>
+    <tr>
+      <th>pvrow_1_front</th>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.162252</td>
+      <td>0.038206</td>
+      <td>0.000000</td>
+      <td>0.083054</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.188039</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+    </tr>
+    <tr>
+      <th>pvrow_2_front</th>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.021514</td>
+      <td>0.005133</td>
+      <td>0.000000</td>
+      <td>0.011564</td>
+      <td>0.245306</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.089807</td>
+      <td>0.000000</td>
+      <td>0.098231</td>
+      <td>0.000000</td>
+    </tr>
+    <tr>
+      <th>pvrow_0_back</th>
+      <td>0.000000</td>
+      <td>0.068373</td>
+      <td>0.000000</td>
+      <td>0.102848</td>
+      <td>0.000000</td>
+      <td>0.000307</td>
+      <td>0.416251</td>
+      <td>0.050835</td>
+      <td>0.002887</td>
+      <td>0.105148</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+    </tr>
+    <tr>
+      <th>pvrow_1_back</th>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.077596</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.460332</td>
+      <td>0.055650</td>
+      <td>0.000000</td>
+      <td>0.113922</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+    </tr>
+    <tr>
+      <th>pvrow_2_back</th>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.055848</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.602271</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+    </tr>
+    <tr>
+      <th>pvrow_1_back</th>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.061102</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000960</td>
+      <td>0.000000</td>
+      <td>0.565426</td>
+      <td>0.051783</td>
+      <td>0.000000</td>
+      <td>0.098231</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+    </tr>
+    <tr>
+      <th>pvrow_2_back</th>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.028140</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.636202</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+</div>
+<div class="section" id="Calculate-radiosities-for-single-time-point-and-using-isotropic-diffuse-sky-dome">
+<h2>Calculate radiosities for single time point and using isotropic diffuse sky dome<a class="headerlink" href="#Calculate-radiosities-for-single-time-point-and-using-isotropic-diffuse-sky-dome" title="Permalink to this headline">¶</a></h2>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [15]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython2 notranslate"><div class="highlight"><pre>
+<span></span><span class="c1"># Define input values for radiosity calculation</span>
+<span class="n">DNI</span> <span class="o">=</span> <span class="mf">1000.</span>
+<span class="n">DHI</span> <span class="o">=</span> <span class="mf">50.</span>
+<span class="n">solar_zenith</span> <span class="o">=</span> <span class="mf">20.</span>
+<span class="n">solar_azimuth</span> <span class="o">=</span> <span class="mf">90.</span>
+<span class="n">array_tilt</span> <span class="o">=</span> <span class="o">-</span><span class="mf">20.</span>
+<span class="n">array_azimuth</span> <span class="o">=</span> <span class="mf">90.</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [16]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython2 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">array_simple</span><span class="o">.</span><span class="n">calculate_radiosities_simple</span><span class="p">(</span><span class="n">solar_zenith</span><span class="p">,</span> <span class="n">solar_azimuth</span><span class="p">,</span>
+                                          <span class="n">array_tilt</span><span class="p">,</span> <span class="n">array_azimuth</span><span class="p">,</span>
+                                          <span class="n">DNI</span><span class="p">,</span> <span class="n">DHI</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [17]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython2 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">array_simple</span><span class="o">.</span><span class="n">surface_registry</span><span class="p">[[</span><span class="s1">&#39;pvrow_index&#39;</span><span class="p">,</span> <span class="s1">&#39;shaded&#39;</span><span class="p">,</span> <span class="s1">&#39;line_type&#39;</span><span class="p">,</span>
+                               <span class="s1">&#39;surface_side&#39;</span><span class="p">,</span> <span class="s1">&#39;irradiance_term&#39;</span><span class="p">,</span> <span class="s1">&#39;q0&#39;</span><span class="p">,</span>
+                               <span class="s1">&#39;qinc&#39;</span><span class="p">,</span> <span class="s1">&#39;isotropic_term&#39;</span><span class="p">,</span> <span class="s1">&#39;reflection_term&#39;</span><span class="p">]]</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>Out[17]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div>
+<style>
+    .dataframe thead tr:only-child th {
+        text-align: right;
+    }
+
+    .dataframe thead th {
+        text-align: left;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>pvrow_index</th>
+      <th>shaded</th>
+      <th>line_type</th>
+      <th>surface_side</th>
+      <th>irradiance_term</th>
+      <th>q0</th>
+      <th>qinc</th>
+      <th>isotropic_term</th>
+      <th>reflection_term</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>0</td>
+      <td>False</td>
+      <td>pvrow</td>
+      <td>front</td>
+      <td>766.044443</td>
+      <td>8.168828</td>
+      <td>816.882800</td>
+      <td>47.572225</td>
+      <td>3.266131</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>1</td>
+      <td>False</td>
+      <td>pvrow</td>
+      <td>front</td>
+      <td>766.044443</td>
+      <td>8.173178</td>
+      <td>817.317825</td>
+      <td>47.573077</td>
+      <td>3.700304</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>2</td>
+      <td>False</td>
+      <td>pvrow</td>
+      <td>front</td>
+      <td>766.044443</td>
+      <td>8.200154</td>
+      <td>820.015392</td>
+      <td>48.657804</td>
+      <td>5.313145</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>None</td>
+      <td>True</td>
+      <td>ground</td>
+      <td>front</td>
+      <td>0.000000</td>
+      <td>5.297125</td>
+      <td>26.485623</td>
+      <td>24.658496</td>
+      <td>1.827127</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>None</td>
+      <td>True</td>
+      <td>ground</td>
+      <td>front</td>
+      <td>0.000000</td>
+      <td>5.297799</td>
+      <td>26.488993</td>
+      <td>24.815420</td>
+      <td>1.673573</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>None</td>
+      <td>True</td>
+      <td>ground</td>
+      <td>front</td>
+      <td>0.000000</td>
+      <td>5.693934</td>
+      <td>28.469672</td>
+      <td>26.933075</td>
+      <td>1.536597</td>
+    </tr>
+    <tr>
+      <th>6</th>
+      <td>None</td>
+      <td>False</td>
+      <td>ground</td>
+      <td>front</td>
+      <td>939.692621</td>
+      <td>195.553701</td>
+      <td>977.768507</td>
+      <td>37.217601</td>
+      <td>0.858285</td>
+    </tr>
+    <tr>
+      <th>7</th>
+      <td>None</td>
+      <td>False</td>
+      <td>ground</td>
+      <td>front</td>
+      <td>939.692621</td>
+      <td>195.651303</td>
+      <td>978.256514</td>
+      <td>37.744932</td>
+      <td>0.818961</td>
+    </tr>
+    <tr>
+      <th>8</th>
+      <td>None</td>
+      <td>False</td>
+      <td>ground</td>
+      <td>front</td>
+      <td>939.692621</td>
+      <td>197.806118</td>
+      <td>989.030592</td>
+      <td>49.286484</td>
+      <td>0.051487</td>
+    </tr>
+    <tr>
+      <th>9</th>
+      <td>None</td>
+      <td>False</td>
+      <td>ground</td>
+      <td>front</td>
+      <td>939.692621</td>
+      <td>197.396142</td>
+      <td>986.980708</td>
+      <td>47.067908</td>
+      <td>0.220179</td>
+    </tr>
+    <tr>
+      <th>10</th>
+      <td>None</td>
+      <td>False</td>
+      <td>ground</td>
+      <td>front</td>
+      <td>939.692621</td>
+      <td>193.168551</td>
+      <td>965.842753</td>
+      <td>24.463549</td>
+      <td>1.686584</td>
+    </tr>
+    <tr>
+      <th>11</th>
+      <td>None</td>
+      <td>False</td>
+      <td>ground</td>
+      <td>front</td>
+      <td>939.692621</td>
+      <td>193.376337</td>
+      <td>966.881685</td>
+      <td>25.572293</td>
+      <td>1.616771</td>
+    </tr>
+    <tr>
+      <th>12</th>
+      <td>None</td>
+      <td>False</td>
+      <td>ground</td>
+      <td>front</td>
+      <td>939.692621</td>
+      <td>197.927305</td>
+      <td>989.636525</td>
+      <td>49.932918</td>
+      <td>0.010986</td>
+    </tr>
+    <tr>
+      <th>13</th>
+      <td>0</td>
+      <td>False</td>
+      <td>pvrow</td>
+      <td>back</td>
+      <td>0.000000</td>
+      <td>3.642228</td>
+      <td>121.407597</td>
+      <td>1.661115</td>
+      <td>119.746482</td>
+    </tr>
+    <tr>
+      <th>14</th>
+      <td>1</td>
+      <td>False</td>
+      <td>pvrow</td>
+      <td>back</td>
+      <td>0.000000</td>
+      <td>3.285173</td>
+      <td>109.505752</td>
+      <td>1.088744</td>
+      <td>108.417008</td>
+    </tr>
+    <tr>
+      <th>15</th>
+      <td>2</td>
+      <td>False</td>
+      <td>pvrow</td>
+      <td>back</td>
+      <td>0.000000</td>
+      <td>3.258358</td>
+      <td>108.611941</td>
+      <td>1.088193</td>
+      <td>107.523748</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<p>We can also use <code class="docutils literal notranslate"><span class="pre">calculate_radiosities_perez()</span></code> method, but it
+requires providing additional inputs from the Perez model</p>
+</div>
+<div class="section" id="Timeseries-calculation-of-radiosity-terms">
+<h2>Timeseries calculation of radiosity terms<a class="headerlink" href="#Timeseries-calculation-of-radiosity-terms" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="For-simple-continuous-surfaces">
+<h3>For simple continuous surfaces<a class="headerlink" href="#For-simple-continuous-surfaces" title="Permalink to this headline">¶</a></h3>
+<p>The user can use the function from the <code class="docutils literal notranslate"><span class="pre">tools</span></code> module named
+<code class="docutils literal notranslate"><span class="pre">calculate_radiosities_serially_perez()</span></code>, which will pre-calculate the
+necessary inputs from the Perez model using the <code class="docutils literal notranslate"><span class="pre">pvlib</span></code> library. The
+user can also use <code class="docutils literal notranslate"><span class="pre">calculate_radiosities_parallel_perez()</span></code>, which will
+run the same calculations but in parallel processes.</p>
+<p>Let’s create some inputs for the function. PLEASE NOTE THAT THE COLUMN
+NAMES NEED TO BE EXACTLY THE ONES SHOWN BELOW.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [18]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython2 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">df_inputs</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+        <span class="p">[[</span><span class="mf">20.</span><span class="p">,</span> <span class="mf">110.</span><span class="p">,</span> <span class="mf">10.</span><span class="p">,</span> <span class="mf">90.</span><span class="p">,</span> <span class="mf">1000.</span><span class="p">,</span> <span class="mf">50.</span><span class="p">],</span>
+         <span class="p">[</span><span class="mf">10.</span><span class="p">,</span> <span class="mf">140.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">90.</span><span class="p">,</span> <span class="mf">300.</span><span class="p">,</span> <span class="mf">500.</span><span class="p">]]),</span>
+    <span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;solar_zenith&#39;</span><span class="p">,</span> <span class="s1">&#39;solar_azimuth&#39;</span><span class="p">,</span> <span class="s1">&#39;array_tilt&#39;</span><span class="p">,</span> <span class="s1">&#39;array_azimuth&#39;</span><span class="p">,</span> <span class="s1">&#39;dni&#39;</span><span class="p">,</span> <span class="s1">&#39;dhi&#39;</span><span class="p">],</span>
+    <span class="n">index</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DatetimeIndex</span><span class="p">(</span>
+        <span class="p">[</span><span class="n">datetime</span><span class="p">(</span><span class="mi">2017</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">31</span><span class="p">,</span> <span class="mi">11</span><span class="p">),</span> <span class="n">datetime</span><span class="p">(</span><span class="mi">2017</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">31</span><span class="p">,</span> <span class="mi">12</span><span class="p">)]</span>
+    <span class="p">)</span>
+<span class="p">)</span>
+<span class="n">df_inputs</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>Out[18]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div>
+<style>
+    .dataframe thead tr:only-child th {
+        text-align: right;
+    }
+
+    .dataframe thead th {
+        text-align: left;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>solar_zenith</th>
+      <th>solar_azimuth</th>
+      <th>array_tilt</th>
+      <th>array_azimuth</th>
+      <th>dni</th>
+      <th>dhi</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>2017-08-31 11:00:00</th>
+      <td>20.0</td>
+      <td>110.0</td>
+      <td>10.0</td>
+      <td>90.0</td>
+      <td>1000.0</td>
+      <td>50.0</td>
+    </tr>
+    <tr>
+      <th>2017-08-31 12:00:00</th>
+      <td>10.0</td>
+      <td>140.0</td>
+      <td>0.0</td>
+      <td>90.0</td>
+      <td>300.0</td>
+      <td>500.0</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<p>That’s all we need to run a calculation</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [19]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython2 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">df_outputs</span><span class="p">,</span> <span class="n">df_bifacial_gain</span><span class="p">,</span> <span class="n">df_inputs_perez</span><span class="p">,</span> <span class="n">df_outputs_segments</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">calculate_radiosities_serially_perez</span><span class="p">((</span><span class="n">arguments</span><span class="p">,</span> <span class="n">df_inputs</span><span class="p">))</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Progress: |██████████████████████████████████████████████████| 100.0% Complete
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [20]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython2 notranslate"><div class="highlight"><pre>
+<span></span><span class="c1"># Show the surface averaged outputs for the PV rows</span>
+<span class="n">df_outputs</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>Out[20]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div>
+<style>
+    .dataframe thead tr:only-child th {
+        text-align: right;
+    }
+
+    .dataframe thead th {
+        text-align: left;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr>
+      <th>pvrow</th>
+      <th colspan="10" halign="left">0</th>
+      <th>...</th>
+      <th colspan="9" halign="left">2</th>
+      <th>array_is_shaded</th>
+    </tr>
+    <tr>
+      <th>side</th>
+      <th colspan="8" halign="left">back</th>
+      <th colspan="2" halign="left">front</th>
+      <th>...</th>
+      <th>back</th>
+      <th colspan="8" halign="left">front</th>
+      <th></th>
+    </tr>
+    <tr>
+      <th>term</th>
+      <th>circumsolar_term</th>
+      <th>direct_term</th>
+      <th>horizon_term</th>
+      <th>irradiance_term</th>
+      <th>isotropic_term</th>
+      <th>q0</th>
+      <th>qinc</th>
+      <th>reflection_term</th>
+      <th>circumsolar_term</th>
+      <th>direct_term</th>
+      <th>...</th>
+      <th>reflection_term</th>
+      <th>circumsolar_term</th>
+      <th>direct_term</th>
+      <th>horizon_term</th>
+      <th>irradiance_term</th>
+      <th>isotropic_term</th>
+      <th>q0</th>
+      <th>qinc</th>
+      <th>reflection_term</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>2017-08-31 11:00:00</th>
+      <td>0</td>
+      <td>0</td>
+      <td>1.64068</td>
+      <td>1.64068</td>
+      <td>0.117972</td>
+      <td>2.80425</td>
+      <td>93.475</td>
+      <td>91.7164</td>
+      <td>30.1646</td>
+      <td>981.226</td>
+      <td>...</td>
+      <td>95.2901</td>
+      <td>30.1646</td>
+      <td>981.226</td>
+      <td>1.64068</td>
+      <td>1013.03</td>
+      <td>20.8498</td>
+      <td>10.3488</td>
+      <td>1034.88</td>
+      <td>0.995106</td>
+      <td>False</td>
+    </tr>
+    <tr>
+      <th>2017-08-31 12:00:00</th>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0.0315921</td>
+      <td>2.49755</td>
+      <td>83.2516</td>
+      <td>83.22</td>
+      <td>293.668</td>
+      <td>295.442</td>
+      <td>...</td>
+      <td>82.0925</td>
+      <td>293.668</td>
+      <td>295.442</td>
+      <td>0</td>
+      <td>589.11</td>
+      <td>206.332</td>
+      <td>7.95442</td>
+      <td>795.442</td>
+      <td>-5.68434e-14</td>
+      <td>False</td>
+    </tr>
+  </tbody>
+</table>
+<p>2 rows × 49 columns</p>
+</div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [21]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython2 notranslate"><div class="highlight"><pre>
+<span></span><span class="c1"># Show the bifacial gain results</span>
+<span class="c1"># Note: this can be calculated using df_outputs</span>
+<span class="n">df_bifacial_gain</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>Out[21]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div>
+<style>
+    .dataframe thead tr:only-child th {
+        text-align: right;
+    }
+
+    .dataframe thead th {
+        text-align: left;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>0</th>
+      <th>1</th>
+      <th>2</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>2017-08-31 11:00:00</th>
+      <td>0.0902939</td>
+      <td>0.0888972</td>
+      <td>0.0938564</td>
+    </tr>
+    <tr>
+      <th>2017-08-31 12:00:00</th>
+      <td>0.104661</td>
+      <td>0.0979647</td>
+      <td>0.103245</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<p>In this case <code class="docutils literal notranslate"><span class="pre">df_outputs_segments</span></code> is <code class="docutils literal notranslate"><span class="pre">None</span></code></p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [22]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython2 notranslate"><div class="highlight"><pre>
+<span></span><span class="k">print</span><span class="p">(</span><span class="n">df_outputs_segments</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+None
+</pre></div></div>
+</div>
+</div>
+<div class="section" id="For-discretized-surfaces">
+<h3>For discretized surfaces<a class="headerlink" href="#For-discretized-surfaces" title="Permalink to this headline">¶</a></h3>
+<p>The user can use a 3rd argument to save the irradiance results of all
+the discretized elements of the middle tracker</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [23]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython2 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">save_segments</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;front&#39;</span><span class="p">)</span>
+<span class="c1"># save the results for the front surface of the pv row #1 (middle)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [24]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython2 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">df_outputs</span><span class="p">,</span> <span class="n">df_bifacial_gain</span><span class="p">,</span> <span class="n">df_inputs_perez</span><span class="p">,</span> <span class="n">df_outputs_segments</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">calculate_radiosities_serially_perez</span><span class="p">((</span><span class="n">arguments_discretize</span><span class="p">,</span> <span class="n">df_inputs</span><span class="p">,</span>
+                                          <span class="n">save_segments</span><span class="p">))</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Progress: |██████████████████████████████████████████████████| 100.0% Complete
+</pre></div></div>
+</div>
+<p>The <code class="docutils literal notranslate"><span class="pre">df_outputs_segments</span></code> output will be a <code class="docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code>
+containing all the calculated irradiance terms for the different
+segments of the front surface of the middle PV row (as specified in the
+inputs), indexed from <code class="docutils literal notranslate"><span class="pre">0</span></code> to <code class="docutils literal notranslate"><span class="pre">n-1</span></code> (<code class="docutils literal notranslate"><span class="pre">n</span></code> being the total number of
+segments)</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [25]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython2 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">df_outputs_segments</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>Out[25]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div>
+<style>
+    .dataframe thead tr:only-child th {
+        text-align: right;
+    }
+
+    .dataframe thead th {
+        text-align: left;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr>
+      <th>irradiance_term</th>
+      <th colspan="5" halign="left">circumsolar_shading_pct</th>
+      <th colspan="5" halign="left">circumsolar_term</th>
+      <th>...</th>
+      <th colspan="5" halign="left">qinc</th>
+      <th colspan="5" halign="left">reflection_term</th>
+    </tr>
+    <tr>
+      <th>segment_index</th>
+      <th>0</th>
+      <th>1</th>
+      <th>2</th>
+      <th>3</th>
+      <th>4</th>
+      <th>0</th>
+      <th>1</th>
+      <th>2</th>
+      <th>3</th>
+      <th>4</th>
+      <th>...</th>
+      <th>0</th>
+      <th>1</th>
+      <th>2</th>
+      <th>3</th>
+      <th>4</th>
+      <th>0</th>
+      <th>1</th>
+      <th>2</th>
+      <th>3</th>
+      <th>4</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>2017-08-31 11:00:00</th>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>30.164599</td>
+      <td>30.164599</td>
+      <td>30.164599</td>
+      <td>30.164599</td>
+      <td>30.164599</td>
+      <td>...</td>
+      <td>1035.059091</td>
+      <td>1035.057629</td>
+      <td>1034.959241</td>
+      <td>1034.871599</td>
+      <td>1034.796473</td>
+      <td>1.287879e+00</td>
+      <td>1.221022e+00</td>
+      <td>1.065602e+00</td>
+      <td>9.350708e-01</td>
+      <td>8.271474e-01</td>
+    </tr>
+    <tr>
+      <th>2017-08-31 12:00:00</th>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>293.667599</td>
+      <td>293.667599</td>
+      <td>293.667599</td>
+      <td>293.667599</td>
+      <td>293.667599</td>
+      <td>...</td>
+      <td>795.442326</td>
+      <td>795.442326</td>
+      <td>795.442326</td>
+      <td>795.442326</td>
+      <td>795.442326</td>
+      <td>-5.684342e-14</td>
+      <td>-5.684342e-14</td>
+      <td>-5.684342e-14</td>
+      <td>-5.684342e-14</td>
+      <td>-5.684342e-14</td>
+    </tr>
+  </tbody>
+</table>
+<p>2 rows × 40 columns</p>
+</div></div>
+</div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+    <div class="clearer"></div>
+  </div>
+    <div class="footer">
+      &copy;Copyright 2016, SunPower Corporation.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+      |
+      <a href="../_sources/developer/pvfactors_demo.ipynb.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+    <a href="https://github.com/SunPower/pvfactors" class="github">
+        <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"  class="github"/>
+    </a>
+    
+
+    
+  </body>
+</html>

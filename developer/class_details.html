@@ -1,0 +1,764 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Details on classes and modules &#8212; pvfactors 3.0.0 documentation</title>
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" src="../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="What’s New" href="../whatsnew.html" />
+    <link rel="prev" title="VF Model: Jupyter notebook guide" href="pvfactors_demo.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  <div class="document">
+    
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<p class="logo">
+  <a href="../index.html">
+    <img class="logo" src="../_static/sp_2014_logo_black_orange_rgb.png" alt="Logo"/>
+    
+  </a>
+</p>
+
+
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=SunPower&repo=pvfactors&type=watch&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../theory/index.html">Theory</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Developer docs</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="how_to.html">How to use the model for single-point calculation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pvfactors_demo.html">VF Model: Jupyter notebook guide</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Details on classes and modules</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#the-array-class">The <em>Array</em> class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#the-tools-module">The <em>tools</em> module</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../whatsnew.html">What’s New</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="index.html">Developer docs</a><ul>
+      <li>Previous: <a href="pvfactors_demo.html" title="previous chapter">VF Model: Jupyter notebook guide</a></li>
+      <li>Next: <a href="../whatsnew.html" title="next chapter">What’s New</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="details-on-classes-and-modules">
+<span id="class-details"></span><h1>Details on classes and modules<a class="headerlink" href="#details-on-classes-and-modules" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="the-array-class">
+<h2>The <em>Array</em> class<a class="headerlink" href="#the-array-class" title="Permalink to this headline">¶</a></h2>
+<p>More details on the array class and its methods.</p>
+<dl class="class">
+<dt id="pvarray.Array">
+<em class="property">class </em><code class="descclassname">pvarray.</code><code class="descname">Array</code><span class="sig-paren">(</span><em>n_pvrows=3</em>, <em>pvrow_height=1.5</em>, <em>pvrow_width=1.0</em>, <em>array_tilt=20.0</em>, <em>array_azimuth=180.0</em>, <em>solar_zenith=0.0</em>, <em>solar_azimuth=180.0</em>, <em>rho_ground=0.2</em>, <em>rho_back_pvrow=0.05</em>, <em>rho_front_pvrow=0.03</em>, <em>gcr=0.3</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#pvarray.Array" title="Permalink to this definition">¶</a></dt>
+<dd><div class="line-block">
+<div class="line">Create the array object. This will call the <a class="reference internal" href="#pvarray.Array.update_view_factors" title="pvarray.Array.update_view_factors"><code class="xref py py-meth docutils literal notranslate"><span class="pre">update_view_factors()</span></code></a></div>
+<div class="line">method which creates the shapely geometry and calculate the view</div>
+<div class="line">factors based on the inputs.</div>
+<div class="line">Azimuth angles are counted positive going East from North. E.g. 0 deg is</div>
+<div class="line">North and 90 degrees is East.</div>
+<div class="line">#FIXME The array azimuth uses a different convention than pvlib: for the</div>
+<div class="line">torque-tube axis to be oriented South-North, the array azimuth angle</div>
+<div class="line">needs to be 90 deg. And 0 deg would be East-West orientation.</div>
+<div class="line">This assumes an equal spacing (or GCR) between all pv rows.</div>
+<div class="line">This assumes that all pv rows have identical rotation angles.</div>
+<div class="line">This assumes that all pv rows are at the same elevation (only x-values</div>
+<div class="line">change from a pv row to another).</div>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>n_pvrows</strong> (<em>int</em>) – number of PV rows in parallel</li>
+<li><strong>pvrow_height</strong> (<em>float</em>) – height of PV rows, measured from ground to
+center [meters]</li>
+<li><strong>pvrow_width</strong> (<em>float</em>) – width of PV rows, in the considered 2D
+dimension [meters]</li>
+<li><strong>array_tilt</strong> (<em>float</em>) – tilt angle of the whole array. All PV rows must
+have the same tilt angle [degrees]</li>
+<li><strong>array_azimuth</strong> (<em>float</em>) – azimuth angle of the whole array. All PV
+rows must have the same azimuth angle [degrees]</li>
+<li><strong>solar_zenith</strong> (<em>float</em>) – zenith angle of the sun [degrees]</li>
+<li><strong>solar_azimuth</strong> (<em>float</em>) – azimuth angle of the sun [degrees]</li>
+<li><strong>rho_ground</strong> (<em>float</em>) – ground albedo</li>
+<li><strong>rho_back_pvrow</strong> (<em>float</em>) – reflectivity of PV row’s back surface</li>
+<li><strong>rho_front_pvrow</strong> (<em>float</em>) – reflectivity of PV row’s front surface</li>
+<li><strong>kwargs</strong> – possible options are: <code class="docutils literal notranslate"><span class="pre">pvrow_class</span></code> if the user wants
+to specify its own PV Row class; <code class="docutils literal notranslate"><span class="pre">cut</span></code> if the user wants to
+discretize some pv rows, e.g. [(0, 5, ‘front’), (4, 2, ‘front’)]
+will discretize the front side of the first PV row into 5 segments,
+and the 5th pv row… ; <code class="docutils literal notranslate"><span class="pre">pvrow_distance</span></code> if the user wants to
+specify the distance between PV rows instead of GCR [DEPRECATED];
+<code class="docutils literal notranslate"><span class="pre">calculate_front_circ_horizon_shading</span></code> is a boolean that indicates
+weather to calculate front circumsolar &amp; horizon band shading or not;
+<code class="docutils literal notranslate"><span class="pre">circumsolar_angle</span></code> would be the full (not half) angle of the
+circumsolar disk; <code class="docutils literal notranslate"><span class="pre">horizon_band_angle</span></code> would be the horizon band
+elevation angle</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="pvarray.Array.apply_front_circumsolar_horizon_shading">
+<code class="descname">apply_front_circumsolar_horizon_shading</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pvarray.Array.apply_front_circumsolar_horizon_shading" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate what amount of diffuse shading is happening on the
+circumsolar and horizon band components and apply it to all ‘front’
+surfaces of pvrows. It just updates the corresponding irradiance
+terms that will be used in the mathematical formulation.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pvarray.Array.calculate_interrow_direct_shading">
+<code class="descname">calculate_interrow_direct_shading</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pvarray.Array.calculate_interrow_direct_shading" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate inter-row direct shading and  break up PV row objects into
+shaded and unshaded parts.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">None; updating <code class="xref py py-attr docutils literal notranslate"><span class="pre">line_registry</span></code> with additional entries</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pvarray.Array.calculate_radiosities_perez">
+<code class="descname">calculate_radiosities_perez</code><span class="sig-paren">(</span><em>solar_zenith</em>, <em>solar_azimuth</em>, <em>array_tilt</em>, <em>array_azimuth</em>, <em>dni</em>, <em>luminance_isotropic</em>, <em>luminance_circumsolar</em>, <em>poa_horizon</em>, <em>poa_circumsolar</em><span class="sig-paren">)</span><a class="headerlink" href="#pvarray.Array.calculate_radiosities_perez" title="Permalink to this definition">¶</a></dt>
+<dd><p>Solve linear system of equations to calculate radiosity terms based on
+the specified inputs and using Perez diffuse light transposition model
+pre-calculated values</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>solar_zenith</strong> (<em>float</em>) – zenith angle of the sun [degrees]</li>
+<li><strong>solar_azimuth</strong> (<em>float</em>) – azimuth angle of the sun [degrees]</li>
+<li><strong>array_tilt</strong> (<em>float</em>) – tilt angle of the whole array. All PV rows must
+have the same tilt angle [degrees]</li>
+<li><strong>array_azimuth</strong> (<em>float</em>) – azimuth angle of the whole array. All PV
+rows must have the same azimuth angle [degrees]</li>
+<li><strong>dni</strong> (<em>float</em>) – direct normal irradiance [W/m2]</li>
+<li><strong>luminance_isotropic</strong> (<em>float</em>) – luminance of the isotropic part of the
+sky dome [W/m2/sr]</li>
+<li><strong>luminance_circumsolar</strong> (<em>float</em>) – luminance of the circumsolar part of
+the sky dome [W/m2/sr]</li>
+<li><strong>poa_horizon</strong> (<em>float</em>) – plane-of-array horizon component of the
+irradiance as calculated by Perez for the front surface of a PV row
+[W/m2]</li>
+<li><strong>poa_circumsolar</strong> (<em>float</em>) – plane-of-array circumsolar component of
+the irradiance as calculated by Perez for the front surface of a PV
+row [W/m2]</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">None; updating <code class="xref py py-attr docutils literal notranslate"><span class="pre">surface_registry</span></code></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pvarray.Array.calculate_radiosities_simple">
+<code class="descname">calculate_radiosities_simple</code><span class="sig-paren">(</span><em>solar_zenith</em>, <em>solar_azimuth</em>, <em>array_tilt</em>, <em>array_azimuth</em>, <em>dni</em>, <em>dhi</em><span class="sig-paren">)</span><a class="headerlink" href="#pvarray.Array.calculate_radiosities_simple" title="Permalink to this definition">¶</a></dt>
+<dd><p>Solve linear system of equations to calculate radiosity terms based on
+the specified inputs and assuming that the whole sky dome is isotropic
+(no diffuse sky dome decomposition)</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>solar_zenith</strong> (<em>float</em>) – zenith angle of the sun [degrees]</li>
+<li><strong>solar_azimuth</strong> (<em>float</em>) – azimuth angle of the sun [degrees]</li>
+<li><strong>array_tilt</strong> (<em>float</em>) – tilt angle of the whole array. All PV rows must
+have the same tilt angle [degrees]</li>
+<li><strong>array_azimuth</strong> (<em>float</em>) – azimuth angle of the whole array. All PV
+rows must have the same azimuth angle [degrees]</li>
+<li><strong>dni</strong> (<em>float</em>) – direct normal irradiance [W/m2]</li>
+<li><strong>dhi</strong> (<em>float</em>) – diffuse horizontal irradiance [W/m2]</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">None; updating <code class="xref py py-attr docutils literal notranslate"><span class="pre">surface_registry</span></code></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pvarray.Array.calculate_sky_and_reflection_components">
+<code class="descname">calculate_sky_and_reflection_components</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pvarray.Array.calculate_sky_and_reflection_components" title="Permalink to this definition">¶</a></dt>
+<dd><p>Assuming that the calculation of view factors and radiosity terms is
+completed, calculate the irradiance components of the isotropic sky dome
+and of the reflections from surrounding surfaces (pv rows and ground)
+for all the surfaces in the PV array.
+Update the surface registry.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pvarray.Array.create_ill_ground">
+<code class="descname">create_ill_ground</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pvarray.Array.create_ill_ground" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create illuminated ground areas between shadows and add them to the
+line registry.
+The function assumes that the shadows are ordered and sorted from left
+to right.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">None; updated <code class="xref py py-attr docutils literal notranslate"><span class="pre">line_registry</span></code></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pvarray.Array.create_pvrow_shadows">
+<code class="descname">create_pvrow_shadows</code><span class="sig-paren">(</span><em>solar_zenith</em>, <em>solar_azimuth</em><span class="sig-paren">)</span><a class="headerlink" href="#pvarray.Array.create_pvrow_shadows" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create the PV row shadows cast on the ground. Since the PV array is in
+2D, the approach here is to project the solar vector into the 2D plane
+considered here. The next step is to calculate the shadow boundaries
+based on the PV row position and the solar angle using some geometry.
+The calculated shadow lines are added to the <code class="xref py py-attr docutils literal notranslate"><span class="pre">line_registry</span></code>.
+Assumption: if there is direct shading between rows, this will mean that
+there is one continuous shadow on the ground formed by all the
+trackers’ shadows.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>solar_zenith</strong> (<em>float</em>) – sun’s zenith angle</li>
+<li><strong>solar_azimuth</strong> (<em>float</em>) – sun’s azimuth angle</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">None</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pvarray.Array.create_pvrows_array">
+<code class="descname">create_pvrows_array</code><span class="sig-paren">(</span><em>n_pvrows</em>, <em>pvrow_height</em><span class="sig-paren">)</span><a class="headerlink" href="#pvarray.Array.create_pvrows_array" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create list of PV rows in array, counting from left to right.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>n_pvrows</strong> (<em>int</em>) – number of PV rows in the array</li>
+<li><strong>pvrow_height</strong> (<em>float</em>) – height of the PV rows, measured from ground
+to the center of the row</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">list of <code class="xref py py-class docutils literal notranslate"><span class="pre">pvrow.PVRowLine</span></code> objects, for now.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pvarray.Array.create_remaining_illum_ground">
+<code class="descname">create_remaining_illum_ground</code><span class="sig-paren">(</span><em>edge_points</em><span class="sig-paren">)</span><a class="headerlink" href="#pvarray.Array.create_remaining_illum_ground" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create the remaining illuminated parts of the ground, at the outer edges
+of the PV array.
+The areas are supposed to be infinite, but for model simplicity they
+are implemented as being very large (fixed values).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>edge_points</strong> (<em>list</em>) – <strong>sorted</strong> list of <code class="xref py py-class docutils literal notranslate"><span class="pre">shapely.Point</span></code>
+objects representing the intersection of PV row lines and the ground</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">None; updating <code class="xref py py-attr docutils literal notranslate"><span class="pre">line_registry</span></code></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pvarray.Array.create_surface_registry">
+<code class="descname">create_surface_registry</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pvarray.Array.create_surface_registry" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create <code class="docutils literal notranslate"><span class="pre">surface_registry</span></code> attribute from <code class="xref py py-attr docutils literal notranslate"><span class="pre">line_registry</span></code>. One of
+the big differences is that the <code class="docutils literal notranslate"><span class="pre">surface_registry</span></code> is able to
+distinguish the two sides of a PV row object. For instance it will
+make sure to record that only one side of a PV row can have direct
+shading, or that only one side may be discretized. The names of the two
+sides are ‘front’ and ‘back’.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">None; creating <code class="docutils literal notranslate"><span class="pre">surface_registry</span></code> attribute</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pvarray.Array.create_view_matrix">
+<code class="descname">create_view_matrix</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pvarray.Array.create_view_matrix" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create the <code class="docutils literal notranslate"><span class="pre">view_matrix</span></code> and the <code class="docutils literal notranslate"><span class="pre">args_matrix</span></code>, which records which
+surface sees which surface, as well as the “type” of view that it is,
+and potential “obstructing” objects.
+The logic here can be a little complex, and there may be ways to
+simplify it.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><code class="docutils literal notranslate"><span class="pre">view_matrix</span></code>, <code class="docutils literal notranslate"><span class="pre">args_matrix</span></code>; both <code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.array</span></code>
+objects and containing the “type” of views of each finite surface to
+the others, and additional arguments like “obstructing” objects</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pvarray.Array.discretize_surfaces">
+<code class="descname">discretize_surfaces</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pvarray.Array.discretize_surfaces" title="Permalink to this definition">¶</a></dt>
+<dd><p>Discretize PV row surfaces using the inputs provided in the class
+constructor. New entries will be added to the <code class="docutils literal notranslate"><span class="pre">surface_registry</span></code>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">None; updating <code class="xref py py-attr docutils literal notranslate"><span class="pre">surface_registry</span></code></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pvarray.Array.find_edge_points">
+<code class="descname">find_edge_points</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pvarray.Array.find_edge_points" title="Permalink to this definition">¶</a></dt>
+<dd><p>Edge points are defined as the virtual intersection of the pvrow
+lines and the ground. They determine what part of the ground the front
+surface of the pvrow sees, and same for the back surface.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">list of <code class="xref py py-class docutils literal notranslate"><span class="pre">shapely.Point</span></code> objects; the
+<code class="xref py py-attr docutils literal notranslate"><span class="pre">line_registry</span></code> is also updated</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pvarray.Array.update_irradiance_terms_perez">
+<code class="descname">update_irradiance_terms_perez</code><span class="sig-paren">(</span><em>solar_zenith</em>, <em>solar_azimuth</em>, <em>array_tilt</em>, <em>array_azimuth</em>, <em>dni</em>, <em>luminance_isotropic</em>, <em>luminance_circumsolar</em>, <em>poa_horizon</em>, <em>poa_circumsolar</em><span class="sig-paren">)</span><a class="headerlink" href="#pvarray.Array.update_irradiance_terms_perez" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the irradiance source terms of all surfaces using values
+pre-calculated from the Perez transposition model.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>solar_zenith</strong> (<em>float</em>) – zenith angle of the sun [degrees]</li>
+<li><strong>solar_azimuth</strong> (<em>float</em>) – azimuth angle of the sun [degrees]</li>
+<li><strong>array_tilt</strong> (<em>float</em>) – tilt angle of the whole array. All PV rows must
+have the same tilt angle [degrees]</li>
+<li><strong>array_azimuth</strong> (<em>float</em>) – azimuth angle of the whole array. All PV
+rows must have the same azimuth angle [degrees]</li>
+<li><strong>dni</strong> (<em>float</em>) – direct normal irradiance [W/m2]</li>
+<li><strong>luminance_isotropic</strong> (<em>float</em>) – luminance of the isotropic part of the
+sky dome [W/m2/sr]</li>
+<li><strong>luminance_circumsolar</strong> (<em>float</em>) – luminance of the circumsolar part of
+the sky dome [W/m2/sr]</li>
+<li><strong>poa_horizon</strong> (<em>float</em>) – plane-of-array horizon component of the
+irradiance as calculated by Perez for the front surface of a PV row
+[W/m2]</li>
+<li><strong>poa_circumsolar</strong> (<em>float</em>) – plane-of-array circumsolar component of
+the irradiance as calculated by Perez for the front surface of a PV
+row [W/m2]</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">None</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pvarray.Array.update_irradiance_terms_simple">
+<code class="descname">update_irradiance_terms_simple</code><span class="sig-paren">(</span><em>solar_zenith</em>, <em>solar_azimuth</em>, <em>array_tilt</em>, <em>array_azimuth</em>, <em>dni</em>, <em>dhi</em><span class="sig-paren">)</span><a class="headerlink" href="#pvarray.Array.update_irradiance_terms_simple" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the irradiance source terms of all surfaces by assuming that
+the whole sky dome is isotropic (no diffuse sky dome decomposition).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>solar_zenith</strong> (<em>float</em>) – zenith angle of the sun [degrees]</li>
+<li><strong>solar_azimuth</strong> (<em>float</em>) – azimuth angle of the sun [degrees]</li>
+<li><strong>array_tilt</strong> (<em>float</em>) – tilt angle of the whole array. All PV rows must
+have the same tilt angle [degrees]</li>
+<li><strong>array_azimuth</strong> (<em>float</em>) – azimuth angle of the whole array. All PV
+rows must have the same azimuth angle [degrees]</li>
+<li><strong>dni</strong> (<em>float</em>) – direct normal irradiance [W/m2]</li>
+<li><strong>dhi</strong> (<em>float</em>) – diffuse horizontal irradiance [W/m2]</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">None</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pvarray.Array.update_reflectivity_matrix">
+<code class="descname">update_reflectivity_matrix</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pvarray.Array.update_reflectivity_matrix" title="Permalink to this definition">¶</a></dt>
+<dd><p>Update new surface registry with reflectivity values for all surfaces,
+and calculate inverse of the reflectivity matrix.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pvarray.Array.update_view_factors">
+<code class="descname">update_view_factors</code><span class="sig-paren">(</span><em>solar_zenith</em>, <em>solar_azimuth</em>, <em>array_tilt</em>, <em>array_azimuth</em><span class="sig-paren">)</span><a class="headerlink" href="#pvarray.Array.update_view_factors" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create new line and surface registries based on new inputs, and re-cal-
+culate the view factor matrix of the updated system.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>solar_zenith</strong> (<em>float</em>) – zenith angle of the sun</li>
+<li><strong>solar_azimuth</strong> (<em>float</em>) – azimuth angle of the sun</li>
+<li><strong>array_tilt</strong> (<em>float</em>) – tilt angle of the whole array. All PV rows must
+have the same tilt angle</li>
+<li><strong>array_azimuth</strong> (<em>float</em>) – azimuth angle of the whole array. All PV
+rows must have the same azimuth angle</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">None</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="the-tools-module">
+<h2>The <em>tools</em> module<a class="headerlink" href="#the-tools-module" title="Permalink to this headline">¶</a></h2>
+<div class="line-block">
+<div class="line">More details on some functions of the <code class="docutils literal notranslate"><span class="pre">tools</span></code> module designed for the users.</div>
+</div>
+<div class="line-block">
+<div class="line">The functions below should be the most useful.</div>
+</div>
+<dl class="function">
+<dt id="tools.plot_surface_registry">
+<code class="descclassname">tools.</code><code class="descname">plot_surface_registry</code><span class="sig-paren">(</span><em>ax</em>, <em>array</em>, <em>line_types_selected=None</em><span class="sig-paren">)</span><a class="headerlink" href="#tools.plot_surface_registry" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plot a <a class="reference internal" href="#pvarray.Array" title="pvarray.Array"><code class="xref py py-class docutils literal notranslate"><span class="pre">pvarray.Array</span></code></a> object’s shapely geometries based on its
+<code class="xref py py-attr docutils literal notranslate"><span class="pre">pvarray.Array.surface_registry</span></code>. The difference with
+<a class="reference internal" href="#tools.plot_line_registry" title="tools.plot_line_registry"><code class="xref py py-func docutils literal notranslate"><span class="pre">tools.plot_line_registry()</span></code></a> is that here the user will see the
+differences between PV row sides, the discretized elements, etc.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>ax</strong> – <code class="xref py py-class docutils literal notranslate"><span class="pre">matplotlib.axes.Axes</span></code> object to use for the plot</li>
+<li><strong>array</strong> – <a class="reference internal" href="#pvarray.Array" title="pvarray.Array"><code class="xref py py-class docutils literal notranslate"><span class="pre">pvarray.Array</span></code></a> object to plot</li>
+<li><strong>line_types_selected</strong> (<em>list</em>) – parameter used to select a subset of
+‘line_type’ to plot; e.g. ‘pvrow’ or ‘ground’</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">None (<code class="docutils literal notranslate"><span class="pre">ax</span></code> is updated)</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="tools.calculate_radiosities_serially_perez">
+<code class="descclassname">tools.</code><code class="descname">calculate_radiosities_serially_perez</code><span class="sig-paren">(</span><em>args</em><span class="sig-paren">)</span><a class="headerlink" href="#tools.calculate_radiosities_serially_perez" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the view factor radiosity and irradiance terms for multiple times.
+The calculations will be sequential, and they will assume a diffuse sky
+dome as calculated in the Perez diffuse sky transposition model (from
+<code class="docutils literal notranslate"><span class="pre">pvlib-python</span></code> implementation).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>args</strong> – tuple of at least two arguments: <code class="docutils literal notranslate"><span class="pre">(arguments,</span> <span class="pre">df_inputs)</span></code>,
+where <code class="docutils literal notranslate"><span class="pre">arguments</span></code> is a <code class="docutils literal notranslate"><span class="pre">dict</span></code> that contains the array parameters
+used to instantiate a <a class="reference internal" href="#pvarray.Array" title="pvarray.Array"><code class="xref py py-class docutils literal notranslate"><span class="pre">pvarray.Array</span></code></a> object, and <code class="docutils literal notranslate"><span class="pre">df_inputs</span></code>
+is a <code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code> with the following columns:
+[‘solar_zenith’, ‘solar_azimuth’, ‘array_tilt’, ‘array_azimuth’, ‘dhi’,
+‘dni’], and with the following units: [‘deg’, ‘deg’, ‘deg’, ‘deg’,
+‘W/m2’, ‘W/m2’]. A possible 3rd argument for the tuple is
+<code class="docutils literal notranslate"><span class="pre">save_segments</span></code>, which is a <code class="docutils literal notranslate"><span class="pre">tuple</span></code> of two elements used to save
+all the irradiance terms calculated for one side of a PV row; e.g.
+<code class="docutils literal notranslate"><span class="pre">(1,</span> <span class="pre">'front')</span></code> the first element is an <code class="docutils literal notranslate"><span class="pre">int</span></code> for the PV row index,
+and the second element a <code class="docutils literal notranslate"><span class="pre">str</span></code> to specify the side of the PV row,
+‘front’ or ‘back’</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><code class="docutils literal notranslate"><span class="pre">df_outputs,</span> <span class="pre">df_bifacial_gain,</span> <span class="pre">df_inputs_perez,</span> <span class="pre">ipoa_dict</span></code>;
+<code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code> objects and <code class="docutils literal notranslate"><span class="pre">dict</span></code> where <code class="docutils literal notranslate"><span class="pre">df_outputs</span></code>
+contains <em>averaged</em> irradiance terms for all PV row sides and at each
+time stamp; <code class="docutils literal notranslate"><span class="pre">df_bifacial_gain</span></code> contains the calculation of
+back-surface over front-surface irradiance for all PV rows and at each
+time stamp; <code class="docutils literal notranslate"><span class="pre">df_inputs_perez</span></code> contains the intermediate input and
+output values from the Perez model calculation in <code class="docutils literal notranslate"><span class="pre">pvlib-python</span></code>;
+<code class="docutils literal notranslate"><span class="pre">ipoa_dict</span></code> is not <code class="docutils literal notranslate"><span class="pre">None</span></code> only when the <code class="docutils literal notranslate"><span class="pre">save_segments</span></code> input is
+specified, and it is otherwise a <code class="docutils literal notranslate"><span class="pre">dict</span></code> where the keys are all the
+calculated irradiance terms’ names, and the values are
+<code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code> objects containing the calculated values for
+all the segments of the PV string side (it is a way of getting detailed
+values instead of averages)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="tools.calculate_radiosities_parallel_perez">
+<code class="descclassname">tools.</code><code class="descname">calculate_radiosities_parallel_perez</code><span class="sig-paren">(</span><em>array_parameters</em>, <em>df_inputs</em>, <em>n_processes=None</em>, <em>save_segments=None</em><span class="sig-paren">)</span><a class="headerlink" href="#tools.calculate_radiosities_parallel_perez" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the view factor radiosity and irradiance terms for multiple times.
+The calculations will be run in parallel on the different processors, and
+they will assume a diffuse sky dome as calculated in the Perez diffuse
+sky transposition model (from <code class="docutils literal notranslate"><span class="pre">pvlib-python</span></code> implementation).
+This function uses <a class="reference internal" href="#tools.calculate_radiosities_serially_perez" title="tools.calculate_radiosities_serially_perez"><code class="xref py py-func docutils literal notranslate"><span class="pre">tools.calculate_radiosities_serially_perez()</span></code></a></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>array_parameters</strong> (<em>dict</em>) – contains the array parameters used to
+instantiate a <a class="reference internal" href="#pvarray.Array" title="pvarray.Array"><code class="xref py py-class docutils literal notranslate"><span class="pre">pvarray.Array</span></code></a> object</li>
+<li><strong>df_inputs</strong> – <code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code> with the following columns:
+[‘solar_zenith’, ‘solar_azimuth’, ‘array_tilt’, ‘array_azimuth’, ‘dhi’,
+‘dni’], and with the following units: [‘deg’, ‘deg’, ‘deg’, ‘deg’,
+‘W/m2’, ‘W/m2’]</li>
+<li><strong>n_processes</strong> (<em>int</em>) – number of processes to use. Default value will be
+the total number of processors on the machine</li>
+<li><strong>save_segments</strong> (<em>tuple</em>) – <code class="docutils literal notranslate"><span class="pre">tuple</span></code> of two elements used to save all the
+irradiance terms calculated for one side of a PV row; e.g.
+<code class="docutils literal notranslate"><span class="pre">(1,</span> <span class="pre">'front')</span></code> the first element is an <code class="docutils literal notranslate"><span class="pre">int</span></code> for the PV row index,
+and the second element a <code class="docutils literal notranslate"><span class="pre">str</span></code> to specify the side of the PV row,
+‘front’ or ‘back’</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">concatenated outputs of
+<a class="reference internal" href="#tools.calculate_radiosities_serially_perez" title="tools.calculate_radiosities_serially_perez"><code class="xref py py-func docutils literal notranslate"><span class="pre">tools.calculate_radiosities_serially_perez()</span></code></a> run and outputted in
+the parallel processes</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<div class="line-block">
+<div class="line">Additional functions:</div>
+</div>
+<dl class="function">
+<dt id="tools.plot_line_registry">
+<code class="descclassname">tools.</code><code class="descname">plot_line_registry</code><span class="sig-paren">(</span><em>ax</em>, <em>array</em>, <em>line_types_selected=None</em><span class="sig-paren">)</span><a class="headerlink" href="#tools.plot_line_registry" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plot a <a class="reference internal" href="#pvarray.Array" title="pvarray.Array"><code class="xref py py-class docutils literal notranslate"><span class="pre">pvarray.Array</span></code></a> object’s shapely geometries based on its
+<code class="xref py py-attr docutils literal notranslate"><span class="pre">pvarray.Array.line_registry</span></code>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>ax</strong> – <code class="xref py py-class docutils literal notranslate"><span class="pre">matplotlib.axes.Axes</span></code> object to use for the plot</li>
+<li><strong>array</strong> – <a class="reference internal" href="#pvarray.Array" title="pvarray.Array"><code class="xref py py-class docutils literal notranslate"><span class="pre">pvarray.Array</span></code></a> object to plot</li>
+<li><strong>line_types_selected</strong> (<em>list</em>) – parameter used to select a subset of
+‘line_type’ to plot; e.g. ‘pvrow’ or ‘ground’</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">None; <code class="docutils literal notranslate"><span class="pre">ax</span></code> is updated</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="tools.calculate_radiosities_serially_simple">
+<code class="descclassname">tools.</code><code class="descname">calculate_radiosities_serially_simple</code><span class="sig-paren">(</span><em>array</em>, <em>df_inputs</em><span class="sig-paren">)</span><a class="headerlink" href="#tools.calculate_radiosities_serially_simple" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the view factor radiosity and irradiance terms for multiple times.
+The calculations will be sequential, and they will assume a completely
+isotropic sky dome.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>array</strong> – <a class="reference internal" href="#pvarray.Array" title="pvarray.Array"><code class="xref py py-class docutils literal notranslate"><span class="pre">pvarray.Array</span></code></a> object already configured and
+instantiated</li>
+<li><strong>df_inputs</strong> – <code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code> with following columns:
+[‘solar_zenith’, ‘solar_azimuth’, ‘array_tilt’, ‘array_azimuth’, ‘dhi’,
+‘dni’]. Units are: [‘deg’, ‘deg’, ‘deg’, ‘deg’, ‘W/m2’, ‘W/m2’]</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><code class="docutils literal notranslate"><span class="pre">df_outputs,</span> <span class="pre">df_bifacial_gain</span></code>; <code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code> objects
+where <code class="docutils literal notranslate"><span class="pre">df_outputs</span></code> contains <em>averaged</em> irradiance terms for all PV row
+sides and at each time stamp; <code class="docutils literal notranslate"><span class="pre">df_bifacial_gain</span></code> contains the
+calculation of back-surface over front-surface irradiance for all PV
+rows and at each time stamp.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="tools.perez_diffuse_luminance">
+<code class="descclassname">tools.</code><code class="descname">perez_diffuse_luminance</code><span class="sig-paren">(</span><em>df_inputs</em><span class="sig-paren">)</span><a class="headerlink" href="#tools.perez_diffuse_luminance" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function used to calculate the luminance and the view factor terms from the
+Perez diffuse light transposition model, as implemented in the
+<code class="docutils literal notranslate"><span class="pre">pvlib-python</span></code> library.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>df_inputs</strong> – class:<cite>pandas.DataFrame</cite> with following columns:
+[‘solar_zenith’, ‘solar_azimuth’, ‘array_tilt’, ‘array_azimuth’, ‘dhi’,
+‘dni’]. Units are: [‘deg’, ‘deg’, ‘deg’, ‘deg’, ‘W/m2’, ‘W/m2’]</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">class:<cite>pandas.DataFrame</cite> with the following columns:
+[‘solar_zenith’, ‘solar_azimuth’, ‘array_tilt’, ‘array_azimuth’, ‘dhi’,
+‘dni’, ‘vf_horizon’, ‘vf_circumsolar’, ‘vf_isotropic’,
+‘luminance_horizon’, ‘luminance_circumsolar’, ‘luminance_isotropic’,
+‘poa_isotropic’, ‘poa_circumsolar’, ‘poa_horizon’, ‘poa_total_diffuse’]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+    <div class="clearer"></div>
+  </div>
+    <div class="footer">
+      &copy;Copyright 2016, SunPower Corporation.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+      |
+      <a href="../_sources/developer/class_details.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+    <a href="https://github.com/SunPower/pvfactors" class="github">
+        <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"  class="github"/>
+    </a>
+    
+
+    
+  </body>
+</html>
