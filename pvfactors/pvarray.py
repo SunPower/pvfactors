@@ -3,7 +3,7 @@
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
-from pvfactors.pvcore import (LinePVArray, Registry,
+from pvfactors.pvcore import (LinePVArray,
                               find_edge_point, Y_GROUND,
                               MAX_X_GROUND, MIN_X_GROUND,
                               calculate_circumsolar_shading,
@@ -12,9 +12,11 @@ from pvfactors.pvcore import (LinePVArray, Registry,
 from pvfactors.pvrow import PVRowLine
 from pvfactors.view_factors import ViewFactorCalculator, VIEW_DICT
 from shapely.geometry import LineString, Point
-import geopandas as gpd
+# import geopandas as gpd
 import numpy as np
-import pandas as pd
+from pvfactors.pvgeometry import PVGeometry
+from pandas import DataFrame as Registry
+from pandas import notnull, Series
 from scipy import linalg
 from pvlib.tools import cosd, sind
 from pvlib.irradiance import aoi as aoi_function
@@ -430,7 +432,7 @@ class Array(ArrayBase):
 
         slice_registry = self.surface_registry.loc[
             (self.surface_registry.surface_side == 'front')
-            & pd.notnull(self.surface_registry.index_pvrow_neighbor), :]
+            & notnull(self.surface_registry.index_pvrow_neighbor), :]
 
         # Calculate the solar and circumsolar elevation angles in 2D plane
         solar_2d_elevation = np.abs(
@@ -681,7 +683,7 @@ class Array(ArrayBase):
 
         self.solar_2d_vector = solar_2d_vector
         pvrow.shadow_line_index = (
-            self.line_registry.add(list_shadow_line_pvarrays))
+            self.line_registry.pvgeometry.add(list_shadow_line_pvarrays))
 
     def create_ill_ground(self):
         """
@@ -717,7 +719,8 @@ class Array(ArrayBase):
                                                        line_type='ground',
                                                        shaded=False)
                     self.illum_ground_indices.append(
-                        self.line_registry.add([ill_gnd_line_pvarray]))
+                        self.line_registry.pvgeometry.add(
+                            [ill_gnd_line_pvarray]))
 
     def find_edge_points(self):
         """
@@ -739,7 +742,7 @@ class Array(ArrayBase):
             edge_pt = find_edge_point(b1, b2)
             self.line_registry.loc[
                 self.line_registry.pvrow_index == 0,
-                'edge_point'] = gpd.GeoSeries(edge_pt).values
+                'edge_point'] = Series(edge_pt).values
             edge_points.append(edge_pt)
         # Use simple vector translation to add other edge points for other
         # trackers
@@ -753,7 +756,7 @@ class Array(ArrayBase):
                     # FIXME: this is not going to work if not single line
                     self.line_registry.loc[
                         self.line_registry.pvrow_index == i + 1,
-                        'edge_point'] = gpd.GeoSeries(new_point).values
+                        'edge_point'] = Series(new_point).values
                     new_edge_points.append(new_point)
             edge_points += new_edge_points
 
@@ -812,7 +815,8 @@ class Array(ArrayBase):
                                     shaded=False)
 
         self.illum_ground_indices.append(
-            self.line_registry.add([ill_gnd_left, ill_gnd_right]))
+            self.line_registry.pvgeometry.add(
+                [ill_gnd_left, ill_gnd_right]))
 
     def calculate_interrow_direct_shading(self):
         """

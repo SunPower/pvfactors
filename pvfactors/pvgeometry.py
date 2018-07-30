@@ -94,3 +94,28 @@ class PVGeometry(object):
             contained.
         """
         return _series_op(self._obj, other, 'contains')
+
+    def add(self, list_lines_pvarray):
+        """
+        Add list of objects of class :class:`pvcore.LinePVArray` to the
+        registry.
+
+        :param list_lines_pvarray: list of objects of type
+            :class:`pvcore.LinePVArray`
+        :return: ``idx_list`` -- ``int``, the list of registry indices that were
+        added to the registry
+        """
+        # Find the start index that will be used to add entries to the registry
+        if len(self._obj.index) > 0:
+            start_index = self._obj.index[-1] + 1
+        else:
+            start_index = 0
+        idx_list = []
+        # Loop through list of PV array lines
+        for counter, line_pvarray in enumerate(list_lines_pvarray):
+            idx = start_index + counter
+            for key in line_pvarray.keys():
+                self._obj.loc[idx, key] = line_pvarray[key]
+            idx_list.append(idx)
+
+        return idx_list

@@ -87,7 +87,7 @@ class PVRowLine(PVRowBase):
         (self.lines, self.highest_point, self.lowest_point, self.right_point,
          self.left_point, self.director_vector, self.normal_vector) = (
             self.create_lines(self.tilt, index))
-        self.line_registry_indices = line_registry.add(self.lines)
+        self.line_registry_indices = line_registry.pvgeometry.add(self.lines)
         # Complete line will have the full pvrow linestring with possibly
         # multiple points on it, but still one linestring only
         self.complete_linestring = self.lines[0]['geometry']
