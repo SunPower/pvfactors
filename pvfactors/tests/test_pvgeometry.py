@@ -53,3 +53,16 @@ def test_add_linepvarray_to_registry():
     _ = registry.pvgeometry.add([line_pvarray])
 
     assert registry.geometry.values[0] == linestring
+
+
+def test_bounds():
+    """ Testing that the geometry bounds are calculated correctly """
+
+    linestring = LineString([Point(0, 1), Point(1, 0)])
+    registry = ArrayBase.initialize_line_registry()
+    line_pvarray = LinePVArray(
+        geometry=linestring,
+        line_type='ground',
+        shaded=True)
+    _ = registry.pvgeometry.add([line_pvarray])
+    assert registry.pvgeometry.bounds.values[0].tolist() == [0., 0., 1., 1.]

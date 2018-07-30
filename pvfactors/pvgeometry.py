@@ -79,6 +79,17 @@ class PVGeometry(object):
         geometry."""
         return _geo_unary_op(self._obj, 'centroid')
 
+    @property
+    def bounds(self):
+        """
+        Returns a ``DataFrame`` with columns ``minx``, ``miny``, ``maxx``,
+        ``maxy`` values containing the bounds for each geometry.
+        """
+        bounds = np.array([geom.bounds for geom in self._obj.geometry])
+        return pd.DataFrame(bounds,
+                            columns=['minx', 'miny', 'maxx', 'maxy'],
+                            index=self._obj.index)
+
     def contains(self, other):
         """Returns a ``Series`` of ``dtype('bool')`` with value ``True`` for
         each geometry that contains `other`.

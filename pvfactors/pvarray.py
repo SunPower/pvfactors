@@ -697,7 +697,7 @@ class Array(ArrayBase):
         df_bounds_shadows = (self.line_registry
                              .loc[(self.line_registry['line_type'] == 'ground')
                                   & self.line_registry.shaded]
-                             .bounds)
+                             .pvgeometry.bounds)
         shadow_indices = df_bounds_shadows.index
         self.illum_ground_indices = []
         # Use the boundary pts defined by each shadow object to find the 2
@@ -784,7 +784,7 @@ class Array(ArrayBase):
         df_bounds_shadows = (self.line_registry
                              .loc[(self.line_registry['line_type'] == 'ground')
                                   & self.line_registry.shaded]
-                             .bounds)
+                             .pvgeometry.bounds)
         shadow_indices = df_bounds_shadows.index
 
         # Take the outermost shadow points to create the remaining illuminated
@@ -827,7 +827,8 @@ class Array(ArrayBase):
         """
         # Find the direction of shading
         # Direct shading calculation must be specific to the PVRow class
-        shading_is_forward = (self.pvrows[0].shadow['geometry'].bounds[0] >=
+        shading_is_forward = (self.pvrows[0].shadow['geometry']
+                              .pvgeometry.bounds[0] >=
                               self.pvrows[0].left_point.x)
         if shading_is_forward:
             for i in range(1, self.n_pvrows):
@@ -836,7 +837,8 @@ class Array(ArrayBase):
                 # Shadows from left to right: find vector of shadow
                 top_point_vector = pvrow.highest_point
                 x1_shadow, x2_shadow = (pvrow
-                                        .get_shadow_bounds(self.solar_2d_vector)
+                                        .get_shadow_bounds(
+                                            self.solar_2d_vector)
                                         )
                 ground_point = Point(x2_shadow, Y_GROUND)
                 linestring_shadow = LineString([top_point_vector, ground_point])
@@ -853,10 +855,12 @@ class Array(ArrayBase):
                 # Shadows from right to left: find vector of shadow
                 top_point_vector = pvrow.highest_point
                 x1_shadow, x2_shadow = (pvrow
-                                        .get_shadow_bounds(self.solar_2d_vector)
+                                        .get_shadow_bounds(
+                                            self.solar_2d_vector)
                                         )
                 ground_point = Point(x1_shadow, Y_GROUND)
-                linestring_shadow = LineString([top_point_vector, ground_point])
+                linestring_shadow = LineString(
+                    [top_point_vector, ground_point])
                 # FIXME: we do not want to create a line_registry object
                 self.line_registry.split_pvrow_geometry(
                     self.pvrows[i].line_registry_indices[0],
@@ -981,7 +985,8 @@ class Array(ArrayBase):
             ground_registry = self.surface_registry.loc[indices_ground,
                                                         :].copy()
             ground_registry[
-                'x_centroid'] = self.surface_registry.centroid.bounds.minx
+                'x_centroid'] = (self.surface_registry.pvgeometry
+                                 .centroid.bounds.minx)
 
             # All pvrow surfaces see the sky dome
             view_matrix[indices_back_pvrows[:, np.newaxis],
