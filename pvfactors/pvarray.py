@@ -202,7 +202,8 @@ class Array(ArrayBase):
         # ------- Line creation: returning the line registry
         LOGGER.debug("...building line registry")
         # Create the PV rows / structures
-        self.pvrows = self.create_pvrows_array(self.n_pvrows, self.pvrow_height)
+        self.pvrows = self.create_pvrows_array(self.n_pvrows,
+                                               self.pvrow_height)
 
         # Create the ground and the shadows on it
         self.create_pvrow_shadows(solar_zenith, solar_azimuth)
@@ -211,7 +212,8 @@ class Array(ArrayBase):
         self.create_remaining_illum_ground(edge_points)
         # Assuming the edge points are ordered
         # --- Add edge points to geometries
-        self.line_registry.split_ground_geometry_from_edge_points(edge_points)
+        self.line_registry.pvgeometry.split_ground_geometry_from_edge_points(
+            edge_points)
         if self.has_direct_shading:
             LOGGER.debug("...calculating interrow shading")
             self.calculate_interrow_direct_shading()
@@ -910,7 +912,7 @@ class Array(ArrayBase):
         self.surface_registry['reflectivity'] = np.nan
         self.surface_registry['q0'] = np.nan
         self.surface_registry['qinc'] = np.nan
-        self.surface_registry['area'] = self.surface_registry.length
+        self.surface_registry['area'] = self.surface_registry.pvgeometry.length
         self.surface_registry['index_pvrow_neighbor'] = np.nan
 
     def discretize_surfaces(self):
@@ -984,9 +986,11 @@ class Array(ArrayBase):
             # Find ground centroid values
             ground_registry = self.surface_registry.loc[indices_ground,
                                                         :].copy()
+            # Need to create a registry to use geometry functions like "bounds"
+            centroids = Registry(self.surface_registry.pvgeometry.centroid,
+                                 columns=['geometry'])
             ground_registry[
-                'x_centroid'] = (self.surface_registry.pvgeometry
-                                 .centroid.bounds.minx)
+                'x_centroid'] = (centroids.pvgeometry.bounds.minx)
 
             # All pvrow surfaces see the sky dome
             view_matrix[indices_back_pvrows[:, np.newaxis],

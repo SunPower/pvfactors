@@ -66,3 +66,22 @@ def test_bounds():
         shaded=True)
     _ = registry.pvgeometry.add([line_pvarray])
     assert registry.pvgeometry.bounds.values[0].tolist() == [0., 0., 1., 1.]
+
+
+def test_split_ground_geometry_from_edge_points():
+    """ Testing that the geometry bounds are calculated correctly """
+
+    linestring = LineString([Point(0, 0), Point(2, 2)])
+    registry = ArrayBase.initialize_line_registry()
+    line_pvarray = LinePVArray(
+        geometry=linestring,
+        line_type='ground',
+        shaded=True)
+    _ = registry.pvgeometry.add([line_pvarray])
+
+    list_edge_points = [Point(1, 1)]
+    registry.pvgeometry.split_ground_geometry_from_edge_points(
+        list_edge_points)
+
+    assert (registry.geometry.values[0] == LineString([(0, 0), (1, 1)]))
+    assert (registry.geometry.values[1] == LineString([(1, 1), (2, 2)]))

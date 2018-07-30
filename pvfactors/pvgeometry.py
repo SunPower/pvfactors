@@ -12,6 +12,7 @@ the integration of the package in other open-source projects.
 
 import numpy as np
 import pandas as pd
+from shapely.geometry import LineString, Point
 
 
 def _series_op(this, other, op, **kwargs):
@@ -130,3 +131,72 @@ class PVGeometry(object):
             idx_list.append(idx)
 
         return idx_list
+
+    def split_ground_geometry_from_edge_points(self, edge_points):
+        """
+        Break up ground lines into multiple ones at the pv row "edge points",
+        which are the intersections of pv row lines and ground lines. This is
+        important to separate the ground lines that a pv row's front surface
+         sees from the ones its back surface does.
+
+        :param edge_points: list of :class:`shapely.Point` objects
+        :return: None
+        """
+        for point in edge_points:
+            df_ground = self._obj.loc[self._obj.loc[:, 'line_type']
+                                      == 'ground', :]
+            geoentry_to_break_up = df_ground.loc[df_ground.pvgeometry
+                                                 .contains(point)]
+            if geoentry_to_break_up.shape[0] == 1:
+                self.break_and_add_entries(geoentry_to_break_up, point)
+            elif geoentry_to_break_up.shape[0] > 1:
+                raise Exception("geoentry_to_break_up.shape[0] cannot be"
+                                " larger than 1")
+
+    def break_and_add_entries(self, geoentry_to_break_up, point):
+        """
+        Break up a surface geometry into two objects at a point location.
+
+        :param geoentry_to_break_up: registry entry to break up
+        :param point: :class:`shapely.Point` object used to decide where to
+            break up entry.
+        :return: None
+        """
+        # Get geometry
+        idx = geoentry_to_break_up.index
+        geometry = geoentry_to_break_up.geometry.values[0]
+        line_1, line_2 = self.cut_linestring(geometry, point)
+        geometry_1 = pd.Series(line_1)
+        geometry_2 = pd.Series(line_2)
+        self._obj.at[idx, 'geometry'] = geometry_1.values
+        new_registry_entry = self._obj.loc[idx, :].copy()
+        new_registry_entry['geometry'] = geometry_2.values
+        self._obj.loc[self._obj.shape[0], :] = new_registry_entry.values[0]
+
+    @staticmethod
+    def cut_linestring(line, point):
+        """
+        Adapted from shapely documentation. Cuts a line in two at a calculated
+        distance from its starting point
+
+        :param line: :class:`shapely.LineString` object to cut
+        :param point: :class:`shapely.Point` object to use for the cut
+        :return: list of two :class:`shapely.LineString` objects
+        """
+
+        distance = line.project(point)
+        assert ((distance >= 0.0) & (distance <= line.length)), (
+            "cut_linestring: the lines didn't intersect")
+        # There could be multiple points in a line
+        coords = list(line.coords)
+        for i, p in enumerate(coords):
+            pd = line.project(Point(p))
+            if pd == distance:
+                return [
+                    LineString(coords[:i + 1]),
+                    LineString(coords[i:])]
+            if pd > distance:
+                cp = line.interpolate(distance)
+                return [
+                    LineString(coords[:i] + [(cp.x, cp.y)]),
+                    LineString([(cp.x, cp.y)] + coords[i:])]
