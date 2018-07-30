@@ -14,6 +14,8 @@ import numpy as np
 import pandas as pd
 from shapely.geometry import LineString, Point
 
+THRESHOLD_DISTANCE_TOO_CLOSE = 1e-10
+
 
 def _series_op(this, other, op, **kwargs):
     """Geometric operation that returns a pandas Series"""
@@ -200,3 +202,51 @@ class PVGeometry(object):
                 return [
                     LineString(coords[:i] + [(cp.x, cp.y)]),
                     LineString([(cp.x, cp.y)] + coords[i:])]
+
+    def split_pvrow_geometry(self, idx, line_shadow, pvrow_top_point):
+        """
+        Break up pv row line into two pv row lines, a shaded one and an unshaded
+         one. This function requires knowing the pv row line index in the
+        registry, the "shadow line" that intersects with the pv row, and the top
+         point of the pv row in order to decide which pv row line will be shaded
+         or not after break up.
+
+        :param int idx: index of shaded pv row entry
+        :param line_shadow: :class:`shapely.LineString` object representing the
+            "shadow line" intersecting with the pv row line
+        :param pvrow_top_point: the highest point of the pv row line (in the
+            elevation direction)
+        :return: None
+        """
+        # Define geometry to work on
+        geometry = self._obj.loc[idx, 'geometry']
+        # Find intersection point
+        point_intersect = geometry.intersection(line_shadow)
+        # Check that the intersection is not too close to a boundary: if it
+        # is it can create a "memory access error" it seems
+        is_too_close = [
+            point.distance(point_intersect) < THRESHOLD_DISTANCE_TOO_CLOSE
+            for point in geometry.boundary]
+        if True in is_too_close:
+            # Leave it as it is and do not split geometry: it should not
+            # affect the calculations for a good threshold
+            pass
+        else:
+            # Cut geometry in two pieces
+            list_new_lines = self.cut_linestring(geometry, point_intersect)
+            # Add new geometry to index
+            new_registry_entry = self._obj.loc[idx, :].copy()
+            new_registry_entry['shaded'] = True
+            if pvrow_top_point in list_new_lines[0].boundary:
+                geometry_ill = pd.Series(list_new_lines[0])
+                geometry_shaded = pd.Series(list_new_lines[1])
+            elif pvrow_top_point in list_new_lines[1].boundary:
+                geometry_ill = pd.Series(list_new_lines[1])
+                geometry_shaded = pd.Series(list_new_lines[0])
+            else:
+                raise Exception("split_pvrow_geometry: unknown error occured")
+
+            # Update registry
+            self._obj.at[idx, 'geometry'] = geometry_ill.values[0]
+            new_registry_entry['geometry'] = geometry_shaded.values[0]
+            self._obj.loc[self._obj.shape[0] + 1, :] = new_registry_entry

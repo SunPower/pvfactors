@@ -830,7 +830,7 @@ class Array(ArrayBase):
         # Find the direction of shading
         # Direct shading calculation must be specific to the PVRow class
         shading_is_forward = (self.pvrows[0].shadow['geometry']
-                              .pvgeometry.bounds[0] >=
+                              .bounds[0] >=
                               self.pvrows[0].left_point.x)
         if shading_is_forward:
             for i in range(1, self.n_pvrows):
@@ -845,7 +845,7 @@ class Array(ArrayBase):
                 ground_point = Point(x2_shadow, Y_GROUND)
                 linestring_shadow = LineString([top_point_vector, ground_point])
                 # FIXME: we do not want to create a line_registry object
-                self.line_registry.split_pvrow_geometry(
+                self.line_registry.pvgeometry.split_pvrow_geometry(
                     self.pvrows[i].line_registry_indices[0],
                     linestring_shadow,
                     adjacent_pvrow.highest_point
@@ -864,7 +864,7 @@ class Array(ArrayBase):
                 linestring_shadow = LineString(
                     [top_point_vector, ground_point])
                 # FIXME: we do not want to create a line_registry object
-                self.line_registry.split_pvrow_geometry(
+                self.line_registry.pvgeometry.split_pvrow_geometry(
                     self.pvrows[i].line_registry_indices[0],
                     linestring_shadow,
                     adjacent_pvrow.highest_point
