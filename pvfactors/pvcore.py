@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
-import geopandas as gpd
-from shapely.geometry import LineString, Point
+from shapely.geometry import Point
 import numpy as np
 import math
 import logging
