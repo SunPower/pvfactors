@@ -1,0 +1,48 @@
+version: 2
+workflows:
+  version: 2
+  test:
+    jobs:
+      - test-python-2.7
+      - test-python-3.6
+jobs:
+  test-python-2.7: &test-template
+    working_directory: ~/SunPower/pvfactors
+    parallelism: 1
+    shell: /bin/bash --login
+    environment:
+      CIRCLE_ARTIFACTS: /tmp/circleci-artifacts
+      CIRCLE_TEST_REPORTS: /tmp/circleci-test-results
+    docker:
+      - image: circleci/python:2.7.14-stretch
+    steps:
+      - checkout
+      - run: mkdir -p $CIRCLE_ARTIFACTS $CIRCLE_TEST_REPORTS
+      - restore_cache:
+          keys:
+            - v1-dep-{{ .Branch }}-
+            - v1-dep-master-
+            - v1-dep-
+      - run: sudo pip install pytest==3.2.2 numpy==1.13.3 scipy==0.19.1 pandas==0.20.3 shapely==1.6.1 geopandas==0.3.0 pvlib==0.5.0 future==0.16.0 six==1.11.0
+      - save_cache:
+          key: v1-dep-{{ .Branch }}-{{ epoch }}
+          paths:
+            - vendor/bundle
+            - ~/virtualenvs
+            - ~/.m2
+            - ~/.ivy2
+            - ~/.bundle
+            - ~/.go_workspace
+            - ~/.gradle
+            - ~/.cache/bower
+      - run: pytest
+      - store_test_results:
+          path: /tmp/circleci-test-results
+      - store_artifacts:
+          path: /tmp/circleci-artifacts
+      - store_artifacts:
+          path: /tmp/circleci-test-results
+  test-python-3.6:
+    <<: *test-template
+    docker:
+      - image: circleci/python:3.6.6-stretch
