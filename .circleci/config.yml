@@ -3,10 +3,10 @@ workflows:
   version: 2
   test:
     jobs:
-      - test-2.7
-      - test-3.7
+      - test-python-2.7
+      - test-python-3.6
 jobs:
-  test-2.7: &test-template
+  test-python-2.7: &test-template
     working_directory: ~/SunPower/pvfactors
     parallelism: 1
     shell: /bin/bash --login
@@ -42,7 +42,7 @@ jobs:
           path: /tmp/circleci-artifacts
       - store_artifacts:
           path: /tmp/circleci-test-results
-  test-3.7:
+  test-python-3.6:
     <<: *test-template
     docker:
       - image: circleci/python:3.6.6-stretch
