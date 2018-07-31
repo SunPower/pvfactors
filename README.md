@@ -44,11 +44,6 @@ a list of important dependencies:
 * [numpy](https://pypi.python.org/pypi/numpy)
 * [scipy](https://pypi.python.org/pypi/scipy)
 * [pandas](https://pypi.python.org/pypi/pandas)
-* [geopandas](https://pypi.python.org/pypi/geopandas): for Windows, follow this
-tutorial: [link](http://geoffboeing.com/2014/09/using-geopandas-windows/). In
-brief, you will need to download a list of dependencies from [this website](https://www.lfd.uci.edu/~gohlke/pythonlibs/) by Christoph Gohlke, and then
-install the packages in a specific order: GDAL (+ add path to system), fiona,
-pyproj, rtree, shapely, and then geopandas
 * [pvlib-python](https://pypi.python.org/pypi/pvlib)
 
 

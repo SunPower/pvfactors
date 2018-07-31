@@ -99,7 +99,7 @@ def test_save_all_outputs_calculate_perez():
     # tilt angle only
     df_inputs_clearday.loc[
         (df_inputs_clearday.solar_azimuth <= 180.), 'array_azimuth'] = (
-        df_inputs_clearday.ix[-1, 'array_azimuth'])
+            df_inputs_clearday.loc[:, 'array_azimuth'][-1])
     df_inputs_clearday.loc[
         (df_inputs_clearday.solar_azimuth <= 180.), 'array_tilt'] *= (-1)
 

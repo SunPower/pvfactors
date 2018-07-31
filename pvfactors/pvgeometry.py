@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
 
 """
-``Geopandas`` is an amazing open-source package, but it brings with it
-a lot of dependencies that are not useful in all use cases of the package.
-In pvfactors, we need a way to store efficiently shapely geometries in
-Dataframes and perform basic geometric operations. So in this case,
-using the whole ``Geopandas`` package may be overkill and may complicate
+In ``pvfactors``, we need a way to store efficiently ``shapely`` geometries in
+Dataframes and perform only basic geometric operations. So in this case,
+using a complete package like ``geopandas`` may be overkill
+since it brings with it a lot of dependencies, and may complicate
 the integration of the package in other open-source projects.
+Here we implement the basic functionalities of geopandas that are useful in
+pvfactors.
 
 """
 

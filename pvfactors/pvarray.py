@@ -12,7 +12,6 @@ from pvfactors.pvcore import (LinePVArray,
 from pvfactors.pvrow import PVRowLine
 from pvfactors.view_factors import ViewFactorCalculator, VIEW_DICT
 from shapely.geometry import LineString, Point
-# import geopandas as gpd
 import numpy as np
 from pvfactors.pvgeometry import PVGeometry
 from pandas import DataFrame as Registry
