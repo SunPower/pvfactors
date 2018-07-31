@@ -318,7 +318,7 @@ class Array(ArrayBase):
         self.surface_registry['horizon_term'] = 0.
         self.surface_registry['direct_term'] = 0.
         self.surface_registry['surface_centroid'] = (
-            self.surface_registry.centroid
+            self.surface_registry.pvgeometry.centroid
         )
         self.surface_registry['circumsolar_shading_pct'] = 0.
         self.surface_registry['horizon_band_shading_pct'] = 0.
@@ -328,8 +328,8 @@ class Array(ArrayBase):
         dni_ground = dni * cosd(solar_zenith)
         circumsolar_ground = luminance_circumsolar
         # FIXME: only works for pvrows as lines
-        aoi_frontsurface = aoi_function(array_tilt, array_azimuth, solar_zenith,
-                                        solar_azimuth)
+        aoi_frontsurface = aoi_function(array_tilt, array_azimuth,
+                                        solar_zenith, solar_azimuth)
 
         # --- Assign terms to surfaces
         # Illuminated ground

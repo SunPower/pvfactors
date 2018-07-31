@@ -286,7 +286,7 @@ def calculate_radiosities_serially_simple(array, df_inputs):
                 df_outputs.loc['array_is_shaded', idx] = (
                     array.has_direct_shading)
         except Exception as err:
-            print("Unexpected error: {0}".format(err))
+            LOGGER.debug("Unexpected error: {0}".format(err))
 
         print_progress(i, n, prefix='Progress:', suffix='Complete',
                        bar_length=50)
@@ -477,7 +477,7 @@ def calculate_radiosities_serially_perez(args):
                 )
 
         except Exception as err:
-            print("Unexpected error: {0}".format(err))
+            LOGGER.debug("Unexpected error: {0}".format(err))
 
         print_progress(i, n, prefix='Progress:', suffix='Complete',
                        bar_length=50)
