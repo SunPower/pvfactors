@@ -45,4 +45,4 @@ jobs:
   test-3.7:
     <<: *test-template
     docker:
-      - image: circleci/python:3.7.0-stretch
+      - image: circleci/python:3.6.6-stretch
