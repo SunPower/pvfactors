@@ -106,3 +106,27 @@ def test_split_pvrow_geomtry():
 
     assert registry.geometry.values[0] == LineString([(1, 1), (2, 2)])
     assert registry.geometry.values[1] == LineString([(0, 0), (1, 1)])
+
+
+def test_cut_pvrow_geometry():
+    """ Testing that the pvrow geometry is discretized as expected """
+
+    linestring = LineString([Point(0, 0), Point(2, 2)])
+    registry = ArrayBase.initialize_line_registry()
+    line_pvarray = LinePVArray(
+        geometry=linestring,
+        line_type='pvrow',
+        shaded=True)
+    _ = registry.pvgeometry.add([line_pvarray])
+    registry['surface_side'] = 'front'
+    registry['pvrow_index'] = 0
+
+    list_points = [Point(1, 1)]
+    pvrow_index = 0
+    side = 'front'
+
+    registry.pvgeometry.cut_pvrow_geometry(list_points, pvrow_index,
+                                           side)
+
+    assert registry.geometry.values[1] == LineString([(1, 1), (2, 2)])
+    assert registry.geometry.values[0] == LineString([(0, 0), (1, 1)])

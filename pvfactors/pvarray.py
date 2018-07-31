@@ -928,7 +928,7 @@ class Array(ArrayBase):
             n_segments = cut[1]
             side = cut[2]
             self.pvrows[pvrow_index].calculate_cut_points(n_segments)
-            self.surface_registry.cut_pvrow_geometry(
+            self.surface_registry.pvgeometry.cut_pvrow_geometry(
                 self.pvrows[pvrow_index].cut_points, pvrow_index, side)
 
 # ------- View matrix creation

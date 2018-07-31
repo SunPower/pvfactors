@@ -14,6 +14,9 @@ import numpy as np
 import pandas as pd
 from shapely.geometry import LineString, Point
 
+
+# TODO: remove hard-coding if possible
+DISTANCE_TOLERANCE = 1e-8
 THRESHOLD_DISTANCE_TOO_CLOSE = 1e-10
 
 
@@ -108,6 +111,16 @@ class PVGeometry(object):
             contained.
         """
         return _series_op(self._obj, other, 'contains')
+
+    def distance(self, other):
+        """Returns a ``Series`` containing the distance to `other`.
+        Parameters
+        ----------
+        other : Geoseries or geometric object
+            The Geoseries (elementwise) or geometric object to find the
+            distance to.
+        """
+        return _series_op(self._obj, other, 'distance')
 
     def add(self, list_lines_pvarray):
         """
@@ -250,3 +263,29 @@ class PVGeometry(object):
             self._obj.at[idx, 'geometry'] = geometry_ill.values[0]
             new_registry_entry['geometry'] = geometry_shaded.values[0]
             self._obj.loc[self._obj.shape[0] + 1, :] = new_registry_entry
+
+    def cut_pvrow_geometry(self, list_points, pvrow_index, side):
+        """
+        Break up pv row lines into multiple segments based on the list of
+        points specified. This is the "discretization" of the pvrow segments.
+        For now, it only works for pv rows.
+
+        :param list_points: list of :class:`shapely.Point`, breaking points for
+            the pv row lines.
+        :param pvrow_index: pv row index to specify the PV row to discretize;
+            note that this could return multiple entries from the registry.
+        :param side: only do it for one side of the selected PV row.
+        :return: None
+        """
+        # TODO: is currently not able to work for other surfaces than pv rows..
+        for point in list_points:
+            df_selected = self._obj.loc[
+                (self._obj['pvrow_index'] == pvrow_index)
+                & (self._obj['surface_side'] == side), :]
+            geoentry_to_break_up = df_selected.loc[
+                df_selected.pvgeometry.distance(point) < DISTANCE_TOLERANCE]
+            if geoentry_to_break_up.shape[0] == 1:
+                self.break_and_add_entries(geoentry_to_break_up, point)
+            elif geoentry_to_break_up.shape[0] > 1:
+                raise Exception("geoentry_to_break_up.shape[0] cannot be"
+                                "larger than 1")
