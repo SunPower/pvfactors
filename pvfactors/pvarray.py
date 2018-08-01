@@ -3,18 +3,19 @@
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
-from pvfactors.pvcore import (LinePVArray, Registry,
+from pvfactors import (PVFactorsError, PVFactorsArrayUpdateException)
+from pvfactors.pvcore import (LinePVArray,
                               find_edge_point, Y_GROUND,
                               MAX_X_GROUND, MIN_X_GROUND,
                               calculate_circumsolar_shading,
-                              calculate_horizon_band_shading,
-                              VFArrayUpdateException)
+                              calculate_horizon_band_shading)
 from pvfactors.pvrow import PVRowLine
 from pvfactors.view_factors import ViewFactorCalculator, VIEW_DICT
 from shapely.geometry import LineString, Point
-import geopandas as gpd
 import numpy as np
-import pandas as pd
+from pvfactors.pvgeometry import PVGeometry
+from pandas import DataFrame as Registry
+from pandas import notnull, Series
 from scipy import linalg
 from pvlib.tools import cosd, sind
 from pvlib.irradiance import aoi as aoi_function
@@ -200,7 +201,8 @@ class Array(ArrayBase):
         # ------- Line creation: returning the line registry
         LOGGER.debug("...building line registry")
         # Create the PV rows / structures
-        self.pvrows = self.create_pvrows_array(self.n_pvrows, self.pvrow_height)
+        self.pvrows = self.create_pvrows_array(self.n_pvrows,
+                                               self.pvrow_height)
 
         # Create the ground and the shadows on it
         self.create_pvrow_shadows(solar_zenith, solar_azimuth)
@@ -209,7 +211,8 @@ class Array(ArrayBase):
         self.create_remaining_illum_ground(edge_points)
         # Assuming the edge points are ordered
         # --- Add edge points to geometries
-        self.line_registry.split_ground_geometry_from_edge_points(edge_points)
+        self.line_registry.pvgeometry.split_ground_geometry_from_edge_points(
+            edge_points)
         if self.has_direct_shading:
             LOGGER.debug("...calculating interrow shading")
             self.calculate_interrow_direct_shading()
@@ -314,7 +317,7 @@ class Array(ArrayBase):
         self.surface_registry['horizon_term'] = 0.
         self.surface_registry['direct_term'] = 0.
         self.surface_registry['surface_centroid'] = (
-            self.surface_registry.centroid
+            self.surface_registry.pvgeometry.centroid
         )
         self.surface_registry['circumsolar_shading_pct'] = 0.
         self.surface_registry['horizon_band_shading_pct'] = 0.
@@ -324,8 +327,8 @@ class Array(ArrayBase):
         dni_ground = dni * cosd(solar_zenith)
         circumsolar_ground = luminance_circumsolar
         # FIXME: only works for pvrows as lines
-        aoi_frontsurface = aoi_function(array_tilt, array_azimuth, solar_zenith,
-                                        solar_azimuth)
+        aoi_frontsurface = aoi_function(array_tilt, array_azimuth,
+                                        solar_zenith, solar_azimuth)
 
         # --- Assign terms to surfaces
         # Illuminated ground
@@ -430,7 +433,7 @@ class Array(ArrayBase):
 
         slice_registry = self.surface_registry.loc[
             (self.surface_registry.surface_side == 'front')
-            & pd.notnull(self.surface_registry.index_pvrow_neighbor), :]
+            & notnull(self.surface_registry.index_pvrow_neighbor), :]
 
         # Calculate the solar and circumsolar elevation angles in 2D plane
         solar_2d_elevation = np.abs(
@@ -555,7 +558,7 @@ class Array(ArrayBase):
             self.update_view_factors(solar_zenith, solar_azimuth, array_tilt,
                                      array_azimuth)
         except Exception as err:
-            raise VFArrayUpdateException(
+            raise PVFactorsArrayUpdateException(
                 "Could not calculate shapely array or view factors because of "
                 "error: %s" % err)
 
@@ -681,7 +684,7 @@ class Array(ArrayBase):
 
         self.solar_2d_vector = solar_2d_vector
         pvrow.shadow_line_index = (
-            self.line_registry.add(list_shadow_line_pvarrays))
+            self.line_registry.pvgeometry.add(list_shadow_line_pvarrays))
 
     def create_ill_ground(self):
         """
@@ -695,7 +698,7 @@ class Array(ArrayBase):
         df_bounds_shadows = (self.line_registry
                              .loc[(self.line_registry['line_type'] == 'ground')
                                   & self.line_registry.shaded]
-                             .bounds)
+                             .pvgeometry.bounds)
         shadow_indices = df_bounds_shadows.index
         self.illum_ground_indices = []
         # Use the boundary pts defined by each shadow object to find the 2
@@ -717,7 +720,8 @@ class Array(ArrayBase):
                                                        line_type='ground',
                                                        shaded=False)
                     self.illum_ground_indices.append(
-                        self.line_registry.add([ill_gnd_line_pvarray]))
+                        self.line_registry.pvgeometry.add(
+                            [ill_gnd_line_pvarray]))
 
     def find_edge_points(self):
         """
@@ -739,7 +743,7 @@ class Array(ArrayBase):
             edge_pt = find_edge_point(b1, b2)
             self.line_registry.loc[
                 self.line_registry.pvrow_index == 0,
-                'edge_point'] = gpd.GeoSeries(edge_pt).values
+                'edge_point'] = Series(edge_pt).values
             edge_points.append(edge_pt)
         # Use simple vector translation to add other edge points for other
         # trackers
@@ -753,7 +757,7 @@ class Array(ArrayBase):
                     # FIXME: this is not going to work if not single line
                     self.line_registry.loc[
                         self.line_registry.pvrow_index == i + 1,
-                        'edge_point'] = gpd.GeoSeries(new_point).values
+                        'edge_point'] = Series(new_point).values
                     new_edge_points.append(new_point)
             edge_points += new_edge_points
 
@@ -781,7 +785,7 @@ class Array(ArrayBase):
         df_bounds_shadows = (self.line_registry
                              .loc[(self.line_registry['line_type'] == 'ground')
                                   & self.line_registry.shaded]
-                             .bounds)
+                             .pvgeometry.bounds)
         shadow_indices = df_bounds_shadows.index
 
         # Take the outermost shadow points to create the remaining illuminated
@@ -812,7 +816,8 @@ class Array(ArrayBase):
                                     shaded=False)
 
         self.illum_ground_indices.append(
-            self.line_registry.add([ill_gnd_left, ill_gnd_right]))
+            self.line_registry.pvgeometry.add(
+                [ill_gnd_left, ill_gnd_right]))
 
     def calculate_interrow_direct_shading(self):
         """
@@ -823,7 +828,8 @@ class Array(ArrayBase):
         """
         # Find the direction of shading
         # Direct shading calculation must be specific to the PVRow class
-        shading_is_forward = (self.pvrows[0].shadow['geometry'].bounds[0] >=
+        shading_is_forward = (self.pvrows[0].shadow['geometry']
+                              .bounds[0] >=
                               self.pvrows[0].left_point.x)
         if shading_is_forward:
             for i in range(1, self.n_pvrows):
@@ -832,12 +838,13 @@ class Array(ArrayBase):
                 # Shadows from left to right: find vector of shadow
                 top_point_vector = pvrow.highest_point
                 x1_shadow, x2_shadow = (pvrow
-                                        .get_shadow_bounds(self.solar_2d_vector)
+                                        .get_shadow_bounds(
+                                            self.solar_2d_vector)
                                         )
                 ground_point = Point(x2_shadow, Y_GROUND)
                 linestring_shadow = LineString([top_point_vector, ground_point])
                 # FIXME: we do not want to create a line_registry object
-                self.line_registry.split_pvrow_geometry(
+                self.line_registry.pvgeometry.split_pvrow_geometry(
                     self.pvrows[i].line_registry_indices[0],
                     linestring_shadow,
                     adjacent_pvrow.highest_point
@@ -849,12 +856,14 @@ class Array(ArrayBase):
                 # Shadows from right to left: find vector of shadow
                 top_point_vector = pvrow.highest_point
                 x1_shadow, x2_shadow = (pvrow
-                                        .get_shadow_bounds(self.solar_2d_vector)
+                                        .get_shadow_bounds(
+                                            self.solar_2d_vector)
                                         )
                 ground_point = Point(x1_shadow, Y_GROUND)
-                linestring_shadow = LineString([top_point_vector, ground_point])
+                linestring_shadow = LineString(
+                    [top_point_vector, ground_point])
                 # FIXME: we do not want to create a line_registry object
-                self.line_registry.split_pvrow_geometry(
+                self.line_registry.pvgeometry.split_pvrow_geometry(
                     self.pvrows[i].line_registry_indices[0],
                     linestring_shadow,
                     adjacent_pvrow.highest_point
@@ -902,7 +911,7 @@ class Array(ArrayBase):
         self.surface_registry['reflectivity'] = np.nan
         self.surface_registry['q0'] = np.nan
         self.surface_registry['qinc'] = np.nan
-        self.surface_registry['area'] = self.surface_registry.length
+        self.surface_registry['area'] = self.surface_registry.pvgeometry.length
         self.surface_registry['index_pvrow_neighbor'] = np.nan
 
     def discretize_surfaces(self):
@@ -918,7 +927,7 @@ class Array(ArrayBase):
             n_segments = cut[1]
             side = cut[2]
             self.pvrows[pvrow_index].calculate_cut_points(n_segments)
-            self.surface_registry.cut_pvrow_geometry(
+            self.surface_registry.pvgeometry.cut_pvrow_geometry(
                 self.pvrows[pvrow_index].cut_points, pvrow_index, side)
 
 # ------- View matrix creation
@@ -976,8 +985,11 @@ class Array(ArrayBase):
             # Find ground centroid values
             ground_registry = self.surface_registry.loc[indices_ground,
                                                         :].copy()
+            # Need to create a registry to use geometry functions like "bounds"
+            centroids = Registry(self.surface_registry.pvgeometry.centroid,
+                                 columns=['geometry'])
             ground_registry[
-                'x_centroid'] = self.surface_registry.centroid.bounds.minx
+                'x_centroid'] = (centroids.pvgeometry.bounds.minx)
 
             # All pvrow surfaces see the sky dome
             view_matrix[indices_back_pvrows[:, np.newaxis],
@@ -1115,7 +1127,7 @@ class Array(ArrayBase):
                                     last_indices_back_pvrow] = (
                             VIEW_DICT["pvrows"])
                     else:
-                        raise Exception(
+                        raise PVFactorsError(
                             "create_view_matrix: facing case not found")
                 # Save last indices for next pvrow interaction
                 last_indices_back_pvrow = indices_back_pvrow

@@ -6,7 +6,7 @@ from pvlib.tools import cosd, sind
 from pvlib.irradiance import aoi_projection
 import numpy as np
 import pandas as pd
-from pvfactors import logging
+from pvfactors import (logging, PVFactorsError)
 from pvfactors.pvarray import Array
 from multiprocessing import Pool, cpu_count
 import time
@@ -90,9 +90,9 @@ def plot_surface_registry(ax, array, line_types_selected=None):
     """
     # FIXME: repeating code from plot_line_registry
     surface_registry = array.surface_registry.copy()
-    surface_registry['color'] = (surface_registry.line_type.values + '_'
-                                 + np.where(surface_registry.shaded.values,
-                                            'shaded', 'illum'))
+    surface_registry.loc[:, 'color'] = (
+        surface_registry.line_type.values + '_'
+        + np.where(surface_registry.shaded.values, 'shaded', 'illum'))
     # TODO: distance may not exist
     distance = array.pvrow_distance
     height = array.pvrow_height
@@ -150,16 +150,17 @@ def perez_diffuse_luminance(df_inputs):
                                 (df_inputs.solar_zenith <= 90))
     df_inputs_back_surface = df_inputs.loc[sun_hitting_back_surface]
     # Reverse the surface normal to switch to back-surface circumsolar calc
-    df_inputs_back_surface['array_azimuth'] -= 180.
-    df_inputs_back_surface['array_azimuth'] = np.mod(
-        df_inputs_back_surface['array_azimuth'], 360.
+    df_inputs_back_surface.loc[:, 'array_azimuth'] -= 180.
+    df_inputs_back_surface.loc[:, 'array_azimuth'] = np.mod(
+        df_inputs_back_surface.loc[:, 'array_azimuth'], 360.
     )
-    df_inputs_back_surface['array_tilt'] = (
+    df_inputs_back_surface.loc[:, 'array_tilt'] = (
         180. - df_inputs_back_surface.array_tilt)
 
     if df_inputs_back_surface.shape[0] > 0:
         # Use recursion to calculate circumsolar luminance for back surface
-        df_inputs_back_surface = perez_diffuse_luminance(df_inputs_back_surface)
+        df_inputs_back_surface = perez_diffuse_luminance(
+            df_inputs_back_surface)
 
     # Calculate Perez diffuse components
     diffuse_poa, components = irradiance.perez(df_inputs.array_tilt,
@@ -265,10 +266,11 @@ def calculate_radiosities_serially_simple(array, df_inputs):
                                                    row['array_azimuth'],
                                                    row['dni'], row['dhi'])
 
-                array.surface_registry['q0'] = (
-                    array.surface_registry['area'] * array.surface_registry.q0)
-                array.surface_registry['qinc'] = (
-                    array.surface_registry['area']
+                array.surface_registry.loc[:, 'q0'] = (
+                    array.surface_registry.loc[:, 'area']
+                    * array.surface_registry.q0)
+                array.surface_registry.loc[:, 'qinc'] = (
+                    array.surface_registry.loc[:, 'area']
                     * array.surface_registry.qinc
                 )
                 df_summed = array.surface_registry.groupby(
@@ -286,7 +288,7 @@ def calculate_radiosities_serially_simple(array, df_inputs):
                 df_outputs.loc['array_is_shaded', idx] = (
                     array.has_direct_shading)
         except Exception as err:
-            print("Unexpected error: {0}".format(err))
+            LOGGER.debug("Unexpected error: {0}".format(err))
 
         print_progress(i, n, prefix='Progress:', suffix='Complete',
                        bar_length=50)
@@ -368,8 +370,8 @@ def calculate_radiosities_serially_perez(args):
 
     # Post process: in vf model tilt angles can be negative and azimuth is
     # generally fixed
-    df_inputs_perez[['array_azimuth', 'array_tilt']] = (
-        df_inputs[['array_azimuth', 'array_tilt']]
+    df_inputs_perez.loc[:, ['array_azimuth', 'array_tilt']] = (
+        df_inputs.loc[:, ['array_azimuth', 'array_tilt']]
     )
 
     # Create index df_outputs
@@ -457,8 +459,8 @@ def calculate_radiosities_serially_perez(args):
                             )
 
                 # Format data to save averages for all pvrows and sides
-                array.surface_registry[cols] = (
-                    array.surface_registry[cols].apply(
+                array.surface_registry.loc[:, cols] = (
+                    array.surface_registry.loc[:, cols].apply(
                         lambda x: x * array.surface_registry['area'], axis=0)
                 )
                 df_summed = array.surface_registry.groupby(
@@ -477,7 +479,7 @@ def calculate_radiosities_serially_perez(args):
                 )
 
         except Exception as err:
-            print("Unexpected error: {0}".format(err))
+            LOGGER.debug("Unexpected error: {0}".format(err))
 
         print_progress(i, n, prefix='Progress:', suffix='Complete',
                        bar_length=50)

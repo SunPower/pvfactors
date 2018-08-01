@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 
-import geopandas as gpd
-from shapely.geometry import LineString, Point
+from shapely.geometry import Point
+from pvfactors import (PVFactorsError, PVFactorsEdgePointDoesNotExist,
+                       PVFactorsArrayUpdateException)
 import numpy as np
 import math
 import logging
@@ -25,186 +26,6 @@ SIGMA = 1. / np.sqrt(2.)
 MU = 0.
 N_SIGMA = 3.
 GAUSSIAN_DIAMETER_CIRCUMSOLAR = 2. * N_SIGMA * SIGMA
-
-
-class Registry(gpd.GeoDataFrame):
-    """
-    The ``Registry`` class is used to store and index most of the
-    information, inputs and outputs of the calculations performed in the
-    view factor model, including the ``shapely`` geometries. It is the
-    entity passed by the :class:`pvarray.Array` to the
-    :class:`view_factor.ViewFactorCalculator`.
-    It is subclassed from :class:`geopandas.GeoDataFrame`, and contains
-    additional methods to handle the ``shapely`` geometry manipulation.
-    """
-
-    def __init__(self, *args, **kwargs):
-        super(Registry, self).__init__(*args, **kwargs)
-
-    def add(self, list_lines_pvarray):
-        """
-        Add list of objects of class :class:`pvcore.LinePVArray` to the
-        registry.
-
-        :param list_lines_pvarray: list of objects of type
-            :class:`pvcore.LinePVArray`
-        :return: ``idx_list`` -- ``int``, the list of registry indices that were
-        added to the registry
-        """
-        # Find the start index that will be used to add entries to the registry
-        if len(self.index) > 0:
-            start_index = self.index[-1] + 1
-        else:
-            start_index = 0
-        idx_list = []
-        # Loop through list of PV array lines
-        for counter, line_pvarray in enumerate(list_lines_pvarray):
-            idx = start_index + counter
-            for key in line_pvarray.keys():
-                self.loc[idx, key] = line_pvarray[key]
-            idx_list.append(idx)
-
-        return idx_list
-
-    def split_ground_geometry_from_edge_points(self, edge_points):
-        """
-        Break up ground lines into multiple ones at the pv row "edge points",
-        which are the intersections of pv row lines and ground lines. This is
-        important to separate the ground lines that a pv row's front surface
-         sees from the ones its back surface does.
-
-        :param edge_points: list of :class:`shapely.Point` objects
-        :return: None
-        """
-        for point in edge_points:
-            gdf_ground = self.loc[self.loc[:, 'line_type'] == 'ground', :]
-            geoentry_to_break_up = gdf_ground.loc[gdf_ground.contains(point)]
-            if geoentry_to_break_up.shape[0] == 1:
-                self.break_and_add_entries(geoentry_to_break_up, point)
-            elif geoentry_to_break_up.shape[0] > 1:
-                raise Exception("geoentry_to_break_up.shape[0] cannot be larger"
-                                " than 1")
-
-    def split_pvrow_geometry(self, idx, line_shadow, pvrow_top_point):
-        """
-        Break up pv row line into two pv row lines, a shaded one and an unshaded
-         one. This function requires knowing the pv row line index in the
-        registry, the "shadow line" that intersects with the pv row, and the top
-         point of the pv row in order to decide which pv row line will be shaded
-         or not after break up.
-
-        :param int idx: index of shaded pv row entry
-        :param line_shadow: :class:`shapely.LineString` object representing the
-            "shadow line" intersecting with the pv row line
-        :param pvrow_top_point: the highest point of the pv row line (in the
-            elevation direction)
-        :return: None
-        """
-        # Define geometry to work on
-        geometry = self.loc[idx, 'geometry']
-        # Find intersection point
-        point_intersect = geometry.intersection(line_shadow)
-        # Check that the intersection is not too close to a boundary: if it
-        # is it can create a "memory access error" it seems
-        is_too_close = [
-            point.distance(point_intersect) < THRESHOLD_DISTANCE_TOO_CLOSE
-            for point in geometry.boundary]
-        if True in is_too_close:
-            # Leave it as it is and do not split geometry: it should not
-            # affect the calculations for a good threshold
-            pass
-        else:
-            # Cut geometry in two pieces
-            list_new_lines = self.cut_linestring(geometry, point_intersect)
-            # Add new geometry to index
-            new_registry_entry = self.loc[idx, :].copy()
-            new_registry_entry['shaded'] = True
-            if pvrow_top_point in list_new_lines[0].boundary:
-                geometry_ill = gpd.GeoSeries(list_new_lines[0])
-                geometry_shaded = gpd.GeoSeries(list_new_lines[1])
-            elif pvrow_top_point in list_new_lines[1].boundary:
-                geometry_ill = gpd.GeoSeries(list_new_lines[1])
-                geometry_shaded = gpd.GeoSeries(list_new_lines[0])
-            else:
-                raise Exception("split_pvrow_geometry: unknown error occured")
-
-            # Update registry
-            self.at[idx, 'geometry'] = geometry_ill.values[0]
-            new_registry_entry['geometry'] = geometry_shaded.values[0]
-            self.loc[self.shape[0] + 1, :] = new_registry_entry
-
-    def cut_pvrow_geometry(self, list_points, pvrow_index, side):
-        """
-        Break up pv row lines into multiple segments based on the list of points
-         specified. This is the "discretization" of the pvrow segments. For now,
-         it only works for pv rows.
-
-        :param list_points: list of :class:`shapely.Point`, breaking points for
-            the pv row lines.
-        :param pvrow_index: pv row index to specify the PV row to discretize;
-            note that this could return multiple entries from the registry.
-        :param side: only do it for one side of the selected PV row.
-        :return: None
-        """
-        # TODO: is currently not able to work for other surfaces than pv rows...
-        for point in list_points:
-            gdf_selected = self.loc[(self['pvrow_index'] == pvrow_index)
-                                    & (self['surface_side'] == side), :]
-            geoentry_to_break_up = gdf_selected.loc[
-                gdf_selected.distance(point) < DISTANCE_TOLERANCE]
-            if geoentry_to_break_up.shape[0] == 1:
-                self.break_and_add_entries(geoentry_to_break_up, point)
-            elif geoentry_to_break_up.shape[0] > 1:
-                raise Exception("geoentry_to_break_up.shape[0] cannot be larger"
-                                " than 1")
-
-    def break_and_add_entries(self, geoentry_to_break_up, point):
-        """
-        Break up a surface geometry into two objects at a point location.
-
-        :param geoentry_to_break_up: registry entry to break up
-        :param point: :class:`shapely.Point` object used to decide where to
-            break up entry.
-        :return: None
-        """
-        # Get geometry
-        idx = geoentry_to_break_up.index
-        geometry = geoentry_to_break_up.geometry.values[0]
-        line_1, line_2 = self.cut_linestring(geometry, point)
-        geometry_1 = gpd.GeoSeries(line_1)
-        geometry_2 = gpd.GeoSeries(line_2)
-        self.at[idx, 'geometry'] = geometry_1.values
-        new_registry_entry = self.loc[idx, :].copy()
-        new_registry_entry['geometry'] = geometry_2.values
-        self.loc[self.shape[0], :] = new_registry_entry.values[0]
-
-    @staticmethod
-    def cut_linestring(line, point):
-        """
-        Adapted from shapely documentation. Cuts a line in two at a calculated
-        distance from its starting point
-
-        :param line: :class:`shapely.LineString` object to cut
-        :param point: :class:`shapely.Point` object to use for the cut
-        :return: list of two :class:`shapely.LineString` objects
-        """
-
-        distance = line.project(point)
-        assert ((distance >= 0.0) & (distance <= line.length)), (
-            "cut_linestring: the lines didn't intersect")
-        # There could be multiple points in a line
-        coords = list(line.coords)
-        for i, p in enumerate(coords):
-            pd = line.project(Point(p))
-            if pd == distance:
-                return [
-                    LineString(coords[:i + 1]),
-                    LineString(coords[i:])]
-            if pd > distance:
-                cp = line.interpolate(distance)
-                return [
-                    LineString(coords[:i] + [(cp.x, cp.y)]),
-                    LineString([(cp.x, cp.y)] + coords[i:])]
 
 
 class LinePVArray(dict):
@@ -234,17 +55,10 @@ class LinePVArray(dict):
                                               shaded=shaded,
                                               pvrow_index=pvrow_index)
         else:
-            raise ValueError("'line_type' cannot be: %s, \n possible values "
-                             "are: %s" % (str(line_type),
-                                          str(self._list_line_types)))
-
-
-class EdgePointDoesNotExist(Exception):
-    pass
-
-
-class VFArrayUpdateException(Exception):
-    pass
+            raise PVFactorsError("'line_type' cannot be: %s, \n possible "
+                                 "values are: %s" % (
+                                     str(line_type),
+                                     str(self._list_line_types)))
 
 
 def calculate_circumsolar_shading(percentage_distance_covered,
@@ -268,8 +82,9 @@ def calculate_circumsolar_shading(percentage_distance_covered,
         perc_shading = gaussian_shading(percentage_distance_covered)
 
     else:
-        raise Exception('calculate_circumsolar_shading: model does not exist: '
-                        + '%s' % model)
+        raise PVFactorsError(
+            'calculate_circumsolar_shading: model does not exist: '
+            + '%s' % model)
 
     return perc_shading
 
