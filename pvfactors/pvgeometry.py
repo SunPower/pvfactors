@@ -14,6 +14,7 @@ pvfactors.
 import numpy as np
 import pandas as pd
 from shapely.geometry import LineString, Point
+from pvfactors import PVFactorsError
 
 
 # TODO: remove hard-coding if possible
@@ -34,7 +35,7 @@ class PVGeometry(object):
         """
         self._obj = pandas_obj
 
-    def _series_op(this, other, op, **kwargs):
+    def _series_op(self, this, other, op, **kwargs):
         """
         Geometric operation that returns a pandas Series
 
@@ -51,7 +52,7 @@ class PVGeometry(object):
                           for s in this.geometry],
                          index=this.index, dtype=np.dtype(type(null_val)))
 
-    def _geo_unary_op(this, op):
+    def _geo_unary_op(self, this, op):
         """
         Unary operation that returns a pandas Series
 
@@ -65,7 +66,7 @@ class PVGeometry(object):
         return pd.Series([getattr(geom, op) for geom in this.geometry],
                          index=this.index)
 
-    def _series_unary_op(this, op, null_value=False):
+    def _series_unary_op(self, this, op, null_value=False):
         """
         Unary operation that returns a pandas Series
 
@@ -183,8 +184,8 @@ class PVGeometry(object):
             if geoentry_to_break_up.shape[0] == 1:
                 self.break_and_add_entries(geoentry_to_break_up, point)
             elif geoentry_to_break_up.shape[0] > 1:
-                raise Exception("geoentry_to_break_up.shape[0] cannot be"
-                                " larger than 1")
+                raise PVFactorsError("geoentry_to_break_up.shape[0] cannot be"
+                                     " larger than 1")
 
     def break_and_add_entries(self, geoentry_to_break_up, point):
         """
@@ -275,7 +276,7 @@ class PVGeometry(object):
                 geometry_ill = pd.Series(list_new_lines[1])
                 geometry_shaded = pd.Series(list_new_lines[0])
             else:
-                raise Exception("split_pvrow_geometry: unknown error occured")
+                raise PVFactorsError("split_pvrow_geometry: unknown error occured")
 
             # Update registry
             self._obj.at[idx, 'geometry'] = geometry_ill.values[0]
@@ -305,5 +306,5 @@ class PVGeometry(object):
             if geoentry_to_break_up.shape[0] == 1:
                 self.break_and_add_entries(geoentry_to_break_up, point)
             elif geoentry_to_break_up.shape[0] > 1:
-                raise Exception("geoentry_to_break_up.shape[0] cannot be"
-                                "larger than 1")
+                raise PVFactorsError("geoentry_to_break_up.shape[0] cannot be"
+                                     "larger than 1")

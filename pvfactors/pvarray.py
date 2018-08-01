@@ -3,12 +3,12 @@
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
+from pvfactors import (PVFactorsError, PVFactorsArrayUpdateException)
 from pvfactors.pvcore import (LinePVArray,
                               find_edge_point, Y_GROUND,
                               MAX_X_GROUND, MIN_X_GROUND,
                               calculate_circumsolar_shading,
-                              calculate_horizon_band_shading,
-                              VFArrayUpdateException)
+                              calculate_horizon_band_shading)
 from pvfactors.pvrow import PVRowLine
 from pvfactors.view_factors import ViewFactorCalculator, VIEW_DICT
 from shapely.geometry import LineString, Point
@@ -558,7 +558,7 @@ class Array(ArrayBase):
             self.update_view_factors(solar_zenith, solar_azimuth, array_tilt,
                                      array_azimuth)
         except Exception as err:
-            raise VFArrayUpdateException(
+            raise PVFactorsArrayUpdateException(
                 "Could not calculate shapely array or view factors because of "
                 "error: %s" % err)
 
@@ -1127,7 +1127,7 @@ class Array(ArrayBase):
                                     last_indices_back_pvrow] = (
                             VIEW_DICT["pvrows"])
                     else:
-                        raise Exception(
+                        raise PVFactorsError(
                             "create_view_matrix: facing case not found")
                 # Save last indices for next pvrow interaction
                 last_indices_back_pvrow = indices_back_pvrow

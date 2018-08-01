@@ -6,7 +6,7 @@ from pvlib.tools import cosd, sind
 from pvlib.irradiance import aoi_projection
 import numpy as np
 import pandas as pd
-from pvfactors import logging
+from pvfactors import (logging, PVFactorsError)
 from pvfactors.pvarray import Array
 from multiprocessing import Pool, cpu_count
 import time

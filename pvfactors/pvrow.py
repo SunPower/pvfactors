@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+from pvfactors import PVFactorsError
 from pvfactors.pvcore import LinePVArray, Y_GROUND
 from shapely.geometry import LineString, Point
 from shapely.affinity import affine_transform
@@ -194,7 +195,7 @@ class PVRowLine(PVRowBase):
         elif self.tilt < 0:
             direction = 'right'
         else:
-            raise Exception("Unknown facing condition for pvrow")
+            raise PVFactorsError("Unknown facing condition for pvrow")
         return direction
 
     def calculate_cut_points(self, n_segments):

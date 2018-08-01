@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 
 from shapely.geometry import Point
+from pvfactors import (PVFactorsError, PVFactorsEdgePointDoesNotExist,
+                       PVFactorsArrayUpdateException)
 import numpy as np
 import math
 import logging
@@ -53,17 +55,10 @@ class LinePVArray(dict):
                                               shaded=shaded,
                                               pvrow_index=pvrow_index)
         else:
-            raise ValueError("'line_type' cannot be: %s, \n possible values "
-                             "are: %s" % (str(line_type),
-                                          str(self._list_line_types)))
-
-
-class EdgePointDoesNotExist(Exception):
-    pass
-
-
-class VFArrayUpdateException(Exception):
-    pass
+            raise PVFactorsError("'line_type' cannot be: %s, \n possible "
+                                 "values are: %s" % (
+                                     str(line_type),
+                                     str(self._list_line_types)))
 
 
 def calculate_circumsolar_shading(percentage_distance_covered,
@@ -87,8 +82,9 @@ def calculate_circumsolar_shading(percentage_distance_covered,
         perc_shading = gaussian_shading(percentage_distance_covered)
 
     else:
-        raise Exception('calculate_circumsolar_shading: model does not exist: '
-                        + '%s' % model)
+        raise PVFactorsError(
+            'calculate_circumsolar_shading: model does not exist: '
+            + '%s' % model)
 
     return perc_shading
 
