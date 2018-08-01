@@ -192,6 +192,8 @@ class PVGeometry(object):
         Break up a surface geometry into two objects at a point location.
 
         :param geoentry_to_break_up: registry entry to break up
+        :type geoentry_to_break_up: ``pandas.DataFrame`` with `geometry`
+            column and ``pvgeometry`` extension
         :param point: point used to decide where to break up entry.
         :type point: :class:`shapely.Point` object
         :return: None
@@ -237,17 +239,18 @@ class PVGeometry(object):
 
     def split_pvrow_geometry(self, idx, line_shadow, pvrow_top_point):
         """
-        Break up pv row line into two pv row lines, a shaded one and an unshaded
-         one. This function requires knowing the pv row line index in the
-        registry, the "shadow line" that intersects with the pv row, and the top
-         point of the pv row in order to decide which pv row line will be shaded
-         or not after break up.
+        Break up pv row line into two pv row lines, a shaded one and an
+        unshaded one. This function requires knowing the pv row line index in
+        the registry, the "shadow line" that intersects with the pv row, and
+        the top point of the pv row in order to decide which pv row line will
+        be shaded or not after break up.
 
         :param int idx: index of shaded pv row entry
         :param line_shadow: :class:`shapely.LineString` object representing the
             "shadow line" intersecting with the pv row line
         :param pvrow_top_point: the highest point of the pv row line (in the
             elevation direction)
+        :param pvrow_top_point: :class:``shapely.Point`` object
         :return: None
         """
         # Define geometry to work on
@@ -276,7 +279,8 @@ class PVGeometry(object):
                 geometry_ill = pd.Series(list_new_lines[1])
                 geometry_shaded = pd.Series(list_new_lines[0])
             else:
-                raise PVFactorsError("split_pvrow_geometry: unknown error occured")
+                raise PVFactorsError("split_pvrow_geometry: "
+                                     "unknown error occured")
 
             # Update registry
             self._obj.at[idx, 'geometry'] = geometry_ill.values[0]
@@ -291,9 +295,11 @@ class PVGeometry(object):
 
         :param list_points: list of :class:`shapely.Point`, breaking points for
             the pv row lines.
-        :param pvrow_index: pv row index to specify the PV row to discretize;
-            note that this could return multiple entries from the registry.
-        :param side: only do it for one side of the selected PV row.
+        :param int pvrow_index: pv row index to specify the PV row to
+            discretize; note that this could return multiple entries from the
+            registry.
+        :param str side: only do it for one side of the selected PV row. This
+            can only be 'front' or 'back'.
         :return: None
         """
         # TODO: is currently not able to work for other surfaces than pv rows..
