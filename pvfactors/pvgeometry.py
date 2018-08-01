@@ -21,70 +21,92 @@ DISTANCE_TOLERANCE = 1e-8
 THRESHOLD_DISTANCE_TOO_CLOSE = 1e-10
 
 
-def _series_op(this, other, op, **kwargs):
-    """Geometric operation that returns a pandas Series"""
-    null_val = False if op not in ['distance', 'project'] else np.nan
-
-    return pd.Series([getattr(s, op)(other, **kwargs) if s else null_val
-                      for s in this.geometry],
-                     index=this.index, dtype=np.dtype(type(null_val)))
-
-
-def _geo_unary_op(this, op):
-    """Unary operation that returns a GeoSeries"""
-
-    # TODO: may need a dtype argument in the returned series
-    return pd.Series([getattr(geom, op) for geom in this.geometry],
-                     index=this.index)
-
-
-def _series_unary_op(this, op, null_value=False):
-    """Unary operation that returns a Series"""
-    return pd.Series([getattr(geom, op, null_value) for geom in this.geometry],
-                     index=this.index, dtype=np.dtype(type(null_value)))
-
-
-# @pd.api.extensions.register_dataframe_accessor("pvgeometry")
 @pd.api.extensions.register_dataframe_accessor("pvgeometry")
 class PVGeometry(object):
-    """ Lightweight version of ``geopandas.GeoSeries``"""
 
     def __init__(self, pandas_obj):
+        """
+        Lightweight extension of ``pandas.DataFrame`` that copies
+        functionalities of ``geopandas.GeoSeries``
+
+        :param pandas_obj: ``pandas`` object to perform operations on
+        :type pandas_obj: ``pandas.DataFrame``
+        """
         self._obj = pandas_obj
+
+    def _series_op(this, other, op, **kwargs):
+        """
+        Geometric operation that returns a pandas Series
+
+        :param this: dataframe that *must* have a `geometry` column
+            containing the geometry objects
+        :type this: :class:``pandas.DataFrame``
+        :param other: generally a ``shapely`` object
+        :param str op: operation to perform
+        :return: a :class:``pandas.Series`` object
+        """
+        null_val = False if op not in ['distance', 'project'] else np.nan
+
+        return pd.Series([getattr(s, op)(other, **kwargs) if s else null_val
+                          for s in this.geometry],
+                         index=this.index, dtype=np.dtype(type(null_val)))
+
+    def _geo_unary_op(this, op):
+        """
+        Unary operation that returns a pandas Series
+
+        :param this: dataframe that *must* have a `geometry` column
+            containing the geometry objects
+        :type this: :class:``pandas.DataFrame``
+        :param str op: operation to perform
+        :return: a :class:``pandas.Series`` object
+        """
+        # TODO: may need a dtype argument in the returned series
+        return pd.Series([getattr(geom, op) for geom in this.geometry],
+                         index=this.index)
+
+    def _series_unary_op(this, op, null_value=False):
+        """
+        Unary operation that returns a pandas Series
+
+        :param this: dataframe that *must* have a `geometry` column
+            containing the geometry objects
+        :type this: :class:``pandas.DataFrame``
+        :param str op: operation to perform
+        :return: a :class:``pandas.Series`` object
+        """
+        return pd.Series([getattr(geom, op, null_value)
+                          for geom in this.geometry],
+                         index=this.index, dtype=np.dtype(type(null_value)))
 
     @property
     def area(self):
         """Returns a ``Series`` containing the area of each geometry in the
         ``GeoSeries``."""
-        return _series_unary_op(self._obj, 'area', null_value=np.nan)
+        return self._series_unary_op(self._obj, 'area', null_value=np.nan)
 
     @property
     def geom_type(self):
         """Returns a ``Series`` of strings specifying the `Geometry Type` of each
         object."""
-        return _series_unary_op(self._obj, 'geom_type', null_value=None)
-
-    @property
-    def type(self):
-        """Return the geometry type of each geometry in the GeoSeries"""
-        return self.geom_type
+        return self._series_unary_op(self._obj, 'geom_type', null_value=None)
 
     @property
     def length(self):
         """Returns a ``Series`` containing the length of each geometry."""
-        return _series_unary_op(self._obj, 'length', null_value=np.nan)
+        return self._series_unary_op(self._obj, 'length', null_value=np.nan)
 
     @property
     def boundary(self):
         """Returns a ``GeoSeries`` of lower dimensional objects representing
         each geometries's set-theoretic `boundary`."""
-        return _geo_unary_op(self._obj, 'boundary')
+        return self._geo_unary_op(self._obj, 'boundary')
 
     @property
     def centroid(self):
         """Returns a ``GeoSeries`` of points representing the centroid of each
         geometry."""
-        return _geo_unary_op(self._obj, 'centroid')
+        return self._geo_unary_op(self._obj, 'centroid')
 
     @property
     def bounds(self):
@@ -103,25 +125,19 @@ class PVGeometry(object):
         An object is said to contain `other` if its `interior` contains the
         `boundary` and `interior` of the other object and their boundaries do
         not touch at all.
-        This is the inverse of :meth:`within` in the sense that the expression
-        ``a.contains(b) == b.within(a)`` always evaluates to ``True``.
-        Parameters
-        ----------
-        other : GeoSeries or geometric object
-            The GeoSeries (elementwise) or geometric object to test if is
-            contained.
+
+        :param other: geometric object to check if contained
+        :type other: ``shapely`` object
         """
-        return _series_op(self._obj, other, 'contains')
+        return self._series_op(self._obj, other, 'contains')
 
     def distance(self, other):
         """Returns a ``Series`` containing the distance to `other`.
-        Parameters
-        ----------
-        other : Geoseries or geometric object
-            The Geoseries (elementwise) or geometric object to find the
-            distance to.
+
+        :param other: geometric object to calculate distance to
+        :type other: ``shapely`` object
         """
-        return _series_op(self._obj, other, 'distance')
+        return self._series_op(self._obj, other, 'distance')
 
     def add(self, list_lines_pvarray):
         """
@@ -130,8 +146,8 @@ class PVGeometry(object):
 
         :param list_lines_pvarray: list of objects of type
             :class:`pvcore.LinePVArray`
-        :return: ``idx_list`` -- ``int``, the list of registry indices that were
-        added to the registry
+        :return: ``idx_list`` -- ``int``, the list of registry indices that
+            were added to the registry
         """
         # Find the start index that will be used to add entries to the registry
         if len(self._obj.index) > 0:
@@ -155,7 +171,8 @@ class PVGeometry(object):
         important to separate the ground lines that a pv row's front surface
          sees from the ones its back surface does.
 
-        :param edge_points: list of :class:`shapely.Point` objects
+        :param edge_points: points the specify location where to break lines
+        :type edge_points: list of :class:`shapely.Point` objects
         :return: None
         """
         for point in edge_points:
@@ -174,8 +191,8 @@ class PVGeometry(object):
         Break up a surface geometry into two objects at a point location.
 
         :param geoentry_to_break_up: registry entry to break up
-        :param point: :class:`shapely.Point` object used to decide where to
-            break up entry.
+        :param point: point used to decide where to break up entry.
+        :type point: :class:`shapely.Point` object
         :return: None
         """
         # Get geometry
