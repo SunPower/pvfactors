@@ -19,3 +19,5 @@ pvfactors/docs/_build/
 # tests
 *__pycache__/
 .pytest_cache/
+build/
+dist/

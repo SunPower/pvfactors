@@ -22,10 +22,10 @@ CLASSIFIERS = [
     'Topic :: Scientific/Engineering',
 ]
 
-INSTALL_REQUIRES = ['numpy>=1.11.1',
-                    'scipy>=0.17.1',
-                    'pandas>=0.18.1',
-                    'shapely>=1.5.16',
+INSTALL_REQUIRES = ['numpy>=1.13.1',
+                    'scipy>=0.19.1',
+                    'pandas>=0.23.3',
+                    'shapely>=1.6.1',
                     'pvlib>=0.5.0',
                     'matplotlib>=2.1.0',
                     'future>=0.16.0',
