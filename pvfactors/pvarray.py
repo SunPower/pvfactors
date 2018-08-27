@@ -421,6 +421,17 @@ class Array(ArrayBase):
         # Isotropic sky dome luminance value
         self.irradiance_terms[-1] = luminance_isotropic
 
+    def apply_back_horizon_shading(self):
+        """
+        Calculate the amount of diffuse shading happening on the horizon
+        band components for the 'back' pvrow surfaces
+        :return: None
+        """
+
+        slice_registry = self.surface_registry.loc[
+            (self.surface_registry.surface_side == 'back')
+            & notnull(self.surface_registry.index_pvrow_neighbor), :]
+
     def apply_front_circumsolar_horizon_shading(self):
         """
         Calculate what amount of diffuse shading is happening on the
@@ -451,11 +462,11 @@ class Array(ArrayBase):
                 (neighbor_point.y - row_point.y)
                 / (neighbor_point.x - row_point.x))
             ) * 180. / np.pi
-            percentage_angle_covered = ((shading_angle -
-                                         lower_angle_circumsolar)
-                                        / self.circumsolar_angle) * 100.
+            percentage_circ_angle_covered = ((shading_angle -
+                                              lower_angle_circumsolar)
+                                             / self.circumsolar_angle) * 100.
             percent_circ_shading = calculate_circumsolar_shading(
-                percentage_angle_covered, model=self.circumsolar_model)
+                percentage_circ_angle_covered, model=self.circumsolar_model)
             percent_horizon_shading = calculate_horizon_band_shading(
                 shading_angle, self.horizon_band_angle)
             self.surface_registry.loc[index, 'circumsolar_term'] *= (
