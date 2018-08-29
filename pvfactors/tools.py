@@ -377,7 +377,7 @@ def calculate_radiosities_serially_perez(args):
     # Create index df_outputs
     cols = ['q0', 'qinc', 'circumsolar_term', 'horizon_term',
             'direct_term', 'irradiance_term', 'isotropic_term',
-            'reflection_term']
+            'reflection_term', 'horizon_band_shading_pct']
     iterables = [
         range(array.n_pvrows),
         ['front', 'back'],

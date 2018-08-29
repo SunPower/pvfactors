@@ -68,6 +68,8 @@ def values_are_consistent(df_outputs):
     # Compare to calculation outputs
     rtol = 0.
     atol = 1e-7
+    # import pdb
+    # pdb.set_trace()
     return np.allclose(expected_outputs_values.astype(float),
                        df_outputs.values.astype(float),
                        rtol=rtol, atol=atol, equal_nan=False)
