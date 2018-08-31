@@ -48,28 +48,50 @@ def test_serial_calculation():
     )
 
     # Did the outputs remain consistent?
-    assert values_are_consistent(df_outputs)
+    test_results = values_are_consistent(df_outputs)
+    for result in test_results:
+        assert result['passed'], "test failed for %s" % result['irradiance_term']
 
 
 def values_are_consistent(df_outputs):
     """
-    Helper function to check consistency with data from file
+    Helper function to check consistency with data from file.
+    Compares all irradiance terms together.
 
     :param df_outputs: output values from calculation as dataframe
     :return: result of comparison to data in test file
     """
     # Read file
     filepath = os.path.join(TEST_DATA,
-                            'file_test_serial_perez_calculations_outputs.csv')
-    expected_df_outputs = pd.read_csv(filepath, header=[0, 1, 2], index_col=[0]
-                                      )
-    expected_outputs_values = expected_df_outputs.values
+                            'file_test_serial_perez.csv')
 
-    # Compare to calculation outputs
-    rtol = 0.
-    atol = 1e-7
-    # import pdb
-    # pdb.set_trace()
-    return np.allclose(expected_outputs_values.astype(float),
-                       df_outputs.values.astype(float),
-                       rtol=rtol, atol=atol, equal_nan=False)
+    expected_df_outputs = pd.read_csv(filepath, index_col=False, parse_dates=['timestamps'])
+    expected_df_outputs['origin'] = 'expected'
+    df_outputs = (df_outputs.assign(timestamps=lambda x: x.index)
+                  .drop('array_is_shaded', axis=1)
+                  .reset_index(drop=True)
+                  .melt(id_vars=['timestamps']))
+    df_outputs['origin'] = 'calculated'
+
+    # Merge calculated and expected values into same dataframe
+    df_comparison = pd.concat([expected_df_outputs, df_outputs], axis=0, join='outer')
+    df_comparison['value'] = df_comparison['value'].astype(float)
+
+    # Group by irradiance term for clearer comparison
+    grouped_comparison = df_comparison.groupby('term')
+    atol = 0.
+    rtol = 1e-7
+    test_results = []
+    for name, group in grouped_comparison:
+        df_term = group.pivot_table(index=['timestamps', 'pvrow', 'side'],
+                                    columns=['origin'], values='value')
+        compare = ('calculated' in df_term.columns) & ('expected' in df_term.columns)
+        # Only run the tests if the category exists in the expected data
+        if compare:
+            test_result = np.allclose(df_term.calculated, df_term.expected,
+                                      atol=0, rtol=rtol)
+
+        test_results.append({'irradiance_term': name, 'passed': test_result,
+                             'df_term': df_term})
+
+    return test_results
