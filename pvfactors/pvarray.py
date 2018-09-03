@@ -347,32 +347,13 @@ class Array(ArrayBase):
         # TODO: poa_horizon should not be negative... but it can be in the Perez
         # model from pvlib
         poa_horizon = np.abs(poa_horizon)
-        # FIXME: poa_horizon should be different in front and back: this is
-        # what the code below was doing
-        # if self.pvrows[0].facing == 'left':
-        #     self.surface_registry.loc[
-        #         (self.surface_registry.pvrow_index == 0)
-        #         & (self.surface_registry.surface_side == 'front'),
-        #         'irradiance_term'] += poa_horizon
-        #     self.surface_registry.loc[
-        #         (self.surface_registry.pvrow_index == self.n_pvrows - 1)
-        #         & (self.surface_registry.surface_side == 'back'),
-        #         'irradiance_term'] += poa_horizon
-        # elif self.pvrows[0].facing == 'right':
-        #     self.surface_registry.loc[
-        #         (self.surface_registry.pvrow_index == self.n_pvrows - 1)
-        #         & (self.surface_registry.surface_side == 'front'),
-        #         'irradiance_term'] += poa_horizon
-        #     self.surface_registry.loc[
-        #         (self.surface_registry.pvrow_index == 0)
-        #         & (self.surface_registry.surface_side == 'back'),
-        #         'irradiance_term'] += poa_horizon
 
-        # TODO: test if should have poa_horizon on all pvrows at all times
+        # Add poa horizon contribution to all pvrow surfaces
         self.surface_registry.loc[
             (self.surface_registry.line_type == 'pvrow'),
             'horizon_term'] += poa_horizon
 
+        # Apply horizon band shading for the pvrow back surfaces
         self.apply_horizon_band_shading('back')
 
         if aoi_frontsurface <= 90.:

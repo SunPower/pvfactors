@@ -1,1 +1,8 @@
 pvfactors/_version.py export-subst
+
+# mark iPython notebooks as Python files
+*.ipynb linguist-language=Python
+
+# documentation
+pvfactors/docs/* linguist-documentation
+notebooks/* linguist-documentation
