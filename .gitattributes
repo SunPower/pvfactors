@@ -1,4 +1,8 @@
 pvfactors/_version.py export-subst
 
-# make sure repo is displayed as python package
+# mark iPython notebooks as Python files
 *.ipynb linguist-language=Python
+
+# documentation
+pvfactors/docs/* linguist-documentation
+notebooks/* linguist-documentation
