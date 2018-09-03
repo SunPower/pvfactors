@@ -1,1 +1,4 @@
 pvfactors/_version.py export-subst
+
+# make sure repo is displayed as python package
+*.ipynb linguist-language=Python
