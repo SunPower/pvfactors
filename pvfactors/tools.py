@@ -222,6 +222,9 @@ def perez_diffuse_luminance(df_inputs):
 
 def calculate_radiosities_serially_simple(array, df_inputs):
     """
+    /!\ DEPRECATED
+    ==============
+
     Calculate the view factor radiosity and irradiance terms for multiple times.
     The calculations will be sequential, and they will assume a completely
     isotropic sky dome.
@@ -237,6 +240,7 @@ def calculate_radiosities_serially_simple(array, df_inputs):
         calculation of back-surface over front-surface irradiance for all PV
         rows and at each time stamp.
     """
+    LOGGER.warning("``calculate_radiosities_serially_simple`` is deprecated")
     # Create index df_outputs
     iterables = [
         range(array.n_pvrows),
@@ -377,7 +381,7 @@ def calculate_radiosities_serially_perez(args):
     # Create index df_outputs
     cols = ['q0', 'qinc', 'circumsolar_term', 'horizon_term',
             'direct_term', 'irradiance_term', 'isotropic_term',
-            'reflection_term']
+            'reflection_term', 'horizon_band_shading_pct']
     iterables = [
         range(array.n_pvrows),
         ['front', 'back'],
