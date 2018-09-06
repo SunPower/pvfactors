@@ -1,0 +1,17 @@
+.. _whatsnew_0110:
+
+v0.1.1 (September 6, 2018)
+==========================
+
+Implementation of important package and model improvements.
+
+* Migration to CircleCI 2.0 (#5)
+* Removed dependency on geopandas (#3)
+* Implementation of back horizon band shading (#7)
+* Clean up and add Github features (#9)
+* Output all the surface registries calculated for each timestamp in a Perez timeseries simulation (#10)
+
+Contributors
+------------
+
+* Marc Anoma
