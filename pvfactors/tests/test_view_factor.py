@@ -144,7 +144,7 @@ def test_negativevf_and_flatcasenoon():
         'UTC').tz_convert('US/Arizona')
 
     args = (pvarray_parameters, df_inputs)
-    df_outputs, _, _, _ = calculate_radiosities_serially_perez(args)
+    df_outputs, _, _, _, _ = calculate_radiosities_serially_perez(args)
 
     vf_ipoa_front = df_outputs.loc[:, IDX_SLICE[1, 'front', 'qinc']]
     vf_ipoa_back = df_outputs.loc[:, IDX_SLICE[1, 'back', 'qinc']]
@@ -186,7 +186,7 @@ def test_back_surface_luminance():
         'UTC').tz_convert('US/Arizona')
 
     args = (pvarray_parameters, df_inputs)
-    df_outputs, _, _, _ = calculate_radiosities_serially_perez(args)
+    df_outputs, _, _, _, _ = calculate_radiosities_serially_perez(args)
 
     vf_ipoa_front = df_outputs.loc[:, IDX_SLICE[1, 'front', 'qinc']]
     vf_ipoa_back = df_outputs.loc[:, IDX_SLICE[1, 'back', 'qinc']]

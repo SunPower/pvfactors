@@ -396,6 +396,9 @@ def calculate_radiosities_serially_perez(args):
     df_outputs.sort_index(inplace=True)
     df_outputs.loc['array_is_shaded', :] = np.nan
 
+    # We want to save the whole registry for each timestamp
+    list_registries = []
+
     # Initialize df_outputs_segments
     if save_segments is not None:
         n_cols = len(array.pvrows[save_segments[0]].cut_points)
@@ -482,6 +485,11 @@ def calculate_radiosities_serially_perez(args):
                     array.has_direct_shading
                 )
 
+                # Save the whole registry
+                registry = array.surface_registry
+                registry['timestamps'] = idx
+                list_registries.append(registry)
+
         except Exception as err:
             LOGGER.debug("Unexpected error: {0}".format(err))
 
@@ -504,8 +512,14 @@ def calculate_radiosities_serially_perez(args):
             index=df_inputs.index,
             columns=range(array.n_pvrows))
 
+    # Save all the registries into 1 output
+    if list_registries:
+        df_registries = pd.concat(list_registries, axis=0, join='outer')
+    else:
+        df_registries = None
+
     return (df_outputs.transpose(), df_bifacial_gain, df_inputs_perez,
-            df_outputs_segments)
+            df_outputs_segments, df_registries)
 
 
 def calculate_radiosities_parallel_perez(array_parameters, df_inputs,

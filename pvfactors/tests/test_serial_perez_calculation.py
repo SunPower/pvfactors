@@ -43,14 +43,15 @@ def test_serial_calculation():
     df_inputs_simulation = df_inputs_simulation.iloc[0:idx_subset, :]
 
     # Run calculation in 1 process only
-    (df_outputs, df_bifacial, _, _) = (
+    (df_outputs, df_bifacial, _, _, _) = (
         calculate_radiosities_serially_perez((arguments, df_inputs_simulation))
     )
 
     # Did the outputs remain consistent?
     test_results = values_are_consistent(df_outputs)
     for result in test_results:
-        assert result['passed'], "test failed for %s" % result['irradiance_term']
+        assert result['passed'], ("test failed for %s" % result[
+            'irradiance_term'])
 
 
 def values_are_consistent(df_outputs):

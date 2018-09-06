@@ -120,10 +120,10 @@ def test_save_all_outputs_calculate_perez():
     args = (arguments, df_inputs_clearday.iloc[:idx_subset], save_segments)
 
     # Run the serial calculation
-    _, _, _, df_outputs_segments_serial = (
+    _, _, _, df_outputs_segments_serial, _ = (
         calculate_radiosities_serially_perez(args))
 
-    _, _, _, df_outputs_segments_parallel = (
+    _, _, _, df_outputs_segments_parallel, _ = (
         calculate_radiosities_parallel_perez(
             arguments, df_inputs_clearday.iloc[:idx_subset],
             save_segments=save_segments
