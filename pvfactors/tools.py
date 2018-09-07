@@ -10,6 +10,7 @@ from pvfactors import (logging, PVFactorsError)
 from pvfactors.pvarray import Array
 from multiprocessing import Pool, cpu_count
 import time
+from copy import deepcopy
 
 DISTANCE_TOLERANCE = 1e-8
 
@@ -29,53 +30,7 @@ COLOR_dic = {
 }
 
 
-# Plot the array geometries
-def plot_line_registry(ax, array, line_types_selected=None):
-    """
-    Plot a :class:`pvarray.Array` object's shapely geometries based on its
-    :attr:`pvarray.Array.line_registry`.
-
-    :param ax: :class:`matplotlib.axes.Axes` object to use for the plot
-    :param array: :class:`pvarray.Array` object to plot
-    :param list line_types_selected: parameter used to select a subset of
-        'line_type' to plot; e.g. 'pvrow' or 'ground'
-    :return: None; ``ax`` is updated
-    """
-    line_registry = array.line_registry.copy()
-    line_registry['color'] = (line_registry.line_type.values + '_'
-                              + np.where(line_registry.shaded.values,
-                                         'shaded', 'illum'))
-    # TODO: distance may not exist
-    distance = array.pvrow_distance
-    height = array.pvrow_height
-    n_pvrows = array.n_pvrows
-    if line_types_selected:
-        for line_type in line_types_selected:
-            line_reg_selected = line_registry.loc[line_registry.line_type
-                                                  == line_type, :]
-            for index, row in line_reg_selected.iterrows():
-                LOGGER.debug("Plotting %s", row['line_type'])
-                plot_coords(ax, row['geometry'])
-                plot_bounds(ax, row['geometry'])
-                plot_line(ax, row['geometry'], row['style'],
-                          row['shading_type'])
-    else:
-        for index, row in line_registry.iterrows():
-            LOGGER.debug("Plotting %s", row['line_type'])
-            plot_coords(ax, row['geometry'])
-            plot_bounds(ax, row['geometry'])
-            plot_line(ax, row['geometry'], row['style'], row['color'])
-
-    ax.axis('equal')
-    ax.set_xlim(- 0.5 * distance, (n_pvrows - 0.5) * distance)
-    ax.set_ylim(-height, 2 * height)
-    ax.set_title("PV Array", fontsize=20)
-
-    ax.set_xlabel("x [m]", fontsize=20)
-    ax.set_ylabel("y [m]", fontsize=20)
-
-
-def plot_surface_registry(ax, array, line_types_selected=None):
+def plot_pvarray(ax, pvarray, line_types_selected=None, fontsize=20):
     """
     Plot a :class:`pvarray.Array` object's shapely geometries based on its
     :attr:`pvarray.Array.surface_registry`. The difference with
@@ -83,24 +38,47 @@ def plot_surface_registry(ax, array, line_types_selected=None):
     differences between PV row sides, the discretized elements, etc.
 
     :param ax: :class:`matplotlib.axes.Axes` object to use for the plot
-    :param array: :class:`pvarray.Array` object to plot
+    :param pvarray: :class:`pvarray.Array` object to plot
+    :param list line_types_selected: parameter used to select a subset of
+        'line_type' to plot; e.g. 'pvrow' or 'ground'
+    :return: None (``ax`` is updated)
+    """
+
+    # FIXME: repeating code from plot_line_registry
+    surface_registry = pvarray.surface_registry.copy()
+    plot_array_from_registry(ax, surface_registry,
+                             line_types_selected=line_types_selected)
+
+    # Plot details
+    distance = pvarray.pvrow_distance
+    height = pvarray.pvrow_height
+    n_pvrows = pvarray.n_pvrows
+    ax.set_xlim(- 0.5 * distance, (n_pvrows - 0.5) * distance)
+    ax.set_ylim(-height, 2 * height)
+    ax.set_title("PV Array", fontsize=fontsize)
+
+
+def plot_array_from_registry(ax, registry, line_types_selected=None,
+                             fontsize=20):
+    """
+    Plot a 2D PV array geometry based using a registry input.
+
+    :param matplotlib.axes.Axes ax: axes to use for the plot
+    :param pd.DataFrame registry: :class:`pvarray.Array` object to plot
     :param list line_types_selected: parameter used to select a subset of
         'line_type' to plot; e.g. 'pvrow' or 'ground'
     :return: None (``ax`` is updated)
     """
     # FIXME: repeating code from plot_line_registry
-    surface_registry = array.surface_registry.copy()
-    surface_registry.loc[:, 'color'] = (
-        surface_registry.line_type.values + '_'
-        + np.where(surface_registry.shaded.values, 'shaded', 'illum'))
+    registry = registry.copy()
+    registry.loc[:, 'color'] = (
+        registry.line_type.values + '_'
+        + np.where(registry.shaded.values, 'shaded', 'illum'))
     # TODO: distance may not exist
-    distance = array.pvrow_distance
-    height = array.pvrow_height
-    n_pvrows = array.n_pvrows
     if line_types_selected:
         for line_type in line_types_selected:
-            surface_reg_selected = surface_registry.loc[
-                surface_registry.line_type == line_type, :]
+            surface_reg_selected = registry.loc[
+                registry.line_type == line_type, :]
             for index, row in surface_reg_selected.iterrows():
                 LOGGER.debug("Plotting %s", row['line_type'])
                 plot_coords(ax, row['geometry'])
@@ -108,22 +86,17 @@ def plot_surface_registry(ax, array, line_types_selected=None):
                 plot_line(ax, row['geometry'], row['style'],
                           row['shading_type'])
     else:
-        for index, row in surface_registry.iterrows():
+        for index, row in registry.iterrows():
             LOGGER.debug("Plotting %s", row['line_type'])
             plot_coords(ax, row['geometry'])
             plot_bounds(ax, row['geometry'])
             plot_line(ax, row['geometry'], row['style'], row['color'])
 
     ax.axis('equal')
-    ax.set_xlim(- 0.5 * distance, (n_pvrows - 0.5) * distance)
-    ax.set_ylim(-height, 2 * height)
-    ax.set_title("PV Array", fontsize=20)
-
-    ax.set_xlabel("x [m]", fontsize=20)
-    ax.set_ylabel("y [m]", fontsize=20)
+    ax.set_xlabel("x [m]", fontsize=fontsize)
+    ax.set_ylabel("y [m]", fontsize=fontsize)
 
 
-# Calculate luminance using pvlib functions and classes
 def perez_diffuse_luminance(df_inputs):
     """
     Function used to calculate the luminance and the view factor terms from the
@@ -465,6 +438,11 @@ def calculate_radiosities_serially_perez(args):
                                 df_pvrow[irradiance_term].values
                             )
 
+                # Save the whole registry
+                registry = deepcopy(array.surface_registry)
+                registry['timestamps'] = idx
+                list_registries.append(registry)
+
                 # Format data to save averages for all pvrows and sides
                 array.surface_registry.loc[:, cols] = (
                     array.surface_registry.loc[:, cols].apply(
@@ -484,11 +462,6 @@ def calculate_radiosities_serially_perez(args):
                 df_outputs.loc['array_is_shaded', idx] = (
                     array.has_direct_shading
                 )
-
-                # Save the whole registry
-                registry = array.surface_registry
-                registry['timestamps'] = idx
-                list_registries.append(registry)
 
         except Exception as err:
             LOGGER.debug("Unexpected error: {0}".format(err))
