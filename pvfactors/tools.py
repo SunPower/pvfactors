@@ -69,7 +69,7 @@ def plot_array_from_registry(ax, registry, line_types_selected=None,
         'line_type' to plot; e.g. 'pvrow' or 'ground'
     :return: None (``ax`` is updated)
     """
-    # FIXME: repeating code from plot_line_registry
+
     registry = registry.copy()
     registry.loc[:, 'color'] = (
         registry.line_type.values + '_'
@@ -607,3 +607,50 @@ def print_progress(iteration, total, prefix='', suffix='', decimals=1,
     if iteration == total:
         sys.stdout.write('\n')
         sys.stdout.flush()
+
+
+def get_average_pvrow_outputs(df_registries):
+    """ Calculate surface side irradiance averages for the pvrows """
+
+    values = ['q0', 'qinc', 'circumsolar_term', 'horizon_term',
+              'direct_term', 'irradiance_term', 'isotropic_term',
+              'reflection_term', 'horizon_band_shading_pct']
+    weight_col = ['area']
+    shade_col = ['shaded']
+    indexes = ['timestamps', 'pvrow_index', 'surface_side']
+
+    # Format registry to get averaged outputs for each surface type
+    df_outputs = (
+        deepcopy(df_registries)
+        .query('line_type == "pvrow"')
+        .assign(pvrow_index=lambda x: x['pvrow_index'].astype(int))
+        .loc[:, values + indexes + weight_col + shade_col]
+        # Calculate weighted averages: make sure to close the col value in lambdas
+        .assign(**{col: lambda x, y=col: x[y] * x[weight_col[0]]
+                   for col in values})
+        .groupby(indexes)
+        .sum()
+        .assign(**{col: lambda x, y=col: x[y] / x[weight_col[0]]
+                   for col in values})
+        .assign(**{shade_col[0]: lambda x: x[shade_col[0]] > 0})
+        # Now pivot data to the right format
+        .reset_index()
+        .melt(id_vars=indexes + shade_col, value_vars=values, var_name='term')
+        .pivot_table(index=['timestamps'] + shade_col,
+                     columns=['pvrow_index', 'surface_side', 'term'],
+                     values='value')
+        # Get shading as a column
+        .reset_index(level=1)
+    )
+
+    return df_outputs
+
+
+def get_bifacial_gain_outputs(df_registries):
+    """ Calculate irradiance bifacial gain for all pvrows """
+    pass
+
+
+def get_pvrow_segment_outputs(df_registries):
+    """ Get only pvrow segment outputs """
+    pass

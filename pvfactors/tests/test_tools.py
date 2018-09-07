@@ -8,7 +8,10 @@ from pvfactors.pvarray import Array
 from pvfactors.tools import (calculate_radiosities_serially_simple,
                              perez_diffuse_luminance,
                              calculate_radiosities_serially_perez,
-                             calculate_radiosities_parallel_perez)
+                             calculate_radiosities_parallel_perez,
+                             get_average_pvrow_outputs,
+                             get_bifacial_gain_outputs,
+                             get_pvrow_segment_outputs)
 import numpy as np
 import pandas as pd
 import os
@@ -148,3 +151,18 @@ def test_save_all_outputs_calculate_perez():
                                                         idx_slice['qinc', :]]
                        .values,
                        atol=atol, rtol=rtol)
+
+
+def test_get_average_pvrow_outputs(df_registries, df_outputs):
+    """ Test that obtaining the correct format """
+
+    calc_df_outputs = get_average_pvrow_outputs(df_registries)
+
+    tol = 1e-8
+    # Compare numerical values
+    assert np.allclose(df_outputs.iloc[:, 1:].values,
+                       calc_df_outputs.iloc[:, 1:].values,
+                       atol=0, rtol=tol)
+    # Compare bool on shading
+    assert np.array_equal(df_outputs.iloc[:, 0].values,
+                          calc_df_outputs.iloc[:, 0].values)
