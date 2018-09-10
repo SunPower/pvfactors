@@ -918,6 +918,7 @@ class Array(ArrayBase):
         ).astype(int)
 
         # Discretize surfaces specified by user
+        self.surface_registry['pvrow_segment_index'] = np.nan
         self.discretize_surfaces()
 
         # Add columns that will be used during calculations

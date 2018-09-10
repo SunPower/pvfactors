@@ -187,7 +187,8 @@ class PVGeometry(object):
                 raise PVFactorsError("geoentry_to_break_up.shape[0] cannot be"
                                      " larger than 1")
 
-    def break_and_add_entries(self, geoentry_to_break_up, point):
+    def break_and_add_entries(self, geoentry_to_break_up, point,
+                              pvrow_segment_index=None):
         """
         Break up a surface geometry into two objects at a point location.
 
@@ -196,6 +197,8 @@ class PVGeometry(object):
             column and ``pvgeometry`` extension
         :param point: point used to decide where to break up entry.
         :type point: :class:`shapely.Point` object
+        :param int pvrow_segment_index: (optional) index of segment being
+            broken up. Default is None.
         :return: None
         """
         # Get geometry
@@ -207,6 +210,10 @@ class PVGeometry(object):
         self._obj.at[idx, 'geometry'] = geometry_1.values
         new_registry_entry = self._obj.loc[idx, :].copy()
         new_registry_entry['geometry'] = geometry_2.values
+        # Add a value to "pvrow segment index" if provided
+        if pvrow_segment_index is not None:
+            self._obj.at[idx, 'pvrow_segment_index'] = pvrow_segment_index
+            new_registry_entry['pvrow_segment_index'] = pvrow_segment_index + 1
         self._obj.loc[self._obj.shape[0], :] = new_registry_entry.values[0]
 
     @staticmethod
@@ -303,14 +310,15 @@ class PVGeometry(object):
         :return: None
         """
         # TODO: is currently not able to work for other surfaces than pv rows..
-        for point in list_points:
+        for idx, point in enumerate(list_points):
             df_selected = self._obj.loc[
                 (self._obj['pvrow_index'] == pvrow_index)
                 & (self._obj['surface_side'] == side), :]
             geoentry_to_break_up = df_selected.loc[
                 df_selected.pvgeometry.distance(point) < DISTANCE_TOLERANCE]
             if geoentry_to_break_up.shape[0] == 1:
-                self.break_and_add_entries(geoentry_to_break_up, point)
+                self.break_and_add_entries(geoentry_to_break_up, point,
+                                           pvrow_segment_index=idx)
             elif geoentry_to_break_up.shape[0] > 1:
                 raise PVFactorsError("geoentry_to_break_up.shape[0] cannot be"
                                      "larger than 1")
