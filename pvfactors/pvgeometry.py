@@ -244,7 +244,8 @@ class PVGeometry(object):
                     LineString(coords[:i] + [(cp.x, cp.y)]),
                     LineString([(cp.x, cp.y)] + coords[i:])]
 
-    def split_pvrow_geometry(self, idx, line_shadow, pvrow_top_point):
+    def split_pvrow_geometry(self, idx_pvrow, line_shadow, pvrow_top_point,
+                             surface_side):
         """
         Break up pv row line into two pv row lines, a shaded one and an
         unshaded one. This function requires knowing the pv row line index in
@@ -252,17 +253,21 @@ class PVGeometry(object):
         the top point of the pv row in order to decide which pv row line will
         be shaded or not after break up.
 
-        :param int idx: index of shaded pv row entry
+        :param int idx_pvrow: index of shaded pv row entry
         :param line_shadow: :class:`shapely.LineString` object representing the
             "shadow line" intersecting with the pv row line
         :param pvrow_top_point: the highest point of the pv row line (in the
             elevation direction)
         :param pvrow_top_point: :class:``shapely.Point`` object
+        :param str surface_side: surface side of the pvrow
         :return: None
         """
         # Define geometry to work on
-        geometry = self._obj.loc[idx, 'geometry']
-        # Find intersection point
+        df_pvrow = self._obj.loc[(self._obj.pvrow_index == idx_pvrow)
+                                 & (self._obj.surface_side == surface_side),
+                                 :]
+        geometry = df_pvrow.loc[:, 'geometry'].values[0]
+        # Find intersection point of line shadow and pvrow geometry
         point_intersect = geometry.intersection(line_shadow)
         # Check that the intersection is not too close to a boundary: if it
         # is it can create a "memory access error" it seems
@@ -275,26 +280,22 @@ class PVGeometry(object):
             pass
         else:
             # Cut geometry in two pieces
-            list_new_lines = self.cut_linestring(geometry, point_intersect)
-            # Add new geometry to index
-            new_registry_entry = self._obj.loc[idx, :].copy()
-            new_registry_entry['shaded'] = True
-            if pvrow_top_point in list_new_lines[0].boundary:
-                geometry_ill = pd.Series(list_new_lines[0])
-                geometry_shaded = pd.Series(list_new_lines[1])
-            elif pvrow_top_point in list_new_lines[1].boundary:
-                geometry_ill = pd.Series(list_new_lines[1])
-                geometry_shaded = pd.Series(list_new_lines[0])
-            else:
-                raise PVFactorsError("split_pvrow_geometry: "
-                                     "unknown error occured")
+            self.cut_pvrow_geometry([point_intersect], idx_pvrow, surface_side)
+            # Find the geometries that should be marked as shaded
+            df_pvrow = self._obj.loc[(self._obj.pvrow_index == idx_pvrow)
+                                     & (self._obj.surface_side == surface_side),
+                                     :]
+            centroids = df_pvrow.pvgeometry.centroid.to_frame()
+            centroids.columns = ['geometry']
+            is_below_shading_interesect = (centroids.pvgeometry.bounds['miny']
+                                           < point_intersect.y)
+            self._obj.loc[(self._obj.pvrow_index == idx_pvrow)
+                          & (self._obj.surface_side == surface_side)
+                          & is_below_shading_interesect,
+                          'shaded'] = True
 
-            # Update registry
-            self._obj.at[idx, 'geometry'] = geometry_ill.values[0]
-            new_registry_entry['geometry'] = geometry_shaded.values[0]
-            self._obj.loc[self._obj.shape[0] + 1, :] = new_registry_entry
-
-    def cut_pvrow_geometry(self, list_points, pvrow_index, side):
+    def cut_pvrow_geometry(self, list_points, pvrow_index, side,
+                           count_segments=False):
         """
         Break up pv row lines into multiple segments based on the list of
         points specified. This is the "discretization" of the pvrow segments.
@@ -307,10 +308,15 @@ class PVGeometry(object):
             registry.
         :param str side: only do it for one side of the selected PV row. This
             can only be 'front' or 'back'.
+        :param bool count_segments: (optional, default False) add pvrow segment idx
         :return: None
         """
         # TODO: is currently not able to work for other surfaces than pv rows..
         for idx, point in enumerate(list_points):
+            if count_segments:
+                pvrow_segment_index = idx
+            else:
+                pvrow_segment_index = None
             df_selected = self._obj.loc[
                 (self._obj['pvrow_index'] == pvrow_index)
                 & (self._obj['surface_side'] == side), :]
@@ -318,7 +324,7 @@ class PVGeometry(object):
                 df_selected.pvgeometry.distance(point) < DISTANCE_TOLERANCE]
             if geoentry_to_break_up.shape[0] == 1:
                 self.break_and_add_entries(geoentry_to_break_up, point,
-                                           pvrow_segment_index=idx)
+                                           pvrow_segment_index=pvrow_segment_index)
             elif geoentry_to_break_up.shape[0] > 1:
                 raise PVFactorsError("geoentry_to_break_up.shape[0] cannot be"
                                      "larger than 1")

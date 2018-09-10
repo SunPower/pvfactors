@@ -144,9 +144,9 @@ def test_interrow_shading():
     }
     array = Array(**arguments)
     # There should be 4 pvrows with direct shading
-    assert (array.line_registry.loc[
-        (array.line_registry.line_type == 'pvrow')
-        & array.line_registry.shaded]
+    assert (array.surface_registry.loc[
+        (array.surface_registry.line_type == 'pvrow')
+        & array.surface_registry.shaded]
         .shape[0] == 4)
 
     # Backward direct shading of the pvrows (sun in the back of the modules)
@@ -162,9 +162,9 @@ def test_interrow_shading():
     }
     array = Array(**arguments)
     # There should still be 4 pvrows with direct shading
-    assert (array.line_registry.loc[
-        (array.line_registry.line_type == 'pvrow')
-        & array.line_registry.shaded]
+    assert (array.surface_registry.loc[
+        (array.surface_registry.line_type == 'pvrow')
+        & array.surface_registry.shaded]
         .shape[0] == 4)
 
     print("Done.")
