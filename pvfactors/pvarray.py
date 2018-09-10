@@ -224,6 +224,9 @@ class Array(ArrayBase):
             LOGGER.debug("...calculating interrow shading")
             self.calculate_interrow_direct_shading()
 
+        # -------- Update the surface areas (/ lengths) after shading calculation
+        self.surface_registry.loc[:, 'area'] = self.surface_registry.pvgeometry.length
+
         # ------- View factors: define the surface views and calculate view
         # factors
         LOGGER.debug("...building view matrix and finding obstructions")
@@ -934,7 +937,7 @@ class Array(ArrayBase):
         self.surface_registry['reflectivity'] = np.nan
         self.surface_registry['q0'] = np.nan
         self.surface_registry['qinc'] = np.nan
-        self.surface_registry['area'] = self.surface_registry.pvgeometry.length
+        self.surface_registry['area'] = np.nan
         self.surface_registry['index_pvrow_neighbor'] = np.nan
 
     def discretize_surfaces(self):

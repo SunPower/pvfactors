@@ -12,6 +12,7 @@ def test_irradiance_terms_simple():
     """
     Check that the irradiance terms calculated for this configuration and
     using the isotropic diffuse sky dome is working as expected
+    There is some direct shading on the back surface in this configuration
     """
     # Simple sky and array configuration
     dni = 1e3
@@ -39,7 +40,7 @@ def test_irradiance_terms_simple():
         [0., 0., 0., 0.,
          173.64817767, 173.64817767, 173.64817767, 173.64817767,
          173.64817767, 0., 0., 866.02540378,
-         866.02540378, 866.02540378, 0., 0.,
+         866.02540378, 866.02540378,
          100.])
     tol = 1e-8
     assert np.allclose(array.irradiance_terms, expected_irradiance_terms,
