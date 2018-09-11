@@ -69,7 +69,7 @@ def test_calculate_radiosities_serially_simple():
                        atol=tol, rtol=0, equal_nan=True)
 
 
-def test_perez_diffuse_luminance():
+def test_perez_diffuse_luminance(df_perez_luminance):
     """
     Test that the calculation of luminance -- first step in using the vf model
     with Perez -- is functional
@@ -81,6 +81,11 @@ def test_perez_diffuse_luminance():
                                 .tz_localize(None))
 
     df_outputs = perez_diffuse_luminance(df_inputs_clearday)
+
+    tol = 1e-8
+    assert np.allclose(df_outputs.values,
+                       df_perez_luminance.values,
+                       atol=0, rtol=tol)
 
 
 def test_save_all_outputs_calculate_perez():
