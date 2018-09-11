@@ -3,14 +3,15 @@
 """
 Test some of the functions in the tools module
 """
-
+import pytest
 from pvfactors.pvarray import Array
 from pvfactors.tools import (calculate_radiosities_serially_simple,
                              perez_diffuse_luminance,
                              calculate_radiosities_serially_perez,
                              calculate_radiosities_parallel_perez,
                              get_average_pvrow_outputs,
-                             get_pvrow_segment_outputs)
+                             get_pvrow_segment_outputs,
+                             breakup_df_inputs)
 import numpy as np
 import pandas as pd
 import os
@@ -19,6 +20,11 @@ TEST_DIR = os.path.dirname(__file__)
 TEST_DATA = os.path.join(TEST_DIR, 'test_files')
 FILE_PATH = os.path.join(TEST_DATA, 'file_test_tools_inputs_clearday.csv')
 idx_slice = pd.IndexSlice
+
+
+@pytest.fixture(scope='function')
+def mock_array_timeseries_calculate(mocker):
+    return mocker.patch('pvfactors.tools.array_timeseries_calculate')
 
 
 def test_calculate_radiosities_serially_simple():
@@ -80,11 +86,43 @@ def test_perez_diffuse_luminance(df_perez_luminance):
                                 .tz_localize('UTC').tz_convert('Etc/GMT+7')
                                 .tz_localize(None))
 
-    df_outputs = perez_diffuse_luminance(df_inputs_clearday)
+    # Break up inputs
+    (timestamps, array_tilt, array_azimuth,
+     solar_zenith, solar_azimuth, dni, dhi) = breakup_df_inputs(df_inputs_clearday)
+    df_outputs = perez_diffuse_luminance(timestamps, array_tilt, array_azimuth,
+                                         solar_zenith, solar_azimuth, dni, dhi)
 
+    col_order = df_outputs.columns
     tol = 1e-8
     assert np.allclose(df_outputs.values,
-                       df_perez_luminance.values,
+                       df_perez_luminance[col_order].values,
+                       atol=0, rtol=tol)
+
+
+def test_luminance_in_timeseries_calc(df_perez_luminance,
+                                      mock_array_timeseries_calculate):
+    """
+    Test that the calculation of luminance -- first step in using the vf model
+    with Perez -- is functional
+    """
+    df_inputs_clearday = pd.read_csv(FILE_PATH)
+    df_inputs_clearday = df_inputs_clearday.set_index('datetime', drop=True)
+    df_inputs_clearday.index = (pd.DatetimeIndex(df_inputs_clearday.index)
+                                .tz_localize('UTC').tz_convert('Etc/GMT+7')
+                                .tz_localize(None))
+
+    # Break up inputs
+    (timestamps, array_tilt, array_azimuth,
+     solar_zenith, solar_azimuth, dni, dhi) = breakup_df_inputs(df_inputs_clearday)
+    _, df_outputs = calculate_radiosities_serially_perez(
+        (None, timestamps, solar_zenith, solar_azimuth,
+         array_tilt, array_azimuth,
+         dni, dhi))
+
+    col_order = df_outputs.columns
+    tol = 1e-8
+    assert np.allclose(df_outputs.values,
+                       df_perez_luminance[col_order].values,
                        atol=0, rtol=tol)
 
 
@@ -121,16 +159,21 @@ def test_save_all_outputs_calculate_perez():
         'rho_front_pvrow': 0.01,
         'cut': [(1, 3, 'front')]
     }
-    args = (arguments, df_inputs_clearday.iloc[:idx_subset])
+
+    # Break up inputs
+    (timestamps, array_tilt, array_azimuth,
+     solar_zenith, solar_azimuth, dni, dhi) = breakup_df_inputs(
+         df_inputs_clearday.iloc[:idx_subset])
+
+    args = (arguments, timestamps, solar_zenith, solar_azimuth,
+            array_tilt, array_azimuth, dni, dhi)
 
     # Run the serial calculation
     df_registries_serial, _ = (
         calculate_radiosities_serially_perez(args))
 
     df_registries_parallel, _ = (
-        calculate_radiosities_parallel_perez(
-            arguments, df_inputs_clearday.iloc[:idx_subset]
-        ))
+        calculate_radiosities_parallel_perez(*args))
 
     # Format the outputs
     df_outputs_segments_serial = get_pvrow_segment_outputs(

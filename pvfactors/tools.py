@@ -103,7 +103,8 @@ def plot_array_from_registry(ax, registry, line_types_selected=None,
     ax.set_ylabel("y [m]", fontsize=fontsize)
 
 
-def perez_diffuse_luminance(df_inputs):
+def perez_diffuse_luminance(timestamps, array_tilt, array_azimuth,
+                            solar_zenith, solar_azimuth, dni, dhi):
     """
     Function used to calculate the luminance and the view factor terms from the
     Perez diffuse light transposition model, as implemented in the
@@ -118,6 +119,13 @@ def perez_diffuse_luminance(df_inputs):
         'luminance_horizon', 'luminance_circumsolar', 'luminance_isotropic',
         'poa_isotropic', 'poa_circumsolar', 'poa_horizon', 'poa_total_diffuse']
     """
+
+    # Create a dataframe to help filtering on all arrays
+    df_inputs = pd.DataFrame(
+        {'array_tilt': array_tilt, 'array_azimuth': array_azimuth,
+         'solar_zenith': solar_zenith, 'solar_azimuth': solar_azimuth,
+         'dni': dni, 'dhi': dhi},
+        index=pd.DatetimeIndex(timestamps))
 
     dni_et = irradiance.extraradiation(df_inputs.index.dayofyear)
     am = atmosphere.relativeairmass(df_inputs.solar_zenith)
@@ -139,7 +147,7 @@ def perez_diffuse_luminance(df_inputs):
     if df_inputs_back_surface.shape[0] > 0:
         # Use recursion to calculate circumsolar luminance for back surface
         df_inputs_back_surface = perez_diffuse_luminance(
-            df_inputs_back_surface)
+            *breakup_df_inputs(df_inputs_back_surface))
 
     # Calculate Perez diffuse components
     diffuse_poa, components = irradiance.perez(df_inputs.array_tilt,
@@ -295,7 +303,40 @@ def calculate_radiosities_serially_simple(array, df_inputs):
     return df_outputs, df_bifacial_gain
 
 
-def calculate_radiosities_serially_perez(args):
+def calculate_custom_perez_transposition(timestamps, array_tilt, array_azimuth,
+                                         solar_zenith, solar_azimuth, dni, dhi):
+    """
+    Calculate custom perez transposition: some pre-processing is necessary in order
+    to get all the components even when the sun is hitting the pv row back surface
+
+    :param pd.DatetimeIndex timestamps:
+    :param np.array array_tilt:
+    :param np.array array_azimuth:
+    :param np.array solar_zenith:
+    :param np.array solar_azimuth:
+    :param np.array dni:
+    :param np.array dhi:
+    :return: ``df_custom_perez``, pandas Dataframe
+    """
+    # Pre-process df_inputs to use the expected format of pvlib's perez model:
+    # only positive tilt angles, and switching azimuth angles
+    array_azimuth_processed = deepcopy(array_azimuth)
+    array_azimuth_processed[array_tilt < 0] = np.remainder(
+        array_azimuth[array_tilt < 0] + 180.,
+        360.)
+    array_tilt_processed = np.abs(array_tilt)
+
+    # Calculate the perez inputs
+    df_custom_perez = perez_diffuse_luminance(timestamps, array_tilt_processed,
+                                              array_azimuth_processed,
+                                              solar_zenith, solar_azimuth, dni, dhi)
+
+    return df_custom_perez
+
+
+def array_timeseries_calculate(
+    arguments, timestamps, solar_zenith, solar_azimuth, array_tilt, array_azimuth,
+        dni, luminance_isotropic, luminance_circumsolar, poa_horizon, poa_circumsolar):
     """
     Calculate the view factor radiosity and irradiance terms for multiple times.
     The calculations will be sequential, and they will assume a diffuse sky
@@ -328,52 +369,26 @@ def calculate_radiosities_serially_perez(args):
         all the segments of the PV string side (it is a way of getting detailed
         values instead of averages)
     """
-
-    # Get arguments
-    arguments, df_inputs = args
-
     # Instantiate array
     array = Array(**arguments)
-    # Pre-process df_inputs to use the expected format of pvlib's perez model:
-    # only positive tilt angles, and switching azimuth angles
-    df_inputs_before_perez = df_inputs.copy()
-    df_inputs_before_perez.loc[df_inputs.array_tilt < 0, 'array_azimuth'] = (
-        np.remainder(
-            df_inputs_before_perez.loc[df_inputs.array_tilt < 0,
-                                       'array_azimuth'] + 180.,
-            360.)
-    )
-    df_inputs_before_perez.array_tilt = np.abs(df_inputs_before_perez
-                                               .array_tilt)
-
-    # Calculate the perez inputs
-    df_inputs_perez = perez_diffuse_luminance(df_inputs_before_perez)
-
-    # Post process: in vf model tilt angles can be negative and azimuth is
-    # generally fixed
-    df_inputs_perez.loc[:, ['array_azimuth', 'array_tilt']] = (
-        df_inputs.loc[:, ['array_azimuth', 'array_tilt']]
-    )
-
     # We want to save the whole registry for each timestamp
     list_registries = []
-
     # Use for printing progress
-    n = df_inputs_perez.shape[0]
+    n = len(timestamps)
     i = 1
-
-    for idx, row in df_inputs_perez.iterrows():
+    for idx, time in enumerate(timestamps):
         try:
-            if ((isinstance(row['solar_zenith'], float))
-                    & (row['solar_zenith'] <= 90.)):
+            if ((isinstance(solar_zenith[idx], float))
+                    & (solar_zenith[idx] <= 90.)):
+                # Run calculation only if daytime
                 array.calculate_radiosities_perez(
-                    row['solar_zenith'], row['solar_azimuth'], row['array_tilt'],
-                    row['array_azimuth'], row['dni'], row['luminance_isotropic'],
-                    row['luminance_circumsolar'], row['poa_horizon'], row['poa_circumsolar'])
+                    solar_zenith[idx], solar_azimuth[idx], array_tilt[idx],
+                    array_azimuth[idx], dni[idx], luminance_isotropic[idx],
+                    luminance_circumsolar[idx], poa_horizon[idx], poa_circumsolar[idx])
 
                 # Save the whole registry
                 registry = deepcopy(array.surface_registry)
-                registry['timestamps'] = idx
+                registry['timestamps'] = time
                 list_registries.append(registry)
 
         except Exception as err:
@@ -390,11 +405,38 @@ def calculate_radiosities_serially_perez(args):
     else:
         df_registries = None
 
-    return df_registries, df_inputs_perez
+    return df_registries
 
 
-def calculate_radiosities_parallel_perez(array_parameters, df_inputs,
-                                         n_processes=None):
+def calculate_radiosities_serially_perez(args):
+    """ Timeseries simulation with no parallellization, using Perez model """
+
+    # Get arguments
+    (arguments, timestamps, solar_zenith, solar_azimuth, array_tilt, array_azimuth,
+     dni, dhi) = args
+
+    # Run custom perez transposition: in order to get circumsolar on back surface too
+    df_custom_perez = calculate_custom_perez_transposition(
+        timestamps, array_tilt, array_azimuth, solar_zenith, solar_azimuth,
+        dni, dhi)
+
+    # Get the necessary inputs
+    luminance_isotropic = df_custom_perez.luminance_isotropic.values
+    luminance_circumsolar = df_custom_perez.luminance_circumsolar.values
+    poa_horizon = df_custom_perez.poa_horizon.values
+    poa_circumsolar = df_custom_perez.poa_circumsolar.values
+
+    # Run timeseries calculation
+    df_registries = array_timeseries_calculate(
+        arguments, timestamps, solar_zenith, solar_azimuth, array_tilt, array_azimuth,
+        dni, luminance_isotropic, luminance_circumsolar, poa_horizon, poa_circumsolar)
+
+    return df_registries, df_custom_perez
+
+
+def calculate_radiosities_parallel_perez(
+        array_parameters, timestamps, solar_zenith, solar_azimuth,
+        array_tilt, array_azimuth, dni, dhi, n_processes=None):
     """
     Calculate the view factor radiosity and irradiance terms for multiple times.
     The calculations will be run in parallel on the different processors, and
@@ -419,11 +461,21 @@ def calculate_radiosities_parallel_perez(array_parameters, df_inputs,
     if n_processes is None:
         n_processes = cpu_count()
 
-    # Define list of arguments for target function
-    list_df_inputs = np.array_split(df_inputs, n_processes, axis=0)
+    # Split all arguments according to number of processes
+    (list_timestamps, list_array_azimuth, list_array_tilt,
+     list_solar_zenith, list_solar_azimuth, list_dni, list_dhi) = map(
+         np.array_split,
+         [timestamps, array_azimuth, array_tilt,
+          solar_zenith, solar_azimuth, dni, dhi],
+        [n_processes] * 7)
     list_parameters = [array_parameters] * n_processes
-    list_args = zip(*(list_parameters, list_df_inputs))
+    # Zip all the arguments together
+    list_args = zip(*(list_parameters, list_timestamps, list_solar_zenith,
+                      list_solar_azimuth, list_array_tilt, list_array_azimuth,
+                      list_dni, list_dhi))
 
+    # import pdb
+    # pdb.set_trace()
     # Start multiprocessing
     pool = Pool(n_processes)
     start = time.time()
@@ -588,3 +640,21 @@ def get_pvrow_segment_outputs(df_registries, values=COLS_TO_SAVE,
                                                                      ].astype(float)
 
     return df_segments
+
+
+def breakup_df_inputs(df_inputs):
+    """
+    It is sometimes easier to provide a dataframe than a list of arrays:
+    this function does the job of breaking up the dataframe into a list of
+    arrays
+    """
+    timestamps = pd.to_datetime(df_inputs.index)
+    array_azimuth = df_inputs.array_azimuth.values
+    array_tilt = df_inputs.array_tilt.values
+    solar_zenith = df_inputs.solar_zenith.values
+    solar_azimuth = df_inputs.solar_azimuth.values
+    dni = df_inputs.dni.values
+    dhi = df_inputs.dhi.values
+
+    return (timestamps, array_tilt, array_azimuth,
+            solar_zenith, solar_azimuth, dni, dhi)

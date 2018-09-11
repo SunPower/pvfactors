@@ -4,7 +4,8 @@
 Testing the multiprocessing calculation from the ``tools`` module
 """
 
-from pvfactors.tools import calculate_radiosities_parallel_perez
+from pvfactors.tools import (calculate_radiosities_parallel_perez,
+                             breakup_df_inputs)
 import os
 import pandas as pd
 
@@ -43,7 +44,10 @@ def test_calculate_radiosities_parallel_perez():
     df_inputs_simulation = df_inputs_simulation.iloc[:subset_idx, :]
     # Select number of processes
     n_processes = None
+    # Break up inputs
+    (timestamps, array_tilt, array_azimuth,
+     solar_zenith, solar_azimuth, dni, dhi) = breakup_df_inputs(df_inputs_simulation)
     # Run calculation
-    results = calculate_radiosities_parallel_perez(arguments,
-                                                   df_inputs_simulation,
-                                                   n_processes=n_processes)
+    results = calculate_radiosities_parallel_perez(
+        arguments, timestamps, array_tilt, array_azimuth,
+        solar_zenith, solar_azimuth, dni, dhi, n_processes=n_processes)

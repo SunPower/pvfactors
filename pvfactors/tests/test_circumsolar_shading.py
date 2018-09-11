@@ -7,7 +7,8 @@ calculations
 
 from pvfactors.pvcore import calculate_circumsolar_shading
 from pvfactors.pvarray import Array
-from pvfactors.tools import calculate_radiosities_serially_perez
+from pvfactors.tools import (calculate_radiosities_serially_perez,
+                             breakup_df_inputs)
 import pandas as pd
 import os
 import numpy as np
@@ -66,8 +67,12 @@ def test_serial_circumsolar_shading_calculation():
         TEST_DATA, 'file_test_serial_circumsolar_shading_calculation.csv')
     df_inputs = pd.read_csv(test_file, index_col=0)
     df_inputs.index = pd.DatetimeIndex(df_inputs.index)
+    (timestamps, array_tilt, array_azimuth,
+     solar_zenith, solar_azimuth, dni, dhi) = breakup_df_inputs(df_inputs)
 
     # Run the calculation for functional testing
     df_registries, df_inputs_perez = (
-        calculate_radiosities_serially_perez((arguments, df_inputs))
+        calculate_radiosities_serially_perez((arguments, timestamps, array_tilt,
+                                              array_azimuth, solar_zenith,
+                                              solar_azimuth, dni, dhi))
     )
