@@ -72,7 +72,6 @@ def test_serial_circumsolar_shading_calculation():
     array = Array(**arguments)
 
     # Run the calculation for functional testing
-    (df_outputs, df_bifacial, df_inputs_perez, df_outputs_segments,
-     df_registries) = (
+    df_registries, df_inputs_perez = (
         calculate_radiosities_serially_perez((arguments, df_inputs, save))
     )
