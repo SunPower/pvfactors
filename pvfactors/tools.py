@@ -329,12 +329,10 @@ def calculate_radiosities_serially_perez(args):
         values instead of averages)
     """
 
-    if len(args) == 3:
-        arguments, df_inputs, save_segments = args
-    else:
-        arguments, df_inputs = args
-        save_segments = None
+    # Get arguments
+    arguments, df_inputs = args
 
+    # Instantiate array
     array = Array(**arguments)
     # Pre-process df_inputs to use the expected format of pvlib's perez model:
     # only positive tilt angles, and switching azimuth angles
@@ -401,7 +399,7 @@ def calculate_radiosities_serially_perez(args):
 
 
 def calculate_radiosities_parallel_perez(array_parameters, df_inputs,
-                                         n_processes=None, save_segments=None):
+                                         n_processes=None):
     """
     Calculate the view factor radiosity and irradiance terms for multiple times.
     The calculations will be run in parallel on the different processors, and
@@ -417,11 +415,6 @@ def calculate_radiosities_parallel_perez(array_parameters, df_inputs,
         'W/m2', 'W/m2']
     :param int n_processes: number of processes to use. Default value will be
         the total number of processors on the machine
-    :param tuple save_segments: ``tuple`` of two elements used to save all the
-        irradiance terms calculated for one side of a PV row; e.g.
-        ``(1, 'front')`` the first element is an ``int`` for the PV row index,
-        and the second element a ``str`` to specify the side of the PV row,
-        'front' or 'back'
     :return: concatenated outputs of
         :func:`tools.calculate_radiosities_serially_perez` run and outputted in
         the parallel processes
@@ -434,8 +427,7 @@ def calculate_radiosities_parallel_perez(array_parameters, df_inputs,
     # Define list of arguments for target function
     list_df_inputs = np.array_split(df_inputs, n_processes, axis=0)
     list_parameters = [array_parameters] * n_processes
-    list_save_segments = [save_segments] * n_processes
-    list_args = zip(*(list_parameters, list_df_inputs, list_save_segments))
+    list_args = zip(*(list_parameters, list_df_inputs))
 
     # Start multiprocessing
     pool = Pool(n_processes)

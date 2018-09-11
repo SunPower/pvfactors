@@ -10,7 +10,6 @@ from pvfactors.tools import (calculate_radiosities_serially_simple,
                              calculate_radiosities_serially_perez,
                              calculate_radiosities_parallel_perez,
                              get_average_pvrow_outputs,
-                             get_bifacial_gain_outputs,
                              get_pvrow_segment_outputs)
 import numpy as np
 import pandas as pd
@@ -33,8 +32,8 @@ def test_calculate_radiosities_serially_simple():
             [[80., 0., 70., 180., 1e3, 1e2],
              [20., 180., 40., 180., 1e3, 1e2],
              [70.4407256, 248.08690811, 42.4337927, 270., 1000., 100.]]),
-        columns=['solar_zenith', 'solar_azimuth', 'array_tilt', 'array_azimuth',
-                 'dni', 'dhi'],
+        columns=['solar_zenith', 'solar_azimuth', 'array_tilt',
+                 'array_azimuth', 'dni', 'dhi'],
         index=[0, 1, 2]
     )
     arguments = {
@@ -117,10 +116,7 @@ def test_save_all_outputs_calculate_perez():
         'rho_front_pvrow': 0.01,
         'cut': [(1, 3, 'front')]
     }
-
-    # We want to save the results from the front side of tracker #2 (index 1)
-    save_segments = (1, 'front')
-    args = (arguments, df_inputs_clearday.iloc[:idx_subset], save_segments)
+    args = (arguments, df_inputs_clearday.iloc[:idx_subset])
 
     # Run the serial calculation
     df_registries_serial, _ = (
@@ -128,8 +124,7 @@ def test_save_all_outputs_calculate_perez():
 
     df_registries_parallel, _ = (
         calculate_radiosities_parallel_perez(
-            arguments, df_inputs_clearday.iloc[:idx_subset],
-            save_segments=save_segments
+            arguments, df_inputs_clearday.iloc[:idx_subset]
         ))
 
     # Format the outputs
