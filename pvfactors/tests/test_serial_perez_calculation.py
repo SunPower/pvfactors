@@ -5,7 +5,8 @@ Test that the serial calculation (using the Perez diffuse sky model) outputs
 consistent results
 """
 
-from pvfactors.tools import calculate_radiosities_serially_perez
+from pvfactors.tools import (calculate_radiosities_serially_perez,
+                             get_average_pvrow_outputs)
 import pandas as pd
 import numpy as np
 import os
@@ -43,9 +44,12 @@ def test_serial_calculation():
     df_inputs_simulation = df_inputs_simulation.iloc[0:idx_subset, :]
 
     # Run calculation in 1 process only
-    (df_outputs, df_bifacial, _, df_segments, _) = (
+    (df_registries, _) = (
         calculate_radiosities_serially_perez((arguments, df_inputs_simulation))
     )
+
+    # Format df_registries to get outputs
+    df_outputs = get_average_pvrow_outputs(df_registries)
 
     # Did the outputs remain consistent?
     test_results = values_are_consistent(df_outputs)
@@ -66,33 +70,36 @@ def values_are_consistent(df_outputs):
     filepath = os.path.join(TEST_DATA,
                             'file_test_serial_perez.csv')
 
-    expected_df_outputs = pd.read_csv(filepath, index_col=False, parse_dates=['timestamps'])
+    expected_df_outputs = pd.read_csv(filepath, index_col=False,
+                                      parse_dates=['timestamps'])
     expected_df_outputs['origin'] = 'expected'
     df_outputs = (df_outputs.assign(timestamps=lambda x: x.index)
-                  .drop('array_is_shaded', axis=1)
+                  .drop('shaded', axis=1)
                   .reset_index(drop=True)
                   .melt(id_vars=['timestamps']))
     df_outputs['origin'] = 'calculated'
 
     # Merge calculated and expected values into same dataframe
-    df_comparison = pd.concat([expected_df_outputs, df_outputs], axis=0, join='outer')
+    df_comparison = pd.concat([expected_df_outputs, df_outputs],
+                              axis=0, join='outer', sort=True)
     df_comparison['value'] = df_comparison['value'].astype(float)
 
     # Group by irradiance term for clearer comparison
     grouped_comparison = df_comparison.groupby('term')
-    atol = 0.
     rtol = 1e-7
     test_results = []
     for name, group in grouped_comparison:
         df_term = group.pivot_table(index=['timestamps', 'pvrow', 'side'],
                                     columns=['origin'], values='value')
-        compare = ('calculated' in df_term.columns) & ('expected' in df_term.columns)
+        compare = (('calculated' in df_term.columns)
+                   & ('expected' in df_term.columns))
         # Only run the tests if the category exists in the expected data
         if compare:
             test_result = np.allclose(df_term.calculated, df_term.expected,
                                       atol=0, rtol=rtol)
 
-        test_results.append({'irradiance_term': name, 'passed': test_result,
-                             'df_term': df_term})
+            test_results.append({'irradiance_term': name,
+                                 'passed': test_result,
+                                 'df_term': df_term})
 
     return test_results

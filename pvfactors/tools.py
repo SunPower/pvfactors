@@ -530,6 +530,7 @@ def get_average_pvrow_outputs(df_registries, values=COLS_TO_SAVE):
         # Calculate weighted averages: make sure to close the col value in lambdas
         .assign(**{col: lambda x, y=col: x[y] * x[weight_col[0]]
                    for col in values})
+        .assign(shaded=lambda x: pd.to_numeric(x.shaded))
         .groupby(indexes)
         .sum()
         .assign(**{col: lambda x, y=col: x[y] / x[weight_col[0]]
@@ -572,7 +573,8 @@ def get_pvrow_segment_outputs(df_registries, values=COLS_TO_SAVE,
         .loc[~ np.isnan(df_registries.pvrow_segment_index).values,
              values + indexes + weight_col + shade_col]
         .assign(pvrow_segment_index=lambda x: x['pvrow_segment_index'].astype(int),
-                pvrow_index=lambda x: x['pvrow_index'].astype(int))
+                pvrow_index=lambda x: x['pvrow_index'].astype(int),
+                shaded=lambda x: pd.to_numeric(x.shaded))
         # Calculate weighted averages: make sure to close the col value in lambdas
         # Include shaded and non shaded segments
         .assign(**{col: lambda x, y=col: x[y] * x[weight_col[0]]
