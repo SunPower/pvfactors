@@ -1,4 +1,4 @@
-timestamps,pvrow,side,term,value
+timestamps,pvrow_index,surface_side,term,value
 4/15/2017 10:26,0,back,circumsolar_term,0
 4/15/2017 10:27,0,back,circumsolar_term,0
 4/15/2017 10:26,0,front,circumsolar_term,51.02503788
