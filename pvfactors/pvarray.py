@@ -213,14 +213,19 @@ class Array(ArrayBase):
         # --- Add edge points to geometries
         self.line_registry.pvgeometry.split_ground_geometry_from_edge_points(
             edge_points)
-        if self.has_direct_shading:
-            LOGGER.debug("...calculating interrow shading")
-            self.calculate_interrow_direct_shading()
 
         # ------- Surface creation: returning the surface registry, a line may
         # represent 2 surfaces (front and back)
         LOGGER.debug("...building surface registry")
         self.create_surface_registry()
+
+        # -------- Interrow shading
+        if self.has_direct_shading:
+            LOGGER.debug("...calculating interrow shading")
+            self.calculate_interrow_direct_shading()
+
+        # -------- Update the surface areas (/ lengths) after shading calculation
+        self.surface_registry.loc[:, 'area'] = self.surface_registry.pvgeometry.length
 
         # ------- View factors: define the surface views and calculate view
         # factors
@@ -842,31 +847,40 @@ class Array(ArrayBase):
         """
         # Find the direction of shading
         # Direct shading calculation must be specific to the PVRow class
+        # Shading is said "forward" if the shadow of the pvrow is on the
+        # right side of the pvrow
         shading_is_forward = (self.pvrows[0].shadow['geometry']
                               .bounds[0] >=
                               self.pvrows[0].left_point.x)
+        # Determine if front or back surface has direct shading
+        if self.pvrows[0].is_front_side_illuminated(self.solar_2d_vector):
+            side_shaded = 'front'
+        else:
+            side_shaded = 'back'
+
         if shading_is_forward:
-            for i in range(1, self.n_pvrows):
-                pvrow = self.pvrows[i - 1]
-                adjacent_pvrow = self.pvrows[i]
+            for idx_pvrow in range(1, self.n_pvrows):
+                # idx_pvrow is the index of the shaded pvrow
+                pvrow = self.pvrows[idx_pvrow - 1]
+                adjacent_pvrow = self.pvrows[idx_pvrow]
                 # Shadows from left to right: find vector of shadow
                 top_point_vector = pvrow.highest_point
-                x1_shadow, x2_shadow = (pvrow
-                                        .get_shadow_bounds(
-                                            self.solar_2d_vector)
-                                        )
+                x1_shadow, x2_shadow = pvrow.get_shadow_bounds(
+                    self.solar_2d_vector)
                 ground_point = Point(x2_shadow, Y_GROUND)
                 linestring_shadow = LineString([top_point_vector, ground_point])
                 # FIXME: we do not want to create a line_registry object
-                self.line_registry.pvgeometry.split_pvrow_geometry(
-                    self.pvrows[i].line_registry_indices[0],
+                self.surface_registry.pvgeometry.split_pvrow_geometry(
+                    idx_pvrow,
                     linestring_shadow,
-                    adjacent_pvrow.highest_point
+                    adjacent_pvrow.highest_point,
+                    side_shaded
                 )
         else:
-            for i in range(self.n_pvrows - 2, -1, -1):
-                pvrow = self.pvrows[i + 1]
-                adjacent_pvrow = self.pvrows[i]
+            for idx_pvrow in range(self.n_pvrows - 2, -1, -1):
+                # idx_pvrow is the index of the shaded pvrow
+                pvrow = self.pvrows[idx_pvrow + 1]
+                adjacent_pvrow = self.pvrows[idx_pvrow]
                 # Shadows from right to left: find vector of shadow
                 top_point_vector = pvrow.highest_point
                 x1_shadow, x2_shadow = (pvrow
@@ -877,10 +891,11 @@ class Array(ArrayBase):
                 linestring_shadow = LineString(
                     [top_point_vector, ground_point])
                 # FIXME: we do not want to create a line_registry object
-                self.line_registry.pvgeometry.split_pvrow_geometry(
-                    self.pvrows[i].line_registry_indices[0],
+                self.surface_registry.pvgeometry.split_pvrow_geometry(
+                    idx_pvrow,
                     linestring_shadow,
-                    adjacent_pvrow.highest_point
+                    adjacent_pvrow.highest_point,
+                    side_shaded
                 )
 
 # ------- Surface creation
@@ -898,15 +913,11 @@ class Array(ArrayBase):
 
         front_surface_registry = copy.copy(self.line_registry)
         front_surface_registry['surface_side'] = 'front'
+        # Create pvrow back surfaces
         back_surface_registry = front_surface_registry.loc[
             front_surface_registry.line_type == 'pvrow'].copy()
         back_surface_registry.loc[:, 'surface_side'] = 'back'
-        # FIXME: this is not gonna work if not single line
-        if self.pvrows[0].is_front_side_illuminated(self.solar_2d_vector):
-            back_surface_registry.loc[:, 'shaded'] = False
-        else:
-            front_surface_registry.loc[front_surface_registry.line_type
-                                       == 'pvrow', 'shaded'] = False
+        # Merge two registries together
         self.surface_registry = front_surface_registry.append(
             back_surface_registry).reset_index(drop=False)
         # FIXME: needed to give special methods to surface_registry, but
@@ -918,6 +929,7 @@ class Array(ArrayBase):
         ).astype(int)
 
         # Discretize surfaces specified by user
+        self.surface_registry['pvrow_segment_index'] = np.nan
         self.discretize_surfaces()
 
         # Add columns that will be used during calculations
@@ -925,7 +937,7 @@ class Array(ArrayBase):
         self.surface_registry['reflectivity'] = np.nan
         self.surface_registry['q0'] = np.nan
         self.surface_registry['qinc'] = np.nan
-        self.surface_registry['area'] = self.surface_registry.pvgeometry.length
+        self.surface_registry['area'] = np.nan
         self.surface_registry['index_pvrow_neighbor'] = np.nan
 
     def discretize_surfaces(self):
@@ -942,7 +954,8 @@ class Array(ArrayBase):
             side = cut[2]
             self.pvrows[pvrow_index].calculate_cut_points(n_segments)
             self.surface_registry.pvgeometry.cut_pvrow_geometry(
-                self.pvrows[pvrow_index].cut_points, pvrow_index, side)
+                self.pvrows[pvrow_index].cut_points, pvrow_index, side,
+                count_segments=True)
 
 # ------- View matrix creation
     def create_view_matrix(self):

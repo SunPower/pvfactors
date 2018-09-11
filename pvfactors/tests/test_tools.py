@@ -8,7 +8,10 @@ from pvfactors.pvarray import Array
 from pvfactors.tools import (calculate_radiosities_serially_simple,
                              perez_diffuse_luminance,
                              calculate_radiosities_serially_perez,
-                             calculate_radiosities_parallel_perez)
+                             calculate_radiosities_parallel_perez,
+                             get_average_pvrow_outputs,
+                             get_bifacial_gain_outputs,
+                             get_pvrow_segment_outputs)
 import numpy as np
 import pandas as pd
 import os
@@ -48,18 +51,18 @@ def test_calculate_radiosities_serially_simple():
 
     # Check that the outputs are as expected
     expected_outputs_array = np.array([
-        [31.601748050014145, 6.289069752504206, 3.5833558115691035],
-        [632.0349610002829, 125.78139505008411, 71.66711623138208],
-        [2.2784386524603493, 31.554019855401, 28.05923970649779],
-        [75.94795508201167, 1051.8006618467002, 935.3079902165931],
-        [31.87339865348199, 6.377687102750911, 1.814318872353118],
-        [637.4679730696398, 127.55374205501823, 36.286377447062364],
-        [2.2047681015326277, 31.218033061227334, 27.857908527655677],
-        [73.4922700510876, 1040.6011020409114, 928.596950921856],
-        [46.79602079759552, 7.215187943800262, 2.1664217462458804],
-        [935.9204159519105, 144.30375887600525, 43.328434924917616],
-        [2.2998617834782267, 31.167227926438414, 27.776289194444438],
-        [76.66205944927422, 1038.9075975479473, 925.8763064814813],
+        [31.60177482, 6.28906975, 3.58335581],
+        [632.03549634, 125.78139505, 71.66711623],
+        [2.27843869, 31.55401986, 28.05923971],
+        [75.94795617, 1051.80066185, 935.30799022],
+        [31.87339866, 6.3776871, 1.81431887],
+        [637.46797317, 127.55374206, 36.28637745],
+        [2.20476856, 31.21803306, 27.85790853],
+        [73.49228524, 1040.60110204, 928.59695092],
+        [46.7960208, 7.21518794, 2.16642175],
+        [935.92041595, 144.30375888, 43.32843492],
+        [2.29986192, 31.16722793, 27.77628919],
+        [76.66206408, 1038.90759755, 925.87630648],
         [True, False, False]], dtype=object)
     tol = 1e-8
     assert np.allclose(expected_outputs_array[:-1, :].astype(float),
@@ -120,14 +123,20 @@ def test_save_all_outputs_calculate_perez():
     args = (arguments, df_inputs_clearday.iloc[:idx_subset], save_segments)
 
     # Run the serial calculation
-    _, _, _, df_outputs_segments_serial, _ = (
+    df_registries_serial, _ = (
         calculate_radiosities_serially_perez(args))
 
-    _, _, _, df_outputs_segments_parallel, _ = (
+    df_registries_parallel, _ = (
         calculate_radiosities_parallel_perez(
             arguments, df_inputs_clearday.iloc[:idx_subset],
             save_segments=save_segments
         ))
+
+    # Format the outputs
+    df_outputs_segments_serial = get_pvrow_segment_outputs(
+        df_registries_serial, values=['qinc'], include_shading=False)
+    df_outputs_segments_parallel = get_pvrow_segment_outputs(
+        df_registries_parallel, values=['qinc'], include_shading=False)
 
     # Load files with expected outputs
     expected_ipoa_dict_qinc = np.array([
@@ -140,11 +149,50 @@ def test_save_all_outputs_calculate_perez():
     rtol = 1e-7
     atol = 0
     assert np.allclose(expected_ipoa_dict_qinc,
-                       df_outputs_segments_serial.loc[:, idx_slice['qinc', :]]
-                       .values,
+                       df_outputs_segments_serial.values,
                        atol=atol, rtol=rtol)
     assert np.allclose(expected_ipoa_dict_qinc,
-                       df_outputs_segments_parallel.loc[:,
-                                                        idx_slice['qinc', :]]
-                       .values,
+                       df_outputs_segments_parallel.values,
                        atol=atol, rtol=rtol)
+
+
+def test_get_average_pvrow_outputs(df_registries, df_outputs):
+    """ Test that obtaining the correct format, using outputs from v011 """
+
+    calc_df_outputs = get_average_pvrow_outputs(df_registries)
+
+    tol = 1e-8
+    # Compare numerical values
+    assert np.allclose(df_outputs.iloc[:, 1:].values,
+                       calc_df_outputs.iloc[:, 1:].values,
+                       atol=0, rtol=tol)
+    # Compare bool on shading
+    assert np.array_equal(df_outputs.iloc[:, 0].values,
+                          calc_df_outputs.iloc[:, 0].values)
+
+
+def test_get_average_pvrow_segments(df_registries, df_segments):
+    """ Test that obtaining the correct format, using outputs from v011 """
+
+    calc_df_segments = get_pvrow_segment_outputs(df_registries)
+
+    # Get only numerical values and levels used by df_segments
+    df_calc_num = (calc_df_segments
+                   .select_dtypes(include=[np.number]))
+    cols_calcs = df_calc_num.columns.droplevel(
+        level=['pvrow_index', 'surface_side'])
+    df_calc_num.columns = cols_calcs
+
+    # Get col ordering of expected df_segments
+    segment_index = df_segments.columns.get_level_values(
+        'segment_index').astype(int)
+    terms = df_segments.columns.get_level_values('irradiance_term')
+    ordered_index = zip(segment_index, terms)
+    # Re-order cols of calculated df segments
+    df_calc_num = df_calc_num.loc[:, ordered_index].fillna(0.)
+    # Compare arrays
+    tol = 1e-8
+    assert np.allclose(
+        df_segments.values,
+        df_calc_num.values,
+        atol=0, rtol=tol)

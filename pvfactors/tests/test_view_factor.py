@@ -5,7 +5,8 @@ Test the calculation of the view factors
 """
 
 from pvfactors.pvarray import Array
-from pvfactors.tools import calculate_radiosities_serially_perez
+from pvfactors.tools import (calculate_radiosities_serially_perez,
+                             get_average_pvrow_outputs)
 import numpy as np
 import pandas as pd
 import os
@@ -144,7 +145,8 @@ def test_negativevf_and_flatcasenoon():
         'UTC').tz_convert('US/Arizona')
 
     args = (pvarray_parameters, df_inputs)
-    df_outputs, _, _, _, _ = calculate_radiosities_serially_perez(args)
+    df_registries, _ = calculate_radiosities_serially_perez(args)
+    df_outputs = get_average_pvrow_outputs(df_registries)
 
     vf_ipoa_front = df_outputs.loc[:, IDX_SLICE[1, 'front', 'qinc']]
     vf_ipoa_back = df_outputs.loc[:, IDX_SLICE[1, 'back', 'qinc']]
@@ -186,7 +188,9 @@ def test_back_surface_luminance():
         'UTC').tz_convert('US/Arizona')
 
     args = (pvarray_parameters, df_inputs)
-    df_outputs, _, _, _, _ = calculate_radiosities_serially_perez(args)
+    df_registries, _ = calculate_radiosities_serially_perez(args)
+
+    df_outputs = get_average_pvrow_outputs(df_registries)
 
     vf_ipoa_front = df_outputs.loc[:, IDX_SLICE[1, 'front', 'qinc']]
     vf_ipoa_back = df_outputs.loc[:, IDX_SLICE[1, 'back', 'qinc']]

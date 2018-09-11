@@ -51,7 +51,7 @@ def test_plotting():
     is_ci = os.environ.get('CI', False)
     if not is_ci:
         import matplotlib.pyplot as plt
-        from pvfactors.tools import plot_line_registry
+        from pvfactors.tools import plot_pvarray
         # Create array where sun vector is in the direction of the modules
         arguments = {
             'n_pvrows': 3,
@@ -65,7 +65,7 @@ def test_plotting():
         }
         array = Array(**arguments)
         f, ax = plt.subplots(figsize=(10, 5))
-        _ = plot_line_registry(ax, array)
+        _ = plot_pvarray(ax, array)
 
         # Test with interrow forward shading
         arguments = {
@@ -80,7 +80,7 @@ def test_plotting():
         }
         array = Array(**arguments)
         f, ax = plt.subplots()
-        _ = plot_line_registry(ax, array)
+        _ = plot_pvarray(ax, array)
 
         # Test with interrow backward shading
         arguments = {
@@ -95,7 +95,7 @@ def test_plotting():
         }
         array = Array(**arguments)
         f, ax = plt.subplots()
-        _ = plot_line_registry(ax, array)
+        _ = plot_pvarray(ax, array)
 
     else:
         print("Not running 'test_plotting' in CI")
@@ -144,9 +144,9 @@ def test_interrow_shading():
     }
     array = Array(**arguments)
     # There should be 4 pvrows with direct shading
-    assert (array.line_registry.loc[
-        (array.line_registry.line_type == 'pvrow')
-        & array.line_registry.shaded]
+    assert (array.surface_registry.loc[
+        (array.surface_registry.line_type == 'pvrow')
+        & array.surface_registry.shaded]
         .shape[0] == 4)
 
     # Backward direct shading of the pvrows (sun in the back of the modules)
@@ -162,9 +162,9 @@ def test_interrow_shading():
     }
     array = Array(**arguments)
     # There should still be 4 pvrows with direct shading
-    assert (array.line_registry.loc[
-        (array.line_registry.line_type == 'pvrow')
-        & array.line_registry.shaded]
+    assert (array.surface_registry.loc[
+        (array.surface_registry.line_type == 'pvrow')
+        & array.surface_registry.shaded]
         .shape[0] == 4)
 
     print("Done.")

@@ -97,15 +97,18 @@ def test_split_pvrow_geomtry():
         line_type='pvrow',
         shaded=True)
     _ = registry.pvgeometry.add([line_pvarray])
+    surface_side = 'front'
+    registry.loc[:, 'surface_side'] = surface_side
+    registry.loc[:, 'pvrow_index'] = 0.
 
     linestring_shadow = LineString([Point(0, 2), Point(2, 0)])
 
     # Split pvrow using shadow linestring
     registry.pvgeometry.split_pvrow_geometry(0, linestring_shadow,
-                                             Point(2, 2))
+                                             Point(2, 2), surface_side)
 
-    assert registry.geometry.values[0] == LineString([(1, 1), (2, 2)])
-    assert registry.geometry.values[1] == LineString([(0, 0), (1, 1)])
+    assert registry.geometry.values[1] == LineString([(1, 1), (2, 2)])
+    assert registry.geometry.values[0] == LineString([(0, 0), (1, 1)])
 
 
 def test_cut_pvrow_geometry():

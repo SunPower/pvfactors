@@ -10,6 +10,7 @@ from pvfactors import (logging, PVFactorsError)
 from pvfactors.pvarray import Array
 from multiprocessing import Pool, cpu_count
 import time
+from copy import deepcopy
 
 DISTANCE_TOLERANCE = 1e-8
 
@@ -28,54 +29,14 @@ COLOR_dic = {
     'ground_illum': '#FFBB33'
 }
 
+COLS_TO_SAVE = ['q0', 'qinc', 'circumsolar_term', 'horizon_term',
+                'direct_term', 'irradiance_term', 'isotropic_term',
+                'reflection_term', 'horizon_band_shading_pct']
 
-# Plot the array geometries
-def plot_line_registry(ax, array, line_types_selected=None):
-    """
-    Plot a :class:`pvarray.Array` object's shapely geometries based on its
-    :attr:`pvarray.Array.line_registry`.
-
-    :param ax: :class:`matplotlib.axes.Axes` object to use for the plot
-    :param array: :class:`pvarray.Array` object to plot
-    :param list line_types_selected: parameter used to select a subset of
-        'line_type' to plot; e.g. 'pvrow' or 'ground'
-    :return: None; ``ax`` is updated
-    """
-    line_registry = array.line_registry.copy()
-    line_registry['color'] = (line_registry.line_type.values + '_'
-                              + np.where(line_registry.shaded.values,
-                                         'shaded', 'illum'))
-    # TODO: distance may not exist
-    distance = array.pvrow_distance
-    height = array.pvrow_height
-    n_pvrows = array.n_pvrows
-    if line_types_selected:
-        for line_type in line_types_selected:
-            line_reg_selected = line_registry.loc[line_registry.line_type
-                                                  == line_type, :]
-            for index, row in line_reg_selected.iterrows():
-                LOGGER.debug("Plotting %s", row['line_type'])
-                plot_coords(ax, row['geometry'])
-                plot_bounds(ax, row['geometry'])
-                plot_line(ax, row['geometry'], row['style'],
-                          row['shading_type'])
-    else:
-        for index, row in line_registry.iterrows():
-            LOGGER.debug("Plotting %s", row['line_type'])
-            plot_coords(ax, row['geometry'])
-            plot_bounds(ax, row['geometry'])
-            plot_line(ax, row['geometry'], row['style'], row['color'])
-
-    ax.axis('equal')
-    ax.set_xlim(- 0.5 * distance, (n_pvrows - 0.5) * distance)
-    ax.set_ylim(-height, 2 * height)
-    ax.set_title("PV Array", fontsize=20)
-
-    ax.set_xlabel("x [m]", fontsize=20)
-    ax.set_ylabel("y [m]", fontsize=20)
+idx_slice = pd.IndexSlice
 
 
-def plot_surface_registry(ax, array, line_types_selected=None):
+def plot_pvarray(ax, pvarray, line_types_selected=None, fontsize=20):
     """
     Plot a :class:`pvarray.Array` object's shapely geometries based on its
     :attr:`pvarray.Array.surface_registry`. The difference with
@@ -83,24 +44,47 @@ def plot_surface_registry(ax, array, line_types_selected=None):
     differences between PV row sides, the discretized elements, etc.
 
     :param ax: :class:`matplotlib.axes.Axes` object to use for the plot
-    :param array: :class:`pvarray.Array` object to plot
+    :param pvarray: :class:`pvarray.Array` object to plot
     :param list line_types_selected: parameter used to select a subset of
         'line_type' to plot; e.g. 'pvrow' or 'ground'
     :return: None (``ax`` is updated)
     """
+
     # FIXME: repeating code from plot_line_registry
-    surface_registry = array.surface_registry.copy()
-    surface_registry.loc[:, 'color'] = (
-        surface_registry.line_type.values + '_'
-        + np.where(surface_registry.shaded.values, 'shaded', 'illum'))
+    surface_registry = pvarray.surface_registry.copy()
+    plot_array_from_registry(ax, surface_registry,
+                             line_types_selected=line_types_selected)
+
+    # Plot details
+    distance = pvarray.pvrow_distance
+    height = pvarray.pvrow_height
+    n_pvrows = pvarray.n_pvrows
+    ax.set_xlim(- 0.5 * distance, (n_pvrows - 0.5) * distance)
+    ax.set_ylim(-height, 2 * height)
+    ax.set_title("PV Array", fontsize=fontsize)
+
+
+def plot_array_from_registry(ax, registry, line_types_selected=None,
+                             fontsize=20):
+    """
+    Plot a 2D PV array geometry based using a registry input.
+
+    :param matplotlib.axes.Axes ax: axes to use for the plot
+    :param pd.DataFrame registry: :class:`pvarray.Array` object to plot
+    :param list line_types_selected: parameter used to select a subset of
+        'line_type' to plot; e.g. 'pvrow' or 'ground'
+    :return: None (``ax`` is updated)
+    """
+
+    registry = registry.copy()
+    registry.loc[:, 'color'] = (
+        registry.line_type.values + '_'
+        + np.where(registry.shaded.values, 'shaded', 'illum'))
     # TODO: distance may not exist
-    distance = array.pvrow_distance
-    height = array.pvrow_height
-    n_pvrows = array.n_pvrows
     if line_types_selected:
         for line_type in line_types_selected:
-            surface_reg_selected = surface_registry.loc[
-                surface_registry.line_type == line_type, :]
+            surface_reg_selected = registry.loc[
+                registry.line_type == line_type, :]
             for index, row in surface_reg_selected.iterrows():
                 LOGGER.debug("Plotting %s", row['line_type'])
                 plot_coords(ax, row['geometry'])
@@ -108,22 +92,17 @@ def plot_surface_registry(ax, array, line_types_selected=None):
                 plot_line(ax, row['geometry'], row['style'],
                           row['shading_type'])
     else:
-        for index, row in surface_registry.iterrows():
+        for index, row in registry.iterrows():
             LOGGER.debug("Plotting %s", row['line_type'])
             plot_coords(ax, row['geometry'])
             plot_bounds(ax, row['geometry'])
             plot_line(ax, row['geometry'], row['style'], row['color'])
 
     ax.axis('equal')
-    ax.set_xlim(- 0.5 * distance, (n_pvrows - 0.5) * distance)
-    ax.set_ylim(-height, 2 * height)
-    ax.set_title("PV Array", fontsize=20)
-
-    ax.set_xlabel("x [m]", fontsize=20)
-    ax.set_ylabel("y [m]", fontsize=20)
+    ax.set_xlabel("x [m]", fontsize=fontsize)
+    ax.set_ylabel("y [m]", fontsize=fontsize)
 
 
-# Calculate luminance using pvlib functions and classes
 def perez_diffuse_luminance(df_inputs):
     """
     Function used to calculate the luminance and the view factor terms from the
@@ -378,52 +357,10 @@ def calculate_radiosities_serially_perez(args):
         df_inputs.loc[:, ['array_azimuth', 'array_tilt']]
     )
 
-    # Create index df_outputs
-    cols = ['q0', 'qinc', 'circumsolar_term', 'horizon_term',
-            'direct_term', 'irradiance_term', 'isotropic_term',
-            'reflection_term', 'horizon_band_shading_pct']
-    iterables = [
-        range(array.n_pvrows),
-        ['front', 'back'],
-        cols
-    ]
-    multiindex = pd.MultiIndex.from_product(iterables,
-                                            names=['pvrow', 'side', 'term'])
-
-    # Initialize df_outputs
-    df_outputs = pd.DataFrame(np.nan, columns=df_inputs_perez.index,
-                              index=multiindex)
-    df_outputs.sort_index(inplace=True)
-    df_outputs.loc['array_is_shaded', :] = np.nan
-
     # We want to save the whole registry for each timestamp
     list_registries = []
 
-    # Initialize df_outputs_segments
-    if save_segments is not None:
-        n_cols = len(array.pvrows[save_segments[0]].cut_points)
-        cols_segments = range(n_cols + 1)
-        irradiance_terms_segments = [
-            'qinc', 'direct_term', 'circumsolar_term', 'horizon_term',
-            'isotropic_term', 'reflection_term', 'circumsolar_shading_pct',
-            'horizon_band_shading_pct'
-        ]
-        iterables_segments = [
-            irradiance_terms_segments,
-            cols_segments
-        ]
-        multiindex_segments = pd.MultiIndex.from_product(
-            iterables_segments, names=['irradiance_term', 'segment_index'])
-        df_outputs_segments = pd.DataFrame(np.nan,
-                                           columns=df_inputs_perez.index,
-                                           index=multiindex_segments)
-        df_outputs_segments.sort_index(inplace=True)
-        df_outputs_segments = df_outputs_segments.transpose()
-    else:
-        df_outputs_segments = None
-
-    idx_slice = pd.IndexSlice
-
+    # Use for printing progress
     n = df_inputs_perez.shape[0]
     i = 1
 
@@ -441,76 +378,18 @@ def calculate_radiosities_serially_perez(args):
                                                   row['poa_horizon'],
                                                   row['poa_circumsolar'])
 
-                # TODO: this will only work if there is no shading on the
-                # surfaces
-                # Format data to save all the surfaces for a pvrow
-                if save_segments is not None:
-                    # Select the surface of the pv row with the segments and the
-                    # right columns
-                    df_pvrow = array.surface_registry.loc[
-                        (array.surface_registry.pvrow_index == save_segments[0])
-                        & (array.surface_registry.surface_side
-                           == save_segments[1]),
-                        irradiance_terms_segments
-                        + ['shaded']
-                    ]
-                    # Check that no segment has direct shading before saving
-                    # results
-                    if df_pvrow.shaded.sum() == 0:
-                        # Add the data to the output variable by looping over
-                        # irradiance terms
-                        for irradiance_term in irradiance_terms_segments:
-                            df_outputs_segments.loc[
-                                idx, idx_slice[irradiance_term, :]] = (
-                                df_pvrow[irradiance_term].values
-                            )
-
-                # Format data to save averages for all pvrows and sides
-                array.surface_registry.loc[:, cols] = (
-                    array.surface_registry.loc[:, cols].apply(
-                        lambda x: x * array.surface_registry['area'], axis=0)
-                )
-                df_summed = array.surface_registry.groupby(
-                    ['pvrow_index', 'surface_side']).sum()
-                df_avg_irradiance = (
-                    df_summed.div(df_summed['area'], axis=0).loc[
-                        idx_slice[:, :], cols].sort_index().stack())
-
-                # # Assign values to df_outputs
-                df_outputs.loc[idx_slice[:, :, cols], idx] = (
-                    df_avg_irradiance.loc[idx_slice[:, :, cols]]
-                )
-
-                df_outputs.loc['array_is_shaded', idx] = (
-                    array.has_direct_shading
-                )
-
                 # Save the whole registry
-                registry = array.surface_registry
+                registry = deepcopy(array.surface_registry)
                 registry['timestamps'] = idx
                 list_registries.append(registry)
 
         except Exception as err:
             LOGGER.debug("Unexpected error: {0}".format(err))
 
+        # Printing progress
         print_progress(i, n, prefix='Progress:', suffix='Complete',
                        bar_length=50)
         i += 1
-
-    try:
-        bifacial_gains = (df_outputs.loc[
-                          idx_slice[:, 'back', 'qinc'], :].values
-                          / df_outputs.loc[
-            idx_slice[:, 'front', 'qinc'], :].values)
-        df_bifacial_gain = pd.DataFrame(bifacial_gains.T,
-                                        index=df_inputs_perez.index,
-                                        columns=range(array.n_pvrows))
-    except Exception as err:
-        LOGGER.warning("Error in calculation of bifacial gain %s" % err)
-        df_bifacial_gain = pd.DataFrame(
-            np.nan * np.ones((len(df_inputs.index), array.n_pvrows)),
-            index=df_inputs.index,
-            columns=range(array.n_pvrows))
 
     # Save all the registries into 1 output
     if list_registries:
@@ -518,8 +397,7 @@ def calculate_radiosities_serially_perez(args):
     else:
         df_registries = None
 
-    return (df_outputs.transpose(), df_bifacial_gain, df_inputs_perez,
-            df_outputs_segments, df_registries)
+    return df_registries, df_inputs_perez
 
 
 def calculate_radiosities_parallel_perez(array_parameters, df_inputs,
@@ -634,3 +512,92 @@ def print_progress(iteration, total, prefix='', suffix='', decimals=1,
     if iteration == total:
         sys.stdout.write('\n')
         sys.stdout.flush()
+
+
+def get_average_pvrow_outputs(df_registries, values=COLS_TO_SAVE):
+    """ Calculate surface side irradiance averages for the pvrows """
+
+    weight_col = ['area']
+    shade_col = ['shaded']
+    indexes = ['timestamps', 'pvrow_index', 'surface_side']
+
+    # Format registry to get averaged outputs for each surface type
+    df_outputs = (
+        deepcopy(df_registries)
+        .query('line_type == "pvrow"')
+        .assign(pvrow_index=lambda x: x['pvrow_index'].astype(int))
+        .loc[:, values + indexes + weight_col + shade_col]
+        # Calculate weighted averages: make sure to close the col value in lambdas
+        .assign(**{col: lambda x, y=col: x[y] * x[weight_col[0]]
+                   for col in values})
+        .assign(shaded=lambda x: pd.to_numeric(x.shaded))
+        .groupby(indexes)
+        .sum()
+        .assign(**{col: lambda x, y=col: x[y] / x[weight_col[0]]
+                   for col in values})
+        # summed up bool values, so there is shading if the shaded col > 0
+        .assign(**{shade_col[0]: lambda x: x[shade_col[0]] > 0})
+        # Now pivot data to the right format
+        .reset_index()
+        .melt(id_vars=indexes + shade_col, value_vars=values, var_name='term')
+        .pivot_table(index=['timestamps'] + shade_col,
+                     columns=['pvrow_index', 'surface_side', 'term'],
+                     values='value')
+        # Get shading as a column
+        .reset_index(level=1)
+    )
+
+    return df_outputs
+
+
+def get_bifacial_gain_outputs(df_outputs):
+    """ Calculate irradiance bifacial gain for all pvrows """
+    pass
+
+
+def get_pvrow_segment_outputs(df_registries, values=COLS_TO_SAVE,
+                              include_shading=True):
+    """ Get only pvrow segment outputs """
+
+    weight_col = ['area']
+    shade_col = ['shaded']
+    indexes = ['timestamps', 'pvrow_index', 'surface_side', 'pvrow_segment_index']
+    if include_shading:
+        final_cols = values + shade_col
+    else:
+        final_cols = values
+
+    # Format registry to get averaged outputs for each surface type
+    df_segments = (
+        deepcopy(df_registries)
+        .loc[~ np.isnan(df_registries.pvrow_segment_index).values,
+             values + indexes + weight_col + shade_col]
+        .assign(pvrow_segment_index=lambda x: x['pvrow_segment_index'].astype(int),
+                pvrow_index=lambda x: x['pvrow_index'].astype(int),
+                shaded=lambda x: pd.to_numeric(x.shaded))
+        # Calculate weighted averages: make sure to close the col value in lambdas
+        # Include shaded and non shaded segments
+        .assign(**{col: lambda x, y=col: x[y] * x[weight_col[0]]
+                   for col in values})
+        .groupby(indexes)
+        .sum()
+        .assign(**{col: lambda x, y=col: x[y] / x[weight_col[0]]
+                   for col in values})
+        # summed up bool values, so there is shading if the shaded col > 0
+        .assign(**{shade_col[0]: lambda x: x[shade_col[0]] > 0})
+        # Now pivot data to the right format
+        .reset_index()
+        .melt(id_vars=indexes, value_vars=final_cols, var_name='term')
+        .pivot_table(index=['timestamps'],
+                     columns=['pvrow_index', 'surface_side', 'pvrow_segment_index',
+                              'term'],
+                     values='value',
+                     # The following works because there is no actual aggregation happening
+                     aggfunc='first'  # necessary to keep 'shaded' bool values
+                     )
+    )
+    # Make sure numerical types are as expected
+    df_segments.loc[:, idx_slice[:, :, :, values]] = df_segments.loc[:, idx_slice[:, :, :, values]
+                                                                     ].astype(float)
+
+    return df_segments
