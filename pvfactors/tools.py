@@ -366,15 +366,10 @@ def calculate_radiosities_serially_perez(args):
         try:
             if ((isinstance(row['solar_zenith'], float))
                     & (row['solar_zenith'] <= 90.)):
-                array.calculate_radiosities_perez(row['solar_zenith'],
-                                                  row['solar_azimuth'],
-                                                  row['array_tilt'],
-                                                  row['array_azimuth'],
-                                                  row['dni'],
-                                                  row['luminance_isotropic'],
-                                                  row['luminance_circumsolar'],
-                                                  row['poa_horizon'],
-                                                  row['poa_circumsolar'])
+                array.calculate_radiosities_perez(
+                    row['solar_zenith'], row['solar_azimuth'], row['array_tilt'],
+                    row['array_azimuth'], row['dni'], row['luminance_isotropic'],
+                    row['luminance_circumsolar'], row['poa_horizon'], row['poa_circumsolar'])
 
                 # Save the whole registry
                 registry = deepcopy(array.surface_registry)
@@ -389,7 +384,7 @@ def calculate_radiosities_serially_perez(args):
                        bar_length=50)
         i += 1
 
-    # Save all the registries into 1 output
+    # Concatenate all surface registries into one dataframe
     if list_registries:
         df_registries = pd.concat(list_registries, axis=0, join='outer')
     else:
