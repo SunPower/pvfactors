@@ -24,3 +24,12 @@ def df_registries():
     fp = os.path.join(DIR_TEST_DATA, 'file_test_df_registries.csv')
     df_registries = pd.read_csv(fp, header=[0], parse_dates=['timestamps'])
     yield df_registries
+
+
+@pytest.fixture(scope='function')
+def df_segments():
+    """ Example of df_segments to be used for tests """
+    fp = os.path.join(DIR_TEST_DATA, 'file_test_df_segments.csv')
+    df_segments = pd.read_csv(fp, header=[0, 1], index_col=0)
+    df_segments.index = pd.to_datetime(df_segments.index)
+    yield df_segments

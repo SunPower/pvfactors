@@ -123,10 +123,10 @@ def test_save_all_outputs_calculate_perez():
     args = (arguments, df_inputs_clearday.iloc[:idx_subset], save_segments)
 
     # Run the serial calculation
-    _, _, _, df_outputs_segments_serial, _ = (
+    _, _, _, df_outputs_segments_serial, df_reg_serial = (
         calculate_radiosities_serially_perez(args))
 
-    _, _, _, df_outputs_segments_parallel, _ = (
+    _, _, _, df_outputs_segments_parallel, df_reg_parallel = (
         calculate_radiosities_parallel_perez(
             arguments, df_inputs_clearday.iloc[:idx_subset],
             save_segments=save_segments
@@ -154,7 +154,7 @@ def test_save_all_outputs_calculate_perez():
 
 
 def test_get_average_pvrow_outputs(df_registries, df_outputs):
-    """ Test that obtaining the correct format """
+    """ Test that obtaining the correct format, using outputs from v011 """
 
     calc_df_outputs = get_average_pvrow_outputs(df_registries)
 
@@ -166,3 +166,30 @@ def test_get_average_pvrow_outputs(df_registries, df_outputs):
     # Compare bool on shading
     assert np.array_equal(df_outputs.iloc[:, 0].values,
                           calc_df_outputs.iloc[:, 0].values)
+
+
+def test_get_average_pvrow_segments(df_registries, df_segments):
+    """ Test that obtaining the correct format, using outputs from v011 """
+
+    calc_df_segments = get_pvrow_segment_outputs(df_registries)
+
+    # Get only numerical values and levels used by df_segments
+    df_calc_num = (calc_df_segments
+                   .select_dtypes(include=[np.number]))
+    cols_calcs = df_calc_num.columns.droplevel(
+        level=['pvrow_index', 'surface_side'])
+    df_calc_num.columns = cols_calcs
+
+    # Get col ordering of expected df_segments
+    segment_index = df_segments.columns.get_level_values(
+        'segment_index').astype(int)
+    terms = df_segments.columns.get_level_values('irradiance_term')
+    ordered_index = zip(segment_index, terms)
+    # Re-order cols of calculated df segments
+    df_calc_num = df_calc_num.loc[:, ordered_index].fillna(0.)
+    # Compare arrays
+    tol = 1e-8
+    assert np.allclose(
+        df_segments.values,
+        df_calc_num.values,
+        atol=0, rtol=tol)

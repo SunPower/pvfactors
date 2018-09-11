@@ -43,7 +43,7 @@ def test_serial_calculation():
     df_inputs_simulation = df_inputs_simulation.iloc[0:idx_subset, :]
 
     # Run calculation in 1 process only
-    (df_outputs, df_bifacial, _, _, _) = (
+    (df_outputs, df_bifacial, _, df_segments, _) = (
         calculate_radiosities_serially_perez((arguments, df_inputs_simulation))
     )
 

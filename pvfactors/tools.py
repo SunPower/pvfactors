@@ -29,6 +29,12 @@ COLOR_dic = {
     'ground_illum': '#FFBB33'
 }
 
+COLS_TO_SAVE = ['q0', 'qinc', 'circumsolar_term', 'horizon_term',
+                'direct_term', 'irradiance_term', 'isotropic_term',
+                'reflection_term', 'horizon_band_shading_pct']
+
+idx_slice = pd.IndexSlice
+
 
 def plot_pvarray(ax, pvarray, line_types_selected=None, fontsize=20):
     """
@@ -609,12 +615,9 @@ def print_progress(iteration, total, prefix='', suffix='', decimals=1,
         sys.stdout.flush()
 
 
-def get_average_pvrow_outputs(df_registries):
+def get_average_pvrow_outputs(df_registries, values=COLS_TO_SAVE):
     """ Calculate surface side irradiance averages for the pvrows """
 
-    values = ['q0', 'qinc', 'circumsolar_term', 'horizon_term',
-              'direct_term', 'irradiance_term', 'isotropic_term',
-              'reflection_term', 'horizon_band_shading_pct']
     weight_col = ['area']
     shade_col = ['shaded']
     indexes = ['timestamps', 'pvrow_index', 'surface_side']
@@ -632,6 +635,7 @@ def get_average_pvrow_outputs(df_registries):
         .sum()
         .assign(**{col: lambda x, y=col: x[y] / x[weight_col[0]]
                    for col in values})
+        # summed up bool values, so there is shading if the shaded col > 0
         .assign(**{shade_col[0]: lambda x: x[shade_col[0]] > 0})
         # Now pivot data to the right format
         .reset_index()
@@ -646,11 +650,48 @@ def get_average_pvrow_outputs(df_registries):
     return df_outputs
 
 
-def get_bifacial_gain_outputs(df_registries):
+def get_bifacial_gain_outputs(df_outputs):
     """ Calculate irradiance bifacial gain for all pvrows """
     pass
 
 
-def get_pvrow_segment_outputs(df_registries):
+def get_pvrow_segment_outputs(df_registries, values=COLS_TO_SAVE):
     """ Get only pvrow segment outputs """
-    pass
+
+    weight_col = ['area']
+    shade_col = ['shaded']
+    indexes = ['timestamps', 'pvrow_index', 'surface_side', 'pvrow_segment_index']
+
+    # Format registry to get averaged outputs for each surface type
+    df_segments = (
+        deepcopy(df_registries)
+        .loc[~ np.isnan(df_registries.pvrow_segment_index).values,
+             values + indexes + weight_col + shade_col]
+        .assign(pvrow_segment_index=lambda x: x['pvrow_segment_index'].astype(int),
+                pvrow_index=lambda x: x['pvrow_index'].astype(int))
+        # Calculate weighted averages: make sure to close the col value in lambdas
+        # Include shaded and non shaded segments
+        .assign(**{col: lambda x, y=col: x[y] * x[weight_col[0]]
+                   for col in values})
+        .groupby(indexes)
+        .sum()
+        .assign(**{col: lambda x, y=col: x[y] / x[weight_col[0]]
+                   for col in values})
+        # summed up bool values, so there is shading if the shaded col > 0
+        .assign(**{shade_col[0]: lambda x: x[shade_col[0]] > 0})
+        # Now pivot data to the right format
+        .reset_index()
+        .melt(id_vars=indexes, value_vars=values + shade_col, var_name='term')
+        .pivot_table(index=['timestamps'],
+                     columns=['pvrow_index', 'surface_side', 'pvrow_segment_index',
+                              'term'],
+                     values='value',
+                     # The following works because there is no actual aggregation happening
+                     aggfunc='first'  # necessary to keep 'shaded' bool values
+                     )
+    )
+    # Make sure numerical types are as expected
+    df_segments.loc[:, idx_slice[:, :, :, values]] = df_segments.loc[:, idx_slice[:, :, :, values]
+                                                                     ].astype(float)
+
+    return df_segments
