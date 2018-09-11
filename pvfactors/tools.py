@@ -357,52 +357,10 @@ def calculate_radiosities_serially_perez(args):
         df_inputs.loc[:, ['array_azimuth', 'array_tilt']]
     )
 
-    # Create index df_outputs
-    cols = ['q0', 'qinc', 'circumsolar_term', 'horizon_term',
-            'direct_term', 'irradiance_term', 'isotropic_term',
-            'reflection_term', 'horizon_band_shading_pct']
-    iterables = [
-        range(array.n_pvrows),
-        ['front', 'back'],
-        cols
-    ]
-    multiindex = pd.MultiIndex.from_product(iterables,
-                                            names=['pvrow', 'side', 'term'])
-
-    # Initialize df_outputs
-    df_outputs = pd.DataFrame(np.nan, columns=df_inputs_perez.index,
-                              index=multiindex)
-    df_outputs.sort_index(inplace=True)
-    df_outputs.loc['array_is_shaded', :] = np.nan
-
     # We want to save the whole registry for each timestamp
     list_registries = []
 
-    # Initialize df_outputs_segments
-    if save_segments is not None:
-        n_cols = len(array.pvrows[save_segments[0]].cut_points)
-        cols_segments = range(n_cols + 1)
-        irradiance_terms_segments = [
-            'qinc', 'direct_term', 'circumsolar_term', 'horizon_term',
-            'isotropic_term', 'reflection_term', 'circumsolar_shading_pct',
-            'horizon_band_shading_pct'
-        ]
-        iterables_segments = [
-            irradiance_terms_segments,
-            cols_segments
-        ]
-        multiindex_segments = pd.MultiIndex.from_product(
-            iterables_segments, names=['irradiance_term', 'segment_index'])
-        df_outputs_segments = pd.DataFrame(np.nan,
-                                           columns=df_inputs_perez.index,
-                                           index=multiindex_segments)
-        df_outputs_segments.sort_index(inplace=True)
-        df_outputs_segments = df_outputs_segments.transpose()
-    else:
-        df_outputs_segments = None
-
-    idx_slice = pd.IndexSlice
-
+    # Use for printing progress
     n = df_inputs_perez.shape[0]
     i = 1
 
@@ -420,76 +378,18 @@ def calculate_radiosities_serially_perez(args):
                                                   row['poa_horizon'],
                                                   row['poa_circumsolar'])
 
-                # TODO: this will only work if there is no shading on the
-                # surfaces
-                # Format data to save all the surfaces for a pvrow
-                if save_segments is not None:
-                    # Select the surface of the pv row with the segments and the
-                    # right columns
-                    df_pvrow = array.surface_registry.loc[
-                        (array.surface_registry.pvrow_index == save_segments[0])
-                        & (array.surface_registry.surface_side
-                           == save_segments[1]),
-                        irradiance_terms_segments
-                        + ['shaded']
-                    ]
-                    # Check that no segment has direct shading before saving
-                    # results
-                    if df_pvrow.shaded.sum() == 0:
-                        # Add the data to the output variable by looping over
-                        # irradiance terms
-                        for irradiance_term in irradiance_terms_segments:
-                            df_outputs_segments.loc[
-                                idx, idx_slice[irradiance_term, :]] = (
-                                df_pvrow[irradiance_term].values
-                            )
-
                 # Save the whole registry
                 registry = deepcopy(array.surface_registry)
                 registry['timestamps'] = idx
                 list_registries.append(registry)
 
-                # Format data to save averages for all pvrows and sides
-                array.surface_registry.loc[:, cols] = (
-                    array.surface_registry.loc[:, cols].apply(
-                        lambda x: x * array.surface_registry['area'], axis=0)
-                )
-                df_summed = array.surface_registry.groupby(
-                    ['pvrow_index', 'surface_side']).sum()
-                df_avg_irradiance = (
-                    df_summed.div(df_summed['area'], axis=0).loc[
-                        idx_slice[:, :], cols].sort_index().stack())
-
-                # # Assign values to df_outputs
-                df_outputs.loc[idx_slice[:, :, cols], idx] = (
-                    df_avg_irradiance.loc[idx_slice[:, :, cols]]
-                )
-
-                df_outputs.loc['array_is_shaded', idx] = (
-                    array.has_direct_shading
-                )
-
         except Exception as err:
             LOGGER.debug("Unexpected error: {0}".format(err))
 
+        # Printing progress
         print_progress(i, n, prefix='Progress:', suffix='Complete',
                        bar_length=50)
         i += 1
-
-    try:
-        bifacial_gains = (df_outputs.loc[
-                          idx_slice[:, 'back', 'qinc'], :].values
-                          / df_outputs.loc[
-            idx_slice[:, 'front', 'qinc'], :].values)
-        df_bifacial_gain = pd.DataFrame(bifacial_gains.T,
-                                        index=df_inputs_perez.index,
-                                        columns=range(array.n_pvrows))
-    except Exception as err:
-        LOGGER.warning("Error in calculation of bifacial gain %s" % err)
-        df_bifacial_gain = pd.DataFrame(
-            np.nan * np.ones((len(df_inputs.index), array.n_pvrows)),
-            index=df_inputs.index,
-            columns=range(array.n_pvrows))
 
     # Save all the registries into 1 output
     if list_registries:
@@ -497,8 +397,7 @@ def calculate_radiosities_serially_perez(args):
     else:
         df_registries = None
 
-    return (df_outputs.transpose(), df_bifacial_gain, df_inputs_perez,
-            df_outputs_segments, df_registries)
+    return df_registries, df_inputs_perez
 
 
 def calculate_radiosities_parallel_perez(array_parameters, df_inputs,
@@ -655,12 +554,17 @@ def get_bifacial_gain_outputs(df_outputs):
     pass
 
 
-def get_pvrow_segment_outputs(df_registries, values=COLS_TO_SAVE):
+def get_pvrow_segment_outputs(df_registries, values=COLS_TO_SAVE,
+                              include_shading=True):
     """ Get only pvrow segment outputs """
 
     weight_col = ['area']
     shade_col = ['shaded']
     indexes = ['timestamps', 'pvrow_index', 'surface_side', 'pvrow_segment_index']
+    if include_shading:
+        final_cols = values + shade_col
+    else:
+        final_cols = values
 
     # Format registry to get averaged outputs for each surface type
     df_segments = (
@@ -681,7 +585,7 @@ def get_pvrow_segment_outputs(df_registries, values=COLS_TO_SAVE):
         .assign(**{shade_col[0]: lambda x: x[shade_col[0]] > 0})
         # Now pivot data to the right format
         .reset_index()
-        .melt(id_vars=indexes, value_vars=values + shade_col, var_name='term')
+        .melt(id_vars=indexes, value_vars=final_cols, var_name='term')
         .pivot_table(index=['timestamps'],
                      columns=['pvrow_index', 'surface_side', 'pvrow_segment_index',
                               'term'],

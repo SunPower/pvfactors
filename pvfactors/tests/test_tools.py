@@ -123,14 +123,20 @@ def test_save_all_outputs_calculate_perez():
     args = (arguments, df_inputs_clearday.iloc[:idx_subset], save_segments)
 
     # Run the serial calculation
-    _, _, _, df_outputs_segments_serial, df_reg_serial = (
+    df_registries_serial, _ = (
         calculate_radiosities_serially_perez(args))
 
-    _, _, _, df_outputs_segments_parallel, df_reg_parallel = (
+    df_registries_parallel, _ = (
         calculate_radiosities_parallel_perez(
             arguments, df_inputs_clearday.iloc[:idx_subset],
             save_segments=save_segments
         ))
+
+    # Format the outputs
+    df_outputs_segments_serial = get_pvrow_segment_outputs(
+        df_registries_serial, values=['qinc'], include_shading=False)
+    df_outputs_segments_parallel = get_pvrow_segment_outputs(
+        df_registries_parallel, values=['qinc'], include_shading=False)
 
     # Load files with expected outputs
     expected_ipoa_dict_qinc = np.array([
@@ -143,13 +149,10 @@ def test_save_all_outputs_calculate_perez():
     rtol = 1e-7
     atol = 0
     assert np.allclose(expected_ipoa_dict_qinc,
-                       df_outputs_segments_serial.loc[:, idx_slice['qinc', :]]
-                       .values,
+                       df_outputs_segments_serial.values,
                        atol=atol, rtol=rtol)
     assert np.allclose(expected_ipoa_dict_qinc,
-                       df_outputs_segments_parallel.loc[:,
-                                                        idx_slice['qinc', :]]
-                       .values,
+                       df_outputs_segments_parallel.values,
                        atol=atol, rtol=rtol)
 
 
