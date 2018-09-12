@@ -60,6 +60,10 @@ def test_consistent_qinc():
     # Run a calculation for the given configuration
     dni = 1e3
     dhi = 1e2
+    luminance_isotropic = dhi
+    luminance_circumsolar = 0.
+    poa_horizon = 0.
+    poa_circumsolar = 0.
 
     solar_zenith = 20.
     solar_azimuth = 180.
@@ -67,8 +71,10 @@ def test_consistent_qinc():
     array_tilt = 20.
     array_azimuth = 180.
 
-    array.calculate_radiosities_simple(solar_zenith, solar_azimuth, array_tilt,
-                                       array_azimuth, dni, dhi)
+    array.calculate_radiosities_perez(solar_zenith, solar_azimuth, array_tilt,
+                                      array_azimuth, dni, luminance_isotropic,
+                                      luminance_circumsolar, poa_horizon,
+                                      poa_circumsolar)
 
     # Compare to expected values
     expected_qinc = np.array([

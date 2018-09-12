@@ -55,7 +55,7 @@ def test_serial_calculation():
          array_tilt, array_azimuth, dni, dhi))
 
     # Format df_registries to get outputs
-    df_outputs = get_average_pvrow_outputs(df_registries)
+    df_outputs = get_average_pvrow_outputs(df_registries, include_shading=False)
 
     # Did the outputs remain consistent?
     test_results = values_are_consistent(df_outputs)
@@ -80,7 +80,6 @@ def values_are_consistent(df_outputs):
                                       parse_dates=['timestamps'])
     expected_df_outputs['origin'] = 'expected'
     df_outputs = (df_outputs.assign(timestamps=lambda x: x.index)
-                  .drop('shaded', axis=1)
                   .reset_index(drop=True)
                   .melt(id_vars=['timestamps']))
     df_outputs['origin'] = 'calculated'

@@ -207,102 +207,6 @@ def perez_diffuse_luminance(timestamps, array_tilt, array_azimuth,
     return df_inputs
 
 
-def calculate_radiosities_serially_simple(array, df_inputs):
-    """
-    /!\ DEPRECATED
-    ==============
-
-    Calculate the view factor radiosity and irradiance terms for multiple times.
-    The calculations will be sequential, and they will assume a completely
-    isotropic sky dome.
-
-    :param array: :class:`pvarray.Array` object already configured and
-        instantiated
-    :param df_inputs: :class:`pandas.DataFrame` with following columns:
-        ['solar_zenith', 'solar_azimuth', 'array_tilt', 'array_azimuth', 'dhi',
-        'dni']. Units are: ['deg', 'deg', 'deg', 'deg', 'W/m2', 'W/m2']
-    :return: ``df_outputs, df_bifacial_gain``; :class:`pandas.DataFrame` objects
-        where ``df_outputs`` contains *averaged* irradiance terms for all PV row
-        sides and at each time stamp; ``df_bifacial_gain`` contains the
-        calculation of back-surface over front-surface irradiance for all PV
-        rows and at each time stamp.
-    """
-    LOGGER.warning("``calculate_radiosities_serially_simple`` is deprecated")
-    # Create index df_outputs
-    iterables = [
-        range(array.n_pvrows),
-        ['front', 'back'],
-        ['q0', 'qinc']
-    ]
-    multiindex = pd.MultiIndex.from_product(iterables,
-                                            names=['pvrow', 'side', 'term'])
-
-    df_outputs = pd.DataFrame(np.nan, columns=df_inputs.index,
-                              index=multiindex)
-    df_outputs.sort_index(inplace=True)
-    df_outputs.loc['array_is_shaded', :] = np.nan
-    idx_slice = pd.IndexSlice
-
-    n = df_inputs.shape[0]
-    i = 1
-
-    for idx, row in df_inputs.iterrows():
-        try:
-
-            if ((isinstance(row['solar_zenith'], float))
-                    & (row['solar_zenith'] <= 90.)):
-                array.calculate_radiosities_simple(row['solar_zenith'],
-                                                   row['solar_azimuth'],
-                                                   row['array_tilt'],
-                                                   row['array_azimuth'],
-                                                   row['dni'], row['dhi'])
-
-                array.surface_registry.loc[:, 'q0'] = (
-                    array.surface_registry.loc[:, 'area']
-                    * array.surface_registry.q0)
-                array.surface_registry.loc[:, 'qinc'] = (
-                    array.surface_registry.loc[:, 'area']
-                    * array.surface_registry.qinc
-                )
-                df_summed = array.surface_registry.groupby(
-                    ['pvrow_index', 'surface_side']).sum()
-                df_avg_irradiance = df_summed.div(df_summed['area'],
-                                                  axis=0).loc[
-                    idx_slice[:, :], ['q0', 'qinc']].sort_index()
-                df_outputs.loc[idx_slice[:, :, 'q0'], idx] = (
-                    df_avg_irradiance.loc[
-                        idx_slice[:, :], 'q0'].values
-                )
-                df_outputs.loc[idx_slice[:, :, 'qinc'],
-                               idx] = df_avg_irradiance.loc[
-                    idx_slice[:, :], 'qinc'].values
-                df_outputs.loc['array_is_shaded', idx] = (
-                    array.has_direct_shading)
-        except Exception as err:
-            LOGGER.debug("Unexpected error: {0}".format(err))
-
-        print_progress(i, n, prefix='Progress:', suffix='Complete',
-                       bar_length=50)
-        i += 1
-
-    try:
-        bifacial_gains = (df_outputs.loc[
-                          idx_slice[:, 'back', 'qinc'], :].values
-                          / df_outputs.loc[
-            idx_slice[:, 'front', 'qinc'], :].values)
-        df_bifacial_gain = pd.DataFrame(bifacial_gains.T,
-                                        index=df_outputs.index,
-                                        columns=range(array.n_pvrows))
-    except Exception as err:
-        LOGGER.warning("Error in calculation of bifacial gain %s" % err)
-        df_bifacial_gain = pd.DataFrame(
-            np.nan * np.ones((len(df_inputs.index), array.n_pvrows)),
-            index=df_inputs.index,
-            columns=range(array.n_pvrows))
-
-    return df_outputs, df_bifacial_gain
-
-
 def calculate_custom_perez_transposition(timestamps, array_tilt, array_azimuth,
                                          solar_zenith, solar_azimuth, dni, dhi):
     """
@@ -553,12 +457,17 @@ def print_progress(iteration, total, prefix='', suffix='', decimals=1,
         sys.stdout.flush()
 
 
-def get_average_pvrow_outputs(df_registries, values=COLS_TO_SAVE):
+def get_average_pvrow_outputs(df_registries, values=COLS_TO_SAVE,
+                              include_shading=True):
     """ Calculate surface side irradiance averages for the pvrows """
 
     weight_col = ['area']
     shade_col = ['shaded']
     indexes = ['timestamps', 'pvrow_index', 'surface_side']
+    if include_shading:
+        final_cols = values + shade_col
+    else:
+        final_cols = values
 
     # Format registry to get averaged outputs for each surface type
     df_outputs = (
@@ -578,13 +487,17 @@ def get_average_pvrow_outputs(df_registries, values=COLS_TO_SAVE):
         .assign(**{shade_col[0]: lambda x: x[shade_col[0]] > 0})
         # Now pivot data to the right format
         .reset_index()
-        .melt(id_vars=indexes + shade_col, value_vars=values, var_name='term')
-        .pivot_table(index=['timestamps'] + shade_col,
+        .melt(id_vars=indexes, value_vars=final_cols, var_name='term')
+        .pivot_table(index=['timestamps'],
                      columns=['pvrow_index', 'surface_side', 'term'],
-                     values='value')
-        # Get shading as a column
-        .reset_index(level=1)
+                     values='value',
+                     # The following works because there is no actual aggregation happening
+                     aggfunc='first'  # necessary to keep 'shaded' bool values
+                     )
     )
+    # Make sure numerical types are as expected
+    df_outputs.loc[:, idx_slice[:, :, values]] = df_outputs.loc[:, idx_slice[:, :, values]
+                                                                ].astype(float)
 
     return df_outputs
 

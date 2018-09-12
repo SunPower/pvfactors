@@ -5,13 +5,13 @@ Test some of the functions in the tools module
 """
 import pytest
 from pvfactors.pvarray import Array
-from pvfactors.tools import (calculate_radiosities_serially_simple,
-                             perez_diffuse_luminance,
+from pvfactors.tools import (perez_diffuse_luminance,
                              calculate_radiosities_serially_perez,
                              calculate_radiosities_parallel_perez,
                              get_average_pvrow_outputs,
                              get_pvrow_segment_outputs,
-                             breakup_df_inputs)
+                             breakup_df_inputs,
+                             array_timeseries_calculate)
 import numpy as np
 import pandas as pd
 import os
@@ -27,10 +27,10 @@ def mock_array_timeseries_calculate(mocker):
     return mocker.patch('pvfactors.tools.array_timeseries_calculate')
 
 
-def test_calculate_radiosities_serially_simple():
+def test_array_calculate_timeseries():
     """
-    Check that the results of the radiosity calculation using the isotropic
-    diffuse sky stay consistent
+    Check that the timeseries results of the radiosity calculation using the isotropic
+    diffuse sky approach stay consistent
     """
     # Simple sky and array configuration
     df_inputs = pd.DataFrame(
@@ -48,11 +48,31 @@ def test_calculate_radiosities_serially_simple():
         'pvrow_width': 1.,
         'gcr': 0.3,
     }
+
     array = Array(**arguments)
 
-    # Calculate irradiance terms
-    df_outputs, df_bifacial_gains = (
-        calculate_radiosities_serially_simple(array, df_inputs))
+    # Break up inputs
+    (timestamps, array_tilt, array_azimuth,
+     solar_zenith, solar_azimuth, dni, dhi) = breakup_df_inputs(df_inputs)
+
+    # Fill in the missing pieces
+    luminance_isotropic = dhi
+    luminance_circumsolar = np.zeros(len(timestamps))
+    poa_horizon = np.zeros(len(timestamps))
+    poa_circumsolar = np.zeros(len(timestamps))
+
+    # # Calculate irradiance terms
+    # df_outputs, df_bifacial_g = (
+    #     calculate_radiosities_serially_simple(array, df_inputs))
+
+    # Run timeseries calculation
+    df_registries = array_timeseries_calculate(
+        arguments, timestamps, solar_zenith, solar_azimuth, array_tilt, array_azimuth,
+        dni, luminance_isotropic, luminance_circumsolar, poa_horizon, poa_circumsolar)
+
+    # Calculate surface averages for pvrows
+    df_outputs = get_average_pvrow_outputs(df_registries, values=['q0', 'qinc'],
+                                           include_shading=False)
 
     # Check that the outputs are as expected
     expected_outputs_array = np.array([
@@ -71,7 +91,7 @@ def test_calculate_radiosities_serially_simple():
         [True, False, False]], dtype=object)
     tol = 1e-8
     assert np.allclose(expected_outputs_array[:-1, :].astype(float),
-                       df_outputs.values[:-1, :].astype(float),
+                       df_outputs.values.T,
                        atol=tol, rtol=0, equal_nan=True)
 
 
@@ -202,16 +222,21 @@ def test_save_all_outputs_calculate_perez():
 def test_get_average_pvrow_outputs(df_registries, df_outputs):
     """ Test that obtaining the correct format, using outputs from v011 """
 
-    calc_df_outputs = get_average_pvrow_outputs(df_registries)
+    calc_df_outputs_num = get_average_pvrow_outputs(df_registries,
+                                                    include_shading=False)
+    calc_df_outputs_shading = get_average_pvrow_outputs(df_registries, values=[],
+                                                        include_shading=True)
 
     tol = 1e-8
     # Compare numerical values
     assert np.allclose(df_outputs.iloc[:, 1:].values,
-                       calc_df_outputs.iloc[:, 1:].values,
+                       calc_df_outputs_num.values,
                        atol=0, rtol=tol)
+
+    array_is_shaded = calc_df_outputs_shading.sum(axis=1).values > 0
     # Compare bool on shading
     assert np.array_equal(df_outputs.iloc[:, 0].values,
-                          calc_df_outputs.iloc[:, 0].values)
+                          array_is_shaded)
 
 
 def test_get_average_pvrow_segments(df_registries, df_segments):

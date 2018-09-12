@@ -511,39 +511,6 @@ class Array(ArrayBase):
         self.inv_reflectivity_matrix = np.diag(
             list(1. / self.surface_registry.reflectivity.values) + [1])
 
-    def calculate_radiosities_simple(self, solar_zenith, solar_azimuth,
-                                     array_tilt, array_azimuth, dni, dhi):
-        """
-        Solve linear system of equations to calculate radiosity terms based on
-        the specified inputs and assuming that the whole sky dome is isotropic
-        (no diffuse sky dome decomposition)
-
-        :param float solar_zenith: zenith angle of the sun [degrees]
-        :param float solar_azimuth: azimuth angle of the sun [degrees]
-        :param float array_tilt: tilt angle of the whole array. All PV rows must
-            have the same tilt angle [degrees]
-        :param float array_azimuth: azimuth angle of the whole array. All PV
-            rows must have the same azimuth angle [degrees]
-        :param float dni: direct normal irradiance [W/m2]
-        :param float dhi: diffuse horizontal irradiance [W/m2]
-        :return: None; updating :attr:`surface_registry`
-        """
-        # Update the array configuration
-        self.update_view_factors(solar_zenith, solar_azimuth, array_tilt,
-                                 array_azimuth)
-        self.update_irradiance_terms_simple(solar_zenith, solar_azimuth,
-                                            array_tilt, array_azimuth, dni, dhi)
-        self.update_reflectivity_matrix()
-
-        # Do calculation
-        a_mat = self.inv_reflectivity_matrix - self.vf_matrix
-        q0 = linalg.solve(a_mat, self.irradiance_terms)
-        qinc = np.dot(self.vf_matrix, q0) + self.irradiance_terms
-        # Assign to surfaces
-        self.surface_registry.loc[:, 'q0'] = q0[:-1]
-        self.surface_registry.loc[:, 'qinc'] = qinc[:-1]
-        self.calculate_sky_and_reflection_components()
-
     def calculate_radiosities_perez(
             self, solar_zenith, solar_azimuth, array_tilt, array_azimuth,
             dni, luminance_isotropic, luminance_circumsolar, poa_horizon,
