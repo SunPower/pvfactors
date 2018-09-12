@@ -21,10 +21,11 @@ COLOR_dic = {
 def plot_array_from_registry(ax, registry, line_types_selected=None,
                              fontsize=20):
     """
-    Plot a 2D PV array geometry based using a registry input.
+    Plot a 2D PV array using the ``shapely`` geometry objects located in
+    a :class:`pvarray.Array` surface registry.
 
     :param matplotlib.axes.Axes ax: axes to use for the plot
-    :param pd.DataFrame registry: :class:`pvarray.Array` object to plot
+    :param pd.DataFrame registry: registry containing geometries  to plot
     :param list line_types_selected: parameter used to select a subset of
         'line_type' to plot; e.g. 'pvrow' or 'ground'
     :return: None (``ax`` is updated)
@@ -59,13 +60,12 @@ def plot_array_from_registry(ax, registry, line_types_selected=None,
 
 def plot_pvarray(ax, pvarray, line_types_selected=None, fontsize=20):
     """
-    Plot a :class:`pvarray.Array` object's shapely geometries based on its
-    :attr:`pvarray.Array.surface_registry`. The difference with
-    :func:`tools.plot_line_registry` is that here the user will see the
-    differences between PV row sides, the discretized elements, etc.
+    Plot a 2D PV array from a :class:`pvarray.Array` using its
+    :attr:`pvarray.Array.surface_registry`.
 
     :param ax: :class:`matplotlib.axes.Axes` object to use for the plot
-    :param pvarray: :class:`pvarray.Array` object to plot
+    :param pvarray: object containing the surface registry as attribute
+    :type pvarray: :class:`pvarray.Array`
     :param list line_types_selected: parameter used to select a subset of
         'line_type' to plot; e.g. 'pvrow' or 'ground'
     :return: None (``ax`` is updated)

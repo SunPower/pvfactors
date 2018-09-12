@@ -24,49 +24,40 @@ idx_slice = pd.IndexSlice
 
 
 def array_timeseries_calculate(
-    arguments, timestamps, solar_zenith, solar_azimuth, array_tilt,
+    pvarray_parameters, timestamps, solar_zenith, solar_azimuth, array_tilt,
         array_azimuth, dni, luminance_isotropic, luminance_circumsolar,
         poa_horizon, poa_circumsolar):
     """
-    Calculate the view factor radiosity and irradiance terms for multiple times.
-    The calculations will be sequential, and they will assume a diffuse sky
-    dome as calculated in the Perez diffuse sky transposition model (from
-    ``pvlib-python`` implementation).
+    Calculate the view factor radiosity and irradiance terms for multiple
+    times.
+    The function inputs assume a diffuse sky dome as represented in the Perez
+    diffuse sky transposition model (from ``pvlib-python`` implementation).
 
-    :param args: tuple of at least two arguments: ``(arguments, df_inputs)``,
-        where ``arguments`` is a ``dict`` that contains the array parameters
-        used to instantiate a :class:`pvarray.Array` object, and ``df_inputs``
-        is a :class:`pandas.DataFrame` with the following columns:
-        ['solar_zenith', 'solar_azimuth', 'array_tilt', 'array_azimuth', 'dhi',
-        'dni'], and with the following units: ['deg', 'deg', 'deg', 'deg',
-        'W/m2', 'W/m2']. A possible 3rd argument for the tuple is
-        ``save_segments``, which is a ``tuple`` of two elements used to save
-        all the irradiance terms calculated for one side of a PV row; e.g.
-        ``(1, 'front')`` the first element is an ``int`` for the PV row index,
-        and the second element a ``str`` to specify the side of the PV row,
-        'front' or 'back'
-    :return: ``df_outputs, df_bifacial_gain, df_inputs_perez, ipoa_dict``;
-        :class:`pandas.DataFrame` objects and ``dict`` where ``df_outputs``
-        contains *averaged* irradiance terms for all PV row sides and at each
-        time stamp; ``df_bifacial_gain`` contains the calculation of
-        back-surface over front-surface irradiance for all PV rows and at each
-        time stamp; ``df_inputs_perez`` contains the intermediate input and
-        output values from the Perez model calculation in ``pvlib-python``;
-        ``ipoa_dict`` is not ``None`` only when the ``save_segments`` input is
-        specified, and it is otherwise a ``dict`` where the keys are all the
-        calculated irradiance terms' names, and the values are
-        :class:`pandas.DataFrame` objects containing the calculated values for
-        all the segments of the PV string side (it is a way of getting detailed
-        values instead of averages)
+    :param dict pvarray_parameters: parameters used to instantiate
+        ``pvarray.Array`` class
+    :param array-like timestamps: simulation timestamps
+    :param array-like solar_zenith: solar zenith angles
+    :param array-like solar_azimuth: solar azimuth angles
+    :param array-like array_tilt: pv module tilt angles
+    :param array-like array_azimuth: pv array azimuth angles
+    :param array-like dni: values for direct normal irradiance
+    :param array-like luminance_isotropic: luminance of the isotropic sky dome
+    :param array-like luminance_circumsolar: luminance of circumsolar area
+    :param array-like poa_horizon: POA irradiance horizon component
+    :param array-like poa_circumsolar: POA irradiance circumsolar component
+
+    :return: ``df_registries``.
+        Concatenated form of the ``pvarray.Array`` surface registries.
+    :rtype: :class:`pandas.DataFrame`
     """
     # Instantiate array
-    array = Array(**arguments)
+    array = Array(**pvarray_parameters)
     # We want to save the whole registry for each timestamp
     list_registries = []
     # Use for printing progress
     n = len(timestamps)
     i = 1
-    for idx, time in enumerate(timestamps):
+    for idx, ts in enumerate(timestamps):
         try:
             if ((isinstance(solar_zenith[idx], float))
                     & (solar_zenith[idx] <= 90.)):
@@ -74,11 +65,12 @@ def array_timeseries_calculate(
                 array.calculate_radiosities_perez(
                     solar_zenith[idx], solar_azimuth[idx], array_tilt[idx],
                     array_azimuth[idx], dni[idx], luminance_isotropic[idx],
-                    luminance_circumsolar[idx], poa_horizon[idx], poa_circumsolar[idx])
+                    luminance_circumsolar[idx], poa_horizon[idx],
+                    poa_circumsolar[idx])
 
                 # Save the whole registry
                 registry = deepcopy(array.surface_registry)
-                registry['timestamps'] = time
+                registry['timestamps'] = ts
                 list_registries.append(registry)
 
         except Exception as err:
@@ -104,17 +96,24 @@ def perez_diffuse_luminance(timestamps, array_tilt, array_azimuth,
     Function used to calculate the luminance and the view factor terms from the
     Perez diffuse light transposition model, as implemented in the
     ``pvlib-python`` library.
+    This function was custom made to allow the calculation of the circumsolar
+    component on the back surface as well. Otherwise, the ``pvlib``
+    implementation would ignore it.
 
-    :param df_inputs: class:`pandas.DataFrame` with following columns:
-        ['solar_zenith', 'solar_azimuth', 'array_tilt', 'array_azimuth', 'dhi',
-        'dni']. Units are: ['deg', 'deg', 'deg', 'deg', 'W/m2', 'W/m2']
-    :return: class:`pandas.DataFrame` with the following columns:
+    :param array-like timestamps: simulation timestamps
+    :param array-like array_tilt: pv module tilt angles
+    :param array-like array_azimuth: pv array azimuth angles
+    :param array-like solar_zenith: solar zenith angles
+    :param array-like solar_azimuth: solar azimuth angles
+    :param array-like dni: values for direct normal irradiance
+    :param array-like dhi: values for diffuse horizontal irradiance
+    :return: ``df_inputs``, dataframe with the following columns:
         ['solar_zenith', 'solar_azimuth', 'array_tilt', 'array_azimuth', 'dhi',
         'dni', 'vf_horizon', 'vf_circumsolar', 'vf_isotropic',
         'luminance_horizon', 'luminance_circumsolar', 'luminance_isotropic',
         'poa_isotropic', 'poa_circumsolar', 'poa_horizon', 'poa_total_diffuse']
+    :rtype: class:`pandas.DataFrame`
     """
-
     # Create a dataframe to help filtering on all arrays
     df_inputs = pd.DataFrame(
         {'array_tilt': array_tilt, 'array_azimuth': array_azimuth,
@@ -203,19 +202,26 @@ def perez_diffuse_luminance(timestamps, array_tilt, array_azimuth,
 
 
 def calculate_custom_perez_transposition(timestamps, array_tilt, array_azimuth,
-                                         solar_zenith, solar_azimuth, dni, dhi):
+                                         solar_zenith, solar_azimuth,
+                                         dni, dhi):
     """
-    Calculate custom perez transposition: some pre-processing is necessary in order
-    to get all the components even when the sun is hitting the pv row back surface
+    Calculate custom perez transposition: some pre-processing is necessary in
+    order to get the circumsolar component when the sun is hitting the back
+    surface as well.
 
-    :param pd.DatetimeIndex timestamps:
-    :param np.array array_tilt:
-    :param np.array array_azimuth:
-    :param np.array solar_zenith:
-    :param np.array solar_azimuth:
-    :param np.array dni:
-    :param np.array dhi:
-    :return: ``df_custom_perez``, pandas Dataframe
+    :param array-like timestamps: simulation timestamps
+    :param array-like array_tilt: pv module tilt angles
+    :param array-like array_azimuth: pv array azimuth angles
+    :param array-like solar_zenith: solar zenith angles
+    :param array-like solar_azimuth: solar azimuth angles
+    :param array-like dni: values for direct normal irradiance
+    :param array-like dhi: values for diffuse horizontal irradiance
+    :return: ``df_custom_perez``, dataframe with the following columns:
+        ['solar_zenith', 'solar_azimuth', 'array_tilt', 'array_azimuth', 'dhi',
+        'dni', 'vf_horizon', 'vf_circumsolar', 'vf_isotropic',
+        'luminance_horizon', 'luminance_circumsolar', 'luminance_isotropic',
+        'poa_isotropic', 'poa_circumsolar', 'poa_horizon', 'poa_total_diffuse']
+    :rtype: class:`pandas.DataFrame`
     """
     # Pre-process df_inputs to use the expected format of pvlib's perez model:
     # only positive tilt angles, and switching azimuth angles
@@ -234,13 +240,27 @@ def calculate_custom_perez_transposition(timestamps, array_tilt, array_azimuth,
 
 
 def calculate_radiosities_serially_perez(args):
-    """ Timeseries simulation with no parallellization, using Perez model """
+    """ Calculate timeseries results of simulation: run both custom Perez
+    diffuse light transposition calculations and ``pvarray.Array`` timeseries
+    calculation.
 
+    :param args: tuple of arguments used to run the timeseries calculation.
+        List in order: ``pvarray_parameters``, ``timestamps``,
+        ``solar_zenith``, ``solar_azimuth``, ``array_tilt``, ``array_azimuth``,
+        ``dni``, ``dhi``.
+        All 1-dimensional arrays.
+    :return: ``df_registries``, ``df_custom_perez``; dataframes containing
+        the concatenated and timestamped ``pvarray.Array.surface_registry``
+        values, and the custom Perez inputs used for it.
+    :rtype: both class:`pandas.DataFrame`
+
+    """
     # Get arguments
-    (arguments, timestamps, solar_zenith, solar_azimuth, array_tilt, array_azimuth,
-     dni, dhi) = args
+    (pvarray_parameters, timestamps, solar_zenith, solar_azimuth,
+     array_tilt, array_azimuth, dni, dhi) = args
 
-    # Run custom perez transposition: in order to get circumsolar on back surface too
+    # Run custom perez transposition: in order to get circumsolar on back
+    # surface too
     df_custom_perez = calculate_custom_perez_transposition(
         timestamps, array_tilt, array_azimuth, solar_zenith, solar_azimuth,
         dni, dhi)
@@ -253,33 +273,36 @@ def calculate_radiosities_serially_perez(args):
 
     # Run timeseries calculation
     df_registries = array_timeseries_calculate(
-        arguments, timestamps, solar_zenith, solar_azimuth, array_tilt, array_azimuth,
-        dni, luminance_isotropic, luminance_circumsolar, poa_horizon, poa_circumsolar)
+        pvarray_parameters, timestamps, solar_zenith, solar_azimuth,
+        array_tilt, array_azimuth, dni, luminance_isotropic,
+        luminance_circumsolar, poa_horizon, poa_circumsolar)
 
     return df_registries, df_custom_perez
 
 
 def calculate_radiosities_parallel_perez(
-        array_parameters, timestamps, solar_zenith, solar_azimuth,
+        pvarray_parameters, timestamps, solar_zenith, solar_azimuth,
         array_tilt, array_azimuth, dni, dhi, n_processes=None):
-    """
-    Calculate the view factor radiosity and irradiance terms for multiple times.
-    The calculations will be run in parallel on the different processors, and
-    they will assume a diffuse sky dome as calculated in the Perez diffuse
-    sky transposition model (from ``pvlib-python`` implementation).
-    This function uses :func:`tools.calculate_radiosities_serially_perez`
+    """ Calculate timeseries results of simulation in parallel:
+    run both custom Perez diffuse light transposition calculations and
+    ``pvarray.Array`` timeseries calculation.
 
-    :param dict array_parameters: contains the array parameters used to
-        instantiate a :class:`pvarray.Array` object
-    :param df_inputs: :class:`pandas.DataFrame` with the following columns:
-        ['solar_zenith', 'solar_azimuth', 'array_tilt', 'array_azimuth', 'dhi',
-        'dni'], and with the following units: ['deg', 'deg', 'deg', 'deg',
-        'W/m2', 'W/m2']
-    :param int n_processes: number of processes to use. Default value will be
-        the total number of processors on the machine
-    :return: concatenated outputs of
-        :func:`tools.calculate_radiosities_serially_perez` run and outputted in
-        the parallel processes
+    :param dict pvarray_parameters: parameters used to instantiate
+        ``pvarray.Array`` class
+    :param array-like timestamps: simulation timestamps
+    :param array-like solar_zenith: solar zenith angles
+    :param array-like solar_azimuth: solar azimuth angles
+    :param array-like array_tilt: pv module tilt angles
+    :param array-like array_azimuth: pv array azimuth angles
+    :param array-like dni: values for direct normal irradiance
+    :param array-like dhi: values for diffuse horizontal irradiance
+    :param int n_processes: (optional, default ``None`` = use all) number of
+        processes to use. Default value will be the total number of processors
+        on the machine.
+    :return: ``df_registries``, ``df_custom_perez``; dataframes containing
+        the concatenated and timestamped ``pvarray.Array.surface_registry``
+        values, and the custom Perez inputs used for it.
+    :rtype: both class:`pandas.DataFrame`
     """
 
     # Choose number of workers
@@ -293,14 +316,12 @@ def calculate_radiosities_parallel_perez(
          [timestamps, array_azimuth, array_tilt,
           solar_zenith, solar_azimuth, dni, dhi],
         [n_processes] * 7)
-    list_parameters = [array_parameters] * n_processes
+    list_parameters = [pvarray_parameters] * n_processes
     # Zip all the arguments together
     list_args = zip(*(list_parameters, list_timestamps, list_solar_zenith,
                       list_solar_azimuth, list_array_tilt, list_array_azimuth,
                       list_dni, list_dhi))
 
-    # import pdb
-    # pdb.set_trace()
     # Start multiprocessing
     pool = Pool(n_processes)
     start = time.time()
@@ -321,7 +342,19 @@ def calculate_radiosities_parallel_perez(
 
 def get_average_pvrow_outputs(df_registries, values=COLS_TO_SAVE,
                               include_shading=True):
-    """ Calculate surface side irradiance averages for the pvrows """
+    """ For each pvrow surface (front and back), calculate the weighted
+    average irradiance and shading values (weighted by length of surface).
+
+    :param df_registries: timestamped and concatenated :class:`pvarray.Array`
+        surface registries
+    :type df_registries: ``pandas.DataFrame``
+    :param list values: list of column names from the surface registries to
+        keep (optional, default=``COLS_TO_SAVE``)
+    :param bool include_shading: flag to decide whether to keep column
+        indicating if surface has direct shading or not
+    :return: ``df_outputs``, dataframe with averaged values and flags
+    :rtype: ``pandas.DataFrame``
+    """
 
     weight_col = ['area']
     shade_col = ['shaded']
@@ -337,7 +370,7 @@ def get_average_pvrow_outputs(df_registries, values=COLS_TO_SAVE,
         .query('line_type == "pvrow"')
         .assign(pvrow_index=lambda x: x['pvrow_index'].astype(int))
         .loc[:, values + indexes + weight_col + shade_col]
-        # Calculate weighted averages: make sure to close the col value in lambdas
+        # Weighted averages: make sure to close the col value in lambdas
         .assign(**{col: lambda x, y=col: x[y] * x[weight_col[0]]
                    for col in values})
         .assign(shaded=lambda x: pd.to_numeric(x.shaded))
@@ -353,29 +386,39 @@ def get_average_pvrow_outputs(df_registries, values=COLS_TO_SAVE,
         .pivot_table(index=['timestamps'],
                      columns=['pvrow_index', 'surface_side', 'term'],
                      values='value',
-                     # The following works because there is no actual aggregation happening
+                     # The following works because there is no actual
+                     # aggregation happening
                      aggfunc='first'  # necessary to keep 'shaded' bool values
                      )
     )
     # Make sure numerical types are as expected
-    df_outputs.loc[:, idx_slice[:, :, values]] = df_outputs.loc[:, idx_slice[:, :, values]
-                                                                ].astype(float)
+    df_outputs.loc[:, idx_slice[:, :, values]] = df_outputs.loc[
+        :, idx_slice[:, :, values]].astype(float)
 
     return df_outputs
 
 
-def get_bifacial_gain_outputs(df_outputs):
-    """ Calculate irradiance bifacial gain for all pvrows """
-    pass
-
-
 def get_pvrow_segment_outputs(df_registries, values=COLS_TO_SAVE,
                               include_shading=True):
-    """ Get only pvrow segment outputs """
+    """For each discretized segment of a pvrow surface (front and back),
+    calculate the weighted average irradiance and shading values
+    (weighted by length of surface).
+
+    :param df_registries: timestamped and concatenated :class:`pvarray.Array`
+        surface registries
+    :type df_registries: ``pandas.DataFrame``
+    :param list values: list of column names from the surface registries to
+        keep (optional, default=``COLS_TO_SAVE``)
+    :param bool include_shading: flag to decide whether to keep column
+        indicating if surface has direct shading or not
+    :return: ``df_segments``, dataframe with averaged values and flags
+    :rtype: ``pandas.DataFrame``
+    """
 
     weight_col = ['area']
     shade_col = ['shaded']
-    indexes = ['timestamps', 'pvrow_index', 'surface_side', 'pvrow_segment_index']
+    indexes = ['timestamps', 'pvrow_index', 'surface_side',
+               'pvrow_segment_index']
     if include_shading:
         final_cols = values + shade_col
     else:
@@ -386,10 +429,11 @@ def get_pvrow_segment_outputs(df_registries, values=COLS_TO_SAVE,
         deepcopy(df_registries)
         .loc[~ np.isnan(df_registries.pvrow_segment_index).values,
              values + indexes + weight_col + shade_col]
-        .assign(pvrow_segment_index=lambda x: x['pvrow_segment_index'].astype(int),
-                pvrow_index=lambda x: x['pvrow_index'].astype(int),
-                shaded=lambda x: pd.to_numeric(x.shaded))
-        # Calculate weighted averages: make sure to close the col value in lambdas
+        .assign(
+            pvrow_segment_index=lambda x: x['pvrow_segment_index'].astype(int),
+            pvrow_index=lambda x: x['pvrow_index'].astype(int),
+            shaded=lambda x: pd.to_numeric(x.shaded))
+        # Weighted averages: make sure to close the col value in lambdas
         # Include shaded and non shaded segments
         .assign(**{col: lambda x, y=col: x[y] * x[weight_col[0]]
                    for col in values})
@@ -403,25 +447,33 @@ def get_pvrow_segment_outputs(df_registries, values=COLS_TO_SAVE,
         .reset_index()
         .melt(id_vars=indexes, value_vars=final_cols, var_name='term')
         .pivot_table(index=['timestamps'],
-                     columns=['pvrow_index', 'surface_side', 'pvrow_segment_index',
-                              'term'],
+                     columns=['pvrow_index', 'surface_side',
+                              'pvrow_segment_index', 'term'],
                      values='value',
-                     # The following works because there is no actual aggregation happening
+                     # The following works because there is no actual
+                     # aggregation happening
                      aggfunc='first'  # necessary to keep 'shaded' bool values
                      )
     )
     # Make sure numerical types are as expected
-    df_segments.loc[:, idx_slice[:, :, :, values]] = df_segments.loc[:, idx_slice[:, :, :, values]
-                                                                     ].astype(float)
+    df_segments.loc[:, idx_slice[:, :, :, values]] = df_segments.loc[
+        :, idx_slice[:, :, :, values]].astype(float)
 
     return df_segments
 
 
 def breakup_df_inputs(df_inputs):
-    """
-    It is sometimes easier to provide a dataframe than a list of arrays:
+    """ It is sometimes easier to provide a dataframe than a list of arrays:
     this function does the job of breaking up the dataframe into a list of
-    arrays
+    expected 1-dim arrays
+
+    :param df_inputs: timestamp-indexed dataframe with following columns:
+        'array_azimuth', 'array_tilt', 'solar_zenith', 'solar_azimuth',
+        'dni', 'dhi'
+    :type df_inputs: ``pandas.DataFrame``
+    :return: ``timestamps``, ``array_tilt``, ``array_azimuth``,
+        ``solar_zenith``, ``solar_azimuth``, ``dni``, ``dhi``
+    :rtype: all 1-dim arrays
     """
     timestamps = pd.to_datetime(df_inputs.index)
     array_azimuth = df_inputs.array_azimuth.values
