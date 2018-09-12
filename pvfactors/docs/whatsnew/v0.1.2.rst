@@ -1,0 +1,15 @@
+.. _whatsnew_0120:
+
+v0.1.2 (September 12, 2018)
+===========================
+
+Major updates of simulation API and package organization, as well as documentation.
+
+* Refactor tools.py: return 1 output df in timeseries Perez (#13)
+* Simplify timeseries calculation API (#14)
+* Update docs because of simulation API changes (#15)
+
+Contributors
+------------
+
+* Marc Anoma
