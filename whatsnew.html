@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>What’s New &#8212; pvfactors 3.0.0 documentation</title>
+    <title>What’s New &#8212; pvfactors 0.1.2 documentation</title>
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript" src="_static/documentation_options.js"></script>
@@ -55,8 +55,16 @@
 <li class="toctree-l1"><a class="reference internal" href="theory/index.html">Theory</a></li>
 <li class="toctree-l1"><a class="reference internal" href="developer/index.html">Developer docs</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">What’s New</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#v0-1-0-may-14-2018">v0.1.0 (May 14, 2018)</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#v0-1-2-september-12-2018">v0.1.2 (September 12, 2018)</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#contributors">Contributors</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#v0-1-1-september-6-2018">v0.1.1 (September 6, 2018)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id1">Contributors</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#v0-1-0-may-14-2018">v0.1.0 (May 14, 2018)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id2">Contributors</a></li>
 </ul>
 </li>
 </ul>
@@ -92,6 +100,38 @@
   <div class="section" id="what-s-new">
 <h1>What’s New<a class="headerlink" href="#what-s-new" title="Permalink to this headline">¶</a></h1>
 <p>These are new features and improvements of note in each release.</p>
+<div class="section" id="v0-1-2-september-12-2018">
+<span id="whatsnew-0120"></span><h2>v0.1.2 (September 12, 2018)<a class="headerlink" href="#v0-1-2-september-12-2018" title="Permalink to this headline">¶</a></h2>
+<p>Major updates of simulation API and package organization, as well as documentation.</p>
+<ul class="simple">
+<li>Refactor tools.py: return 1 output df in timeseries Perez (#13)</li>
+<li>Simplify timeseries calculation API (#14)</li>
+<li>Update docs because of simulation API changes (#15)</li>
+</ul>
+<div class="section" id="contributors">
+<h3>Contributors<a class="headerlink" href="#contributors" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li>Marc Anoma</li>
+</ul>
+</div>
+</div>
+<div class="section" id="v0-1-1-september-6-2018">
+<span id="whatsnew-0110"></span><h2>v0.1.1 (September 6, 2018)<a class="headerlink" href="#v0-1-1-september-6-2018" title="Permalink to this headline">¶</a></h2>
+<p>Implementation of important package and model improvements.</p>
+<ul class="simple">
+<li>Migration to CircleCI 2.0 (#5)</li>
+<li>Removed dependency on geopandas (#3)</li>
+<li>Implementation of back horizon band shading (#7)</li>
+<li>Clean up and add Github features (#9)</li>
+<li>Output all the surface registries calculated for each timestamp in a Perez timeseries simulation (#10)</li>
+</ul>
+<div class="section" id="id1">
+<h3>Contributors<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li>Marc Anoma</li>
+</ul>
+</div>
+</div>
 <div class="section" id="v0-1-0-may-14-2018">
 <span id="whatsnew-0100"></span><h2>v0.1.0 (May 14, 2018)<a class="headerlink" href="#v0-1-0-may-14-2018" title="Permalink to this headline">¶</a></h2>
 <p>This is the first release of pvfactors.
@@ -109,8 +149,8 @@ calculation for the PV industry.</p>
 <li>Add continuous integration with CircleCI</li>
 <li>Add versioneer for “auto-versioning” of package</li>
 </ul>
-<div class="section" id="contributors">
-<h3>Contributors<a class="headerlink" href="#contributors" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id2">
+<h3>Contributors<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li>Marc Anoma</li>
 </ul>
