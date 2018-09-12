@@ -8,7 +8,7 @@ import math
 import logging
 
 LOGGER = logging.getLogger(__name__)
-LOGGER.setLevel(logging.DEBUG)
+LOGGER.setLevel(logging.INFO)
 
 # TODO: hard coding these values is not ideal
 MAX_X_GROUND = 1e2
@@ -237,7 +237,7 @@ def find_edge_point(b1_pvrow, b2_pvrow):
 
     # TODO: need to find a better way to deal with this case
     if np.abs(x_edge_point) > THRESHOLD_EDGE_POINT:
-        LOGGER.warning("find_edge_point: it looks like the tilt should be "
-                       "approximated with a flat case instead")
+        LOGGER.debug("find_edge_point: it looks like the tilt should be "
+                     "approximated with a flat case")
 
     return Point(x_edge_point, Y_GROUND)
