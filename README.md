@@ -231,7 +231,7 @@ df_avg_outputs
 </div>
 
 
-Plot pv array at a given time of the simulation:
+The user can also plot the pv array at a given time of the simulation:
 
 
 ```python

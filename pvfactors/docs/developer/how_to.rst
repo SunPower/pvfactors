@@ -22,13 +22,11 @@ Visualize PV array lines
 ------------------------
 
 | The user can easily visualize the array by plotting the ``shapely`` lines that it's comprised of.
-| The ``plot_line_registry`` and ``plot_surface_registry`` functions located in the tool box should be used in combination with the ``matplotlib`` package for visualization.
+| The ``plot_pvarray`` and ``plot_array_from_registry`` functions located in the ``plot`` module should be used in combination with the ``matplotlib`` package for visualization.
 
-.. autofunction:: tools.plot_line_registry
+.. autofunction:: plot.plot_pvarray
    :noindex:
 
-.. autofunction:: tools.plot_surface_registry
-   :noindex:
 
 Update PV array angles
 ----------------------
@@ -41,13 +39,8 @@ Update PV array angles
 Calculate irradiance terms
 --------------------------
 
-After creating a PV array object, the user can calculate all of the irradiance terms described in the problem formulation. There are two options for this, but they will both write the ouputs of the calculation into the ``surface_registry``.
-| The first option is to use the ``calculate_radiosities_simple`` method, which assumes that the whole sky dome is isotropic.
-
-.. automethod:: pvarray.Array.calculate_radiosities_simple
-   :noindex:
-
-| The second option is to use the ``calculate_radiosities_perez`` method, which uses the Perez diffuse light decomposition model to calculate luminance and other related terms. This method is more accurate.
+After creating a PV array object, the user can calculate all of the irradiance terms described in the problem formulation.
+The ouputs of the calculation will be written into the ``surface_registry``. The approach builds on top of the Perez diffuse light transposition model.
 
 .. automethod:: pvarray.Array.calculate_radiosities_perez
    :noindex:
@@ -55,4 +48,4 @@ After creating a PV array object, the user can calculate all of the irradiance t
 Surface registry
 ----------------
 
-In the end, the core information and results about the PV array object will be stored in its ``surface_registry`` attribute.
+In the end, the core information and results about the PV array object will be stored in its ``surface_registry`` attribute of the ``Array`` object.
