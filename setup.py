@@ -31,7 +31,7 @@ INSTALL_REQUIRES = ['numpy>=1.13.1',
                     'future>=0.16.0',
                     'six>=1.11.0']
 
-TESTS_REQUIRE = ['pytest>=3.2.1']
+TESTS_REQUIRE = ['pytest>=3.2.1', 'pytest-mock>=1.10.0']
 
 setup(name=DISTNAME,
       description=DESCRIPTION,

@@ -5,8 +5,9 @@ Test the calculation of the view factors
 """
 
 from pvfactors.pvarray import Array
-from pvfactors.tools import (calculate_radiosities_serially_perez,
-                             get_average_pvrow_outputs)
+from pvfactors.timeseries import (calculate_radiosities_serially_perez,
+                                  get_average_pvrow_outputs,
+                                  breakup_df_inputs)
 import numpy as np
 import pandas as pd
 import os
@@ -144,7 +145,12 @@ def test_negativevf_and_flatcasenoon():
     df_inputs.index = pd.DatetimeIndex(df_inputs.index).tz_localize(
         'UTC').tz_convert('US/Arizona')
 
-    args = (pvarray_parameters, df_inputs)
+    # Break up inputs
+    (timestamps, array_tilt, array_azimuth,
+     solar_zenith, solar_azimuth, dni, dhi) = breakup_df_inputs(df_inputs)
+
+    args = (pvarray_parameters, timestamps, solar_zenith, solar_azimuth,
+            array_tilt, array_azimuth, dni, dhi)
     df_registries, _ = calculate_radiosities_serially_perez(args)
     df_outputs = get_average_pvrow_outputs(df_registries)
 
@@ -187,7 +193,12 @@ def test_back_surface_luminance():
     df_inputs.index = pd.DatetimeIndex(df_inputs.index).tz_localize(
         'UTC').tz_convert('US/Arizona')
 
-    args = (pvarray_parameters, df_inputs)
+    # Break up inputs
+    (timestamps, array_tilt, array_azimuth,
+     solar_zenith, solar_azimuth, dni, dhi) = breakup_df_inputs(df_inputs)
+
+    args = (pvarray_parameters, timestamps, solar_zenith, solar_azimuth,
+            array_tilt, array_azimuth, dni, dhi)
     df_registries, _ = calculate_radiosities_serially_perez(args)
 
     df_outputs = get_average_pvrow_outputs(df_registries)

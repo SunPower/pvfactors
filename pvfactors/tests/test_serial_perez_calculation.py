@@ -5,8 +5,9 @@ Test that the serial calculation (using the Perez diffuse sky model) outputs
 consistent results
 """
 
-from pvfactors.tools import (calculate_radiosities_serially_perez,
-                             get_average_pvrow_outputs)
+from pvfactors.timeseries import (calculate_radiosities_serially_perez,
+                                  get_average_pvrow_outputs,
+                                  breakup_df_inputs)
 import pandas as pd
 import numpy as np
 import os
@@ -43,13 +44,18 @@ def test_serial_calculation():
     idx_subset = 10
     df_inputs_simulation = df_inputs_simulation.iloc[0:idx_subset, :]
 
+    # Break up inputs
+    (timestamps, array_tilt, array_azimuth,
+     solar_zenith, solar_azimuth, dni, dhi) = breakup_df_inputs(df_inputs_simulation)
+
     # Run calculation in 1 process only
-    (df_registries, _) = (
-        calculate_radiosities_serially_perez((arguments, df_inputs_simulation))
-    )
+    df_registries, _ = calculate_radiosities_serially_perez(
+        (arguments, timestamps,
+         solar_zenith, solar_azimuth,
+         array_tilt, array_azimuth, dni, dhi))
 
     # Format df_registries to get outputs
-    df_outputs = get_average_pvrow_outputs(df_registries)
+    df_outputs = get_average_pvrow_outputs(df_registries, include_shading=False)
 
     # Did the outputs remain consistent?
     test_results = values_are_consistent(df_outputs)
@@ -74,7 +80,6 @@ def values_are_consistent(df_outputs):
                                       parse_dates=['timestamps'])
     expected_df_outputs['origin'] = 'expected'
     df_outputs = (df_outputs.assign(timestamps=lambda x: x.index)
-                  .drop('shaded', axis=1)
                   .reset_index(drop=True)
                   .melt(id_vars=['timestamps']))
     df_outputs['origin'] = 'calculated'
@@ -89,7 +94,7 @@ def values_are_consistent(df_outputs):
     rtol = 1e-7
     test_results = []
     for name, group in grouped_comparison:
-        df_term = group.pivot_table(index=['timestamps', 'pvrow', 'side'],
+        df_term = group.pivot_table(index=['timestamps', 'pvrow_index', 'surface_side'],
                                     columns=['origin'], values='value')
         compare = (('calculated' in df_term.columns)
                    & ('expected' in df_term.columns))

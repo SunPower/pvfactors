@@ -33,3 +33,11 @@ def df_segments():
     df_segments = pd.read_csv(fp, header=[0, 1], index_col=0)
     df_segments.index = pd.to_datetime(df_segments.index)
     yield df_segments
+
+
+@pytest.fixture(scope='function')
+def df_perez_luminance():
+    """ Example of df_segments to be used for tests """
+    fp = os.path.join(DIR_TEST_DATA, 'file_test_df_perez_luminance.csv')
+    df_perez_luminance = pd.read_csv(fp, header=[0], index_col=0)
+    yield df_perez_luminance

@@ -51,7 +51,7 @@ def test_plotting():
     is_ci = os.environ.get('CI', False)
     if not is_ci:
         import matplotlib.pyplot as plt
-        from pvfactors.tools import plot_pvarray
+        from pvfactors.plot import plot_pvarray
         # Create array where sun vector is in the direction of the modules
         arguments = {
             'n_pvrows': 3,
