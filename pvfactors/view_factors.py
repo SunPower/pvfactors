@@ -9,7 +9,7 @@ import numpy as np
 import logging
 
 LOGGER = logging.getLogger(__name__)
-LOGGER.setLevel(logging.DEBUG)
+LOGGER.setLevel(logging.INFO)
 
 
 np.set_printoptions(suppress=True)
@@ -166,8 +166,8 @@ class ViewFactorCalculator(object):
                                        - uncrossed_length1 - uncrossed_length2)
 
         if vf_12 < 0:
-            LOGGER.warning("Hottel pvrow front: view factors should not be "
-                           "negative: vf_12 = %.4f" % vf_12)
+            LOGGER.debug("Hottel pvrow front: unexpected value for "
+                           "vf_12 = %.4f" % vf_12)
 
         return vf_12
 
@@ -222,8 +222,8 @@ class ViewFactorCalculator(object):
                 vf_12 = 0.
 
         if vf_12 < 0:
-            LOGGER.warning("Hottel pvrow front: view factors should not be "
-                           "negative: vf_12 = %.4f" % vf_12)
+            LOGGER.debug("Hottel pvrow front: unexpected value for "
+                           "vf_12 = %.4f" % vf_12)
 
         return vf_12
 

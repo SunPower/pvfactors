@@ -15,6 +15,10 @@ import numpy as np
 import pandas as pd
 from shapely.geometry import LineString, Point
 from pvfactors import PVFactorsError
+import logging
+
+LOGGER = logging.getLogger(__name__)
+LOGGER.setLevel(logging.INFO)
 
 
 # TODO: remove hard-coding if possible
