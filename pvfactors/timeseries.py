@@ -1,106 +1,101 @@
 # -*- coding: utf-8 -*-
 
-import sys
 from pvlib import atmosphere, irradiance
 from pvlib.tools import cosd, sind
 from pvlib.irradiance import aoi_projection
 import numpy as np
 import pandas as pd
-from pvfactors import (logging, PVFactorsError)
+from pvfactors import (logging, print_progress)
 from pvfactors.pvarray import Array
 from multiprocessing import Pool, cpu_count
 import time
 from copy import deepcopy
 
-DISTANCE_TOLERANCE = 1e-8
 
 LOGGER = logging.getLogger(__name__)
 LOGGER.setLevel(logging.INFO)
 
 
-# Define colors used for plotting the 2D arrays
-COLOR_dic = {
-    'i': '#FFBB33',
-    's': '#A7A49D',
-    't': '#6699cc',
-    'pvrow_illum': '#6699cc',
-    'pvrow_shaded': '#ff0000',
-    'ground_shaded': '#A7A49D',
-    'ground_illum': '#FFBB33'
-}
-
 COLS_TO_SAVE = ['q0', 'qinc', 'circumsolar_term', 'horizon_term',
                 'direct_term', 'irradiance_term', 'isotropic_term',
                 'reflection_term', 'horizon_band_shading_pct']
-
+DISTANCE_TOLERANCE = 1e-8
 idx_slice = pd.IndexSlice
 
 
-def plot_pvarray(ax, pvarray, line_types_selected=None, fontsize=20):
+def array_timeseries_calculate(
+    arguments, timestamps, solar_zenith, solar_azimuth, array_tilt,
+        array_azimuth, dni, luminance_isotropic, luminance_circumsolar,
+        poa_horizon, poa_circumsolar):
     """
-    Plot a :class:`pvarray.Array` object's shapely geometries based on its
-    :attr:`pvarray.Array.surface_registry`. The difference with
-    :func:`tools.plot_line_registry` is that here the user will see the
-    differences between PV row sides, the discretized elements, etc.
+    Calculate the view factor radiosity and irradiance terms for multiple times.
+    The calculations will be sequential, and they will assume a diffuse sky
+    dome as calculated in the Perez diffuse sky transposition model (from
+    ``pvlib-python`` implementation).
 
-    :param ax: :class:`matplotlib.axes.Axes` object to use for the plot
-    :param pvarray: :class:`pvarray.Array` object to plot
-    :param list line_types_selected: parameter used to select a subset of
-        'line_type' to plot; e.g. 'pvrow' or 'ground'
-    :return: None (``ax`` is updated)
+    :param args: tuple of at least two arguments: ``(arguments, df_inputs)``,
+        where ``arguments`` is a ``dict`` that contains the array parameters
+        used to instantiate a :class:`pvarray.Array` object, and ``df_inputs``
+        is a :class:`pandas.DataFrame` with the following columns:
+        ['solar_zenith', 'solar_azimuth', 'array_tilt', 'array_azimuth', 'dhi',
+        'dni'], and with the following units: ['deg', 'deg', 'deg', 'deg',
+        'W/m2', 'W/m2']. A possible 3rd argument for the tuple is
+        ``save_segments``, which is a ``tuple`` of two elements used to save
+        all the irradiance terms calculated for one side of a PV row; e.g.
+        ``(1, 'front')`` the first element is an ``int`` for the PV row index,
+        and the second element a ``str`` to specify the side of the PV row,
+        'front' or 'back'
+    :return: ``df_outputs, df_bifacial_gain, df_inputs_perez, ipoa_dict``;
+        :class:`pandas.DataFrame` objects and ``dict`` where ``df_outputs``
+        contains *averaged* irradiance terms for all PV row sides and at each
+        time stamp; ``df_bifacial_gain`` contains the calculation of
+        back-surface over front-surface irradiance for all PV rows and at each
+        time stamp; ``df_inputs_perez`` contains the intermediate input and
+        output values from the Perez model calculation in ``pvlib-python``;
+        ``ipoa_dict`` is not ``None`` only when the ``save_segments`` input is
+        specified, and it is otherwise a ``dict`` where the keys are all the
+        calculated irradiance terms' names, and the values are
+        :class:`pandas.DataFrame` objects containing the calculated values for
+        all the segments of the PV string side (it is a way of getting detailed
+        values instead of averages)
     """
+    # Instantiate array
+    array = Array(**arguments)
+    # We want to save the whole registry for each timestamp
+    list_registries = []
+    # Use for printing progress
+    n = len(timestamps)
+    i = 1
+    for idx, time in enumerate(timestamps):
+        try:
+            if ((isinstance(solar_zenith[idx], float))
+                    & (solar_zenith[idx] <= 90.)):
+                # Run calculation only if daytime
+                array.calculate_radiosities_perez(
+                    solar_zenith[idx], solar_azimuth[idx], array_tilt[idx],
+                    array_azimuth[idx], dni[idx], luminance_isotropic[idx],
+                    luminance_circumsolar[idx], poa_horizon[idx], poa_circumsolar[idx])
 
-    # FIXME: repeating code from plot_line_registry
-    surface_registry = pvarray.surface_registry.copy()
-    plot_array_from_registry(ax, surface_registry,
-                             line_types_selected=line_types_selected)
+                # Save the whole registry
+                registry = deepcopy(array.surface_registry)
+                registry['timestamps'] = time
+                list_registries.append(registry)
 
-    # Plot details
-    distance = pvarray.pvrow_distance
-    height = pvarray.pvrow_height
-    n_pvrows = pvarray.n_pvrows
-    ax.set_xlim(- 0.5 * distance, (n_pvrows - 0.5) * distance)
-    ax.set_ylim(-height, 2 * height)
-    ax.set_title("PV Array", fontsize=fontsize)
+        except Exception as err:
+            LOGGER.debug("Unexpected error: {0}".format(err))
 
+        # Printing progress
+        print_progress(i, n, prefix='Progress:', suffix='Complete',
+                       bar_length=50)
+        i += 1
 
-def plot_array_from_registry(ax, registry, line_types_selected=None,
-                             fontsize=20):
-    """
-    Plot a 2D PV array geometry based using a registry input.
-
-    :param matplotlib.axes.Axes ax: axes to use for the plot
-    :param pd.DataFrame registry: :class:`pvarray.Array` object to plot
-    :param list line_types_selected: parameter used to select a subset of
-        'line_type' to plot; e.g. 'pvrow' or 'ground'
-    :return: None (``ax`` is updated)
-    """
-
-    registry = registry.copy()
-    registry.loc[:, 'color'] = (
-        registry.line_type.values + '_'
-        + np.where(registry.shaded.values, 'shaded', 'illum'))
-    # TODO: distance may not exist
-    if line_types_selected:
-        for line_type in line_types_selected:
-            surface_reg_selected = registry.loc[
-                registry.line_type == line_type, :]
-            for index, row in surface_reg_selected.iterrows():
-                LOGGER.debug("Plotting %s", row['line_type'])
-                plot_coords(ax, row['geometry'])
-                plot_bounds(ax, row['geometry'])
-                plot_line(ax, row['geometry'], row['style'],
-                          row['shading_type'])
+    # Concatenate all surface registries into one dataframe
+    if list_registries:
+        df_registries = pd.concat(list_registries, axis=0, join='outer')
     else:
-        for index, row in registry.iterrows():
-            LOGGER.debug("Plotting %s", row['line_type'])
-            plot_coords(ax, row['geometry'])
-            plot_bounds(ax, row['geometry'])
-            plot_line(ax, row['geometry'], row['style'], row['color'])
+        df_registries = None
 
-    ax.axis('equal')
-    ax.set_xlabel("x [m]", fontsize=fontsize)
-    ax.set_ylabel("y [m]", fontsize=fontsize)
+    return df_registries
 
 
 def perez_diffuse_luminance(timestamps, array_tilt, array_azimuth,
@@ -238,80 +233,6 @@ def calculate_custom_perez_transposition(timestamps, array_tilt, array_azimuth,
     return df_custom_perez
 
 
-def array_timeseries_calculate(
-    arguments, timestamps, solar_zenith, solar_azimuth, array_tilt, array_azimuth,
-        dni, luminance_isotropic, luminance_circumsolar, poa_horizon, poa_circumsolar):
-    """
-    Calculate the view factor radiosity and irradiance terms for multiple times.
-    The calculations will be sequential, and they will assume a diffuse sky
-    dome as calculated in the Perez diffuse sky transposition model (from
-    ``pvlib-python`` implementation).
-
-    :param args: tuple of at least two arguments: ``(arguments, df_inputs)``,
-        where ``arguments`` is a ``dict`` that contains the array parameters
-        used to instantiate a :class:`pvarray.Array` object, and ``df_inputs``
-        is a :class:`pandas.DataFrame` with the following columns:
-        ['solar_zenith', 'solar_azimuth', 'array_tilt', 'array_azimuth', 'dhi',
-        'dni'], and with the following units: ['deg', 'deg', 'deg', 'deg',
-        'W/m2', 'W/m2']. A possible 3rd argument for the tuple is
-        ``save_segments``, which is a ``tuple`` of two elements used to save
-        all the irradiance terms calculated for one side of a PV row; e.g.
-        ``(1, 'front')`` the first element is an ``int`` for the PV row index,
-        and the second element a ``str`` to specify the side of the PV row,
-        'front' or 'back'
-    :return: ``df_outputs, df_bifacial_gain, df_inputs_perez, ipoa_dict``;
-        :class:`pandas.DataFrame` objects and ``dict`` where ``df_outputs``
-        contains *averaged* irradiance terms for all PV row sides and at each
-        time stamp; ``df_bifacial_gain`` contains the calculation of
-        back-surface over front-surface irradiance for all PV rows and at each
-        time stamp; ``df_inputs_perez`` contains the intermediate input and
-        output values from the Perez model calculation in ``pvlib-python``;
-        ``ipoa_dict`` is not ``None`` only when the ``save_segments`` input is
-        specified, and it is otherwise a ``dict`` where the keys are all the
-        calculated irradiance terms' names, and the values are
-        :class:`pandas.DataFrame` objects containing the calculated values for
-        all the segments of the PV string side (it is a way of getting detailed
-        values instead of averages)
-    """
-    # Instantiate array
-    array = Array(**arguments)
-    # We want to save the whole registry for each timestamp
-    list_registries = []
-    # Use for printing progress
-    n = len(timestamps)
-    i = 1
-    for idx, time in enumerate(timestamps):
-        try:
-            if ((isinstance(solar_zenith[idx], float))
-                    & (solar_zenith[idx] <= 90.)):
-                # Run calculation only if daytime
-                array.calculate_radiosities_perez(
-                    solar_zenith[idx], solar_azimuth[idx], array_tilt[idx],
-                    array_azimuth[idx], dni[idx], luminance_isotropic[idx],
-                    luminance_circumsolar[idx], poa_horizon[idx], poa_circumsolar[idx])
-
-                # Save the whole registry
-                registry = deepcopy(array.surface_registry)
-                registry['timestamps'] = time
-                list_registries.append(registry)
-
-        except Exception as err:
-            LOGGER.debug("Unexpected error: {0}".format(err))
-
-        # Printing progress
-        print_progress(i, n, prefix='Progress:', suffix='Complete',
-                       bar_length=50)
-        i += 1
-
-    # Concatenate all surface registries into one dataframe
-    if list_registries:
-        df_registries = pd.concat(list_registries, axis=0, join='outer')
-    else:
-        df_registries = None
-
-    return df_registries
-
-
 def calculate_radiosities_serially_perez(args):
     """ Timeseries simulation with no parallellization, using Perez model """
 
@@ -396,65 +317,6 @@ def calculate_radiosities_parallel_perez(
                          results_grouped)
 
     return results_concat
-
-
-# Base functions used to plot the 2D array
-def plot_coords(ax, ob):
-    try:
-        x, y = ob.xy
-        ax.plot(x, y, 'o', color='#999999', zorder=1)
-    except NotImplementedError:
-        for line in ob:
-            x, y = line.xy
-            ax.plot(x, y, 'o', color='#999999', zorder=1)
-
-
-def plot_bounds(ax, ob):
-    # Check if shadow reduces to one point (for very specific sun alignment)
-    if len(ob.boundary) == 0:
-        x, y = ob.coords[0]
-    else:
-        x, y = zip(*list((p.x, p.y) for p in ob.boundary))
-    ax.plot(x, y, 'o', color='#000000', zorder=1)
-
-
-def plot_line(ax, ob, line_style, line_color):
-    try:
-        x, y = ob.xy
-        ax.plot(x, y, color=COLOR_dic[line_color], ls=line_style, alpha=0.7,
-                linewidth=3, solid_capstyle='round', zorder=2)
-    except NotImplementedError:
-        for line in ob:
-            x, y = line.xy
-            ax.plot(x, y, color=COLOR_dic[line_color], ls=line_style, alpha=0.7,
-                    linewidth=3, solid_capstyle='round', zorder=2)
-
-
-# Define function used for progress bar when running long simulations
-# Borrowed from: https://gist.github.com/aubricus
-def print_progress(iteration, total, prefix='', suffix='', decimals=1,
-                   bar_length=100):
-    """
-    Call in a loop to create terminal progress bar
-    @params:
-        iteration   - Required  : current iteration (Int)
-        total       - Required  : total iterations (Int)
-        prefix      - Optional  : prefix string (Str)
-        suffix      - Optional  : suffix string (Str)
-        decimals    - Optional  : positive number of decimals in percent
-        complete (Int)
-        bar_length   - Optional  : character length of bar (Int)
-    """
-    format_str = "{0:." + str(decimals) + "f}"
-    percents = format_str.format(100 * (iteration / float(total)))
-    filled_length = int(round(bar_length * iteration / float(total)))
-    bar = '█' * filled_length + '-' * (bar_length - filled_length)
-    sys.stdout.write('\r%s |%s| %s%s %s' % (prefix, bar, percents, '%',
-                                            suffix)),
-    sys.stdout.flush()
-    if iteration == total:
-        sys.stdout.write('\n')
-        sys.stdout.flush()
 
 
 def get_average_pvrow_outputs(df_registries, values=COLS_TO_SAVE,

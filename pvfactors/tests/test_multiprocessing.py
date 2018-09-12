@@ -4,8 +4,8 @@
 Testing the multiprocessing calculation from the ``tools`` module
 """
 
-from pvfactors.tools import (calculate_radiosities_parallel_perez,
-                             breakup_df_inputs)
+from pvfactors.timeseries import (calculate_radiosities_parallel_perez,
+                                  breakup_df_inputs)
 import os
 import pandas as pd
 

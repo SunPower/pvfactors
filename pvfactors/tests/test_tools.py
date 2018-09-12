@@ -5,13 +5,13 @@ Test some of the functions in the tools module
 """
 import pytest
 from pvfactors.pvarray import Array
-from pvfactors.tools import (perez_diffuse_luminance,
-                             calculate_radiosities_serially_perez,
-                             calculate_radiosities_parallel_perez,
-                             get_average_pvrow_outputs,
-                             get_pvrow_segment_outputs,
-                             breakup_df_inputs,
-                             array_timeseries_calculate)
+from pvfactors.timeseries import (perez_diffuse_luminance,
+                                  calculate_radiosities_serially_perez,
+                                  calculate_radiosities_parallel_perez,
+                                  get_average_pvrow_outputs,
+                                  get_pvrow_segment_outputs,
+                                  breakup_df_inputs,
+                                  array_timeseries_calculate)
 import numpy as np
 import pandas as pd
 import os
@@ -24,7 +24,7 @@ idx_slice = pd.IndexSlice
 
 @pytest.fixture(scope='function')
 def mock_array_timeseries_calculate(mocker):
-    return mocker.patch('pvfactors.tools.array_timeseries_calculate')
+    return mocker.patch('pvfactors.timeseries.array_timeseries_calculate')
 
 
 def test_array_calculate_timeseries():

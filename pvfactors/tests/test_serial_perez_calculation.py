@@ -5,9 +5,9 @@ Test that the serial calculation (using the Perez diffuse sky model) outputs
 consistent results
 """
 
-from pvfactors.tools import (calculate_radiosities_serially_perez,
-                             get_average_pvrow_outputs,
-                             breakup_df_inputs)
+from pvfactors.timeseries import (calculate_radiosities_serially_perez,
+                                  get_average_pvrow_outputs,
+                                  breakup_df_inputs)
 import pandas as pd
 import numpy as np
 import os

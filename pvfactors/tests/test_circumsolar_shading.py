@@ -6,9 +6,8 @@ calculations
 """
 
 from pvfactors.pvcore import calculate_circumsolar_shading
-from pvfactors.pvarray import Array
-from pvfactors.tools import (calculate_radiosities_serially_perez,
-                             breakup_df_inputs)
+from pvfactors.timeseries import (calculate_radiosities_serially_perez,
+                                  breakup_df_inputs)
 import pandas as pd
 import os
 import numpy as np

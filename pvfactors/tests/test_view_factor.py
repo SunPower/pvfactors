@@ -5,9 +5,9 @@ Test the calculation of the view factors
 """
 
 from pvfactors.pvarray import Array
-from pvfactors.tools import (calculate_radiosities_serially_perez,
-                             get_average_pvrow_outputs,
-                             breakup_df_inputs)
+from pvfactors.timeseries import (calculate_radiosities_serially_perez,
+                                  get_average_pvrow_outputs,
+                                  breakup_df_inputs)
 import numpy as np
 import pandas as pd
 import os
