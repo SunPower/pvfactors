@@ -38,7 +38,9 @@ def test_create_array():
     expected_pvrow_neighbors = np.array(
         [np.nan, 0., 1., np.nan, np.nan, np.nan, np.nan, np.nan,
          np.nan, np.nan, np.nan, np.nan, np.nan, 1., 2., np.nan])
-    assert np.allclose(array.surface_registry.index_pvrow_neighbor.values,
+    calculated_pvrow_neighbors = (array.surface_registry
+                                  .index_pvrow_neighbor.values)
+    assert np.allclose(calculated_pvrow_neighbors,
                        expected_pvrow_neighbors, atol=tol, rtol=0,
                        equal_nan=True)
 
@@ -166,5 +168,3 @@ def test_interrow_shading():
         (array.surface_registry.line_type == 'pvrow')
         & array.surface_registry.shaded]
         .shape[0] == 4)
-
-    print("Done.")

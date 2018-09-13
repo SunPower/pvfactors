@@ -16,46 +16,52 @@ TEST_DIR = os.path.dirname(__file__)
 TEST_DATA = os.path.join(TEST_DIR, 'test_files')
 
 
-def test_serial_calculation():
+def test_serial_calculation_with_skips(
+    pvarray_parameters_serial_calc,
+        df_inputs_serial_calculation_with_skips):
     """
     Make sure that the calculations using the Perez model stay consistent for
     all the modeled surfaces. Also testing that there is no unexpected NaN.
     """
-    # Create array
-    arguments = {
-        'n_pvrows': 2,
-        'pvrow_height': 1.5,
-        'pvrow_width': 1.,
-        'array_azimuth': 270,
-        'array_tilt': -20.,
-        'gcr': 0.3,
-        'solar_zenith': 30.,
-        'solar_azimuth': 90.,
-        'rho_ground': 0.22,
-        'rho_pvrow_front': 0.01,
-        'rho_pvrow_back': 0.03
-    }
-
-    # Import simulation inputs for calculation
-    filename = "file_test_multiprocessing_inputs.csv"
-    df_inputs_simulation = pd.read_csv(os.path.join(TEST_DATA, filename),
-                                       index_col=0)
-    df_inputs_simulation.index = pd.DatetimeIndex(df_inputs_simulation.index)
-    idx_subset = 10
-    df_inputs_simulation = df_inputs_simulation.iloc[0:idx_subset, :]
 
     # Break up inputs
     (timestamps, array_tilt, array_azimuth,
-     solar_zenith, solar_azimuth, dni, dhi) = breakup_df_inputs(df_inputs_simulation)
+     solar_zenith, solar_azimuth, dni, dhi) = breakup_df_inputs(
+         df_inputs_serial_calculation_with_skips)
 
     # Run calculation in 1 process only
     df_registries, _ = calculate_radiosities_serially_perez(
-        (arguments, timestamps,
+        (pvarray_parameters_serial_calc, timestamps,
+         solar_zenith, solar_azimuth,
+         array_tilt, array_azimuth, dni, dhi))
+
+    list_nan_idx = df_registries.index[
+        df_registries.set_index('timestamps').count(axis=1) == 0]
+    # There should be one line with only nan values
+    assert len(list_nan_idx) == 1
+
+
+def test_serial_calculation(pvarray_parameters_serial_calc,
+                            df_inputs_serial_calculation):
+    """
+    Make sure that the calculations using the Perez model stay consistent for
+    all the modeled surfaces. Also testing that there is no unexpected NaN.
+    """
+
+    # Break up inputs
+    (timestamps, array_tilt, array_azimuth,
+     solar_zenith, solar_azimuth, dni, dhi) = breakup_df_inputs(
+         df_inputs_serial_calculation)
+
+    # Run calculation in 1 process only
+    df_registries, _ = calculate_radiosities_serially_perez(
+        (pvarray_parameters_serial_calc, timestamps,
          solar_zenith, solar_azimuth,
          array_tilt, array_azimuth, dni, dhi))
 
     # Format df_registries to get outputs
-    df_outputs = get_average_pvrow_outputs(df_registries, include_shading=False)
+    df_outputs = get_average_pvrow_outputs(df_registries,
+                                           include_shading=False)
 
     # Did the outputs remain consistent?
     test_results = values_are_consistent(df_outputs)

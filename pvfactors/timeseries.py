@@ -54,6 +54,8 @@ def array_timeseries_calculate(
     array = Array(**pvarray_parameters)
     # We want to save the whole registry for each timestamp
     list_registries = []
+    # We want to record the skipped_ts
+    skipped_ts = []
     # Use for printing progress
     n = len(timestamps)
     i = 1
@@ -73,8 +75,12 @@ def array_timeseries_calculate(
                 registry['timestamps'] = ts
                 list_registries.append(registry)
 
+            else:
+                skipped_ts.append(ts)
+
         except Exception as err:
             LOGGER.debug("Unexpected error: {0}".format(err))
+            skipped_ts.append(ts)
 
         # Printing progress
         print_progress(i, n, prefix='Progress:', suffix='Complete',
@@ -83,9 +89,22 @@ def array_timeseries_calculate(
 
     # Concatenate all surface registries into one dataframe
     if list_registries:
-        df_registries = pd.concat(list_registries, axis=0, join='outer')
+        if skipped_ts:
+            df_skipped = pd.DataFrame(
+                np.nan, columns=Array.registry_cols,
+                index=range(len(skipped_ts))
+            ).assign(timestamps=skipped_ts)
+            list_registries.append(df_skipped)
+        df_registries = (pd.concat(list_registries, axis=0, join='outer',
+                                   sort=False)
+                         .sort_values(by=['timestamps'])
+                         .reset_index(drop=True))
     else:
-        df_registries = None
+        df_registries = pd.DataFrame(
+            np.nan,
+            columns=Array.registry_cols,
+            index=range(len(timestamps))
+        ).assign(timestamps=timestamps)
 
     return df_registries
 
@@ -333,7 +352,8 @@ def calculate_radiosities_parallel_perez(
     LOGGER.info("Parallel calculation elapsed time: %s sec" % str(end - start))
 
     results_grouped = zip(*results)
-    results_concat = map(lambda x: pd.concat(x, axis=0, join='outer')
+    results_concat = map(lambda x: pd.concat(x, axis=0, join='outer',
+                                             sort=True)
                          if x[0] is not None else None,
                          results_grouped)
 
@@ -390,12 +410,14 @@ def get_average_pvrow_outputs(df_registries, values=COLS_TO_SAVE,
                      # aggregation happening
                      aggfunc='first'  # necessary to keep 'shaded' bool values
                      )
+        .pipe(add_df_registries_nans, df_registries)
     )
+
     # Make sure numerical types are as expected
     df_outputs.loc[:, idx_slice[:, :, values]] = df_outputs.loc[
         :, idx_slice[:, :, values]].astype(float)
 
-    return df_outputs
+    return df_outputs.sort_index()
 
 
 def get_pvrow_segment_outputs(df_registries, values=COLS_TO_SAVE,
@@ -454,12 +476,13 @@ def get_pvrow_segment_outputs(df_registries, values=COLS_TO_SAVE,
                      # aggregation happening
                      aggfunc='first'  # necessary to keep 'shaded' bool values
                      )
+        .pipe(add_df_registries_nans, df_registries)
     )
     # Make sure numerical types are as expected
     df_segments.loc[:, idx_slice[:, :, :, values]] = df_segments.loc[
         :, idx_slice[:, :, :, values]].astype(float)
 
-    return df_segments
+    return df_segments.sort_index()
 
 
 def breakup_df_inputs(df_inputs):
@@ -485,3 +508,22 @@ def breakup_df_inputs(df_inputs):
 
     return (timestamps, array_tilt, array_azimuth,
             solar_zenith, solar_azimuth, dni, dhi)
+
+
+def add_df_registries_nans(df, df_registries):
+    """ df_registries as nan entries for timestamps that were skipped,
+    make sure to add them back in
+
+    :param pd.DataFrame df: dataframe to which the nan values will be added
+    :param pd.DataFrame df_registries: dataframe of concatenated registries
+    :return: ``pandas.DataFrame`` with nan values added
+    """
+    df_registries = df_registries.copy().set_index('timestamps')
+    list_idx_nans = df_registries.index[
+        df_registries.count(axis=1) == 0].tolist()
+    if list_idx_nans:
+        df_nan = pd.DataFrame(np.nan, columns=df.columns,
+                              index=list_idx_nans)
+        df = pd.concat([df, df_nan], axis=0, sort=True)
+
+    return df

@@ -45,7 +45,7 @@ def test_add_linepvarray_to_registry():
     """ Testing that the lines are added correctly to the registry """
 
     linestring = LineString([Point(0, 1), Point(1, 0)])
-    registry = ArrayBase.initialize_line_registry()
+    registry = ArrayBase.initialize_registry()
     line_pvarray = LinePVArray(
         geometry=linestring,
         line_type='ground',
@@ -59,7 +59,7 @@ def test_bounds():
     """ Testing that the geometry bounds are calculated correctly """
 
     linestring = LineString([Point(0, 1), Point(1, 0)])
-    registry = ArrayBase.initialize_line_registry()
+    registry = ArrayBase.initialize_registry()
     line_pvarray = LinePVArray(
         geometry=linestring,
         line_type='ground',
@@ -72,7 +72,7 @@ def test_split_ground_geometry_from_edge_points():
     """ Testing that the geometry bounds are calculated correctly """
 
     linestring = LineString([Point(0, 0), Point(2, 0)])
-    registry = ArrayBase.initialize_line_registry()
+    registry = ArrayBase.initialize_registry()
     line_pvarray = LinePVArray(
         geometry=linestring,
         line_type='ground',
@@ -91,7 +91,7 @@ def test_split_pvrow_geomtry():
     """ Testing that the pvrow geometry is split up correctly by line """
 
     linestring = LineString([Point(0, 0), Point(2, 2)])
-    registry = ArrayBase.initialize_line_registry()
+    registry = ArrayBase.initialize_registry()
     line_pvarray = LinePVArray(
         geometry=linestring,
         line_type='pvrow',
@@ -115,7 +115,7 @@ def test_cut_pvrow_geometry():
     """ Testing that the pvrow geometry is discretized as expected """
 
     linestring = LineString([Point(0, 0), Point(2, 2)])
-    registry = ArrayBase.initialize_line_registry()
+    registry = ArrayBase.initialize_registry()
     line_pvarray = LinePVArray(
         geometry=linestring,
         line_type='pvrow',
