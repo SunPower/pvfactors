@@ -417,7 +417,7 @@ def get_average_pvrow_outputs(df_registries, values=COLS_TO_SAVE,
     df_outputs.loc[:, idx_slice[:, :, values]] = df_outputs.loc[
         :, idx_slice[:, :, values]].astype(float)
 
-    return df_outputs
+    return df_outputs.sort_index()
 
 
 def get_pvrow_segment_outputs(df_registries, values=COLS_TO_SAVE,
@@ -482,7 +482,7 @@ def get_pvrow_segment_outputs(df_registries, values=COLS_TO_SAVE,
     df_segments.loc[:, idx_slice[:, :, :, values]] = df_segments.loc[
         :, idx_slice[:, :, :, values]].astype(float)
 
-    return df_segments
+    return df_segments.sort_index()
 
 
 def breakup_df_inputs(df_inputs):
