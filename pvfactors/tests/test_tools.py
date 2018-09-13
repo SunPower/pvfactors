@@ -29,8 +29,8 @@ def mock_array_timeseries_calculate(mocker):
 
 def test_array_calculate_timeseries():
     """
-    Check that the timeseries results of the radiosity calculation using the isotropic
-    diffuse sky approach stay consistent
+    Check that the timeseries results of the radiosity calculation using the
+    isotropic diffuse sky approach stay consistent
     """
     # Simple sky and array configuration
     df_inputs = pd.DataFrame(
@@ -61,17 +61,15 @@ def test_array_calculate_timeseries():
     poa_horizon = np.zeros(len(timestamps))
     poa_circumsolar = np.zeros(len(timestamps))
 
-    # # Calculate irradiance terms
-    # df_outputs, df_bifacial_g = (
-    #     calculate_radiosities_serially_simple(array, df_inputs))
-
     # Run timeseries calculation
     df_registries = array_timeseries_calculate(
-        arguments, timestamps, solar_zenith, solar_azimuth, array_tilt, array_azimuth,
-        dni, luminance_isotropic, luminance_circumsolar, poa_horizon, poa_circumsolar)
+        arguments, timestamps, solar_zenith, solar_azimuth,
+        array_tilt, array_azimuth, dni, luminance_isotropic,
+        luminance_circumsolar, poa_horizon, poa_circumsolar)
 
     # Calculate surface averages for pvrows
-    df_outputs = get_average_pvrow_outputs(df_registries, values=['q0', 'qinc'],
+    df_outputs = get_average_pvrow_outputs(df_registries,
+                                           values=['q0', 'qinc'],
                                            include_shading=False)
 
     # Check that the outputs are as expected
@@ -107,8 +105,8 @@ def test_perez_diffuse_luminance(df_perez_luminance):
                                 .tz_localize(None))
 
     # Break up inputs
-    (timestamps, array_tilt, array_azimuth,
-     solar_zenith, solar_azimuth, dni, dhi) = breakup_df_inputs(df_inputs_clearday)
+    (timestamps, array_tilt, array_azimuth, solar_zenith, solar_azimuth,
+     dni, dhi) = breakup_df_inputs(df_inputs_clearday)
     df_outputs = perez_diffuse_luminance(timestamps, array_tilt, array_azimuth,
                                          solar_zenith, solar_azimuth, dni, dhi)
 
@@ -132,8 +130,8 @@ def test_luminance_in_timeseries_calc(df_perez_luminance,
                                 .tz_localize(None))
 
     # Break up inputs
-    (timestamps, array_tilt, array_azimuth,
-     solar_zenith, solar_azimuth, dni, dhi) = breakup_df_inputs(df_inputs_clearday)
+    (timestamps, array_tilt, array_azimuth, solar_zenith, solar_azimuth,
+     dni, dhi) = breakup_df_inputs(df_inputs_clearday)
     _, df_outputs = calculate_radiosities_serially_perez(
         (None, timestamps, solar_zenith, solar_azimuth,
          array_tilt, array_azimuth,
@@ -224,9 +222,11 @@ def test_get_average_pvrow_outputs(df_registries, df_outputs):
 
     calc_df_outputs_num = get_average_pvrow_outputs(df_registries,
                                                     include_shading=False)
-    calc_df_outputs_shading = get_average_pvrow_outputs(df_registries, values=[],
+    calc_df_outputs_shading = get_average_pvrow_outputs(df_registries,
+                                                        values=[],
                                                         include_shading=True)
 
+    # print(calc_df_outputs_num)
     tol = 1e-8
     # Compare numerical values
     assert np.allclose(df_outputs.iloc[:, 1:].values,
@@ -264,3 +264,31 @@ def test_get_average_pvrow_segments(df_registries, df_segments):
         df_segments.values,
         df_calc_num.values,
         atol=0, rtol=tol)
+
+
+def test_get_average_pvrow_outputs_nans(df_registries_with_nan, df_outputs):
+    """ Test that obtaining the correct format, using outputs from v011 """
+
+    calc_df_outputs_num = get_average_pvrow_outputs(
+        df_registries_with_nan,
+        include_shading=False)
+    calc_df_outputs_shading = get_average_pvrow_outputs(
+        df_registries_with_nan,
+        values=[],
+        include_shading=True)
+
+    # Check the number of lines to make sure the nans were added
+    assert calc_df_outputs_num.shape[0] == 3
+    assert calc_df_outputs_shading.shape[0] == 3
+
+    tol = 1e-8
+    # Compare numerical values
+    assert np.allclose(df_outputs.iloc[:, 1:].values,
+                       calc_df_outputs_num.dropna(axis=0, how='all').values,
+                       atol=0, rtol=tol)
+
+    array_is_shaded = calc_df_outputs_shading.dropna(
+        axis=0, how='all').sum(axis=1).values > 0
+    # Compare bool on shading
+    assert np.array_equal(df_outputs.iloc[:, 0].values,
+                          array_is_shaded)
