@@ -13,6 +13,7 @@ from pvfactors.pvrow import PVRowLine
 from pvfactors.view_factors import ViewFactorCalculator, VIEW_DICT
 from shapely.geometry import LineString, Point
 import numpy as np
+import pandas as pd
 from pvfactors.pvgeometry import PVGeometry
 from pandas import DataFrame as Registry
 from pandas import notnull, Series
@@ -42,13 +43,31 @@ class ArrayBase(object):
     :param int n_pvrows: number of PV rows in PV array
     :param float pvrow_height: height of PV rows
     """
+    registry_cols = [
+        # LinePVArray keys
+        'geometry', 'style', 'line_type', 'shaded', 'pvrow_index',
+        # Geometry cols
+        'pvrow_segment_index', 'index_pvrow_neighbor',
+        'edge_point', 'surface_side', 'surface_centroid',
+        'area', 'line_registry_index',
+        # Irradiance terms
+        'reflectivity', 'irradiance_term', 'direct_term',
+        'isotropic_term', 'circumsolar_term',
+        'horizon_term', 'circumsolar_shading_pct',
+        'horizon_band_shading_pct', 'q0', 'qinc']
+    registry_numeric_cols = [
+        'pvrow_index', 'pvrow_segment_index', 'index_pvrow_neighbor',
+        'area', 'line_registry_index', 'reflectivity', 'irradiance_term',
+        'direct_term', 'isotropic_term', 'circumsolar_term',
+        'horizon_term', 'circumsolar_shading_pct',
+        'horizon_band_shading_pct', 'q0', 'qinc']
 
     def __init__(self, n_pvrows, pvrow_height):
         self.n_pvrows = n_pvrows
         self.pvrow_height = pvrow_height
         self.pvrows = []
 
-        self.line_registry = self.initialize_line_registry()
+        self.line_registry = self.initialize_registry()
         self.surface_registry = None
         self.view_matrix = None
         self.args_matrix = None
@@ -57,7 +76,7 @@ class ArrayBase(object):
         self.inv_reflectivity_matrix = None
 
     @staticmethod
-    def initialize_line_registry():
+    def initialize_registry():
         """
         Create an empty line registry based on the property keys of PV Array
         lines.
@@ -67,11 +86,10 @@ class ArrayBase(object):
         # Create the line and surface registries
         # TODO: line_pvarray_keys should not be dependent on specific classes
         # like ``LinePVArray()``
-        line_pvarray_keys = list(LinePVArray().keys())
-        extra_keys_line_registry = ['edge_point']
-        line_registry = Registry(columns=(line_pvarray_keys +
-                                          extra_keys_line_registry))
-        return line_registry
+        registry = Registry(columns=ArrayBase.registry_cols)
+        registry[ArrayBase.registry_numeric_cols] = (
+            registry[ArrayBase.registry_numeric_cols].astype(float))
+        return registry
 
     def create_pvrows_array(self, *args, **kwargs):
         raise NotImplementedError
@@ -170,7 +188,8 @@ class Array(ArrayBase):
         self.calculate_front_circ_horizon_shading = kwargs.get(
             'calculate_front_circ_horizon_shading', False
         )
-        self.circumsolar_model = kwargs.get('circumsolar_model', 'uniform_disk')
+        self.circumsolar_model = kwargs.get('circumsolar_model',
+                                            'uniform_disk')
 
         # Update array from initial parameters
         self.update_view_factors(solar_zenith, solar_azimuth, array_tilt,
@@ -190,7 +209,7 @@ class Array(ArrayBase):
             rows must have the same azimuth angle
         :return: None
         """
-        self.line_registry = self.initialize_line_registry()
+        self.line_registry = self.initialize_registry()
 
         # Update array parameters
         self.array_azimuth = array_azimuth
@@ -224,8 +243,9 @@ class Array(ArrayBase):
             LOGGER.debug("...calculating interrow shading")
             self.calculate_interrow_direct_shading()
 
-        # -------- Update the surface areas (/ lengths) after shading calculation
-        self.surface_registry.loc[:, 'area'] = self.surface_registry.pvgeometry.length
+        # -------- Update the surface areas (lengths) after shading calculation
+        self.surface_registry.loc[
+            :, 'area'] = self.surface_registry.pvgeometry.length
 
         # ------- View factors: define the surface views and calculate view
         # factors
@@ -349,8 +369,8 @@ class Array(ArrayBase):
         # -- PVRow surfaces
 
         # Set the horizon diffuse light
-        # TODO: poa_horizon should not be negative... but it can be in the Perez
-        # model from pvlib
+        # TODO: poa_horizon should not be negative... but it can be in the
+        # Perez model from pvlib
         poa_horizon = np.abs(poa_horizon)
 
         # Add poa horizon contribution to all pvrow surfaces
@@ -879,33 +899,21 @@ class Array(ArrayBase):
         """
 
         front_surface_registry = copy.copy(self.line_registry)
-        front_surface_registry['surface_side'] = 'front'
+        front_surface_registry.loc[:, 'surface_side'] = 'front'
         # Create pvrow back surfaces
         back_surface_registry = front_surface_registry.loc[
             front_surface_registry.line_type == 'pvrow'].copy()
         back_surface_registry.loc[:, 'surface_side'] = 'back'
         # Merge two registries together
-        self.surface_registry = front_surface_registry.append(
-            back_surface_registry).reset_index(drop=False)
-        # FIXME: needed to give special methods to surface_registry, but
-        # Registry should not be its class
-        self.surface_registry = Registry(self.surface_registry.rename(
-            columns={'index': 'line_registry_index'}))
-        self.surface_registry.line_registry_index = (
-            self.surface_registry.line_registry_index
-        ).astype(int)
+        self.surface_registry = (
+            front_surface_registry
+            .append(back_surface_registry)
+            .assign(line_registry_index=lambda x: x.index.astype(int))
+            .reset_index(drop=True)
+        )
 
         # Discretize surfaces specified by user
-        self.surface_registry['pvrow_segment_index'] = np.nan
         self.discretize_surfaces()
-
-        # Add columns that will be used during calculations
-        self.surface_registry['irradiance_term'] = np.nan
-        self.surface_registry['reflectivity'] = np.nan
-        self.surface_registry['q0'] = np.nan
-        self.surface_registry['qinc'] = np.nan
-        self.surface_registry['area'] = np.nan
-        self.surface_registry['index_pvrow_neighbor'] = np.nan
 
     def discretize_surfaces(self):
         """

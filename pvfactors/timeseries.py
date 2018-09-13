@@ -54,6 +54,8 @@ def array_timeseries_calculate(
     array = Array(**pvarray_parameters)
     # We want to save the whole registry for each timestamp
     list_registries = []
+    # We want to record the skipped_ts
+    skipped_ts = []
     # Use for printing progress
     n = len(timestamps)
     i = 1
@@ -73,8 +75,12 @@ def array_timeseries_calculate(
                 registry['timestamps'] = ts
                 list_registries.append(registry)
 
+            else:
+                skipped_ts.append(ts)
+
         except Exception as err:
             LOGGER.debug("Unexpected error: {0}".format(err))
+            skipped_ts.append(ts)
 
         # Printing progress
         print_progress(i, n, prefix='Progress:', suffix='Complete',
