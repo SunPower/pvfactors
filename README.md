@@ -244,7 +244,7 @@ plt.show()
 ```
 
 
-![png](pvfactors/docs/_static/pvarray.png)
+![png](https://raw.githubusercontent.com/SunPower/pvfactors/master/pvfactors/docs/_static/pvarray.png)
 
 
 References
