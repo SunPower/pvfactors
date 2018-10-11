@@ -115,7 +115,7 @@ def test_merge_shadows():
         'pvrow_height': 2.,
         'solar_zenith': 30,
         'solar_azimuth': 0.,
-        'array_azimuth': 180.,
+        'array_azimuth': 90.,
         'pvrow_width': 3,
         'gcr': 0.9,
         'array_tilt': -20.
@@ -139,7 +139,7 @@ def test_interrow_shading():
         'pvrow_height': 3.,
         'solar_zenith': 30,
         'solar_azimuth': 180.,
-        'array_azimuth': 180.,
+        'array_azimuth': 90.,
         'pvrow_width': 3.,
         'gcr': 0.9,
         'array_tilt': 20.
@@ -157,7 +157,7 @@ def test_interrow_shading():
         'pvrow_height': 3.0,
         'solar_zenith': 60,
         'solar_azimuth': 0.,
-        'array_azimuth': 180.,
+        'array_azimuth': 90.,
         'pvrow_width': 3.0,
         'gcr': 0.9,
         'array_tilt': -20.

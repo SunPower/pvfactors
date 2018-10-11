@@ -41,7 +41,7 @@ def test_calculate_back_horizon_shading():
     solar_zenith = 45.
     solar_azimuth = 90.
     array_tilt = 90.  # tilted towards East
-    array_azimuth = 90.  # South-North TT orientation
+    surface_azimuth = 90.  # South-North TT orientation
     dni = 0.
     luminance_isotropic = 0.
     luminance_circumsolar = 0.
@@ -49,7 +49,7 @@ def test_calculate_back_horizon_shading():
     poa_circumsolar = 0.
 
     array.update_irradiance_terms_perez(
-        solar_zenith, solar_azimuth, array_tilt, array_azimuth,
+        solar_zenith, solar_azimuth, array_tilt, surface_azimuth,
         dni, luminance_isotropic, luminance_circumsolar,
         poa_horizon, poa_circumsolar)
 

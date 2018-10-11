@@ -66,12 +66,12 @@ def test_serial_circumsolar_shading_calculation():
         TEST_DATA, 'file_test_serial_circumsolar_shading_calculation.csv')
     df_inputs = pd.read_csv(test_file, index_col=0)
     df_inputs.index = pd.DatetimeIndex(df_inputs.index)
-    (timestamps, array_tilt, array_azimuth,
+    (timestamps, array_tilt, surface_azimuth,
      solar_zenith, solar_azimuth, dni, dhi) = breakup_df_inputs(df_inputs)
 
     # Run the calculation for functional testing
     df_registries, df_inputs_perez = (
         calculate_radiosities_serially_perez((arguments, timestamps, array_tilt,
-                                              array_azimuth, solar_zenith,
+                                              surface_azimuth, solar_zenith,
                                               solar_azimuth, dni, dhi))
     )

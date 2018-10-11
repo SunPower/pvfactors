@@ -8,7 +8,9 @@ from pvfactors.pvcore import (LinePVArray,
                               find_edge_point, Y_GROUND,
                               MAX_X_GROUND, MIN_X_GROUND,
                               calculate_circumsolar_shading,
-                              calculate_horizon_band_shading)
+                              calculate_horizon_band_shading,
+                              calculate_surface_azimuth,
+                              calculate_axis_azimuth)
 from pvfactors.pvrow import PVRowLine
 from pvfactors.view_factors import ViewFactorCalculator, VIEW_DICT
 from shapely.geometry import LineString, Point
@@ -135,8 +137,10 @@ class Array(ArrayBase):
         dimension [meters]
     :param float array_tilt: tilt angle of the whole array. All PV rows must
         have the same tilt angle [degrees]
-    :param float array_azimuth: azimuth angle of the whole array. All PV
-        rows must have the same azimuth angle [degrees]
+    :param float array_azimuth: azimuth angle of the whole array axis. All PV
+        rows must have the same azimuth angle [degrees]. For instance, it will
+        be the azimuth angle of the torque tube in the case of single-axis
+        trackers.
     :param float solar_zenith: zenith angle of the sun [degrees]
     :param float solar_azimuth: azimuth angle of the sun [degrees]
     :param float rho_ground: ground albedo
@@ -159,7 +163,7 @@ class Array(ArrayBase):
     _view_factor_calculator = ViewFactorCalculator
 
     def __init__(self, n_pvrows=3, pvrow_height=1.5, pvrow_width=1.,
-                 array_tilt=20., array_azimuth=180., solar_zenith=0.,
+                 array_tilt=20., array_azimuth=90., solar_zenith=0.,
                  solar_azimuth=180., rho_ground=0.2, rho_back_pvrow=0.05,
                  rho_front_pvrow=0.03, gcr=0.3, **kwargs):
 
@@ -170,7 +174,8 @@ class Array(ArrayBase):
         self.gcr = gcr
         self.pvrow_width = pvrow_width
         self.array_azimuth = None
-        self.array_tilt = None
+        self.surface_azimuth = None
+        self.surface_tilt = None
         self.illum_ground_indices = None
         self.has_direct_shading = None
         self.solar_2d_vector = None
@@ -191,28 +196,33 @@ class Array(ArrayBase):
         self.circumsolar_model = kwargs.get('circumsolar_model',
                                             'uniform_disk')
 
+        # Calculate surface azimuth assuming fixed tilt or single axis tracker
+        surface_azimuth = calculate_surface_azimuth(array_azimuth, array_tilt)
+
         # Update array from initial parameters
         self.update_view_factors(solar_zenith, solar_azimuth, array_tilt,
-                                 array_azimuth)
+                                 surface_azimuth)
 
     def update_view_factors(self, solar_zenith, solar_azimuth, array_tilt,
-                            array_azimuth):
+                            surface_azimuth):
         """
         Create new line and surface registries based on new inputs, and re-cal-
         culate the view factor matrix of the updated system.
 
-        :param float solar_zenith: zenith angle of the sun
-        :param float solar_azimuth: azimuth angle of the sun
+        :param float solar_zenith: zenith angle of the sun [in deg]
+        :param float solar_azimuth: azimuth angle of the sun [in deg]
         :param float array_tilt: tilt angle of the whole array. All PV rows must
-            have the same tilt angle
-        :param float array_azimuth: azimuth angle of the whole array. All PV
-            rows must have the same azimuth angle
+            have the same tilt angle [in deg]
+        :param float surface_azimuth: azimuth angle of the PV surfaces. All PV
+            surfaces must have the same azimuth angle [in deg]
         :return: None
         """
         self.line_registry = self.initialize_registry()
 
         # Update array parameters
-        self.array_azimuth = array_azimuth
+        self.surface_azimuth = surface_azimuth
+        self.array_azimuth = calculate_axis_azimuth(surface_azimuth,
+                                                    array_tilt)
         self.array_tilt = array_tilt
         self.solar_zenith = solar_zenith
         self.solar_azimuth = solar_azimuth
@@ -278,7 +288,7 @@ class Array(ArrayBase):
 
         # --- Calculate terms
         dni_ground = dni * cosd(solar_zenith)
-        # FIXME: only works for mono tilt
+        # TODO: only works for mono tilt
         aoi_array = aoi_function(array_tilt, array_azimuth, solar_zenith,
                                  solar_azimuth)
 
@@ -311,7 +321,7 @@ class Array(ArrayBase):
         self.irradiance_terms[-1] = dhi
 
     def update_irradiance_terms_perez(self, solar_zenith, solar_azimuth,
-                                      array_tilt, array_azimuth, dni,
+                                      array_tilt, surface_azimuth, dni,
                                       luminance_isotropic,
                                       luminance_circumsolar,
                                       poa_horizon, poa_circumsolar):
@@ -323,8 +333,8 @@ class Array(ArrayBase):
         :param float solar_azimuth: azimuth angle of the sun [degrees]
         :param float array_tilt: tilt angle of the whole array. All PV rows must
             have the same tilt angle [degrees]
-        :param float array_azimuth: azimuth angle of the whole array. All PV
-            rows must have the same azimuth angle [degrees]
+        :param float surface_azimuth: azimuth angle of the PV surfaces. All PV
+            surfaces must have the same azimuth angle [degrees]
         :param float dni: direct normal irradiance [W/m2]
         :param float luminance_isotropic: luminance of the isotropic part of the
             sky dome [W/m2/sr]
@@ -352,7 +362,7 @@ class Array(ArrayBase):
         dni_ground = dni * cosd(solar_zenith)
         circumsolar_ground = luminance_circumsolar
         # FIXME: only works for pvrows as lines
-        aoi_frontsurface = aoi_function(array_tilt, array_azimuth,
+        aoi_frontsurface = aoi_function(array_tilt, surface_azimuth,
                                         solar_zenith, solar_azimuth)
 
         # --- Assign terms to surfaces
@@ -532,7 +542,7 @@ class Array(ArrayBase):
             list(1. / self.surface_registry.reflectivity.values) + [1])
 
     def calculate_radiosities_perez(
-            self, solar_zenith, solar_azimuth, array_tilt, array_azimuth,
+            self, solar_zenith, solar_azimuth, array_tilt, surface_azimuth,
             dni, luminance_isotropic, luminance_circumsolar, poa_horizon,
             poa_circumsolar):
         """
@@ -544,8 +554,8 @@ class Array(ArrayBase):
         :param float solar_azimuth: azimuth angle of the sun [degrees]
         :param float array_tilt: tilt angle of the whole array. All PV rows must
             have the same tilt angle [degrees]
-        :param float array_azimuth: azimuth angle of the whole array. All PV
-            rows must have the same azimuth angle [degrees]
+        :param float surface_azimuth: azimuth angle of the PV surfaces. All PV
+            surfaces must have the same azimuth angle [degrees]
         :param float dni: direct normal irradiance [W/m2]
         :param float luminance_isotropic: luminance of the isotropic part of the
             sky dome [W/m2/sr]
@@ -562,14 +572,14 @@ class Array(ArrayBase):
         # Update the array configuration
         try:
             self.update_view_factors(solar_zenith, solar_azimuth, array_tilt,
-                                     array_azimuth)
+                                     surface_azimuth)
         except Exception as err:
             raise PVFactorsArrayUpdateException(
                 "Could not calculate shapely array or view factors because of "
                 "error: %s" % err)
 
         self.update_irradiance_terms_perez(solar_zenith, solar_azimuth,
-                                           array_tilt, array_azimuth, dni,
+                                           array_tilt, surface_azimuth, dni,
                                            luminance_isotropic,
                                            luminance_circumsolar,
                                            poa_horizon, poa_circumsolar)
@@ -608,6 +618,11 @@ class Array(ArrayBase):
     def create_pvrows_array(self, n_pvrows, pvrow_height):
         """
         Create list of PV rows in array, counting from left to right.
+        In the 2D plane that will be considered, no matter the array azimuth
+        angle will be, POSITIVE tilts will lead to pv surfaces tilted to the
+        LEFT, and NEGATIVE tilts will lead to PV surfaces tilted to the RIGHT.
+        So in the case of a single axis tracker, the direction of the torque
+        tube will be the normal vector going out of the 2D plane.
 
         :param int n_pvrows: number of PV rows in the array
         :param float pvrow_height: height of the PV rows, measured from ground
@@ -649,9 +664,15 @@ class Array(ArrayBase):
         """
         # Projection of 3d solar vector onto the cross section of the systems:
         # which is the 2d plane we are considering: needed to calculate shadows
-        solar_2d_vector = [sind(solar_zenith) * cosd(self.array_azimuth
-                                                     - solar_azimuth),
-                           cosd(solar_zenith)]
+        # Remember that the 2D plane is such that the direction of the torque
+        # tube vector goes out of (and normal to) the 2D plane, such that
+        # positive tilt angles will have the PV surfaces tilted to the LEFT
+        # and vice versa
+        solar_2d_vector = [
+            # a drawing really helps understand the following
+            - sind(solar_zenith)
+            * cosd(90. - (self.array_azimuth - solar_azimuth)),
+            cosd(solar_zenith)]
         # for a line of equation a*x + b*y + c = 0, we calculate intercept c
         # and can derive x_0 such that crosses with line y = 0: x_0 = - c / a
         list_x_shadows = []

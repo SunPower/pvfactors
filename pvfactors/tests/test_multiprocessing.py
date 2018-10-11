@@ -45,9 +45,9 @@ def test_calculate_radiosities_parallel_perez():
     # Select number of processes
     n_processes = None
     # Break up inputs
-    (timestamps, array_tilt, array_azimuth,
-     solar_zenith, solar_azimuth, dni, dhi) = breakup_df_inputs(df_inputs_simulation)
+    (timestamps, array_tilt, surface_azimuth, solar_zenith, solar_azimuth,
+     dni, dhi) = breakup_df_inputs(df_inputs_simulation)
     # Run calculation
     results = calculate_radiosities_parallel_perez(
-        arguments, timestamps, array_tilt, array_azimuth,
+        arguments, timestamps, array_tilt, surface_azimuth,
         solar_zenith, solar_azimuth, dni, dhi, n_processes=n_processes)

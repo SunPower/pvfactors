@@ -52,7 +52,7 @@ def test_array_calculate_timeseries():
     array = Array(**arguments)
 
     # Break up inputs
-    (timestamps, array_tilt, array_azimuth,
+    (timestamps, array_tilt, surface_azimuth,
      solar_zenith, solar_azimuth, dni, dhi) = breakup_df_inputs(df_inputs)
 
     # Fill in the missing pieces
@@ -64,7 +64,7 @@ def test_array_calculate_timeseries():
     # Run timeseries calculation
     df_registries = array_timeseries_calculate(
         arguments, timestamps, solar_zenith, solar_azimuth,
-        array_tilt, array_azimuth, dni, luminance_isotropic,
+        array_tilt, surface_azimuth, dni, luminance_isotropic,
         luminance_circumsolar, poa_horizon, poa_circumsolar)
 
     # Calculate surface averages for pvrows
@@ -105,9 +105,9 @@ def test_perez_diffuse_luminance(df_perez_luminance):
                                 .tz_localize(None))
 
     # Break up inputs
-    (timestamps, array_tilt, array_azimuth, solar_zenith, solar_azimuth,
+    (timestamps, array_tilt, surface_azimuth, solar_zenith, solar_azimuth,
      dni, dhi) = breakup_df_inputs(df_inputs_clearday)
-    df_outputs = perez_diffuse_luminance(timestamps, array_tilt, array_azimuth,
+    df_outputs = perez_diffuse_luminance(timestamps, array_tilt, surface_azimuth,
                                          solar_zenith, solar_azimuth, dni, dhi)
 
     col_order = df_outputs.columns
@@ -130,11 +130,11 @@ def test_luminance_in_timeseries_calc(df_perez_luminance,
                                 .tz_localize(None))
 
     # Break up inputs
-    (timestamps, array_tilt, array_azimuth, solar_zenith, solar_azimuth,
+    (timestamps, array_tilt, surface_azimuth, solar_zenith, solar_azimuth,
      dni, dhi) = breakup_df_inputs(df_inputs_clearday)
     _, df_outputs = calculate_radiosities_serially_perez(
         (None, timestamps, solar_zenith, solar_azimuth,
-         array_tilt, array_azimuth,
+         array_tilt, surface_azimuth,
          dni, dhi))
 
     col_order = df_outputs.columns
@@ -179,12 +179,12 @@ def test_save_all_outputs_calculate_perez():
     }
 
     # Break up inputs
-    (timestamps, array_tilt, array_azimuth,
+    (timestamps, array_tilt, surface_azimuth,
      solar_zenith, solar_azimuth, dni, dhi) = breakup_df_inputs(
          df_inputs_clearday.iloc[:idx_subset])
 
     args = (arguments, timestamps, solar_zenith, solar_azimuth,
-            array_tilt, array_azimuth, dni, dhi)
+            array_tilt, surface_azimuth, dni, dhi)
 
     # Run the serial calculation
     df_registries_serial, _ = (
@@ -207,7 +207,7 @@ def test_save_all_outputs_calculate_perez():
         [842.24681064, 842.26195526, 842.15463995]])
 
     # Perform the comparisons
-    rtol = 1e-7
+    rtol = 1e-6
     atol = 0
     assert np.allclose(expected_ipoa_dict_qinc,
                        df_outputs_segments_serial.values,

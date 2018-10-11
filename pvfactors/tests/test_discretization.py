@@ -69,10 +69,10 @@ def test_consistent_qinc():
     solar_azimuth = 180.
 
     array_tilt = 20.
-    array_azimuth = 180.
+    surface_azimuth = 180.
 
     array.calculate_radiosities_perez(solar_zenith, solar_azimuth, array_tilt,
-                                      array_azimuth, dni, luminance_isotropic,
+                                      surface_azimuth, dni, luminance_isotropic,
                                       luminance_circumsolar, poa_horizon,
                                       poa_circumsolar)
 

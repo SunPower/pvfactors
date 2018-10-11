@@ -33,7 +33,7 @@ def test_view_matrix():
         'pvrow_height': 1.5,
         'solar_zenith': 30,
         'solar_azimuth': 180.,
-        'array_azimuth': 180.,
+        'array_azimuth': 90.,
         'pvrow_width': 1.,
         'gcr': 0.3,
         'array_tilt': 20.
@@ -74,7 +74,7 @@ def test_view_factor_matrix():
         'pvrow_height': 1.5,
         'solar_zenith': 30,
         'solar_azimuth': 180.,
-        'array_azimuth': 180.,
+        'array_azimuth': 90.,
         'pvrow_width': 1.0,
         'gcr': 0.4,
         'array_tilt': 30.
@@ -146,11 +146,11 @@ def test_negativevf_and_flatcasenoon():
         'UTC').tz_convert('US/Arizona')
 
     # Break up inputs
-    (timestamps, array_tilt, array_azimuth,
+    (timestamps, array_tilt, surface_azimuth,
      solar_zenith, solar_azimuth, dni, dhi) = breakup_df_inputs(df_inputs)
 
     args = (pvarray_parameters, timestamps, solar_zenith, solar_azimuth,
-            array_tilt, array_azimuth, dni, dhi)
+            array_tilt, surface_azimuth, dni, dhi)
     df_registries, _ = calculate_radiosities_serially_perez(args)
     df_outputs = get_average_pvrow_outputs(df_registries)
 
@@ -194,11 +194,11 @@ def test_back_surface_luminance():
         'UTC').tz_convert('US/Arizona')
 
     # Break up inputs
-    (timestamps, array_tilt, array_azimuth,
+    (timestamps, array_tilt, surface_azimuth,
      solar_zenith, solar_azimuth, dni, dhi) = breakup_df_inputs(df_inputs)
 
     args = (pvarray_parameters, timestamps, solar_zenith, solar_azimuth,
-            array_tilt, array_azimuth, dni, dhi)
+            array_tilt, surface_azimuth, dni, dhi)
     df_registries, _ = calculate_radiosities_serially_perez(args)
 
     df_outputs = get_average_pvrow_outputs(df_registries)
