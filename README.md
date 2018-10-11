@@ -62,6 +62,8 @@ Given some timeseries inputs:
 
 
 ```python
+import numpy as np
+from datetime import datetime
 timestamps = np.array([datetime(2017, 8, 31, 11), datetime(2017, 8, 31, 12)])
 solar_zenith = np.array([20., 10.])
 solar_azimuth = np.array([110., 140.])
