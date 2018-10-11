@@ -17,17 +17,26 @@ Documentation
 -------------
 
 The documentation can be found [here](https://sunpower.github.io/pvfactors).
+Please refer to the TL;DR section below to find a quick start tutorial.
 
 
 Installation
 ------------
 
-pvfactors is currently compatible and tested with Python versions 2.7 and 3.6
+pvfactors is currently compatible and tested with Python versions 2.7 and 3.6, and is available in [PyPI](https://pypi.org/project/pvfactors/).
 
-You can install the package using [pip](https://pip.pypa.io/en/stable/) and the
-wheel file from the latest release in the [release section](https://github.com/SunPower/pvfactors/releases) of this Github repository.
+The easiest way to install pvfactors is to use [pip](https://pip.pypa.io/en/stable/) as follows:
 
-You can also fork this repository and install the pvfactors using [pip](https://pip.pypa.io/en/stable/) in the root folder of the package:
+    $ pip install pvfactors
+
+The package wheel files are also available in the [release section](https://github.com/SunPower/pvfactors/releases) of the Github repository.
+
+
+Contributing
+------------
+
+Contributions are much needed in order to improve this package.
+If you wish to contribute, you can start by forking the repository and installing pvfactors using [pip](https://pip.pypa.io/en/stable/) in the root folder of the package:
 
     $ pip install .
 
@@ -49,14 +58,14 @@ a list of important dependencies:
 * [pvlib-python](https://pypi.python.org/pypi/pvlib)
 
 
-Quickstart Example
-------------------
+Notebook demo
+-------------
 
-The following Jupyter notebook is a good way to get started: [notebook](http://sunpower.github.io/pvfactors/developer/pvfactors_demo.html)
+The following Jupyter notebook is a good way to get a quick overview: [notebook](http://sunpower.github.io/pvfactors/developer/pvfactors_demo.html)
 
 
-TL;DR
------
+TL;DR - Quick Start
+-------------------
 
 Given some timeseries inputs:
 
