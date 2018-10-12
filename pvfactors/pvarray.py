@@ -362,7 +362,8 @@ class Array(ArrayBase):
         dni_ground = dni * cosd(solar_zenith)
         circumsolar_ground = luminance_circumsolar
         # FIXME: only works for pvrows as lines
-        aoi_frontsurface = aoi_function(array_tilt, surface_azimuth,
+        surface_tilt = np.abs(array_tilt)
+        aoi_frontsurface = aoi_function(surface_tilt, surface_azimuth,
                                         solar_zenith, solar_azimuth)
 
         # --- Assign terms to surfaces
