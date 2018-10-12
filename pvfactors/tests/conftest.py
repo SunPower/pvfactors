@@ -42,6 +42,10 @@ def df_perez_luminance():
     """ Example of df_segments to be used for tests """
     fp = os.path.join(DIR_TEST_DATA, 'file_test_df_perez_luminance.csv')
     df_perez_luminance = pd.read_csv(fp, header=[0], index_col=0)
+
+    df_perez_luminance.index = (pd.DatetimeIndex(df_perez_luminance.index)
+                                .tz_localize('UTC').tz_convert('Etc/GMT+7')
+                                .tz_localize(None))
     yield df_perez_luminance
 
 

@@ -98,17 +98,15 @@ def test_perez_diffuse_luminance(df_perez_luminance):
     Test that the calculation of luminance -- first step in using the vf model
     with Perez -- is functional
     """
-    df_inputs_clearday = pd.read_csv(FILE_PATH)
-    df_inputs_clearday = df_inputs_clearday.set_index('datetime', drop=True)
-    df_inputs_clearday.index = (pd.DatetimeIndex(df_inputs_clearday.index)
-                                .tz_localize('UTC').tz_convert('Etc/GMT+7')
-                                .tz_localize(None))
-
+    df_inputs = df_perez_luminance[['array_tilt', 'array_azimuth',
+                                    'solar_zenith', 'solar_azimuth', 'dni',
+                                    'dhi']]
     # Break up inputs
     (timestamps, array_tilt, surface_azimuth, solar_zenith, solar_azimuth,
-     dni, dhi) = breakup_df_inputs(df_inputs_clearday)
-    df_outputs = perez_diffuse_luminance(timestamps, array_tilt, surface_azimuth,
-                                         solar_zenith, solar_azimuth, dni, dhi)
+     dni, dhi) = breakup_df_inputs(df_inputs)
+    df_outputs = perez_diffuse_luminance(timestamps, array_tilt,
+                                         surface_azimuth, solar_zenith,
+                                         solar_azimuth, dni, dhi)
 
     col_order = df_outputs.columns
     tol = 1e-8
