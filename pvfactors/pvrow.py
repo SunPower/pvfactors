@@ -153,16 +153,16 @@ class PVRowLine(PVRowBase):
             geometry = line['geometry']
             b1 = geometry.boundary[0]
             b2 = geometry.boundary[1]
-            shadow_intercept_1 = - (solar_2d_vector[1] * b1.x
-                                    + solar_2d_vector[0] * b1.y)
-            shadow_intercept_2 = - (solar_2d_vector[1] * b2.x
-                                    + solar_2d_vector[0] * b2.y)
-            x1_shadow = - ((shadow_intercept_1
-                            + solar_2d_vector[0] * Y_GROUND)
-                           / solar_2d_vector[1])
-            x2_shadow = - ((shadow_intercept_2
-                            + solar_2d_vector[0] * Y_GROUND)
-                           / solar_2d_vector[1])
+            # consider line equation: u*x + v*y + c = 0
+            # for lines 1 and 2 (parallel)
+            u = - solar_2d_vector[0]
+            v = solar_2d_vector[1]
+            # Find intercepts for lines 1 and 2
+            c_1 = - (u * b1.x + v * b1.y)
+            c_2 = - (u * b2.x + v * b2.y)
+            # Find intersections of ray lines with horizontal ground line
+            x1_shadow = - (c_1 + v * Y_GROUND) / u
+            x2_shadow = - (c_2 + v * Y_GROUND) / u
             list_x_values.append(x1_shadow)
             list_x_values.append(x2_shadow)
         x1_shadow = min(list_x_values)
