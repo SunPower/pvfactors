@@ -670,8 +670,7 @@ class Array(ArrayBase):
         # and vice versa
         solar_2d_vector = [
             # a drawing really helps understand the following
-            - sind(solar_zenith)
-            * cosd(90. - (self.array_azimuth - solar_azimuth)),
+            sind(solar_zenith) * sind(self.array_azimuth - solar_azimuth),
             cosd(solar_zenith)]
         # for a line of equation a*x + b*y + c = 0, we calculate intercept c
         # and can derive x_0 such that crosses with line y = 0: x_0 = - c / a
