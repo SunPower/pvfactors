@@ -155,8 +155,8 @@ class PVRowLine(PVRowBase):
             b2 = geometry.boundary[1]
             # consider line equation: u*x + v*y + c = 0
             # for lines 1 and 2 (parallel)
-            u = - solar_2d_vector[0]
-            v = solar_2d_vector[1]
+            u = - solar_2d_vector[1]
+            v = solar_2d_vector[0]
             # Find intercepts for lines 1 and 2
             c_1 = - (u * b1.x + v * b1.y)
             c_2 = - (u * b2.x + v * b2.y)
