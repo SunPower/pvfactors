@@ -33,11 +33,14 @@ def test_array_calculate_timeseries():
     isotropic diffuse sky approach stay consistent
     """
     # Simple sky and array configuration
-    df_inputs = pd.DataFrame(
-        np.array(
-            [[80., 0., 70., 180., 1e3, 1e2],
-             [20., 180., 40., 180., 1e3, 1e2],
-             [70.4407256, 248.08690811, 42.4337927, 270., 1000., 100.]]),
+    df_inputs = pd.DataFrame({
+        'solar_zenith': [80., 20., 70.4407256],
+        'solar_azimuth': [0., 180., 248.08690811],
+        'array_tilt': [70., 40., 42.4337927],
+        'array_azimuth': [180., 180., 270.],
+        'dni': [1e3, 1e3, 1000.],
+        'dhi': [1e2, 1e2, 100.]
+    },
         columns=['solar_zenith', 'solar_azimuth', 'array_tilt',
                  'array_azimuth', 'dni', 'dhi'],
         index=[0, 1, 2]
@@ -48,8 +51,6 @@ def test_array_calculate_timeseries():
         'pvrow_width': 1.,
         'gcr': 0.3,
     }
-
-    array = Array(**arguments)
 
     # Break up inputs
     (timestamps, array_tilt, surface_azimuth,
@@ -88,9 +89,10 @@ def test_array_calculate_timeseries():
         [76.66206408, 1038.90759755, 925.87630648],
         [True, False, False]], dtype=object)
     tol = 1e-8
-    assert np.allclose(expected_outputs_array[:-1, :].astype(float),
-                       df_outputs.values.T,
-                       atol=tol, rtol=0, equal_nan=True)
+    print(df_outputs.values.T)
+    np.testing.assert_allclose(expected_outputs_array[:-1, :].astype(float),
+                               df_outputs.values.T,
+                               atol=tol, rtol=0, equal_nan=True)
 
 
 def test_perez_diffuse_luminance(df_perez_luminance):
@@ -110,9 +112,9 @@ def test_perez_diffuse_luminance(df_perez_luminance):
 
     col_order = df_outputs.columns
     tol = 1e-8
-    assert np.allclose(df_outputs.values,
-                       df_perez_luminance[col_order].values,
-                       atol=0, rtol=tol)
+    np.testing.assert_allclose(df_outputs.values,
+                               df_perez_luminance[col_order].values,
+                               atol=0, rtol=tol)
 
 
 def test_luminance_in_timeseries_calc(df_perez_luminance,
@@ -137,9 +139,9 @@ def test_luminance_in_timeseries_calc(df_perez_luminance,
 
     col_order = df_outputs.columns
     tol = 1e-8
-    assert np.allclose(df_outputs.values,
-                       df_perez_luminance[col_order].values,
-                       atol=0, rtol=tol)
+    np.testing.assert_allclose(df_outputs.values,
+                               df_perez_luminance[col_order].values,
+                               atol=0, rtol=tol)
 
 
 def test_save_all_outputs_calculate_perez():
@@ -207,12 +209,12 @@ def test_save_all_outputs_calculate_perez():
     # Perform the comparisons
     rtol = 1e-6
     atol = 0
-    assert np.allclose(expected_ipoa_dict_qinc,
-                       df_outputs_segments_serial.values,
-                       atol=atol, rtol=rtol)
-    assert np.allclose(expected_ipoa_dict_qinc,
-                       df_outputs_segments_parallel.values,
-                       atol=atol, rtol=rtol)
+    np.testing.assert_allclose(expected_ipoa_dict_qinc,
+                               df_outputs_segments_serial.values,
+                               atol=atol, rtol=rtol)
+    np.testing.assert_allclose(expected_ipoa_dict_qinc,
+                               df_outputs_segments_parallel.values,
+                               atol=atol, rtol=rtol)
 
 
 def test_get_average_pvrow_outputs(df_registries, df_outputs):
@@ -227,9 +229,9 @@ def test_get_average_pvrow_outputs(df_registries, df_outputs):
     # print(calc_df_outputs_num)
     tol = 1e-8
     # Compare numerical values
-    assert np.allclose(df_outputs.iloc[:, 1:].values,
-                       calc_df_outputs_num.values,
-                       atol=0, rtol=tol)
+    np.testing.assert_allclose(df_outputs.iloc[:, 1:].values,
+                               calc_df_outputs_num.values,
+                               atol=0, rtol=tol)
 
     array_is_shaded = calc_df_outputs_shading.sum(axis=1).values > 0
     # Compare bool on shading
@@ -258,7 +260,7 @@ def test_get_average_pvrow_segments(df_registries, df_segments):
     df_calc_num = df_calc_num.loc[:, ordered_index].fillna(0.)
     # Compare arrays
     tol = 1e-8
-    assert np.allclose(
+    np.testing.assert_allclose(
         df_segments.values,
         df_calc_num.values,
         atol=0, rtol=tol)
@@ -281,9 +283,10 @@ def test_get_average_pvrow_outputs_nans(df_registries_with_nan, df_outputs):
 
     tol = 1e-8
     # Compare numerical values
-    assert np.allclose(df_outputs.iloc[:, 1:].values,
-                       calc_df_outputs_num.dropna(axis=0, how='all').values,
-                       atol=0, rtol=tol)
+    np.testing.assert_allclose(df_outputs.iloc[:, 1:].values,
+                               calc_df_outputs_num.dropna(axis=0,
+                                                          how='all').values,
+                               atol=0, rtol=tol)
 
     array_is_shaded = calc_df_outputs_shading.dropna(
         axis=0, how='all').sum(axis=1).values > 0
