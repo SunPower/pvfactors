@@ -89,7 +89,6 @@ def test_array_calculate_timeseries():
         [76.66206408, 1038.90759755, 925.87630648],
         [True, False, False]], dtype=object)
     tol = 1e-8
-    print(df_outputs.values.T)
     np.testing.assert_allclose(expected_outputs_array[:-1, :].astype(float),
                                df_outputs.values.T,
                                atol=tol, rtol=0, equal_nan=True)

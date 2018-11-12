@@ -218,6 +218,10 @@ class Array(ArrayBase):
         :return: None
         """
         self.line_registry = self.initialize_registry()
+        # Check on which side the light is incident
+        surface_tilt = np.abs(array_tilt)
+        sun_on_front_surface = aoi_function(surface_tilt, surface_azimuth,
+                                            solar_zenith, solar_azimuth) <= 90
 
         # Update array parameters
         self.surface_azimuth = surface_azimuth
@@ -251,7 +255,7 @@ class Array(ArrayBase):
         # -------- Interrow shading
         if self.has_direct_shading:
             LOGGER.debug("...calculating interrow shading")
-            self.calculate_interrow_direct_shading()
+            self.calculate_interrow_direct_shading(sun_on_front_surface)
 
         # -------- Update the surface areas (lengths) after shading calculation
         self.surface_registry.loc[
@@ -846,11 +850,13 @@ class Array(ArrayBase):
             self.line_registry.pvgeometry.add(
                 [ill_gnd_left, ill_gnd_right]))
 
-    def calculate_interrow_direct_shading(self):
+    def calculate_interrow_direct_shading(self, sun_on_front_surface):
         """
         Calculate inter-row direct shading and  break up PV row objects into
         shaded and unshaded parts.
 
+        :param bool sun_on_front_surface: flag check if sun is incident on
+            front surface
         :return: None; updating :attr:`line_registry` with additional entries
         """
         # Find the direction of shading
@@ -861,7 +867,7 @@ class Array(ArrayBase):
                               .bounds[0] >=
                               self.pvrows[0].left_point.x)
         # Determine if front or back surface has direct shading
-        if self.pvrows[0].is_front_side_illuminated(self.solar_2d_vector):
+        if sun_on_front_surface:
             side_shaded = 'front'
         else:
             side_shaded = 'back'
