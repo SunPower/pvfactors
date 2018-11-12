@@ -173,20 +173,21 @@ def perez_diffuse_luminance(timestamps, array_tilt, array_azimuth,
                                                return_components=True)
 
     # Calculate Perez view factors:
-    a = aoi_projection(df_inputs.array_tilt, df_inputs.array_azimuth,
+    a = aoi_projection(np.abs(df_inputs.array_tilt), df_inputs.array_azimuth,
                        df_inputs.solar_zenith, df_inputs.solar_azimuth)
     a = np.maximum(a, 0)
     b = cosd(df_inputs.solar_zenith)
     b = np.maximum(b, cosd(85))
 
-    vf_perez = pd.DataFrame(
-        np.array([
-            sind(df_inputs.array_tilt),
-            a / b,
-            (1. + cosd(df_inputs.array_tilt)) / 2.
-        ]).T,
-        index=df_inputs.index,
-        columns=['vf_horizon', 'vf_circumsolar', 'vf_isotropic']
+    print("\na: {}".format(a))
+    print("b: {}".format(b))
+
+    vf_perez = pd.DataFrame({
+        'vf_horizon': sind(df_inputs.array_tilt),
+        'vf_circumsolar': a / b,
+        'vf_isotropic': (1. + cosd(df_inputs.array_tilt)) / 2.
+    },
+        index=df_inputs.index
     )
 
     # Calculate diffuse luminance
