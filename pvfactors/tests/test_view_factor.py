@@ -36,7 +36,7 @@ def test_view_matrix():
         'array_azimuth': 90.,
         'pvrow_width': 1.,
         'gcr': 0.3,
-        'array_tilt': 20.
+        'tracker_theta': 20.
     }
     array = Array(**arguments)
 
@@ -77,7 +77,7 @@ def test_view_factor_matrix():
         'array_azimuth': 90.,
         'pvrow_width': 1.0,
         'gcr': 0.4,
-        'array_tilt': 30.
+        'tracker_theta': 30.
     }
     array = Array(**arguments)
 
@@ -127,7 +127,7 @@ def test_negativevf_and_flatcasenoon():
 
     pvarray_parameters = {
         'array_azimuth': 90,
-        'array_tilt': 0.0,
+        'tracker_theta': 0.0,
         'gcr': 0.3,
         'n_pvrows': 3,
         'pvrow_height': 1.5,
@@ -146,11 +146,11 @@ def test_negativevf_and_flatcasenoon():
         'UTC').tz_convert('US/Arizona')
 
     # Break up inputs
-    (timestamps, array_tilt, surface_azimuth,
+    (timestamps, tracker_theta, surface_azimuth,
      solar_zenith, solar_azimuth, dni, dhi) = breakup_df_inputs(df_inputs)
 
     args = (pvarray_parameters, timestamps, solar_zenith, solar_azimuth,
-            array_tilt, surface_azimuth, dni, dhi)
+            tracker_theta, surface_azimuth, dni, dhi)
     df_registries, _ = calculate_radiosities_serially_perez(args)
     df_outputs = get_average_pvrow_outputs(df_registries)
 
@@ -174,7 +174,7 @@ def test_back_surface_luminance():
     """
     pvarray_parameters = {
         'array_azimuth': 90,
-        'array_tilt': 0.0,
+        'tracker_theta': 0.0,
         'gcr': 0.3,
         'n_pvrows': 3,
         'pvrow_height': 1.5,
@@ -194,11 +194,11 @@ def test_back_surface_luminance():
         'UTC').tz_convert('US/Arizona')
 
     # Break up inputs
-    (timestamps, array_tilt, surface_azimuth,
+    (timestamps, tracker_theta, surface_azimuth,
      solar_zenith, solar_azimuth, dni, dhi) = breakup_df_inputs(df_inputs)
 
     args = (pvarray_parameters, timestamps, solar_zenith, solar_azimuth,
-            array_tilt, surface_azimuth, dni, dhi)
+            tracker_theta, surface_azimuth, dni, dhi)
     df_registries, _ = calculate_radiosities_serially_perez(args)
 
     df_outputs = get_average_pvrow_outputs(df_registries)

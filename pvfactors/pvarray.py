@@ -135,7 +135,7 @@ class Array(ArrayBase):
         center [meters]
     :param float pvrow_width: width of PV rows, in the considered 2D
         dimension [meters]
-    :param float array_tilt: tilt angle of the whole array. All PV rows must
+    :param float tracker_theta: tilt angle of the whole array. All PV rows must
         have the same tilt angle [degrees]
     :param float array_azimuth: azimuth angle of the whole array axis. All PV
         rows must have the same azimuth angle [degrees]. For instance, it will
@@ -163,7 +163,7 @@ class Array(ArrayBase):
     _view_factor_calculator = ViewFactorCalculator
 
     def __init__(self, n_pvrows=3, pvrow_height=1.5, pvrow_width=1.,
-                 array_tilt=20., array_azimuth=90., solar_zenith=0.,
+                 tracker_theta=20., array_azimuth=90., solar_zenith=0.,
                  solar_azimuth=180., rho_ground=0.2, rho_back_pvrow=0.05,
                  rho_front_pvrow=0.03, gcr=0.3, **kwargs):
 
@@ -197,13 +197,13 @@ class Array(ArrayBase):
                                             'uniform_disk')
 
         # Calculate surface azimuth assuming fixed tilt or single axis tracker
-        surface_azimuth = calculate_surface_azimuth(array_azimuth, array_tilt)
+        surface_azimuth = calculate_surface_azimuth(array_azimuth, tracker_theta)
 
         # Update array from initial parameters
-        self.update_view_factors(solar_zenith, solar_azimuth, array_tilt,
+        self.update_view_factors(solar_zenith, solar_azimuth, tracker_theta,
                                  surface_azimuth)
 
-    def update_view_factors(self, solar_zenith, solar_azimuth, array_tilt,
+    def update_view_factors(self, solar_zenith, solar_azimuth, tracker_theta,
                             surface_azimuth):
         """
         Create new line and surface registries based on new inputs, and re-cal-
@@ -211,7 +211,7 @@ class Array(ArrayBase):
 
         :param float solar_zenith: zenith angle of the sun [in deg]
         :param float solar_azimuth: azimuth angle of the sun [in deg]
-        :param float array_tilt: tilt angle of the whole array. All PV rows must
+        :param float tracker_theta: tilt angle of the whole array. All PV rows must
             have the same tilt angle [in deg]
         :param float surface_azimuth: azimuth angle of the PV surfaces. All PV
             surfaces must have the same azimuth angle [in deg]
@@ -219,15 +219,15 @@ class Array(ArrayBase):
         """
         self.line_registry = self.initialize_registry()
         # Check on which side the light is incident
-        surface_tilt = np.abs(array_tilt)
+        surface_tilt = np.abs(tracker_theta)
         sun_on_front_surface = aoi_function(surface_tilt, surface_azimuth,
                                             solar_zenith, solar_azimuth) <= 90
 
         # Update array parameters
         self.surface_azimuth = surface_azimuth
         self.array_azimuth = calculate_axis_azimuth(surface_azimuth,
-                                                    array_tilt)
-        self.array_tilt = array_tilt
+                                                    tracker_theta)
+        self.tracker_theta = tracker_theta
         self.solar_zenith = solar_zenith
         self.solar_azimuth = solar_azimuth
 
@@ -272,14 +272,14 @@ class Array(ArrayBase):
         )
 
     def update_irradiance_terms_simple(self, solar_zenith, solar_azimuth,
-                                       array_tilt, array_azimuth, dni, dhi):
+                                       tracker_theta, array_azimuth, dni, dhi):
         """
         Calculate the irradiance source terms of all surfaces by assuming that
         the whole sky dome is isotropic (no diffuse sky dome decomposition).
 
         :param float solar_zenith: zenith angle of the sun [degrees]
         :param float solar_azimuth: azimuth angle of the sun [degrees]
-        :param float array_tilt: tilt angle of the whole array. All PV rows must
+        :param float tracker_theta: tilt angle of the whole array. All PV rows must
             have the same tilt angle [degrees]
         :param float array_azimuth: azimuth angle of the whole array. All PV
             rows must have the same azimuth angle [degrees]
@@ -293,7 +293,7 @@ class Array(ArrayBase):
         # --- Calculate terms
         dni_ground = dni * cosd(solar_zenith)
         # TODO: only works for mono tilt
-        aoi_array = aoi_function(array_tilt, array_azimuth, solar_zenith,
+        aoi_array = aoi_function(tracker_theta, array_azimuth, solar_zenith,
                                  solar_azimuth)
 
         # --- Assign terms to surfaces
@@ -325,7 +325,7 @@ class Array(ArrayBase):
         self.irradiance_terms[-1] = dhi
 
     def update_irradiance_terms_perez(self, solar_zenith, solar_azimuth,
-                                      array_tilt, surface_azimuth, dni,
+                                      tracker_theta, surface_azimuth, dni,
                                       luminance_isotropic,
                                       luminance_circumsolar,
                                       poa_horizon, poa_circumsolar):
@@ -335,7 +335,7 @@ class Array(ArrayBase):
 
         :param float solar_zenith: zenith angle of the sun [degrees]
         :param float solar_azimuth: azimuth angle of the sun [degrees]
-        :param float array_tilt: tilt angle of the whole array. All PV rows must
+        :param float tracker_theta: tilt angle of the whole array. All PV rows must
             have the same tilt angle [degrees]
         :param float surface_azimuth: azimuth angle of the PV surfaces. All PV
             surfaces must have the same azimuth angle [degrees]
@@ -366,7 +366,7 @@ class Array(ArrayBase):
         dni_ground = dni * cosd(solar_zenith)
         circumsolar_ground = luminance_circumsolar
         # FIXME: only works for pvrows as lines
-        surface_tilt = np.abs(array_tilt)
+        surface_tilt = np.abs(tracker_theta)
         aoi_frontsurface = aoi_function(surface_tilt, surface_azimuth,
                                         solar_zenith, solar_azimuth)
 
@@ -547,7 +547,7 @@ class Array(ArrayBase):
             list(1. / self.surface_registry.reflectivity.values) + [1])
 
     def calculate_radiosities_perez(
-            self, solar_zenith, solar_azimuth, array_tilt, surface_azimuth,
+            self, solar_zenith, solar_azimuth, tracker_theta, surface_azimuth,
             dni, luminance_isotropic, luminance_circumsolar, poa_horizon,
             poa_circumsolar):
         """
@@ -557,7 +557,7 @@ class Array(ArrayBase):
 
         :param float solar_zenith: zenith angle of the sun [degrees]
         :param float solar_azimuth: azimuth angle of the sun [degrees]
-        :param float array_tilt: tilt angle of the whole array. All PV rows must
+        :param float tracker_theta: tilt angle of the whole array. All PV rows must
             have the same tilt angle [degrees]
         :param float surface_azimuth: azimuth angle of the PV surfaces. All PV
             surfaces must have the same azimuth angle [degrees]
@@ -576,7 +576,7 @@ class Array(ArrayBase):
         """
         # Update the array configuration
         try:
-            self.update_view_factors(solar_zenith, solar_azimuth, array_tilt,
+            self.update_view_factors(solar_zenith, solar_azimuth, tracker_theta,
                                      surface_azimuth)
         except Exception as err:
             raise PVFactorsArrayUpdateException(
@@ -584,7 +584,7 @@ class Array(ArrayBase):
                 "error: %s" % err)
 
         self.update_irradiance_terms_perez(solar_zenith, solar_azimuth,
-                                           array_tilt, surface_azimuth, dni,
+                                           tracker_theta, surface_azimuth, dni,
                                            luminance_isotropic,
                                            luminance_circumsolar,
                                            poa_horizon, poa_circumsolar)
@@ -639,14 +639,14 @@ class Array(ArrayBase):
         x_center = X_ORIGIN_PVROWS
         index = 0
         pvrow = self.pvrow_class(self.line_registry, x_center, y_center, index,
-                                 self.array_tilt, self.pvrow_width)
+                                 self.tracker_theta, self.pvrow_width)
         pvrows = [pvrow]
         if n_pvrows > 1:
             distance = pvrow.width / self.gcr
             for i in range(1, n_pvrows):
                 x_center = i * distance
                 pvrow = self.pvrow_class(self.line_registry, x_center, y_center,
-                                         i, self.array_tilt, self.pvrow_width)
+                                         i, self.tracker_theta, self.pvrow_width)
                 pvrows.append(pvrow)
 
         return pvrows

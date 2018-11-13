@@ -25,7 +25,7 @@ def test_serial_calculation_with_skips(
     """
 
     # Break up inputs
-    (timestamps, array_tilt, surface_azimuth,
+    (timestamps, tracker_theta, surface_azimuth,
      solar_zenith, solar_azimuth, dni, dhi) = breakup_df_inputs(
          df_inputs_serial_calculation_with_skips)
 
@@ -33,7 +33,7 @@ def test_serial_calculation_with_skips(
     df_registries, _ = calculate_radiosities_serially_perez(
         (pvarray_parameters_serial_calc, timestamps,
          solar_zenith, solar_azimuth,
-         array_tilt, surface_azimuth, dni, dhi))
+         tracker_theta, surface_azimuth, dni, dhi))
 
     list_nan_idx = df_registries.index[
         df_registries.set_index('timestamps').count(axis=1) == 0]
@@ -49,7 +49,7 @@ def test_serial_calculation(pvarray_parameters_serial_calc,
     """
 
     # Break up inputs
-    (timestamps, array_tilt, surface_azimuth,
+    (timestamps, tracker_theta, surface_azimuth,
      solar_zenith, solar_azimuth, dni, dhi) = breakup_df_inputs(
          df_inputs_serial_calculation)
 
@@ -57,7 +57,7 @@ def test_serial_calculation(pvarray_parameters_serial_calc,
     df_registries, _ = calculate_radiosities_serially_perez(
         (pvarray_parameters_serial_calc, timestamps,
          solar_zenith, solar_azimuth,
-         array_tilt, surface_azimuth, dni, dhi))
+         tracker_theta, surface_azimuth, dni, dhi))
 
     # Format df_registries to get outputs
     df_outputs = get_average_pvrow_outputs(df_registries,

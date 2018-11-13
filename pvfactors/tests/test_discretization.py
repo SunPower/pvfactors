@@ -18,7 +18,7 @@ def test_discretized_surfaces():
         'pvrow_height': 1.5,
         'pvrow_width': 1.,
         'gcr': 0.4,
-        'array_tilt': 20.,
+        'tracker_theta': 20.,
         'cut': [(0, 5, 'front'), (1, 3, 'front')]
     }
     array = Array(**arguments)
@@ -52,7 +52,7 @@ def test_consistent_qinc():
         'array_azimuth': 180.,
         'pvrow_width': 1.5,
         'gcr': 0.6,
-        'array_tilt': 30.,
+        'tracker_theta': 30.,
         'cut': [(0, 5, 'front'), (4, 2, 'front')]
     }
     array = Array(**arguments)
@@ -68,10 +68,10 @@ def test_consistent_qinc():
     solar_zenith = 20.
     solar_azimuth = 180.
 
-    array_tilt = 20.
+    tracker_theta = 20.
     surface_azimuth = 180.
 
-    array.calculate_radiosities_perez(solar_zenith, solar_azimuth, array_tilt,
+    array.calculate_radiosities_perez(solar_zenith, solar_azimuth, tracker_theta,
                                       surface_azimuth, dni, luminance_isotropic,
                                       luminance_circumsolar, poa_horizon,
                                       poa_circumsolar)

@@ -45,7 +45,7 @@ def test_serial_circumsolar_shading_calculation():
     # eg 'calculate_front_circ_horizon_shading'
     arguments = {
         'array_azimuth': 90.0,
-        'array_tilt': 20.0,
+        'tracker_theta': 20.0,
         'cut': [(1, 5, 'front')],
         'gcr': 0.3,
         'n_pvrows': 2,
@@ -66,12 +66,12 @@ def test_serial_circumsolar_shading_calculation():
         TEST_DATA, 'file_test_serial_circumsolar_shading_calculation.csv')
     df_inputs = pd.read_csv(test_file, index_col=0)
     df_inputs.index = pd.DatetimeIndex(df_inputs.index)
-    (timestamps, array_tilt, surface_azimuth,
+    (timestamps, tracker_theta, surface_azimuth,
      solar_zenith, solar_azimuth, dni, dhi) = breakup_df_inputs(df_inputs)
 
     # Run the calculation for functional testing
     df_registries, df_inputs_perez = (
-        calculate_radiosities_serially_perez((arguments, timestamps, array_tilt,
+        calculate_radiosities_serially_perez((arguments, timestamps, tracker_theta,
                                               surface_azimuth, solar_zenith,
                                               solar_azimuth, dni, dhi))
     )

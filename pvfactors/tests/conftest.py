@@ -69,7 +69,7 @@ def pvarray_parameters_serial_calc():
         'pvrow_height': 1.5,
         'pvrow_width': 1.,
         'array_azimuth': 270,
-        'array_tilt': -20.,
+        'tracker_theta': -20.,
         'gcr': 0.3,
         'solar_zenith': 30.,
         'solar_azimuth': 90.,
@@ -86,7 +86,7 @@ def df_inputs_serial_calculation_with_skips(
     """ Create inputs that will lead to at least 1 skip in serial calc """
 
     df_skips = pd.DataFrame(
-        {'array_tilt': 0.,
+        {'tracker_theta': 0.,
          'array_azimuth': 0.,
          'solar_zenith': 100.,  # the sun is down
          'solar_azimuth': 0.,

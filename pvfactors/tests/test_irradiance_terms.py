@@ -19,7 +19,7 @@ def test_irradiance_terms_simple():
     dhi = 1e2
     solar_zenith = 80.
     solar_azimuth = 0.
-    array_tilt = 70.
+    tracker_theta = 70.
     array_azimuth = 180.
     arguments = {
         'n_pvrows': 3,
@@ -30,10 +30,10 @@ def test_irradiance_terms_simple():
     # Create vf array
     array = Array(**arguments)
     # Calculate irradiance terms
-    array.update_view_factors(solar_zenith, solar_azimuth, array_tilt,
+    array.update_view_factors(solar_zenith, solar_azimuth, tracker_theta,
                               array_azimuth)
     array.update_irradiance_terms_simple(solar_zenith, solar_azimuth,
-                                         array_tilt, array_azimuth, dni, dhi)
+                                         tracker_theta, array_azimuth, dni, dhi)
 
     # Check that the values are as expected
     expected_irradiance_terms = np.array(

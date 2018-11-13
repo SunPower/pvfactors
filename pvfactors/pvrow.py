@@ -71,17 +71,17 @@ class PVRowLine(PVRowBase):
     :param float x_center: x coordinate of center of the line [m]
     :param float y_center: y coordinate of center of the line [m]
     :param int index: PV row index, used to distinguish different PV rows
-    :param float array_tilt: tilt of the PV row, same as the whole array a
+    :param float tracker_theta: tilt of the PV row, same as the whole array a
     priori [deg]
     :param float pvrow_width: width of the PV row, which is the length of
     the PV row line [m]
     """
 
-    def __init__(self, line_registry, x_center, y_center, index, array_tilt,
+    def __init__(self, line_registry, x_center, y_center, index, tracker_theta,
                  pvrow_width):
         super(PVRowLine, self).__init__()
         self.width = pvrow_width
-        self.tilt = array_tilt
+        self.tilt = tracker_theta
         self.index = index
         self.x_center = x_center
         self.y_center = y_center
