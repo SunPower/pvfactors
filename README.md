@@ -76,8 +76,8 @@ from datetime import datetime
 timestamps = np.array([datetime(2017, 8, 31, 11), datetime(2017, 8, 31, 12)])
 solar_zenith = np.array([20., 10.])
 solar_azimuth = np.array([110., 140.])
-array_tilt = np.array([10., 0.])
-array_azimuth = np.array([90., 90.])
+tracker_theta = np.array([10., 0.])
+surface_azimuth = np.array([90., 90.])
 dni = np.array([1000., 300.])
 dhi = np.array([50., 500.])
 ```
@@ -104,7 +104,7 @@ from pvfactors.timeseries import calculate_radiosities_serially_perez
 df_registries, _ = calculate_radiosities_serially_perez((
     pvarray_parameters, timestamps,
     solar_zenith, solar_azimuth,
-    array_tilt, array_azimuth, dni, dhi))
+    tracker_theta, surface_azimuth, dni, dhi))
 ```
 
     Progress: |██████████████████████████████████████████████████| 100.0% Complete
