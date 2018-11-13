@@ -86,7 +86,7 @@ class PVRowLine(PVRowBase):
         self.x_center = x_center
         self.y_center = y_center
         (self.lines, self.highest_point, self.lowest_point, self.right_point,
-         self.left_point, self.director_vector, self.normal_vector) = (
+         self.left_point) = (
             self.create_lines(self.tilt, index))
         self.line_registry_indices = line_registry.pvgeometry.add(self.lines)
         # Complete line will have the full pvrow linestring with possibly
@@ -102,14 +102,12 @@ class PVRowLine(PVRowBase):
         :param float tilt: tilt angle of the PV row [deg]
         :param int index: PV row index, used to distinguish different PV rows
         :return: [line_pvarray], highest_point, lowest_point,
-                right_point, left_point, director_vector, normal_vector / which
+                right_point, left_point / which
                 are: list of :class:`pvcore.LinePVArray`;
                 :class:`shapely.Point` of the line with biggest y coordinate;
                 :class:`shapely.Point` of the line with smallest y coordinate;
                 :class:`shapely.Point` of the line with biggest x coordinate;
-                :class:`shapely.Point` of the line with smallest x coordinate;
-                list of 2 coordinates for director vector of the line; list of
-                2 coordinates for normal vector of the line
+                :class:`shapely.Point` of the line with smallest x coordinate
         """
         tilt_rad = np.radians(tilt)
 
@@ -125,15 +123,11 @@ class PVRowLine(PVRowBase):
         right_point = Point(x2, y2) if x2 >= x1 else Point(x1, y1)
         left_point = Point(x1, y1) if x2 >= x1 else Point(x2, y2)
 
-        # making sure director_vector[0] >= 0
-        director_vector = [x2 - x1, y2 - y1]
-        # making sure normal_vector[1] >= 0
-        normal_vector = [- director_vector[1], director_vector[0]]
         geometry = LineString([(x1, y1), (x2, y2)])
         line_pvarray = LinePVArray(geometry=geometry, line_type='pvrow',
                                    shaded=False, pvrow_index=index)
         return ([line_pvarray], highest_point, lowest_point,
-                right_point, left_point, director_vector, normal_vector)
+                right_point, left_point)
 
     def get_shadow_bounds(self, solar_2d_vector):
         """
@@ -168,19 +162,6 @@ class PVRowLine(PVRowBase):
         x1_shadow = min(list_x_values)
         x2_shadow = max(list_x_values)
         return x1_shadow, x2_shadow
-
-    def is_front_side_illuminated(self, solar_2d_vector):
-        """
-        Find out if the direct sun light is incident on the front or back
-        surface of the PV rows
-
-        :param list solar_2d_vector: projection of solar vector into the 2D
-        plane of the array geometry
-        :return: ``bool``, True if front surface is illuminated
-        """
-        # Only 1 normal vector here
-        dot_product = np.dot(solar_2d_vector, self.normal_vector)
-        return dot_product <= 0
 
     @property
     def facing(self):
