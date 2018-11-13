@@ -100,7 +100,8 @@ def values_are_consistent(df_outputs):
     rtol = 1e-4
     test_results = []
     for name, group in grouped_comparison:
-        df_term = group.pivot_table(index=['timestamps', 'pvrow_index', 'surface_side'],
+        df_term = group.pivot_table(index=['timestamps', 'pvrow_index',
+                                           'surface_side'],
                                     columns=['origin'], values='value')
         compare = (('calculated' in df_term.columns)
                    & ('expected' in df_term.columns))

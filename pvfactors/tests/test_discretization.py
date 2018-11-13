@@ -71,8 +71,9 @@ def test_consistent_qinc():
     tracker_theta = 20.
     surface_azimuth = 180.
 
-    array.calculate_radiosities_perez(solar_zenith, solar_azimuth, tracker_theta,
-                                      surface_azimuth, dni, luminance_isotropic,
+    array.calculate_radiosities_perez(solar_zenith, solar_azimuth,
+                                      tracker_theta, surface_azimuth,
+                                      dni, luminance_isotropic,
                                       luminance_circumsolar, poa_horizon,
                                       poa_circumsolar)
 

@@ -135,12 +135,12 @@ class Array(ArrayBase):
         center [meters]
     :param float pvrow_width: width of PV rows, in the considered 2D
         dimension [meters]
-    :param float tracker_theta: tilt angle of the whole array. All PV rows must
-        have the same tilt angle [degrees]
-    :param float axis_azimuth: azimuth angle of the whole array axis. All PV
-        rows must have the same azimuth angle [degrees]. For instance, it will
-        be the azimuth angle of the torque tube in the case of single-axis
-        trackers.
+    :param float tracker_theta: The rotation angle of the tracker.
+        tracker_theta = 0 is horizontal, and positive rotation angles are
+        clockwise. [degrees]
+    :param float axis_azimuth: A value denoting the compass direction along
+        which the axis of rotation lies. Measured in decimal degrees East of
+        North.
     :param float solar_zenith: zenith angle of the sun [degrees]
     :param float solar_azimuth: azimuth angle of the sun [degrees]
     :param float rho_ground: ground albedo
@@ -197,7 +197,8 @@ class Array(ArrayBase):
                                             'uniform_disk')
 
         # Calculate surface azimuth assuming fixed tilt or single axis tracker
-        surface_azimuth = calculate_surface_azimuth(axis_azimuth, tracker_theta)
+        surface_azimuth = calculate_surface_azimuth(axis_azimuth,
+                                                    tracker_theta)
 
         # Update array from initial parameters
         self.update_view_factors(solar_zenith, solar_azimuth, tracker_theta,
@@ -211,10 +212,12 @@ class Array(ArrayBase):
 
         :param float solar_zenith: zenith angle of the sun [in deg]
         :param float solar_azimuth: azimuth angle of the sun [in deg]
-        :param float tracker_theta: tilt angle of the whole array. All PV rows must
-            have the same tilt angle [in deg]
-        :param float surface_azimuth: azimuth angle of the PV surfaces. All PV
-            surfaces must have the same azimuth angle [in deg]
+        :param float tracker_theta: The rotation angle of the tracker.
+            tracker_theta = 0 is horizontal, and positive rotation angles are
+            clockwise. [degrees]
+        :param float surface_azimuth: The azimuth of the rotated panel,
+            determined by projecting the vector normal to the panel's surface
+            to the earth's surface [degrees].
         :return: None
         """
         self.line_registry = self.initialize_registry()
@@ -282,15 +285,16 @@ class Array(ArrayBase):
 
         :param float solar_zenith: zenith angle of the sun [degrees]
         :param float solar_azimuth: azimuth angle of the sun [degrees]
-        :param float tracker_theta: tilt angle of the whole array. All PV rows must
-            have the same tilt angle [degrees]
+        :param float tracker_theta: The rotation angle of the tracker.
+            tracker_theta = 0 is horizontal, and positive rotation angles are
+            clockwise. [degrees]
         :param float surface_azimuth: azimuth angle of the PV surfaces. All PV
             surfaces must have the same azimuth angle [degrees]
         :param float dni: direct normal irradiance [W/m2]
-        :param float luminance_isotropic: luminance of the isotropic part of the
-            sky dome [W/m2/sr]
-        :param float luminance_circumsolar: luminance of the circumsolar part of
+        :param float luminance_isotropic: luminance of the isotropic part of
             the sky dome [W/m2/sr]
+        :param float luminance_circumsolar: luminance of the circumsolar part
+            of the sky dome [W/m2/sr]
         :param float poa_horizon: plane-of-array horizon component of the
             irradiance as calculated by Perez for the front surface of a PV row
             [W/m2]
@@ -504,15 +508,17 @@ class Array(ArrayBase):
 
         :param float solar_zenith: zenith angle of the sun [degrees]
         :param float solar_azimuth: azimuth angle of the sun [degrees]
-        :param float tracker_theta: tilt angle of the whole array. All PV rows must
-            have the same tilt angle [degrees]
-        :param float surface_azimuth: azimuth angle of the PV surfaces. All PV
-            surfaces must have the same azimuth angle [degrees]
+        :param float tracker_theta: The rotation angle of the tracker.
+            tracker_theta = 0 is horizontal, and positive rotation angles are
+            clockwise. [degrees]
+        :param float surface_azimuth: The azimuth of the rotated panel,
+            determined by projecting the vector normal to the panel's surface
+            to the earth's surface [degrees].
         :param float dni: direct normal irradiance [W/m2]
-        :param float luminance_isotropic: luminance of the isotropic part of the
-            sky dome [W/m2/sr]
-        :param float luminance_circumsolar: luminance of the circumsolar part of
+        :param float luminance_isotropic: luminance of the isotropic part of
             the sky dome [W/m2/sr]
+        :param float luminance_circumsolar: luminance of the circumsolar part
+            of the sky dome [W/m2/sr]
         :param float poa_horizon: plane-of-array horizon component of the
             irradiance as calculated by Perez for the front surface of a PV row
             [W/m2]
@@ -523,8 +529,8 @@ class Array(ArrayBase):
         """
         # Update the array configuration
         try:
-            self.update_view_factors(solar_zenith, solar_azimuth, tracker_theta,
-                                     surface_azimuth)
+            self.update_view_factors(solar_zenith, solar_azimuth,
+                                     tracker_theta, surface_azimuth)
         except Exception as err:
             raise PVFactorsArrayUpdateException(
                 "Could not calculate shapely array or view factors because of "
@@ -549,9 +555,9 @@ class Array(ArrayBase):
     def calculate_sky_and_reflection_components(self):
         """
         Assuming that the calculation of view factors and radiosity terms is
-        completed, calculate the irradiance components of the isotropic sky dome
-        and of the reflections from surrounding surfaces (pv rows and ground)
-        for all the surfaces in the PV array.
+        completed, calculate the irradiance components of the isotropic sky
+        dome and of the reflections from surrounding surfaces
+        (pv rows and ground) for all the surfaces in the PV array.
         Update the surface registry.
 
         :return: None
@@ -592,8 +598,9 @@ class Array(ArrayBase):
             distance = pvrow.width / self.gcr
             for i in range(1, n_pvrows):
                 x_center = i * distance
-                pvrow = self.pvrow_class(self.line_registry, x_center, y_center,
-                                         i, self.tracker_theta, self.pvrow_width)
+                pvrow = self.pvrow_class(
+                    self.line_registry, x_center, y_center,
+                    i, self.tracker_theta, self.pvrow_width)
                 pvrows.append(pvrow)
 
         return pvrows
@@ -605,8 +612,8 @@ class Array(ArrayBase):
         considered here. The next step is to calculate the shadow boundaries
         based on the PV row position and the solar angle using some geometry.
         The calculated shadow lines are added to the :attr:`line_registry`.
-        Assumption: if there is direct shading between rows, this will mean that
-        there is one continuous shadow on the ground formed by all the
+        Assumption: if there is direct shading between rows, this will mean
+        that there is one continuous shadow on the ground formed by all the
         trackers' shadows.
 
 
@@ -680,7 +687,7 @@ class Array(ArrayBase):
         shadow_indices = df_bounds_shadows.index
         self.illum_ground_indices = []
         # Use the boundary pts defined by each shadow object to find the 2
-        # points necessary to build the illuminated ground line in-between shad.
+        # points necessary to build the illuminated ground line in-between shad
         if df_bounds_shadows.shape[0] > 1:
             for idx in range(df_bounds_shadows.shape[0] - 1):
                 point_1 = Point(
@@ -692,7 +699,7 @@ class Array(ArrayBase):
                 )
                 if point_1 != point_2:
                     # If the two points are different, it means that there is
-                    # some illuminated ground between the shadows -> create geom
+                    # some illum ground between the shadows -> create geom
                     geometry = LineString([point_1, point_2])
                     ill_gnd_line_pvarray = LinePVArray(geometry=geometry,
                                                        line_type='ground',
@@ -743,13 +750,14 @@ class Array(ArrayBase):
 
     def create_remaining_illum_ground(self, edge_points):
         """
-        Create the remaining illuminated parts of the ground, at the outer edges
-        of the PV array.
+        Create the remaining illuminated parts of the ground, at the outer
+        edges of the PV array.
         The areas are supposed to be infinite, but for model simplicity they
         are implemented as being very large (fixed values).
 
         :param list edge_points: **sorted** list of :class:`shapely.Point`
-            objects representing the intersection of PV row lines and the ground
+            objects representing the intersection of PV row lines and the
+            ground
         :return: None; updating :attr:`line_registry`
         """
         if edge_points:
@@ -829,7 +837,8 @@ class Array(ArrayBase):
                 x1_shadow, x2_shadow = pvrow.get_shadow_bounds(
                     self.solar_2d_vector)
                 ground_point = Point(x2_shadow, Y_GROUND)
-                linestring_shadow = LineString([top_point_vector, ground_point])
+                linestring_shadow = LineString([top_point_vector,
+                                                ground_point])
                 # FIXME: we do not want to create a line_registry object
                 self.surface_registry.pvgeometry.split_pvrow_geometry(
                     idx_pvrow,
@@ -862,8 +871,8 @@ class Array(ArrayBase):
 # ------- Surface creation
     def create_surface_registry(self):
         """
-        Create ``surface_registry`` attribute from :attr:`line_registry`. One of
-        the big differences is that the ``surface_registry`` is able to
+        Create ``surface_registry`` attribute from :attr:`line_registry`.
+        One of the big differences is that the ``surface_registry`` is able to
         distinguish the two sides of a PV row object. For instance it will
         make sure to record that only one side of a PV row can have direct
         shading, or that only one side may be discretized. The names of the two
@@ -916,14 +925,14 @@ class Array(ArrayBase):
         simplify it.
 
         :return: ``view_matrix``, ``args_matrix``; both :class:`numpy.array`
-            objects and containing the "type" of views of each finite surface to
-            the others, and additional arguments like "obstructing" objects
+            objects and containing the "type" of views of each finite surface
+            to the others, and additional arguments like "obstructing" objects
         """
 
         # view matrix will contain the view relationships between each surface
         view_matrix = np.zeros((self.surface_registry.shape[0] + 1,
                                 self.surface_registry.shape[0] + 1), dtype=int)
-        # args matrix will contain the obstructing objects of views for instance
+        # args matrix will contain the obstructng objects of views for instance
         args_matrix = np.zeros((self.surface_registry.shape[0] + 1,
                                 self.surface_registry.shape[0] + 1),
                                dtype=object)

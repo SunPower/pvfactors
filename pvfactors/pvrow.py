@@ -102,7 +102,7 @@ class PVRowLine(PVRowBase):
         :param float tilt: tilt angle of the PV row [deg]
         :param int index: PV row index, used to distinguish different PV rows
         :return: [line_pvarray], highest_point, lowest_point,
-                right_point, left_point, director_vector, normal_vector // which
+                right_point, left_point, director_vector, normal_vector / which
                 are: list of :class:`pvcore.LinePVArray`;
                 :class:`shapely.Point` of the line with biggest y coordinate;
                 :class:`shapely.Point` of the line with smallest y coordinate;
@@ -140,8 +140,8 @@ class PVRowLine(PVRowBase):
         Calculate the x coordinates of the boundary points of the shadow lines
         on the ground, assuming Y_GROUND is the y coordinate of the ground.
         Note: this shadow construction is more or less ignored when direct
-        shading happens between rows, leading to one continous shadows formed by
-         all the PV rows in the array.
+        shading happens between rows, leading to one continous shadows formed
+        by all the PV rows in the array.
 
         :param list solar_2d_vector: projection of solar vector into the 2D
         plane of the array geometry
@@ -200,8 +200,8 @@ class PVRowLine(PVRowBase):
 
     def calculate_cut_points(self, n_segments):
         """
-        Calculate the points of the PV row geometry on which the PV line will be
-         cut and discretized. The list of cut points is saved into the object.
+        Calculate the points of the PV row geometry on which the PV line will
+        be cut and discretized. The list of cut points is saved into the object
 
         :param int n_segments: number of segments wanted for the discretization
         :return: None

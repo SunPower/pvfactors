@@ -71,7 +71,8 @@ def test_serial_circumsolar_shading_calculation():
 
     # Run the calculation for functional testing
     df_registries, df_inputs_perez = (
-        calculate_radiosities_serially_perez((arguments, timestamps, tracker_theta,
+        calculate_radiosities_serially_perez((arguments, timestamps,
+                                              tracker_theta,
                                               surface_azimuth, solar_zenith,
                                               solar_azimuth, dni, dhi))
     )

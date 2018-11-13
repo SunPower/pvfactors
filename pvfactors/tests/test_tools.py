@@ -4,7 +4,6 @@
 Test some of the functions in the tools module
 """
 import pytest
-from pvfactors.pvarray import Array
 from pvfactors.timeseries import (perez_diffuse_luminance,
                                   calculate_radiosities_serially_perez,
                                   calculate_radiosities_parallel_perez,
@@ -37,12 +36,12 @@ def test_array_calculate_timeseries():
         'solar_zenith': [80., 20., 70.4407256],
         'solar_azimuth': [0., 180., 248.08690811],
         'tracker_theta': [70., 40., 42.4337927],
-        'axis_azimuth': [180., 180., 270.],
+        'surface_azimuth': [180., 180., 270.],
         'dni': [1e3, 1e3, 1000.],
         'dhi': [1e2, 1e2, 100.]
     },
         columns=['solar_zenith', 'solar_azimuth', 'tracker_theta',
-                 'axis_azimuth', 'dni', 'dhi'],
+                 'surface_azimuth', 'dni', 'dhi'],
         index=[0, 1, 2]
     )
     arguments = {
@@ -99,7 +98,7 @@ def test_perez_diffuse_luminance(df_perez_luminance):
     Test that the calculation of luminance -- first step in using the vf model
     with Perez -- is functional
     """
-    df_inputs = df_perez_luminance[['tracker_theta', 'axis_azimuth',
+    df_inputs = df_perez_luminance[['tracker_theta', 'surface_azimuth',
                                     'solar_zenith', 'solar_azimuth', 'dni',
                                     'dhi']]
     (timestamps, tracker_theta, surface_azimuth, solar_zenith, solar_azimuth,
