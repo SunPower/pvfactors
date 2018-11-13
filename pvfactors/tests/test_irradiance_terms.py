@@ -8,7 +8,7 @@ from pvfactors.pvarray import Array
 import numpy as np
 
 
-def test_irradiance_terms_simple():
+def test_irradiance_terms_perez_but_isotropic():
     """
     Check that the irradiance terms calculated for this configuration and
     using the isotropic diffuse sky dome is working as expected
@@ -20,7 +20,7 @@ def test_irradiance_terms_simple():
     solar_zenith = 80.
     solar_azimuth = 0.
     tracker_theta = 70.
-    axis_azimuth = 180.
+    surface_azimuth = 180.
     arguments = {
         'n_pvrows': 3,
         'pvrow_height': 1.5,
@@ -31,9 +31,10 @@ def test_irradiance_terms_simple():
     array = Array(**arguments)
     # Calculate irradiance terms
     array.update_view_factors(solar_zenith, solar_azimuth, tracker_theta,
-                              axis_azimuth)
-    array.update_irradiance_terms_simple(solar_zenith, solar_azimuth,
-                                         tracker_theta, axis_azimuth, dni, dhi)
+                              surface_azimuth)
+    array.update_irradiance_terms_perez(solar_zenith, solar_azimuth,
+                                        tracker_theta, surface_azimuth,
+                                        dni, dhi, 0., 0., 0.)
 
     # Check that the values are as expected
     expected_irradiance_terms = np.array(

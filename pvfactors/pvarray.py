@@ -271,59 +271,6 @@ class Array(ArrayBase):
             self.surface_registry, self.view_matrix, self.args_matrix
         )
 
-    def update_irradiance_terms_simple(self, solar_zenith, solar_azimuth,
-                                       tracker_theta, axis_azimuth, dni, dhi):
-        """
-        Calculate the irradiance source terms of all surfaces by assuming that
-        the whole sky dome is isotropic (no diffuse sky dome decomposition).
-
-        :param float solar_zenith: zenith angle of the sun [degrees]
-        :param float solar_azimuth: azimuth angle of the sun [degrees]
-        :param float tracker_theta: tilt angle of the whole array. All PV rows must
-            have the same tilt angle [degrees]
-        :param float axis_azimuth: azimuth angle of the whole array. All PV
-            rows must have the same azimuth angle [degrees]
-        :param float dni: direct normal irradiance [W/m2]
-        :param float dhi: diffuse horizontal irradiance [W/m2]
-        :return: None
-        """
-        self.surface_registry['irradiance_term'] = 0.
-        self.irradiance_terms = np.zeros(self.surface_registry.shape[0] + 1)
-
-        # --- Calculate terms
-        dni_ground = dni * cosd(solar_zenith)
-        # TODO: only works for mono tilt
-        aoi_array = aoi_function(tracker_theta, axis_azimuth, solar_zenith,
-                                 solar_azimuth)
-
-        # --- Assign terms to surfaces
-        # Illuminated ground
-        self.surface_registry.loc[
-            ~ self.surface_registry.shaded
-            & (self.surface_registry.line_type == 'ground'),
-            'irradiance_term'] = dni_ground
-        # PVRow surfaces
-        if aoi_array <= 90.:
-            # Direct light is incident on front side of pvrows
-            dni_pvrow = dni * cosd(aoi_array)
-            self.surface_registry.loc[
-                ~ self.surface_registry.shaded
-                & (self.surface_registry.line_type == 'pvrow')
-                & (self.surface_registry.surface_side == 'front'),
-                'irradiance_term'] = dni_pvrow
-        else:
-            # Direct light is incident on back side of pvrows
-            dni_pvrow = dni * cosd(180. - aoi_array)
-            self.surface_registry.loc[
-                ~ self.surface_registry.shaded
-                & (self.surface_registry.line_type == 'pvrow')
-                & (self.surface_registry.surface_side == 'back'),
-                'irradiance_term'] = dni_pvrow
-
-        self.irradiance_terms[:-1] = (self.surface_registry.irradiance_term
-                                      .values)
-        self.irradiance_terms[-1] = dhi
-
     def update_irradiance_terms_perez(self, solar_zenith, solar_azimuth,
                                       tracker_theta, surface_azimuth, dni,
                                       luminance_isotropic,
