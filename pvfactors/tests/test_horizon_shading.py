@@ -17,7 +17,7 @@ idx_slice = pd.IndexSlice
 def test_calculate_back_horizon_shading():
 
     arguments = {
-        'array_azimuth': 90.0,
+        'axis_azimuth': 90.0,
         'tracker_theta': -30.0,
         'gcr': 0.5,
         'n_pvrows': 2,

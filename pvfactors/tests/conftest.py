@@ -68,7 +68,7 @@ def pvarray_parameters_serial_calc():
         'n_pvrows': 2,
         'pvrow_height': 1.5,
         'pvrow_width': 1.,
-        'array_azimuth': 270,
+        'axis_azimuth': 270,
         'tracker_theta': -20.,
         'gcr': 0.3,
         'solar_zenith': 30.,
@@ -87,7 +87,7 @@ def df_inputs_serial_calculation_with_skips(
 
     df_skips = pd.DataFrame(
         {'tracker_theta': 0.,
-         'array_azimuth': 0.,
+         'axis_azimuth': 0.,
          'solar_zenith': 100.,  # the sun is down
          'solar_azimuth': 0.,
          'dni': np.nan, 'dhi': np.nan},

@@ -60,7 +60,7 @@ def test_plotting():
             'pvrow_height': 1.5,
             'solar_zenith': 30,
             'solar_azimuth': 0.,
-            'array_azimuth': 180.,
+            'axis_azimuth': 180.,
             'pvrow_width': 1.,
             'gcr': 0.3,
             'tracker_theta': 0.
@@ -75,7 +75,7 @@ def test_plotting():
             'pvrow_height': 3.0,
             'solar_zenith': 30,
             'solar_azimuth': 180.,
-            'array_azimuth': 180.,
+            'axis_azimuth': 180.,
             'pvrow_width': 3.0,
             'gcr': 0.9,
             'tracker_theta': 20.
@@ -90,7 +90,7 @@ def test_plotting():
             'pvrow_height': 3.0,
             'solar_zenith': 60,
             'solar_azimuth': 0.,
-            'array_azimuth': 180.,
+            'axis_azimuth': 180.,
             'pvrow_width': 3.0,
             'gcr': 0.9,
             'tracker_theta': -20.
@@ -115,7 +115,7 @@ def test_merge_shadows():
         'pvrow_height': 2.,
         'solar_zenith': 30,
         'solar_azimuth': 0.,
-        'array_azimuth': 90.,
+        'axis_azimuth': 90.,
         'pvrow_width': 3,
         'gcr': 0.9,
         'tracker_theta': -20.
@@ -139,7 +139,7 @@ def test_interrow_shading():
         'pvrow_height': 3.,
         'solar_zenith': 30,
         'solar_azimuth': 180.,
-        'array_azimuth': 90.,
+        'axis_azimuth': 90.,
         'pvrow_width': 3.,
         'gcr': 0.9,
         'tracker_theta': 20.
@@ -157,7 +157,7 @@ def test_interrow_shading():
         'pvrow_height': 3.0,
         'solar_zenith': 60,
         'solar_azimuth': 0.,
-        'array_azimuth': 90.,
+        'axis_azimuth': 90.,
         'pvrow_width': 3.0,
         'gcr': 0.9,
         'tracker_theta': -20.

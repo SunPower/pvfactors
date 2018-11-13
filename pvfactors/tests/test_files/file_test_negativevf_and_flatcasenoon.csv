@@ -1,4 +1,4 @@
-,solar_zenith,solar_azimuth,dni,dhi,array_azimuth,tracker_theta
+,solar_zenith,solar_azimuth,dni,dhi,axis_azimuth,tracker_theta
 2015-07-22 00:30:00-07:00,127.5556325,359.9269098,0,0,90,0
 2015-07-22 01:30:00-07:00,125.6483195,17.30710453,0,0,90,0
 2015-07-22 02:30:00-07:00,120.251146,32.80904697,0,0,90,0

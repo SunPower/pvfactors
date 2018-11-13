@@ -137,7 +137,7 @@ class Array(ArrayBase):
         dimension [meters]
     :param float tracker_theta: tilt angle of the whole array. All PV rows must
         have the same tilt angle [degrees]
-    :param float array_azimuth: azimuth angle of the whole array axis. All PV
+    :param float axis_azimuth: azimuth angle of the whole array axis. All PV
         rows must have the same azimuth angle [degrees]. For instance, it will
         be the azimuth angle of the torque tube in the case of single-axis
         trackers.
@@ -163,7 +163,7 @@ class Array(ArrayBase):
     _view_factor_calculator = ViewFactorCalculator
 
     def __init__(self, n_pvrows=3, pvrow_height=1.5, pvrow_width=1.,
-                 tracker_theta=20., array_azimuth=90., solar_zenith=0.,
+                 tracker_theta=20., axis_azimuth=90., solar_zenith=0.,
                  solar_azimuth=180., rho_ground=0.2, rho_back_pvrow=0.05,
                  rho_front_pvrow=0.03, gcr=0.3, **kwargs):
 
@@ -173,7 +173,7 @@ class Array(ArrayBase):
         self.view_factor_calculator = self._view_factor_calculator()
         self.gcr = gcr
         self.pvrow_width = pvrow_width
-        self.array_azimuth = None
+        self.axis_azimuth = None
         self.surface_azimuth = None
         self.surface_tilt = None
         self.illum_ground_indices = None
@@ -197,7 +197,7 @@ class Array(ArrayBase):
                                             'uniform_disk')
 
         # Calculate surface azimuth assuming fixed tilt or single axis tracker
-        surface_azimuth = calculate_surface_azimuth(array_azimuth, tracker_theta)
+        surface_azimuth = calculate_surface_azimuth(axis_azimuth, tracker_theta)
 
         # Update array from initial parameters
         self.update_view_factors(solar_zenith, solar_azimuth, tracker_theta,
@@ -225,8 +225,8 @@ class Array(ArrayBase):
 
         # Update array parameters
         self.surface_azimuth = surface_azimuth
-        self.array_azimuth = calculate_axis_azimuth(surface_azimuth,
-                                                    tracker_theta)
+        self.axis_azimuth = calculate_axis_azimuth(surface_azimuth,
+                                                   tracker_theta)
         self.tracker_theta = tracker_theta
         self.solar_zenith = solar_zenith
         self.solar_azimuth = solar_azimuth
@@ -272,7 +272,7 @@ class Array(ArrayBase):
         )
 
     def update_irradiance_terms_simple(self, solar_zenith, solar_azimuth,
-                                       tracker_theta, array_azimuth, dni, dhi):
+                                       tracker_theta, axis_azimuth, dni, dhi):
         """
         Calculate the irradiance source terms of all surfaces by assuming that
         the whole sky dome is isotropic (no diffuse sky dome decomposition).
@@ -281,7 +281,7 @@ class Array(ArrayBase):
         :param float solar_azimuth: azimuth angle of the sun [degrees]
         :param float tracker_theta: tilt angle of the whole array. All PV rows must
             have the same tilt angle [degrees]
-        :param float array_azimuth: azimuth angle of the whole array. All PV
+        :param float axis_azimuth: azimuth angle of the whole array. All PV
             rows must have the same azimuth angle [degrees]
         :param float dni: direct normal irradiance [W/m2]
         :param float dhi: diffuse horizontal irradiance [W/m2]
@@ -293,7 +293,7 @@ class Array(ArrayBase):
         # --- Calculate terms
         dni_ground = dni * cosd(solar_zenith)
         # TODO: only works for mono tilt
-        aoi_array = aoi_function(tracker_theta, array_azimuth, solar_zenith,
+        aoi_array = aoi_function(tracker_theta, axis_azimuth, solar_zenith,
                                  solar_azimuth)
 
         # --- Assign terms to surfaces
@@ -675,7 +675,7 @@ class Array(ArrayBase):
         # and vice versa
         solar_2d_vector = [
             # a drawing really helps understand the following
-            sind(solar_zenith) * sind(self.array_azimuth - solar_azimuth),
+            sind(solar_zenith) * sind(self.axis_azimuth - solar_azimuth),
             cosd(solar_zenith)]
         # for a line of equation a*x + b*y + c = 0, we calculate intercept c
         # and can derive x_0 such that crosses with line y = 0: x_0 = - c / a

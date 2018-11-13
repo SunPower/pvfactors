@@ -44,7 +44,7 @@ def test_serial_circumsolar_shading_calculation():
     # the calculation to be triggered:
     # eg 'calculate_front_circ_horizon_shading'
     arguments = {
-        'array_azimuth': 90.0,
+        'axis_azimuth': 90.0,
         'tracker_theta': 20.0,
         'cut': [(1, 5, 'front')],
         'gcr': 0.3,

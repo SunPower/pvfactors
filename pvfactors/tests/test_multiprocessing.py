@@ -26,7 +26,7 @@ def test_calculate_radiosities_parallel_perez():
         'n_pvrows': 2,
         'pvrow_height': 3.,
         'pvrow_width': 1.,
-        'array_azimuth': 270.,
+        'axis_azimuth': 270.,
         'tracker_theta': -20.,
         'gcr': 0.3,
         'solar_zenith': 20.,
