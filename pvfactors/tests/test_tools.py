@@ -157,14 +157,6 @@ def test_save_all_outputs_calculate_perez():
                                 .tz_localize(None))
     idx_subset = 10
 
-    # Adjustment in angles needed: need to keep azimuth constant and change
-    # tilt angle only
-    df_inputs_clearday.loc[
-        (df_inputs_clearday.solar_azimuth <= 180.), 'array_azimuth'] = (
-            df_inputs_clearday.loc[:, 'array_azimuth'][-1])
-    df_inputs_clearday.loc[
-        (df_inputs_clearday.solar_azimuth <= 180.), 'array_tilt'] *= (-1)
-
     # PV array parameters for test
     arguments = {
         'n_pvrows': 3,
@@ -200,10 +192,10 @@ def test_save_all_outputs_calculate_perez():
 
     # Load files with expected outputs
     expected_ipoa_dict_qinc = np.array([
-        [842.43691838, 842.54795737, 842.52912932],
-        [839.30539601, 839.30285394, 839.29810984],
-        [839.17118976, 839.17513111, 839.17725576],
-        [842.24681064, 842.26195526, 842.15463995]])
+        [842.54617681, 842.5566707, 842.43690951],
+        [839.30179691, 839.30652961, 839.30906023],
+        [839.17118956, 839.17513098, 839.17725568],
+        [842.24679271, 842.26194393, 842.15463231]])
 
     # Perform the comparisons
     rtol = 1e-6

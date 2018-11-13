@@ -74,7 +74,6 @@ def array_timeseries_calculate(
                 registry = deepcopy(array.surface_registry)
                 registry['timestamps'] = ts
                 list_registries.append(registry)
-
             else:
                 skipped_ts.append(ts)
 
@@ -178,9 +177,6 @@ def perez_diffuse_luminance(timestamps, array_tilt, array_azimuth,
     a = np.maximum(a, 0)
     b = cosd(df_inputs.solar_zenith)
     b = np.maximum(b, cosd(85))
-
-    print("\na: {}".format(a))
-    print("b: {}".format(b))
 
     vf_perez = pd.DataFrame({
         'vf_horizon': sind(df_inputs.array_tilt),
