@@ -112,7 +112,7 @@ def array_timeseries_calculate(
     return df_registries
 
 
-def perez_diffuse_luminance(timestamps, tracker_theta, surface_azimuth,
+def perez_diffuse_luminance(timestamps, surface_tilt, surface_azimuth,
                             solar_zenith, solar_azimuth, dni, dhi):
     """
     Function used to calculate the luminance and the view factor terms from the
@@ -123,9 +123,10 @@ def perez_diffuse_luminance(timestamps, tracker_theta, surface_azimuth,
     implementation would ignore it.
 
     :param array-like timestamps: simulation timestamps
-    :param array-like tracker_theta: The rotation angle of the tracker.
-        tracker_theta = 0 is horizontal, and positive rotation angles are
-        clockwise. [degrees]
+    :param array-like surface_tilt: Surface tilt angles in decimal degrees.
+        surface_tilt must be >=0 and <=180.
+        The tilt angle is defined as degrees from horizontal
+        (e.g. surface facing up = 0, surface facing horizon = 90)
     :param array-like surface_azimuth: The azimuth of the rotated panel,
         determined by projecting the vector normal to the panel's surface to
         the earth's surface [degrees].
@@ -134,7 +135,7 @@ def perez_diffuse_luminance(timestamps, tracker_theta, surface_azimuth,
     :param array-like dni: values for direct normal irradiance
     :param array-like dhi: values for diffuse horizontal irradiance
     :return: ``df_inputs``, dataframe with the following columns:
-        ['solar_zenith', 'solar_azimuth', 'tracker_theta', 'surface_azimuth',
+        ['solar_zenith', 'solar_azimuth', 'surface_tilt', 'surface_azimuth',
         'dhi', 'dni', 'vf_horizon', 'vf_circumsolar', 'vf_isotropic',
         'luminance_horizon', 'luminance_circumsolar', 'luminance_isotropic',
         'poa_isotropic', 'poa_circumsolar', 'poa_horizon', 'poa_total_diffuse']
@@ -142,7 +143,7 @@ def perez_diffuse_luminance(timestamps, tracker_theta, surface_azimuth,
     """
     # Create a dataframe to help filtering on all arrays
     df_inputs = pd.DataFrame(
-        {'tracker_theta': tracker_theta, 'surface_azimuth': surface_azimuth,
+        {'surface_tilt': surface_tilt, 'surface_azimuth': surface_azimuth,
          'solar_zenith': solar_zenith, 'solar_azimuth': solar_azimuth,
          'dni': dni, 'dhi': dhi},
         index=pd.DatetimeIndex(timestamps))
@@ -152,7 +153,7 @@ def perez_diffuse_luminance(timestamps, tracker_theta, surface_azimuth,
 
     # Need to treat the case when the sun is hitting the back surface of pvrow
     aoi_proj = aoi_projection(
-        df_inputs.tracker_theta, df_inputs.surface_azimuth,
+        df_inputs.surface_tilt, df_inputs.surface_azimuth,
         df_inputs.solar_zenith, df_inputs.solar_azimuth)
     sun_hitting_back_surface = ((aoi_proj < 0) &
                                 (df_inputs.solar_zenith <= 90))
@@ -162,8 +163,8 @@ def perez_diffuse_luminance(timestamps, tracker_theta, surface_azimuth,
     df_inputs_back_surface.loc[:, 'surface_azimuth'] = np.mod(
         df_inputs_back_surface.loc[:, 'surface_azimuth'], 360.
     )
-    df_inputs_back_surface.loc[:, 'tracker_theta'] = (
-        180. - df_inputs_back_surface.tracker_theta)
+    df_inputs_back_surface.loc[:, 'surface_tilt'] = (
+        180. - df_inputs_back_surface.surface_tilt)
 
     if df_inputs_back_surface.shape[0] > 0:
         # Use recursion to calculate circumsolar luminance for back surface
@@ -171,7 +172,7 @@ def perez_diffuse_luminance(timestamps, tracker_theta, surface_azimuth,
             *breakup_df_inputs(df_inputs_back_surface))
 
     # Calculate Perez diffuse components
-    diffuse_poa, components = irradiance.perez(df_inputs.tracker_theta,
+    diffuse_poa, components = irradiance.perez(df_inputs.surface_tilt,
                                                df_inputs.surface_azimuth,
                                                df_inputs.dhi, df_inputs.dni,
                                                dni_et,
@@ -181,7 +182,7 @@ def perez_diffuse_luminance(timestamps, tracker_theta, surface_azimuth,
                                                return_components=True)
 
     # Calculate Perez view factors:
-    a = aoi_projection(np.abs(df_inputs.tracker_theta),
+    a = aoi_projection(df_inputs.surface_tilt,
                        df_inputs.surface_azimuth, df_inputs.solar_zenith,
                        df_inputs.solar_azimuth)
     a = np.maximum(a, 0)
@@ -189,9 +190,9 @@ def perez_diffuse_luminance(timestamps, tracker_theta, surface_azimuth,
     b = np.maximum(b, cosd(85))
 
     vf_perez = pd.DataFrame({
-        'vf_horizon': sind(df_inputs.tracker_theta),
+        'vf_horizon': sind(df_inputs.surface_tilt),
         'vf_circumsolar': a / b,
-        'vf_isotropic': (1. + cosd(df_inputs.tracker_theta)) / 2.
+        'vf_isotropic': (1. + cosd(df_inputs.surface_tilt)) / 2.
     },
         index=df_inputs.index
     )
@@ -231,11 +232,14 @@ def calculate_custom_perez_transposition(timestamps, tracker_theta,
                                          surface_azimuth, solar_zenith,
                                          solar_azimuth, dni, dhi):
     """
-    Calculate custom perez transposition: some pre-processing is necessary in
+    Calculate custom perez transposition: some customization is necessary in
     order to get the circumsolar component when the sun is hitting the back
     surface as well.
 
     :param array-like timestamps: simulation timestamps
+    :param array-like tracker_theta: The rotation angle of the tracker.
+        tracker_theta = 0 is horizontal, and positive rotation angles are
+        clockwise. [degrees]
     :param array-like surface_azimuth: The azimuth of the rotated panel,
         determined by projecting the vector normal to the panel's surface to
         the earth's surface [degrees].
@@ -250,18 +254,10 @@ def calculate_custom_perez_transposition(timestamps, tracker_theta,
         'poa_isotropic', 'poa_circumsolar', 'poa_horizon', 'poa_total_diffuse']
     :rtype: class:`pandas.DataFrame`
     """
-    # Pre-process df_inputs to use the expected format of pvlib's perez model:
-    # only positive tilt angles, and switching azimuth angles
-    surface_azimuth_processed = deepcopy(surface_azimuth)
-    surface_azimuth_processed[tracker_theta < 0] = np.remainder(
-        surface_azimuth[tracker_theta < 0] + 180.,
-        360.)
-    tracker_theta_processed = np.abs(tracker_theta)
-
     # Calculate the perez inputs
+    surface_tilt = np.abs(tracker_theta)
     df_custom_perez = perez_diffuse_luminance(
-        timestamps, tracker_theta_processed,
-        surface_azimuth_processed,
+        timestamps, surface_tilt, surface_azimuth,
         solar_zenith, solar_azimuth, dni, dhi)
 
     return df_custom_perez
@@ -499,27 +495,32 @@ def get_pvrow_segment_outputs(df_registries, values=COLS_TO_SAVE,
 
 
 def breakup_df_inputs(df_inputs):
-    """ It is sometimes easier to provide a dataframe than a list of arrays:
-    this function does the job of breaking up the dataframe into a list of
-    expected 1-dim arrays
+    """
+    Helper function: It is sometimes easier to provide a dataframe than a list
+    of arrays: this function does the job of breaking up the dataframe into a
+    list of expected 1-dim arrays
 
     :param df_inputs: timestamp-indexed dataframe with following columns:
         'surface_azimuth', 'tracker_theta', 'solar_zenith', 'solar_azimuth',
-        'dni', 'dhi'
+        'dni', 'dhi'. Instead of 'tracker_theta', can also have 'surface_tilt'
     :type df_inputs: ``pandas.DataFrame``
-    :return: ``timestamps``, ``tracker_theta``, ``surface_azimuth``,
+    :return: ``timestamps``, ``tilt_angles``, ``surface_azimuth``,
         ``solar_zenith``, ``solar_azimuth``, ``dni``, ``dhi``
     :rtype: all 1-dim arrays
     """
     timestamps = pd.to_datetime(df_inputs.index)
     surface_azimuth = df_inputs.surface_azimuth.values
-    tracker_theta = df_inputs.tracker_theta.values
+    if 'tracker_theta' in df_inputs.columns:
+        tilt_angles = df_inputs.tracker_theta.values
+    else:
+        # If tracker_theta not present, use surface_tilt instead
+        tilt_angles = df_inputs.surface_tilt.values
     solar_zenith = df_inputs.solar_zenith.values
     solar_azimuth = df_inputs.solar_azimuth.values
     dni = df_inputs.dni.values
     dhi = df_inputs.dhi.values
 
-    return (timestamps, tracker_theta, surface_azimuth,
+    return (timestamps, tilt_angles, surface_azimuth,
             solar_zenith, solar_azimuth, dni, dhi)
 
 

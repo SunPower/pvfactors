@@ -103,14 +103,18 @@ def test_perez_diffuse_luminance(df_perez_luminance):
                                     'dhi']]
     (timestamps, tracker_theta, surface_azimuth, solar_zenith, solar_azimuth,
      dni, dhi) = breakup_df_inputs(df_inputs)
-    df_outputs = perez_diffuse_luminance(timestamps, tracker_theta,
+    surface_tilt = np.abs(tracker_theta)
+    df_outputs = perez_diffuse_luminance(timestamps, surface_tilt,
                                          surface_azimuth, solar_zenith,
                                          solar_azimuth, dni, dhi)
 
     col_order = df_outputs.columns
+    expected_output = df_perez_luminance.rename(
+        columns={'tracker_theta': 'surface_tilt'})
+    expected_output['surface_tilt'] = np.abs(expected_output['surface_tilt'])
     tol = 1e-8
     np.testing.assert_allclose(df_outputs.values,
-                               df_perez_luminance[col_order].values,
+                               expected_output[col_order].values,
                                atol=0, rtol=tol)
 
 
@@ -134,10 +138,13 @@ def test_luminance_in_timeseries_calc(df_perez_luminance,
          tracker_theta, surface_azimuth,
          dni, dhi))
 
+    expected_output = df_perez_luminance.rename(
+        columns={'tracker_theta': 'surface_tilt'})
+    expected_output['surface_tilt'] = np.abs(expected_output['surface_tilt'])
     col_order = df_outputs.columns
     tol = 1e-8
     np.testing.assert_allclose(df_outputs.values,
-                               df_perez_luminance[col_order].values,
+                               expected_output[col_order].values,
                                atol=0, rtol=tol)
 
 
