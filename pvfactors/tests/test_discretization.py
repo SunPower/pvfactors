@@ -89,5 +89,5 @@ def test_consistent_qinc():
         1103.05456561, 1103.03688292, 1097.08812485])
 
     tol = 1e-8
-    assert np.allclose(array.surface_registry.qinc, expected_qinc,
-                       atol=0, rtol=tol, equal_nan=True)
+    np.testing.assert_allclose(array.surface_registry.qinc, expected_qinc,
+                               atol=0, rtol=tol, equal_nan=True)

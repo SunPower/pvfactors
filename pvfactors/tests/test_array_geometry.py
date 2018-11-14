@@ -40,9 +40,9 @@ def test_create_array():
          np.nan, np.nan, np.nan, np.nan, np.nan, 1., 2., np.nan])
     calculated_pvrow_neighbors = (array.surface_registry
                                   .index_pvrow_neighbor.values)
-    assert np.allclose(calculated_pvrow_neighbors,
-                       expected_pvrow_neighbors, atol=tol, rtol=0,
-                       equal_nan=True)
+    np.testing.assert_allclose(calculated_pvrow_neighbors,
+                               expected_pvrow_neighbors, atol=tol, rtol=0,
+                               equal_nan=True)
 
 
 def test_plotting():

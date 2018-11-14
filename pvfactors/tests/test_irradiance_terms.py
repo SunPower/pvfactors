@@ -44,5 +44,6 @@ def test_irradiance_terms_perez_but_isotropic():
          866.02540378, 866.02540378,
          100.])
     tol = 1e-8
-    assert np.allclose(array.irradiance_terms, expected_irradiance_terms,
-                       atol=tol, rtol=0)
+    np.testing.assert_allclose(
+        array.irradiance_terms, expected_irradiance_terms,
+        atol=tol, rtol=0)

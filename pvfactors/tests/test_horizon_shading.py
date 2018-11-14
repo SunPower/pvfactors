@@ -62,7 +62,9 @@ def test_calculate_back_horizon_shading():
             ['horizon_band_shading_pct', 'horizon_term']].values[0]
 
     TOL = 1e-7
-    assert np.allclose(expected_horizon_shading, calculated_horizon_shading,
-                       atol=0, rtol=TOL)
-    assert np.allclose(np.array([0., 1.]), calculated_no_horizon_shading,
-                       atol=0, rtol=TOL)
+    np.testing.assert_allclose(
+        expected_horizon_shading, calculated_horizon_shading,
+        atol=0, rtol=TOL)
+    np.testing.assert_allclose(
+        np.array([0., 1.]), calculated_no_horizon_shading,
+        atol=0, rtol=TOL)

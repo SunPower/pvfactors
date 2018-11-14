@@ -57,7 +57,7 @@ def test_view_matrix():
 
     # Compare with expectations: make sure to remove the sky from the views
     n_shape = expected_view_matrix.shape[0]
-    assert np.array_equal(array.view_matrix, expected_view_matrix)
+    np.testing.assert_array_equal(array.view_matrix, expected_view_matrix)
     finite_surfaces_view_matrix = array.view_matrix[n_shape - 1:, n_shape - 1]
     # Make sure that the matrix is symmetric:
     # "if I can see you, you can see me"

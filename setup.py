@@ -6,7 +6,7 @@ import versioneer
 DESCRIPTION = ('2D View Factor Model to calculate the irradiance incident on '
                + 'PV arrays')
 DISTNAME = 'pvfactors'
-AUTHOR = 'anomam'
+AUTHOR = 'SunPower'
 MAINTAINER_EMAIL = 'marc.abouanoma@sunpowercorp.com'
 URL = 'https://github.com/SunPower/pvfactors'
 PACKAGES = ['pvfactors']

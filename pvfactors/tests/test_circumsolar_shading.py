@@ -30,8 +30,8 @@ def test_calculate_circumsolar_shading():
     expected_disk_shading_perc = 14.2378489933
     atol = 0
     rtol = 1e-8
-    assert np.isclose(expected_disk_shading_perc, percent_shading, atol=atol,
-                      rtol=rtol)
+    np.testing.assert_allclose(expected_disk_shading_perc, percent_shading,
+                               atol=atol, rtol=rtol)
 
 
 def test_serial_circumsolar_shading_calculation():

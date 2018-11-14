@@ -48,6 +48,6 @@ def test_calculate_radiosities_parallel_perez():
     (timestamps, tracker_theta, surface_azimuth, solar_zenith, solar_azimuth,
      dni, dhi) = breakup_df_inputs(df_inputs_simulation)
     # Run calculation
-    results = calculate_radiosities_parallel_perez(
+    _ = calculate_radiosities_parallel_perez(
         arguments, timestamps, tracker_theta, surface_azimuth,
         solar_zenith, solar_azimuth, dni, dhi, n_processes=n_processes)

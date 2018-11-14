@@ -4,7 +4,6 @@
 Test the implementation of the pvgeometry helper functions
 """
 
-import numpy as np
 import pandas as pd
 from shapely.geometry import LineString, Point
 from pvfactors.pvgeometry import PVGeometry

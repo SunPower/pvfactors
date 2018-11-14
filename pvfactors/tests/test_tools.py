@@ -40,8 +40,6 @@ def test_array_calculate_timeseries():
         'dni': [1e3, 1e3, 1000.],
         'dhi': [1e2, 1e2, 100.]
     },
-        columns=['solar_zenith', 'solar_azimuth', 'tracker_theta',
-                 'surface_azimuth', 'dni', 'dhi'],
         index=[0, 1, 2]
     )
     arguments = {
