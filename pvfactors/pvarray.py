@@ -3,14 +3,12 @@
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
-from pvfactors import (PVFactorsError, PVFactorsArrayUpdateException)
+from pvfactors import PVFactorsArrayUpdateException
 from pvfactors.pvcore import (LinePVArray,
                               find_edge_point, Y_GROUND,
                               MAX_X_GROUND, MIN_X_GROUND,
                               calculate_circumsolar_shading,
-                              calculate_horizon_band_shading,
-                              calculate_surface_azimuth,
-                              calculate_axis_azimuth)
+                              calculate_horizon_band_shading)
 from pvfactors.pvrow import PVRowLine
 from pvfactors.view_factors import ViewFactorCalculator, VIEW_DICT
 from shapely.geometry import LineString, Point
@@ -135,9 +133,10 @@ class Array(ArrayBase):
         center [meters]
     :param float pvrow_width: width of PV rows, in the considered 2D
         dimension [meters]
-    :param float tracker_theta: The rotation angle of the tracker.
-        tracker_theta = 0 is horizontal, and positive rotation angles are
-        clockwise. [degrees]
+    :param float surface_tilt: Surface tilt angles in decimal degrees.
+        surface_tilt must be >=0 and <=180.
+        The tilt angle is defined as degrees from horizontal
+        (e.g. surface facing up = 0, surface facing horizon = 90)
     :param float axis_azimuth: A value denoting the compass direction along
         which the axis of rotation lies. Measured in decimal degrees East of
         North.
@@ -163,7 +162,7 @@ class Array(ArrayBase):
     _view_factor_calculator = ViewFactorCalculator
 
     def __init__(self, n_pvrows=3, pvrow_height=1.5, pvrow_width=1.,
-                 tracker_theta=20., axis_azimuth=90., solar_zenith=0.,
+                 surface_tilt=20., surface_azimuth=180., solar_zenith=0.,
                  solar_azimuth=180., rho_ground=0.2, rho_back_pvrow=0.05,
                  rho_front_pvrow=0.03, gcr=0.3, **kwargs):
 
@@ -171,17 +170,9 @@ class Array(ArrayBase):
         super(Array, self).__init__(n_pvrows, pvrow_height)
         self.pvrow_class = kwargs.get('pvrow_class', self._pvrow_class)
         self.view_factor_calculator = self._view_factor_calculator()
+        # Fixed array parameters
         self.gcr = gcr
         self.pvrow_width = pvrow_width
-        self.axis_azimuth = None
-        self.surface_azimuth = None
-        self.surface_tilt = None
-        self.illum_ground_indices = None
-        self.has_direct_shading = None
-        self.solar_2d_vector = None
-        self.solar_zenith = None
-        self.solar_azimuth = None
-        self.irradiance_terms = None
         self.rho_ground = rho_ground
         self.rho_back_pvrow = rho_back_pvrow
         self.rho_front_pvrow = rho_front_pvrow
@@ -195,16 +186,21 @@ class Array(ArrayBase):
         )
         self.circumsolar_model = kwargs.get('circumsolar_model',
                                             'uniform_disk')
-
-        # Calculate surface azimuth assuming fixed tilt or single axis tracker
-        surface_azimuth = calculate_surface_azimuth(axis_azimuth,
-                                                    tracker_theta)
+        # Variable array parameters
+        self.solar_zenith = None
+        self.solar_azimuth = None
+        self.surface_azimuth = None
+        self.surface_tilt = None
+        self.illum_ground_indices = None
+        self.has_direct_shading = None
+        self.solar_2d_vector = None
+        self.irradiance_terms = None
 
         # Update array from initial parameters
-        self.update_view_factors(solar_zenith, solar_azimuth, tracker_theta,
-                                 surface_azimuth)
+        self.update_view_factors(solar_zenith, solar_azimuth,
+                                 surface_tilt, surface_azimuth)
 
-    def update_view_factors(self, solar_zenith, solar_azimuth, tracker_theta,
+    def update_view_factors(self, solar_zenith, solar_azimuth, surface_tilt,
                             surface_azimuth):
         """
         Create new line and surface registries based on new inputs, and re-cal-
@@ -212,9 +208,10 @@ class Array(ArrayBase):
 
         :param float solar_zenith: zenith angle of the sun [in deg]
         :param float solar_azimuth: azimuth angle of the sun [in deg]
-        :param float tracker_theta: The rotation angle of the tracker.
-            tracker_theta = 0 is horizontal, and positive rotation angles are
-            clockwise. [degrees]
+        :param float surface_tilt: Surface tilt angles in decimal degrees.
+            surface_tilt must be >=0 and <=180.
+            The tilt angle is defined as degrees from horizontal
+            (e.g. surface facing up = 0, surface facing horizon = 90)
         :param float surface_azimuth: The azimuth of the rotated panel,
             determined by projecting the vector normal to the panel's surface
             to the earth's surface [degrees].
@@ -222,15 +219,12 @@ class Array(ArrayBase):
         """
         self.line_registry = self.initialize_registry()
         # Check on which side the light is incident
-        surface_tilt = np.abs(tracker_theta)
         sun_on_front_surface = aoi_function(surface_tilt, surface_azimuth,
                                             solar_zenith, solar_azimuth) <= 90
 
         # Update array parameters
         self.surface_azimuth = surface_azimuth
-        self.axis_azimuth = calculate_axis_azimuth(surface_azimuth,
-                                                   tracker_theta)
-        self.tracker_theta = tracker_theta
+        self.surface_tilt = surface_tilt
         self.solar_zenith = solar_zenith
         self.solar_azimuth = solar_azimuth
 
@@ -241,7 +235,7 @@ class Array(ArrayBase):
                                                self.pvrow_height)
 
         # Create the ground and the shadows on it
-        self.create_pvrow_shadows(solar_zenith, solar_azimuth)
+        self.create_pvrow_shadows(surface_azimuth, solar_zenith, solar_azimuth)
         self.create_ill_ground()
         edge_points = self.find_edge_points()
         self.create_remaining_illum_ground(edge_points)
@@ -275,7 +269,7 @@ class Array(ArrayBase):
         )
 
     def update_irradiance_terms_perez(self, solar_zenith, solar_azimuth,
-                                      tracker_theta, surface_azimuth, dni,
+                                      surface_tilt, surface_azimuth, dni,
                                       luminance_isotropic,
                                       luminance_circumsolar,
                                       poa_horizon, poa_circumsolar):
@@ -285,9 +279,10 @@ class Array(ArrayBase):
 
         :param float solar_zenith: zenith angle of the sun [degrees]
         :param float solar_azimuth: azimuth angle of the sun [degrees]
-        :param float tracker_theta: The rotation angle of the tracker.
-            tracker_theta = 0 is horizontal, and positive rotation angles are
-            clockwise. [degrees]
+        :param float surface_tilt: Surface tilt angles in decimal degrees.
+            surface_tilt must be >=0 and <=180.
+            The tilt angle is defined as degrees from horizontal
+            (e.g. surface facing up = 0, surface facing horizon = 90)
         :param float surface_azimuth: azimuth angle of the PV surfaces. All PV
             surfaces must have the same azimuth angle [degrees]
         :param float dni: direct normal irradiance [W/m2]
@@ -317,7 +312,6 @@ class Array(ArrayBase):
         dni_ground = dni * cosd(solar_zenith)
         circumsolar_ground = luminance_circumsolar
         # FIXME: only works for pvrows as lines
-        surface_tilt = np.abs(tracker_theta)
         aoi_frontsurface = aoi_function(surface_tilt, surface_azimuth,
                                         solar_zenith, solar_azimuth)
 
@@ -498,7 +492,7 @@ class Array(ArrayBase):
             list(1. / self.surface_registry.reflectivity.values) + [1])
 
     def calculate_radiosities_perez(
-            self, solar_zenith, solar_azimuth, tracker_theta, surface_azimuth,
+            self, solar_zenith, solar_azimuth, surface_tilt, surface_azimuth,
             dni, luminance_isotropic, luminance_circumsolar, poa_horizon,
             poa_circumsolar):
         """
@@ -508,9 +502,10 @@ class Array(ArrayBase):
 
         :param float solar_zenith: zenith angle of the sun [degrees]
         :param float solar_azimuth: azimuth angle of the sun [degrees]
-        :param float tracker_theta: The rotation angle of the tracker.
-            tracker_theta = 0 is horizontal, and positive rotation angles are
-            clockwise. [degrees]
+        :param float surface_tilt: Surface tilt angles in decimal degrees.
+            surface_tilt must be >=0 and <=180.
+            The tilt angle is defined as degrees from horizontal
+            (e.g. surface facing up = 0, surface facing horizon = 90)
         :param float surface_azimuth: The azimuth of the rotated panel,
             determined by projecting the vector normal to the panel's surface
             to the earth's surface [degrees].
@@ -530,14 +525,14 @@ class Array(ArrayBase):
         # Update the array configuration
         try:
             self.update_view_factors(solar_zenith, solar_azimuth,
-                                     tracker_theta, surface_azimuth)
+                                     surface_tilt, surface_azimuth)
         except Exception as err:
             raise PVFactorsArrayUpdateException(
                 "Could not calculate shapely array or view factors because of "
                 "error: %s" % err)
 
         self.update_irradiance_terms_perez(solar_zenith, solar_azimuth,
-                                           tracker_theta, surface_azimuth, dni,
+                                           surface_tilt, surface_azimuth, dni,
                                            luminance_isotropic,
                                            luminance_circumsolar,
                                            poa_horizon, poa_circumsolar)
@@ -592,7 +587,7 @@ class Array(ArrayBase):
         x_center = X_ORIGIN_PVROWS
         index = 0
         pvrow = self.pvrow_class(self.line_registry, x_center, y_center, index,
-                                 self.tracker_theta, self.pvrow_width)
+                                 self.surface_tilt, self.pvrow_width)
         pvrows = [pvrow]
         if n_pvrows > 1:
             distance = pvrow.width / self.gcr
@@ -600,12 +595,13 @@ class Array(ArrayBase):
                 x_center = i * distance
                 pvrow = self.pvrow_class(
                     self.line_registry, x_center, y_center,
-                    i, self.tracker_theta, self.pvrow_width)
+                    i, self.surface_tilt, self.pvrow_width)
                 pvrows.append(pvrow)
 
         return pvrows
 
-    def create_pvrow_shadows(self, solar_zenith, solar_azimuth):
+    def create_pvrow_shadows(self, surface_azimuth,
+                             solar_zenith, solar_azimuth):
         """
         Create the PV row shadows cast on the ground. Since the PV array is in
         2D, the approach here is to project the solar vector into the 2D plane
@@ -617,6 +613,9 @@ class Array(ArrayBase):
         trackers' shadows.
 
 
+        :param float surface_azimuth: The azimuth of the rotated panel,
+            determined by projecting the vector normal to the panel's surface
+            to the earth's surface [degrees].
         :param float solar_zenith: sun's zenith angle
         :param float solar_azimuth: sun's azimuth angle
         :return: None
@@ -629,7 +628,7 @@ class Array(ArrayBase):
         # and vice versa
         solar_2d_vector = [
             # a drawing really helps understand the following
-            sind(solar_zenith) * sind(self.axis_azimuth - solar_azimuth),
+            - sind(solar_zenith) * cosd(surface_azimuth - solar_azimuth),
             cosd(solar_zenith)]
         # for a line of equation a*x + b*y + c = 0, we calculate intercept c
         # and can derive x_0 such that crosses with line y = 0: x_0 = - c / a
@@ -938,6 +937,7 @@ class Array(ArrayBase):
                                dtype=object)
         args_matrix[:] = None
 
+        # All surface indices need to be grouped and tracked for simplification
         indices_front_pvrows = self.surface_registry.loc[
             (self.surface_registry.line_type == 'pvrow')
             & (self.surface_registry.surface_side == 'front')].index.values
@@ -949,15 +949,16 @@ class Array(ArrayBase):
         ].index.values
         index_sky_dome = np.array([view_matrix.shape[0] - 1])
 
-        # Direction that pvrows are facing
-        facing = self.pvrows[0].facing
-
         # The ground will always see the sky
         # Use broadcasting for assigning values to subarrays of view matrix
         # Could also use np.ix_
         view_matrix[indices_ground[:, np.newaxis],
                     index_sky_dome] = VIEW_DICT["ground_sky"]
-        if facing == 'up':
+
+        # The pvrow front surface is always either flat or pointing to the
+        # left by design
+        pvrow_is_flat = (self.surface_tilt == 0.)
+        if pvrow_is_flat:
             # Only back surface can see the ground
             view_matrix[indices_back_pvrows[:, np.newaxis],
                         indices_ground] = VIEW_DICT["back_gnd"]
@@ -984,7 +985,6 @@ class Array(ArrayBase):
 
             # Initialize last indices for interrow views
             last_indices_back_pvrow = None
-            last_indices_front_pvrow = None
 
             # PVRow neighbors for each PVRow
             pvrows_list = self.pvrows + [None]
@@ -1017,50 +1017,30 @@ class Array(ArrayBase):
                 left_neighbor_pvrow = pvrows_list[idx - 1]
                 indices_ground_seen_by_front = None
                 indices_ground_seen_by_back = None
-                if facing == 'right':
-                    indices_ground_seen_by_front = (
-                        indices_ground_right_of_edge_pt)
-                    indices_ground_seen_by_back = (
-                        indices_ground_left_of_edge_pt
-                    )
-                    # Finding any obstructing pv rows
-                    front_obstruction_pvrow = right_neighbor_pvrow
-                    back_obstruction_pvrow = left_neighbor_pvrow
-                    # Save the PV row neighbor index values
-                    if right_neighbor_pvrow is not None:
-                        self.surface_registry.loc[
-                            (self.surface_registry.pvrow_index == pvrow.index)
-                            & (self.surface_registry.surface_side == 'front'),
-                            'index_pvrow_neighbor'
-                        ] = right_neighbor_pvrow.index
-                    if left_neighbor_pvrow is not None:
-                        self.surface_registry.loc[
-                            (self.surface_registry.pvrow_index == pvrow.index)
-                            & (self.surface_registry.surface_side == 'back'),
-                            'index_pvrow_neighbor'
-                        ] = left_neighbor_pvrow.index
-                elif facing == 'left':
-                    indices_ground_seen_by_front = (
-                        indices_ground_left_of_edge_pt)
-                    indices_ground_seen_by_back = (
-                        indices_ground_right_of_edge_pt
-                    )
-                    # Finding any obstructing pv rows
-                    front_obstruction_pvrow = left_neighbor_pvrow
-                    back_obstruction_pvrow = right_neighbor_pvrow
-                    # Save the PV row neighbor index values
-                    if right_neighbor_pvrow is not None:
-                        self.surface_registry.loc[
-                            (self.surface_registry.pvrow_index == pvrow.index)
-                            & (self.surface_registry.surface_side == 'back'),
-                            'index_pvrow_neighbor'
-                        ] = right_neighbor_pvrow.index
-                    if left_neighbor_pvrow is not None:
-                        self.surface_registry.loc[
-                            (self.surface_registry.pvrow_index == pvrow.index)
-                            & (self.surface_registry.surface_side == 'front'),
-                            'index_pvrow_neighbor'
-                        ] = left_neighbor_pvrow.index
+
+                # The projection of normal of front surface onto ground points
+                # to the left (by design of PVRow objects)
+                indices_ground_seen_by_front = (
+                    indices_ground_left_of_edge_pt)
+                indices_ground_seen_by_back = (
+                    indices_ground_right_of_edge_pt
+                )
+                # Finding any obstructing pv rows
+                front_obstruction_pvrow = left_neighbor_pvrow
+                back_obstruction_pvrow = right_neighbor_pvrow
+                # Save the PV row neighbor index values
+                if right_neighbor_pvrow is not None:
+                    self.surface_registry.loc[
+                        (self.surface_registry.pvrow_index == pvrow.index)
+                        & (self.surface_registry.surface_side == 'back'),
+                        'index_pvrow_neighbor'
+                    ] = right_neighbor_pvrow.index
+                if left_neighbor_pvrow is not None:
+                    self.surface_registry.loc[
+                        (self.surface_registry.pvrow_index == pvrow.index)
+                        & (self.surface_registry.surface_side == 'front'),
+                        'index_pvrow_neighbor'
+                    ] = left_neighbor_pvrow.index
 
                 # Front and back sides see different lines on the ground
                 if indices_ground_seen_by_back is not None:
@@ -1095,27 +1075,15 @@ class Array(ArrayBase):
 
                 # --- Find the views between neighbor pv rows
                 if last_indices_back_pvrow is not None:
-                    if facing == "right":
-                        # pvrow to pvrow view
-                        view_matrix[last_indices_front_pvrow[:, np.newaxis],
-                                    indices_back_pvrow] = (
-                            VIEW_DICT["pvrows"])
-                        view_matrix[indices_back_pvrow[:, np.newaxis],
-                                    last_indices_front_pvrow] = (
-                            VIEW_DICT["pvrows"])
-                    elif facing == "left":
-                        # pvrow to pvrow view
-                        view_matrix[last_indices_back_pvrow[:, np.newaxis],
-                                    indices_front_pvrow] = (
-                            VIEW_DICT["pvrows"])
-                        view_matrix[indices_front_pvrow[:, np.newaxis],
-                                    last_indices_back_pvrow] = (
-                            VIEW_DICT["pvrows"])
-                    else:
-                        raise PVFactorsError(
-                            "create_view_matrix: facing case not found")
+                    # pvrow to pvrow view
+                    view_matrix[last_indices_back_pvrow[:, np.newaxis],
+                                indices_front_pvrow] = (
+                        VIEW_DICT["pvrows"])
+                    view_matrix[indices_front_pvrow[:, np.newaxis],
+                                last_indices_back_pvrow] = (
+                        VIEW_DICT["pvrows"])
+
                 # Save last indices for next pvrow interaction
                 last_indices_back_pvrow = indices_back_pvrow
-                last_indices_front_pvrow = indices_front_pvrow
 
         return view_matrix, args_matrix

@@ -24,7 +24,7 @@ idx_slice = pd.IndexSlice
 
 
 def array_timeseries_calculate(
-    pvarray_parameters, timestamps, solar_zenith, solar_azimuth, tracker_theta,
+    pvarray_parameters, timestamps, solar_zenith, solar_azimuth, surface_tilt,
         surface_azimuth, dni, luminance_isotropic, luminance_circumsolar,
         poa_horizon, poa_circumsolar):
     """
@@ -38,9 +38,10 @@ def array_timeseries_calculate(
     :param array-like timestamps: simulation timestamps
     :param array-like solar_zenith: solar zenith angles
     :param array-like solar_azimuth: solar azimuth angles
-    :param array-like tracker_theta: The rotation angle of the tracker.
-        tracker_theta = 0 is horizontal, and positive rotation angles are
-        clockwise. [degrees]
+    :param array-like surface_tilt: Surface tilt angles in decimal degrees.
+        surface_tilt must be >=0 and <=180.
+        The tilt angle is defined as degrees from horizontal
+        (e.g. surface facing up = 0, surface facing horizon = 90)
     :param array-like surface_azimuth: The azimuth of the rotated panel,
         determined by projecting the vector normal to the panel's surface to
         the earth's surface [degrees].
@@ -69,7 +70,7 @@ def array_timeseries_calculate(
                     & (solar_zenith[idx] <= 90.)):
                 # Run calculation only if daytime
                 array.calculate_radiosities_perez(
-                    solar_zenith[idx], solar_azimuth[idx], tracker_theta[idx],
+                    solar_zenith[idx], solar_azimuth[idx], surface_tilt[idx],
                     surface_azimuth[idx], dni[idx], luminance_isotropic[idx],
                     luminance_circumsolar[idx], poa_horizon[idx],
                     poa_circumsolar[idx])
@@ -228,7 +229,7 @@ def perez_diffuse_luminance(timestamps, surface_tilt, surface_azimuth,
     return df_inputs
 
 
-def calculate_custom_perez_transposition(timestamps, tracker_theta,
+def calculate_custom_perez_transposition(timestamps, surface_tilt,
                                          surface_azimuth, solar_zenith,
                                          solar_azimuth, dni, dhi):
     """
@@ -237,9 +238,10 @@ def calculate_custom_perez_transposition(timestamps, tracker_theta,
     surface as well.
 
     :param array-like timestamps: simulation timestamps
-    :param array-like tracker_theta: The rotation angle of the tracker.
-        tracker_theta = 0 is horizontal, and positive rotation angles are
-        clockwise. [degrees]
+    :param array-like surface_tilt: Surface tilt angles in decimal degrees.
+        surface_tilt must be >=0 and <=180.
+        The tilt angle is defined as degrees from horizontal
+        (e.g. surface facing up = 0, surface facing horizon = 90)
     :param array-like surface_azimuth: The azimuth of the rotated panel,
         determined by projecting the vector normal to the panel's surface to
         the earth's surface [degrees].
@@ -248,14 +250,13 @@ def calculate_custom_perez_transposition(timestamps, tracker_theta,
     :param array-like dni: values for direct normal irradiance
     :param array-like dhi: values for diffuse horizontal irradiance
     :return: ``df_custom_perez``, dataframe with the following columns:
-        ['solar_zenith', 'solar_azimuth', 'tracker_theta', 'surface_azimuth',
+        ['solar_zenith', 'solar_azimuth', 'surface_tilt', 'surface_azimuth',
         'dhi', 'dni', 'vf_horizon', 'vf_circumsolar', 'vf_isotropic',
         'luminance_horizon', 'luminance_circumsolar', 'luminance_isotropic',
         'poa_isotropic', 'poa_circumsolar', 'poa_horizon', 'poa_total_diffuse']
     :rtype: class:`pandas.DataFrame`
     """
     # Calculate the perez inputs
-    surface_tilt = np.abs(tracker_theta)
     df_custom_perez = perez_diffuse_luminance(
         timestamps, surface_tilt, surface_azimuth,
         solar_zenith, solar_azimuth, dni, dhi)
@@ -270,7 +271,7 @@ def calculate_radiosities_serially_perez(args):
 
     :param args: tuple of arguments used to run the timeseries calculation.
         List in order: ``pvarray_parameters``, ``timestamps``,
-        ``solar_zenith``, ``solar_azimuth``, ``tracker_theta``,
+        ``solar_zenith``, ``solar_azimuth``, ``surface_tilt``,
         ``surface_azimuth``, ``dni``, ``dhi``.
         All 1-dimensional arrays.
     :return: ``df_registries``, ``df_custom_perez``; dataframes containing
@@ -281,12 +282,12 @@ def calculate_radiosities_serially_perez(args):
     """
     # Get arguments
     (pvarray_parameters, timestamps, solar_zenith, solar_azimuth,
-     tracker_theta, surface_azimuth, dni, dhi) = args
+     surface_tilt, surface_azimuth, dni, dhi) = args
 
     # Run custom perez transposition: in order to get circumsolar on back
     # surface too
     df_custom_perez = calculate_custom_perez_transposition(
-        timestamps, tracker_theta, surface_azimuth, solar_zenith,
+        timestamps, surface_tilt, surface_azimuth, solar_zenith,
         solar_azimuth, dni, dhi)
 
     # Get the necessary inputs
@@ -298,7 +299,7 @@ def calculate_radiosities_serially_perez(args):
     # Run timeseries calculation
     df_registries = array_timeseries_calculate(
         pvarray_parameters, timestamps, solar_zenith, solar_azimuth,
-        tracker_theta, surface_azimuth, dni, luminance_isotropic,
+        surface_tilt, surface_azimuth, dni, luminance_isotropic,
         luminance_circumsolar, poa_horizon, poa_circumsolar)
 
     return df_registries, df_custom_perez
@@ -306,7 +307,7 @@ def calculate_radiosities_serially_perez(args):
 
 def calculate_radiosities_parallel_perez(
         pvarray_parameters, timestamps, solar_zenith, solar_azimuth,
-        tracker_theta, surface_azimuth, dni, dhi, n_processes=None):
+        surface_tilt, surface_azimuth, dni, dhi, n_processes=None):
     """ Calculate timeseries results of simulation in parallel:
     run both custom Perez diffuse light transposition calculations and
     ``pvarray.Array`` timeseries calculation.
@@ -316,9 +317,10 @@ def calculate_radiosities_parallel_perez(
     :param array-like timestamps: simulation timestamps
     :param array-like solar_zenith: solar zenith angles
     :param array-like solar_azimuth: solar azimuth angles
-    :param array-like tracker_theta: The rotation angle of the tracker.
-        tracker_theta = 0 is horizontal, and positive rotation angles are
-        clockwise. [degrees]
+    :param array-like surface_tilt: Surface tilt angles in decimal degrees.
+        surface_tilt must be >=0 and <=180.
+        The tilt angle is defined as degrees from horizontal
+        (e.g. surface facing up = 0, surface facing horizon = 90)
     :param array-like surface_azimuth: The azimuth of the rotated panel,
         determined by projecting the vector normal to the panel's surface to
         the earth's surface [degrees].
@@ -338,16 +340,16 @@ def calculate_radiosities_parallel_perez(
         n_processes = cpu_count()
 
     # Split all arguments according to number of processes
-    (list_timestamps, list_surface_azimuth, list_tracker_theta,
+    (list_timestamps, list_surface_azimuth, list_surface_tilt,
      list_solar_zenith, list_solar_azimuth, list_dni, list_dhi) = map(
          np.array_split,
-         [timestamps, surface_azimuth, tracker_theta,
+         [timestamps, surface_azimuth, surface_tilt,
           solar_zenith, solar_azimuth, dni, dhi],
         [n_processes] * 7)
     list_parameters = [pvarray_parameters] * n_processes
     # Zip all the arguments together
     list_args = zip(*(list_parameters, list_timestamps, list_solar_zenith,
-                      list_solar_azimuth, list_tracker_theta,
+                      list_solar_azimuth, list_surface_tilt,
                       list_surface_azimuth, list_dni, list_dhi))
 
     # Start multiprocessing
@@ -501,8 +503,8 @@ def breakup_df_inputs(df_inputs):
     list of expected 1-dim arrays
 
     :param df_inputs: timestamp-indexed dataframe with following columns:
-        'surface_azimuth', 'tracker_theta', 'solar_zenith', 'solar_azimuth',
-        'dni', 'dhi'. Instead of 'tracker_theta', can also have 'surface_tilt'
+        'surface_azimuth', 'surface_tilt', 'solar_zenith', 'solar_azimuth',
+        'dni', 'dhi'
     :type df_inputs: ``pandas.DataFrame``
     :return: ``timestamps``, ``tilt_angles``, ``surface_azimuth``,
         ``solar_zenith``, ``solar_azimuth``, ``dni``, ``dhi``
@@ -510,17 +512,13 @@ def breakup_df_inputs(df_inputs):
     """
     timestamps = pd.to_datetime(df_inputs.index)
     surface_azimuth = df_inputs.surface_azimuth.values
-    if 'tracker_theta' in df_inputs.columns:
-        tilt_angles = df_inputs.tracker_theta.values
-    else:
-        # If tracker_theta not present, use surface_tilt instead
-        tilt_angles = df_inputs.surface_tilt.values
+    surface_tilt = df_inputs.surface_tilt.values
     solar_zenith = df_inputs.solar_zenith.values
     solar_azimuth = df_inputs.solar_azimuth.values
     dni = df_inputs.dni.values
     dhi = df_inputs.dhi.values
 
-    return (timestamps, tilt_angles, surface_azimuth,
+    return (timestamps, surface_tilt, surface_azimuth,
             solar_zenith, solar_azimuth, dni, dhi)
 
 

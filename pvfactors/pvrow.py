@@ -71,17 +71,20 @@ class PVRowLine(PVRowBase):
     :param float x_center: x coordinate of center of the line [m]
     :param float y_center: y coordinate of center of the line [m]
     :param int index: PV row index, used to distinguish different PV rows
-    :param float tracker_theta: tilt of the PV row, same as the whole array a
-    priori [deg]
+    :param float surface_tilt: Surface tilt angles in decimal degrees.
+        surface_tilt must be >=0 and <=180.
+        The tilt angle is defined as degrees from horizontal
     :param float pvrow_width: width of the PV row, which is the length of
     the PV row line [m]
     """
 
-    def __init__(self, line_registry, x_center, y_center, index, tracker_theta,
+    def __init__(self, line_registry, x_center, y_center, index, surface_tilt,
                  pvrow_width):
         super(PVRowLine, self).__init__()
+        assert ((surface_tilt >= 0) and (surface_tilt < 180)), (
+            "Range of surface_tilt incorrect: {}".format(surface_tilt))
         self.width = pvrow_width
-        self.tilt = tracker_theta
+        self.tilt = surface_tilt
         self.index = index
         self.x_center = x_center
         self.y_center = y_center
@@ -99,7 +102,9 @@ class PVRowLine(PVRowBase):
         Create the :class:`pvcore.LinePVArray` objects that the PV row
         is made out of, based on the inputted geometrical parameters.
 
-        :param float tilt: tilt angle of the PV row [deg]
+        :param float tilt: Surface tilt angles in decimal degrees.
+            surface_tilt must be >=0 and <=180.
+            The tilt angle is defined as degrees from horizontal
         :param int index: PV row index, used to distinguish different PV rows
         :return: [line_pvarray], highest_point, lowest_point,
                 right_point, left_point / which
@@ -118,8 +123,8 @@ class PVRowLine(PVRowBase):
         x2 = radius * np.cos(tilt_rad) + self.x_center
         y2 = radius * np.sin(tilt_rad) + self.y_center
 
-        highest_point = Point(x2, y2) if y2 >= y1 else Point(x1, y1)
-        lowest_point = Point(x1, y1) if y2 >= y1 else Point(x2, y2)
+        highest_point = Point(x2, y2)
+        lowest_point = Point(x1, y1)
         right_point = Point(x2, y2) if x2 >= x1 else Point(x1, y1)
         left_point = Point(x1, y1) if x2 >= x1 else Point(x2, y2)
 

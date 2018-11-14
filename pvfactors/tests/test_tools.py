@@ -35,7 +35,7 @@ def test_array_calculate_timeseries():
     df_inputs = pd.DataFrame({
         'solar_zenith': [80., 20., 70.4407256],
         'solar_azimuth': [0., 180., 248.08690811],
-        'tracker_theta': [70., 40., 42.4337927],
+        'surface_tilt': [70., 40., 42.4337927],
         'surface_azimuth': [180., 180., 270.],
         'dni': [1e3, 1e3, 1000.],
         'dhi': [1e2, 1e2, 100.]
@@ -50,7 +50,7 @@ def test_array_calculate_timeseries():
     }
 
     # Break up inputs
-    (timestamps, tracker_theta, surface_azimuth,
+    (timestamps, surface_tilt, surface_azimuth,
      solar_zenith, solar_azimuth, dni, dhi) = breakup_df_inputs(df_inputs)
 
     # Fill in the missing pieces
@@ -62,7 +62,7 @@ def test_array_calculate_timeseries():
     # Run timeseries calculation
     df_registries = array_timeseries_calculate(
         arguments, timestamps, solar_zenith, solar_azimuth,
-        tracker_theta, surface_azimuth, dni, luminance_isotropic,
+        surface_tilt, surface_azimuth, dni, luminance_isotropic,
         luminance_circumsolar, poa_horizon, poa_circumsolar)
 
     # Calculate surface averages for pvrows
@@ -96,23 +96,19 @@ def test_perez_diffuse_luminance(df_perez_luminance):
     Test that the calculation of luminance -- first step in using the vf model
     with Perez -- is functional
     """
-    df_inputs = df_perez_luminance[['tracker_theta', 'surface_azimuth',
+    df_inputs = df_perez_luminance[['surface_tilt', 'surface_azimuth',
                                     'solar_zenith', 'solar_azimuth', 'dni',
                                     'dhi']]
-    (timestamps, tracker_theta, surface_azimuth, solar_zenith, solar_azimuth,
+    (timestamps, surface_tilt, surface_azimuth, solar_zenith, solar_azimuth,
      dni, dhi) = breakup_df_inputs(df_inputs)
-    surface_tilt = np.abs(tracker_theta)
     df_outputs = perez_diffuse_luminance(timestamps, surface_tilt,
                                          surface_azimuth, solar_zenith,
                                          solar_azimuth, dni, dhi)
 
     col_order = df_outputs.columns
-    expected_output = df_perez_luminance.rename(
-        columns={'tracker_theta': 'surface_tilt'})
-    expected_output['surface_tilt'] = np.abs(expected_output['surface_tilt'])
     tol = 1e-8
     np.testing.assert_allclose(df_outputs.values,
-                               expected_output[col_order].values,
+                               df_perez_luminance[col_order].values,
                                atol=0, rtol=tol)
 
 
@@ -129,20 +125,17 @@ def test_luminance_in_timeseries_calc(df_perez_luminance,
                                 .tz_localize(None))
 
     # Break up inputs
-    (timestamps, tracker_theta, surface_azimuth, solar_zenith, solar_azimuth,
+    (timestamps, surface_tilt, surface_azimuth, solar_zenith, solar_azimuth,
      dni, dhi) = breakup_df_inputs(df_inputs_clearday)
     _, df_outputs = calculate_radiosities_serially_perez(
         (None, timestamps, solar_zenith, solar_azimuth,
-         tracker_theta, surface_azimuth,
+         surface_tilt, surface_azimuth,
          dni, dhi))
 
-    expected_output = df_perez_luminance.rename(
-        columns={'tracker_theta': 'surface_tilt'})
-    expected_output['surface_tilt'] = np.abs(expected_output['surface_tilt'])
     col_order = df_outputs.columns
     tol = 1e-8
     np.testing.assert_allclose(df_outputs.values,
-                               expected_output[col_order].values,
+                               df_perez_luminance[col_order].values,
                                atol=0, rtol=tol)
 
 
@@ -173,12 +166,12 @@ def test_save_all_outputs_calculate_perez():
     }
 
     # Break up inputs
-    (timestamps, tracker_theta, surface_azimuth,
+    (timestamps, surface_tilt, surface_azimuth,
      solar_zenith, solar_azimuth, dni, dhi) = breakup_df_inputs(
          df_inputs_clearday.iloc[:idx_subset])
 
     args = (arguments, timestamps, solar_zenith, solar_azimuth,
-            tracker_theta, surface_azimuth, dni, dhi)
+            surface_tilt, surface_azimuth, dni, dhi)
 
     # Run the serial calculation
     df_registries_serial, _ = (

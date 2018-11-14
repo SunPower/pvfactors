@@ -22,7 +22,8 @@ def test_create_array():
         'pvrow_height': 1.5,
         'pvrow_width': 1.,
         'gcr': 0.3,
-        'tracker_theta': 20.
+        'surface_tilt': 20.,
+        'surface_azimuth': 180.
     }
     # Create vf array
     array = Array(**arguments)
@@ -60,10 +61,10 @@ def test_plotting():
             'pvrow_height': 1.5,
             'solar_zenith': 30,
             'solar_azimuth': 0.,
-            'axis_azimuth': 180.,
+            'surface_azimuth': 90.,
             'pvrow_width': 1.,
             'gcr': 0.3,
-            'tracker_theta': 0.
+            'surface_tilt': 0.
         }
         array = Array(**arguments)
         f, ax = plt.subplots(figsize=(10, 5))
@@ -75,10 +76,10 @@ def test_plotting():
             'pvrow_height': 3.0,
             'solar_zenith': 30,
             'solar_azimuth': 180.,
-            'axis_azimuth': 180.,
+            'surface_azimuth': 270.,
             'pvrow_width': 3.0,
             'gcr': 0.9,
-            'tracker_theta': 20.
+            'surface_tilt': 20.
         }
         array = Array(**arguments)
         f, ax = plt.subplots()
@@ -90,10 +91,10 @@ def test_plotting():
             'pvrow_height': 3.0,
             'solar_zenith': 60,
             'solar_azimuth': 0.,
-            'axis_azimuth': 180.,
+            'surface_azimuth': 90.,
             'pvrow_width': 3.0,
             'gcr': 0.9,
-            'tracker_theta': -20.
+            'surface_tilt': 20.
         }
         array = Array(**arguments)
         f, ax = plt.subplots()
@@ -115,10 +116,10 @@ def test_merge_shadows():
         'pvrow_height': 2.,
         'solar_zenith': 30,
         'solar_azimuth': 0.,
-        'axis_azimuth': 90.,
+        'surface_azimuth': 0.,
         'pvrow_width': 3,
         'gcr': 0.9,
-        'tracker_theta': -20.
+        'surface_tilt': 20.
     }
     array = Array(**arguments)
     # There should be 1 continuous shadow on the groud, but 4 distinct ground
@@ -139,10 +140,10 @@ def test_interrow_shading():
         'pvrow_height': 3.,
         'solar_zenith': 30,
         'solar_azimuth': 180.,
-        'axis_azimuth': 90.,
+        'surface_azimuth': 180.,
         'pvrow_width': 3.,
         'gcr': 0.9,
-        'tracker_theta': 20.
+        'surface_tilt': 20.
     }
     array = Array(**arguments)
     # There should be 4 pvrows with direct shading
@@ -155,12 +156,12 @@ def test_interrow_shading():
     arguments = {
         'n_pvrows': 5,
         'pvrow_height': 3.0,
-        'solar_zenith': 60,
+        'solar_zenith': 80,
         'solar_azimuth': 0.,
-        'axis_azimuth': 90.,
+        'surface_azimuth': 180.,
         'pvrow_width': 3.0,
         'gcr': 0.9,
-        'tracker_theta': -20.
+        'surface_tilt': 30.
     }
     array = Array(**arguments)
     # There should still be 4 pvrows with direct shading

@@ -61,54 +61,6 @@ class LinePVArray(dict):
                                      str(self._list_line_types)))
 
 
-def calculate_surface_azimuth(axis_azimuth, surface_tilt):
-    """
-    Calculate surface azimuth from axis azimuth, assuming fixed tilt or
-    single-axis tracker.
-    Reference: https://github.com/pvlib/pvlib-python/blob/master/pvlib/
-    tracking.py#L538-L544
-
-    :param float axis_azimuth: tracker or fixed tilt rack azimuth value in deg
-    :return: surface_azimuth; value of surface azimuth in degrees
-    :rtype: float
-    """
-    if surface_tilt >= 0:
-        surface_azimuth = axis_azimuth + 90.
-    else:
-        surface_azimuth = axis_azimuth - 90.
-
-    # Map azimuth into [0,360) domain.
-    if surface_azimuth < 0:
-        surface_azimuth += 360
-    elif surface_azimuth >= 360:
-        surface_azimuth -= 360
-
-    return surface_azimuth
-
-
-def calculate_axis_azimuth(surface_azimuth, surface_tilt):
-    """
-    Calculate axis_azimuth from surface azimuth. Assuming fixed tilt or single-
-    axis tracker.
-
-    :param float surface_azimuth: PV surface azimuth value in deg
-    :return: axis_azimuth; value of axis azimuth in degrees
-    :rtype: float
-    """
-    if surface_tilt >= 0:
-        axis_azimuth = surface_azimuth - 90.
-    else:
-        axis_azimuth = surface_azimuth + 90.
-
-    # Map azimuth into [0,360) domain.
-    if axis_azimuth < 0:
-        axis_azimuth += 360
-    elif axis_azimuth >= 360:
-        axis_azimuth -= 360
-
-    return axis_azimuth
-
-
 def calculate_circumsolar_shading(percentage_distance_covered,
                                   model='uniform_disk'):
     """

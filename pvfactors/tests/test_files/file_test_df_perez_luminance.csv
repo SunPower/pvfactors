@@ -1,4 +1,4 @@
-datetime,solar_zenith,solar_azimuth,tracker_theta,surface_azimuth,dni,dhi,poa_isotropic,poa_circumsolar,poa_horizon,vf_horizon,vf_circumsolar,vf_isotropic,luminance_horizon,luminance_circumsolar,luminance_isotropic,poa_total_diffuse
+datetime,solar_zenith,solar_azimuth,surface_tilt,surface_azimuth,dni,dhi,poa_isotropic,poa_circumsolar,poa_horizon,vf_horizon,vf_circumsolar,vf_isotropic,luminance_horizon,luminance_circumsolar,luminance_isotropic,poa_total_diffuse
 10/2/2015 12:40,42.54210405,174.3715553,5.142972856,90,1000,100,53.90495896,46.1721986,1.841766119,0.08964132,1.00404216,0.997987056,20.54595037,45.98631454,54.01368546,101.9189237
 10/2/2015 12:50,42.41609807,178.0613184,1.77035709,90,1000,100,53.9393075,46.06980636,0.633882293,0.030893644,1.00047755,0.999761339,20.51821071,46.0478162,53.9521838,100.6429962
 10/2/2015 13:00,42.41574779,181.7602662,1.607556458,270,1000,100,53.94139578,46.06611763,0.575604882,0.028053472,1.000393731,0.999803212,20.51813336,46.04798711,53.95201289,100.5831183

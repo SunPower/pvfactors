@@ -19,7 +19,7 @@ def test_irradiance_terms_perez_but_isotropic():
     dhi = 1e2
     solar_zenith = 80.
     solar_azimuth = 0.
-    tracker_theta = 70.
+    surface_tilt = 70.
     surface_azimuth = 180.
     arguments = {
         'n_pvrows': 3,
@@ -30,10 +30,10 @@ def test_irradiance_terms_perez_but_isotropic():
     # Create vf array
     array = Array(**arguments)
     # Calculate irradiance terms
-    array.update_view_factors(solar_zenith, solar_azimuth, tracker_theta,
+    array.update_view_factors(solar_zenith, solar_azimuth, surface_tilt,
                               surface_azimuth)
     array.update_irradiance_terms_perez(solar_zenith, solar_azimuth,
-                                        tracker_theta, surface_azimuth,
+                                        surface_tilt, surface_azimuth,
                                         dni, dhi, 0., 0., 0.)
 
     # Check that the values are as expected

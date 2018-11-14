@@ -33,10 +33,10 @@ def test_view_matrix():
         'pvrow_height': 1.5,
         'solar_zenith': 30,
         'solar_azimuth': 180.,
-        'axis_azimuth': 90.,
+        'surface_azimuth': 180.,
         'pvrow_width': 1.,
         'gcr': 0.3,
-        'tracker_theta': 20.
+        'surface_tilt': 20.
     }
     array = Array(**arguments)
 
@@ -74,10 +74,10 @@ def test_view_factor_matrix():
         'pvrow_height': 1.5,
         'solar_zenith': 30,
         'solar_azimuth': 180.,
-        'axis_azimuth': 90.,
+        'surface_azimuth': 180.,
         'pvrow_width': 1.0,
         'gcr': 0.4,
-        'tracker_theta': 30.
+        'surface_tilt': 30.
     }
     array = Array(**arguments)
 
@@ -126,7 +126,7 @@ def is_symmetric(matrix):
 def test_negativevf_and_flatcasenoon():
 
     pvarray_parameters = {
-        'axis_azimuth': 90,
+        'surface_azimuth': 90,
         'tracker_theta': 0.0,
         'gcr': 0.3,
         'n_pvrows': 3,
@@ -173,8 +173,8 @@ def test_back_surface_luminance():
     back surface). Fix was implemented, and this should check for it.
     """
     pvarray_parameters = {
-        'axis_azimuth': 90,
-        'tracker_theta': 0.0,
+        'surface_azimuth': 90,
+        'surface_tilt': 0.0,
         'gcr': 0.3,
         'n_pvrows': 3,
         'Pvrow_height': 1.5,
