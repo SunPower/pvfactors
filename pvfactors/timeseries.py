@@ -158,9 +158,10 @@ def perez_diffuse_luminance(timestamps, surface_tilt, surface_azimuth,
         df_inputs.solar_zenith, df_inputs.solar_azimuth)
     sun_hitting_back_surface = ((aoi_proj < 0) &
                                 (df_inputs.solar_zenith <= 90))
-    df_inputs_back_surface = df_inputs.loc[sun_hitting_back_surface]
+    df_inputs_back_surface = df_inputs.loc[sun_hitting_back_surface].copy()
     # Reverse the surface normal to switch to back-surface circumsolar calc
-    df_inputs_back_surface.loc[:, 'surface_azimuth'] -= 180.
+    df_inputs_back_surface.loc[:, 'surface_azimuth'] = (
+        df_inputs_back_surface.loc[:, 'surface_azimuth'] - 180.)
     df_inputs_back_surface.loc[:, 'surface_azimuth'] = np.mod(
         df_inputs_back_surface.loc[:, 'surface_azimuth'], 360.
     )
@@ -224,8 +225,7 @@ def perez_diffuse_luminance(timestamps, surface_tilt, surface_azimuth,
     # Adjust the circumsolar luminance when it hits the back surface
     if df_inputs_back_surface.shape[0] > 0:
         df_inputs.loc[sun_hitting_back_surface, 'luminance_circumsolar'] = (
-            df_inputs_back_surface.loc[:, 'luminance_circumsolar']
-        )
+            df_inputs_back_surface.loc[:, 'luminance_circumsolar'])
     return df_inputs
 
 

@@ -39,7 +39,6 @@ def test_serial_circumsolar_shading_calculation():
     Calculate and save results from front surface circumsolar shading on
     pvrows. Test that it functions with the given data.
     """
-
     # Choose a PV array configuration and pass the arguments necessary for
     # the calculation to be triggered:
     # eg 'calculate_front_circ_horizon_shading'

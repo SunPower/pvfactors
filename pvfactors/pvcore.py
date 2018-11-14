@@ -220,20 +220,23 @@ def calculate_horizon_band_shading(shading_angle, horizon_band_angle):
 def find_edge_point(b1_pvrow, b2_pvrow):
     """
     Return edge point formed by pv row line and ground line. This assumes a
-    flat ground surface, located at the hard-coded elevation ``Y_GROUND`` value.
+    flat ground surface, located at the hard-coded elevation ``Y_GROUND`` value
 
     :param b1_pvrow: :class:`shapely.Point` object, first boundary point of the
         pv row line.
-    :param b2_pvrow: :class:`shapely.Point` object, second boundary point of the
-        pv row line.
+    :param b2_pvrow: :class:`shapely.Point` object, second boundary point of
+        the pv row line.
     """
 
     u_vector = [b1_pvrow.x - b2_pvrow.x, b1_pvrow.y - b2_pvrow.y]
     n_vector = [u_vector[1], -u_vector[0]]
     intercept = - (n_vector[0] * b1_pvrow.x + n_vector[1] * b1_pvrow.y)
 
-    x_edge_point = - (intercept
-                      + n_vector[1] * Y_GROUND) / np.float64(n_vector[0])
+    if n_vector[0]:
+        x_edge_point = - (intercept
+                          + n_vector[1] * Y_GROUND) / np.float64(n_vector[0])
+    else:
+        x_edge_point = np.inf
 
     # TODO: need to find a better way to deal with this case
     if np.abs(x_edge_point) > THRESHOLD_EDGE_POINT:

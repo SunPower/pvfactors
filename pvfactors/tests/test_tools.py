@@ -244,7 +244,7 @@ def test_get_average_pvrow_segments(df_registries, df_segments):
     terms = df_segments.columns.get_level_values('irradiance_term')
     ordered_index = zip(segment_index, terms)
     # Re-order cols of calculated df segments
-    df_calc_num = df_calc_num.loc[:, ordered_index].fillna(0.)
+    df_calc_num = df_calc_num.T.reindex(ordered_index).T.fillna(0.)
     # Compare arrays
     tol = 1e-8
     np.testing.assert_allclose(
