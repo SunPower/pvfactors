@@ -73,11 +73,11 @@ And some PV array parameters:
 
 ```python
 pvarray_parameters = {
-    'n_pvrows': 3,  # number of pv rows
+    'n_pvrows': 3,         # number of pv rows
     'pvrow_height': 1.75,  # height of pvrows (measured at center / torque tube)
-    'pvrow_width': 2.44,  # width of pvrows
-    'gcr': 0.4,  # ground coverage ratio
-    'rho_ground': 0.2,  # albedo
+    'pvrow_width': 2.44,   # width of pvrows
+    'gcr': 0.4,            # ground coverage ratio
+    'rho_ground': 0.2,     # albedo
 }
 ```
 
