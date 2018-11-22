@@ -137,22 +137,22 @@ class Array(ArrayBase):
         surface_tilt must be >=0 and <=180.
         The tilt angle is defined as degrees from horizontal
         (e.g. surface facing up = 0, surface facing horizon = 90)
-    :param float axis_azimuth: A value denoting the compass direction along
-        which the axis of rotation lies. Measured in decimal degrees East of
-        North.
+    :param float surface_azimuth: The azimuth of the rotated panel,
+        determined by projecting the vector normal to the panel's surface
+        to the earth's surface [degrees].
     :param float solar_zenith: zenith angle of the sun [degrees]
     :param float solar_azimuth: azimuth angle of the sun [degrees]
     :param float rho_ground: ground albedo
     :param float rho_back_pvrow: reflectivity of PV row's back surface
     :param float rho_front_pvrow: reflectivity of PV row's front surface
+    :param float gcr: ground coverage ratio of the PV array
     :param kwargs: possible options are: ``pvrow_class`` if the user wants
         to specify its own PV Row class; ``cut`` if the user wants to
-        discretize some pv rows, e.g. [(0, 5, 'front'), (4, 2, 'front')]
-        will discretize the front side of the first PV row into 5 segments,
-        and the 5th pv row... ; ``pvrow_distance`` if the user wants to
-        specify the distance between PV rows instead of GCR [DEPRECATED];
+        discretize some pv rows, e.g. [(0, 5, 'front'), (4, 2, 'back')]
+        will discretize the front surface of the first PV row into 5 segments,
+        and the back surface of the 5th pv row into 2 segments;
         ``calculate_front_circ_horizon_shading`` is a boolean that indicates
-        weather to calculate front circumsolar & horizon band shading or not;
+        whether to calculate front circumsolar & horizon band shading or not;
         ``circumsolar_angle`` would be the full (not half) angle of the
         circumsolar disk; ``horizon_band_angle`` would be the horizon band
         elevation angle
