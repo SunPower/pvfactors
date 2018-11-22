@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>How to use the model for single-point calculation &#8212; pvfactors 0.1.3 documentation</title>
+    <title>How to use the model for single-point calculation &#8212; pvfactors 0.1.4 documentation</title>
     <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <script type="text/javascript" src="../_static/documentation_options.js"></script>
@@ -116,7 +116,7 @@
 </div>
 <dl class="class">
 <dt>
-<em class="property">class </em><code class="descclassname">pvarray.</code><code class="descname">Array</code><span class="sig-paren">(</span><em>n_pvrows=3</em>, <em>pvrow_height=1.5</em>, <em>pvrow_width=1.0</em>, <em>array_tilt=20.0</em>, <em>array_azimuth=180.0</em>, <em>solar_zenith=0.0</em>, <em>solar_azimuth=180.0</em>, <em>rho_ground=0.2</em>, <em>rho_back_pvrow=0.05</em>, <em>rho_front_pvrow=0.03</em>, <em>gcr=0.3</em>, <em>**kwargs</em><span class="sig-paren">)</span></dt>
+<em class="property">class </em><code class="descclassname">pvarray.</code><code class="descname">Array</code><span class="sig-paren">(</span><em>n_pvrows=3</em>, <em>pvrow_height=1.5</em>, <em>pvrow_width=1.0</em>, <em>surface_tilt=20.0</em>, <em>surface_azimuth=180.0</em>, <em>solar_zenith=0.0</em>, <em>solar_azimuth=180.0</em>, <em>rho_ground=0.2</em>, <em>rho_back_pvrow=0.05</em>, <em>rho_front_pvrow=0.03</em>, <em>gcr=0.3</em>, <em>**kwargs</em><span class="sig-paren">)</span></dt>
 <dd><div class="line-block">
 <div class="line">Create the array object. This will call the <a class="reference internal" href="class_details.html#pvarray.Array.update_view_factors" title="pvarray.Array.update_view_factors"><code class="xref py py-meth docutils literal notranslate"><span class="pre">update_view_factors()</span></code></a></div>
 <div class="line">method which creates the shapely geometry and calculate the view</div>
@@ -141,23 +141,26 @@
 center [meters]</li>
 <li><strong>pvrow_width</strong> (<em>float</em>) – width of PV rows, in the considered 2D
 dimension [meters]</li>
-<li><strong>array_tilt</strong> (<em>float</em>) – tilt angle of the whole array. All PV rows must
-have the same tilt angle [degrees]</li>
-<li><strong>array_azimuth</strong> (<em>float</em>) – azimuth angle of the whole array. All PV
-rows must have the same azimuth angle [degrees]</li>
+<li><strong>surface_tilt</strong> (<em>float</em>) – Surface tilt angles in decimal degrees.
+surface_tilt must be &gt;=0 and &lt;=180.
+The tilt angle is defined as degrees from horizontal
+(e.g. surface facing up = 0, surface facing horizon = 90)</li>
+<li><strong>surface_azimuth</strong> (<em>float</em>) – The azimuth of the rotated panel,
+determined by projecting the vector normal to the panel’s surface
+to the earth’s surface [degrees].</li>
 <li><strong>solar_zenith</strong> (<em>float</em>) – zenith angle of the sun [degrees]</li>
 <li><strong>solar_azimuth</strong> (<em>float</em>) – azimuth angle of the sun [degrees]</li>
 <li><strong>rho_ground</strong> (<em>float</em>) – ground albedo</li>
 <li><strong>rho_back_pvrow</strong> (<em>float</em>) – reflectivity of PV row’s back surface</li>
 <li><strong>rho_front_pvrow</strong> (<em>float</em>) – reflectivity of PV row’s front surface</li>
+<li><strong>gcr</strong> (<em>float</em>) – ground coverage ratio of the PV array</li>
 <li><strong>kwargs</strong> – possible options are: <code class="docutils literal notranslate"><span class="pre">pvrow_class</span></code> if the user wants
 to specify its own PV Row class; <code class="docutils literal notranslate"><span class="pre">cut</span></code> if the user wants to
-discretize some pv rows, e.g. [(0, 5, ‘front’), (4, 2, ‘front’)]
-will discretize the front side of the first PV row into 5 segments,
-and the 5th pv row… ; <code class="docutils literal notranslate"><span class="pre">pvrow_distance</span></code> if the user wants to
-specify the distance between PV rows instead of GCR [DEPRECATED];
+discretize some pv rows, e.g. [(0, 5, ‘front’), (4, 2, ‘back’)]
+will discretize the front surface of the first PV row into 5 segments,
+and the back surface of the 5th pv row into 2 segments;
 <code class="docutils literal notranslate"><span class="pre">calculate_front_circ_horizon_shading</span></code> is a boolean that indicates
-weather to calculate front circumsolar &amp; horizon band shading or not;
+whether to calculate front circumsolar &amp; horizon band shading or not;
 <code class="docutils literal notranslate"><span class="pre">circumsolar_angle</span></code> would be the full (not half) angle of the
 circumsolar disk; <code class="docutils literal notranslate"><span class="pre">horizon_band_angle</span></code> would be the horizon band
 elevation angle</li>
@@ -207,7 +210,7 @@ elevation angle</li>
 </div>
 <dl class="method">
 <dt>
-<code class="descclassname">Array.</code><code class="descname">update_view_factors</code><span class="sig-paren">(</span><em>solar_zenith</em>, <em>solar_azimuth</em>, <em>array_tilt</em>, <em>array_azimuth</em><span class="sig-paren">)</span></dt>
+<code class="descclassname">Array.</code><code class="descname">update_view_factors</code><span class="sig-paren">(</span><em>solar_zenith</em>, <em>solar_azimuth</em>, <em>surface_tilt</em>, <em>surface_azimuth</em><span class="sig-paren">)</span></dt>
 <dd><p>Create new line and surface registries based on new inputs, and re-cal-
 culate the view factor matrix of the updated system.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -215,12 +218,15 @@ culate the view factor matrix of the updated system.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>solar_zenith</strong> (<em>float</em>) – zenith angle of the sun</li>
-<li><strong>solar_azimuth</strong> (<em>float</em>) – azimuth angle of the sun</li>
-<li><strong>array_tilt</strong> (<em>float</em>) – tilt angle of the whole array. All PV rows must
-have the same tilt angle</li>
-<li><strong>array_azimuth</strong> (<em>float</em>) – azimuth angle of the whole array. All PV
-rows must have the same azimuth angle</li>
+<li><strong>solar_zenith</strong> (<em>float</em>) – zenith angle of the sun [in deg]</li>
+<li><strong>solar_azimuth</strong> (<em>float</em>) – azimuth angle of the sun [in deg]</li>
+<li><strong>surface_tilt</strong> (<em>float</em>) – Surface tilt angles in decimal degrees.
+surface_tilt must be &gt;=0 and &lt;=180.
+The tilt angle is defined as degrees from horizontal
+(e.g. surface facing up = 0, surface facing horizon = 90)</li>
+<li><strong>surface_azimuth</strong> (<em>float</em>) – The azimuth of the rotated panel,
+determined by projecting the vector normal to the panel’s surface
+to the earth’s surface [degrees].</li>
 </ul>
 </td>
 </tr>
@@ -238,7 +244,7 @@ rows must have the same azimuth angle</li>
 The ouputs of the calculation will be written into the <code class="docutils literal notranslate"><span class="pre">surface_registry</span></code>. The approach builds on top of the Perez diffuse light transposition model.</p>
 <dl class="method">
 <dt>
-<code class="descclassname">Array.</code><code class="descname">calculate_radiosities_perez</code><span class="sig-paren">(</span><em>solar_zenith</em>, <em>solar_azimuth</em>, <em>array_tilt</em>, <em>array_azimuth</em>, <em>dni</em>, <em>luminance_isotropic</em>, <em>luminance_circumsolar</em>, <em>poa_horizon</em>, <em>poa_circumsolar</em><span class="sig-paren">)</span></dt>
+<code class="descclassname">Array.</code><code class="descname">calculate_radiosities_perez</code><span class="sig-paren">(</span><em>solar_zenith</em>, <em>solar_azimuth</em>, <em>surface_tilt</em>, <em>surface_azimuth</em>, <em>dni</em>, <em>luminance_isotropic</em>, <em>luminance_circumsolar</em>, <em>poa_horizon</em>, <em>poa_circumsolar</em><span class="sig-paren">)</span></dt>
 <dd><p>Solve linear system of equations to calculate radiosity terms based on
 the specified inputs and using Perez diffuse light transposition model
 pre-calculated values</p>
@@ -249,15 +255,18 @@ pre-calculated values</p>
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>solar_zenith</strong> (<em>float</em>) – zenith angle of the sun [degrees]</li>
 <li><strong>solar_azimuth</strong> (<em>float</em>) – azimuth angle of the sun [degrees]</li>
-<li><strong>array_tilt</strong> (<em>float</em>) – tilt angle of the whole array. All PV rows must
-have the same tilt angle [degrees]</li>
-<li><strong>array_azimuth</strong> (<em>float</em>) – azimuth angle of the whole array. All PV
-rows must have the same azimuth angle [degrees]</li>
+<li><strong>surface_tilt</strong> (<em>float</em>) – Surface tilt angles in decimal degrees.
+surface_tilt must be &gt;=0 and &lt;=180.
+The tilt angle is defined as degrees from horizontal
+(e.g. surface facing up = 0, surface facing horizon = 90)</li>
+<li><strong>surface_azimuth</strong> (<em>float</em>) – The azimuth of the rotated panel,
+determined by projecting the vector normal to the panel’s surface
+to the earth’s surface [degrees].</li>
 <li><strong>dni</strong> (<em>float</em>) – direct normal irradiance [W/m2]</li>
-<li><strong>luminance_isotropic</strong> (<em>float</em>) – luminance of the isotropic part of the
-sky dome [W/m2/sr]</li>
-<li><strong>luminance_circumsolar</strong> (<em>float</em>) – luminance of the circumsolar part of
+<li><strong>luminance_isotropic</strong> (<em>float</em>) – luminance of the isotropic part of
 the sky dome [W/m2/sr]</li>
+<li><strong>luminance_circumsolar</strong> (<em>float</em>) – luminance of the circumsolar part
+of the sky dome [W/m2/sr]</li>
 <li><strong>poa_horizon</strong> (<em>float</em>) – plane-of-array horizon component of the
 irradiance as calculated by Perez for the front surface of a PV row
 [W/m2]</li>
