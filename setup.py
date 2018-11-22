@@ -4,7 +4,9 @@ from setuptools import setup
 import versioneer
 
 DESCRIPTION = ('2D View Factor Model to calculate the irradiance incident on '
-               + 'PV arrays')
+               + 'various surfaces of PV arrays')
+with open('README.md', 'r') as f:
+    LONG_DESCRIPTION = f.read()
 DISTNAME = 'pvfactors'
 AUTHOR = 'SunPower'
 MAINTAINER_EMAIL = 'marc.abouanoma@sunpowercorp.com'
@@ -35,6 +37,7 @@ TESTS_REQUIRE = ['pytest>=3.2.1', 'pytest-mock>=1.10.0']
 
 setup(name=DISTNAME,
       description=DESCRIPTION,
+      long_description=LONG_DESCRIPTION,
       version=versioneer.get_version(),
       cmdclass=versioneer.get_cmdclass(),
       author=AUTHOR,
