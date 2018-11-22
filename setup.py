@@ -38,6 +38,7 @@ TESTS_REQUIRE = ['pytest>=3.2.1', 'pytest-mock>=1.10.0']
 setup(name=DISTNAME,
       description=DESCRIPTION,
       long_description=LONG_DESCRIPTION,
+      long_description_content_type='text/markdown',
       version=versioneer.get_version(),
       cmdclass=versioneer.get_cmdclass(),
       author=AUTHOR,
