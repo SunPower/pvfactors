@@ -1,0 +1,15 @@
+.. _whatsnew_0140:
+
+v0.1.4 (November 22, 2018)
+==========================
+
+Major simplification of simulation input types, and update of docs for PyPI.
+Now the only PV array angles needed for simulations are 'surface_tilt' and 'surface_azimuth', and they also follow the pvlib-python convention.
+
+* Small updates for PyPI upload (#21)
+* Use 'surface_azimuth' and 'surface_tilt' only, with pvlib convention (#22)
+
+Contributors
+------------
+
+* Marc Anoma
