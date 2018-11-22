@@ -42,6 +42,10 @@ def df_perez_luminance():
     """ Example of df_segments to be used for tests """
     fp = os.path.join(DIR_TEST_DATA, 'file_test_df_perez_luminance.csv')
     df_perez_luminance = pd.read_csv(fp, header=[0], index_col=0)
+
+    df_perez_luminance.index = (pd.DatetimeIndex(df_perez_luminance.index)
+                                .tz_localize('UTC').tz_convert('Etc/GMT+7')
+                                .tz_localize(None))
     yield df_perez_luminance
 
 
@@ -64,8 +68,8 @@ def pvarray_parameters_serial_calc():
         'n_pvrows': 2,
         'pvrow_height': 1.5,
         'pvrow_width': 1.,
-        'array_azimuth': 270,
-        'array_tilt': -20.,
+        'axis_azimuth': 270,
+        'tracker_theta': -20.,
         'gcr': 0.3,
         'solar_zenith': 30.,
         'solar_azimuth': 90.,
@@ -82,8 +86,8 @@ def df_inputs_serial_calculation_with_skips(
     """ Create inputs that will lead to at least 1 skip in serial calc """
 
     df_skips = pd.DataFrame(
-        {'array_tilt': 0.,
-         'array_azimuth': 0.,
+        {'tracker_theta': 0.,
+         'axis_azimuth': 0.,
          'solar_zenith': 100.,  # the sun is down
          'solar_azimuth': 0.,
          'dni': np.nan, 'dhi': np.nan},

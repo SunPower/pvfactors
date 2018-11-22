@@ -33,10 +33,10 @@ def test_view_matrix():
         'pvrow_height': 1.5,
         'solar_zenith': 30,
         'solar_azimuth': 180.,
-        'array_azimuth': 180.,
+        'surface_azimuth': 180.,
         'pvrow_width': 1.,
         'gcr': 0.3,
-        'array_tilt': 20.
+        'surface_tilt': 20.
     }
     array = Array(**arguments)
 
@@ -57,7 +57,7 @@ def test_view_matrix():
 
     # Compare with expectations: make sure to remove the sky from the views
     n_shape = expected_view_matrix.shape[0]
-    assert np.array_equal(array.view_matrix, expected_view_matrix)
+    np.testing.assert_array_equal(array.view_matrix, expected_view_matrix)
     finite_surfaces_view_matrix = array.view_matrix[n_shape - 1:, n_shape - 1]
     # Make sure that the matrix is symmetric:
     # "if I can see you, you can see me"
@@ -74,10 +74,10 @@ def test_view_factor_matrix():
         'pvrow_height': 1.5,
         'solar_zenith': 30,
         'solar_azimuth': 180.,
-        'array_azimuth': 180.,
+        'surface_azimuth': 180.,
         'pvrow_width': 1.0,
         'gcr': 0.4,
-        'array_tilt': 30.
+        'surface_tilt': 30.
     }
     array = Array(**arguments)
 
@@ -126,8 +126,8 @@ def is_symmetric(matrix):
 def test_negativevf_and_flatcasenoon():
 
     pvarray_parameters = {
-        'array_azimuth': 90,
-        'array_tilt': 0.0,
+        'surface_azimuth': 90,
+        'tracker_theta': 0.0,
         'gcr': 0.3,
         'n_pvrows': 3,
         'pvrow_height': 1.5,
@@ -146,11 +146,11 @@ def test_negativevf_and_flatcasenoon():
         'UTC').tz_convert('US/Arizona')
 
     # Break up inputs
-    (timestamps, array_tilt, array_azimuth,
+    (timestamps, tracker_theta, surface_azimuth,
      solar_zenith, solar_azimuth, dni, dhi) = breakup_df_inputs(df_inputs)
 
     args = (pvarray_parameters, timestamps, solar_zenith, solar_azimuth,
-            array_tilt, array_azimuth, dni, dhi)
+            tracker_theta, surface_azimuth, dni, dhi)
     df_registries, _ = calculate_radiosities_serially_perez(args)
     df_outputs = get_average_pvrow_outputs(df_registries)
 
@@ -173,11 +173,11 @@ def test_back_surface_luminance():
     back surface). Fix was implemented, and this should check for it.
     """
     pvarray_parameters = {
-        'array_azimuth': 90,
-        'array_tilt': 0.0,
+        'surface_azimuth': 90,
+        'surface_tilt': 0.0,
         'gcr': 0.3,
         'n_pvrows': 3,
-        'pvrow_height': 1.5,
+        'Pvrow_height': 1.5,
         'pvrow_width': 1.0,
         'rho_back_pvrow': 0.03,
         'rho_front_pvrow': 0.01,
@@ -194,11 +194,11 @@ def test_back_surface_luminance():
         'UTC').tz_convert('US/Arizona')
 
     # Break up inputs
-    (timestamps, array_tilt, array_azimuth,
+    (timestamps, tracker_theta, surface_azimuth,
      solar_zenith, solar_azimuth, dni, dhi) = breakup_df_inputs(df_inputs)
 
     args = (pvarray_parameters, timestamps, solar_zenith, solar_azimuth,
-            array_tilt, array_azimuth, dni, dhi)
+            tracker_theta, surface_azimuth, dni, dhi)
     df_registries, _ = calculate_radiosities_serially_perez(args)
 
     df_outputs = get_average_pvrow_outputs(df_registries)

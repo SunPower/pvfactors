@@ -71,22 +71,25 @@ class PVRowLine(PVRowBase):
     :param float x_center: x coordinate of center of the line [m]
     :param float y_center: y coordinate of center of the line [m]
     :param int index: PV row index, used to distinguish different PV rows
-    :param float array_tilt: tilt of the PV row, same as the whole array a
-    priori [deg]
+    :param float surface_tilt: Surface tilt angles in decimal degrees.
+        surface_tilt must be >=0 and <=180.
+        The tilt angle is defined as degrees from horizontal
     :param float pvrow_width: width of the PV row, which is the length of
     the PV row line [m]
     """
 
-    def __init__(self, line_registry, x_center, y_center, index, array_tilt,
+    def __init__(self, line_registry, x_center, y_center, index, surface_tilt,
                  pvrow_width):
         super(PVRowLine, self).__init__()
+        assert ((surface_tilt >= 0) and (surface_tilt < 180)), (
+            "Range of surface_tilt incorrect: {}".format(surface_tilt))
         self.width = pvrow_width
-        self.tilt = array_tilt
+        self.tilt = surface_tilt
         self.index = index
         self.x_center = x_center
         self.y_center = y_center
         (self.lines, self.highest_point, self.lowest_point, self.right_point,
-         self.left_point, self.director_vector, self.normal_vector) = (
+         self.left_point) = (
             self.create_lines(self.tilt, index))
         self.line_registry_indices = line_registry.pvgeometry.add(self.lines)
         # Complete line will have the full pvrow linestring with possibly
@@ -99,17 +102,17 @@ class PVRowLine(PVRowBase):
         Create the :class:`pvcore.LinePVArray` objects that the PV row
         is made out of, based on the inputted geometrical parameters.
 
-        :param float tilt: tilt angle of the PV row [deg]
+        :param float tilt: Surface tilt angles in decimal degrees.
+            surface_tilt must be >=0 and <=180.
+            The tilt angle is defined as degrees from horizontal
         :param int index: PV row index, used to distinguish different PV rows
         :return: [line_pvarray], highest_point, lowest_point,
-                right_point, left_point, director_vector, normal_vector // which
+                right_point, left_point / which
                 are: list of :class:`pvcore.LinePVArray`;
                 :class:`shapely.Point` of the line with biggest y coordinate;
                 :class:`shapely.Point` of the line with smallest y coordinate;
                 :class:`shapely.Point` of the line with biggest x coordinate;
-                :class:`shapely.Point` of the line with smallest x coordinate;
-                list of 2 coordinates for director vector of the line; list of
-                2 coordinates for normal vector of the line
+                :class:`shapely.Point` of the line with smallest x coordinate
         """
         tilt_rad = np.radians(tilt)
 
@@ -120,28 +123,24 @@ class PVRowLine(PVRowBase):
         x2 = radius * np.cos(tilt_rad) + self.x_center
         y2 = radius * np.sin(tilt_rad) + self.y_center
 
-        highest_point = Point(x2, y2) if y2 >= y1 else Point(x1, y1)
-        lowest_point = Point(x1, y1) if y2 >= y1 else Point(x2, y2)
+        highest_point = Point(x2, y2)
+        lowest_point = Point(x1, y1)
         right_point = Point(x2, y2) if x2 >= x1 else Point(x1, y1)
         left_point = Point(x1, y1) if x2 >= x1 else Point(x2, y2)
 
-        # making sure director_vector[0] >= 0
-        director_vector = [x2 - x1, y2 - y1]
-        # making sure normal_vector[1] >= 0
-        normal_vector = [- director_vector[1], director_vector[0]]
         geometry = LineString([(x1, y1), (x2, y2)])
         line_pvarray = LinePVArray(geometry=geometry, line_type='pvrow',
                                    shaded=False, pvrow_index=index)
         return ([line_pvarray], highest_point, lowest_point,
-                right_point, left_point, director_vector, normal_vector)
+                right_point, left_point)
 
     def get_shadow_bounds(self, solar_2d_vector):
         """
         Calculate the x coordinates of the boundary points of the shadow lines
         on the ground, assuming Y_GROUND is the y coordinate of the ground.
         Note: this shadow construction is more or less ignored when direct
-        shading happens between rows, leading to one continous shadows formed by
-         all the PV rows in the array.
+        shading happens between rows, leading to one continous shadows formed
+        by all the PV rows in the array.
 
         :param list solar_2d_vector: projection of solar vector into the 2D
         plane of the array geometry
@@ -153,34 +152,21 @@ class PVRowLine(PVRowBase):
             geometry = line['geometry']
             b1 = geometry.boundary[0]
             b2 = geometry.boundary[1]
-            shadow_intercept_1 = - (solar_2d_vector[1] * b1.x
-                                    + solar_2d_vector[0] * b1.y)
-            shadow_intercept_2 = - (solar_2d_vector[1] * b2.x
-                                    + solar_2d_vector[0] * b2.y)
-            x1_shadow = - ((shadow_intercept_1
-                            + solar_2d_vector[0] * Y_GROUND)
-                           / solar_2d_vector[1])
-            x2_shadow = - ((shadow_intercept_2
-                            + solar_2d_vector[0] * Y_GROUND)
-                           / solar_2d_vector[1])
+            # consider line equation: u*x + v*y + c = 0
+            # for lines 1 and 2 (parallel)
+            u = - solar_2d_vector[1]
+            v = solar_2d_vector[0]
+            # Find intercepts for lines 1 and 2
+            c_1 = - (u * b1.x + v * b1.y)
+            c_2 = - (u * b2.x + v * b2.y)
+            # Find intersections of ray lines with horizontal ground line
+            x1_shadow = - (c_1 + v * Y_GROUND) / u
+            x2_shadow = - (c_2 + v * Y_GROUND) / u
             list_x_values.append(x1_shadow)
             list_x_values.append(x2_shadow)
         x1_shadow = min(list_x_values)
         x2_shadow = max(list_x_values)
         return x1_shadow, x2_shadow
-
-    def is_front_side_illuminated(self, solar_2d_vector):
-        """
-        Find out if the direct sun light is incident on the front or back
-        surface of the PV rows
-
-        :param list solar_2d_vector: projection of solar vector into the 2D
-        plane of the array geometry
-        :return: ``bool``, True if front surface is illuminated
-        """
-        # Only 1 normal vector here
-        dot_product = np.dot(solar_2d_vector, self.normal_vector)
-        return dot_product <= 0
 
     @property
     def facing(self):
@@ -200,8 +186,8 @@ class PVRowLine(PVRowBase):
 
     def calculate_cut_points(self, n_segments):
         """
-        Calculate the points of the PV row geometry on which the PV line will be
-         cut and discretized. The list of cut points is saved into the object.
+        Calculate the points of the PV row geometry on which the PV line will
+        be cut and discretized. The list of cut points is saved into the object
 
         :param int n_segments: number of segments wanted for the discretization
         :return: None

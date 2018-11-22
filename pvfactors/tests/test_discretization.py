@@ -18,7 +18,8 @@ def test_discretized_surfaces():
         'pvrow_height': 1.5,
         'pvrow_width': 1.,
         'gcr': 0.4,
-        'array_tilt': 20.,
+        'surface_tilt': 20.,
+        'surface_azimuth': 180.,
         'cut': [(0, 5, 'front'), (1, 3, 'front')]
     }
     array = Array(**arguments)
@@ -49,10 +50,10 @@ def test_consistent_qinc():
         'pvrow_height': 1.,
         'solar_zenith': 70,
         'solar_azimuth': 180.,
-        'array_azimuth': 180.,
+        'surface_azimuth': 180.,
         'pvrow_width': 1.5,
         'gcr': 0.6,
-        'array_tilt': 30.,
+        'surface_tilt': 30.,
         'cut': [(0, 5, 'front'), (4, 2, 'front')]
     }
     array = Array(**arguments)
@@ -68,11 +69,12 @@ def test_consistent_qinc():
     solar_zenith = 20.
     solar_azimuth = 180.
 
-    array_tilt = 20.
-    array_azimuth = 180.
+    tracker_theta = 20.
+    surface_azimuth = 180.
 
-    array.calculate_radiosities_perez(solar_zenith, solar_azimuth, array_tilt,
-                                      array_azimuth, dni, luminance_isotropic,
+    array.calculate_radiosities_perez(solar_zenith, solar_azimuth,
+                                      tracker_theta, surface_azimuth,
+                                      dni, luminance_isotropic,
                                       luminance_circumsolar, poa_horizon,
                                       poa_circumsolar)
 
@@ -88,5 +90,5 @@ def test_consistent_qinc():
         1103.05456561, 1103.03688292, 1097.08812485])
 
     tol = 1e-8
-    assert np.allclose(array.surface_registry.qinc, expected_qinc,
-                       atol=0, rtol=tol, equal_nan=True)
+    np.testing.assert_allclose(array.surface_registry.qinc, expected_qinc,
+                               atol=0, rtol=tol, equal_nan=True)

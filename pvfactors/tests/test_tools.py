@@ -4,7 +4,6 @@
 Test some of the functions in the tools module
 """
 import pytest
-from pvfactors.pvarray import Array
 from pvfactors.timeseries import (perez_diffuse_luminance,
                                   calculate_radiosities_serially_perez,
                                   calculate_radiosities_parallel_perez,
@@ -33,13 +32,14 @@ def test_array_calculate_timeseries():
     isotropic diffuse sky approach stay consistent
     """
     # Simple sky and array configuration
-    df_inputs = pd.DataFrame(
-        np.array(
-            [[80., 0., 70., 180., 1e3, 1e2],
-             [20., 180., 40., 180., 1e3, 1e2],
-             [70.4407256, 248.08690811, 42.4337927, 270., 1000., 100.]]),
-        columns=['solar_zenith', 'solar_azimuth', 'array_tilt',
-                 'array_azimuth', 'dni', 'dhi'],
+    df_inputs = pd.DataFrame({
+        'solar_zenith': [80., 20., 70.4407256],
+        'solar_azimuth': [0., 180., 248.08690811],
+        'surface_tilt': [70., 40., 42.4337927],
+        'surface_azimuth': [180., 180., 270.],
+        'dni': [1e3, 1e3, 1000.],
+        'dhi': [1e2, 1e2, 100.]
+    },
         index=[0, 1, 2]
     )
     arguments = {
@@ -49,10 +49,8 @@ def test_array_calculate_timeseries():
         'gcr': 0.3,
     }
 
-    array = Array(**arguments)
-
     # Break up inputs
-    (timestamps, array_tilt, array_azimuth,
+    (timestamps, surface_tilt, surface_azimuth,
      solar_zenith, solar_azimuth, dni, dhi) = breakup_df_inputs(df_inputs)
 
     # Fill in the missing pieces
@@ -64,7 +62,7 @@ def test_array_calculate_timeseries():
     # Run timeseries calculation
     df_registries = array_timeseries_calculate(
         arguments, timestamps, solar_zenith, solar_azimuth,
-        array_tilt, array_azimuth, dni, luminance_isotropic,
+        surface_tilt, surface_azimuth, dni, luminance_isotropic,
         luminance_circumsolar, poa_horizon, poa_circumsolar)
 
     # Calculate surface averages for pvrows
@@ -88,9 +86,9 @@ def test_array_calculate_timeseries():
         [76.66206408, 1038.90759755, 925.87630648],
         [True, False, False]], dtype=object)
     tol = 1e-8
-    assert np.allclose(expected_outputs_array[:-1, :].astype(float),
-                       df_outputs.values.T,
-                       atol=tol, rtol=0, equal_nan=True)
+    np.testing.assert_allclose(expected_outputs_array[:-1, :].astype(float),
+                               df_outputs.values.T,
+                               atol=tol, rtol=0, equal_nan=True)
 
 
 def test_perez_diffuse_luminance(df_perez_luminance):
@@ -98,23 +96,20 @@ def test_perez_diffuse_luminance(df_perez_luminance):
     Test that the calculation of luminance -- first step in using the vf model
     with Perez -- is functional
     """
-    df_inputs_clearday = pd.read_csv(FILE_PATH)
-    df_inputs_clearday = df_inputs_clearday.set_index('datetime', drop=True)
-    df_inputs_clearday.index = (pd.DatetimeIndex(df_inputs_clearday.index)
-                                .tz_localize('UTC').tz_convert('Etc/GMT+7')
-                                .tz_localize(None))
-
-    # Break up inputs
-    (timestamps, array_tilt, array_azimuth, solar_zenith, solar_azimuth,
-     dni, dhi) = breakup_df_inputs(df_inputs_clearday)
-    df_outputs = perez_diffuse_luminance(timestamps, array_tilt, array_azimuth,
-                                         solar_zenith, solar_azimuth, dni, dhi)
+    df_inputs = df_perez_luminance[['surface_tilt', 'surface_azimuth',
+                                    'solar_zenith', 'solar_azimuth', 'dni',
+                                    'dhi']]
+    (timestamps, surface_tilt, surface_azimuth, solar_zenith, solar_azimuth,
+     dni, dhi) = breakup_df_inputs(df_inputs)
+    df_outputs = perez_diffuse_luminance(timestamps, surface_tilt,
+                                         surface_azimuth, solar_zenith,
+                                         solar_azimuth, dni, dhi)
 
     col_order = df_outputs.columns
     tol = 1e-8
-    assert np.allclose(df_outputs.values,
-                       df_perez_luminance[col_order].values,
-                       atol=0, rtol=tol)
+    np.testing.assert_allclose(df_outputs.values,
+                               df_perez_luminance[col_order].values,
+                               atol=0, rtol=tol)
 
 
 def test_luminance_in_timeseries_calc(df_perez_luminance,
@@ -130,18 +125,18 @@ def test_luminance_in_timeseries_calc(df_perez_luminance,
                                 .tz_localize(None))
 
     # Break up inputs
-    (timestamps, array_tilt, array_azimuth, solar_zenith, solar_azimuth,
+    (timestamps, surface_tilt, surface_azimuth, solar_zenith, solar_azimuth,
      dni, dhi) = breakup_df_inputs(df_inputs_clearday)
     _, df_outputs = calculate_radiosities_serially_perez(
         (None, timestamps, solar_zenith, solar_azimuth,
-         array_tilt, array_azimuth,
+         surface_tilt, surface_azimuth,
          dni, dhi))
 
     col_order = df_outputs.columns
     tol = 1e-8
-    assert np.allclose(df_outputs.values,
-                       df_perez_luminance[col_order].values,
-                       atol=0, rtol=tol)
+    np.testing.assert_allclose(df_outputs.values,
+                               df_perez_luminance[col_order].values,
+                               atol=0, rtol=tol)
 
 
 def test_save_all_outputs_calculate_perez():
@@ -158,14 +153,6 @@ def test_save_all_outputs_calculate_perez():
                                 .tz_localize(None))
     idx_subset = 10
 
-    # Adjustment in angles needed: need to keep azimuth constant and change
-    # tilt angle only
-    df_inputs_clearday.loc[
-        (df_inputs_clearday.solar_azimuth <= 180.), 'array_azimuth'] = (
-            df_inputs_clearday.loc[:, 'array_azimuth'][-1])
-    df_inputs_clearday.loc[
-        (df_inputs_clearday.solar_azimuth <= 180.), 'array_tilt'] *= (-1)
-
     # PV array parameters for test
     arguments = {
         'n_pvrows': 3,
@@ -179,12 +166,12 @@ def test_save_all_outputs_calculate_perez():
     }
 
     # Break up inputs
-    (timestamps, array_tilt, array_azimuth,
+    (timestamps, surface_tilt, surface_azimuth,
      solar_zenith, solar_azimuth, dni, dhi) = breakup_df_inputs(
          df_inputs_clearday.iloc[:idx_subset])
 
     args = (arguments, timestamps, solar_zenith, solar_azimuth,
-            array_tilt, array_azimuth, dni, dhi)
+            surface_tilt, surface_azimuth, dni, dhi)
 
     # Run the serial calculation
     df_registries_serial, _ = (
@@ -201,20 +188,20 @@ def test_save_all_outputs_calculate_perez():
 
     # Load files with expected outputs
     expected_ipoa_dict_qinc = np.array([
-        [842.43691838, 842.54795737, 842.52912932],
-        [839.30539601, 839.30285394, 839.29810984],
-        [839.17118976, 839.17513111, 839.17725576],
-        [842.24681064, 842.26195526, 842.15463995]])
+        [842.54617681, 842.5566707, 842.43690951],
+        [839.30179691, 839.30652961, 839.30906023],
+        [839.17118956, 839.17513098, 839.17725568],
+        [842.24679271, 842.26194393, 842.15463231]])
 
     # Perform the comparisons
-    rtol = 1e-7
+    rtol = 1e-6
     atol = 0
-    assert np.allclose(expected_ipoa_dict_qinc,
-                       df_outputs_segments_serial.values,
-                       atol=atol, rtol=rtol)
-    assert np.allclose(expected_ipoa_dict_qinc,
-                       df_outputs_segments_parallel.values,
-                       atol=atol, rtol=rtol)
+    np.testing.assert_allclose(expected_ipoa_dict_qinc,
+                               df_outputs_segments_serial.values,
+                               atol=atol, rtol=rtol)
+    np.testing.assert_allclose(expected_ipoa_dict_qinc,
+                               df_outputs_segments_parallel.values,
+                               atol=atol, rtol=rtol)
 
 
 def test_get_average_pvrow_outputs(df_registries, df_outputs):
@@ -229,9 +216,9 @@ def test_get_average_pvrow_outputs(df_registries, df_outputs):
     # print(calc_df_outputs_num)
     tol = 1e-8
     # Compare numerical values
-    assert np.allclose(df_outputs.iloc[:, 1:].values,
-                       calc_df_outputs_num.values,
-                       atol=0, rtol=tol)
+    np.testing.assert_allclose(df_outputs.iloc[:, 1:].values,
+                               calc_df_outputs_num.values,
+                               atol=0, rtol=tol)
 
     array_is_shaded = calc_df_outputs_shading.sum(axis=1).values > 0
     # Compare bool on shading
@@ -257,10 +244,10 @@ def test_get_average_pvrow_segments(df_registries, df_segments):
     terms = df_segments.columns.get_level_values('irradiance_term')
     ordered_index = zip(segment_index, terms)
     # Re-order cols of calculated df segments
-    df_calc_num = df_calc_num.loc[:, ordered_index].fillna(0.)
+    df_calc_num = df_calc_num.T.reindex(ordered_index).T.fillna(0.)
     # Compare arrays
     tol = 1e-8
-    assert np.allclose(
+    np.testing.assert_allclose(
         df_segments.values,
         df_calc_num.values,
         atol=0, rtol=tol)
@@ -283,9 +270,10 @@ def test_get_average_pvrow_outputs_nans(df_registries_with_nan, df_outputs):
 
     tol = 1e-8
     # Compare numerical values
-    assert np.allclose(df_outputs.iloc[:, 1:].values,
-                       calc_df_outputs_num.dropna(axis=0, how='all').values,
-                       atol=0, rtol=tol)
+    np.testing.assert_allclose(df_outputs.iloc[:, 1:].values,
+                               calc_df_outputs_num.dropna(axis=0,
+                                                          how='all').values,
+                               atol=0, rtol=tol)
 
     array_is_shaded = calc_df_outputs_shading.dropna(
         axis=0, how='all').sum(axis=1).values > 0

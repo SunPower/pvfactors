@@ -10,7 +10,7 @@ equations.
 
 This package is the open-source fork of the original 'vf_model' package developed
 by SunPower, and which had over 300 commits. The package was used for all the
-material presented at IEEE PVSC 44 2017 (see [1]).
+material presented at IEEE PVSC 44 2017 (see [1] and [link](https://pdfs.semanticscholar.org/ebb2/35e3c3796b158e1a3c45b40954e60d876ea9.pdf) to paper).
 
 
 Documentation
@@ -30,20 +30,6 @@ The easiest way to install pvfactors is to use [pip](https://pip.pypa.io/en/stab
     $ pip install pvfactors
 
 The package wheel files are also available in the [release section](https://github.com/SunPower/pvfactors/releases) of the Github repository.
-
-
-Contributing
-------------
-
-Contributions are much needed in order to improve this package.
-If you wish to contribute, you can start by forking the repository and installing pvfactors using [pip](https://pip.pypa.io/en/stable/) in the root folder of the package:
-
-    $ pip install .
-
-
-To install the package in editable mode, you can use:
-
-    $ pip install -e .
 
 
 Requirements
@@ -76,8 +62,8 @@ from datetime import datetime
 timestamps = np.array([datetime(2017, 8, 31, 11), datetime(2017, 8, 31, 12)])
 solar_zenith = np.array([20., 10.])
 solar_azimuth = np.array([110., 140.])
-array_tilt = np.array([10., 0.])
-array_azimuth = np.array([90., 90.])
+surface_tilt = np.array([10., 0.])
+surface_azimuth = np.array([90., 90.])
 dni = np.array([1000., 300.])
 dhi = np.array([50., 500.])
 ```
@@ -104,7 +90,7 @@ from pvfactors.timeseries import calculate_radiosities_serially_perez
 df_registries, _ = calculate_radiosities_serially_perez((
     pvarray_parameters, timestamps,
     solar_zenith, solar_azimuth,
-    array_tilt, array_azimuth, dni, dhi))
+    surface_tilt, surface_azimuth, dni, dhi))
 ```
 
     Progress: |██████████████████████████████████████████████████| 100.0% Complete
@@ -258,10 +244,23 @@ plt.show()
 ![png](https://raw.githubusercontent.com/SunPower/pvfactors/master/pvfactors/docs/_static/pvarray.png)
 
 
+
+Contributing
+------------
+
+Contributions are much needed in order to improve this package.
+If you wish to contribute, you can start by forking the repository and installing pvfactors using [pip](https://pip.pypa.io/en/stable/) in the root folder of the package:
+
+    $ pip install .
+
+
+To install the package in editable mode, you can use:
+
+    $ pip install -e .
+
+
 References
 ----------
 
-[1] Marc Abou Anoma, David Jacob, Ben C. Bourne, Jonathan A. Scholl,
-Daniel M. Riley, Clifford W. Hansen. “View Factor Model and Validation
-for Bifacial PV and Diffuse Shade on Single-Axis Trackers.”
-Photovoltaic Specialist Conference (PVSC), 2017 IEEE 44th. IEEE, 2017.
+[1] Anoma, M., Jacob, D., Bourne, B. C., Scholl, J. A., Riley, D. M., & Hansen, C. W. (2017).
+View Factor Model and Validation for Bifacial PV and Diffuse Shade on Single-Axis Trackers. In 44th IEEE Photovoltaic Specialist Conference.

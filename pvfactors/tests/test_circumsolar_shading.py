@@ -30,8 +30,8 @@ def test_calculate_circumsolar_shading():
     expected_disk_shading_perc = 14.2378489933
     atol = 0
     rtol = 1e-8
-    assert np.isclose(expected_disk_shading_perc, percent_shading, atol=atol,
-                      rtol=rtol)
+    np.testing.assert_allclose(expected_disk_shading_perc, percent_shading,
+                               atol=atol, rtol=rtol)
 
 
 def test_serial_circumsolar_shading_calculation():
@@ -39,13 +39,12 @@ def test_serial_circumsolar_shading_calculation():
     Calculate and save results from front surface circumsolar shading on
     pvrows. Test that it functions with the given data.
     """
-
     # Choose a PV array configuration and pass the arguments necessary for
     # the calculation to be triggered:
     # eg 'calculate_front_circ_horizon_shading'
     arguments = {
-        'array_azimuth': 90.0,
-        'array_tilt': 20.0,
+        'surface_azimuth': 180.0,
+        'surface_tilt': 20.0,
         'cut': [(1, 5, 'front')],
         'gcr': 0.3,
         'n_pvrows': 2,
@@ -66,12 +65,13 @@ def test_serial_circumsolar_shading_calculation():
         TEST_DATA, 'file_test_serial_circumsolar_shading_calculation.csv')
     df_inputs = pd.read_csv(test_file, index_col=0)
     df_inputs.index = pd.DatetimeIndex(df_inputs.index)
-    (timestamps, array_tilt, array_azimuth,
+    (timestamps, tracker_theta, surface_azimuth,
      solar_zenith, solar_azimuth, dni, dhi) = breakup_df_inputs(df_inputs)
 
     # Run the calculation for functional testing
     df_registries, df_inputs_perez = (
-        calculate_radiosities_serially_perez((arguments, timestamps, array_tilt,
-                                              array_azimuth, solar_zenith,
+        calculate_radiosities_serially_perez((arguments, timestamps,
+                                              tracker_theta,
+                                              surface_azimuth, solar_zenith,
                                               solar_azimuth, dni, dhi))
     )
