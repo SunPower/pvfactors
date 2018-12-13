@@ -66,8 +66,8 @@ def array_timeseries_calculate(
     i = 1
     for idx, ts in enumerate(timestamps):
         try:
-            if ((isinstance(solar_zenith[idx], float))
-                    & (solar_zenith[idx] <= 90.)):
+            if ((isinstance(solar_zenith[idx], float)) &
+                    (solar_zenith[idx] <= 90.)):
                 # Run calculation only if daytime
                 array.calculate_radiosities_perez(
                     solar_zenith[idx], solar_azimuth[idx], surface_tilt[idx],
@@ -156,8 +156,8 @@ def perez_diffuse_luminance(timestamps, surface_tilt, surface_azimuth,
     aoi_proj = aoi_projection(
         df_inputs.surface_tilt, df_inputs.surface_azimuth,
         df_inputs.solar_zenith, df_inputs.solar_azimuth)
-    sun_hitting_back_surface = ((aoi_proj < 0) &
-                                (df_inputs.solar_zenith <= 90))
+    sun_hitting_back_surface = ((aoi_proj < 0)
+                                & (df_inputs.solar_zenith <= 90))
     df_inputs_back_surface = df_inputs.loc[sun_hitting_back_surface].copy()
     # Reverse the surface normal to switch to back-surface circumsolar calc
     df_inputs_back_surface.loc[:, 'surface_azimuth'] = (
@@ -174,14 +174,16 @@ def perez_diffuse_luminance(timestamps, surface_tilt, surface_azimuth,
             *breakup_df_inputs(df_inputs_back_surface))
 
     # Calculate Perez diffuse components
-    diffuse_poa, components = irradiance.perez(df_inputs.surface_tilt,
-                                               df_inputs.surface_azimuth,
-                                               df_inputs.dhi, df_inputs.dni,
-                                               dni_et,
-                                               df_inputs.solar_zenith,
-                                               df_inputs.solar_azimuth,
-                                               am,
-                                               return_components=True)
+    components = irradiance.perez(df_inputs.surface_tilt,
+                                  df_inputs.surface_azimuth,
+                                  df_inputs.dhi, df_inputs.dni,
+                                  dni_et,
+                                  df_inputs.solar_zenith,
+                                  df_inputs.solar_azimuth,
+                                  am,
+                                  return_components=True)
+    diffuse_poa = (components['horizon'] + components['circumsolar'] +
+                   components['isotropic'])
 
     # Calculate Perez view factors:
     a = aoi_projection(df_inputs.surface_tilt,
