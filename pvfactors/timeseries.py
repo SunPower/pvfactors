@@ -182,8 +182,6 @@ def perez_diffuse_luminance(timestamps, surface_tilt, surface_azimuth,
                                   df_inputs.solar_azimuth,
                                   am,
                                   return_components=True)
-    diffuse_poa = (components['horizon'] + components['circumsolar'] +
-                   components['isotropic'])
 
     # Calculate Perez view factors:
     a = aoi_projection(df_inputs.surface_tilt,
@@ -212,17 +210,16 @@ def perez_diffuse_luminance(timestamps, surface_tilt, surface_azimuth,
         columns=['luminance_horizon', 'luminance_circumsolar',
                  'luminance_isotropic']
     )
-    luminance.loc[diffuse_poa == 0, :] = 0.
+    luminance.loc[components['sky_diffuse'] == 0, :] = 0.
 
     # Format components column names
     components = components.rename(columns={'isotropic': 'poa_isotropic',
                                             'circumsolar': 'poa_circumsolar',
                                             'horizon': 'poa_horizon'})
 
-    df_inputs = pd.concat([df_inputs, components, vf_perez, luminance,
-                           diffuse_poa],
+    df_inputs = pd.concat([df_inputs, components, vf_perez, luminance],
                           axis=1, join='outer')
-    df_inputs = df_inputs.rename(columns={0: 'poa_total_diffuse'})
+    df_inputs = df_inputs.rename(columns={'sky_diffuse': 'poa_total_diffuse'})
 
     # Adjust the circumsolar luminance when it hits the back surface
     if df_inputs_back_surface.shape[0] > 0:
