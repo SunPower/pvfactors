@@ -1,0 +1,14 @@
+.. _whatsnew_0150:
+
+v0.1.5 (December 14, 2018)
+==========================
+
+Updates so that pvfactors is not broken by pvlib-python updates in upcoming version 6.1
+
+* Updates for upcoming pvlib version 6.1 (#24)
+* Small fixes to display long description on PyPI, and docs
+
+Contributors
+------------
+
+* Marc Anoma
