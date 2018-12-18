@@ -28,7 +28,7 @@ INSTALL_REQUIRES = ['numpy>=1.13.1',
                     'scipy>=0.19.1',
                     'pandas>=0.23.3',
                     'shapely>=1.6.1',
-                    'pvlib>=0.6.1b0',
+                    'pvlib>=0.6.0',
                     'matplotlib>=2.1.0',
                     'future>=0.16.0',
                     'six>=1.11.0']
