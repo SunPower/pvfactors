@@ -14,14 +14,13 @@
 
 import sys
 import os
-import shlex
 from pvfactors.version import __version__
 
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
-#sys.path.insert(0, os.path.abspath('.'))
+# sys.path.insert(0, os.path.abspath('.'))
 pvfactors_dir = os.path.abspath(os.path.join('..'))
 project_dir = os.path.abspath(os.path.join('..\..'))
 sys.path.insert(0, pvfactors_dir)
@@ -113,18 +112,12 @@ todo_include_todos = False
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
-html_theme = 'alabaster'  # 'classic'
+html_theme = 'sphinx_rtd_theme'
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
 # documentation.
-html_theme_options = {
-    "fixed_sidebar": True,
-    "github_user": "SunPower",
-    "github_repo": "pvfactors",
-    "github_banner": True,
-    "logo": 'sp_2014_logo_black_orange_rgb.png',
-}
+html_theme_options = {}
 
 # Add any paths that contain custom themes here, relative to this directory.
 #html_theme_path = []
@@ -138,7 +131,7 @@ html_theme_options = {
 
 # The name of an image file (relative to this directory) to place at the top
 # of the sidebar.
-#html_logo = None
+html_logo = 'sp_2014_logo_all_white_LARGE.png'
 
 # The name of an image file (within the static path) to use as favicon of the
 # docs.  This file should be a Windows icon file (.ico) being 16x16 or 32x32
@@ -300,3 +293,9 @@ texinfo_documents = [
 
 # If true, do not generate a @detailmenu in the "Top" node's menu.
 #texinfo_no_detailmenu = False
+
+# allow wider windows
+
+
+def setup(app):
+    app.add_stylesheet('css/custom.css')

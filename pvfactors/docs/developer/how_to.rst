@@ -8,6 +8,8 @@ How to use the model for single-point calculation
 
 
 .. figure:: /developer/class_implementation_pictures/pvfactors_process.png
+   :align: center
+   :width: 50%
 
 Instantiate PV array class
 --------------------------
