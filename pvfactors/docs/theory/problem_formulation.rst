@@ -1,7 +1,7 @@
 .. _problem_formulation:
 
-Problem Formulation
-===================
+Mathematical Model
+==================
 
 In order to use the view factors as follows, we need to assume that the surfaces considered are diffuse (lambertian). Which means that their optical properties are independent of the angle of the rays (incident, reflected, or emitted). This is an important assumption that prevents the usage of AOI loss factors for instance.
 
