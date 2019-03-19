@@ -49,7 +49,8 @@ setup(name=DISTNAME,
       install_requires=INSTALL_REQUIRES,
       extras_require={
           'testing': TESTS_REQUIRES,
-          'docs': ['Sphinx', 'sphinx_rtd_theme', 'nbsphinx']
+          'docs': ['Sphinx', 'sphinx_rtd_theme', 'nbsphinx',
+                   'sphinxcontrib-napoleon']
       },
       license=LICENSE
       )
