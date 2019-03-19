@@ -21,3 +21,4 @@ pvfactors/docs/_build/
 .pytest_cache/
 build/
 dist/
+pvfactors/docs/developer/generated/*

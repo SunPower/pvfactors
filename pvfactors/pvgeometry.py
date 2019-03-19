@@ -174,7 +174,7 @@ class PVGeometry(object):
         Break up ground lines into multiple ones at the pv row "edge points",
         which are the intersections of pv row lines and ground lines. This is
         important to separate the ground lines that a pv row's front surface
-         sees from the ones its back surface does.
+        sees from the ones its back surface does.
 
         :param edge_points: points the specify location where to break lines
         :type edge_points: list of :class:`shapely.Point` objects

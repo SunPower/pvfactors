@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+"""All the functions necessary for timeseries calculations."""
 
 from pvlib import atmosphere, irradiance
 from pvlib.tools import cosd, sind

@@ -1,8 +1,7 @@
-# -*- coding: utf-8 -*-
+""" Some utility functions and classes for pvfactors """
 
 from shapely.geometry import Point
-from pvfactors import (PVFactorsError, PVFactorsEdgePointDoesNotExist,
-                       PVFactorsArrayUpdateException)
+from pvfactors import PVFactorsError
 import numpy as np
 import math
 import logging
@@ -35,19 +34,22 @@ class LinePVArray(dict):
     def __init__(self, geometry=None, style='-', line_type=None,
                  shaded=None, pvrow_index=None):
         """
-        ``LinePVArray`` is the general class that is used to instantiate all the
-        initial line objects of the pv array before putting them into the
+        ``LinePVArray`` is the general class that is used to instantiate all
+        the initial line objects of the pv array before putting them into the
         surface registry.
         It is a sub-class of a dictionary with already defined keys.
 
         :param geometry: ``shapely`` geometry object
-        :param str style: ``matplotlib`` plotting style for the line. E.g. '--'.
+        :param str style: ``matplotlib`` plotting style for the line. E.g. '--'
         :param str line_type: type of surface in the :class:`pvarray.Array`,
             e.g. 'pvrow' or 'ground'
-        :param bool shaded: specifies if surface is shaded (from direct shading)
+        :param bool shaded: specifies if surface is shaded
+            (from direct shading)
         :param pvrow_index: if the surface's ``line_type`` is a 'pvrow', this
             will be its pv row index (which is different from its
             :attr:`pvarray.Array.surface_registry` index)
+        :return: None
+
         """
         if line_type in self._list_line_types:
             super(LinePVArray, self).__init__(geometry=geometry, style=style,
@@ -149,7 +151,7 @@ def uniform_circumsolar_disk_shading(percentage_distance_covered):
     neighboring object.
 
     :param float percentage_distance_covered: distance covered of
-    circumsolar disk diameter [% - values from 0 to 100]
+        circumsolar disk diameter [% - values from 0 to 100]
     :return: ``percent_shading``, circumsolar disk shading percentage [%]
     """
 

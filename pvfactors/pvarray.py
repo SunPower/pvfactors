@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+"""PV array classes"""
 
 from __future__ import absolute_import
 from __future__ import division
@@ -115,14 +115,11 @@ class ArrayBase(object):
 
 class Array(ArrayBase):
     """
-    | Create the array object. This will call the :meth:`update_view_factors`
-    | method which creates the shapely geometry and calculate the view
-    | factors based on the inputs.
+    Create the array object. This will call the :meth:`update_view_factors`
+    method which creates the shapely geometry and calculate the view
+    factors based on the inputs.
     | Azimuth angles are counted positive going East from North. E.g. 0 deg is
-    | North and 90 degrees is East.
-    | #FIXME The array azimuth uses a different convention than pvlib: for the
-    | torque-tube axis to be oriented South-North, the array azimuth angle
-    | needs to be 90 deg. And 0 deg would be East-West orientation.
+    North and 90 degrees is East.
     | This assumes an equal spacing (or GCR) between all pv rows.
     | This assumes that all pv rows have identical rotation angles.
     | This assumes that all pv rows are at the same elevation (only x-values

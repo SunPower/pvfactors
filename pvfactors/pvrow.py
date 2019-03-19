@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+"""Classes representing pv row geometries"""
 
 from pvfactors import PVFactorsError
 from pvfactors.pvcore import LinePVArray, Y_GROUND
@@ -10,9 +10,9 @@ import numpy as np
 class PVRowBase(object):
     """
     ``PVRowBase`` exists for future developments of the model. It is the
-     base class for PV Rows that will contain all the boiler plate code
-     shared by sub classes like :class:`PVRowLine`, or for instance
-     ``PVRowRoof``.
+    base class for PV Rows that will contain all the boiler plate code
+    shared by sub classes like :class:`PVRowLine`, or for instance
+    ``PVRowRoof``.
     """
 
     def __init__(self):
@@ -75,7 +75,7 @@ class PVRowLine(PVRowBase):
         surface_tilt must be >=0 and <=180.
         The tilt angle is defined as degrees from horizontal
     :param float pvrow_width: width of the PV row, which is the length of
-    the PV row line [m]
+        the PV row line [m]
     """
 
     def __init__(self, line_registry, x_center, y_center, index, surface_tilt,
@@ -143,9 +143,9 @@ class PVRowLine(PVRowBase):
         by all the PV rows in the array.
 
         :param list solar_2d_vector: projection of solar vector into the 2D
-        plane of the array geometry
+            plane of the array geometry
         :return: x1_shadow, x2_shadow // ``float`` smallest x coordinate of
-        shadow, ``float`` largest x coordinate of shadow
+            shadow, ``float`` largest x coordinate of shadow
         """
         list_x_values = []
         for line in self.lines:

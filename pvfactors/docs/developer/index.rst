@@ -10,6 +10,6 @@ Contents:
 .. toctree::
    :maxdepth: 2
 
-   how_to
    pvfactors_demo
-   class_details
+   api_reference
+   how_to

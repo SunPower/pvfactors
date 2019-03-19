@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+"""Elementary methods for view factor calculations."""
 
 from __future__ import absolute_import
 from __future__ import division
@@ -167,7 +167,7 @@ class ViewFactorCalculator(object):
 
         if vf_12 < 0:
             LOGGER.debug("Hottel pvrow front: unexpected value for "
-                           "vf_12 = %.4f" % vf_12)
+                         "vf_12 = %.4f" % vf_12)
 
         return vf_12
 
@@ -223,7 +223,7 @@ class ViewFactorCalculator(object):
 
         if vf_12 < 0:
             LOGGER.debug("Hottel pvrow front: unexpected value for "
-                           "vf_12 = %.4f" % vf_12)
+                         "vf_12 = %.4f" % vf_12)
 
         return vf_12
 
@@ -272,13 +272,13 @@ class ViewFactorCalculator(object):
         :param pt1: :class:`shapely.Point` of surface 1
         :param pt2: :class:`shapely.Point` of surface 2
         :param obstruction: :class:`pvrow.PVRowLine` with ``lowest_point``
-        attribute.
+            attribute.
         :return: length [m], is_obstructing / float, bool. The length of the
-        Hottel string, and a boolean flag specifying if there's obstruction or
-        not
+            Hottel string, and a boolean flag specifying if there's obstruction
+            or not
         """
-        # FIXME: specific to pvlinestrings, and assumes b1_obstruction should be
-        #  used if obstruction
+        # FIXME: specific to pvlinestrings, and assumes b1_obstruction should
+        # be used if obstruction
         string = LineString([(pt1.x, pt1.y), (pt2.x, pt2.y)])
         is_obstructing = False
         if obstruction is not None:
