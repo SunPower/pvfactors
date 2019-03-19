@@ -1,7 +1,7 @@
 .. pvfactors documentation
 
-Developer docs
-==============
+Developer
+=========
 
 This part describes how to use the model and perform additional developments.
 
