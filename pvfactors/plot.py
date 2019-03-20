@@ -20,21 +20,32 @@ COLOR_dic = {
 
 def plot_array_from_registry(ax, registry, line_types_selected=None,
                              fontsize=20):
-    """
-    Plot a 2D PV array using the ``shapely`` geometry objects located in
-    a :class:`pvarray.Array` surface registry.
+    """Plot a 2D PV array using the ``shapely`` geometry objects located in
+    an :py:class:`~pvfactors.pvarray.Array` surface registry.
 
-    :param matplotlib.axes.Axes ax: axes to use for the plot
-    :param pd.DataFrame registry: registry containing geometries  to plot
-    :param list line_types_selected: parameter used to select a subset of
-        'line_type' to plot; e.g. 'pvrow' or 'ground'
-    :return: None (``ax`` is updated)
+    Parameters
+    ----------
+    ax : ``matplotlib.axes.Axes``
+        axes to use for the plot
+    registry : ``pandas.DataFrame``
+        registry containing geometries  to plot
+    line_types_selected : list
+        parameter used to select a subset of
+        'line_type' to plot; e.g. 'pvrow' or 'ground' (Default value = None)
+    fontsize : int, optional
+         Font size to use in plot (Default value = 20)
+
+    Returns
+    -------
+    None
+       Plot is shown in ``ax`` 's figure
+
     """
 
     registry = registry.copy()
     registry.loc[:, 'color'] = (
-        registry.line_type.values + '_'
-        + np.where(registry.shaded.values, 'shaded', 'illum'))
+        registry.line_type.values + '_' +
+        np.where(registry.shaded.values, 'shaded', 'illum'))
     # TODO: distance may not exist
     if line_types_selected:
         for line_type in line_types_selected:
@@ -59,16 +70,26 @@ def plot_array_from_registry(ax, registry, line_types_selected=None,
 
 
 def plot_pvarray(ax, pvarray, line_types_selected=None, fontsize=20):
-    """
-    Plot a 2D PV array from a :class:`pvarray.Array` using its
-    :attr:`pvarray.Array.surface_registry`.
+    """Plot a 2D PV array from a :py:class:`~pvfactors.pvarray.Array` using its
+    ``surface_registry``
 
-    :param ax: :class:`matplotlib.axes.Axes` object to use for the plot
-    :param pvarray: object containing the surface registry as attribute
-    :type pvarray: :class:`pvarray.Array`
-    :param list line_types_selected: parameter used to select a subset of
-        'line_type' to plot; e.g. 'pvrow' or 'ground'
-    :return: None (``ax`` is updated)
+    Parameters
+    ----------
+    ax : ``matplotlib.axes.Axes``
+        axes to use for the plot
+    pvarray : :py:class:`~pvfactors.pvarray.Array`
+        Array object with surface registry attribute
+    line_types_selected : list
+        parameter used to select a subset of
+        'line_type' to plot; e.g. 'pvrow' or 'ground' (Default value = None)
+    fontsize : int, optional
+         Font size to use in plot (Default value = 20)
+
+    Returns
+    -------
+    None
+       Plot is shown in ``ax`` 's figure
+
     """
 
     # FIXME: repeating code from plot_line_registry
@@ -87,6 +108,16 @@ def plot_pvarray(ax, pvarray, line_types_selected=None, fontsize=20):
 
 # Base functions used to plot the 2D array
 def plot_coords(ax, ob):
+    """Plot coordinates of shapely objects
+
+    Parameters
+    ----------
+    ax : ``matplotlib.pyplot.Axes`` object
+        Axes for plotting
+    ob : ``Shapely`` object
+        Geometry object whose x,y coordinates should be plotted
+
+    """
     try:
         x, y = ob.xy
         ax.plot(x, y, 'o', color='#999999', zorder=1)
@@ -97,6 +128,16 @@ def plot_coords(ax, ob):
 
 
 def plot_bounds(ax, ob):
+    """Plot boundaries of shapely object
+
+    Parameters
+    ----------
+    ax : ``matplotlib.pyplot.Axes`` object
+        Axes for plotting
+    ob : ``Shapely`` object
+        Geometry object whose boundaries should be plotted
+
+    """
     # Check if shadow reduces to one point (for very specific sun alignment)
     if len(ob.boundary) == 0:
         x, y = ob.coords[0]
@@ -106,6 +147,20 @@ def plot_bounds(ax, ob):
 
 
 def plot_line(ax, ob, line_style, line_color):
+    """Plot boundaries of shapely line
+
+    Parameters
+    ----------
+    ax : ``matplotlib.pyplot.Axes`` object
+        Axes for plotting
+    ob : ``Shapely`` object
+        Geometry object whose boundaries should be plotted
+    line_style : str
+        matplotlib style to use for plotting the line
+    line_color :
+        matplotlib color to use for plotting the line
+
+    """
     try:
         x, y = ob.xy
         ax.plot(x, y, color=COLOR_dic[line_color], ls=line_style, alpha=0.7,
