@@ -21,3 +21,12 @@ Quick start
 -----------
 
 A quick start example is available in the :doc:`/developer/pvfactors_demo` section of this documentation, along with in-depth examples.
+
+
+pvlib implementation
+--------------------
+
+A limited implementation of ``pvfactors`` is available in the bifacial module of pvlib-python_: see here_.
+
+.. _pvlib-python: https://pvlib-python.readthedocs.io
+.. _here: https://pvlib-python.readthedocs.io/en/latest/generated/pvlib.bifacial.pvfactors_timeseries.html#pvlib.bifacial.pvfactors_timeseries
