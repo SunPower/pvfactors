@@ -8,11 +8,11 @@ import numpy as np
 
 
 class PVRowBase(object):
-    """
-    ``PVRowBase`` exists for future developments of the model. It is the
+    """``PVRowBase`` exists for future developments of the model. It is the
     base class for PV Rows that will contain all the boiler plate code
     shared by sub classes like :class:`PVRowLine`, or for instance
     ``PVRowRoof``.
+
     """
 
     def __init__(self):
@@ -33,20 +33,40 @@ class PVRowBase(object):
         self.complete_linestring = None  # for obstruction purposes
 
     def create_lines(self, *args, **kwargs):
+        """Create lines
+
+        Parameters
+        ----------
+        *args : tuple
+
+        **kwargs : dict
+
+        """
         raise NotImplementedError
 
     def get_shadow_bounds(self, *args, **kwargs):
+        """Get shadow bounds
+
+        Parameters
+        ----------
+        *args : tuple
+
+        **kwargs : dict
+
+        """
         raise NotImplementedError
 
     def translate_2d_lines(self, x_off, y_off):
-        """
-        Translate all the :class:`pvfactors.components.LinePVArray` objects in
-        the line attribute in the x and y directions.
-        /!\ method is unfinished
+        """Translate all the :py:class:`~pvfactors.pvcore.LinePVArray` objects
+        in the line attribute in the x and y directions.
 
-        :param float x_off: translation in the x direction
-        :param float y_off: translation in the y direction
-        :return: None
+        Parameters
+        ----------
+        x_off : float
+            translation in the x direction
+        y_off : float
+            translation in the y direction
+
         """
         matrix_2d_translation = [1, 1, 1, 1, x_off, y_off]
         for line in self.lines:
@@ -56,26 +76,33 @@ class PVRowBase(object):
 
 
 class PVRowLine(PVRowBase):
-    """
-    ``PVRowLine`` is sub-classed from :class:`PVRowBase`, and its core is
-    made of :class:`pvfactors.components.LinePVArray` objects. It is a
+    """``PVRowLine`` is sub-classed from :py:class:`~pvfactors.pvrow.PVRowBase`
+    , and its core is
+    made of :py:class:`~pvfactors.pvcore.LinePVArray` objects. It is a
     container that has methods and attributes relative to PV Rows and their
     shadows.
     ``PVRowLine`` can only create PV rows that have the shape of
     straight lines. So it won't be able to create shapes like dual-tilt
     systems for instance.
 
-    :param line_registry: line registry passed by :class:`pvarray.Array`
-        object
-    :type line_registry: :class:`pvcore.Registry`
-    :param float x_center: x coordinate of center of the line [m]
-    :param float y_center: y coordinate of center of the line [m]
-    :param int index: PV row index, used to distinguish different PV rows
-    :param float surface_tilt: Surface tilt angles in decimal degrees.
+    Parameters
+    ----------
+    line_registry : ``pd.DataFrame``
+        line registry passed by :py:class:`~pvfactors.pvarray.Array` object
+    x_center : float
+        x coordinate of center of the line [m]
+    y_center : float
+        y coordinate of center of the line [m]
+    index : int
+        PV row index, used to distinguish different PV rows
+    surface_tilt : float
+        Surface tilt angles in decimal degrees.
         surface_tilt must be >=0 and <=180.
         The tilt angle is defined as degrees from horizontal
-    :param float pvrow_width: width of the PV row, which is the length of
+    pvrow_width : float
+        width of the PV row, which is the length of
         the PV row line [m]
+
     """
 
     def __init__(self, line_registry, x_center, y_center, index, surface_tilt,
@@ -98,21 +125,30 @@ class PVRowLine(PVRowBase):
         self.cut_points = []
 
     def create_lines(self, tilt, index):
-        """
-        Create the :class:`pvcore.LinePVArray` objects that the PV row
-        is made out of, based on the inputted geometrical parameters.
+        """Create the :py:class:`~pvfactors.pvcore.LinePVArray` objects that
+        the PV row is made out of, based on the inputted geometrical parameters
 
-        :param float tilt: Surface tilt angles in decimal degrees.
+        Parameters
+        ----------
+        tilt : float
+            Surface tilt angles in decimal degrees.
             surface_tilt must be >=0 and <=180.
             The tilt angle is defined as degrees from horizontal
-        :param int index: PV row index, used to distinguish different PV rows
-        :return: [line_pvarray], highest_point, lowest_point,
-                right_point, left_point / which
-                are: list of :class:`pvcore.LinePVArray`;
-                :class:`shapely.Point` of the line with biggest y coordinate;
-                :class:`shapely.Point` of the line with smallest y coordinate;
-                :class:`shapely.Point` of the line with biggest x coordinate;
-                :class:`shapely.Point` of the line with smallest x coordinate
+        index : int
+            PV row index, used to distinguish different PV rows
+
+        Returns
+        -------
+        line_pvarray : list of :py:class:`~pvfactors.pvcore.LinePVArray`
+        highest_point : ``shapely.Point``
+            highest point of pvrow in y direction
+        lowest_point : ``shapely.Point``
+            lowest point of pvrow in y direction
+        right_point : ``shapely.Point``
+            rightmost point of pvrow in x direction
+        left_point : ``shapely.Point``
+            leftmost point of pvrow in x direction
+
         """
         tilt_rad = np.radians(tilt)
 
@@ -135,17 +171,24 @@ class PVRowLine(PVRowBase):
                 right_point, left_point)
 
     def get_shadow_bounds(self, solar_2d_vector):
-        """
-        Calculate the x coordinates of the boundary points of the shadow lines
+        """Calculate the x coordinates of the boundary points of the shadow lines
         on the ground, assuming Y_GROUND is the y coordinate of the ground.
         Note: this shadow construction is more or less ignored when direct
         shading happens between rows, leading to one continous shadows formed
         by all the PV rows in the array.
 
-        :param list solar_2d_vector: projection of solar vector into the 2D
+        Parameters
+        ----------
+        solar_2d_vector : list
+            projection of solar vector into the 2D
             plane of the array geometry
-        :return: x1_shadow, x2_shadow // ``float`` smallest x coordinate of
-            shadow, ``float`` largest x coordinate of shadow
+
+        Returns
+        -------
+        x1_shadow : float
+            smallest x-coord value of shadow
+        x2_shadow : float
+            largest x-coord value of shadow
         """
         list_x_values = []
         for line in self.lines:
@@ -170,9 +213,14 @@ class PVRowLine(PVRowBase):
 
     @property
     def facing(self):
-        """
-        This property is mainly used to calculate the view_matrix
-        :return: direction that the pvrow front surfaces are facing
+        """This property is mainly used to calculate the view_matrix
+
+        Returns
+        -------
+        str
+            Direction where pvrow front is pointing, depending on its tilt
+            angle
+
         """
         if self.tilt == 0.:
             direction = 'up'
@@ -185,12 +233,14 @@ class PVRowLine(PVRowBase):
         return direction
 
     def calculate_cut_points(self, n_segments):
-        """
-        Calculate the points of the PV row geometry on which the PV line will
+        """Calculate the points of the PV row geometry on which the PV line will
         be cut and discretized. The list of cut points is saved into the object
 
-        :param int n_segments: number of segments wanted for the discretization
-        :return: None
+        Parameters
+        ----------
+        n_segments : int
+            number of segments wanted for the discretization
+
         """
         fractions = np.linspace(0., 1., num=n_segments + 1)[1:-1]
         list_points = [self.complete_linestring.interpolate(fraction,
