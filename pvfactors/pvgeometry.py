@@ -28,27 +28,39 @@ THRESHOLD_DISTANCE_TOO_CLOSE = 1e-10
 
 @pd.api.extensions.register_dataframe_accessor("pvgeometry")
 class PVGeometry(object):
+    """Lightweight extension of ``pandas.DataFrame`` that copies
+    functionalities of ``geopandas.GeoSeries``
+
+    Parameters
+    ----------
+    pandas_obj : ``pandas.DataFrame``
+        ``pandas`` object to perform operations on
+
+    """
 
     def __init__(self, pandas_obj):
-        """
-        Lightweight extension of ``pandas.DataFrame`` that copies
-        functionalities of ``geopandas.GeoSeries``
-
-        :param pandas_obj: ``pandas`` object to perform operations on
-        :type pandas_obj: ``pandas.DataFrame``
-        """
         self._obj = pandas_obj
 
     def _series_op(self, this, other, op, **kwargs):
-        """
-        Geometric operation that returns a pandas Series
+        """Geometric operation that returns a pandas Series
 
-        :param this: dataframe that *must* have a `geometry` column
+        Parameters
+        ----------
+        this : ``pandas.DataFrame``
+            dataframe that *must* have a `geometry` column
             containing the geometry objects
-        :type this: :class:``pandas.DataFrame``
-        :param other: generally a ``shapely`` object
-        :param str op: operation to perform
-        :return: a :class:``pandas.Series`` object
+        other : ``shapely`` object
+            generally a ``shapely`` object
+        op : str
+            operation to perform
+        **kwargs :
+
+
+        Returns
+        -------
+        ``pandas.Series``
+            series after operation was performed
+
         """
         null_val = False if op not in ['distance', 'project'] else np.nan
 
@@ -57,28 +69,44 @@ class PVGeometry(object):
                          index=this.index, dtype=np.dtype(type(null_val)))
 
     def _geo_unary_op(self, this, op):
-        """
-        Unary operation that returns a pandas Series
+        """Unary operation that returns a pandas Series
 
-        :param this: dataframe that *must* have a `geometry` column
+        Parameters
+        ----------
+        this : ``pandas.DataFrame``
+            dataframe that *must* have a `geometry` column
             containing the geometry objects
-        :type this: :class:``pandas.DataFrame``
-        :param str op: operation to perform
-        :return: a :class:``pandas.Series`` object
+        op : str
+            operation to perform
+
+        Returns
+        -------
+        ``pandas.Series``
+            series after operation was performed
+
         """
         # TODO: may need a dtype argument in the returned series
         return pd.Series([getattr(geom, op) for geom in this.geometry],
                          index=this.index)
 
     def _series_unary_op(self, this, op, null_value=False):
-        """
-        Unary operation that returns a pandas Series
+        """Unary operation that returns a pandas Series
 
-        :param this: dataframe that *must* have a `geometry` column
+        Parameters
+        ----------
+        this : ``pandas.DataFrame``
+            dataframe that *must* have a `geometry` column
             containing the geometry objects
-        :type this: :class:``pandas.DataFrame``
-        :param str op: operation to perform
-        :return: a :class:``pandas.Series`` object
+        op : str
+            operation to perform
+        null_value : bool, optional
+             (Default value = False)
+
+        Returns
+        -------
+        ``pandas.Series``
+            series after operation was performed
+
         """
         return pd.Series([getattr(geom, op, null_value)
                           for geom in this.geometry],
@@ -87,37 +115,75 @@ class PVGeometry(object):
     @property
     def area(self):
         """Returns a ``Series`` containing the area of each geometry in the
-        ``GeoSeries``."""
+        ``GeoSeries``.
+
+        Returns
+        -------
+        ``pandas.Series``
+            series after area operation was performed
+
+        """
         return self._series_unary_op(self._obj, 'area', null_value=np.nan)
 
     @property
     def geom_type(self):
         """Returns a ``Series`` of strings specifying the `Geometry Type` of each
-        object."""
+        object.
+
+        Returns
+        -------
+        ``pandas.Series``
+            series after geom_type operation was performed
+
+        """
         return self._series_unary_op(self._obj, 'geom_type', null_value=None)
 
     @property
     def length(self):
-        """Returns a ``Series`` containing the length of each geometry."""
+        """Returns a ``Series`` containing the length of each geometry.
+
+        Returns
+        -------
+        ``pandas.Series``
+            series after length operation was performed
+        """
         return self._series_unary_op(self._obj, 'length', null_value=np.nan)
 
     @property
     def boundary(self):
         """Returns a ``GeoSeries`` of lower dimensional objects representing
-        each geometries's set-theoretic `boundary`."""
+        each geometries's set-theoretic `boundary`.
+
+        Returns
+        -------
+        ``pandas.Series``
+            series after boundary geo operation was performed
+        """
         return self._geo_unary_op(self._obj, 'boundary')
 
     @property
     def centroid(self):
         """Returns a ``GeoSeries`` of points representing the centroid of each
-        geometry."""
+        geometry.
+
+        Returns
+        -------
+        ``pandas.Series``
+            series after centroid geo operation was performed
+        """
         return self._geo_unary_op(self._obj, 'centroid')
 
     @property
     def bounds(self):
-        """
-        Returns a ``DataFrame`` with columns ``minx``, ``miny``, ``maxx``,
+        """Returns a ``DataFrame`` with columns ``minx``, ``miny``, ``maxx``,
         ``maxy`` values containing the bounds for each geometry.
+
+        Returns
+        -------
+        :class:``pandas.DataFrame``
+            dataframe with bounds of geometries and columns:
+            ['minx', 'miny', 'maxx', 'maxy']
+
         """
         bounds = np.array([geom.bounds for geom in self._obj.geometry])
         return pd.DataFrame(bounds,
@@ -131,28 +197,49 @@ class PVGeometry(object):
         `boundary` and `interior` of the other object and their boundaries do
         not touch at all.
 
-        :param other: geometric object to check if contained
-        :type other: ``shapely`` object
+        Parameters
+        ----------
+        other : ``shapely`` object
+            geometric object to check if contained
+
+        Returns
+        -------
+        ``pandas.Series``
+            series after contains series operation was performed
+
         """
         return self._series_op(self._obj, other, 'contains')
 
     def distance(self, other):
         """Returns a ``Series`` containing the distance to `other`.
 
-        :param other: geometric object to calculate distance to
-        :type other: ``shapely`` object
+        Parameters
+        ----------
+        other : ``shapely`` object
+            geometric object to calculate distance to
+
+        Returns
+        -------
+        ``pandas.Series``
+            series after distance series operation was performed
+
         """
         return self._series_op(self._obj, other, 'distance')
 
     def add(self, list_lines_pvarray):
-        """
-        Add list of objects of class :class:`pvcore.LinePVArray` to the
-        registry.
+        """Add list of objects of class
+        :py:class:`~pvfactors.pvcore.LinePVArray` to the registry.
 
-        :param list_lines_pvarray: list of objects of type
-            :class:`pvcore.LinePVArray`
-        :return: ``idx_list`` -- ``int``, the list of registry indices that
-            were added to the registry
+        Parameters
+        ----------
+        list_lines_pvarray : list
+            list of objects of type :py:class:`~pvfactors.pvcore.LinePVArray`
+
+        Returns
+        -------
+        list
+            the list of registry indices that were added to the registry
+
         """
         # Find the start index that will be used to add entries to the registry
         if len(self._obj.index) > 0:
@@ -170,19 +257,25 @@ class PVGeometry(object):
         return idx_list
 
     def split_ground_geometry_from_edge_points(self, edge_points):
-        """
-        Break up ground lines into multiple ones at the pv row "edge points",
+        """Break up ground lines into multiple ones at the pv row "edge points",
         which are the intersections of pv row lines and ground lines. This is
         important to separate the ground lines that a pv row's front surface
-         sees from the ones its back surface does.
+        sees from the ones its back surface does.
 
-        :param edge_points: points the specify location where to break lines
-        :type edge_points: list of :class:`shapely.Point` objects
-        :return: None
+        Parameters
+        ----------
+        edge_points : list
+            list of ``shapely.Point`` objects,
+            points that specify location where to break lines
+
+        Returns
+        -------
+        None
+
         """
         for point in edge_points:
-            df_ground = self._obj.loc[self._obj.loc[:, 'line_type']
-                                      == 'ground', :]
+            df_ground = self._obj.loc[self._obj.loc[:, 'line_type'] ==
+                                      'ground', :]
             geoentry_to_break_up = df_ground.loc[df_ground.pvgeometry
                                                  .contains(point)]
             if geoentry_to_break_up.shape[0] == 1:
@@ -193,17 +286,24 @@ class PVGeometry(object):
 
     def break_and_add_entries(self, geoentry_to_break_up, point,
                               pvrow_segment_index=None):
-        """
-        Break up a surface geometry into two objects at a point location.
+        """Break up a surface geometry into two objects at a point location.
 
-        :param geoentry_to_break_up: registry entry to break up
-        :type geoentry_to_break_up: ``pandas.DataFrame`` with `geometry`
-            column and ``pvgeometry`` extension
-        :param point: point used to decide where to break up entry.
-        :type point: :class:`shapely.Point` object
-        :param int pvrow_segment_index: (optional) index of segment being
+        Parameters
+        ----------
+        geoentry_to_break_up : ``pandas.DataFrame`` upgraded
+            ``pandas.DataFrame`` with `geometry`
+            column and ``pvgeometry`` extension,
+            registry entry to break up
+        point : ``shapely.Point``
+            point used to decide where to break up entry.
+        pvrow_segment_index : int, optional
+            index of segment being
             broken up. Default is None.
-        :return: None
+
+        Returns
+        -------
+        None
+
         """
         # Get geometry
         idx = geoentry_to_break_up.index
@@ -222,13 +322,21 @@ class PVGeometry(object):
 
     @staticmethod
     def cut_linestring(line, point):
-        """
-        Adapted from shapely documentation. Cuts a line in two at a calculated
+        """Adapted from shapely documentation. Cuts a line in two at a calculated
         distance from its starting point
 
-        :param line: :class:`shapely.LineString` object to cut
-        :param point: :class:`shapely.Point` object to use for the cut
-        :return: list of two :class:`shapely.LineString` objects
+        Parameters
+        ----------
+        line : ``shapely.LineString``
+            linestring object to cut
+        point : ``shapely.Point``
+            point to use for the cut, location of cut
+
+        Returns
+        -------
+        list
+            list of two ``shapely.LineString`` objects obtained after cut
+
         """
 
         distance = line.project(point)
@@ -250,25 +358,33 @@ class PVGeometry(object):
 
     def split_pvrow_geometry(self, idx_pvrow, line_shadow, pvrow_top_point,
                              surface_side):
-        """
-        Break up pv row line into two pv row lines, a shaded one and an
+        """Break up pv row line into two pv row lines, a shaded one and an
         unshaded one. This function requires knowing the pv row line index in
         the registry, the "shadow line" that intersects with the pv row, and
         the top point of the pv row in order to decide which pv row line will
         be shaded or not after break up.
 
-        :param int idx_pvrow: index of shaded pv row entry
-        :param line_shadow: :class:`shapely.LineString` object representing the
-            "shadow line" intersecting with the pv row line
-        :param pvrow_top_point: the highest point of the pv row line (in the
+        Parameters
+        ----------
+        idx_pvrow : int
+            index of shaded pv row entry
+        line_shadow : ``shapely.LineString``
+            Line representing the "shadow line" intersecting with the pv row
+           line
+        pvrow_top_point : ``shapely.Point``
+            the highest point of the pv row line (in the
             elevation direction)
-        :param pvrow_top_point: :class:``shapely.Point`` object
-        :param str surface_side: surface side of the pvrow
-        :return: None
+        surface_side : str
+            surface side of the pvrow
+
+        Returns
+        -------
+        None
+
         """
         # Define geometry to work on
-        df_pvrow = self._obj.loc[(self._obj.pvrow_index == idx_pvrow)
-                                 & (self._obj.surface_side == surface_side),
+        df_pvrow = self._obj.loc[(self._obj.pvrow_index == idx_pvrow) &
+                                 (self._obj.surface_side == surface_side),
                                  :]
         geometry = df_pvrow.loc[:, 'geometry'].values[0]
         # Find intersection point of line shadow and pvrow geometry
@@ -286,34 +402,43 @@ class PVGeometry(object):
             # Cut geometry in two pieces
             self.cut_pvrow_geometry([point_intersect], idx_pvrow, surface_side)
             # Find the geometries that should be marked as shaded
-            df_pvrow = self._obj.loc[(self._obj.pvrow_index == idx_pvrow)
-                                     & (self._obj.surface_side == surface_side),
+            df_pvrow = self._obj.loc[(self._obj.pvrow_index == idx_pvrow) &
+                                     (self._obj.surface_side == surface_side),
                                      :]
             centroids = df_pvrow.pvgeometry.centroid.to_frame()
             centroids.columns = ['geometry']
-            is_below_shading_interesect = (centroids.pvgeometry.bounds['miny']
-                                           < point_intersect.y)
-            self._obj.loc[(self._obj.pvrow_index == idx_pvrow)
-                          & (self._obj.surface_side == surface_side)
-                          & is_below_shading_interesect,
+            is_below_shading_interesect = \
+                centroids.pvgeometry.bounds['miny'] < point_intersect.y
+            self._obj.loc[(self._obj.pvrow_index == idx_pvrow) &
+                          (self._obj.surface_side == surface_side) &
+                          is_below_shading_interesect,
                           'shaded'] = True
 
     def cut_pvrow_geometry(self, list_points, pvrow_index, side,
                            count_segments=False):
-        """
-        Break up pv row lines into multiple segments based on the list of
+        """Break up pv row lines into multiple segments based on the list of
         points specified. This is the "discretization" of the pvrow segments.
         For now, it only works for pv rows.
 
-        :param list_points: list of :class:`shapely.Point`, breaking points for
+        Parameters
+        ----------
+        list_points : list
+            list of :class:`shapely.Point`, breaking points for
             the pv row lines.
-        :param int pvrow_index: pv row index to specify the PV row to
+        pvrow_index : index
+            pv row index to specify the PV row to
             discretize; note that this could return multiple entries from the
             registry.
-        :param str side: only do it for one side of the selected PV row. This
+        side : str
+            only do it for one side of the selected PV row. This
             can only be 'front' or 'back'.
-        :param bool count_segments: (optional, default False) add pvrow segment idx
-        :return: None
+        count_segments : bool, optional
+            Add count of segments (Default = False)
+
+        Returns
+        -------
+        None
+
         """
         # TODO: is currently not able to work for other surfaces than pv rows..
         for idx, point in enumerate(list_points):
@@ -322,13 +447,14 @@ class PVGeometry(object):
             else:
                 pvrow_segment_index = None
             df_selected = self._obj.loc[
-                (self._obj['pvrow_index'] == pvrow_index)
-                & (self._obj['surface_side'] == side), :]
+                (self._obj['pvrow_index'] == pvrow_index) &
+                (self._obj['surface_side'] == side), :]
             geoentry_to_break_up = df_selected.loc[
                 df_selected.pvgeometry.distance(point) < DISTANCE_TOLERANCE]
             if geoentry_to_break_up.shape[0] == 1:
-                self.break_and_add_entries(geoentry_to_break_up, point,
-                                           pvrow_segment_index=pvrow_segment_index)
+                self.break_and_add_entries(
+                    geoentry_to_break_up, point,
+                    pvrow_segment_index=pvrow_segment_index)
             elif geoentry_to_break_up.shape[0] > 1:
                 raise PVFactorsError("geoentry_to_break_up.shape[0] cannot be"
                                      "larger than 1")

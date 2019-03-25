@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+"""PV array classes"""
 
 from __future__ import absolute_import
 from __future__ import division
@@ -34,14 +34,18 @@ DEFAULT_HORIZON_BAND_ANGLE = 6.5
 
 
 class ArrayBase(object):
-    """
-    ``ArrayBase`` exists for future developments of the model. It is the
+    """``ArrayBase`` exists for future developments of the model. It is the
      base class for PV arrays that will contain all the boiler plate code
      shared by sub classes like ``Array``, or for instance more complex
      PV array classes with varying GCR values, or non-flat ground, etc.
 
-    :param int n_pvrows: number of PV rows in PV array
-    :param float pvrow_height: height of PV rows
+    Parameters
+    ----------
+    n_pvrows : int
+        number of PV rows in PV array
+    pvrow_height : float
+        height of PV rows
+
     """
     registry_cols = [
         # LinePVArray keys
@@ -77,11 +81,13 @@ class ArrayBase(object):
 
     @staticmethod
     def initialize_registry():
-        """
-        Create an empty line registry based on the property keys of PV Array
+        """Create an empty line registry based on the property keys of PV Array
         lines.
 
-        :return: empty :class:`pvcore.Registry` object
+        Returns
+        -------
+        registry object
+
         """
         # Create the line and surface registries
         # TODO: line_pvarray_keys should not be dependent on specific classes
@@ -92,10 +98,20 @@ class ArrayBase(object):
         return registry
 
     def create_pvrows_array(self, *args, **kwargs):
+        """
+
+        Parameters
+        ----------
+        *args :
+
+        **kwargs :
+
+        """
         raise NotImplementedError
 
     @property
     def tilt(self):
+        """ """
         pvrow = self.pvrows[0]
         if hasattr(pvrow, 'tilt'):
             return pvrow.tilt
@@ -105,6 +121,7 @@ class ArrayBase(object):
 
     @property
     def pvrow_distance(self):
+        """ """
         pvrow = self.pvrows[0]
         if hasattr(pvrow, 'width') & (self.gcr is not None):
             return float(pvrow.width) / self.gcr
@@ -114,39 +131,49 @@ class ArrayBase(object):
 
 
 class Array(ArrayBase):
-    """
-    | Create the array object. This will call the :meth:`update_view_factors`
-    | method which creates the shapely geometry and calculate the view
-    | factors based on the inputs.
+    """Create the array object. This will call the :meth:`update_view_factors`
+    method which creates the shapely geometry and calculate the view
+    factors based on the inputs.
     | Azimuth angles are counted positive going East from North. E.g. 0 deg is
-    | North and 90 degrees is East.
-    | #FIXME The array azimuth uses a different convention than pvlib: for the
-    | torque-tube axis to be oriented South-North, the array azimuth angle
-    | needs to be 90 deg. And 0 deg would be East-West orientation.
+    North and 90 degrees is East.
     | This assumes an equal spacing (or GCR) between all pv rows.
     | This assumes that all pv rows have identical rotation angles.
     | This assumes that all pv rows are at the same elevation (only x-values
     | change from a pv row to another).
 
-    :param int n_pvrows: number of PV rows in parallel
-    :param float pvrow_height: height of PV rows, measured from ground to
+    Parameters
+    ----------
+    n_pvrows : int
+        number of PV rows in parallel
+    pvrow_height : float
+        height of PV rows, measured from ground to
         center [meters]
-    :param float pvrow_width: width of PV rows, in the considered 2D
+    pvrow_width : float
+        width of PV rows, in the considered 2D
         dimension [meters]
-    :param float surface_tilt: Surface tilt angles in decimal degrees.
+    surface_tilt : float
+        Surface tilt angles in decimal degrees.
         surface_tilt must be >=0 and <=180.
         The tilt angle is defined as degrees from horizontal
         (e.g. surface facing up = 0, surface facing horizon = 90)
-    :param float surface_azimuth: The azimuth of the rotated panel,
+    surface_azimuth : float
+        The azimuth of the rotated panel,
         determined by projecting the vector normal to the panel's surface
         to the earth's surface [degrees].
-    :param float solar_zenith: zenith angle of the sun [degrees]
-    :param float solar_azimuth: azimuth angle of the sun [degrees]
-    :param float rho_ground: ground albedo
-    :param float rho_back_pvrow: reflectivity of PV row's back surface
-    :param float rho_front_pvrow: reflectivity of PV row's front surface
-    :param float gcr: ground coverage ratio of the PV array
-    :param kwargs: possible options are: ``pvrow_class`` if the user wants
+    solar_zenith : float
+        zenith angle of the sun [degrees]
+    solar_azimuth : float
+        azimuth angle of the sun [degrees]
+    rho_ground : float
+        ground albedo
+    rho_back_pvrow : float
+        reflectivity of PV row's back surface
+    rho_front_pvrow : float
+        reflectivity of PV row's front surface
+    gcr : float
+        ground coverage ratio of the PV array
+    kwargs : dict
+        possible options are: ``pvrow_class`` if the user wants
         to specify its own PV Row class; ``cut`` if the user wants to
         discretize some pv rows, e.g. [(0, 5, 'front'), (4, 2, 'back')]
         will discretize the front surface of the first PV row into 5 segments,
@@ -156,6 +183,7 @@ class Array(ArrayBase):
         ``circumsolar_angle`` would be the full (not half) angle of the
         circumsolar disk; ``horizon_band_angle`` would be the horizon band
         elevation angle
+
     """
 
     _pvrow_class = PVRowLine
@@ -202,20 +230,25 @@ class Array(ArrayBase):
 
     def update_view_factors(self, solar_zenith, solar_azimuth, surface_tilt,
                             surface_azimuth):
-        """
-        Create new line and surface registries based on new inputs, and re-cal-
+        """Create new line and surface registries based on new inputs, and re-cal-
         culate the view factor matrix of the updated system.
 
-        :param float solar_zenith: zenith angle of the sun [in deg]
-        :param float solar_azimuth: azimuth angle of the sun [in deg]
-        :param float surface_tilt: Surface tilt angles in decimal degrees.
+        Parameters
+        ----------
+        solar_zenith : float
+            zenith angle of the sun [in deg]
+        solar_azimuth : float
+            azimuth angle of the sun [in deg]
+        surface_tilt : float
+            Surface tilt angles in decimal degrees.
             surface_tilt must be >=0 and <=180.
             The tilt angle is defined as degrees from horizontal
             (e.g. surface facing up = 0, surface facing horizon = 90)
-        :param float surface_azimuth: The azimuth of the rotated panel,
+        surface_azimuth : float
+            The azimuth of the rotated panel,
             determined by projecting the vector normal to the panel's surface
             to the earth's surface [degrees].
-        :return: None
+
         """
         self.line_registry = self.initialize_registry()
         # Check on which side the light is incident
@@ -273,30 +306,40 @@ class Array(ArrayBase):
                                       luminance_isotropic,
                                       luminance_circumsolar,
                                       poa_horizon, poa_circumsolar):
-        """
-        Calculate the irradiance source terms of all surfaces using values
+        """Calculate the irradiance source terms of all surfaces using values
         pre-calculated from the Perez transposition model.
 
-        :param float solar_zenith: zenith angle of the sun [degrees]
-        :param float solar_azimuth: azimuth angle of the sun [degrees]
-        :param float surface_tilt: Surface tilt angles in decimal degrees.
+        Parameters
+        ----------
+        solar_zenith : float
+            zenith angle of the sun [degrees]
+        solar_azimuth : float
+            azimuth angle of the sun [degrees]
+        surface_tilt : float
+            Surface tilt angles in decimal degrees.
             surface_tilt must be >=0 and <=180.
             The tilt angle is defined as degrees from horizontal
             (e.g. surface facing up = 0, surface facing horizon = 90)
-        :param float surface_azimuth: azimuth angle of the PV surfaces. All PV
+        surface_azimuth : float
+            azimuth angle of the PV surfaces. All PV
             surfaces must have the same azimuth angle [degrees]
-        :param float dni: direct normal irradiance [W/m2]
-        :param float luminance_isotropic: luminance of the isotropic part of
+        dni : float
+            direct normal irradiance [W/m2]
+        luminance_isotropic : float
+            luminance of the isotropic part of
             the sky dome [W/m2/sr]
-        :param float luminance_circumsolar: luminance of the circumsolar part
+        luminance_circumsolar : float
+            luminance of the circumsolar part
             of the sky dome [W/m2/sr]
-        :param float poa_horizon: plane-of-array horizon component of the
+        poa_horizon : float
+            plane-of-array horizon component of the
             irradiance as calculated by Perez for the front surface of a PV row
             [W/m2]
-        :param float poa_circumsolar: plane-of-array circumsolar component of
+        poa_circumsolar : float
+            plane-of-array circumsolar component of
             the irradiance as calculated by Perez for the front surface of a PV
             row [W/m2]
-        :return: None
+
         """
         self.surface_registry['circumsolar_term'] = 0.
         self.surface_registry['horizon_term'] = 0.
@@ -390,12 +433,14 @@ class Array(ArrayBase):
         self.irradiance_terms[-1] = luminance_isotropic
 
     def apply_horizon_band_shading(self, pvrow_side):
-        """
-        Calculate the amount of diffuse shading happening on the horizon
+        """Calculate the amount of diffuse shading happening on the horizon
         band components for the 'back' pvrow surfaces
 
-        :param str pvrow_side:
-        :return: None
+        Parameters
+        ----------
+        pvrow_side : str
+            Side of pvrow on which to apply horizon band shading
+
         """
 
         slice_registry = self.surface_registry.loc[
@@ -421,13 +466,11 @@ class Array(ArrayBase):
                 percent_horizon_shading)
 
     def apply_front_circumsolar_horizon_shading(self):
-        """
-        Calculate what amount of diffuse shading is happening on the
+        """Calculate what amount of diffuse shading is happening on the
         circumsolar and horizon band components and apply it to all 'front'
         surfaces of pvrows. It just updates the corresponding irradiance
         terms that will be used in the mathematical formulation.
 
-        :return: None
         """
 
         slice_registry = self.surface_registry.loc[
@@ -467,11 +510,9 @@ class Array(ArrayBase):
                 percent_horizon_shading)
 
     def update_reflectivity_matrix(self):
-        """
-        Update new surface registry with reflectivity values for all surfaces,
+        """Update new surface registry with reflectivity values for all surfaces,
         and calculate inverse of the reflectivity matrix.
 
-        :return: None
         """
         self.surface_registry['reflectivity'] = np.nan
 
@@ -495,32 +536,42 @@ class Array(ArrayBase):
             self, solar_zenith, solar_azimuth, surface_tilt, surface_azimuth,
             dni, luminance_isotropic, luminance_circumsolar, poa_horizon,
             poa_circumsolar):
-        """
-        Solve linear system of equations to calculate radiosity terms based on
+        """Solve linear system of equations to calculate radiosity terms based on
         the specified inputs and using Perez diffuse light transposition model
         pre-calculated values
 
-        :param float solar_zenith: zenith angle of the sun [degrees]
-        :param float solar_azimuth: azimuth angle of the sun [degrees]
-        :param float surface_tilt: Surface tilt angles in decimal degrees.
+        Parameters
+        ----------
+        solar_zenith : float
+            zenith angle of the sun [degrees]
+        solar_azimuth : float
+            azimuth angle of the sun [degrees]
+        surface_tilt : float
+            Surface tilt angles in decimal degrees.
             surface_tilt must be >=0 and <=180.
             The tilt angle is defined as degrees from horizontal
             (e.g. surface facing up = 0, surface facing horizon = 90)
-        :param float surface_azimuth: The azimuth of the rotated panel,
+        surface_azimuth : float
+            The azimuth of the rotated panel,
             determined by projecting the vector normal to the panel's surface
             to the earth's surface [degrees].
-        :param float dni: direct normal irradiance [W/m2]
-        :param float luminance_isotropic: luminance of the isotropic part of
+        dni : float
+            direct normal irradiance [W/m2]
+        luminance_isotropic : float
+            luminance of the isotropic part of
             the sky dome [W/m2/sr]
-        :param float luminance_circumsolar: luminance of the circumsolar part
+        luminance_circumsolar : float
+            luminance of the circumsolar part
             of the sky dome [W/m2/sr]
-        :param float poa_horizon: plane-of-array horizon component of the
+        poa_horizon : float
+            plane-of-array horizon component of the
             irradiance as calculated by Perez for the front surface of a PV row
             [W/m2]
-        :param float poa_circumsolar: plane-of-array circumsolar component of
+        poa_circumsolar : float
+            plane-of-array circumsolar component of
             the irradiance as calculated by Perez for the front surface of a PV
             row [W/m2]
-        :return: None; updating :attr:`surface_registry`
+
         """
         # Update the array configuration
         try:
@@ -548,14 +599,12 @@ class Array(ArrayBase):
         self.calculate_sky_and_reflection_components()
 
     def calculate_sky_and_reflection_components(self):
-        """
-        Assuming that the calculation of view factors and radiosity terms is
+        """Assuming that the calculation of view factors and radiosity terms is
         completed, calculate the irradiance components of the isotropic sky
         dome and of the reflections from surrounding surfaces
         (pv rows and ground) for all the surfaces in the PV array.
         Update the surface registry.
 
-        :return: None
         """
 
         # FIXME: not very robust, make sure to have a test for it
@@ -569,18 +618,26 @@ class Array(ArrayBase):
 
 # ------- Line creation
     def create_pvrows_array(self, n_pvrows, pvrow_height):
-        """
-        Create list of PV rows in array, counting from left to right.
+        """Create list of PV rows in array, counting from left to right.
         In the 2D plane that will be considered, no matter the array azimuth
         angle will be, POSITIVE tilts will lead to pv surfaces tilted to the
         LEFT, and NEGATIVE tilts will lead to PV surfaces tilted to the RIGHT.
         So in the case of a single axis tracker, the direction of the torque
         tube will be the normal vector going out of the 2D plane.
 
-        :param int n_pvrows: number of PV rows in the array
-        :param float pvrow_height: height of the PV rows, measured from ground
+        Parameters
+        ----------
+        n_pvrows : int
+            number of PV rows in the array
+        pvrow_height : float
+            height of the PV rows, measured from ground
             to the center of the row
-        :return: list of :class:`pvrow.PVRowLine` objects, for now.
+
+        Returns
+        -------
+        list
+            list of :py:class:`pvfactors.pvrow.PVRowLine` objects
+
         """
         # Assume that all rows are at the same height
         y_center = pvrow_height
@@ -602,8 +659,7 @@ class Array(ArrayBase):
 
     def create_pvrow_shadows(self, surface_azimuth,
                              solar_zenith, solar_azimuth):
-        """
-        Create the PV row shadows cast on the ground. Since the PV array is in
+        """Create the PV row shadows cast on the ground. Since the PV array is in
         2D, the approach here is to project the solar vector into the 2D plane
         considered here. The next step is to calculate the shadow boundaries
         based on the PV row position and the solar angle using some geometry.
@@ -612,13 +668,17 @@ class Array(ArrayBase):
         that there is one continuous shadow on the ground formed by all the
         trackers' shadows.
 
-
-        :param float surface_azimuth: The azimuth of the rotated panel,
+        Parameters
+        ----------
+        surface_azimuth : float
+            The azimuth of the rotated panel,
             determined by projecting the vector normal to the panel's surface
             to the earth's surface [degrees].
-        :param float solar_zenith: sun's zenith angle
-        :param float solar_azimuth: sun's azimuth angle
-        :return: None
+        solar_zenith : float
+            sun's zenith angle
+        solar_azimuth : float
+            sun's azimuth angle
+
         """
         # Projection of 3d solar vector onto the cross section of the systems:
         # which is the 2d plane we are considering: needed to calculate shadows
@@ -671,13 +731,10 @@ class Array(ArrayBase):
             self.line_registry.pvgeometry.add(list_shadow_line_pvarrays))
 
     def create_ill_ground(self):
-        """
-        Create illuminated ground areas between shadows and add them to the
+        """Create illuminated ground areas between shadows and add them to the
         line registry.
         The function assumes that the shadows are ordered and sorted from left
         to right.
-
-        :return: None; updated :attr:`line_registry`
         """
         df_bounds_shadows = (self.line_registry
                              .loc[(self.line_registry['line_type'] == 'ground')
@@ -708,13 +765,15 @@ class Array(ArrayBase):
                             [ill_gnd_line_pvarray]))
 
     def find_edge_points(self):
-        """
-        Edge points are defined as the virtual intersection of the pvrow
+        """Edge points are defined as the virtual intersection of the pvrow
         lines and the ground. They determine what part of the ground the front
         surface of the pvrow sees, and same for the back surface.
 
-        :return: list of :class:`shapely.Point` objects; the
-            :attr:`line_registry` is also updated
+        Returns
+        -------
+        list
+            list of ``shapely.Point`` objects
+
         """
 
         # --- Find edge points
@@ -748,16 +807,18 @@ class Array(ArrayBase):
         return edge_points
 
     def create_remaining_illum_ground(self, edge_points):
-        """
-        Create the remaining illuminated parts of the ground, at the outer
+        """Create the remaining illuminated parts of the ground, at the outer
         edges of the PV array.
         The areas are supposed to be infinite, but for model simplicity they
         are implemented as being very large (fixed values).
 
-        :param list edge_points: **sorted** list of :class:`shapely.Point`
+        Parameters
+        ----------
+        edge_points : list
+            **sorted** list of ``shapely.Point``
             objects representing the intersection of PV row lines and the
             ground
-        :return: None; updating :attr:`line_registry`
+
         """
         if edge_points:
             x_min_edge_points = edge_points[0].x
@@ -805,13 +866,14 @@ class Array(ArrayBase):
                 [ill_gnd_left, ill_gnd_right]))
 
     def calculate_interrow_direct_shading(self, sun_on_front_surface):
-        """
-        Calculate inter-row direct shading and  break up PV row objects into
+        """Calculate inter-row direct shading and  break up PV row objects into
         shaded and unshaded parts.
 
-        :param bool sun_on_front_surface: flag check if sun is incident on
-            front surface
-        :return: None; updating :attr:`line_registry` with additional entries
+        Parameters
+        ----------
+        sun_on_front_surface : bool
+            flag check if sun is incident on front surface
+
         """
         # Find the direction of shading
         # Direct shading calculation must be specific to the PVRow class
@@ -869,15 +931,12 @@ class Array(ArrayBase):
 
 # ------- Surface creation
     def create_surface_registry(self):
-        """
-        Create ``surface_registry`` attribute from :attr:`line_registry`.
+        """Create ``surface_registry`` attribute from :attr:`line_registry`.
         One of the big differences is that the ``surface_registry`` is able to
         distinguish the two sides of a PV row object. For instance it will
         make sure to record that only one side of a PV row can have direct
         shading, or that only one side may be discretized. The names of the two
         sides are 'front' and 'back'.
-
-        :return: None; creating ``surface_registry`` attribute
         """
 
         front_surface_registry = copy.copy(self.line_registry)
@@ -898,11 +957,8 @@ class Array(ArrayBase):
         self.discretize_surfaces()
 
     def discretize_surfaces(self):
-        """
-        Discretize PV row surfaces using the inputs provided in the class
+        """Discretize PV row surfaces using the inputs provided in the class
         constructor. New entries will be added to the ``surface_registry``.
-
-        :return: None; updating :attr:`surface_registry`
         """
 
         for cut in self.cut:
@@ -916,16 +972,21 @@ class Array(ArrayBase):
 
 # ------- View matrix creation
     def create_view_matrix(self):
-        """
-        Create the ``view_matrix`` and the ``args_matrix``, which records which
+        """Create the ``view_matrix`` and the ``args_matrix``, which records which
         surface sees which surface, as well as the "type" of view that it is,
         and potential "obstructing" objects.
         The logic here can be a little complex, and there may be ways to
         simplify it.
 
-        :return: ``view_matrix``, ``args_matrix``; both :class:`numpy.array`
-            objects and containing the "type" of views of each finite surface
-            to the others, and additional arguments like "obstructing" objects
+        Returns
+        -------
+        view_matrix : np.ndarray
+            2D matrix containing the 'type' of view from each finite surface
+            to the others
+        args_matrix : np.ndarray
+            2D matrix containing additional arguments like "obstructing"
+            objects, and related to that type of view
+
         """
 
         # view matrix will contain the view relationships between each surface

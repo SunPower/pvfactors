@@ -14,14 +14,13 @@
 
 import sys
 import os
-import shlex
-from pvfactors.version import __version__
+from pvfactors import __version__
 
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
-#sys.path.insert(0, os.path.abspath('.'))
+# sys.path.insert(0, os.path.abspath('.'))
 pvfactors_dir = os.path.abspath(os.path.join('..'))
 project_dir = os.path.abspath(os.path.join('..\..'))
 sys.path.insert(0, pvfactors_dir)
@@ -34,7 +33,16 @@ sys.path.insert(0, project_dir)
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
-extensions = ['sphinx.ext.mathjax', 'sphinx.ext.autodoc', 'nbsphinx']
+extensions = [
+    'sphinx.ext.mathjax',
+    'sphinx.ext.autodoc',
+    'sphinx.ext.autosummary',
+    'sphinx.ext.viewcode',
+    'sphinx.ext.todo',
+    'sphinx.ext.coverage',
+    'nbsphinx',
+    'sphinxcontrib.napoleon'
+]
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -53,14 +61,14 @@ master_doc = 'index'
 # General information about the project.
 project = u'pvfactors'
 copyright = u'Copyright 2016, SunPower Corporation'
-author = u'Marc Anoma'
+author = u'SunPower Corporation'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
 # built documents.
 #
-# The short X.Y version.
-version = __version__
+# The short X.Y version only
+version = '%s' % (__version__.split('+')[0])
 # The full version, including alpha/beta/rc tags.
 release = __version__
 
@@ -69,7 +77,7 @@ release = __version__
 #
 # This is also used if you do content translation via gettext catalogs.
 # Usually you set "language" from the command line for these cases.
-language = None
+# language = None
 
 # There are two options for replacing |today|: either, you set today to some
 # non-false value, then it is used:
@@ -113,18 +121,24 @@ todo_include_todos = False
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
-html_theme = 'alabaster'  # 'classic'
+html_theme = 'sphinx_rtd_theme'
+
+html_context = {
+    'display_github': True,
+    'github_user': 'SunPower',
+    'github_repo': 'pvfactors'
+}
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
 # documentation.
-html_theme_options = {
-    "fixed_sidebar": True,
-    "github_user": "SunPower",
-    "github_repo": "pvfactors",
-    "github_banner": True,
-    "logo": 'sp_2014_logo_black_orange_rgb.png',
-}
+html_theme_options = {}
+
+# Make sure the "Edit on Github" link is not broken
+rst_prolog = """
+:github_url: https://github.com/SunPower/pvfactors/
+
+"""
 
 # Add any paths that contain custom themes here, relative to this directory.
 #html_theme_path = []
@@ -138,7 +152,7 @@ html_theme_options = {
 
 # The name of an image file (relative to this directory) to place at the top
 # of the sidebar.
-#html_logo = None
+html_logo = '_static/sp_2014_logo_all_white_LARGE.png'
 
 # The name of an image file (within the static path) to use as favicon of the
 # docs.  This file should be a Windows icon file (.ico) being 16x16 or 32x32
@@ -187,7 +201,7 @@ html_sidebars = {
 #html_split_index = False
 
 # If true, links to the reST sources are added to the pages.
-#html_show_sourcelink = True
+html_show_sourcelink = True
 
 # If true, "Created using Sphinx" is shown in the HTML footer. Default is True.
 #html_show_sphinx = True
@@ -300,3 +314,15 @@ texinfo_documents = [
 
 # If true, do not generate a @detailmenu in the "Top" node's menu.
 #texinfo_no_detailmenu = False
+
+# turns off numpydoc autosummary warnings
+numpydoc_show_class_members = False
+
+# generating stub pages automatically
+autosummary_generate = True
+
+# allow wider windows
+
+
+def setup(app):
+    app.add_stylesheet('css/custom.css')

@@ -1,8 +1,7 @@
-# -*- coding: utf-8 -*-
+""" Some utility functions and classes for pvfactors """
 
 from shapely.geometry import Point
-from pvfactors import (PVFactorsError, PVFactorsEdgePointDoesNotExist,
-                       PVFactorsArrayUpdateException)
+from pvfactors import PVFactorsError
 import numpy as np
 import math
 import logging
@@ -29,26 +28,33 @@ GAUSSIAN_DIAMETER_CIRCUMSOLAR = 2. * N_SIGMA * SIGMA
 
 
 class LinePVArray(dict):
+    """``LinePVArray`` is the general class that is used to instantiate all
+    the initial line objects of the pv array before putting them into the
+    surface registry.
+    It is a sub-class of a dictionary with already defined keys.
+
+    Parameters
+    ----------
+    geometry : ``shapely`` geometry object
+        Python representation of pv line geometry
+    style : str
+        matplotlib`` plotting style for the line. E.g. '--'
+    line_type : str
+        type of surface in :py:class:`~pvfactors.pvarray.Array`,
+        e.g. 'pvrow' or 'ground'
+    shaded : bool
+        specifies if surface is shaded (from direct shading)
+    pvrow_index : int
+        if the surface's ``line_type`` is a 'pvrow', this
+        will be its pv row index (which is different from its
+        ``surface_registry`` index in :py:class:`~pvfactors.pvarray.Array`)
+
+    """
 
     _list_line_types = ['pvrow', 'ground', None]
 
     def __init__(self, geometry=None, style='-', line_type=None,
                  shaded=None, pvrow_index=None):
-        """
-        ``LinePVArray`` is the general class that is used to instantiate all the
-        initial line objects of the pv array before putting them into the
-        surface registry.
-        It is a sub-class of a dictionary with already defined keys.
-
-        :param geometry: ``shapely`` geometry object
-        :param str style: ``matplotlib`` plotting style for the line. E.g. '--'.
-        :param str line_type: type of surface in the :class:`pvarray.Array`,
-            e.g. 'pvrow' or 'ground'
-        :param bool shaded: specifies if surface is shaded (from direct shading)
-        :param pvrow_index: if the surface's ``line_type`` is a 'pvrow', this
-            will be its pv row index (which is different from its
-            :attr:`pvarray.Array.surface_registry` index)
-        """
         if line_type in self._list_line_types:
             super(LinePVArray, self).__init__(geometry=geometry, style=style,
                                               line_type=line_type,
@@ -63,16 +69,24 @@ class LinePVArray(dict):
 
 def calculate_circumsolar_shading(percentage_distance_covered,
                                   model='uniform_disk'):
-    """
-    Select the model to calculate circumsolar shading based on the current PV
+    """Select the model to calculate circumsolar shading based on the current PV
     array condition.
 
-    :param float percentage_distance_covered: this represents how much of the
+    Parameters
+    ----------
+    percentage_distance_covered : float
+        this represents how much of the
         circumsolar diameter is covered by the neighboring row [in %]
-    :param str model: name of the circumsolar shading model to use:
+    model : str, optional
+        name of the circumsolar shading model to use:
         'uniform_disk' and 'gaussian' are the two models currently available
-    :return: a ``float`` representing the percentage shading of the
-        circumsolar disk [in %]
+        (Default value = 'uniform_disk')
+
+    Returns
+    -------
+    float
+        shading percentage of circumsolar area
+
     """
     if model == 'uniform_disk':
         perc_shading = uniform_circumsolar_disk_shading(
@@ -83,32 +97,46 @@ def calculate_circumsolar_shading(percentage_distance_covered,
 
     else:
         raise PVFactorsError(
-            'calculate_circumsolar_shading: model does not exist: '
-            + '%s' % model)
+            'calculate_circumsolar_shading: model does not exist: ' +
+            '%s' % model)
 
     return perc_shading
 
 
 def integral_default_gaussian(y, x):
-    """
-    Calculate the value of the integral from x to y of the erf function
+    """Calculate the value of the integral from x to y of the erf function
 
-    :param float y: upper limit
-    :param float x: lower limit
-    :return: ``float``, value of the integral
+    Parameters
+    ----------
+    y : float
+        upper limit
+    x : float
+        lower limit
+
+    Returns
+    -------
+    float
+        Calculated value of integral
+
     """
     return 0.5 * (math.erf(x) - math.erf(y))
 
 
 def gaussian_shading(percentage_distance_covered):
-    """
-    Calculate circumsolar shading by assuming that the irradiance profile on
+    """Calculate circumsolar shading by assuming that the irradiance profile on
     a 2D section of the circumsolar disk is Gaussian
 
-    :param float percentage_distance_covered: [in %], proportion of the
-        circumsolar disk covered by the neighboring pvrow
-    :return: ``float`` representing the total circumsolar shading percentage
-        in [%]
+    Parameters
+    ----------
+    percentage_distance_covered : float
+        [in %], proportion of the
+        circumsolar disk area covered by the neighboring pvrow
+
+    Returns
+    -------
+    float
+        percentage shading in terms of irradiance (using gaussian profile)
+
     """
     if percentage_distance_covered < 0.:
         perc_shading = 0.
@@ -116,8 +144,8 @@ def gaussian_shading(percentage_distance_covered):
         perc_shading = 100.
     else:
         y = - N_SIGMA * SIGMA
-        x = (y
-             + percentage_distance_covered / 100. *
+        x = (y +
+             percentage_distance_covered / 100. *
              GAUSSIAN_DIAMETER_CIRCUMSOLAR)
         area = integral_default_gaussian(y, x)
         total_gaussian_area = integral_default_gaussian(- N_SIGMA * SIGMA,
@@ -128,29 +156,45 @@ def gaussian_shading(percentage_distance_covered):
 
 
 def gaussian(x, mu=0., sigma=1.):
-    """
-    Gaussian density function
+    """Gaussian density function
 
-    :param float x: argument of function
-    :param float mu: mean of the gaussian
-    :param float sigma: standard deviation of the gaussian
-    :return: ``float``, value of the density function evaluated at ``x``
+    Parameters
+    ----------
+    x : float
+        argument of function
+    mu : float, optional
+        mean of the gaussian (Default value = 0.)
+    sigma : float, optional
+        standard deviation of the gaussian (Default value = 1.)
+
+    Returns
+    -------
+    float
+        value of guassian function at point x
+
     """
-    return (1. / (sigma * np.sqrt(2. * np.pi))
-            * np.exp(- 0.5 * np.power((x - mu) / sigma, 2)))
+    return (1. / (sigma * np.sqrt(2. * np.pi)) *
+            np.exp(- 0.5 * np.power((x - mu) / sigma, 2)))
 
 
 def uniform_circumsolar_disk_shading(percentage_distance_covered):
-    """
-    Calculate the percentage shading of circumsolar irradiance. This
+    """Calculate the percentage shading of circumsolar irradiance. This
     model considers circumsolar to be a disk, and calculates the
     percentage shaded based on the percentage "distance covered",
     which is how much of the disk's diameter is covered by the
     neighboring object.
 
-    :param float percentage_distance_covered: distance covered of
-    circumsolar disk diameter [% - values from 0 to 100]
-    :return: ``percent_shading``, circumsolar disk shading percentage [%]
+    Parameters
+    ----------
+    percentage_distance_covered : float
+        distance covered of circumsolar disk diameter
+        [% - values from 0 to 100]
+
+    Returns
+    -------
+    float
+        value of guassian function at point x
+
     """
 
     # Define a circumsolar disk
@@ -174,8 +218,8 @@ def uniform_circumsolar_disk_shading(percentage_distance_covered):
         area_shaded = area_circle_sector - area_triangle_sector
         percent_shading = area_shaded / area_circumsolar * 100.
 
-    elif (distance_covered > r_circumsolar) & (distance_covered
-                                               < d_circumsolar):
+    elif (distance_covered > r_circumsolar) & (distance_covered <
+                                               d_circumsolar):
         distance_uncovered = d_circumsolar - distance_covered
 
         # Theta is the full circle sector angle (not half) used to
@@ -195,16 +239,22 @@ def uniform_circumsolar_disk_shading(percentage_distance_covered):
 
 
 def calculate_horizon_band_shading(shading_angle, horizon_band_angle):
-    """
-    Calculate the percentage shading of the horizon band; which is just the
+    """Calculate the percentage shading of the horizon band; which is just the
     proportion of what's masked by the neighboring row since we assume
     uniform luminance values for the band
 
-    :param float shading_angle: the elevation angle to use for shading
-    :param float horizon_band_angle: the total elevation angle of the horizon
-        band
-    :return: ``float``, percentage shading of the horizon band [in % - from 0
-        to 100]
+    Parameters
+    ----------
+    shading_angle : float
+        the elevation angle to use for shading
+    horizon_band_angle : float
+        the total elevation angle of the horizon band
+
+    Returns
+    -------
+    float
+        shading percentage of horizon band
+
     """
     percent_shading = 0.
     if shading_angle >= horizon_band_angle:
@@ -218,14 +268,21 @@ def calculate_horizon_band_shading(shading_angle, horizon_band_angle):
 
 
 def find_edge_point(b1_pvrow, b2_pvrow):
-    """
-    Return edge point formed by pv row line and ground line. This assumes a
+    """Return edge point formed by pv row line and ground line. This assumes a
     flat ground surface, located at the hard-coded elevation ``Y_GROUND`` value
 
-    :param b1_pvrow: :class:`shapely.Point` object, first boundary point of the
-        pv row line.
-    :param b2_pvrow: :class:`shapely.Point` object, second boundary point of
-        the pv row line.
+    Parameters
+    ----------
+    b1_pvrow : ``shapely.Point``
+        first boundary point of the pv row line.
+    b2_pvrow : ``shapely.Point``
+        second boundary point of the pv row line.
+
+    Returns
+    -------
+    ``shapely.Point``
+        intersection point of pvrow continued line and ground line
+
     """
 
     u_vector = [b1_pvrow.x - b2_pvrow.x, b1_pvrow.y - b2_pvrow.y]
@@ -233,8 +290,8 @@ def find_edge_point(b1_pvrow, b2_pvrow):
     intercept = - (n_vector[0] * b1_pvrow.x + n_vector[1] * b1_pvrow.y)
 
     if n_vector[0]:
-        x_edge_point = - (intercept
-                          + n_vector[1] * Y_GROUND) / np.float64(n_vector[0])
+        x_edge_point = - (intercept +
+                          n_vector[1] * Y_GROUND) / np.float64(n_vector[0])
     else:
         x_edge_point = np.inf
 

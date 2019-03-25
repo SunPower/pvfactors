@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+"""Elementary methods for view factor calculations."""
 
 from __future__ import absolute_import
 from __future__ import division
@@ -34,10 +34,10 @@ THRESHOLD_VF_12 = 5e-5
 
 
 class ViewFactorCalculator(object):
-    """
-    This class calculates the view factors based on the surface registry of
-    :class:`pvarray.Array` class. Its only attribute is a mapping between
-    "view types" and the "low-level" view factor calculation functions.
+    """This class calculates the view factors based on the surface registry of
+    :py:class:`~pvfactors.pvarray.Array` class. Its only attribute is a mapping
+    between "view types" and the "low-level" view factor calculation functions
+
     """
 
     def __init__(self):
@@ -52,29 +52,36 @@ class ViewFactorCalculator(object):
 
     def calculate_view_factors(self, surface_registry, view_matrix,
                                args_matrix):
-        """
-        Calculate the view factors based on the inputs of the
-        :class:`pvarray.Array` class, and using a mapping of "view types" with
-        view factor calculation methods.
+        """Calculate the view factors based on the inputs of the
+        :py:class:`~pvfactors.pvarray.Array` class, and using a mapping of
+        "view types" with view factor calculation methods.
         The method uses a faster implementation by only calculating half of the
         view factors, and uses the symmetry property of the transformed view
         factor matrix to calculate the other half.
         The symmetry property comes from the reciprocity property of view
-        factors: A_1 * VF_1-2 = A_2 * VF_2-1, where A_i is the area of surface i
+        factors: :math:`A_1 * VF_{1-2} = A_2 * VF_{2-1}`,
+        where A_i is the area of surface i
 
-        :param surface_registry: surface registry attribute of
-            :class:`pvarray.Array` class
-        :type surface_registry: :class:`pvcore.Registry`
-        :param view_matrix: view matrix attribute of :class:`pvarray.Array`
+        Parameters
+        ----------
+        surface_registry : ``pd.DataFrame``
+            surface registry attribute of
+            :py:class:`~pvfactors.pvarray.Array` class
+        view_matrix : ``numpy.ndarray``
+            view matrix attribute of :py:class:`~pvfactors.pvarray.Array`
             class. This matrix specifies what surfaces each surface views, and
             also what type of view it is
-        :type view_matrix: :class:`numpy.array`
-        :param args_matrix: args matrix attribute of :class:`pvarray.Array`,
-            complementing the :attr:`pvarray.Array.view_matrix` by providing
+        args_matrix : ``numpy.ndarray``
+            args matrix attribute of :py:class:`~pvfactors.pvarray.Array`,
+            complementing the attribute ``view_matrix`` by providing
             additional arguments for the calculations; e.g. what surfaces are
             obstructing the view between surface i and surface j
-        :type args_matrix: :class:`numpy.array`
-        :return: matrix of view factors. Type is :class:`numpy.array`
+
+        Returns
+        -------
+        ``numpy.ndarray``
+            matrix of view factors (values from 0 to 1 in theory)
+
         """
         view_factors = np.zeros(view_matrix.shape, dtype=float)
 
@@ -97,7 +104,7 @@ class ViewFactorCalculator(object):
                                                             obstructing_line)
 
         # Use the reciprocity property of view factors to speed up the
-        # view factor calculation: A_1 * F_1-2 = A_2 * F_2-1 ==> symmetric matrx
+        # vfactor calculation: A_1 * F_1-2 = A_2 * F_2-1 ==> symmetric matrx
         areas = surface_registry['area'].values
         matrix_areas = np.diag(areas)
         matrix_areas_inv = np.diag(1. / areas)
@@ -106,8 +113,8 @@ class ViewFactorCalculator(object):
                                           view_factors[:n_finite_surfaces,
                                                        :n_finite_surfaces])
 
-        total_matrix_reciprocity = (upper_matrix_reciprocity
-                                    + upper_matrix_reciprocity.T)
+        total_matrix_reciprocity = (upper_matrix_reciprocity +
+                                    upper_matrix_reciprocity.T)
         finite_vf_matrix = np.dot(matrix_areas_inv, total_matrix_reciprocity)
         view_factors[:n_finite_surfaces, :n_finite_surfaces] = (
             finite_vf_matrix
@@ -120,17 +127,23 @@ class ViewFactorCalculator(object):
         return view_factors
 
     def vf_hottel_pvrowline_back(self, line_1, line_2, obstructing_line):
-        """
-        Use Hottel method to calculate view factor between PV row back-surface
+        """Use Hottel method to calculate view factor between PV row back-surface
         and the ground. Can account for obstructing object.
 
-        :param line_1: :class:`shapely.LineString` for surface 1, pv row or
-            ground
-        :param line_2: :class:`shapely.LineString` for surface 2, pv row or
-            ground
-        :param obstructing_line: :class:`shapely.LineString` for obstructing
-            surface
-        :return: calculated view factor vf_12. Type is ``float``.
+        Parameters
+        ----------
+        line_1 : ``shapely.LineString``
+            Line for surface 1: pv row or ground
+        line_2 : ``shapely.LineString``
+            Line for surface 2: pv row or ground
+        obstructing_line : ``shapely.LineString``
+            Line for obstructing the view between line_1 and line_2
+
+        Returns
+        -------
+        float
+            calculated view factor vf_12
+
         """
         # FIXME: specific to pvlinestring
         obs_1 = obstructing_line
@@ -162,27 +175,33 @@ class ViewFactorCalculator(object):
             logging.info("Hottel back: View is completely obstructed")
             vf_12 = 0.
         else:
-            vf_12 = 1. / (2. * a_1) * (crossed_length1 + crossed_length2
-                                       - uncrossed_length1 - uncrossed_length2)
+            vf_12 = 1. / (2. * a_1) * (crossed_length1 + crossed_length2 -
+                                       uncrossed_length1 - uncrossed_length2)
 
         if vf_12 < 0:
             LOGGER.debug("Hottel pvrow front: unexpected value for "
-                           "vf_12 = %.4f" % vf_12)
+                         "vf_12 = %.4f" % vf_12)
 
         return vf_12
 
     def vf_hottel_pvrowline_front(self, line_1, line_2, obstructing_line):
-        """
-        Use Hottel method to calculate view factor between PV row front-surface
+        """Use Hottel method to calculate view factor between PV row front-surface
         and the ground. Can account for obstructing object.
 
-        :param line_1: :class:`shapely.LineString` for surface 1, pv row or
-            ground
-        :param line_2: :class:`shapely.LineString` for surface 2, pv row or
-            ground
-        :param obstructing_line: :class:`shapely.LineString` for obstructing
-            surface
-        :return: calculated view factor vf_12. Type is ``float``.
+        Parameters
+        ----------
+        line_1 : ``shapely.LineString``
+            Line for surface 1: pv row or ground
+        line_2 : ``shapely.LineString``
+            Line for surface 2: pv row or ground
+        obstructing_line : ``shapely.LineString``
+            Line for obstructing the view between line_1 and line_2
+
+        Returns
+        -------
+        float
+            calculated view factor vf_12
+
         """
         # FIXME: specific to pvlinestring
         obs_1 = obstructing_line
@@ -214,8 +233,8 @@ class ViewFactorCalculator(object):
             logging.info("Hottel front: View is completely obstructed")
             vf_12 = 0.
         else:
-            vf_12 = 1. / (2. * a_1) * (crossed_length1 + crossed_length2
-                                       - uncrossed_length1 - uncrossed_length2)
+            vf_12 = 1. / (2. * a_1) * (crossed_length1 + crossed_length2 -
+                                       uncrossed_length1 - uncrossed_length2)
             # FIXME: temporary fix, I'm getting negative values smaller that
             # 5e-5 when ran in a notebook
             if (vf_12 < 0) and (vf_12 > - THRESHOLD_VF_12):
@@ -223,25 +242,30 @@ class ViewFactorCalculator(object):
 
         if vf_12 < 0:
             LOGGER.debug("Hottel pvrow front: unexpected value for "
-                           "vf_12 = %.4f" % vf_12)
+                         "vf_12 = %.4f" % vf_12)
 
         return vf_12
 
     @staticmethod
     def vf_trk_to_trk(line_1, line_2, *args):
-        """
-        Use parallel plane formula to calculate view factor between PV rows.
-        This assumes that pv row #2 is just a translation along the x-axis of pv
-        row #1; meaning that only their x-values are different, and they have
+        """Use parallel plane formula to calculate view factor between PV rows.
+        This assumes that pv row #2 is just a translation along the x-axis of
+        pv row #1; meaning that only their x-values are different and they have
         the same elevation or rotation angle.
 
-        :param line_1: :class:`shapely.LineString` for surface 1, pv row or
-            ground
-        :param line_2: :class:`shapely.LineString` for surface 2, pv row or
-            ground
-        :param obstructing_line: :class:`shapely.LineString` for obstructing
-            surface
-        :return: calculated view factor vf_12. Type is ``float``.
+        Parameters
+        ----------
+        line_1 : ``shapely.LineString``
+            Line for surface 1: pv row or ground
+        line_2 : ``shapely.LineString``
+            Line for surface 2: pv row or ground
+        *args : tuple
+
+        Returns
+        -------
+        float
+            calculated view factor vf
+
         """
 
         b1_line1 = line_1.boundary[0]
@@ -261,32 +285,42 @@ class ViewFactorCalculator(object):
 
     @staticmethod
     def length_string(pt1, pt2, obstruction):
-        """
-        Calculate the length of a string between two boundary points of two
+        """Calculate the length of a string between two boundary points of two
         lines as defined in the Hottel method. This accounts for potentially
         obstructing objects.
-        It assumes that the obstructing line is a :class:`pvrow.PVRowLine`
+        It assumes that the obstructing line is a
+        :py:class:`~pvfactors.pvrow.PVRowLine`
         and that it has a ``lowest_point`` attribute in order to calculate the
         Hottel string length when there is obstruction.
 
-        :param pt1: :class:`shapely.Point` of surface 1
-        :param pt2: :class:`shapely.Point` of surface 2
-        :param obstruction: :class:`pvrow.PVRowLine` with ``lowest_point``
-        attribute.
-        :return: length [m], is_obstructing / float, bool. The length of the
-        Hottel string, and a boolean flag specifying if there's obstruction or
-        not
+        Parameters
+        ----------
+        pt1 : ``shapely.Point``
+            a point from line 1
+        pt2 : ``shapely.Point``
+            a point from line 2
+        obstruction : ``shapely.LineString``
+            Line obstructing the view between line_1 and line_2
+
+        Returns
+        -------
+        length : float
+            the length of the Hottel string
+        is_obstructing : bool
+            boolean flag specifying if there's obstruction or not between the
+            two points
+
         """
-        # FIXME: specific to pvlinestrings, and assumes b1_obstruction should be
-        #  used if obstruction
+        # FIXME: specific to pvlinestrings, and assumes b1_obstruction should
+        # be used if obstruction
         string = LineString([(pt1.x, pt1.y), (pt2.x, pt2.y)])
         is_obstructing = False
         if obstruction is not None:
             is_obstructing = string.intersects(obstruction.complete_linestring)
         if is_obstructing:
             b1_obstruction = obstruction.lowest_point
-            length = (pt1.distance(b1_obstruction)
-                      + b1_obstruction.distance(pt2))
+            length = (pt1.distance(b1_obstruction) +
+                      b1_obstruction.distance(pt2))
         else:
             length = pt1.distance(pt2)
 
@@ -294,11 +328,26 @@ class ViewFactorCalculator(object):
 
 
 def vf_parallel_planes(length_1, length_2, length_3, length_4, w1):
-    """
-    See: http://www.thermalradiation.net/sectionc/C-2a.htm
+    """See: http://www.thermalradiation.net/sectionc/C-2a.htm
 
-    Arguments:
-    length_1, length_2, length_3, length_4, w1 -- lengths
+    Parameters
+    ----------
+    length_1 : float
+
+    length_2 : float
+
+    length_3 : float
+
+    length_4 : float
+
+    w1 : float
+
+
+    Returns
+    -------
+    float
+        view factor between the two parallel lines
+
     """
     vf_1_to_2 = (length_1 + length_2 - length_3 - length_4) / (2. * w1)
 

@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+"""All the functions necessary for timeseries calculations."""
 
 from pvlib import atmosphere, irradiance
 from pvlib.tools import cosd, sind
@@ -27,33 +27,47 @@ def array_timeseries_calculate(
     pvarray_parameters, timestamps, solar_zenith, solar_azimuth, surface_tilt,
         surface_azimuth, dni, luminance_isotropic, luminance_circumsolar,
         poa_horizon, poa_circumsolar):
-    """
-    Calculate the view factor radiosity and irradiance terms for multiple
+    """Calculate the view factor radiosity and irradiance terms for multiple
     times.
     The function inputs assume a diffuse sky dome as represented in the Perez
     diffuse sky transposition model (from ``pvlib-python`` implementation).
 
-    :param dict pvarray_parameters: parameters used to instantiate
-        ``pvarray.Array`` class
-    :param array-like timestamps: simulation timestamps
-    :param array-like solar_zenith: solar zenith angles
-    :param array-like solar_azimuth: solar azimuth angles
-    :param array-like surface_tilt: Surface tilt angles in decimal degrees.
+    Parameters
+    ----------
+    pvarray_parameters : dict
+        parameters used to instantiate :py:class:`~pvfactors.pvarray.Array`
+    timestamps : array-like
+        simulation timestamps
+    solar_zenith : array-like
+        solar zenith angles
+    solar_azimuth : array-like
+        solar azimuth angles
+    surface_tilt : array-like
+        Surface tilt angles in decimal degrees.
         surface_tilt must be >=0 and <=180.
         The tilt angle is defined as degrees from horizontal
         (e.g. surface facing up = 0, surface facing horizon = 90)
-    :param array-like surface_azimuth: The azimuth of the rotated panel,
+    surface_azimuth : array-like
+        The azimuth of the rotated panel,
         determined by projecting the vector normal to the panel's surface to
         the earth's surface [degrees].
-    :param array-like dni: values for direct normal irradiance
-    :param array-like luminance_isotropic: luminance of the isotropic sky dome
-    :param array-like luminance_circumsolar: luminance of circumsolar area
-    :param array-like poa_horizon: POA irradiance horizon component
-    :param array-like poa_circumsolar: POA irradiance circumsolar component
+    dni : array-like
+        values for direct normal irradiance
+    luminance_isotropic : array-like
+        luminance of the isotropic sky dome
+    luminance_circumsolar : array-like
+        luminance of circumsolar area
+    poa_horizon : array-like
+        POA irradiance horizon component
+    poa_circumsolar : array-like
+        POA irradiance circumsolar component
 
-    :return: ``df_registries``.
-        Concatenated form of the ``pvarray.Array`` surface registries.
-    :rtype: :class:`pandas.DataFrame`
+    Returns
+    -------
+    df_registries : `pandas.DataFrame`
+        Timeseries concatenated form of the
+        :py:class:`~pvfactors.pvarray.Array` surface registry
+
     """
     # Instantiate array
     array = Array(**pvarray_parameters)
@@ -115,32 +129,44 @@ def array_timeseries_calculate(
 
 def perez_diffuse_luminance(timestamps, surface_tilt, surface_azimuth,
                             solar_zenith, solar_azimuth, dni, dhi):
-    """
-    Function used to calculate the luminance and the view factor terms from the
+    """Function used to calculate the luminance and the view factor terms from the
     Perez diffuse light transposition model, as implemented in the
     ``pvlib-python`` library.
     This function was custom made to allow the calculation of the circumsolar
     component on the back surface as well. Otherwise, the ``pvlib``
     implementation would ignore it.
 
-    :param array-like timestamps: simulation timestamps
-    :param array-like surface_tilt: Surface tilt angles in decimal degrees.
+    Parameters
+    ----------
+    timestamps : array-like
+        simulation timestamps
+    surface_tilt : array-like
+        Surface tilt angles in decimal degrees.
         surface_tilt must be >=0 and <=180.
         The tilt angle is defined as degrees from horizontal
         (e.g. surface facing up = 0, surface facing horizon = 90)
-    :param array-like surface_azimuth: The azimuth of the rotated panel,
+    surface_azimuth : array-like
+        The azimuth of the rotated panel,
         determined by projecting the vector normal to the panel's surface to
         the earth's surface [degrees].
-    :param array-like solar_zenith: solar zenith angles
-    :param array-like solar_azimuth: solar azimuth angles
-    :param array-like dni: values for direct normal irradiance
-    :param array-like dhi: values for diffuse horizontal irradiance
-    :return: ``df_inputs``, dataframe with the following columns:
+    solar_zenith : array-like
+        solar zenith angles
+    solar_azimuth : array-like
+        solar azimuth angles
+    dni : array-like
+        values for direct normal irradiance
+    dhi : array-like
+        values for diffuse horizontal irradiance
+
+    Returns
+    -------
+    df_inputs : `pandas.DataFrame`
+        Dataframe with the following columns:
         ['solar_zenith', 'solar_azimuth', 'surface_tilt', 'surface_azimuth',
         'dhi', 'dni', 'vf_horizon', 'vf_circumsolar', 'vf_isotropic',
         'luminance_horizon', 'luminance_circumsolar', 'luminance_isotropic',
         'poa_isotropic', 'poa_circumsolar', 'poa_horizon', 'poa_total_diffuse']
-    :rtype: class:`pandas.DataFrame`
+
     """
     # Create a dataframe to help filtering on all arrays
     df_inputs = pd.DataFrame(
@@ -156,8 +182,8 @@ def perez_diffuse_luminance(timestamps, surface_tilt, surface_azimuth,
     aoi_proj = aoi_projection(
         df_inputs.surface_tilt, df_inputs.surface_azimuth,
         df_inputs.solar_zenith, df_inputs.solar_azimuth)
-    sun_hitting_back_surface = ((aoi_proj < 0)
-                                & (df_inputs.solar_zenith <= 90))
+    sun_hitting_back_surface = ((aoi_proj < 0) &
+                                (df_inputs.solar_zenith <= 90))
     df_inputs_back_surface = df_inputs.loc[sun_hitting_back_surface].copy()
     # Reverse the surface normal to switch to back-surface circumsolar calc
     df_inputs_back_surface.loc[:, 'surface_azimuth'] = (
@@ -231,29 +257,41 @@ def perez_diffuse_luminance(timestamps, surface_tilt, surface_azimuth,
 def calculate_custom_perez_transposition(timestamps, surface_tilt,
                                          surface_azimuth, solar_zenith,
                                          solar_azimuth, dni, dhi):
-    """
-    Calculate custom perez transposition: some customization is necessary in
+    """Calculate custom perez transposition: some customization is necessary in
     order to get the circumsolar component when the sun is hitting the back
     surface as well.
 
-    :param array-like timestamps: simulation timestamps
-    :param array-like surface_tilt: Surface tilt angles in decimal degrees.
+    Parameters
+    ----------
+    timestamps : array-like
+        simulation timestamps
+    surface_tilt : array-like
+        Surface tilt angles in decimal degrees.
         surface_tilt must be >=0 and <=180.
         The tilt angle is defined as degrees from horizontal
         (e.g. surface facing up = 0, surface facing horizon = 90)
-    :param array-like surface_azimuth: The azimuth of the rotated panel,
+    surface_azimuth : array-like
+        The azimuth of the rotated panel,
         determined by projecting the vector normal to the panel's surface to
         the earth's surface [degrees].
-    :param array-like solar_zenith: solar zenith angles
-    :param array-like solar_azimuth: solar azimuth angles
-    :param array-like dni: values for direct normal irradiance
-    :param array-like dhi: values for diffuse horizontal irradiance
-    :return: ``df_custom_perez``, dataframe with the following columns:
+    solar_zenith : array-like
+        solar zenith angles
+    solar_azimuth : array-like
+        solar azimuth angles
+    dni : array-like
+        values for direct normal irradiance
+    dhi : array-like
+        values for diffuse horizontal irradiance
+
+    Returns
+    -------
+    df_custom_perez :`pandas.DataFrame`
+        Dataframe with the following columns:
         ['solar_zenith', 'solar_azimuth', 'surface_tilt', 'surface_azimuth',
         'dhi', 'dni', 'vf_horizon', 'vf_circumsolar', 'vf_isotropic',
         'luminance_horizon', 'luminance_circumsolar', 'luminance_isotropic',
         'poa_isotropic', 'poa_circumsolar', 'poa_horizon', 'poa_total_diffuse']
-    :rtype: class:`pandas.DataFrame`
+
     """
     # Calculate the perez inputs
     df_custom_perez = perez_diffuse_luminance(
@@ -264,19 +302,26 @@ def calculate_custom_perez_transposition(timestamps, surface_tilt,
 
 
 def calculate_radiosities_serially_perez(args):
-    """ Calculate timeseries results of simulation: run both custom Perez
-    diffuse light transposition calculations and ``pvarray.Array`` timeseries
-    calculation.
+    """Calculate timeseries results of simulation: run both custom Perez
+    diffuse light transposition calculations and
+    :py:class:`~pvfactors.pvarray.Array` timeseries calculation.
 
-    :param args: tuple of arguments used to run the timeseries calculation.
+    Parameters
+    ----------
+    args : tuple
+        tuple of arguments used to run the timeseries calculation.
         List in order: ``pvarray_parameters``, ``timestamps``,
         ``solar_zenith``, ``solar_azimuth``, ``surface_tilt``,
         ``surface_azimuth``, ``dni``, ``dhi``.
         All 1-dimensional arrays.
-    :return: ``df_registries``, ``df_custom_perez``; dataframes containing
-        the concatenated and timestamped ``pvarray.Array.surface_registry``
-        values, and the custom Perez inputs used for it.
-    :rtype: both class:`pandas.DataFrame`
+
+    Returns
+    -------
+    df_registries : ``pandas.DataFrame``
+        Timeseries concatenated form of the
+        :py:class:`~pvfactors.pvarray.Array` surface registry
+    df_custom_perez : ``pandas.DataFrame``
+        Dataframe with custom Perez inputs used in the models
 
     """
     # Get arguments
@@ -307,31 +352,46 @@ def calculate_radiosities_serially_perez(args):
 def calculate_radiosities_parallel_perez(
         pvarray_parameters, timestamps, solar_zenith, solar_azimuth,
         surface_tilt, surface_azimuth, dni, dhi, n_processes=None):
-    """ Calculate timeseries results of simulation in parallel:
+    """Calculate timeseries results of simulation in parallel:
     run both custom Perez diffuse light transposition calculations and
-    ``pvarray.Array`` timeseries calculation.
+    :py:class:`~pvfactors.pvarray.Array` timeseries calculation.
 
-    :param dict pvarray_parameters: parameters used to instantiate
-        ``pvarray.Array`` class
-    :param array-like timestamps: simulation timestamps
-    :param array-like solar_zenith: solar zenith angles
-    :param array-like solar_azimuth: solar azimuth angles
-    :param array-like surface_tilt: Surface tilt angles in decimal degrees.
+    Parameters
+    ----------
+    pvarray_parameters : dict
+        parameters used to instantiate :py:class:`~pvfactors.pvarray.Array`
+    timestamps : array-like
+        simulation timestamps
+    solar_zenith : array-like
+        solar zenith angles
+    solar_azimuth : array-like
+        solar azimuth angles
+    surface_tilt : array-like
+        Surface tilt angles in decimal degrees.
         surface_tilt must be >=0 and <=180.
         The tilt angle is defined as degrees from horizontal
         (e.g. surface facing up = 0, surface facing horizon = 90)
-    :param array-like surface_azimuth: The azimuth of the rotated panel,
+    surface_azimuth : array-like
+        The azimuth of the rotated panel,
         determined by projecting the vector normal to the panel's surface to
         the earth's surface [degrees].
-    :param array-like dni: values for direct normal irradiance
-    :param array-like dhi: values for diffuse horizontal irradiance
-    :param int n_processes: (optional, default ``None`` = use all) number of
-        processes to use. Default value will be the total number of processors
+    dni : array-like
+        values for direct normal irradiance
+    dhi : array-like
+        values for diffuse horizontal irradiance
+    n_processes : int, optional
+        (default ``None`` = use all available CPUs) number of
+        CPUs to use. Default value will be the total number of processors
         on the machine.
-    :return: ``df_registries``, ``df_custom_perez``; dataframes containing
-        the concatenated and timestamped ``pvarray.Array.surface_registry``
-        values, and the custom Perez inputs used for it.
-    :rtype: both class:`pandas.DataFrame`
+
+    Returns
+    -------
+    df_registries : ``pandas.DataFrame``
+        Timeseries concatenated form of the
+        :py:class:`~pvfactors.pvarray.Array` surface registry
+    df_custom_perez : ``pandas.DataFrame``
+        Dataframe with custom Perez inputs used in the models
+
     """
 
     # Choose number of workers
@@ -372,18 +432,26 @@ def calculate_radiosities_parallel_perez(
 
 def get_average_pvrow_outputs(df_registries, values=COLS_TO_SAVE,
                               include_shading=True):
-    """ For each pvrow surface (front and back), calculate the weighted
+    """For each pvrow surface (front and back), calculate the weighted
     average irradiance and shading values (weighted by length of surface).
 
-    :param df_registries: timestamped and concatenated :class:`pvarray.Array`
+    Parameters
+    ----------
+    df_registries : ``pandas.DataFrame``
+        timestamped and concatenated :py:class:`~pvfactors.pvarray.Array`
         surface registries
-    :type df_registries: ``pandas.DataFrame``
-    :param list values: list of column names from the surface registries to
-        keep (optional, default=``COLS_TO_SAVE``)
-    :param bool include_shading: flag to decide whether to keep column
+    values : list, optional
+        list of column names from the surface registries to
+        keep (default=``COLS_TO_SAVE``)
+    include_shading : bool, optional
+        flag to decide whether to keep column
         indicating if surface has direct shading or not
-    :return: ``df_outputs``, dataframe with averaged values and flags
-    :rtype: ``pandas.DataFrame``
+
+    Returns
+    -------
+    ``pandas.DataFrame``
+        dataframe with averaged values and flags
+
     """
 
     weight_col = ['area']
@@ -436,15 +504,23 @@ def get_pvrow_segment_outputs(df_registries, values=COLS_TO_SAVE,
     calculate the weighted average irradiance and shading values
     (weighted by length of surface).
 
-    :param df_registries: timestamped and concatenated :class:`pvarray.Array`
+    Parameters
+    ----------
+    df_registries : ``pandas.DataFrame``
+        timestamped and concatenated :py:class:`~pvfactors.pvarray.Array`
         surface registries
-    :type df_registries: ``pandas.DataFrame``
-    :param list values: list of column names from the surface registries to
-        keep (optional, default=``COLS_TO_SAVE``)
-    :param bool include_shading: flag to decide whether to keep column
+    values : list, optional
+        list of column names from the surface registries to
+        keep (default=``COLS_TO_SAVE``)
+    include_shading : bool, optional
+        flag to decide whether to keep column
         indicating if surface has direct shading or not
-    :return: ``df_segments``, dataframe with averaged values and flags
-    :rtype: ``pandas.DataFrame``
+
+    Returns
+    -------
+    ``pandas.DataFrame``
+        dataframe with averaged values and flags
+
     """
 
     weight_col = ['area']
@@ -496,18 +572,23 @@ def get_pvrow_segment_outputs(df_registries, values=COLS_TO_SAVE,
 
 
 def breakup_df_inputs(df_inputs):
-    """
-    Helper function: It is sometimes easier to provide a dataframe than a list
+    """Helper function: It is sometimes easier to provide a dataframe than a list
     of arrays: this function does the job of breaking up the dataframe into a
     list of expected 1-dim arrays
 
-    :param df_inputs: timestamp-indexed dataframe with following columns:
+    Parameters
+    ----------
+    df_inputs : ``pandas.DataFrame``
+        timestamp-indexed dataframe with following columns:
         'surface_azimuth', 'surface_tilt', 'solar_zenith', 'solar_azimuth',
         'dni', 'dhi'
-    :type df_inputs: ``pandas.DataFrame``
-    :return: ``timestamps``, ``tilt_angles``, ``surface_azimuth``,
+
+    Returns
+    -------
+    all 1-dim ``numpy.ndarray``
+        ``timestamps``, ``tilt_angles``, ``surface_azimuth``,
         ``solar_zenith``, ``solar_azimuth``, ``dni``, ``dhi``
-    :rtype: all 1-dim arrays
+
     """
     timestamps = pd.to_datetime(df_inputs.index)
     surface_azimuth = df_inputs.surface_azimuth.values
@@ -522,12 +603,21 @@ def breakup_df_inputs(df_inputs):
 
 
 def add_df_registries_nans(df, df_registries):
-    """ df_registries as nan entries for timestamps that were skipped,
-    make sure to add them back in
+    """df_registries has nan entries for timestamps that were skipped,
+    make sure to add them back in with this function
 
-    :param pd.DataFrame df: dataframe to which the nan values will be added
-    :param pd.DataFrame df_registries: dataframe of concatenated registries
-    :return: ``pandas.DataFrame`` with nan values added
+    Parameters
+    ----------
+    df : ``pandas.DataFrame``
+        dataframe to which the nan values will be added
+    df_registries : ``pandas.DataFrame``
+        dataframe of concatenated registries, coming
+
+    Returns
+    -------
+    ``pandas.DataFrame``
+        Result dataframe with nan values added
+
     """
     df_registries = df_registries.copy().set_index('timestamps')
     list_idx_nans = df_registries.index[

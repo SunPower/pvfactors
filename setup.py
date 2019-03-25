@@ -33,7 +33,7 @@ INSTALL_REQUIRES = ['numpy>=1.13.1',
                     'future>=0.16.0',
                     'six>=1.11.0']
 
-TESTS_REQUIRE = ['pytest>=3.2.1', 'pytest-mock>=1.10.0']
+TESTS_REQUIRES = ['pytest>=3.2.1', 'pytest-mock>=1.10.0']
 
 setup(name=DISTNAME,
       description=DESCRIPTION,
@@ -47,6 +47,10 @@ setup(name=DISTNAME,
       packages=PACKAGES,
       classifiers=CLASSIFIERS,
       install_requires=INSTALL_REQUIRES,
-      tests_require=TESTS_REQUIRE,
+      extras_require={
+          'testing': TESTS_REQUIRES,
+          'docs': ['Sphinx', 'sphinx_rtd_theme', 'nbsphinx',
+                   'sphinxcontrib-napoleon']
+      },
       license=LICENSE
       )

@@ -1,7 +1,7 @@
 .. pvfactors documentation
 
-Developer docs
-==============
+Developer
+=========
 
 This part describes how to use the model and perform additional developments.
 
@@ -10,6 +10,6 @@ Contents:
 .. toctree::
    :maxdepth: 2
 
-   how_to
    pvfactors_demo
-   class_details
+   api_reference
+   how_to
