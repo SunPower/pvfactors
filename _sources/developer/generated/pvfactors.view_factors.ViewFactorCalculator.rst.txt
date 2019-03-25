@@ -1,0 +1,27 @@
+pvfactors.view\_factors.ViewFactorCalculator
+============================================
+
+.. currentmodule:: pvfactors.view_factors
+
+.. autoclass:: ViewFactorCalculator
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~ViewFactorCalculator.__init__
+      ~ViewFactorCalculator.calculate_view_factors
+      ~ViewFactorCalculator.length_string
+      ~ViewFactorCalculator.vf_hottel_pvrowline_back
+      ~ViewFactorCalculator.vf_hottel_pvrowline_front
+      ~ViewFactorCalculator.vf_trk_to_trk
+   
+   
+
+   
+   
+   

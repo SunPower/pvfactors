@@ -1,0 +1,6 @@
+pvfactors.pvarray.Array.create\_remaining\_illum\_ground
+========================================================
+
+.. currentmodule:: pvfactors.pvarray
+
+.. automethod:: Array.create_remaining_illum_ground

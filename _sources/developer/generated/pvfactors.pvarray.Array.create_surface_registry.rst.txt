@@ -1,0 +1,6 @@
+pvfactors.pvarray.Array.create\_surface\_registry
+=================================================
+
+.. currentmodule:: pvfactors.pvarray
+
+.. automethod:: Array.create_surface_registry

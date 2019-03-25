@@ -1,0 +1,6 @@
+pvfactors.pvcore.calculate\_horizon\_band\_shading
+==================================================
+
+.. currentmodule:: pvfactors.pvcore
+
+.. autofunction:: calculate_horizon_band_shading

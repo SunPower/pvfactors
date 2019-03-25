@@ -1,0 +1,6 @@
+pvfactors.pvgeometry.PVGeometry.boundary
+========================================
+
+.. currentmodule:: pvfactors.pvgeometry
+
+.. autoattribute:: PVGeometry.boundary

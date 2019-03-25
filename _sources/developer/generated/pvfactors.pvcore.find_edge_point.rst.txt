@@ -1,0 +1,6 @@
+pvfactors.pvcore.find\_edge\_point
+==================================
+
+.. currentmodule:: pvfactors.pvcore
+
+.. autofunction:: find_edge_point

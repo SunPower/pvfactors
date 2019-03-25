@@ -1,0 +1,6 @@
+pvfactors.timeseries.perez\_diffuse\_luminance
+==============================================
+
+.. currentmodule:: pvfactors.timeseries
+
+.. autofunction:: perez_diffuse_luminance

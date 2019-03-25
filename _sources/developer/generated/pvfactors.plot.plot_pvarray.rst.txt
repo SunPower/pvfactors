@@ -1,0 +1,6 @@
+pvfactors.plot.plot\_pvarray
+============================
+
+.. currentmodule:: pvfactors.plot
+
+.. autofunction:: plot_pvarray

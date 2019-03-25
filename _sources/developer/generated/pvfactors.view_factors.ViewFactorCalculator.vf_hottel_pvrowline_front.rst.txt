@@ -1,0 +1,6 @@
+pvfactors.view\_factors.ViewFactorCalculator.vf\_hottel\_pvrowline\_front
+=========================================================================
+
+.. currentmodule:: pvfactors.view_factors
+
+.. automethod:: ViewFactorCalculator.vf_hottel_pvrowline_front

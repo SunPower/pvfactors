@@ -1,0 +1,451 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>pvfactors.pvrow &mdash; pvfactors 0.1.5+24.g5ce1047 documentation</title>
+  
+
+  
+  
+    <link rel="shortcut icon" href="../../_static/favicon.ico"/>
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../_static/doctools.js"></script>
+        <script type="text/javascript" src="../../_static/language_data.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/css/custom.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> pvfactors
+          
+
+          
+            
+            <img src="../../_static/sp_2014_logo_all_white_LARGE.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.1.5
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../intro.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../getting_started/index.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../theory/index.html">Theory</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../developer/index.html">Developer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../whatsnew.html">What’s New</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">pvfactors</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>pvfactors.pvrow</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for pvfactors.pvrow</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Classes representing pv row geometries&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">pvfactors</span> <span class="k">import</span> <span class="n">PVFactorsError</span>
+<span class="kn">from</span> <span class="nn">pvfactors.pvcore</span> <span class="k">import</span> <span class="n">LinePVArray</span><span class="p">,</span> <span class="n">Y_GROUND</span>
+<span class="kn">from</span> <span class="nn">shapely.geometry</span> <span class="k">import</span> <span class="n">LineString</span><span class="p">,</span> <span class="n">Point</span>
+<span class="kn">from</span> <span class="nn">shapely.affinity</span> <span class="k">import</span> <span class="n">affine_transform</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+
+<div class="viewcode-block" id="PVRowBase"><a class="viewcode-back" href="../../developer/generated/pvfactors.pvrow.PVRowBase.html#pvfactors.pvrow.PVRowBase">[docs]</a><span class="k">class</span> <span class="nc">PVRowBase</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;``PVRowBase`` exists for future developments of the model. It is the</span>
+<span class="sd">    base class for PV Rows that will contain all the boiler plate code</span>
+<span class="sd">    shared by sub classes like :class:`PVRowLine`, or for instance</span>
+<span class="sd">    ``PVRowRoof``.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="PVRowBase.__init__"><a class="viewcode-back" href="../../developer/generated/pvfactors.pvrow.PVRowBase.html#pvfactors.pvrow.PVRowBase.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">front</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">back</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">shadow</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">shadow_line_index</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lines</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">highest_point</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># for shading purposes</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lowest_point</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># for shading purposes</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">left_point</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># for shading purposes</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">right_point</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># for shading purposes</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">director_vector</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># for shading purposes</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">normal_vector</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># for shading purposes</span>
+        <span class="c1"># Complete line will have the full PVRow linestring with possibly</span>
+        <span class="c1"># multiple points on it, but still one linestring only</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">complete_linestring</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># for obstruction purposes</span></div>
+
+    <span class="k">def</span> <span class="nf">create_lines</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Create lines</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        *args : tuple</span>
+
+<span class="sd">        **kwargs : dict</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+    <span class="k">def</span> <span class="nf">get_shadow_bounds</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get shadow bounds</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        *args : tuple</span>
+
+<span class="sd">        **kwargs : dict</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+    <span class="k">def</span> <span class="nf">translate_2d_lines</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x_off</span><span class="p">,</span> <span class="n">y_off</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Translate all the :py:class:`~pvfactors.pvcore.LinePVArray` objects</span>
+<span class="sd">        in the line attribute in the x and y directions.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        x_off : float</span>
+<span class="sd">            translation in the x direction</span>
+<span class="sd">        y_off : float</span>
+<span class="sd">            translation in the y direction</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">matrix_2d_translation</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">x_off</span><span class="p">,</span> <span class="n">y_off</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">lines</span><span class="p">:</span>
+            <span class="n">line</span><span class="p">[</span><span class="s1">&#39;shapeline&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">affine_transform</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="s1">&#39;shapeline&#39;</span><span class="p">],</span>
+                                                 <span class="n">matrix_2d_translation</span><span class="p">)</span></div>
+        <span class="c1"># and update lines in line_registry</span>
+
+
+<div class="viewcode-block" id="PVRowLine"><a class="viewcode-back" href="../../developer/generated/pvfactors.pvrow.PVRowLine.html#pvfactors.pvrow.PVRowLine">[docs]</a><span class="k">class</span> <span class="nc">PVRowLine</span><span class="p">(</span><span class="n">PVRowBase</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;``PVRowLine`` is sub-classed from :py:class:`~pvfactors.pvrow.PVRowBase`</span>
+<span class="sd">    , and its core is</span>
+<span class="sd">    made of :py:class:`~pvfactors.pvcore.LinePVArray` objects. It is a</span>
+<span class="sd">    container that has methods and attributes relative to PV Rows and their</span>
+<span class="sd">    shadows.</span>
+<span class="sd">    ``PVRowLine`` can only create PV rows that have the shape of</span>
+<span class="sd">    straight lines. So it won&#39;t be able to create shapes like dual-tilt</span>
+<span class="sd">    systems for instance.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    line_registry : ``pd.DataFrame``</span>
+<span class="sd">        line registry passed by :py:class:`~pvfactors.pvarray.Array` object</span>
+<span class="sd">    x_center : float</span>
+<span class="sd">        x coordinate of center of the line [m]</span>
+<span class="sd">    y_center : float</span>
+<span class="sd">        y coordinate of center of the line [m]</span>
+<span class="sd">    index : int</span>
+<span class="sd">        PV row index, used to distinguish different PV rows</span>
+<span class="sd">    surface_tilt : float</span>
+<span class="sd">        Surface tilt angles in decimal degrees.</span>
+<span class="sd">        surface_tilt must be &gt;=0 and &lt;=180.</span>
+<span class="sd">        The tilt angle is defined as degrees from horizontal</span>
+<span class="sd">    pvrow_width : float</span>
+<span class="sd">        width of the PV row, which is the length of</span>
+<span class="sd">        the PV row line [m]</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="PVRowLine.__init__"><a class="viewcode-back" href="../../developer/generated/pvfactors.pvrow.PVRowLine.html#pvfactors.pvrow.PVRowLine.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">line_registry</span><span class="p">,</span> <span class="n">x_center</span><span class="p">,</span> <span class="n">y_center</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">surface_tilt</span><span class="p">,</span>
+                 <span class="n">pvrow_width</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">PVRowLine</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="k">assert</span> <span class="p">((</span><span class="n">surface_tilt</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">surface_tilt</span> <span class="o">&lt;</span> <span class="mi">180</span><span class="p">)),</span> <span class="p">(</span>
+            <span class="s2">&quot;Range of surface_tilt incorrect: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">surface_tilt</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">width</span> <span class="o">=</span> <span class="n">pvrow_width</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tilt</span> <span class="o">=</span> <span class="n">surface_tilt</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="n">index</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">x_center</span> <span class="o">=</span> <span class="n">x_center</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">y_center</span> <span class="o">=</span> <span class="n">y_center</span>
+        <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lines</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">highest_point</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">lowest_point</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">right_point</span><span class="p">,</span>
+         <span class="bp">self</span><span class="o">.</span><span class="n">left_point</span><span class="p">)</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">create_lines</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tilt</span><span class="p">,</span> <span class="n">index</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">line_registry_indices</span> <span class="o">=</span> <span class="n">line_registry</span><span class="o">.</span><span class="n">pvgeometry</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lines</span><span class="p">)</span>
+        <span class="c1"># Complete line will have the full pvrow linestring with possibly</span>
+        <span class="c1"># multiple points on it, but still one linestring only</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">complete_linestring</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lines</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;geometry&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cut_points</span> <span class="o">=</span> <span class="p">[]</span></div>
+
+<div class="viewcode-block" id="PVRowLine.create_lines"><a class="viewcode-back" href="../../developer/generated/pvfactors.pvrow.PVRowLine.create_lines.html#pvfactors.pvrow.PVRowLine.create_lines">[docs]</a>    <span class="k">def</span> <span class="nf">create_lines</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tilt</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Create the :py:class:`~pvfactors.pvcore.LinePVArray` objects that</span>
+<span class="sd">        the PV row is made out of, based on the inputted geometrical parameters</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        tilt : float</span>
+<span class="sd">            Surface tilt angles in decimal degrees.</span>
+<span class="sd">            surface_tilt must be &gt;=0 and &lt;=180.</span>
+<span class="sd">            The tilt angle is defined as degrees from horizontal</span>
+<span class="sd">        index : int</span>
+<span class="sd">            PV row index, used to distinguish different PV rows</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        line_pvarray : list of :py:class:`~pvfactors.pvcore.LinePVArray`</span>
+<span class="sd">        highest_point : ``shapely.Point``</span>
+<span class="sd">            highest point of pvrow in y direction</span>
+<span class="sd">        lowest_point : ``shapely.Point``</span>
+<span class="sd">            lowest point of pvrow in y direction</span>
+<span class="sd">        right_point : ``shapely.Point``</span>
+<span class="sd">            rightmost point of pvrow in x direction</span>
+<span class="sd">        left_point : ``shapely.Point``</span>
+<span class="sd">            leftmost point of pvrow in x direction</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">tilt_rad</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">tilt</span><span class="p">)</span>
+
+        <span class="c1"># Create the three trackers</span>
+        <span class="n">radius</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">width</span> <span class="o">/</span> <span class="mf">2.</span>
+        <span class="n">x1</span> <span class="o">=</span> <span class="n">radius</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">tilt_rad</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">x_center</span>
+        <span class="n">y1</span> <span class="o">=</span> <span class="n">radius</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">tilt_rad</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">y_center</span>
+        <span class="n">x2</span> <span class="o">=</span> <span class="n">radius</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">tilt_rad</span><span class="p">)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">x_center</span>
+        <span class="n">y2</span> <span class="o">=</span> <span class="n">radius</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">tilt_rad</span><span class="p">)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">y_center</span>
+
+        <span class="n">highest_point</span> <span class="o">=</span> <span class="n">Point</span><span class="p">(</span><span class="n">x2</span><span class="p">,</span> <span class="n">y2</span><span class="p">)</span>
+        <span class="n">lowest_point</span> <span class="o">=</span> <span class="n">Point</span><span class="p">(</span><span class="n">x1</span><span class="p">,</span> <span class="n">y1</span><span class="p">)</span>
+        <span class="n">right_point</span> <span class="o">=</span> <span class="n">Point</span><span class="p">(</span><span class="n">x2</span><span class="p">,</span> <span class="n">y2</span><span class="p">)</span> <span class="k">if</span> <span class="n">x2</span> <span class="o">&gt;=</span> <span class="n">x1</span> <span class="k">else</span> <span class="n">Point</span><span class="p">(</span><span class="n">x1</span><span class="p">,</span> <span class="n">y1</span><span class="p">)</span>
+        <span class="n">left_point</span> <span class="o">=</span> <span class="n">Point</span><span class="p">(</span><span class="n">x1</span><span class="p">,</span> <span class="n">y1</span><span class="p">)</span> <span class="k">if</span> <span class="n">x2</span> <span class="o">&gt;=</span> <span class="n">x1</span> <span class="k">else</span> <span class="n">Point</span><span class="p">(</span><span class="n">x2</span><span class="p">,</span> <span class="n">y2</span><span class="p">)</span>
+
+        <span class="n">geometry</span> <span class="o">=</span> <span class="n">LineString</span><span class="p">([(</span><span class="n">x1</span><span class="p">,</span> <span class="n">y1</span><span class="p">),</span> <span class="p">(</span><span class="n">x2</span><span class="p">,</span> <span class="n">y2</span><span class="p">)])</span>
+        <span class="n">line_pvarray</span> <span class="o">=</span> <span class="n">LinePVArray</span><span class="p">(</span><span class="n">geometry</span><span class="o">=</span><span class="n">geometry</span><span class="p">,</span> <span class="n">line_type</span><span class="o">=</span><span class="s1">&#39;pvrow&#39;</span><span class="p">,</span>
+                                   <span class="n">shaded</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">pvrow_index</span><span class="o">=</span><span class="n">index</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">([</span><span class="n">line_pvarray</span><span class="p">],</span> <span class="n">highest_point</span><span class="p">,</span> <span class="n">lowest_point</span><span class="p">,</span>
+                <span class="n">right_point</span><span class="p">,</span> <span class="n">left_point</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="PVRowLine.get_shadow_bounds"><a class="viewcode-back" href="../../developer/generated/pvfactors.pvrow.PVRowLine.get_shadow_bounds.html#pvfactors.pvrow.PVRowLine.get_shadow_bounds">[docs]</a>    <span class="k">def</span> <span class="nf">get_shadow_bounds</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">solar_2d_vector</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Calculate the x coordinates of the boundary points of the shadow lines</span>
+<span class="sd">        on the ground, assuming Y_GROUND is the y coordinate of the ground.</span>
+<span class="sd">        Note: this shadow construction is more or less ignored when direct</span>
+<span class="sd">        shading happens between rows, leading to one continous shadows formed</span>
+<span class="sd">        by all the PV rows in the array.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        solar_2d_vector : list</span>
+<span class="sd">            projection of solar vector into the 2D</span>
+<span class="sd">            plane of the array geometry</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        x1_shadow : float</span>
+<span class="sd">            smallest x-coord value of shadow</span>
+<span class="sd">        x2_shadow : float</span>
+<span class="sd">            largest x-coord value of shadow</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">list_x_values</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">lines</span><span class="p">:</span>
+            <span class="n">geometry</span> <span class="o">=</span> <span class="n">line</span><span class="p">[</span><span class="s1">&#39;geometry&#39;</span><span class="p">]</span>
+            <span class="n">b1</span> <span class="o">=</span> <span class="n">geometry</span><span class="o">.</span><span class="n">boundary</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">b2</span> <span class="o">=</span> <span class="n">geometry</span><span class="o">.</span><span class="n">boundary</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="c1"># consider line equation: u*x + v*y + c = 0</span>
+            <span class="c1"># for lines 1 and 2 (parallel)</span>
+            <span class="n">u</span> <span class="o">=</span> <span class="o">-</span> <span class="n">solar_2d_vector</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">v</span> <span class="o">=</span> <span class="n">solar_2d_vector</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="c1"># Find intercepts for lines 1 and 2</span>
+            <span class="n">c_1</span> <span class="o">=</span> <span class="o">-</span> <span class="p">(</span><span class="n">u</span> <span class="o">*</span> <span class="n">b1</span><span class="o">.</span><span class="n">x</span> <span class="o">+</span> <span class="n">v</span> <span class="o">*</span> <span class="n">b1</span><span class="o">.</span><span class="n">y</span><span class="p">)</span>
+            <span class="n">c_2</span> <span class="o">=</span> <span class="o">-</span> <span class="p">(</span><span class="n">u</span> <span class="o">*</span> <span class="n">b2</span><span class="o">.</span><span class="n">x</span> <span class="o">+</span> <span class="n">v</span> <span class="o">*</span> <span class="n">b2</span><span class="o">.</span><span class="n">y</span><span class="p">)</span>
+            <span class="c1"># Find intersections of ray lines with horizontal ground line</span>
+            <span class="n">x1_shadow</span> <span class="o">=</span> <span class="o">-</span> <span class="p">(</span><span class="n">c_1</span> <span class="o">+</span> <span class="n">v</span> <span class="o">*</span> <span class="n">Y_GROUND</span><span class="p">)</span> <span class="o">/</span> <span class="n">u</span>
+            <span class="n">x2_shadow</span> <span class="o">=</span> <span class="o">-</span> <span class="p">(</span><span class="n">c_2</span> <span class="o">+</span> <span class="n">v</span> <span class="o">*</span> <span class="n">Y_GROUND</span><span class="p">)</span> <span class="o">/</span> <span class="n">u</span>
+            <span class="n">list_x_values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">x1_shadow</span><span class="p">)</span>
+            <span class="n">list_x_values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">x2_shadow</span><span class="p">)</span>
+        <span class="n">x1_shadow</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">list_x_values</span><span class="p">)</span>
+        <span class="n">x2_shadow</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">list_x_values</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">x1_shadow</span><span class="p">,</span> <span class="n">x2_shadow</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">facing</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;This property is mainly used to calculate the view_matrix</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        str</span>
+<span class="sd">            Direction where pvrow front is pointing, depending on its tilt</span>
+<span class="sd">            angle</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">tilt</span> <span class="o">==</span> <span class="mf">0.</span><span class="p">:</span>
+            <span class="n">direction</span> <span class="o">=</span> <span class="s1">&#39;up&#39;</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">tilt</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">direction</span> <span class="o">=</span> <span class="s1">&#39;left&#39;</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">tilt</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">direction</span> <span class="o">=</span> <span class="s1">&#39;right&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">PVFactorsError</span><span class="p">(</span><span class="s2">&quot;Unknown facing condition for pvrow&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">direction</span>
+
+<div class="viewcode-block" id="PVRowLine.calculate_cut_points"><a class="viewcode-back" href="../../developer/generated/pvfactors.pvrow.PVRowLine.calculate_cut_points.html#pvfactors.pvrow.PVRowLine.calculate_cut_points">[docs]</a>    <span class="k">def</span> <span class="nf">calculate_cut_points</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_segments</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Calculate the points of the PV row geometry on which the PV line will</span>
+<span class="sd">        be cut and discretized. The list of cut points is saved into the object</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        n_segments : int</span>
+<span class="sd">            number of segments wanted for the discretization</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">fractions</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">,</span> <span class="n">num</span><span class="o">=</span><span class="n">n_segments</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">list_points</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">complete_linestring</span><span class="o">.</span><span class="n">interpolate</span><span class="p">(</span><span class="n">fraction</span><span class="p">,</span>
+                                                            <span class="n">normalized</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                       <span class="k">for</span> <span class="n">fraction</span> <span class="ow">in</span> <span class="n">fractions</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cut_points</span> <span class="o">=</span> <span class="n">list_points</span></div></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright Copyright 2016, SunPower Corporation
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

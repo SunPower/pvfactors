@@ -1,0 +1,6 @@
+pvfactors.pvrow.PVRowLine.get\_shadow\_bounds
+=============================================
+
+.. currentmodule:: pvfactors.pvrow
+
+.. automethod:: PVRowLine.get_shadow_bounds

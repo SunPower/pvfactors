@@ -1,0 +1,41 @@
+pvfactors.pvgeometry.PVGeometry
+===============================
+
+.. currentmodule:: pvfactors.pvgeometry
+
+.. autoclass:: PVGeometry
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~PVGeometry.__init__
+      ~PVGeometry.add
+      ~PVGeometry.break_and_add_entries
+      ~PVGeometry.contains
+      ~PVGeometry.cut_linestring
+      ~PVGeometry.cut_pvrow_geometry
+      ~PVGeometry.distance
+      ~PVGeometry.split_ground_geometry_from_edge_points
+      ~PVGeometry.split_pvrow_geometry
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~PVGeometry.area
+      ~PVGeometry.boundary
+      ~PVGeometry.bounds
+      ~PVGeometry.centroid
+      ~PVGeometry.geom_type
+      ~PVGeometry.length
+   
+   

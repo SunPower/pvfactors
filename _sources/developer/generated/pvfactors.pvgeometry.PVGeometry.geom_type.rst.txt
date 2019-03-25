@@ -1,0 +1,6 @@
+pvfactors.pvgeometry.PVGeometry.geom\_type
+==========================================
+
+.. currentmodule:: pvfactors.pvgeometry
+
+.. autoattribute:: PVGeometry.geom_type

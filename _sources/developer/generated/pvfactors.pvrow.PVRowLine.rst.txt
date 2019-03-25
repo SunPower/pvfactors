@@ -1,0 +1,32 @@
+pvfactors.pvrow.PVRowLine
+=========================
+
+.. currentmodule:: pvfactors.pvrow
+
+.. autoclass:: PVRowLine
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~PVRowLine.__init__
+      ~PVRowLine.calculate_cut_points
+      ~PVRowLine.create_lines
+      ~PVRowLine.get_shadow_bounds
+      ~PVRowLine.translate_2d_lines
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~PVRowLine.facing
+   
+   

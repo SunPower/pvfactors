@@ -10,11 +10,10 @@ Contents:
 .. toctree::
    :maxdepth: 2
 
-   intro
    view_factors
    problem_formulation
 
 
 .. rubric:: Footnotes
 
-.. [#vf_paper] Anoma, Marc A, et al. "View Factor Model and Validation for Bifacial PV and Diffuse Shade on Single-Axis Trackers." Photovoltaic Specialist Conference (PVSC), 2017 IEEE 44th. IEEE, 2017.
+.. [#vf_paper] Anoma, M., Jacob, D., Bourne, B.C., Scholl, J.A., Riley, D.M. and Hansen, C.W., 2017. View Factor Model and Validation for Bifacial PV and Diffuse Shade on Single-Axis Trackers. In 44th IEEE Photovoltaic Specialist Conference.

@@ -1,0 +1,25 @@
+pvfactors.pvrow.PVRowBase
+=========================
+
+.. currentmodule:: pvfactors.pvrow
+
+.. autoclass:: PVRowBase
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~PVRowBase.__init__
+      ~PVRowBase.create_lines
+      ~PVRowBase.get_shadow_bounds
+      ~PVRowBase.translate_2d_lines
+   
+   
+
+   
+   
+   

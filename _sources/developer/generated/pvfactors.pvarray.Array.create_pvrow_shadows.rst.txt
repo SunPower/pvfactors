@@ -1,0 +1,6 @@
+pvfactors.pvarray.Array.create\_pvrow\_shadows
+==============================================
+
+.. currentmodule:: pvfactors.pvarray
+
+.. automethod:: Array.create_pvrow_shadows

@@ -1,0 +1,6 @@
+pvfactors.pvarray.Array.calculate\_radiosities\_perez
+=====================================================
+
+.. currentmodule:: pvfactors.pvarray
+
+.. automethod:: Array.calculate_radiosities_perez

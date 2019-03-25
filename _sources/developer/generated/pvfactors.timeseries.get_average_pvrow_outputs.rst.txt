@@ -1,0 +1,6 @@
+pvfactors.timeseries.get\_average\_pvrow\_outputs
+=================================================
+
+.. currentmodule:: pvfactors.timeseries
+
+.. autofunction:: get_average_pvrow_outputs

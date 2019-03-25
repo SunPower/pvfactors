@@ -1,0 +1,6 @@
+pvfactors.pvgeometry.PVGeometry.distance
+========================================
+
+.. currentmodule:: pvfactors.pvgeometry
+
+.. automethod:: PVGeometry.distance

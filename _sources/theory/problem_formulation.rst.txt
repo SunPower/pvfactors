@@ -1,7 +1,7 @@
 .. _problem_formulation:
 
-Problem Formulation
-===================
+Mathematical Model
+==================
 
 In order to use the view factors as follows, we need to assume that the surfaces considered are diffuse (lambertian). Which means that their optical properties are independent of the angle of the rays (incident, reflected, or emitted). This is an important assumption that prevents the usage of AOI loss factors for instance.
 
@@ -9,6 +9,8 @@ The current version of the view factor model only addresses PV rows that are mad
 
 
 .. figure:: /theory/problem_formulation_pictures/Array_example_clean.png
+   :width: 60%
+   :align: center
 
 By making some assumptions, it is possible to represent the calculation of irradiance terms on each surface with a linear system. The dimension of this system changes depending on the number of surfaces considered. But we can formulate it for the general case of ``n`` surfaces.
 
@@ -51,7 +53,7 @@ This results into a linear system that can be written as follows:
 .. math::
 
 	\mathbf{q_o} = \mathbf{R} . (\mathbf{F} . \mathbf{q_o} + \mathbf{Irr})
-	
+
 	(\mathbf{R}^{-1} - \mathbf{F}).\mathbf{q_o} = \mathbf{Irr}
 
 Or, for a system of ``n`` surfaces:
@@ -63,7 +65,7 @@ Or, for a system of ``n`` surfaces:
 	0             & {\rho_2}      & 0      & \cdots   & 0\\
 	\vdots        & \vdots        & \vdots & \ddots   & \vdots\\
 	0             & 0             & 0      & \cdots   & {\rho_n}\\
-	\end{pmatrix}^{-1} - 
+	\end{pmatrix}^{-1} -
 	\begin{pmatrix}
 	F_{1,1}      & F_{1,2}      & F_{1,3}      & \cdots   & F_{1,n}\\
 	F_{2,1}      & F_{2,2}      & F_{2,3}      & \cdots   & F_{2,n}\\
@@ -76,12 +78,12 @@ Or, for a system of ``n`` surfaces:
 	\vdots\\
 	q_{o, n}\\
 	\end{pmatrix}
-	= 
+	=
 	\begin{pmatrix}
 	Irr_1\\
 	Irr_2\\
 	\vdots\\
 	Irr_n\\
 	\end{pmatrix}
-  
+
 After solving this system and finding all of the radiosities, it is very easy to deduce values of interest like back side or front side incident irradiance.

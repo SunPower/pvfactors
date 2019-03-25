@@ -1,0 +1,662 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>pvfactors.pvgeometry &mdash; pvfactors 0.1.5+24.g5ce1047 documentation</title>
+  
+
+  
+  
+    <link rel="shortcut icon" href="../../_static/favicon.ico"/>
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../_static/doctools.js"></script>
+        <script type="text/javascript" src="../../_static/language_data.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/css/custom.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> pvfactors
+          
+
+          
+            
+            <img src="../../_static/sp_2014_logo_all_white_LARGE.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.1.5
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../intro.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../getting_started/index.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../theory/index.html">Theory</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../developer/index.html">Developer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../whatsnew.html">What’s New</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">pvfactors</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>pvfactors.pvgeometry</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for pvfactors.pvgeometry</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">In ``pvfactors``, we need a way to store efficiently ``shapely`` geometries in</span>
+<span class="sd">Dataframes and perform only basic geometric operations. So in this case,</span>
+<span class="sd">using a complete package like ``geopandas`` may be overkill</span>
+<span class="sd">since it brings with it a lot of dependencies, and may complicate</span>
+<span class="sd">the integration of the package in other open-source projects.</span>
+<span class="sd">Here we implement the basic functionalities of geopandas that are useful in</span>
+<span class="sd">pvfactors.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">from</span> <span class="nn">shapely.geometry</span> <span class="k">import</span> <span class="n">LineString</span><span class="p">,</span> <span class="n">Point</span>
+<span class="kn">from</span> <span class="nn">pvfactors</span> <span class="k">import</span> <span class="n">PVFactorsError</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+
+<span class="n">LOGGER</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+<span class="n">LOGGER</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">)</span>
+
+
+<span class="c1"># TODO: remove hard-coding if possible</span>
+<span class="n">DISTANCE_TOLERANCE</span> <span class="o">=</span> <span class="mf">1e-8</span>
+<span class="n">THRESHOLD_DISTANCE_TOO_CLOSE</span> <span class="o">=</span> <span class="mf">1e-10</span>
+
+
+<div class="viewcode-block" id="PVGeometry"><a class="viewcode-back" href="../../developer/generated/pvfactors.pvgeometry.PVGeometry.html#pvfactors.pvgeometry.PVGeometry">[docs]</a><span class="nd">@pd</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">extensions</span><span class="o">.</span><span class="n">register_dataframe_accessor</span><span class="p">(</span><span class="s2">&quot;pvgeometry&quot;</span><span class="p">)</span>
+<span class="k">class</span> <span class="nc">PVGeometry</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Lightweight extension of ``pandas.DataFrame`` that copies</span>
+<span class="sd">    functionalities of ``geopandas.GeoSeries``</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    pandas_obj : ``pandas.DataFrame``</span>
+<span class="sd">        ``pandas`` object to perform operations on</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="PVGeometry.__init__"><a class="viewcode-back" href="../../developer/generated/pvfactors.pvgeometry.PVGeometry.html#pvfactors.pvgeometry.PVGeometry.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pandas_obj</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span> <span class="o">=</span> <span class="n">pandas_obj</span></div>
+
+<div class="viewcode-block" id="PVGeometry._series_op"><a class="viewcode-back" href="../../developer/generated/pvfactors.pvgeometry.PVGeometry._series_op.html#pvfactors.pvgeometry.PVGeometry._series_op">[docs]</a>    <span class="k">def</span> <span class="nf">_series_op</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">this</span><span class="p">,</span> <span class="n">other</span><span class="p">,</span> <span class="n">op</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Geometric operation that returns a pandas Series</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        this : ``pandas.DataFrame``</span>
+<span class="sd">            dataframe that *must* have a `geometry` column</span>
+<span class="sd">            containing the geometry objects</span>
+<span class="sd">        other : ``shapely`` object</span>
+<span class="sd">            generally a ``shapely`` object</span>
+<span class="sd">        op : str</span>
+<span class="sd">            operation to perform</span>
+<span class="sd">        **kwargs :</span>
+
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        ``pandas.Series``</span>
+<span class="sd">            series after operation was performed</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">null_val</span> <span class="o">=</span> <span class="kc">False</span> <span class="k">if</span> <span class="n">op</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;distance&#39;</span><span class="p">,</span> <span class="s1">&#39;project&#39;</span><span class="p">]</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+
+        <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">([</span><span class="nb">getattr</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">op</span><span class="p">)(</span><span class="n">other</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="k">if</span> <span class="n">s</span> <span class="k">else</span> <span class="n">null_val</span>
+                          <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">this</span><span class="o">.</span><span class="n">geometry</span><span class="p">],</span>
+                         <span class="n">index</span><span class="o">=</span><span class="n">this</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">dtype</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">null_val</span><span class="p">)))</span></div>
+
+<div class="viewcode-block" id="PVGeometry._geo_unary_op"><a class="viewcode-back" href="../../developer/generated/pvfactors.pvgeometry.PVGeometry._geo_unary_op.html#pvfactors.pvgeometry.PVGeometry._geo_unary_op">[docs]</a>    <span class="k">def</span> <span class="nf">_geo_unary_op</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">this</span><span class="p">,</span> <span class="n">op</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Unary operation that returns a pandas Series</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        this : ``pandas.DataFrame``</span>
+<span class="sd">            dataframe that *must* have a `geometry` column</span>
+<span class="sd">            containing the geometry objects</span>
+<span class="sd">        op : str</span>
+<span class="sd">            operation to perform</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        ``pandas.Series``</span>
+<span class="sd">            series after operation was performed</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># TODO: may need a dtype argument in the returned series</span>
+        <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">([</span><span class="nb">getattr</span><span class="p">(</span><span class="n">geom</span><span class="p">,</span> <span class="n">op</span><span class="p">)</span> <span class="k">for</span> <span class="n">geom</span> <span class="ow">in</span> <span class="n">this</span><span class="o">.</span><span class="n">geometry</span><span class="p">],</span>
+                         <span class="n">index</span><span class="o">=</span><span class="n">this</span><span class="o">.</span><span class="n">index</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="PVGeometry._series_unary_op"><a class="viewcode-back" href="../../developer/generated/pvfactors.pvgeometry.PVGeometry._series_unary_op.html#pvfactors.pvgeometry.PVGeometry._series_unary_op">[docs]</a>    <span class="k">def</span> <span class="nf">_series_unary_op</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">this</span><span class="p">,</span> <span class="n">op</span><span class="p">,</span> <span class="n">null_value</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Unary operation that returns a pandas Series</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        this : ``pandas.DataFrame``</span>
+<span class="sd">            dataframe that *must* have a `geometry` column</span>
+<span class="sd">            containing the geometry objects</span>
+<span class="sd">        op : str</span>
+<span class="sd">            operation to perform</span>
+<span class="sd">        null_value : bool, optional</span>
+<span class="sd">             (Default value = False)</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        ``pandas.Series``</span>
+<span class="sd">            series after operation was performed</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">([</span><span class="nb">getattr</span><span class="p">(</span><span class="n">geom</span><span class="p">,</span> <span class="n">op</span><span class="p">,</span> <span class="n">null_value</span><span class="p">)</span>
+                          <span class="k">for</span> <span class="n">geom</span> <span class="ow">in</span> <span class="n">this</span><span class="o">.</span><span class="n">geometry</span><span class="p">],</span>
+                         <span class="n">index</span><span class="o">=</span><span class="n">this</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">dtype</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">null_value</span><span class="p">)))</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">area</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Returns a ``Series`` containing the area of each geometry in the</span>
+<span class="sd">        ``GeoSeries``.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        ``pandas.Series``</span>
+<span class="sd">            series after area operation was performed</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_series_unary_op</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">,</span> <span class="s1">&#39;area&#39;</span><span class="p">,</span> <span class="n">null_value</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">geom_type</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Returns a ``Series`` of strings specifying the `Geometry Type` of each</span>
+<span class="sd">        object.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        ``pandas.Series``</span>
+<span class="sd">            series after geom_type operation was performed</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_series_unary_op</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">,</span> <span class="s1">&#39;geom_type&#39;</span><span class="p">,</span> <span class="n">null_value</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">length</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Returns a ``Series`` containing the length of each geometry.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        ``pandas.Series``</span>
+<span class="sd">            series after length operation was performed</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_series_unary_op</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">,</span> <span class="s1">&#39;length&#39;</span><span class="p">,</span> <span class="n">null_value</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">boundary</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Returns a ``GeoSeries`` of lower dimensional objects representing</span>
+<span class="sd">        each geometries&#39;s set-theoretic `boundary`.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        ``pandas.Series``</span>
+<span class="sd">            series after boundary geo operation was performed</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_geo_unary_op</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">,</span> <span class="s1">&#39;boundary&#39;</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">centroid</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Returns a ``GeoSeries`` of points representing the centroid of each</span>
+<span class="sd">        geometry.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        ``pandas.Series``</span>
+<span class="sd">            series after centroid geo operation was performed</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_geo_unary_op</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">,</span> <span class="s1">&#39;centroid&#39;</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">bounds</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Returns a ``DataFrame`` with columns ``minx``, ``miny``, ``maxx``,</span>
+<span class="sd">        ``maxy`` values containing the bounds for each geometry.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        :class:``pandas.DataFrame``</span>
+<span class="sd">            dataframe with bounds of geometries and columns:</span>
+<span class="sd">            [&#39;minx&#39;, &#39;miny&#39;, &#39;maxx&#39;, &#39;maxy&#39;]</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">bounds</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">geom</span><span class="o">.</span><span class="n">bounds</span> <span class="k">for</span> <span class="n">geom</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">geometry</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">bounds</span><span class="p">,</span>
+                            <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;minx&#39;</span><span class="p">,</span> <span class="s1">&#39;miny&#39;</span><span class="p">,</span> <span class="s1">&#39;maxx&#39;</span><span class="p">,</span> <span class="s1">&#39;maxy&#39;</span><span class="p">],</span>
+                            <span class="n">index</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
+
+<div class="viewcode-block" id="PVGeometry.contains"><a class="viewcode-back" href="../../developer/generated/pvfactors.pvgeometry.PVGeometry.contains.html#pvfactors.pvgeometry.PVGeometry.contains">[docs]</a>    <span class="k">def</span> <span class="nf">contains</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Returns a ``Series`` of ``dtype(&#39;bool&#39;)`` with value ``True`` for</span>
+<span class="sd">        each geometry that contains `other`.</span>
+<span class="sd">        An object is said to contain `other` if its `interior` contains the</span>
+<span class="sd">        `boundary` and `interior` of the other object and their boundaries do</span>
+<span class="sd">        not touch at all.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        other : ``shapely`` object</span>
+<span class="sd">            geometric object to check if contained</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        ``pandas.Series``</span>
+<span class="sd">            series after contains series operation was performed</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_series_op</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">,</span> <span class="n">other</span><span class="p">,</span> <span class="s1">&#39;contains&#39;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="PVGeometry.distance"><a class="viewcode-back" href="../../developer/generated/pvfactors.pvgeometry.PVGeometry.distance.html#pvfactors.pvgeometry.PVGeometry.distance">[docs]</a>    <span class="k">def</span> <span class="nf">distance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Returns a ``Series`` containing the distance to `other`.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        other : ``shapely`` object</span>
+<span class="sd">            geometric object to calculate distance to</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        ``pandas.Series``</span>
+<span class="sd">            series after distance series operation was performed</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_series_op</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">,</span> <span class="n">other</span><span class="p">,</span> <span class="s1">&#39;distance&#39;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="PVGeometry.add"><a class="viewcode-back" href="../../developer/generated/pvfactors.pvgeometry.PVGeometry.add.html#pvfactors.pvgeometry.PVGeometry.add">[docs]</a>    <span class="k">def</span> <span class="nf">add</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">list_lines_pvarray</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Add list of objects of class</span>
+<span class="sd">        :py:class:`~pvfactors.pvcore.LinePVArray` to the registry.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        list_lines_pvarray : list</span>
+<span class="sd">            list of objects of type :py:class:`~pvfactors.pvcore.LinePVArray`</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        list</span>
+<span class="sd">            the list of registry indices that were added to the registry</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Find the start index that will be used to add entries to the registry</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">index</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">start_index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">start_index</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">idx_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="c1"># Loop through list of PV array lines</span>
+        <span class="k">for</span> <span class="n">counter</span><span class="p">,</span> <span class="n">line_pvarray</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">list_lines_pvarray</span><span class="p">):</span>
+            <span class="n">idx</span> <span class="o">=</span> <span class="n">start_index</span> <span class="o">+</span> <span class="n">counter</span>
+            <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">line_pvarray</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">idx</span><span class="p">,</span> <span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">line_pvarray</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+            <span class="n">idx_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">idx_list</span></div>
+
+<div class="viewcode-block" id="PVGeometry.split_ground_geometry_from_edge_points"><a class="viewcode-back" href="../../developer/generated/pvfactors.pvgeometry.PVGeometry.split_ground_geometry_from_edge_points.html#pvfactors.pvgeometry.PVGeometry.split_ground_geometry_from_edge_points">[docs]</a>    <span class="k">def</span> <span class="nf">split_ground_geometry_from_edge_points</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">edge_points</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Break up ground lines into multiple ones at the pv row &quot;edge points&quot;,</span>
+<span class="sd">        which are the intersections of pv row lines and ground lines. This is</span>
+<span class="sd">        important to separate the ground lines that a pv row&#39;s front surface</span>
+<span class="sd">        sees from the ones its back surface does.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        edge_points : list</span>
+<span class="sd">            list of ``shapely.Point`` objects,</span>
+<span class="sd">            points that specify location where to break lines</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        None</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">point</span> <span class="ow">in</span> <span class="n">edge_points</span><span class="p">:</span>
+            <span class="n">df_ground</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s1">&#39;line_type&#39;</span><span class="p">]</span> <span class="o">==</span>
+                                      <span class="s1">&#39;ground&#39;</span><span class="p">,</span> <span class="p">:]</span>
+            <span class="n">geoentry_to_break_up</span> <span class="o">=</span> <span class="n">df_ground</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">df_ground</span><span class="o">.</span><span class="n">pvgeometry</span>
+                                                 <span class="o">.</span><span class="n">contains</span><span class="p">(</span><span class="n">point</span><span class="p">)]</span>
+            <span class="k">if</span> <span class="n">geoentry_to_break_up</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">break_and_add_entries</span><span class="p">(</span><span class="n">geoentry_to_break_up</span><span class="p">,</span> <span class="n">point</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">geoentry_to_break_up</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">PVFactorsError</span><span class="p">(</span><span class="s2">&quot;geoentry_to_break_up.shape[0] cannot be&quot;</span>
+                                     <span class="s2">&quot; larger than 1&quot;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="PVGeometry.break_and_add_entries"><a class="viewcode-back" href="../../developer/generated/pvfactors.pvgeometry.PVGeometry.break_and_add_entries.html#pvfactors.pvgeometry.PVGeometry.break_and_add_entries">[docs]</a>    <span class="k">def</span> <span class="nf">break_and_add_entries</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">geoentry_to_break_up</span><span class="p">,</span> <span class="n">point</span><span class="p">,</span>
+                              <span class="n">pvrow_segment_index</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Break up a surface geometry into two objects at a point location.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        geoentry_to_break_up : ``pandas.DataFrame`` upgraded</span>
+<span class="sd">            ``pandas.DataFrame`` with `geometry`</span>
+<span class="sd">            column and ``pvgeometry`` extension,</span>
+<span class="sd">            registry entry to break up</span>
+<span class="sd">        point : ``shapely.Point``</span>
+<span class="sd">            point used to decide where to break up entry.</span>
+<span class="sd">        pvrow_segment_index : int, optional</span>
+<span class="sd">            index of segment being</span>
+<span class="sd">            broken up. Default is None.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        None</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Get geometry</span>
+        <span class="n">idx</span> <span class="o">=</span> <span class="n">geoentry_to_break_up</span><span class="o">.</span><span class="n">index</span>
+        <span class="n">geometry</span> <span class="o">=</span> <span class="n">geoentry_to_break_up</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">line_1</span><span class="p">,</span> <span class="n">line_2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cut_linestring</span><span class="p">(</span><span class="n">geometry</span><span class="p">,</span> <span class="n">point</span><span class="p">)</span>
+        <span class="n">geometry_1</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">line_1</span><span class="p">)</span>
+        <span class="n">geometry_2</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">line_2</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="n">idx</span><span class="p">,</span> <span class="s1">&#39;geometry&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">geometry_1</span><span class="o">.</span><span class="n">values</span>
+        <span class="n">new_registry_entry</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">idx</span><span class="p">,</span> <span class="p">:]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">new_registry_entry</span><span class="p">[</span><span class="s1">&#39;geometry&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">geometry_2</span><span class="o">.</span><span class="n">values</span>
+        <span class="c1"># Add a value to &quot;pvrow segment index&quot; if provided</span>
+        <span class="k">if</span> <span class="n">pvrow_segment_index</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="n">idx</span><span class="p">,</span> <span class="s1">&#39;pvrow_segment_index&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pvrow_segment_index</span>
+            <span class="n">new_registry_entry</span><span class="p">[</span><span class="s1">&#39;pvrow_segment_index&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pvrow_segment_index</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">new_registry_entry</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="PVGeometry.cut_linestring"><a class="viewcode-back" href="../../developer/generated/pvfactors.pvgeometry.PVGeometry.cut_linestring.html#pvfactors.pvgeometry.PVGeometry.cut_linestring">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">cut_linestring</span><span class="p">(</span><span class="n">line</span><span class="p">,</span> <span class="n">point</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Adapted from shapely documentation. Cuts a line in two at a calculated</span>
+<span class="sd">        distance from its starting point</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        line : ``shapely.LineString``</span>
+<span class="sd">            linestring object to cut</span>
+<span class="sd">        point : ``shapely.Point``</span>
+<span class="sd">            point to use for the cut, location of cut</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        list</span>
+<span class="sd">            list of two ``shapely.LineString`` objects obtained after cut</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">distance</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">project</span><span class="p">(</span><span class="n">point</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="p">((</span><span class="n">distance</span> <span class="o">&gt;=</span> <span class="mf">0.0</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">distance</span> <span class="o">&lt;=</span> <span class="n">line</span><span class="o">.</span><span class="n">length</span><span class="p">)),</span> <span class="p">(</span>
+            <span class="s2">&quot;cut_linestring: the lines didn&#39;t intersect&quot;</span><span class="p">)</span>
+        <span class="c1"># There could be multiple points in a line</span>
+        <span class="n">coords</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">coords</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">p</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">coords</span><span class="p">):</span>
+            <span class="n">pd</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">project</span><span class="p">(</span><span class="n">Point</span><span class="p">(</span><span class="n">p</span><span class="p">))</span>
+            <span class="k">if</span> <span class="n">pd</span> <span class="o">==</span> <span class="n">distance</span><span class="p">:</span>
+                <span class="k">return</span> <span class="p">[</span>
+                    <span class="n">LineString</span><span class="p">(</span><span class="n">coords</span><span class="p">[:</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]),</span>
+                    <span class="n">LineString</span><span class="p">(</span><span class="n">coords</span><span class="p">[</span><span class="n">i</span><span class="p">:])]</span>
+            <span class="k">if</span> <span class="n">pd</span> <span class="o">&gt;</span> <span class="n">distance</span><span class="p">:</span>
+                <span class="n">cp</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">interpolate</span><span class="p">(</span><span class="n">distance</span><span class="p">)</span>
+                <span class="k">return</span> <span class="p">[</span>
+                    <span class="n">LineString</span><span class="p">(</span><span class="n">coords</span><span class="p">[:</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="p">[(</span><span class="n">cp</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">cp</span><span class="o">.</span><span class="n">y</span><span class="p">)]),</span>
+                    <span class="n">LineString</span><span class="p">([(</span><span class="n">cp</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">cp</span><span class="o">.</span><span class="n">y</span><span class="p">)]</span> <span class="o">+</span> <span class="n">coords</span><span class="p">[</span><span class="n">i</span><span class="p">:])]</span></div>
+
+<div class="viewcode-block" id="PVGeometry.split_pvrow_geometry"><a class="viewcode-back" href="../../developer/generated/pvfactors.pvgeometry.PVGeometry.split_pvrow_geometry.html#pvfactors.pvgeometry.PVGeometry.split_pvrow_geometry">[docs]</a>    <span class="k">def</span> <span class="nf">split_pvrow_geometry</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idx_pvrow</span><span class="p">,</span> <span class="n">line_shadow</span><span class="p">,</span> <span class="n">pvrow_top_point</span><span class="p">,</span>
+                             <span class="n">surface_side</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Break up pv row line into two pv row lines, a shaded one and an</span>
+<span class="sd">        unshaded one. This function requires knowing the pv row line index in</span>
+<span class="sd">        the registry, the &quot;shadow line&quot; that intersects with the pv row, and</span>
+<span class="sd">        the top point of the pv row in order to decide which pv row line will</span>
+<span class="sd">        be shaded or not after break up.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        idx_pvrow : int</span>
+<span class="sd">            index of shaded pv row entry</span>
+<span class="sd">        line_shadow : ``shapely.LineString``</span>
+<span class="sd">            Line representing the &quot;shadow line&quot; intersecting with the pv row</span>
+<span class="sd">           line</span>
+<span class="sd">        pvrow_top_point : ``shapely.Point``</span>
+<span class="sd">            the highest point of the pv row line (in the</span>
+<span class="sd">            elevation direction)</span>
+<span class="sd">        surface_side : str</span>
+<span class="sd">            surface side of the pvrow</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        None</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Define geometry to work on</span>
+        <span class="n">df_pvrow</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">loc</span><span class="p">[(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">pvrow_index</span> <span class="o">==</span> <span class="n">idx_pvrow</span><span class="p">)</span> <span class="o">&amp;</span>
+                                 <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">surface_side</span> <span class="o">==</span> <span class="n">surface_side</span><span class="p">),</span>
+                                 <span class="p">:]</span>
+        <span class="n">geometry</span> <span class="o">=</span> <span class="n">df_pvrow</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s1">&#39;geometry&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="c1"># Find intersection point of line shadow and pvrow geometry</span>
+        <span class="n">point_intersect</span> <span class="o">=</span> <span class="n">geometry</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="n">line_shadow</span><span class="p">)</span>
+        <span class="c1"># Check that the intersection is not too close to a boundary: if it</span>
+        <span class="c1"># is it can create a &quot;memory access error&quot; it seems</span>
+        <span class="n">is_too_close</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">point</span><span class="o">.</span><span class="n">distance</span><span class="p">(</span><span class="n">point_intersect</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">THRESHOLD_DISTANCE_TOO_CLOSE</span>
+            <span class="k">for</span> <span class="n">point</span> <span class="ow">in</span> <span class="n">geometry</span><span class="o">.</span><span class="n">boundary</span><span class="p">]</span>
+        <span class="k">if</span> <span class="kc">True</span> <span class="ow">in</span> <span class="n">is_too_close</span><span class="p">:</span>
+            <span class="c1"># Leave it as it is and do not split geometry: it should not</span>
+            <span class="c1"># affect the calculations for a good threshold</span>
+            <span class="k">pass</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Cut geometry in two pieces</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">cut_pvrow_geometry</span><span class="p">([</span><span class="n">point_intersect</span><span class="p">],</span> <span class="n">idx_pvrow</span><span class="p">,</span> <span class="n">surface_side</span><span class="p">)</span>
+            <span class="c1"># Find the geometries that should be marked as shaded</span>
+            <span class="n">df_pvrow</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">loc</span><span class="p">[(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">pvrow_index</span> <span class="o">==</span> <span class="n">idx_pvrow</span><span class="p">)</span> <span class="o">&amp;</span>
+                                     <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">surface_side</span> <span class="o">==</span> <span class="n">surface_side</span><span class="p">),</span>
+                                     <span class="p">:]</span>
+            <span class="n">centroids</span> <span class="o">=</span> <span class="n">df_pvrow</span><span class="o">.</span><span class="n">pvgeometry</span><span class="o">.</span><span class="n">centroid</span><span class="o">.</span><span class="n">to_frame</span><span class="p">()</span>
+            <span class="n">centroids</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;geometry&#39;</span><span class="p">]</span>
+            <span class="n">is_below_shading_interesect</span> <span class="o">=</span> \
+                <span class="n">centroids</span><span class="o">.</span><span class="n">pvgeometry</span><span class="o">.</span><span class="n">bounds</span><span class="p">[</span><span class="s1">&#39;miny&#39;</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">point_intersect</span><span class="o">.</span><span class="n">y</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">loc</span><span class="p">[(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">pvrow_index</span> <span class="o">==</span> <span class="n">idx_pvrow</span><span class="p">)</span> <span class="o">&amp;</span>
+                          <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">surface_side</span> <span class="o">==</span> <span class="n">surface_side</span><span class="p">)</span> <span class="o">&amp;</span>
+                          <span class="n">is_below_shading_interesect</span><span class="p">,</span>
+                          <span class="s1">&#39;shaded&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span></div>
+
+<div class="viewcode-block" id="PVGeometry.cut_pvrow_geometry"><a class="viewcode-back" href="../../developer/generated/pvfactors.pvgeometry.PVGeometry.cut_pvrow_geometry.html#pvfactors.pvgeometry.PVGeometry.cut_pvrow_geometry">[docs]</a>    <span class="k">def</span> <span class="nf">cut_pvrow_geometry</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">list_points</span><span class="p">,</span> <span class="n">pvrow_index</span><span class="p">,</span> <span class="n">side</span><span class="p">,</span>
+                           <span class="n">count_segments</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Break up pv row lines into multiple segments based on the list of</span>
+<span class="sd">        points specified. This is the &quot;discretization&quot; of the pvrow segments.</span>
+<span class="sd">        For now, it only works for pv rows.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        list_points : list</span>
+<span class="sd">            list of :class:`shapely.Point`, breaking points for</span>
+<span class="sd">            the pv row lines.</span>
+<span class="sd">        pvrow_index : index</span>
+<span class="sd">            pv row index to specify the PV row to</span>
+<span class="sd">            discretize; note that this could return multiple entries from the</span>
+<span class="sd">            registry.</span>
+<span class="sd">        side : str</span>
+<span class="sd">            only do it for one side of the selected PV row. This</span>
+<span class="sd">            can only be &#39;front&#39; or &#39;back&#39;.</span>
+<span class="sd">        count_segments : bool, optional</span>
+<span class="sd">            Add count of segments (Default = False)</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        None</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># TODO: is currently not able to work for other surfaces than pv rows..</span>
+        <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">point</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">list_points</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">count_segments</span><span class="p">:</span>
+                <span class="n">pvrow_segment_index</span> <span class="o">=</span> <span class="n">idx</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">pvrow_segment_index</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">df_selected</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span>
+                <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="s1">&#39;pvrow_index&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">pvrow_index</span><span class="p">)</span> <span class="o">&amp;</span>
+                <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="s1">&#39;surface_side&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">side</span><span class="p">),</span> <span class="p">:]</span>
+            <span class="n">geoentry_to_break_up</span> <span class="o">=</span> <span class="n">df_selected</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span>
+                <span class="n">df_selected</span><span class="o">.</span><span class="n">pvgeometry</span><span class="o">.</span><span class="n">distance</span><span class="p">(</span><span class="n">point</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">DISTANCE_TOLERANCE</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">geoentry_to_break_up</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">break_and_add_entries</span><span class="p">(</span>
+                    <span class="n">geoentry_to_break_up</span><span class="p">,</span> <span class="n">point</span><span class="p">,</span>
+                    <span class="n">pvrow_segment_index</span><span class="o">=</span><span class="n">pvrow_segment_index</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">geoentry_to_break_up</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">PVFactorsError</span><span class="p">(</span><span class="s2">&quot;geoentry_to_break_up.shape[0] cannot be&quot;</span>
+                                     <span class="s2">&quot;larger than 1&quot;</span><span class="p">)</span></div></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright Copyright 2016, SunPower Corporation
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

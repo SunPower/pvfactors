@@ -1,0 +1,6 @@
+pvfactors.pvarray.Array.create\_pvrows\_array
+=============================================
+
+.. currentmodule:: pvfactors.pvarray
+
+.. automethod:: Array.create_pvrows_array

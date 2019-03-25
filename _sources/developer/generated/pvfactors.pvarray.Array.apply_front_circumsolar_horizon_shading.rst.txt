@@ -1,0 +1,6 @@
+pvfactors.pvarray.Array.apply\_front\_circumsolar\_horizon\_shading
+===================================================================
+
+.. currentmodule:: pvfactors.pvarray
+
+.. automethod:: Array.apply_front_circumsolar_horizon_shading

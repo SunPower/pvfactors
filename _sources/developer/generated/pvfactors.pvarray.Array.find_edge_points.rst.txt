@@ -1,0 +1,6 @@
+pvfactors.pvarray.Array.find\_edge\_points
+==========================================
+
+.. currentmodule:: pvfactors.pvarray
+
+.. automethod:: Array.find_edge_points

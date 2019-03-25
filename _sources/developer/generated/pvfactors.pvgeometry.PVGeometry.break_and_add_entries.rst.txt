@@ -1,0 +1,6 @@
+pvfactors.pvgeometry.PVGeometry.break\_and\_add\_entries
+========================================================
+
+.. currentmodule:: pvfactors.pvgeometry
+
+.. automethod:: PVGeometry.break_and_add_entries

@@ -1,0 +1,6 @@
+pvfactors.pvcore.gaussian
+=========================
+
+.. currentmodule:: pvfactors.pvcore
+
+.. autofunction:: gaussian

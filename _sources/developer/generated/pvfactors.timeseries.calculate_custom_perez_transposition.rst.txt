@@ -1,0 +1,6 @@
+pvfactors.timeseries.calculate\_custom\_perez\_transposition
+============================================================
+
+.. currentmodule:: pvfactors.timeseries
+
+.. autofunction:: calculate_custom_perez_transposition

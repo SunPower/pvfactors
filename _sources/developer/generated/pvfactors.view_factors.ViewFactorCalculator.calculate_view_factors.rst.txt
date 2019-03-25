@@ -1,0 +1,6 @@
+pvfactors.view\_factors.ViewFactorCalculator.calculate\_view\_factors
+=====================================================================
+
+.. currentmodule:: pvfactors.view_factors
+
+.. automethod:: ViewFactorCalculator.calculate_view_factors

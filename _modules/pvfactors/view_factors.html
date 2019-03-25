@@ -1,0 +1,556 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>pvfactors.view_factors &mdash; pvfactors 0.1.5+24.g5ce1047 documentation</title>
+  
+
+  
+  
+    <link rel="shortcut icon" href="../../_static/favicon.ico"/>
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../_static/doctools.js"></script>
+        <script type="text/javascript" src="../../_static/language_data.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/css/custom.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> pvfactors
+          
+
+          
+            
+            <img src="../../_static/sp_2014_logo_all_white_LARGE.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.1.5
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../intro.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../getting_started/index.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../theory/index.html">Theory</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../developer/index.html">Developer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../whatsnew.html">What’s New</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">pvfactors</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>pvfactors.view_factors</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for pvfactors.view_factors</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Elementary methods for view factor calculations.&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">absolute_import</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">division</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">print_function</span>
+<span class="kn">from</span> <span class="nn">future.utils</span> <span class="k">import</span> <span class="n">iteritems</span>
+<span class="kn">from</span> <span class="nn">shapely.geometry</span> <span class="k">import</span> <span class="n">LineString</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+
+<span class="n">LOGGER</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+<span class="n">LOGGER</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">)</span>
+
+
+<span class="n">np</span><span class="o">.</span><span class="n">set_printoptions</span><span class="p">(</span><span class="n">suppress</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="c1"># The view dictionaries associate integer indices to &#39;types&#39; of views. For</span>
+<span class="c1"># instance &quot;ground_sky&quot; would be the view between a ground surface and the</span>
+<span class="c1"># sky, and it would use the integer index ``1``.</span>
+<span class="n">VIEW_DICT</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="kc">None</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="s2">&quot;ground_sky&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="s2">&quot;back_gnd&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+    <span class="s2">&quot;gnd_back&quot;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>
+    <span class="s2">&quot;front_sky&quot;</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span>
+    <span class="s2">&quot;back_sky&quot;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
+    <span class="s2">&quot;back_gnd_obst&quot;</span><span class="p">:</span> <span class="mi">6</span><span class="p">,</span>
+    <span class="s2">&quot;gnd_back_obst&quot;</span><span class="p">:</span> <span class="mi">7</span><span class="p">,</span>
+    <span class="s2">&quot;front_gnd_obst&quot;</span><span class="p">:</span> <span class="mi">8</span><span class="p">,</span>
+    <span class="s2">&quot;gnd_front_obst&quot;</span><span class="p">:</span> <span class="mi">9</span><span class="p">,</span>
+    <span class="s2">&quot;pvrows&quot;</span><span class="p">:</span> <span class="mi">10</span><span class="p">}</span>
+<span class="n">REVERSE_VIEW_DICT</span> <span class="o">=</span> <span class="p">{</span><span class="n">v</span><span class="p">:</span> <span class="n">k</span> <span class="k">for</span> <span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span> <span class="ow">in</span> <span class="n">iteritems</span><span class="p">(</span><span class="n">VIEW_DICT</span><span class="p">)}</span>
+<span class="n">THRESHOLD_VF_12</span> <span class="o">=</span> <span class="mf">5e-5</span>
+
+
+<div class="viewcode-block" id="ViewFactorCalculator"><a class="viewcode-back" href="../../developer/generated/pvfactors.view_factors.ViewFactorCalculator.html#pvfactors.view_factors.ViewFactorCalculator">[docs]</a><span class="k">class</span> <span class="nc">ViewFactorCalculator</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;This class calculates the view factors based on the surface registry of</span>
+<span class="sd">    :py:class:`~pvfactors.pvarray.Array` class. Its only attribute is a mapping</span>
+<span class="sd">    between &quot;view types&quot; and the &quot;low-level&quot; view factor calculation functions</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="ViewFactorCalculator.__init__"><a class="viewcode-back" href="../../developer/generated/pvfactors.view_factors.ViewFactorCalculator.html#pvfactors.view_factors.ViewFactorCalculator.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">function_mapping</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;back_gnd&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">vf_hottel_pvrowline_back</span><span class="p">,</span>
+            <span class="s2">&quot;gnd_back&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">vf_hottel_pvrowline_back</span><span class="p">,</span>
+            <span class="s2">&quot;back_gnd_obst&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">vf_hottel_pvrowline_back</span><span class="p">,</span>
+            <span class="s2">&quot;gnd_back_obst&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">vf_hottel_pvrowline_back</span><span class="p">,</span>
+            <span class="s2">&quot;front_gnd_obst&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">vf_hottel_pvrowline_front</span><span class="p">,</span>
+            <span class="s2">&quot;gnd_front_obst&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">vf_hottel_pvrowline_front</span><span class="p">,</span>
+            <span class="s2">&quot;pvrows&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">vf_trk_to_trk</span><span class="p">}</span></div>
+
+<div class="viewcode-block" id="ViewFactorCalculator.calculate_view_factors"><a class="viewcode-back" href="../../developer/generated/pvfactors.view_factors.ViewFactorCalculator.calculate_view_factors.html#pvfactors.view_factors.ViewFactorCalculator.calculate_view_factors">[docs]</a>    <span class="k">def</span> <span class="nf">calculate_view_factors</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">surface_registry</span><span class="p">,</span> <span class="n">view_matrix</span><span class="p">,</span>
+                               <span class="n">args_matrix</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Calculate the view factors based on the inputs of the</span>
+<span class="sd">        :py:class:`~pvfactors.pvarray.Array` class, and using a mapping of</span>
+<span class="sd">        &quot;view types&quot; with view factor calculation methods.</span>
+<span class="sd">        The method uses a faster implementation by only calculating half of the</span>
+<span class="sd">        view factors, and uses the symmetry property of the transformed view</span>
+<span class="sd">        factor matrix to calculate the other half.</span>
+<span class="sd">        The symmetry property comes from the reciprocity property of view</span>
+<span class="sd">        factors: :math:`A_1 * VF_{1-2} = A_2 * VF_{2-1}`,</span>
+<span class="sd">        where A_i is the area of surface i</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        surface_registry : ``pd.DataFrame``</span>
+<span class="sd">            surface registry attribute of</span>
+<span class="sd">            :py:class:`~pvfactors.pvarray.Array` class</span>
+<span class="sd">        view_matrix : ``numpy.ndarray``</span>
+<span class="sd">            view matrix attribute of :py:class:`~pvfactors.pvarray.Array`</span>
+<span class="sd">            class. This matrix specifies what surfaces each surface views, and</span>
+<span class="sd">            also what type of view it is</span>
+<span class="sd">        args_matrix : ``numpy.ndarray``</span>
+<span class="sd">            args matrix attribute of :py:class:`~pvfactors.pvarray.Array`,</span>
+<span class="sd">            complementing the attribute ``view_matrix`` by providing</span>
+<span class="sd">            additional arguments for the calculations; e.g. what surfaces are</span>
+<span class="sd">            obstructing the view between surface i and surface j</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        ``numpy.ndarray``</span>
+<span class="sd">            matrix of view factors (values from 0 to 1 in theory)</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">view_factors</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">view_matrix</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+
+        <span class="c1"># --- First deal with finite surfaces from the registry, and treat only</span>
+        <span class="c1"># half of the views because symmetry will be used next</span>
+        <span class="n">n_finite_surfaces</span> <span class="o">=</span> <span class="n">surface_registry</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">view_matrix_upper_finite_surfaces</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">triu</span><span class="p">(</span>
+            <span class="n">view_matrix</span><span class="p">[:</span><span class="n">n_finite_surfaces</span><span class="p">,</span> <span class="p">:</span><span class="n">n_finite_surfaces</span><span class="p">])</span>
+        <span class="n">indices_views_finite</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">view_matrix_upper_finite_surfaces</span><span class="p">)</span>
+
+        <span class="n">n_views</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">indices_views_finite</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">geometries</span> <span class="o">=</span> <span class="n">surface_registry</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">values</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_views</span><span class="p">):</span>
+            <span class="n">idx</span> <span class="o">=</span> <span class="p">(</span><span class="n">indices_views_finite</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">i</span><span class="p">],</span> <span class="n">indices_views_finite</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="n">i</span><span class="p">])</span>
+            <span class="n">view</span> <span class="o">=</span> <span class="n">REVERSE_VIEW_DICT</span><span class="p">[</span><span class="n">view_matrix</span><span class="p">[</span><span class="n">idx</span><span class="p">]]</span>
+            <span class="n">line_i</span> <span class="o">=</span> <span class="n">geometries</span><span class="p">[</span><span class="n">idx</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+            <span class="n">line_j</span> <span class="o">=</span> <span class="n">geometries</span><span class="p">[</span><span class="n">idx</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span>
+            <span class="n">obstructing_line</span> <span class="o">=</span> <span class="n">args_matrix</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
+            <span class="n">view_factors</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">function_mapping</span><span class="p">[</span><span class="n">view</span><span class="p">](</span><span class="n">line_i</span><span class="p">,</span> <span class="n">line_j</span><span class="p">,</span>
+                                                            <span class="n">obstructing_line</span><span class="p">)</span>
+
+        <span class="c1"># Use the reciprocity property of view factors to speed up the</span>
+        <span class="c1"># vfactor calculation: A_1 * F_1-2 = A_2 * F_2-1 ==&gt; symmetric matrx</span>
+        <span class="n">areas</span> <span class="o">=</span> <span class="n">surface_registry</span><span class="p">[</span><span class="s1">&#39;area&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
+        <span class="n">matrix_areas</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">areas</span><span class="p">)</span>
+        <span class="n">matrix_areas_inv</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="mf">1.</span> <span class="o">/</span> <span class="n">areas</span><span class="p">)</span>
+
+        <span class="n">upper_matrix_reciprocity</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">matrix_areas</span><span class="p">,</span>
+                                          <span class="n">view_factors</span><span class="p">[:</span><span class="n">n_finite_surfaces</span><span class="p">,</span>
+                                                       <span class="p">:</span><span class="n">n_finite_surfaces</span><span class="p">])</span>
+
+        <span class="n">total_matrix_reciprocity</span> <span class="o">=</span> <span class="p">(</span><span class="n">upper_matrix_reciprocity</span> <span class="o">+</span>
+                                    <span class="n">upper_matrix_reciprocity</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+        <span class="n">finite_vf_matrix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">matrix_areas_inv</span><span class="p">,</span> <span class="n">total_matrix_reciprocity</span><span class="p">)</span>
+        <span class="n">view_factors</span><span class="p">[:</span><span class="n">n_finite_surfaces</span><span class="p">,</span> <span class="p">:</span><span class="n">n_finite_surfaces</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">finite_vf_matrix</span>
+        <span class="p">)</span>
+
+        <span class="c1"># --- Then do the calculations for the sky, which is the remaining</span>
+        <span class="c1"># portion of the hemisphere</span>
+        <span class="n">view_factors</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">view_factors</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">view_factors</span></div>
+
+<div class="viewcode-block" id="ViewFactorCalculator.vf_hottel_pvrowline_back"><a class="viewcode-back" href="../../developer/generated/pvfactors.view_factors.ViewFactorCalculator.vf_hottel_pvrowline_back.html#pvfactors.view_factors.ViewFactorCalculator.vf_hottel_pvrowline_back">[docs]</a>    <span class="k">def</span> <span class="nf">vf_hottel_pvrowline_back</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">line_1</span><span class="p">,</span> <span class="n">line_2</span><span class="p">,</span> <span class="n">obstructing_line</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Use Hottel method to calculate view factor between PV row back-surface</span>
+<span class="sd">        and the ground. Can account for obstructing object.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        line_1 : ``shapely.LineString``</span>
+<span class="sd">            Line for surface 1: pv row or ground</span>
+<span class="sd">        line_2 : ``shapely.LineString``</span>
+<span class="sd">            Line for surface 2: pv row or ground</span>
+<span class="sd">        obstructing_line : ``shapely.LineString``</span>
+<span class="sd">            Line for obstructing the view between line_1 and line_2</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        float</span>
+<span class="sd">            calculated view factor vf_12</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># FIXME: specific to pvlinestring</span>
+        <span class="n">obs_1</span> <span class="o">=</span> <span class="n">obstructing_line</span>
+        <span class="c1"># Implement the Hottel method</span>
+        <span class="n">b1_line1</span> <span class="o">=</span> <span class="n">line_1</span><span class="o">.</span><span class="n">boundary</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">b2_line1</span> <span class="o">=</span> <span class="n">line_1</span><span class="o">.</span><span class="n">boundary</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">a_1</span> <span class="o">=</span> <span class="n">line_1</span><span class="o">.</span><span class="n">length</span>
+
+        <span class="n">b1_line2</span> <span class="o">=</span> <span class="n">line_2</span><span class="o">.</span><span class="n">boundary</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">b2_line2</span> <span class="o">=</span> <span class="n">line_2</span><span class="o">.</span><span class="n">boundary</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="n">uncrossed_length1</span><span class="p">,</span> <span class="n">state_1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">length_string</span><span class="p">(</span><span class="n">b1_line1</span><span class="p">,</span> <span class="n">b1_line2</span><span class="p">,</span>
+                                                        <span class="n">obs_1</span><span class="p">)</span>
+        <span class="n">uncrossed_length2</span><span class="p">,</span> <span class="n">state_2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">length_string</span><span class="p">(</span><span class="n">b2_line1</span><span class="p">,</span> <span class="n">b2_line2</span><span class="p">,</span>
+                                                        <span class="n">obs_1</span><span class="p">)</span>
+        <span class="n">crossed_length1</span><span class="p">,</span> <span class="n">state_3</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">length_string</span><span class="p">(</span><span class="n">b1_line1</span><span class="p">,</span> <span class="n">b2_line2</span><span class="p">,</span>
+                                                      <span class="n">obs_1</span><span class="p">)</span>
+        <span class="n">crossed_length2</span><span class="p">,</span> <span class="n">state_4</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">length_string</span><span class="p">(</span><span class="n">b2_line1</span><span class="p">,</span> <span class="n">b1_line2</span><span class="p">,</span>
+                                                      <span class="n">obs_1</span><span class="p">)</span>
+
+        <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;... obstruction of uncrossed string 1: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">state_1</span><span class="p">)</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;... obstruction of uncrossed string 2: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">state_2</span><span class="p">)</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;... obstruction of crossed string 1: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">state_3</span><span class="p">)</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;... obstruction of crossed string 2: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">state_4</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">state_1</span> <span class="o">*</span> <span class="n">state_2</span> <span class="o">*</span> <span class="n">state_3</span> <span class="o">*</span> <span class="n">state_4</span><span class="p">:</span>
+            <span class="c1"># Complete obstruction: can happen when direct shading and when</span>
+            <span class="c1"># considering top segments of the pv string line</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Hottel back: View is completely obstructed&quot;</span><span class="p">)</span>
+            <span class="n">vf_12</span> <span class="o">=</span> <span class="mf">0.</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">vf_12</span> <span class="o">=</span> <span class="mf">1.</span> <span class="o">/</span> <span class="p">(</span><span class="mf">2.</span> <span class="o">*</span> <span class="n">a_1</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">crossed_length1</span> <span class="o">+</span> <span class="n">crossed_length2</span> <span class="o">-</span>
+                                       <span class="n">uncrossed_length1</span> <span class="o">-</span> <span class="n">uncrossed_length2</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">vf_12</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">LOGGER</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Hottel pvrow front: unexpected value for &quot;</span>
+                         <span class="s2">&quot;vf_12 = </span><span class="si">%.4f</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">vf_12</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">vf_12</span></div>
+
+<div class="viewcode-block" id="ViewFactorCalculator.vf_hottel_pvrowline_front"><a class="viewcode-back" href="../../developer/generated/pvfactors.view_factors.ViewFactorCalculator.vf_hottel_pvrowline_front.html#pvfactors.view_factors.ViewFactorCalculator.vf_hottel_pvrowline_front">[docs]</a>    <span class="k">def</span> <span class="nf">vf_hottel_pvrowline_front</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">line_1</span><span class="p">,</span> <span class="n">line_2</span><span class="p">,</span> <span class="n">obstructing_line</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Use Hottel method to calculate view factor between PV row front-surface</span>
+<span class="sd">        and the ground. Can account for obstructing object.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        line_1 : ``shapely.LineString``</span>
+<span class="sd">            Line for surface 1: pv row or ground</span>
+<span class="sd">        line_2 : ``shapely.LineString``</span>
+<span class="sd">            Line for surface 2: pv row or ground</span>
+<span class="sd">        obstructing_line : ``shapely.LineString``</span>
+<span class="sd">            Line for obstructing the view between line_1 and line_2</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        float</span>
+<span class="sd">            calculated view factor vf_12</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># FIXME: specific to pvlinestring</span>
+        <span class="n">obs_1</span> <span class="o">=</span> <span class="n">obstructing_line</span>
+        <span class="c1"># Implement the Hottel method</span>
+        <span class="n">b1_line1</span> <span class="o">=</span> <span class="n">line_1</span><span class="o">.</span><span class="n">boundary</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">b2_line1</span> <span class="o">=</span> <span class="n">line_1</span><span class="o">.</span><span class="n">boundary</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">a_1</span> <span class="o">=</span> <span class="n">line_1</span><span class="o">.</span><span class="n">length</span>
+
+        <span class="n">b1_line2</span> <span class="o">=</span> <span class="n">line_2</span><span class="o">.</span><span class="n">boundary</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">b2_line2</span> <span class="o">=</span> <span class="n">line_2</span><span class="o">.</span><span class="n">boundary</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="n">uncrossed_length1</span><span class="p">,</span> <span class="n">state_1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">length_string</span><span class="p">(</span><span class="n">b1_line1</span><span class="p">,</span> <span class="n">b2_line2</span><span class="p">,</span>
+                                                        <span class="n">obs_1</span><span class="p">)</span>
+        <span class="n">uncrossed_length2</span><span class="p">,</span> <span class="n">state_2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">length_string</span><span class="p">(</span><span class="n">b2_line1</span><span class="p">,</span> <span class="n">b1_line2</span><span class="p">,</span>
+                                                        <span class="n">obs_1</span><span class="p">)</span>
+        <span class="n">crossed_length1</span><span class="p">,</span> <span class="n">state_3</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">length_string</span><span class="p">(</span><span class="n">b1_line1</span><span class="p">,</span> <span class="n">b1_line2</span><span class="p">,</span>
+                                                      <span class="n">obs_1</span><span class="p">)</span>
+        <span class="n">crossed_length2</span><span class="p">,</span> <span class="n">state_4</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">length_string</span><span class="p">(</span><span class="n">b2_line1</span><span class="p">,</span> <span class="n">b2_line2</span><span class="p">,</span>
+                                                      <span class="n">obs_1</span><span class="p">)</span>
+
+        <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;... obstruction of uncrossed string 1: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">state_1</span><span class="p">)</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;... obstruction of uncrossed string 2: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">state_2</span><span class="p">)</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;... obstruction of crossed string 1: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">state_3</span><span class="p">)</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;... obstruction of crossed string 2: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">state_4</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">state_1</span> <span class="o">*</span> <span class="n">state_2</span> <span class="o">*</span> <span class="n">state_3</span> <span class="o">*</span> <span class="n">state_4</span><span class="p">:</span>
+            <span class="c1"># Complete obstruction: can happen when direct shading and when</span>
+            <span class="c1"># considering top segments of the pv string line</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Hottel front: View is completely obstructed&quot;</span><span class="p">)</span>
+            <span class="n">vf_12</span> <span class="o">=</span> <span class="mf">0.</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">vf_12</span> <span class="o">=</span> <span class="mf">1.</span> <span class="o">/</span> <span class="p">(</span><span class="mf">2.</span> <span class="o">*</span> <span class="n">a_1</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">crossed_length1</span> <span class="o">+</span> <span class="n">crossed_length2</span> <span class="o">-</span>
+                                       <span class="n">uncrossed_length1</span> <span class="o">-</span> <span class="n">uncrossed_length2</span><span class="p">)</span>
+            <span class="c1"># FIXME: temporary fix, I&#39;m getting negative values smaller that</span>
+            <span class="c1"># 5e-5 when ran in a notebook</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">vf_12</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">vf_12</span> <span class="o">&gt;</span> <span class="o">-</span> <span class="n">THRESHOLD_VF_12</span><span class="p">):</span>
+                <span class="n">vf_12</span> <span class="o">=</span> <span class="mf">0.</span>
+
+        <span class="k">if</span> <span class="n">vf_12</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">LOGGER</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Hottel pvrow front: unexpected value for &quot;</span>
+                         <span class="s2">&quot;vf_12 = </span><span class="si">%.4f</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">vf_12</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">vf_12</span></div>
+
+<div class="viewcode-block" id="ViewFactorCalculator.vf_trk_to_trk"><a class="viewcode-back" href="../../developer/generated/pvfactors.view_factors.ViewFactorCalculator.vf_trk_to_trk.html#pvfactors.view_factors.ViewFactorCalculator.vf_trk_to_trk">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">vf_trk_to_trk</span><span class="p">(</span><span class="n">line_1</span><span class="p">,</span> <span class="n">line_2</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Use parallel plane formula to calculate view factor between PV rows.</span>
+<span class="sd">        This assumes that pv row #2 is just a translation along the x-axis of</span>
+<span class="sd">        pv row #1; meaning that only their x-values are different and they have</span>
+<span class="sd">        the same elevation or rotation angle.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        line_1 : ``shapely.LineString``</span>
+<span class="sd">            Line for surface 1: pv row or ground</span>
+<span class="sd">        line_2 : ``shapely.LineString``</span>
+<span class="sd">            Line for surface 2: pv row or ground</span>
+<span class="sd">        *args : tuple</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        float</span>
+<span class="sd">            calculated view factor vf</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">b1_line1</span> <span class="o">=</span> <span class="n">line_1</span><span class="o">.</span><span class="n">boundary</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">b2_line1</span> <span class="o">=</span> <span class="n">line_1</span><span class="o">.</span><span class="n">boundary</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">b1_line2</span> <span class="o">=</span> <span class="n">line_2</span><span class="o">.</span><span class="n">boundary</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">b2_line2</span> <span class="o">=</span> <span class="n">line_2</span><span class="o">.</span><span class="n">boundary</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="n">length_3</span> <span class="o">=</span> <span class="n">b1_line1</span><span class="o">.</span><span class="n">distance</span><span class="p">(</span><span class="n">b1_line2</span><span class="p">)</span>
+        <span class="n">length_4</span> <span class="o">=</span> <span class="n">b2_line1</span><span class="o">.</span><span class="n">distance</span><span class="p">(</span><span class="n">b2_line2</span><span class="p">)</span>
+        <span class="n">length_1</span> <span class="o">=</span> <span class="n">b2_line1</span><span class="o">.</span><span class="n">distance</span><span class="p">(</span><span class="n">b1_line2</span><span class="p">)</span>
+        <span class="n">length_2</span> <span class="o">=</span> <span class="n">b1_line1</span><span class="o">.</span><span class="n">distance</span><span class="p">(</span><span class="n">b2_line2</span><span class="p">)</span>
+        <span class="n">w1</span> <span class="o">=</span> <span class="n">b1_line1</span><span class="o">.</span><span class="n">distance</span><span class="p">(</span><span class="n">b2_line1</span><span class="p">)</span>
+
+        <span class="n">vf</span> <span class="o">=</span> <span class="n">vf_parallel_planes</span><span class="p">(</span><span class="n">length_1</span><span class="p">,</span> <span class="n">length_2</span><span class="p">,</span> <span class="n">length_3</span><span class="p">,</span> <span class="n">length_4</span><span class="p">,</span> <span class="n">w1</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">vf</span></div>
+
+<div class="viewcode-block" id="ViewFactorCalculator.length_string"><a class="viewcode-back" href="../../developer/generated/pvfactors.view_factors.ViewFactorCalculator.length_string.html#pvfactors.view_factors.ViewFactorCalculator.length_string">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">length_string</span><span class="p">(</span><span class="n">pt1</span><span class="p">,</span> <span class="n">pt2</span><span class="p">,</span> <span class="n">obstruction</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Calculate the length of a string between two boundary points of two</span>
+<span class="sd">        lines as defined in the Hottel method. This accounts for potentially</span>
+<span class="sd">        obstructing objects.</span>
+<span class="sd">        It assumes that the obstructing line is a</span>
+<span class="sd">        :py:class:`~pvfactors.pvrow.PVRowLine`</span>
+<span class="sd">        and that it has a ``lowest_point`` attribute in order to calculate the</span>
+<span class="sd">        Hottel string length when there is obstruction.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        pt1 : ``shapely.Point``</span>
+<span class="sd">            a point from line 1</span>
+<span class="sd">        pt2 : ``shapely.Point``</span>
+<span class="sd">            a point from line 2</span>
+<span class="sd">        obstruction : ``shapely.LineString``</span>
+<span class="sd">            Line obstructing the view between line_1 and line_2</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        length : float</span>
+<span class="sd">            the length of the Hottel string</span>
+<span class="sd">        is_obstructing : bool</span>
+<span class="sd">            boolean flag specifying if there&#39;s obstruction or not between the</span>
+<span class="sd">            two points</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># FIXME: specific to pvlinestrings, and assumes b1_obstruction should</span>
+        <span class="c1"># be used if obstruction</span>
+        <span class="n">string</span> <span class="o">=</span> <span class="n">LineString</span><span class="p">([(</span><span class="n">pt1</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">pt1</span><span class="o">.</span><span class="n">y</span><span class="p">),</span> <span class="p">(</span><span class="n">pt2</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">pt2</span><span class="o">.</span><span class="n">y</span><span class="p">)])</span>
+        <span class="n">is_obstructing</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="n">obstruction</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">is_obstructing</span> <span class="o">=</span> <span class="n">string</span><span class="o">.</span><span class="n">intersects</span><span class="p">(</span><span class="n">obstruction</span><span class="o">.</span><span class="n">complete_linestring</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">is_obstructing</span><span class="p">:</span>
+            <span class="n">b1_obstruction</span> <span class="o">=</span> <span class="n">obstruction</span><span class="o">.</span><span class="n">lowest_point</span>
+            <span class="n">length</span> <span class="o">=</span> <span class="p">(</span><span class="n">pt1</span><span class="o">.</span><span class="n">distance</span><span class="p">(</span><span class="n">b1_obstruction</span><span class="p">)</span> <span class="o">+</span>
+                      <span class="n">b1_obstruction</span><span class="o">.</span><span class="n">distance</span><span class="p">(</span><span class="n">pt2</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">length</span> <span class="o">=</span> <span class="n">pt1</span><span class="o">.</span><span class="n">distance</span><span class="p">(</span><span class="n">pt2</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">length</span><span class="p">,</span> <span class="n">is_obstructing</span></div></div>
+
+
+<div class="viewcode-block" id="vf_parallel_planes"><a class="viewcode-back" href="../../developer/generated/pvfactors.view_factors.vf_parallel_planes.html#pvfactors.view_factors.vf_parallel_planes">[docs]</a><span class="k">def</span> <span class="nf">vf_parallel_planes</span><span class="p">(</span><span class="n">length_1</span><span class="p">,</span> <span class="n">length_2</span><span class="p">,</span> <span class="n">length_3</span><span class="p">,</span> <span class="n">length_4</span><span class="p">,</span> <span class="n">w1</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;See: http://www.thermalradiation.net/sectionc/C-2a.htm</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    length_1 : float</span>
+
+<span class="sd">    length_2 : float</span>
+
+<span class="sd">    length_3 : float</span>
+
+<span class="sd">    length_4 : float</span>
+
+<span class="sd">    w1 : float</span>
+
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    float</span>
+<span class="sd">        view factor between the two parallel lines</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">vf_1_to_2</span> <span class="o">=</span> <span class="p">(</span><span class="n">length_1</span> <span class="o">+</span> <span class="n">length_2</span> <span class="o">-</span> <span class="n">length_3</span> <span class="o">-</span> <span class="n">length_4</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mf">2.</span> <span class="o">*</span> <span class="n">w1</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">vf_1_to_2</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright Copyright 2016, SunPower Corporation
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

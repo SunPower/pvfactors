@@ -1,0 +1,6 @@
+pvfactors.pvarray.Array.update\_view\_factors
+=============================================
+
+.. currentmodule:: pvfactors.pvarray
+
+.. automethod:: Array.update_view_factors

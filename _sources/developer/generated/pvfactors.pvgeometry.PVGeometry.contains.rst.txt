@@ -1,0 +1,6 @@
+pvfactors.pvgeometry.PVGeometry.contains
+========================================
+
+.. currentmodule:: pvfactors.pvgeometry
+
+.. automethod:: PVGeometry.contains

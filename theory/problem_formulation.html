@@ -1,143 +1,257 @@
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
-<html xmlns="http://www.w3.org/1999/xhtml">
-  <head>
-    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>Problem Formulation &#8212; pvfactors 0.1.5 documentation</title>
-    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
-    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-    <script type="text/javascript" src="../_static/documentation_options.js"></script>
-    <script type="text/javascript" src="../_static/jquery.js"></script>
-    <script type="text/javascript" src="../_static/underscore.js"></script>
-    <script type="text/javascript" src="../_static/doctools.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Mathematical Model &mdash; pvfactors 0.1.5+24.g5ce1047 documentation</title>
+  
+
+  
+  
     <link rel="shortcut icon" href="../_static/favicon.ico"/>
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+        <script type="text/javascript" src="../_static/language_data.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Developer docs" href="../developer/index.html" />
-    <link rel="prev" title="View Factors" href="view_factors.html" />
+    <link rel="next" title="Developer" href="../developer/index.html" />
+    <link rel="prev" title="View Factors" href="view_factors.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
    
-  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
-  
-  
-  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
-
-  </head><body>
-  <div class="document">
+  <div class="wy-grid-for-nav">
     
-      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
-        <div class="sphinxsidebarwrapper">
-<p class="logo">
-  <a href="../index.html">
-    <img class="logo" src="../_static/sp_2014_logo_black_orange_rgb.png" alt="Logo"/>
-    
-  </a>
-</p>
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
 
+          
+            <a href="../index.html" class="icon icon-home"> pvfactors
+          
 
+          
+            
+            <img src="../_static/sp_2014_logo_all_white_LARGE.png" class="logo" alt="Logo"/>
+          
+          </a>
 
+          
+            
+            
+              <div class="version">
+                0.1.5
+              </div>
+            
+          
 
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
 
+          
+        </div>
 
-<p>
-<iframe src="https://ghbtns.com/github-btn.html?user=SunPower&repo=pvfactors&type=watch&count=true&size=large&v=2"
-  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
-</p>
-
-
-
-
-
-<h3>Navigation</h3>
-<ul class="current">
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../intro.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting_started/index.html">Getting started</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">Theory</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="intro.html">Introduction</a></li>
 <li class="toctree-l2"><a class="reference internal" href="view_factors.html">View Factors</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Problem Formulation</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Mathematical Model</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="../developer/index.html">Developer docs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../developer/index.html">Developer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../whatsnew.html">What’s New</a></li>
 </ul>
 
-<div class="relations">
-<h3>Related Topics</h3>
-<ul>
-  <li><a href="../index.html">Documentation overview</a><ul>
-  <li><a href="index.html">Theory</a><ul>
-      <li>Previous: <a href="view_factors.html" title="previous chapter">View Factors</a></li>
-      <li>Next: <a href="../developer/index.html" title="next chapter">Developer docs</a></li>
-  </ul></li>
-  </ul></li>
-</ul>
-</div>
-<div id="searchbox" style="display: none" role="search">
-  <h3>Quick search</h3>
-    <div class="searchformwrapper">
-    <form class="search" action="../search.html" method="get">
-      <input type="text" name="q" />
-      <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
-    </form>
-    </div>
-</div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
+            
+          
         </div>
       </div>
-      <div class="documentwrapper">
-        <div class="bodywrapper">
-          <div class="body" role="main">
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">pvfactors</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="index.html">Theory</a> &raquo;</li>
+        
+      <li>Mathematical Model</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
             
-  <div class="section" id="problem-formulation">
-<span id="id1"></span><h1>Problem Formulation<a class="headerlink" href="#problem-formulation" title="Permalink to this headline">¶</a></h1>
+            
+              <!-- User defined GitHub URL -->
+              <a href="https://github.com/SunPower/pvfactors/" class="fa fa-github"> Edit on GitHub</a>
+            
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast,
+.nboutput.nblast {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast + .nbinput {
+    margin-top: -19px;
+}
+
+/* nice headers on first paragraph of info/warning boxes */
+.admonition .first {
+    margin: -12px;
+    padding: 6px 12px;
+    margin-bottom: 12px;
+    color: #fff;
+    line-height: 1;
+    display: block;
+}
+.admonition.warning .first {
+    background: #f0b37e;
+}
+.admonition.note .first {
+    background: #6ab0de;
+}
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+</style>
+<div class="section" id="mathematical-model">
+<span id="problem-formulation"></span><h1>Mathematical Model<a class="headerlink" href="#mathematical-model" title="Permalink to this headline">¶</a></h1>
 <p>In order to use the view factors as follows, we need to assume that the surfaces considered are diffuse (lambertian). Which means that their optical properties are independent of the angle of the rays (incident, reflected, or emitted). This is an important assumption that prevents the usage of AOI loss factors for instance.</p>
 <p>The current version of the view factor model only addresses PV rows that are made out of straight lines (no “dual-tilt” for instance). But the PV array can have any azimuth or tilt angle for the simulations. Below is the 2D representation of such a PV array.</p>
-<div class="figure">
-<img alt="../_images/Array_example_clean.png" src="../_images/Array_example_clean.png" />
+<div class="figure align-center">
+<a class="reference internal image-reference" href="../_images/Array_example_clean.png"><img alt="../_images/Array_example_clean.png" src="../_images/Array_example_clean.png" style="width: 60%;" /></a>
 </div>
 <p>By making some assumptions, it is possible to represent the calculation of irradiance terms on each surface with a linear system. The dimension of this system changes depending on the number of surfaces considered. But we can formulate it for the general case of <code class="docutils literal notranslate"><span class="pre">n</span></code> surfaces.</p>
 <p>For a surface <code class="docutils literal notranslate"><span class="pre">i</span></code> we can write that:</p>
-<div class="math notranslate">
+<div class="math notranslate nohighlight">
 \[q_{o, i} = q_{emitted, i} + q_{reflected, i}\]</div>
-<p>Unit: <span class="math notranslate">\(W/m^2\)</span>.</p>
+<p>Unit: <span class="math notranslate nohighlight">\(W/m^2\)</span>.</p>
 <div class="line-block">
-<div class="line">* <span class="math notranslate">\(q_{o, i}\)</span> is the radiosity of surface <code class="docutils literal notranslate"><span class="pre">i</span></code>, and it represents the outgoing radiative flux from it.</div>
-<div class="line">* <span class="math notranslate">\(q_{emitted, i}\)</span> is the emitted radiative flux from that surface. For instance the total emitted radiative flux of a blackbody is known to be <span class="math notranslate">\({\sigma}T^4\)</span> (with <span class="math notranslate">\(T\)</span> the surface temperature and <span class="math notranslate">\({\sigma}\)</span> the Stefan–Boltzmann constant).</div>
-<div class="line">* <span class="math notranslate">\(q_{reflected, i}\)</span> is the reflected flux from that surface.</div>
+<div class="line">* <span class="math notranslate nohighlight">\(q_{o, i}\)</span> is the radiosity of surface <code class="docutils literal notranslate"><span class="pre">i</span></code>, and it represents the outgoing radiative flux from it.</div>
+<div class="line">* <span class="math notranslate nohighlight">\(q_{emitted, i}\)</span> is the emitted radiative flux from that surface. For instance the total emitted radiative flux of a blackbody is known to be <span class="math notranslate nohighlight">\({\sigma}T^4\)</span> (with <span class="math notranslate nohighlight">\(T\)</span> the surface temperature and <span class="math notranslate nohighlight">\({\sigma}\)</span> the Stefan–Boltzmann constant).</div>
+<div class="line">* <span class="math notranslate nohighlight">\(q_{reflected, i}\)</span> is the reflected flux from that surface.</div>
 </div>
-<p>Finding values of interest like back side irradiance can only be done after finding the radiosities <span class="math notranslate">\(q_{o, i}\)</span> of all surfaces <code class="docutils literal notranslate"><span class="pre">i</span></code>. This can become a very complex system of equations where one would need to solve the energy balance on the considered systems .</p>
+<p>Finding values of interest like back side irradiance can only be done after finding the radiosities <span class="math notranslate nohighlight">\(q_{o, i}\)</span> of all surfaces <code class="docutils literal notranslate"><span class="pre">i</span></code>. This can become a very complex system of equations where one would need to solve the energy balance on the considered systems .</p>
 <div class="line-block">
-<div class="line">But if we decide to make the assumption that <span class="math notranslate">\(q_{emitted, i}\)</span> is negligible, we can simplify the problem in a way that would enable us to find more easily some approximations of the values of interest. For now, this assumption makes some sense because the temperatures of the PV systems and the surroundings are generally not very high (&lt; 330K). Besides the surfaces are not real black bodies, which means that their total (or broadband) emissions and absorptions will be even lower.</div>
+<div class="line">But if we decide to make the assumption that <span class="math notranslate nohighlight">\(q_{emitted, i}\)</span> is negligible, we can simplify the problem in a way that would enable us to find more easily some approximations of the values of interest. For now, this assumption makes some sense because the temperatures of the PV systems and the surroundings are generally not very high (&lt; 330K). Besides the surfaces are not real black bodies, which means that their total (or broadband) emissions and absorptions will be even lower.</div>
 <div class="line">Under this assumption, we end up with:</div>
 </div>
-<div class="math notranslate">
+<div class="math notranslate nohighlight">
 \[q_{o, i}{\;}{\approx}{\;}q_{reflected, i}\]</div>
 <p>where:</p>
-<div class="math notranslate">
+<div class="math notranslate nohighlight">
 \[q_{reflected, i} = {\rho_i} * q_{incident, i}\]</div>
 <div class="line-block">
 <div class="line">with:</div>
-<div class="line">* <span class="math notranslate">\(q_{incident, i}\)</span> is the incident radiative flux on surface <code class="docutils literal notranslate"><span class="pre">i</span></code>.</div>
-<div class="line">* <span class="math notranslate">\({\rho_i}\)</span> is the total reflectivity of surface <code class="docutils literal notranslate"><span class="pre">i</span></code>.</div>
+<div class="line">* <span class="math notranslate nohighlight">\(q_{incident, i}\)</span> is the incident radiative flux on surface <code class="docutils literal notranslate"><span class="pre">i</span></code>.</div>
+<div class="line">* <span class="math notranslate nohighlight">\({\rho_i}\)</span> is the total reflectivity of surface <code class="docutils literal notranslate"><span class="pre">i</span></code>.</div>
 </div>
 <p>We can further develop this expression and involve configuration factors as well as irradiance terms as follows:</p>
-<div class="math notranslate">
+<div class="math notranslate nohighlight">
 \[q_{reflected, i} = {\rho_i} * ({\sum_{j} q_{o, j} * F_{i, j}} + Irr_i)\]</div>
 <div class="line-block">
 <div class="line">where:</div>
-<div class="line">* <span class="math notranslate">\({\sum_{j} q_{o, j} * F_{i, j}}\)</span> is the contribution of all the surfaces <code class="docutils literal notranslate"><span class="pre">j</span></code> surrounding <code class="docutils literal notranslate"><span class="pre">i</span></code> to the incident radiative flux onto surface <code class="docutils literal notranslate"><span class="pre">i</span></code>.</div>
-<div class="line">* <span class="math notranslate">\(F_{i, j}\)</span> is the configuration factor (or view factor) of surface <code class="docutils literal notranslate"><span class="pre">i</span></code> to surface <code class="docutils literal notranslate"><span class="pre">j</span></code>.</div>
-<div class="line">* <span class="math notranslate">\(Irr_i\)</span> is an irradiance term specific to surface <code class="docutils literal notranslate"><span class="pre">i</span></code> which contributes to the incident radiative flux  <span class="math notranslate">\(q_{incident, i}\)</span>. For instance, it will be equal to the <span class="math notranslate">\(DNI_{POA}\)</span> for the front side of the modules.</div>
+<div class="line">* <span class="math notranslate nohighlight">\({\sum_{j} q_{o, j} * F_{i, j}}\)</span> is the contribution of all the surfaces <code class="docutils literal notranslate"><span class="pre">j</span></code> surrounding <code class="docutils literal notranslate"><span class="pre">i</span></code> to the incident radiative flux onto surface <code class="docutils literal notranslate"><span class="pre">i</span></code>.</div>
+<div class="line">* <span class="math notranslate nohighlight">\(F_{i, j}\)</span> is the configuration factor (or view factor) of surface <code class="docutils literal notranslate"><span class="pre">i</span></code> to surface <code class="docutils literal notranslate"><span class="pre">j</span></code>.</div>
+<div class="line">* <span class="math notranslate nohighlight">\(Irr_i\)</span> is an irradiance term specific to surface <code class="docutils literal notranslate"><span class="pre">i</span></code> which contributes to the incident radiative flux  <span class="math notranslate nohighlight">\(q_{incident, i}\)</span>. For instance, it will be equal to the <span class="math notranslate nohighlight">\(DNI_{POA}\)</span> for the front side of the modules.</div>
 </div>
 <p>This results into a linear system that can be written as follows:</p>
-<div class="math notranslate">
+<div class="math notranslate nohighlight">
 \[ \begin{align}\begin{aligned}\mathbf{q_o} = \mathbf{R} . (\mathbf{F} . \mathbf{q_o} + \mathbf{Irr})\\(\mathbf{R}^{-1} - \mathbf{F}).\mathbf{q_o} = \mathbf{Irr}\end{aligned}\end{align} \]</div>
 <p>Or, for a system of <code class="docutils literal notranslate"><span class="pre">n</span></code> surfaces:</p>
-<div class="math notranslate">
+<div class="math notranslate nohighlight">
 \[\begin{split}(\begin{pmatrix}
 {\rho_1}      &amp; 0             &amp; 0      &amp; \cdots   &amp; 0\\
 0             &amp; {\rho_2}      &amp; 0      &amp; \cdots   &amp; 0\\
@@ -167,29 +281,52 @@ Irr_n\\
 </div>
 
 
+           </div>
+           
           </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="../developer/index.html" class="btn btn-neutral float-right" title="Developer" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="view_factors.html" class="btn btn-neutral float-left" title="View Factors" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright Copyright 2016, SunPower Corporation
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
         </div>
       </div>
-    <div class="clearer"></div>
+
+    </section>
+
   </div>
-    <div class="footer">
-      &copy;Copyright 2016, SunPower Corporation.
-      
-      |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.2</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
-      
-      |
-      <a href="../_sources/theory/problem_formulation.rst.txt"
-          rel="nofollow">Page source</a>
-    </div>
+  
 
-    
-    <a href="https://github.com/SunPower/pvfactors" class="github">
-        <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"  class="github"/>
-    </a>
-    
 
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
     
-  </body>
+   
+
+</body>
 </html>

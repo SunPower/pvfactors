@@ -1,0 +1,6 @@
+pvfactors.plot.plot\_bounds
+===========================
+
+.. currentmodule:: pvfactors.plot
+
+.. autofunction:: plot_bounds

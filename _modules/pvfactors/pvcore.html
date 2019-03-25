@@ -1,0 +1,505 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>pvfactors.pvcore &mdash; pvfactors 0.1.5+24.g5ce1047 documentation</title>
+  
+
+  
+  
+    <link rel="shortcut icon" href="../../_static/favicon.ico"/>
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../_static/doctools.js"></script>
+        <script type="text/javascript" src="../../_static/language_data.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/css/custom.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> pvfactors
+          
+
+          
+            
+            <img src="../../_static/sp_2014_logo_all_white_LARGE.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.1.5
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../intro.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../getting_started/index.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../theory/index.html">Theory</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../developer/index.html">Developer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../whatsnew.html">What’s New</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">pvfactors</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>pvfactors.pvcore</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for pvfactors.pvcore</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot; Some utility functions and classes for pvfactors &quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">shapely.geometry</span> <span class="k">import</span> <span class="n">Point</span>
+<span class="kn">from</span> <span class="nn">pvfactors</span> <span class="k">import</span> <span class="n">PVFactorsError</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+
+<span class="n">LOGGER</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+<span class="n">LOGGER</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">)</span>
+
+<span class="c1"># TODO: hard coding these values is not ideal</span>
+<span class="n">MAX_X_GROUND</span> <span class="o">=</span> <span class="mf">1e2</span>
+<span class="n">MIN_X_GROUND</span> <span class="o">=</span> <span class="o">-</span> <span class="n">MAX_X_GROUND</span>
+<span class="n">Y_GROUND</span> <span class="o">=</span> <span class="mf">0.</span>
+<span class="n">THRESHOLD_EDGE_POINT</span> <span class="o">=</span> <span class="mf">1e3</span>
+<span class="n">RADIUS_CIRCUMSOLAR</span> <span class="o">=</span> <span class="mf">1.</span>
+
+<span class="c1"># TODO: hard-coding for registry</span>
+<span class="n">DISTANCE_TOLERANCE</span> <span class="o">=</span> <span class="mf">1e-8</span>
+<span class="n">THRESHOLD_DISTANCE_TOO_CLOSE</span> <span class="o">=</span> <span class="mf">1e-10</span>
+
+<span class="c1"># Gaussian shading default parameters: TOTAL_GAUSSIAN_AREA dependent on these</span>
+<span class="n">SIGMA</span> <span class="o">=</span> <span class="mf">1.</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mf">2.</span><span class="p">)</span>
+<span class="n">MU</span> <span class="o">=</span> <span class="mf">0.</span>
+<span class="n">N_SIGMA</span> <span class="o">=</span> <span class="mf">3.</span>
+<span class="n">GAUSSIAN_DIAMETER_CIRCUMSOLAR</span> <span class="o">=</span> <span class="mf">2.</span> <span class="o">*</span> <span class="n">N_SIGMA</span> <span class="o">*</span> <span class="n">SIGMA</span>
+
+
+<div class="viewcode-block" id="LinePVArray"><a class="viewcode-back" href="../../developer/generated/pvfactors.pvcore.LinePVArray.html#pvfactors.pvcore.LinePVArray">[docs]</a><span class="k">class</span> <span class="nc">LinePVArray</span><span class="p">(</span><span class="nb">dict</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;``LinePVArray`` is the general class that is used to instantiate all</span>
+<span class="sd">    the initial line objects of the pv array before putting them into the</span>
+<span class="sd">    surface registry.</span>
+<span class="sd">    It is a sub-class of a dictionary with already defined keys.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    geometry : ``shapely`` geometry object</span>
+<span class="sd">        Python representation of pv line geometry</span>
+<span class="sd">    style : str</span>
+<span class="sd">        matplotlib`` plotting style for the line. E.g. &#39;--&#39;</span>
+<span class="sd">    line_type : str</span>
+<span class="sd">        type of surface in :py:class:`~pvfactors.pvarray.Array`,</span>
+<span class="sd">        e.g. &#39;pvrow&#39; or &#39;ground&#39;</span>
+<span class="sd">    shaded : bool</span>
+<span class="sd">        specifies if surface is shaded (from direct shading)</span>
+<span class="sd">    pvrow_index : int</span>
+<span class="sd">        if the surface&#39;s ``line_type`` is a &#39;pvrow&#39;, this</span>
+<span class="sd">        will be its pv row index (which is different from its</span>
+<span class="sd">        ``surface_registry`` index in :py:class:`~pvfactors.pvarray.Array`)</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">_list_line_types</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;pvrow&#39;</span><span class="p">,</span> <span class="s1">&#39;ground&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span>
+
+<div class="viewcode-block" id="LinePVArray.__init__"><a class="viewcode-back" href="../../developer/generated/pvfactors.pvcore.LinePVArray.html#pvfactors.pvcore.LinePVArray.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">geometry</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="s1">&#39;-&#39;</span><span class="p">,</span> <span class="n">line_type</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">shaded</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">pvrow_index</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">line_type</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_list_line_types</span><span class="p">:</span>
+            <span class="nb">super</span><span class="p">(</span><span class="n">LinePVArray</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">geometry</span><span class="o">=</span><span class="n">geometry</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">style</span><span class="p">,</span>
+                                              <span class="n">line_type</span><span class="o">=</span><span class="n">line_type</span><span class="p">,</span>
+                                              <span class="n">shaded</span><span class="o">=</span><span class="n">shaded</span><span class="p">,</span>
+                                              <span class="n">pvrow_index</span><span class="o">=</span><span class="n">pvrow_index</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">PVFactorsError</span><span class="p">(</span><span class="s2">&quot;&#39;line_type&#39; cannot be: </span><span class="si">%s</span><span class="s2">, </span><span class="se">\n</span><span class="s2"> possible &quot;</span>
+                                 <span class="s2">&quot;values are: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span>
+                                     <span class="nb">str</span><span class="p">(</span><span class="n">line_type</span><span class="p">),</span>
+                                     <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_list_line_types</span><span class="p">)))</span></div></div>
+
+
+<div class="viewcode-block" id="calculate_circumsolar_shading"><a class="viewcode-back" href="../../developer/generated/pvfactors.pvcore.calculate_circumsolar_shading.html#pvfactors.pvcore.calculate_circumsolar_shading">[docs]</a><span class="k">def</span> <span class="nf">calculate_circumsolar_shading</span><span class="p">(</span><span class="n">percentage_distance_covered</span><span class="p">,</span>
+                                  <span class="n">model</span><span class="o">=</span><span class="s1">&#39;uniform_disk&#39;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Select the model to calculate circumsolar shading based on the current PV</span>
+<span class="sd">    array condition.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    percentage_distance_covered : float</span>
+<span class="sd">        this represents how much of the</span>
+<span class="sd">        circumsolar diameter is covered by the neighboring row [in %]</span>
+<span class="sd">    model : str, optional</span>
+<span class="sd">        name of the circumsolar shading model to use:</span>
+<span class="sd">        &#39;uniform_disk&#39; and &#39;gaussian&#39; are the two models currently available</span>
+<span class="sd">        (Default value = &#39;uniform_disk&#39;)</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    float</span>
+<span class="sd">        shading percentage of circumsolar area</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">model</span> <span class="o">==</span> <span class="s1">&#39;uniform_disk&#39;</span><span class="p">:</span>
+        <span class="n">perc_shading</span> <span class="o">=</span> <span class="n">uniform_circumsolar_disk_shading</span><span class="p">(</span>
+            <span class="n">percentage_distance_covered</span><span class="p">)</span>
+
+    <span class="k">elif</span> <span class="n">model</span> <span class="o">==</span> <span class="s1">&#39;gaussian&#39;</span><span class="p">:</span>
+        <span class="n">perc_shading</span> <span class="o">=</span> <span class="n">gaussian_shading</span><span class="p">(</span><span class="n">percentage_distance_covered</span><span class="p">)</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">PVFactorsError</span><span class="p">(</span>
+            <span class="s1">&#39;calculate_circumsolar_shading: model does not exist: &#39;</span> <span class="o">+</span>
+            <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">model</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">perc_shading</span></div>
+
+
+<div class="viewcode-block" id="integral_default_gaussian"><a class="viewcode-back" href="../../developer/generated/pvfactors.pvcore.integral_default_gaussian.html#pvfactors.pvcore.integral_default_gaussian">[docs]</a><span class="k">def</span> <span class="nf">integral_default_gaussian</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Calculate the value of the integral from x to y of the erf function</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    y : float</span>
+<span class="sd">        upper limit</span>
+<span class="sd">    x : float</span>
+<span class="sd">        lower limit</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    float</span>
+<span class="sd">        Calculated value of integral</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">erf</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">-</span> <span class="n">math</span><span class="o">.</span><span class="n">erf</span><span class="p">(</span><span class="n">y</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="gaussian_shading"><a class="viewcode-back" href="../../developer/generated/pvfactors.pvcore.gaussian_shading.html#pvfactors.pvcore.gaussian_shading">[docs]</a><span class="k">def</span> <span class="nf">gaussian_shading</span><span class="p">(</span><span class="n">percentage_distance_covered</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Calculate circumsolar shading by assuming that the irradiance profile on</span>
+<span class="sd">    a 2D section of the circumsolar disk is Gaussian</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    percentage_distance_covered : float</span>
+<span class="sd">        [in %], proportion of the</span>
+<span class="sd">        circumsolar disk area covered by the neighboring pvrow</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    float</span>
+<span class="sd">        percentage shading in terms of irradiance (using gaussian profile)</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">percentage_distance_covered</span> <span class="o">&lt;</span> <span class="mf">0.</span><span class="p">:</span>
+        <span class="n">perc_shading</span> <span class="o">=</span> <span class="mf">0.</span>
+    <span class="k">elif</span> <span class="n">percentage_distance_covered</span> <span class="o">&gt;</span> <span class="mf">100.</span><span class="p">:</span>
+        <span class="n">perc_shading</span> <span class="o">=</span> <span class="mf">100.</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="o">-</span> <span class="n">N_SIGMA</span> <span class="o">*</span> <span class="n">SIGMA</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="p">(</span><span class="n">y</span> <span class="o">+</span>
+             <span class="n">percentage_distance_covered</span> <span class="o">/</span> <span class="mf">100.</span> <span class="o">*</span>
+             <span class="n">GAUSSIAN_DIAMETER_CIRCUMSOLAR</span><span class="p">)</span>
+        <span class="n">area</span> <span class="o">=</span> <span class="n">integral_default_gaussian</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
+        <span class="n">total_gaussian_area</span> <span class="o">=</span> <span class="n">integral_default_gaussian</span><span class="p">(</span><span class="o">-</span> <span class="n">N_SIGMA</span> <span class="o">*</span> <span class="n">SIGMA</span><span class="p">,</span>
+                                                        <span class="n">N_SIGMA</span> <span class="o">*</span> <span class="n">SIGMA</span><span class="p">)</span>
+        <span class="n">perc_shading</span> <span class="o">=</span> <span class="n">area</span> <span class="o">/</span> <span class="n">total_gaussian_area</span> <span class="o">*</span> <span class="mf">100.</span>
+
+    <span class="k">return</span> <span class="n">perc_shading</span></div>
+
+
+<div class="viewcode-block" id="gaussian"><a class="viewcode-back" href="../../developer/generated/pvfactors.pvcore.gaussian.html#pvfactors.pvcore.gaussian">[docs]</a><span class="k">def</span> <span class="nf">gaussian</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">mu</span><span class="o">=</span><span class="mf">0.</span><span class="p">,</span> <span class="n">sigma</span><span class="o">=</span><span class="mf">1.</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Gaussian density function</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    x : float</span>
+<span class="sd">        argument of function</span>
+<span class="sd">    mu : float, optional</span>
+<span class="sd">        mean of the gaussian (Default value = 0.)</span>
+<span class="sd">    sigma : float, optional</span>
+<span class="sd">        standard deviation of the gaussian (Default value = 1.)</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    float</span>
+<span class="sd">        value of guassian function at point x</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="p">(</span><span class="mf">1.</span> <span class="o">/</span> <span class="p">(</span><span class="n">sigma</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mf">2.</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">))</span> <span class="o">*</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">((</span><span class="n">x</span> <span class="o">-</span> <span class="n">mu</span><span class="p">)</span> <span class="o">/</span> <span class="n">sigma</span><span class="p">,</span> <span class="mi">2</span><span class="p">)))</span></div>
+
+
+<div class="viewcode-block" id="uniform_circumsolar_disk_shading"><a class="viewcode-back" href="../../developer/generated/pvfactors.pvcore.uniform_circumsolar_disk_shading.html#pvfactors.pvcore.uniform_circumsolar_disk_shading">[docs]</a><span class="k">def</span> <span class="nf">uniform_circumsolar_disk_shading</span><span class="p">(</span><span class="n">percentage_distance_covered</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Calculate the percentage shading of circumsolar irradiance. This</span>
+<span class="sd">    model considers circumsolar to be a disk, and calculates the</span>
+<span class="sd">    percentage shaded based on the percentage &quot;distance covered&quot;,</span>
+<span class="sd">    which is how much of the disk&#39;s diameter is covered by the</span>
+<span class="sd">    neighboring object.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    percentage_distance_covered : float</span>
+<span class="sd">        distance covered of circumsolar disk diameter</span>
+<span class="sd">        [% - values from 0 to 100]</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    float</span>
+<span class="sd">        value of guassian function at point x</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Define a circumsolar disk</span>
+    <span class="n">r_circumsolar</span> <span class="o">=</span> <span class="n">RADIUS_CIRCUMSOLAR</span>
+    <span class="n">d_circumsolar</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">r_circumsolar</span>
+    <span class="n">area_circumsolar</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">r_circumsolar</span><span class="o">**</span><span class="mf">2.</span>
+
+    <span class="c1"># Calculate circumsolar on case by case</span>
+    <span class="n">distance_covered</span> <span class="o">=</span> <span class="n">percentage_distance_covered</span> <span class="o">/</span> <span class="mf">100.</span> <span class="o">*</span> <span class="n">d_circumsolar</span>
+
+    <span class="k">if</span> <span class="n">distance_covered</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="c1"># No shading of circumsolar</span>
+        <span class="n">percent_shading</span> <span class="o">=</span> <span class="mf">0.</span>
+    <span class="k">elif</span> <span class="p">(</span><span class="n">distance_covered</span> <span class="o">&gt;</span> <span class="mf">0.</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">distance_covered</span> <span class="o">&lt;=</span> <span class="n">r_circumsolar</span><span class="p">):</span>
+        <span class="c1"># Theta is the full circle sector angle (not half) used to</span>
+        <span class="c1"># calculate circumsolar shading</span>
+        <span class="n">theta</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">arccos</span><span class="p">((</span><span class="n">r_circumsolar</span> <span class="o">-</span> <span class="n">distance_covered</span><span class="p">)</span> <span class="o">/</span>
+                              <span class="n">r_circumsolar</span><span class="p">)</span>  <span class="c1"># rad</span>
+        <span class="n">area_circle_sector</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">r_circumsolar</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">theta</span>
+        <span class="n">area_triangle_sector</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">r_circumsolar</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span>
+        <span class="n">area_shaded</span> <span class="o">=</span> <span class="n">area_circle_sector</span> <span class="o">-</span> <span class="n">area_triangle_sector</span>
+        <span class="n">percent_shading</span> <span class="o">=</span> <span class="n">area_shaded</span> <span class="o">/</span> <span class="n">area_circumsolar</span> <span class="o">*</span> <span class="mf">100.</span>
+
+    <span class="k">elif</span> <span class="p">(</span><span class="n">distance_covered</span> <span class="o">&gt;</span> <span class="n">r_circumsolar</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">distance_covered</span> <span class="o">&lt;</span>
+                                               <span class="n">d_circumsolar</span><span class="p">):</span>
+        <span class="n">distance_uncovered</span> <span class="o">=</span> <span class="n">d_circumsolar</span> <span class="o">-</span> <span class="n">distance_covered</span>
+
+        <span class="c1"># Theta is the full circle sector angle (not half) used to</span>
+        <span class="c1"># calculate circumsolar shading</span>
+        <span class="n">theta</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">arccos</span><span class="p">((</span><span class="n">r_circumsolar</span> <span class="o">-</span> <span class="n">distance_uncovered</span><span class="p">)</span> <span class="o">/</span>
+                              <span class="n">r_circumsolar</span><span class="p">)</span>  <span class="c1"># rad</span>
+        <span class="n">area_circle_sector</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">r_circumsolar</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">theta</span>
+        <span class="n">area_triangle_sector</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">r_circumsolar</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span>
+        <span class="n">area_not_shaded</span> <span class="o">=</span> <span class="n">area_circle_sector</span> <span class="o">-</span> <span class="n">area_triangle_sector</span>
+        <span class="n">percent_shading</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.</span> <span class="o">-</span> <span class="n">area_not_shaded</span> <span class="o">/</span> <span class="n">area_circumsolar</span><span class="p">)</span> <span class="o">*</span> <span class="mf">100.</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># Total shading of circumsolar: distance_covered &gt;= d_circumsolar</span>
+        <span class="n">percent_shading</span> <span class="o">=</span> <span class="mf">100.</span>
+
+    <span class="k">return</span> <span class="n">percent_shading</span></div>
+
+
+<div class="viewcode-block" id="calculate_horizon_band_shading"><a class="viewcode-back" href="../../developer/generated/pvfactors.pvcore.calculate_horizon_band_shading.html#pvfactors.pvcore.calculate_horizon_band_shading">[docs]</a><span class="k">def</span> <span class="nf">calculate_horizon_band_shading</span><span class="p">(</span><span class="n">shading_angle</span><span class="p">,</span> <span class="n">horizon_band_angle</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Calculate the percentage shading of the horizon band; which is just the</span>
+<span class="sd">    proportion of what&#39;s masked by the neighboring row since we assume</span>
+<span class="sd">    uniform luminance values for the band</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    shading_angle : float</span>
+<span class="sd">        the elevation angle to use for shading</span>
+<span class="sd">    horizon_band_angle : float</span>
+<span class="sd">        the total elevation angle of the horizon band</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    float</span>
+<span class="sd">        shading percentage of horizon band</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">percent_shading</span> <span class="o">=</span> <span class="mf">0.</span>
+    <span class="k">if</span> <span class="n">shading_angle</span> <span class="o">&gt;=</span> <span class="n">horizon_band_angle</span><span class="p">:</span>
+        <span class="n">percent_shading</span> <span class="o">=</span> <span class="mf">100.</span>
+    <span class="k">elif</span> <span class="p">(</span><span class="n">shading_angle</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">shading_angle</span> <span class="o">&lt;</span> <span class="n">horizon_band_angle</span><span class="p">):</span>
+        <span class="n">percent_shading</span> <span class="o">=</span> <span class="mf">100.</span> <span class="o">*</span> <span class="n">shading_angle</span> <span class="o">/</span> <span class="n">horizon_band_angle</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># No shading</span>
+        <span class="k">pass</span>
+    <span class="k">return</span> <span class="n">percent_shading</span></div>
+
+
+<div class="viewcode-block" id="find_edge_point"><a class="viewcode-back" href="../../developer/generated/pvfactors.pvcore.find_edge_point.html#pvfactors.pvcore.find_edge_point">[docs]</a><span class="k">def</span> <span class="nf">find_edge_point</span><span class="p">(</span><span class="n">b1_pvrow</span><span class="p">,</span> <span class="n">b2_pvrow</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Return edge point formed by pv row line and ground line. This assumes a</span>
+<span class="sd">    flat ground surface, located at the hard-coded elevation ``Y_GROUND`` value</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    b1_pvrow : ``shapely.Point``</span>
+<span class="sd">        first boundary point of the pv row line.</span>
+<span class="sd">    b2_pvrow : ``shapely.Point``</span>
+<span class="sd">        second boundary point of the pv row line.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    ``shapely.Point``</span>
+<span class="sd">        intersection point of pvrow continued line and ground line</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">u_vector</span> <span class="o">=</span> <span class="p">[</span><span class="n">b1_pvrow</span><span class="o">.</span><span class="n">x</span> <span class="o">-</span> <span class="n">b2_pvrow</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">b1_pvrow</span><span class="o">.</span><span class="n">y</span> <span class="o">-</span> <span class="n">b2_pvrow</span><span class="o">.</span><span class="n">y</span><span class="p">]</span>
+    <span class="n">n_vector</span> <span class="o">=</span> <span class="p">[</span><span class="n">u_vector</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="o">-</span><span class="n">u_vector</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+    <span class="n">intercept</span> <span class="o">=</span> <span class="o">-</span> <span class="p">(</span><span class="n">n_vector</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">b1_pvrow</span><span class="o">.</span><span class="n">x</span> <span class="o">+</span> <span class="n">n_vector</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">b1_pvrow</span><span class="o">.</span><span class="n">y</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">n_vector</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+        <span class="n">x_edge_point</span> <span class="o">=</span> <span class="o">-</span> <span class="p">(</span><span class="n">intercept</span> <span class="o">+</span>
+                          <span class="n">n_vector</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">Y_GROUND</span><span class="p">)</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">(</span><span class="n">n_vector</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">x_edge_point</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span>
+
+    <span class="c1"># TODO: need to find a better way to deal with this case</span>
+    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">x_edge_point</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">THRESHOLD_EDGE_POINT</span><span class="p">:</span>
+        <span class="n">LOGGER</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;find_edge_point: it looks like the tilt should be &quot;</span>
+                     <span class="s2">&quot;approximated with a flat case&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">Point</span><span class="p">(</span><span class="n">x_edge_point</span><span class="p">,</span> <span class="n">Y_GROUND</span><span class="p">)</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright Copyright 2016, SunPower Corporation
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

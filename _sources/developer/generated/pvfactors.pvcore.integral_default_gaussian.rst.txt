@@ -1,0 +1,6 @@
+pvfactors.pvcore.integral\_default\_gaussian
+============================================
+
+.. currentmodule:: pvfactors.pvcore
+
+.. autofunction:: integral_default_gaussian

@@ -1,0 +1,6 @@
+pvfactors.timeseries.breakup\_df\_inputs
+========================================
+
+.. currentmodule:: pvfactors.timeseries
+
+.. autofunction:: breakup_df_inputs

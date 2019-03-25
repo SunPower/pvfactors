@@ -1,0 +1,318 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>pvfactors.view_factors.ViewFactorCalculator.calculate_view_factors &mdash; pvfactors 0.1.5+24.g5ce1047 documentation</title>
+  
+
+  
+  
+    <link rel="shortcut icon" href="../../_static/favicon.ico"/>
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../_static/doctools.js"></script>
+        <script type="text/javascript" src="../../_static/language_data.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/css/custom.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="pvfactors.view_factors.ViewFactorCalculator.vf_hottel_pvrowline_back" href="pvfactors.view_factors.ViewFactorCalculator.vf_hottel_pvrowline_back.html" />
+    <link rel="prev" title="pvfactors.view_factors.ViewFactorCalculator" href="pvfactors.view_factors.ViewFactorCalculator.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> pvfactors
+          
+
+          
+            
+            <img src="../../_static/sp_2014_logo_all_white_LARGE.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.1.5
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../intro.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../getting_started/index.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../theory/index.html">Theory</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">Developer</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../pvfactors_demo.html">pvfactors: Jupyter notebook guide</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../api_reference.html">API Reference</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../api_reference.html#module-pvfactors.pvarray">pvfactors.pvarray</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../api_reference.html#module-pvfactors.pvcore">pvfactors.pvcore</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../api_reference.html#module-pvfactors.pvgeometry">pvfactors.pvgeometry</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../api_reference.html#module-pvfactors.pvrow">pvfactors.pvrow</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../api_reference.html#module-pvfactors.timeseries">pvfactors.timeseries</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="../api_reference.html#module-pvfactors.view_factors">pvfactors.view_factors</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="../api_reference.html#id6">Classes</a></li>
+<li class="toctree-l4 current"><a class="reference internal" href="../api_reference.html#id7">Methods</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../api_reference.html#id8">Functions</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../api_reference.html#module-pvfactors.plot">pvfactors.plot</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../how_to.html">General modeling flow for single-point calculation</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../whatsnew.html">What’s New</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">pvfactors</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Developer</a> &raquo;</li>
+        
+          <li><a href="../api_reference.html">API Reference</a> &raquo;</li>
+        
+      <li>pvfactors.view_factors.ViewFactorCalculator.calculate_view_factors</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            
+              <!-- User defined GitHub URL -->
+              <a href="https://github.com/SunPower/pvfactors/" class="fa fa-github"> Edit on GitHub</a>
+            
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast,
+.nboutput.nblast {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast + .nbinput {
+    margin-top: -19px;
+}
+
+/* nice headers on first paragraph of info/warning boxes */
+.admonition .first {
+    margin: -12px;
+    padding: 6px 12px;
+    margin-bottom: 12px;
+    color: #fff;
+    line-height: 1;
+    display: block;
+}
+.admonition.warning .first {
+    background: #f0b37e;
+}
+.admonition.note .first {
+    background: #6ab0de;
+}
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+</style>
+<div class="section" id="pvfactors-view-factors-viewfactorcalculator-calculate-view-factors">
+<h1>pvfactors.view_factors.ViewFactorCalculator.calculate_view_factors<a class="headerlink" href="#pvfactors-view-factors-viewfactorcalculator-calculate-view-factors" title="Permalink to this headline">¶</a></h1>
+<dl class="method">
+<dt id="pvfactors.view_factors.ViewFactorCalculator.calculate_view_factors">
+<code class="descclassname">ViewFactorCalculator.</code><code class="descname">calculate_view_factors</code><span class="sig-paren">(</span><em>surface_registry</em>, <em>view_matrix</em>, <em>args_matrix</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pvfactors/view_factors.html#ViewFactorCalculator.calculate_view_factors"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pvfactors.view_factors.ViewFactorCalculator.calculate_view_factors" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the view factors based on the inputs of the
+<a class="reference internal" href="pvfactors.pvarray.Array.html#pvfactors.pvarray.Array" title="pvfactors.pvarray.Array"><code class="xref py py-class docutils literal notranslate"><span class="pre">Array</span></code></a> class, and using a mapping of
+“view types” with view factor calculation methods.
+The method uses a faster implementation by only calculating half of the
+view factors, and uses the symmetry property of the transformed view
+factor matrix to calculate the other half.
+The symmetry property comes from the reciprocity property of view
+factors: <span class="math notranslate nohighlight">\(A_1 * VF_{1-2} = A_2 * VF_{2-1}\)</span>,
+where A_i is the area of surface i</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>surface_registry</strong> (<code class="docutils literal notranslate"><span class="pre">pd.DataFrame</span></code>) – surface registry attribute of
+<a class="reference internal" href="pvfactors.pvarray.Array.html#pvfactors.pvarray.Array" title="pvfactors.pvarray.Array"><code class="xref py py-class docutils literal notranslate"><span class="pre">Array</span></code></a> class</li>
+<li><strong>view_matrix</strong> (<code class="docutils literal notranslate"><span class="pre">numpy.ndarray</span></code>) – view matrix attribute of <a class="reference internal" href="pvfactors.pvarray.Array.html#pvfactors.pvarray.Array" title="pvfactors.pvarray.Array"><code class="xref py py-class docutils literal notranslate"><span class="pre">Array</span></code></a>
+class. This matrix specifies what surfaces each surface views, and
+also what type of view it is</li>
+<li><strong>args_matrix</strong> (<code class="docutils literal notranslate"><span class="pre">numpy.ndarray</span></code>) – args matrix attribute of <a class="reference internal" href="pvfactors.pvarray.Array.html#pvfactors.pvarray.Array" title="pvfactors.pvarray.Array"><code class="xref py py-class docutils literal notranslate"><span class="pre">Array</span></code></a>,
+complementing the attribute <code class="docutils literal notranslate"><span class="pre">view_matrix</span></code> by providing
+additional arguments for the calculations; e.g. what surfaces are
+obstructing the view between surface i and surface j</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">matrix of view factors (values from 0 to 1 in theory)</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><code class="docutils literal notranslate"><span class="pre">numpy.ndarray</span></code></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="pvfactors.view_factors.ViewFactorCalculator.vf_hottel_pvrowline_back.html" class="btn btn-neutral float-right" title="pvfactors.view_factors.ViewFactorCalculator.vf_hottel_pvrowline_back" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="pvfactors.view_factors.ViewFactorCalculator.html" class="btn btn-neutral float-left" title="pvfactors.view_factors.ViewFactorCalculator" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright Copyright 2016, SunPower Corporation
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
