@@ -1,7 +1,7 @@
 pvfactors (open-source fork of vf_model)
 ========================================
 
-[![CircleCI](https://circleci.com/gh/SunPower/pvfactors.svg?style=svg)](https://circleci.com/gh/SunPower/pvfactors)
+[![CircleCI](https://circleci.com/gh/SunPower/pvfactors.svg?style=shield)](https://circleci.com/gh/SunPower/pvfactors)
 
 pvfactors is a tool designed for PV professionals to calculate the
 irradiance incident on surfaces of a photovoltaic array. It relies on the use of
@@ -241,7 +241,7 @@ plt.show()
 ```
 
 
-![png](https://raw.githubusercontent.com/SunPower/pvfactors/master/pvfactors/docs/_static/pvarray.png)
+![png](https://raw.githubusercontent.com/SunPower/pvfactors/master/docs/sphinx/_static/pvarray.png)
 
 
 
