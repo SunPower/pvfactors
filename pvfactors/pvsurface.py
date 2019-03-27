@@ -12,7 +12,7 @@ class BaseSurface(LineString):
         self.n_vec = normal_vector
 
 
-class PVSurfaceRigid(BaseSurface):
+class PVSurface(BaseSurface):
     """Rigid PV surfaces are extensions of base surfaces, as they add PV
     related properties and methods, like reflectivity, shading, etc. They can
     only represent only 1 ``shapely`` :py:class:`LineString` geometry."""
@@ -20,7 +20,7 @@ class PVSurfaceRigid(BaseSurface):
     def __init__(self, coords=None, normal_vector=None, reflectivity=0.03,
                  shaded=False):
 
-        super(PVSurfaceRigid, self).__init__(coords, normal_vector)
+        super(PVSurface, self).__init__(coords, normal_vector)
         self.reflectivity = reflectivity
         self.shaded = shaded
 
@@ -35,21 +35,21 @@ class PVSurfaceRigid(BaseSurface):
                    shaded=shaded)
 
 
-class PVSurfaceFluid(GeometryCollection):
-    """A fluid PV surface will be a collection of 2 rigid PV surfaces,
-    a shaded one and an unshaded one. It inherits from ``shapely``
+class PVSegment(GeometryCollection):
+    """A PV segment will be a collection of 2 PV surfaces,
+    a shaded one and an illuminated one. It inherits from ``shapely``
     :py:class:`GeometryCollection` so that we can still call basic geometrical
-    methods and properties on it, eg like length (and get sum of lengths
-    here)"""
+    methods and properties on it, eg call length and get sum of lengths
+    here of the two surfaces"""
 
-    def __init__(self, illum_surface=PVSurfaceRigid(shaded=False),
-                 shaded_surface=PVSurfaceRigid(shaded=True)):
+    def __init__(self, illum_surface=PVSurface(shaded=False),
+                 shaded_surface=PVSurface(shaded=True)):
         assert shaded_surface.shaded, "surface should be shaded"
         assert not illum_surface.shaded, "surface should not be shaded"
         self._shaded_surface = shaded_surface
         self._illum_surface = illum_surface
-        super(PVSurfaceFluid, self).__init__([self._shaded_surface,
-                                              self._illum_surface])
+        super(PVSegment, self).__init__([self._shaded_surface,
+                                         self._illum_surface])
 
     @property
     def shaded_surface(self):
@@ -59,14 +59,14 @@ class PVSurfaceFluid(GeometryCollection):
     def shaded_surface(self, new_surface):
         assert new_surface.shaded, "surface should be shaded"
         self._shaded_surface = new_surface
-        super(PVSurfaceFluid, self).__init__([self._shaded_surface,
-                                              self._illum_surface])
+        super(PVSegment, self).__init__([self._shaded_surface,
+                                         self._illum_surface])
 
     @shaded_surface.deleter
     def shaded_surface(self):
-        self._shaded_surface = PVSurfaceRigid()
-        super(PVSurfaceFluid, self).__init__([self._shaded_surface,
-                                              self._illum_surface])
+        self._shaded_surface = PVSurface()
+        super(PVSegment, self).__init__([self._shaded_surface,
+                                         self._illum_surface])
 
     @property
     def illum_surface(self):
@@ -76,11 +76,15 @@ class PVSurfaceFluid(GeometryCollection):
     def illum_surface(self, new_surface):
         assert not new_surface.shaded, "surface should not be shaded"
         self._illum_surface = new_surface
-        super(PVSurfaceFluid, self).__init__([self._shaded_surface,
-                                              self._illum_surface])
+        super(PVSegment, self).__init__([self._shaded_surface,
+                                         self._illum_surface])
 
     @illum_surface.deleter
     def illum_surface(self):
-        self._illum_surface = PVSurfaceRigid()
-        super(PVSurfaceFluid, self).__init__([self._shaded_surface,
-                                              self._illum_surface])
+        self._illum_surface = PVSurface()
+        super(PVSegment, self).__init__([self._shaded_surface,
+                                         self._illum_surface])
+
+    @property
+    def shaded_length(self):
+        return self._shaded_surface.length

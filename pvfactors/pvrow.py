@@ -2,17 +2,35 @@
 
 from pvfactors import PVFactorsError
 from pvfactors.pvcore import LinePVArray, Y_GROUND
-from shapely.geometry import LineString, Point
+from shapely.geometry import LineString, Point, GeometryCollection
 from shapely.affinity import affine_transform
 import numpy as np
+
+
+class PVRowSide(GeometryCollection):
+    """A PV row side represents the whole surface of one side of a PV row.
+    At its core it will contain a fixed number of
+    :py:class:`~pvfactors.pvsurfaces.PVSegment` objects that will together
+    constitue one side of a PV row: a PV row side could for instance be
+    "discretized" into multiple segments"""
+
+    def __init__(self, list_pvsegments=[]):
+        self.list_pvsegments = tuple(list_pvsegments)
+        super(PVRowSide, self).__init__(list_pvsegments)
+
+    @property
+    def shaded_length(self):
+        shaded_length = 0.
+        for segment in self.list_pvsegments:
+            shaded_length += segment.shaded_length
+        return shaded_length
 
 
 class PVRowBase(object):
     """``PVRowBase`` exists for future developments of the model. It is the
     base class for PV Rows that will contain all the boiler plate code
-    shared by sub classes like :class:`PVRowLine`, or for instance
+    shared by sub classes like :py:class:`PVRowLine`, or for instance
     ``PVRowRoof``.
-
     """
 
     def __init__(self):
