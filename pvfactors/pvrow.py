@@ -26,6 +26,18 @@ class PVRowSide(GeometryCollection):
         return shaded_length
 
 
+class PVRow(GeometryCollection):
+    """A PV row is made of two PV row sides, a front and a back one"""
+
+    def __init__(self, front_side=PVRowSide(), back_side=PVRowSide()):
+        """front and back sides are supposed to be deleted"""
+        self.front = front_side
+        self.back = back_side
+        super(PVRow, self).__init__([self.front, self.back])
+
+####################################################################
+
+
 class PVRowBase(object):
     """``PVRowBase`` exists for future developments of the model. It is the
     base class for PV Rows that will contain all the boiler plate code
