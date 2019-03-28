@@ -41,21 +41,6 @@ def test_shaded_length():
     assert side.shaded_length == 1
 
 
-@pytest.fixture(scope='function')
-def pvsegments():
-    seg_1 = PVSegment(
-        illum_surface=PVSurface([(0, 0), (1, 0)], shaded=False))
-    seg_2 = PVSegment(
-        shaded_surface=PVSurface([(1, 0), (2, 0)], shaded=True))
-    yield seg_1, seg_2
-
-
-@pytest.fixture(scope='function')
-def pvrow_side(pvsegments):
-    side = PVRowSide(pvsegments)
-    yield side
-
-
 def test_pvrow(pvrow_side):
     """Test that can successfully create a PVRow object from 1 PVRow side,
     with a shaded pv surface"""
