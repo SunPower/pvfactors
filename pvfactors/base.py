@@ -4,32 +4,34 @@ from pvfactors.config import DEFAULT_NORMAL_VEC, TOL_COLLINEAR
 from shapely.geometry import GeometryCollection
 
 
+class ShadeCollection(GeometryCollection):
+    """A group :py:class:`~pvfactors.pvsurface.PVSurface`
+    objects that have the same shading status. The pv surfaces are not
+    necessarily contiguous or collinear."""
+
+    def __init__(self, list_surfaces=[]):
+        check_uniform_shading(list_surfaces)
+        self.list_surfaces = list_surfaces
+        self.shaded = self._get_shading()
+        super(ShadeCollection, self).__init__(list_surfaces)
+
+    def _get_shading(self):
+        """Get the surface shading from the provided list of pv surfaces."""
+        if len(self.list_surfaces):
+            return self.list_surfaces[0].shaded
+        else:
+            return None
+
+
 class BaseSide(GeometryCollection):
     """A side represents a fixed collection of
     :py:class:`~pvfactors.pvsurfaces.PVSegment` objects that should
     all be collinear, with the same normal vector"""
 
     def __init__(self, list_segments=[]):
-        self._check_segments(list_segments)
+        check_collinear(list_segments)
         self.list_segments = tuple(list_segments)
         super(BaseSide, self).__init__(list_segments)
-
-    def _check_segments(self, list_segments):
-        """Check that all segments are collinear"""
-        u_direction = None  # will be orthogonal to normal vector
-        for segment in list_segments:
-            if not segment.is_empty:
-                if u_direction is None:
-                    # set u_direction if not defined already
-                    u_direction = np.array([- segment.n_vector[1],
-                                            segment.n_vector[0]])
-                else:
-                    # check that collinear
-                    dot_prod = u_direction.dot(segment.n_vector)
-                    is_col = np.abs(dot_prod) < TOL_COLLINEAR
-                    if not is_col:
-                        msg = "All segments should be collinear in BaseSide"
-                        raise PVFactorsError(msg)
 
     @property
     def n_vector(self):
@@ -44,3 +46,37 @@ class BaseSide(GeometryCollection):
         for segment in self.list_segments:
             shaded_length += segment.shaded_length
         return shaded_length
+
+
+def check_collinear(list_elements):
+    """Check that all :py:class:`~pvfactors.pvsurface.PVSegment`
+    or :py:class:`~pvfactors.pvsurface.PVSurface` objects in list
+    are collinear"""
+    u_direction = None  # will be orthogonal to normal vector
+    for element in list_elements:
+        if not element.is_empty:
+            if u_direction is None:
+                # set u_direction if not defined already
+                u_direction = np.array([- element.n_vector[1],
+                                        element.n_vector[0]])
+            else:
+                # check that collinear
+                dot_prod = u_direction.dot(element.n_vector)
+                is_col = np.abs(dot_prod) < TOL_COLLINEAR
+                if not is_col:
+                    msg = "All elements should be collinear"
+                    raise PVFactorsError(msg)
+
+
+def check_uniform_shading(list_elements):
+    """Check that all :py:class:`~pvfactors.pvsurface.PVSurface` objects in
+    list are collinear"""
+    shaded = None
+    for element in list_elements:
+        if shaded is None:
+            shaded = element.shaded
+        else:
+            is_uniform = shaded == element.shaded
+            if not is_uniform:
+                msg = "All elements should have same shading"
+                raise PVFactorsError(msg)
