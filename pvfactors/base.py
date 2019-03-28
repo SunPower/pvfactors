@@ -9,18 +9,35 @@ class ShadeCollection(GeometryCollection):
     objects that have the same shading status. The pv surfaces are not
     necessarily contiguous or collinear."""
 
-    def __init__(self, list_surfaces=[]):
+    def __init__(self, list_surfaces=[], shaded=None):
+        """
+        Parameters
+        ----------
+        shaded : bool, optional
+            Will be used only if no surfaces were passed
+        """
         check_uniform_shading(list_surfaces)
         self.list_surfaces = list_surfaces
-        self.shaded = self._get_shading()
+        self.shaded = self._get_shading(shaded)
+        self.is_collinear = is_collinear(list_surfaces)
         super(ShadeCollection, self).__init__(list_surfaces)
 
-    def _get_shading(self):
+    def _get_shading(self, shaded):
         """Get the surface shading from the provided list of pv surfaces."""
         if len(self.list_surfaces):
             return self.list_surfaces[0].shaded
         else:
-            return None
+            return shaded
+
+    @property
+    def n_vector(self):
+        if not self.is_collinear:
+            msg = "Cannot request n_vector if all elements not collinear"
+            raise PVFactorsError(msg)
+        if len(self.list_surfaces):
+            return self.list_surfaces[0].n_vector
+        else:
+            return DEFAULT_NORMAL_VEC
 
 
 class BaseSide(GeometryCollection):
@@ -48,10 +65,11 @@ class BaseSide(GeometryCollection):
         return shaded_length
 
 
-def check_collinear(list_elements):
+def is_collinear(list_elements):
     """Check that all :py:class:`~pvfactors.pvsurface.PVSegment`
     or :py:class:`~pvfactors.pvsurface.PVSurface` objects in list
     are collinear"""
+    is_col = True
     u_direction = None  # will be orthogonal to normal vector
     for element in list_elements:
         if not element.is_empty:
@@ -64,8 +82,18 @@ def check_collinear(list_elements):
                 dot_prod = u_direction.dot(element.n_vector)
                 is_col = np.abs(dot_prod) < TOL_COLLINEAR
                 if not is_col:
-                    msg = "All elements should be collinear"
-                    raise PVFactorsError(msg)
+                    return is_col
+    return is_col
+
+
+def check_collinear(list_elements):
+    """Raise error if all :py:class:`~pvfactors.pvsurface.PVSegment`
+    or :py:class:`~pvfactors.pvsurface.PVSurface` objects in list
+    are not collinear"""
+    is_col = is_collinear(list_elements)
+    if not is_col:
+        msg = "All elements should be collinear"
+        raise PVFactorsError(msg)
 
 
 def check_uniform_shading(list_elements):
@@ -80,3 +108,9 @@ def check_uniform_shading(list_elements):
             if not is_uniform:
                 msg = "All elements should have same shading"
                 raise PVFactorsError(msg)
+
+
+def are_2d_vecs_collinear(u1, u2):
+    n1 = np.array([-u1[1], u1[0]])
+    dot_prod = n1.dot(u2)
+    return np.abs(dot_prod) < TOL_COLLINEAR

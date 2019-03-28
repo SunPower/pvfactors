@@ -2,6 +2,7 @@
 
 from pvfactors.pvrow import PVRowSide
 from pvfactors.pvsurface import PVSegment, PVSurface
+from pvfactors.base import ShadeCollection
 import pytest
 import os
 import pandas as pd
@@ -118,12 +119,19 @@ def df_registries_with_nan(df_registries):
 
 
 @pytest.fixture(scope='function')
-def pvsegments():
+def pvsegments(shade_collections):
     seg_1 = PVSegment(
-        illum_surface=PVSurface([(0, 0), (1, 0)], shaded=False))
+        illum_collection=shade_collections[0])
     seg_2 = PVSegment(
-        shaded_surface=PVSurface([(1, 0), (2, 0)], shaded=True))
+        shaded_collection=shade_collections[1])
     yield seg_1, seg_2
+
+
+@pytest.fixture(scope='function')
+def shade_collections():
+    illum_col = ShadeCollection([PVSurface([(0, 0), (1, 0)], shaded=False)])
+    shaded_col = ShadeCollection([PVSurface([(1, 0), (2, 0)], shaded=True)])
+    yield illum_col, shaded_col
 
 
 @pytest.fixture(scope='function')

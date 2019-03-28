@@ -1,6 +1,8 @@
 import numpy as np
 from pvfactors.config import DEFAULT_NORMAL_VEC
 from shapely.geometry import LineString, GeometryCollection
+from pvfactors.base import (
+    ShadeCollection, check_collinear, are_2d_vecs_collinear)
 
 
 class BaseSurface(LineString):
@@ -64,61 +66,73 @@ class PVSegment(GeometryCollection):
     methods and properties on it, eg call length and get sum of lengths
     here of the two surfaces"""
 
-    def __init__(self, illum_surface=PVSurface(shaded=False),
-                 shaded_surface=PVSurface(shaded=True)):
-        assert shaded_surface.shaded, "surface should be shaded"
-        assert not illum_surface.shaded, "surface should not be shaded"
-        self._shaded_surface = shaded_surface
-        self._illum_surface = illum_surface
-        super(PVSegment, self).__init__([self._shaded_surface,
-                                         self._illum_surface])
+    def __init__(self, illum_collection=ShadeCollection(shaded=False),
+                 shaded_collection=ShadeCollection(shaded=True)):
+        assert shaded_collection.shaded, "surface should be shaded"
+        assert not illum_collection.shaded, "surface should not be shaded"
+        self._check_collinear(illum_collection, shaded_collection)
+        self._shaded_collection = shaded_collection
+        self._illum_collection = illum_collection
+        super(PVSegment, self).__init__([self._shaded_collection,
+                                         self._illum_collection])
+
+    def _check_collinear(self, illum_collection, shaded_collection):
+        assert illum_collection.is_collinear
+        assert shaded_collection.is_collinear
+        # Check that if none or all of the collection is empty, n_vectors are
+        # equal
+        if (not illum_collection.is_empty) \
+           and (not shaded_collection.is_empty):
+            n_vec_ill = illum_collection.n_vector
+            n_vec_shaded = shaded_collection.n_vector
+            assert are_2d_vecs_collinear(n_vec_ill, n_vec_shaded)
 
     @property
     def n_vector(self):
         """Since shaded and illum surfaces are supposed to be collinear,
         this should return either surfaces' normal vector. If both empty,
         return None."""
-        if not self.illum_surface.is_empty:
-            return self.illum_surface.n_vector
-        elif not self.shaded_surface.is_empty:
-            return self.shaded_surface.n_vector
+        if not self.illum_collection.is_empty:
+            return self.illum_collection.n_vector
+        elif not self.shaded_collection.is_empty:
+            return self.shaded_collection.n_vector
         else:
             return DEFAULT_NORMAL_VEC
 
     @property
-    def shaded_surface(self):
-        return self._shaded_surface
+    def shaded_collection(self):
+        return self._shaded_collection
 
-    @shaded_surface.setter
-    def shaded_surface(self, new_surface):
-        assert new_surface.shaded, "surface should be shaded"
-        self._shaded_surface = new_surface
-        super(PVSegment, self).__init__([self._shaded_surface,
-                                         self._illum_surface])
+    @shaded_collection.setter
+    def shaded_collection(self, new_collection):
+        assert new_collection.shaded, "surface should be shaded"
+        self._shaded_collection = new_collection
+        super(PVSegment, self).__init__([self._shaded_collection,
+                                         self._illum_collection])
 
-    @shaded_surface.deleter
-    def shaded_surface(self):
-        self._shaded_surface = PVSurface()
-        super(PVSegment, self).__init__([self._shaded_surface,
-                                         self._illum_surface])
+    @shaded_collection.deleter
+    def shaded_collection(self):
+        self._shaded_collection = ShadeCollection(shaded=True)
+        super(PVSegment, self).__init__([self._shaded_collection,
+                                         self._illum_collection])
 
     @property
-    def illum_surface(self):
-        return self._illum_surface
+    def illum_collection(self):
+        return self._illum_collection
 
-    @illum_surface.setter
-    def illum_surface(self, new_surface):
-        assert not new_surface.shaded, "surface should not be shaded"
-        self._illum_surface = new_surface
-        super(PVSegment, self).__init__([self._shaded_surface,
-                                         self._illum_surface])
+    @illum_collection.setter
+    def illum_collection(self, new_collection):
+        assert not new_collection.shaded, "surface should not be shaded"
+        self._illum_collection = new_collection
+        super(PVSegment, self).__init__([self._shaded_collection,
+                                         self._illum_collection])
 
-    @illum_surface.deleter
-    def illum_surface(self):
-        self._illum_surface = PVSurface()
-        super(PVSegment, self).__init__([self._shaded_surface,
-                                         self._illum_surface])
+    @illum_collection.deleter
+    def illum_collection(self):
+        self._illum_collection = ShadeCollection(shaded=False)
+        super(PVSegment, self).__init__([self._shaded_collection,
+                                         self._illum_collection])
 
     @property
     def shaded_length(self):
-        return self._shaded_surface.length
+        return self._shaded_collection.length

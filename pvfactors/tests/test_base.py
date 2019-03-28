@@ -30,3 +30,10 @@ def test_shade_collection():
 
     assert str(err.value) \
         == 'All elements should have same shading'
+
+    with pytest.raises(PVFactorsError) as err:
+        col = ShadeCollection([surf_illum_1, surf_illum_2])
+        col.n_vector
+
+    assert str(err.value) \
+        == "Cannot request n_vector if all elements not collinear"
