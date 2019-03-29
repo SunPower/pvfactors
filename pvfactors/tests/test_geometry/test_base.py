@@ -1,8 +1,7 @@
 import pytest
 import numpy as np
 from pvfactors import PVFactorsError
-from pvfactors.base import BaseSide, ShadeCollection
-from pvfactors.pvsurface import PVSurface
+from pvfactors.geometry import BaseSide, ShadeCollection, PVSurface
 
 
 def test_baseside(pvsegments):

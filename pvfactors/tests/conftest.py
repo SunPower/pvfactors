@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 
-from pvfactors.pvrow import PVRowSide
-from pvfactors.pvsurface import PVSegment, PVSurface
-from pvfactors.base import ShadeCollection
+from pvfactors.geometry import \
+    ShadeCollection, PVSegment, PVSurface, PVRowSide
 import pytest
 import os
 import pandas as pd

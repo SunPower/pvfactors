@@ -1,8 +1,7 @@
 import numpy as np
 from pvfactors.config import DEFAULT_NORMAL_VEC
 from shapely.geometry import LineString, GeometryCollection
-from pvfactors.base import (
-    ShadeCollection, check_collinear, are_2d_vecs_collinear)
+from pvfactors.geometry.base import ShadeCollection, are_2d_vecs_collinear
 
 
 class BaseSurface(LineString):
