@@ -219,6 +219,18 @@ class PVSegment(GeometryCollection):
         else:
             return DEFAULT_NORMAL_VEC
 
+    @classmethod
+    def from_linestring_coords(cls, coords, shaded=False, normal_vector=None,
+                               index=None):
+        """Create a PVSegment from the coordinates of a single ``shapely``
+        :py:class:`LineString`"""
+        col = ShadeCollection.from_linestring_coords(
+            coords, shaded=shaded, normal_vector=normal_vector)
+        if shaded:
+            return cls(shaded_collection=col, index=index)
+        else:
+            return cls(illum_collection=col, index=index)
+
     @property
     def shaded_collection(self):
         return self._shaded_collection
