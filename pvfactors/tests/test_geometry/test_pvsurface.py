@@ -1,5 +1,4 @@
 from pvfactors.pvsurface import PVSegment
-from shapely.geometry import LineString
 
 
 def test_pvsegment_setter(shade_collections):

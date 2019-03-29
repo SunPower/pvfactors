@@ -1,37 +1,9 @@
-import numpy as np
+"""Classes related to pv surfaces and segments."""
+
 from pvfactors.config import DEFAULT_NORMAL_VEC
-from shapely.geometry import LineString, GeometryCollection
-from pvfactors.geometry.base import ShadeCollection, are_2d_vecs_collinear
-
-
-class BaseSurface(LineString):
-    """Base surfaces will be extensions of :py:class:`LineString` classes,
-    but adding an orientation to it. So two surfaces could use the same
-    linestring, but have opposite orientations."""
-
-    def __init__(self, coords, normal_vector=None):
-        """Normal vector can have two directions for a given LineString,
-        so the user can provide it in order to be specific,
-        otherwise it will be automatically
-        calculated, but then the surface won't know if it was supposed to be
-        pointing "up" or "down". If the surface is empty, the normal vector
-        will take the default value."""
-
-        super(BaseSurface, self).__init__(coords)
-        if normal_vector is None:
-            self.n_vector = self._calculate_n_vector()
-        else:
-            self.n_vector = normal_vector
-
-    def _calculate_n_vector(self):
-        """Calculate normal vector of the surface if not empty"""
-        if not self.is_empty:
-            b1, b2 = self.boundary
-            dx = b2.x - b1.x
-            dy = b2.y - b1.y
-            return np.array([-dy, dx])
-        else:
-            return DEFAULT_NORMAL_VEC
+from shapely.geometry import GeometryCollection
+from pvfactors.geometry.base import \
+    ShadeCollection, are_2d_vecs_collinear, BaseSurface
 
 
 class PVSurface(BaseSurface):
