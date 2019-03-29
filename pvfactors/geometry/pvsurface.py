@@ -12,11 +12,12 @@ class PVSurface(BaseSurface):
     only represent only 1 ``shapely`` :py:class:`LineString` geometry."""
 
     def __init__(self, coords=None, normal_vector=None, reflectivity=0.03,
-                 shaded=False):
+                 shaded=False, index=None):
 
         super(PVSurface, self).__init__(coords, normal_vector)
         self.reflectivity = reflectivity
         self.shaded = shaded
+        self.index = index
 
     @classmethod
     def from_center_tilt_width(cls, center, tilt, width, reflectivity=0.03,
@@ -38,12 +39,13 @@ class PVSegment(GeometryCollection):
     here of the two surfaces"""
 
     def __init__(self, illum_collection=ShadeCollection(shaded=False),
-                 shaded_collection=ShadeCollection(shaded=True)):
+                 shaded_collection=ShadeCollection(shaded=True), index=None):
         assert shaded_collection.shaded, "surface should be shaded"
         assert not illum_collection.shaded, "surface should not be shaded"
         self._check_collinear(illum_collection, shaded_collection)
         self._shaded_collection = shaded_collection
         self._illum_collection = illum_collection
+        self.index = index
         super(PVSegment, self).__init__([self._shaded_collection,
                                          self._illum_collection])
 

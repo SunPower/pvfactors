@@ -16,8 +16,10 @@ class PVRowSide(BaseSide):
 class PVRow(GeometryCollection):
     """A PV row is made of two PV row sides, a front and a back one"""
 
-    def __init__(self, front_side=PVRowSide(), back_side=PVRowSide()):
+    def __init__(self, front_side=PVRowSide(), back_side=PVRowSide(),
+                 index=None):
         """front and back sides are supposed to be deleted"""
         self.front = front_side
         self.back = back_side
+        self.index = index
         super(PVRow, self).__init__([self.front, self.back])
