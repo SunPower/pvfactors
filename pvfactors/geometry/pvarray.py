@@ -2,6 +2,7 @@
 from pvfactors.geometry.pvground import PVGround
 from pvfactors.geometry.pvrow import PVRow
 from pvfactors.config import X_ORIGIN_PVROWS, COLOR_DIC, PLOT_FONTSIZE
+from pvfactors.geometry.base import get_solar_2d_vector
 
 
 class OrderedPVArray(object):
@@ -11,8 +12,8 @@ class OrderedPVArray(object):
     calculations."""
 
     def __init__(self, list_pvrows=[], ground=None, surface_tilt=None,
-                 surface_azimuth=None, solar_zenith=None, solar_azimuth=None,
-                 gcr=None, height=None, distance=None):
+                 surface_azimuth=None, axis_azimuth=None, solar_zenith=None,
+                 solar_azimuth=None, gcr=None, height=None, distance=None):
         self.pvrows = list_pvrows
         self.ground = ground
         self.gcr = gcr
@@ -22,6 +23,10 @@ class OrderedPVArray(object):
         self.solar_azimuth = solar_azimuth
         self.surface_tilt = surface_tilt
         self.surface_azimuth = surface_azimuth
+        self.axis_azimuth = axis_azimuth
+        self.solar_2d_vector = get_solar_2d_vector(solar_zenith,
+                                                   solar_azimuth,
+                                                   surface_azimuth)
 
     @classmethod
     def from_dict(cls, parameters):
@@ -32,6 +37,8 @@ class OrderedPVArray(object):
         list_pvrows = []
         width = parameters['pvrow_width']
         tilt = parameters['surface_tilt']
+        surface_azimuth = parameters['surface_azimuth']
+        axis_azimuth = parameters['axis_azimuth']
         gcr = parameters['gcr']
         y_center = parameters['pvrow_height']
         distance = width / gcr
@@ -39,13 +46,15 @@ class OrderedPVArray(object):
         cut = parameters.get('cut', {})
         # Loop for pvrow creation
         for idx in range(parameters['n_pvrows']):
+            # Make equally spaced pv rows
             x_center = X_ORIGIN_PVROWS + idx * distance
             pvrow = PVRow.from_center_tilt_width(
-                (x_center, y_center), tilt, width, index=idx,
-                cut=cut.get(idx, {}))
+                (x_center, y_center), tilt, width, surface_azimuth,
+                axis_azimuth, index=idx, cut=cut.get(idx, {}))
             list_pvrows.append(pvrow)
         return cls(list_pvrows=list_pvrows, ground=ground, surface_tilt=tilt,
-                   surface_azimuth=parameters['surface_azimuth'],
+                   surface_azimuth=surface_azimuth,
+                   axis_azimuth=axis_azimuth,
                    solar_zenith=parameters['solar_zenith'],
                    solar_azimuth=parameters['solar_azimuth'],
                    gcr=gcr, height=y_center, distance=distance)
@@ -53,7 +62,9 @@ class OrderedPVArray(object):
     def update_tilt(self, new_tilt):
         pass
 
-    def cast_shadows(self, sun_vector):
+    def cast_shadows(self):
+        """Use calculated solar_2d_vector and array configuration to calculate
+        shadows being casted in the array"""
         pass
 
     def plot(self, ax):

@@ -13,6 +13,7 @@ def params():
         'pvrow_height': 2.5,
         'pvrow_width': 2.,
         'surface_azimuth': 90.,  # east oriented modules
+        'axis_azimuth': 0.,  # axis of rotation towards North
         'surface_tilt': 20.,
         'gcr': 0.4,
         'solar_zenith': 20.,
@@ -38,11 +39,11 @@ def discr_params():
         'gcr': 0.4,
         'solar_zenith': 20.,
         'solar_azimuth': 90.,  # sun located in the east
+        'axis_azimuth': 0.,  # axis of rotation towards North
         'rho_ground': 0.2,
         'rho_front_pvrow': 0.01,
         'rho_back_pvrow': 0.03,
-        'cut': {0: {'front': 5}, 1: {'back': 3}},
-        # [(0, 5, 'front'), (1, 3, 'back')]
+        'cut': {0: {'front': 5}, 1: {'back': 3}}
     }
     yield params
 
@@ -85,7 +86,8 @@ def test_plot_ordered_pvarray():
             'n_pvrows': 3,
             'pvrow_height': 2.5,
             'pvrow_width': 2.,
-            'surface_azimuth': 90.,  # east oriented modules
+            'surface_azimuth': 90.,  # east oriented modules / point right
+            'axis_azimuth': 0.,  # axis of rotation towards North
             'surface_tilt': 20.,
             'gcr': 0.4,
             'solar_zenith': 20.,
@@ -102,7 +104,8 @@ def test_plot_ordered_pvarray():
         plt.show()
 
         # Plot discretized ordered pv array
-        params.update({'cut': {0: {'front': 5}, 1: {'back': 3}}})
+        params.update({'cut': {0: {'front': 5}, 1: {'back': 3}},
+                       'surface_azimuth': 270.})  # point left
         ordered_pvarray = OrderedPVArray.from_dict(params)
         f, ax = plt.subplots()
         ordered_pvarray.plot(ax)

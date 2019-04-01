@@ -60,18 +60,55 @@ def are_2d_vecs_collinear(u1, u2):
     return np.abs(dot_prod) < TOL_COLLINEAR
 
 
-def coords_from_center_tilt_length(xy_center, tilt, length):
+def coords_from_center_tilt_length(xy_center, tilt, length,
+                                   surface_azimuth, axis_azimuth):
     """Calculate ``shapely`` :py:class:`LineString` coordinate from
-    center coords, surface tilt angle and length of line"""
-    # Create the three trackers
+    center coords, surface tilt angle and length of line.
+    The axis azimuth indicates the axis of rotation of the pvrows (if single-
+    axis trackers). In the 2D plane, the axis of rotation will be the vector
+    normal to that 2D plane and going into the 2D plane (when plotting it).
+    The surface azimuth should always be 90 degrees away from the axis azimuth,
+    either in the positive or negative direction.
+    For instance, a single axis trk with axis azimuth = 0 deg (North), will
+    have surface azimuth values equal to 90 deg (East) or 270 deg (West).
+    Tilt angles need to always be positive. For the axis azimuth and surface
+    azimuth, a rotation angle will be derived. Positive rotation angles will
+    indicate pvrows pointing to the left, and negative rotation angles will
+    indicate pvrows pointing to the right.
+    All of these conventions are necessary to make sure that no matter what
+    the tilt and surface angles are, we can still identify correctly
+    the same pv rows.
+    """
+    is_pointing_right = ((surface_azimuth - axis_azimuth) % 360.) > 180.
+    if is_pointing_right:
+        # system should be rotated to the right: so negative rotation angle
+        rotation = tilt
+    else:
+        # need positive rotation angle for system to point to the left
+        rotation = - tilt
     x_center, y_center = xy_center
     radius = length / 2.
-    x1 = radius * cosd(tilt + 180.) + x_center
-    y1 = radius * sind(tilt + 180.) + y_center
-    x2 = radius * cosd(tilt) + x_center
-    y2 = radius * sind(tilt) + y_center
+    x1 = radius * cosd(rotation + 180.) + x_center
+    y1 = radius * sind(rotation + 180.) + y_center
+    x2 = radius * cosd(rotation) + x_center
+    y2 = radius * sind(rotation) + y_center
 
     return [(x1, y1), (x2, y2)]
+
+
+def get_solar_2d_vector(solar_zenith, solar_azimuth, surface_azimuth):
+    """Projection of 3d solar vector onto the cross section of the systems:
+    which is the 2d plane we are considering: needed to calculate shadows
+    Remember that the 2D plane is such that the direction of the torque
+    tube vector goes out of (and normal to) the 2D plane, such that
+    positive tilt angles will have the PV surfaces tilted to the LEFT
+    and vice versa"""
+    solar_2d_vector = np.array([
+        # a drawing really helps understand the following
+        - sind(solar_zenith) * cosd(surface_azimuth - solar_azimuth),
+        cosd(solar_zenith)])
+
+    return solar_2d_vector
 
 
 class BaseSurface(LineString):

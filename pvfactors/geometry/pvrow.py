@@ -51,9 +51,11 @@ class PVRow(GeometryCollection):
         return cls(front_side=front_side, back_side=back_side, index=index)
 
     @classmethod
-    def from_center_tilt_width(cls, xy_center, tilt, width, shaded=False,
-                               normal_vector=None, index=None, cut={}):
-        coords = coords_from_center_tilt_length(xy_center, tilt, width)
+    def from_center_tilt_width(cls, xy_center, tilt, width, surface_azimuth,
+                               axis_azimuth, shaded=False, normal_vector=None,
+                               index=None, cut={}):
+        coords = coords_from_center_tilt_length(xy_center, tilt, width,
+                                                surface_azimuth, axis_azimuth)
         return cls.from_linestring_coords(coords, shaded=shaded,
                                           normal_vector=normal_vector,
                                           index=index, cut=cut)
