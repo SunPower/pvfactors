@@ -1,5 +1,6 @@
 """ Some utility functions and classes for pvfactors """
 
+from pvfactors.config import Y_GROUND
 from shapely.geometry import Point
 from pvfactors import PVFactorsError
 import numpy as np

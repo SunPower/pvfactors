@@ -1,7 +1,8 @@
 """Classes representing pv row geometries"""
 
 from pvfactors import PVFactorsError
-from pvfactors.pvcore import LinePVArray, Y_GROUND
+from pvfactors.config import Y_GROUND
+from pvfactors.pvcore import LinePVArray
 from shapely.geometry import LineString, Point
 from shapely.affinity import affine_transform
 import numpy as np
