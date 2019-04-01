@@ -29,7 +29,7 @@ class PVRow(GeometryCollection):
 
     @classmethod
     def from_linestring_coords(cls, coords, shaded=False, normal_vector=None,
-                               index=None):
+                               index=None, cut={}):
         """
         Parameters
         ----------
@@ -40,23 +40,23 @@ class PVRow(GeometryCollection):
         index_single_segment = 0
         front_side = PVRowSide.from_linestring_coords(
             coords, shaded=shaded, normal_vector=normal_vector,
-            index=index_single_segment)
+            index=index_single_segment, n_segments=cut.get('front', 1))
         if normal_vector is not None:
             back_n_vec = - np.array(normal_vector)
         else:
             back_n_vec = - front_side.n_vector
         back_side = PVRowSide.from_linestring_coords(
             coords, shaded=shaded, normal_vector=back_n_vec,
-            index=index_single_segment)
+            index=index_single_segment, n_segments=cut.get('back', 1))
         return cls(front_side=front_side, back_side=back_side, index=index)
 
     @classmethod
     def from_center_tilt_width(cls, xy_center, tilt, width, shaded=False,
-                               normal_vector=None, index=None):
+                               normal_vector=None, index=None, cut={}):
         coords = coords_from_center_tilt_length(xy_center, tilt, width)
         return cls.from_linestring_coords(coords, shaded=shaded,
                                           normal_vector=normal_vector,
-                                          index=index)
+                                          index=index, cut=cut)
 
     def plot(self, ax, color_shaded=COLOR_DIC['pvrow_shaded'],
              color_illum=COLOR_DIC['pvrow_illum']):

@@ -35,10 +35,14 @@ class OrderedPVArray(object):
         gcr = parameters['gcr']
         y_center = parameters['pvrow_height']
         distance = width / gcr
+        # Discretization params
+        cut = parameters.get('cut', {})
+        # Loop for pvrow creation
         for idx in range(parameters['n_pvrows']):
             x_center = X_ORIGIN_PVROWS + idx * distance
             pvrow = PVRow.from_center_tilt_width(
-                (x_center, y_center), tilt, width, index=idx)
+                (x_center, y_center), tilt, width, index=idx,
+                cut=cut.get(idx, {}))
             list_pvrows.append(pvrow)
         return cls(list_pvrows=list_pvrows, ground=ground, surface_tilt=tilt,
                    surface_azimuth=parameters['surface_azimuth'],

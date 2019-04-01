@@ -166,9 +166,24 @@ class BaseSide(GeometryCollection):
 
     @classmethod
     def from_linestring_coords(cls, coords, shaded=False, normal_vector=None,
-                               index=None):
-        list_pvsegments = [PVSegment.from_linestring_coords(
-            coords, shaded=shaded, normal_vector=normal_vector, index=index)]
+                               index=None, n_segments=1):
+        if n_segments == 1:
+            list_pvsegments = [PVSegment.from_linestring_coords(
+                coords, shaded=shaded, normal_vector=normal_vector,
+                index=index)]
+        else:
+            # Discretize coords and create segments accordingly
+            linestring = LineString(coords)
+            fractions = np.linspace(0., 1., num=n_segments + 1)
+            list_points = [linestring.interpolate(fraction, normalized=True)
+                           for fraction in fractions]
+            list_pvsegments = []
+            for idx in range(n_segments):
+                new_coords = list_points[idx:idx + 2]
+                pvsegment = PVSegment.from_linestring_coords(
+                    new_coords, shaded=shaded, normal_vector=normal_vector,
+                    index=index)
+                list_pvsegments.append(pvsegment)
         return cls(list_pvsegments=list_pvsegments)
 
     @property
