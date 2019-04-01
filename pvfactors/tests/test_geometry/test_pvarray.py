@@ -38,3 +38,8 @@ def test_ordered_pvarray_from_dict(params):
     np.testing.assert_array_equal(
         pvarray.pvrows[0].front.n_vector, -pvarray.pvrows[0].back.n_vector)
     assert pvarray.pvrows[0].front.shaded_length == 0
+    assert pvarray.gcr == params['gcr']
+    assert pvarray.surface_tilt == params['surface_tilt']
+    assert pvarray.surface_azimuth == params['surface_azimuth']
+    assert pvarray.solar_zenith == params['solar_zenith']
+    assert pvarray.solar_azimuth == params['solar_azimuth']
