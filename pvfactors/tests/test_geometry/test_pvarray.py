@@ -1,6 +1,6 @@
+import os
 import pytest
 import numpy as np
-import matplotlib.pyplot as plt
 from pvfactors.geometry import OrderedPVArray, PVGround
 from pvfactors.config import MAX_X_GROUND, MIN_X_GROUND
 
@@ -53,6 +53,10 @@ def test_ordered_pvarray_from_dict(params):
 
 
 def test_plot_pvarray(pvarray):
-    f, ax = plt.subplots()
-    pvarray.plot(ax)
-    plt.show()
+    """Test that ordered pv array plotting works correctly"""
+    is_ci = os.environ.get('CI', False)
+    if not is_ci:
+        import matplotlib.pyplot as plt
+        f, ax = plt.subplots()
+        pvarray.plot(ax)
+        plt.show()
