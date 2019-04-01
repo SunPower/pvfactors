@@ -1,7 +1,7 @@
 """Implement PV array classes, which will use PV rows and ground geometries"""
 from pvfactors.geometry.pvground import PVGround
 from pvfactors.geometry.pvrow import PVRow
-from pvfactors.config import X_ORIGIN_PVROWS
+from pvfactors.config import X_ORIGIN_PVROWS, COLOR_DIC, PLOT_FONTSIZE
 
 
 class OrderedPVArray(object):
@@ -12,10 +12,12 @@ class OrderedPVArray(object):
 
     def __init__(self, list_pvrows=[], ground=None, surface_tilt=None,
                  surface_azimuth=None, solar_zenith=None, solar_azimuth=None,
-                 gcr=None):
+                 gcr=None, height=None, distance=None):
         self.pvrows = list_pvrows
         self.ground = ground
         self.gcr = gcr
+        self.height = height
+        self.distance = distance
         self.solar_zenith = solar_zenith
         self.solar_azimuth = solar_azimuth
         self.surface_tilt = surface_tilt
@@ -23,6 +25,7 @@ class OrderedPVArray(object):
 
     @classmethod
     def from_dict(cls, parameters):
+        """Create ordered PV array from dictionary of parameters"""
         # Create ground
         ground = PVGround.as_flat()
         # Create pvrows
@@ -41,7 +44,7 @@ class OrderedPVArray(object):
                    surface_azimuth=parameters['surface_azimuth'],
                    solar_zenith=parameters['solar_zenith'],
                    solar_azimuth=parameters['solar_azimuth'],
-                   gcr=gcr)
+                   gcr=gcr, height=y_center, distance=distance)
 
     def update_tilt(self, new_tilt):
         pass
@@ -50,4 +53,18 @@ class OrderedPVArray(object):
         pass
 
     def plot(self, ax):
-        pass
+        """Plot PV array"""
+        # Plot pv array structures
+        self.ground.plot(ax, color_shaded=COLOR_DIC['ground_shaded'],
+                         color_illum=COLOR_DIC['ground_illum'])
+        for pvrow in self.pvrows:
+            pvrow.plot(ax, color_shaded=COLOR_DIC['pvrow_shaded'],
+                       color_illum=COLOR_DIC['pvrow_illum'])
+
+        # Plot formatting
+        ax.axis('equal')
+        n_pvrows = len(self.pvrows)
+        ax.set_xlim(- 0.5 * self.distance, (n_pvrows - 0.5) * self.distance)
+        ax.set_ylim(- self.height, 2 * self.height)
+        ax.set_xlabel("x [m]", fontsize=PLOT_FONTSIZE)
+        ax.set_ylabel("y [m]", fontsize=PLOT_FONTSIZE)

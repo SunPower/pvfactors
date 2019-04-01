@@ -2,7 +2,8 @@
 
 import numpy as np
 from pvfactors import PVFactorsError
-from pvfactors.config import DEFAULT_NORMAL_VEC, TOL_COLLINEAR
+from pvfactors.config import DEFAULT_NORMAL_VEC, TOL_COLLINEAR, COLOR_DIC
+from pvfactors.geometry.plot import plot_coords, plot_bounds, plot_line
 from shapely.geometry import GeometryCollection, LineString
 from pvlib.tools import cosd, sind
 
@@ -53,6 +54,7 @@ def check_uniform_shading(list_elements):
 
 
 def are_2d_vecs_collinear(u1, u2):
+    """Check that two 2D vectors are collinear"""
     n1 = np.array([-u1[1], u1[0]])
     dot_prod = n1.dot(u2)
     return np.abs(dot_prod) < TOL_COLLINEAR
@@ -101,6 +103,11 @@ class BaseSurface(LineString):
         else:
             return DEFAULT_NORMAL_VEC
 
+    def plot(self, ax, color=None):
+        plot_coords(ax, self)
+        plot_bounds(ax, self)
+        plot_line(ax, self, color)
+
 
 class ShadeCollection(GeometryCollection):
     """A group :py:class:`~pvfactors.pvsurface.PVSurface`
@@ -126,6 +133,10 @@ class ShadeCollection(GeometryCollection):
             return self.list_surfaces[0].shaded
         else:
             return shaded
+
+    def plot(self, ax, color=None):
+        for surface in self.list_surfaces:
+            surface.plot(ax, color=color)
 
     @property
     def n_vector(self):
@@ -153,6 +164,13 @@ class BaseSide(GeometryCollection):
         self.list_segments = tuple(list_segments)
         super(BaseSide, self).__init__(list_segments)
 
+    @classmethod
+    def from_linestring_coords(cls, coords, shaded=False, normal_vector=None,
+                               index=None):
+        list_pvsegments = [PVSegment.from_linestring_coords(
+            coords, shaded=shaded, normal_vector=normal_vector, index=index)]
+        return cls(list_pvsegments=list_pvsegments)
+
     @property
     def n_vector(self):
         if len(self.list_segments):
@@ -167,12 +185,12 @@ class BaseSide(GeometryCollection):
             shaded_length += segment.shaded_length
         return shaded_length
 
-    @classmethod
-    def from_linestring_coords(cls, coords, shaded=False, normal_vector=None,
-                               index=None):
-        list_pvsegments = [PVSegment.from_linestring_coords(
-            coords, shaded=shaded, normal_vector=normal_vector, index=index)]
-        return cls(list_pvsegments=list_pvsegments)
+    def plot(self, ax, color_shaded=COLOR_DIC['pvrow_shaded'],
+             color_illum=COLOR_DIC['pvrow_illum']):
+        """Plot all PV segments in side object"""
+        for segment in self.list_segments:
+            segment.plot(ax, color_shaded=color_shaded,
+                         color_illum=color_illum)
 
 
 class PVSurface(BaseSurface):
@@ -228,6 +246,11 @@ class PVSegment(GeometryCollection):
             n_vec_ill = illum_collection.n_vector
             n_vec_shaded = shaded_collection.n_vector
             assert are_2d_vecs_collinear(n_vec_ill, n_vec_shaded)
+
+    def plot(self, ax, color_shaded=COLOR_DIC['pvrow_shaded'],
+             color_illum=COLOR_DIC['pvrow_illum']):
+        self._shaded_collection.plot(ax, color=color_shaded)
+        self._illum_collection.plot(ax, color=color_illum)
 
     @property
     def n_vector(self):

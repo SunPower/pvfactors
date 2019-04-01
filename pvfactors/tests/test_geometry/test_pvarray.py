@@ -1,5 +1,6 @@
 import pytest
 import numpy as np
+import matplotlib.pyplot as plt
 from pvfactors.geometry import OrderedPVArray, PVGround
 from pvfactors.config import MAX_X_GROUND, MIN_X_GROUND
 
@@ -24,6 +25,12 @@ def params():
     yield pvarray_parameters
 
 
+@pytest.fixture(scope='function')
+def pvarray(params):
+    pvarray = OrderedPVArray.from_dict(params)
+    yield pvarray
+
+
 def test_ordered_pvarray_from_dict(params):
     """Test that can successfully create ordered pvarray from parameters dict
     """
@@ -43,3 +50,9 @@ def test_ordered_pvarray_from_dict(params):
     assert pvarray.surface_azimuth == params['surface_azimuth']
     assert pvarray.solar_zenith == params['solar_zenith']
     assert pvarray.solar_azimuth == params['solar_azimuth']
+
+
+def test_plot_pvarray(pvarray):
+    f, ax = plt.subplots()
+    pvarray.plot(ax)
+    plt.show()

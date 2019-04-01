@@ -1,4 +1,5 @@
 import numpy as np
+from pvfactors.config import COLOR_DIC
 from pvfactors.geometry.base import \
     BaseSide, coords_from_center_tilt_length
 from shapely.geometry import GeometryCollection
@@ -56,3 +57,9 @@ class PVRow(GeometryCollection):
         return cls.from_linestring_coords(coords, shaded=shaded,
                                           normal_vector=normal_vector,
                                           index=index)
+
+    def plot(self, ax, color_shaded=COLOR_DIC['pvrow_shaded'],
+             color_illum=COLOR_DIC['pvrow_illum']):
+
+        self.front.plot(ax, color_shaded=color_shaded, color_illum=color_illum)
+        self.back.plot(ax, color_shaded=color_shaded, color_illum=color_illum)

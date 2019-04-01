@@ -15,6 +15,5 @@ class PVGround(BaseSide):
             x_min, x_max = MIN_X_GROUND, MAX_X_GROUND
         # Create PV segment for flat ground
         seg = PVSegment.from_linestring_coords(
-            [(x_min, 0), (x_max, 0)], shaded=shaded, normal_vector=[0., 1.]
-        )
+            [(x_min, 0), (x_max, 0)], shaded=shaded, normal_vector=[0., 1.])
         return cls(list_segments=[seg])

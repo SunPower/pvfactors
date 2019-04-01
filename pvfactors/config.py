@@ -11,3 +11,15 @@ Y_GROUND = 0.
 
 # PV rows parameters
 X_ORIGIN_PVROWS = 0.
+
+# Define colors used for plotting the 2D arrays
+COLOR_DIC = {
+    'i': '#FFBB33',
+    's': '#A7A49D',
+    't': '#6699cc',
+    'pvrow_illum': '#6699cc',
+    'pvrow_shaded': '#ff0000',
+    'ground_shaded': '#A7A49D',
+    'ground_illum': '#FFBB33'
+}
+PLOT_FONTSIZE = 20
