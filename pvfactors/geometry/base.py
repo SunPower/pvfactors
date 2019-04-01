@@ -4,6 +4,7 @@ import numpy as np
 from pvfactors import PVFactorsError
 from pvfactors.config import DEFAULT_NORMAL_VEC, TOL_COLLINEAR
 from shapely.geometry import GeometryCollection, LineString
+from pvlib.tools import cosd, sind
 
 
 def is_collinear(list_elements):
@@ -55,6 +56,20 @@ def are_2d_vecs_collinear(u1, u2):
     n1 = np.array([-u1[1], u1[0]])
     dot_prod = n1.dot(u2)
     return np.abs(dot_prod) < TOL_COLLINEAR
+
+
+def coords_from_center_tilt_length(xy_center, tilt, length):
+    """Calculate ``shapely`` :py:class:`LineString` coordinate from
+    center coords, surface tilt angle and length of line"""
+    # Create the three trackers
+    x_center, y_center = xy_center
+    radius = length / 2.
+    x1 = radius * cosd(tilt + 180.) + x_center
+    y1 = radius * sind(tilt + 180.) + y_center
+    x2 = radius * cosd(tilt) + x_center
+    y2 = radius * sind(tilt) + y_center
+
+    return [(x1, y1), (x2, y2)]
 
 
 class BaseSurface(LineString):
@@ -151,6 +166,13 @@ class BaseSide(GeometryCollection):
         for segment in self.list_segments:
             shaded_length += segment.shaded_length
         return shaded_length
+
+    @classmethod
+    def from_linestring_coords(cls, coords, shaded=False, normal_vector=None,
+                               index=None):
+        list_pvsegments = [PVSegment.from_linestring_coords(
+            coords, shaded=shaded, normal_vector=normal_vector, index=index)]
+        return cls(list_pvsegments=list_pvsegments)
 
 
 class PVSurface(BaseSurface):

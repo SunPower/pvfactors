@@ -4,7 +4,8 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 from pvfactors import PVFactorsArrayUpdateException
-from pvfactors.config import Y_GROUND, MAX_X_GROUND, MIN_X_GROUND
+from pvfactors.config import \
+    Y_GROUND, MAX_X_GROUND, MIN_X_GROUND, X_ORIGIN_PVROWS
 from pvfactors.pvcore import (LinePVArray,
                               find_edge_point,
                               calculate_circumsolar_shading,
@@ -26,7 +27,6 @@ import copy
 LOGGER = logging.getLogger(__name__)
 LOGGER.setLevel(logging.INFO)
 
-X_ORIGIN_PVROWS = 0.
 DEFAULT_EDGE_PT_X = X_ORIGIN_PVROWS
 DELTA_MAX_MIN_GROUND_WHEN_TOO_SMALL_BIG = 1
 DEFAULT_CIRCUMSOLAR_ANGLE = 30.

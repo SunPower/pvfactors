@@ -1,4 +1,6 @@
-from pvfactors.geometry.base import BaseSide
+import numpy as np
+from pvfactors.geometry.base import \
+    BaseSide, coords_from_center_tilt_length
 from shapely.geometry import GeometryCollection
 
 
@@ -23,3 +25,34 @@ class PVRow(GeometryCollection):
         self.back = back_side
         self.index = index
         super(PVRow, self).__init__([self.front, self.back])
+
+    @classmethod
+    def from_linestring_coords(cls, coords, shaded=False, normal_vector=None,
+                               index=None):
+        """
+        Parameters
+        ----------
+
+        normal_vector : list
+            Normal vector of the front side PV segments
+        """
+        index_single_segment = 0
+        front_side = PVRowSide.from_linestring_coords(
+            coords, shaded=shaded, normal_vector=normal_vector,
+            index=index_single_segment)
+        if normal_vector is not None:
+            back_n_vec = - np.array(normal_vector)
+        else:
+            back_n_vec = - front_side.n_vector
+        back_side = PVRowSide.from_linestring_coords(
+            coords, shaded=shaded, normal_vector=back_n_vec,
+            index=index_single_segment)
+        return cls(front_side=front_side, back_side=back_side, index=index)
+
+    @classmethod
+    def from_center_tilt_width(cls, xy_center, tilt, width, shaded=False,
+                               normal_vector=None, index=None):
+        coords = coords_from_center_tilt_length(xy_center, tilt, width)
+        return cls.from_linestring_coords(coords, shaded=shaded,
+                                          normal_vector=normal_vector,
+                                          index=index)

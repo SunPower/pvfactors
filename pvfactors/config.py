@@ -8,3 +8,6 @@ TOL_COLLINEAR = 1e-5
 MAX_X_GROUND = 1e2
 MIN_X_GROUND = - MAX_X_GROUND
 Y_GROUND = 0.
+
+# PV rows parameters
+X_ORIGIN_PVROWS = 0.
