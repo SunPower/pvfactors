@@ -2,6 +2,7 @@ import pytest
 import numpy as np
 from pvfactors import PVFactorsError
 from pvfactors.geometry import BaseSide, ShadeCollection, PVSurface, PVSegment
+from shapely.geometry import LineString
 
 
 def test_baseside(pvsegments):
@@ -69,3 +70,52 @@ def test_segment_shaded_length(shade_collections):
     seg_2 = PVSegment(
         shaded_collection=shaded_col)
     assert seg_2.shaded_length == 1
+
+
+def test_cast_shadow_segment():
+    """Test shadow casting on PVSegment"""
+    seg = PVSegment.from_linestring_coords([(0, 0), (2, 0)], shaded=False,
+                                           index=0)
+    shadow = LineString([(0.5, 0), (1.5, 0)])
+    seg.cast_shadow(shadow)
+
+    assert seg.length == 2
+    assert seg.shaded_length == 1
+    assert seg.index == 0
+
+
+def test_remove_linestring_shadedcollection():
+    """Check removing linestring element from shade collection"""
+    # multi-part geometry difference
+    coords = [(0, 0), (2, 0)]
+    shaded = False
+    collection_1 = ShadeCollection.from_linestring_coords(coords, shaded)
+    line = LineString([(0.5, 0), (1.5, 0)])
+    collection_1.remove_linestring(line)
+
+    assert collection_1.length == 1
+    assert not collection_1.shaded
+    assert collection_1.is_collinear
+
+    # single geometry difference
+    coords = [(0, 0), (2, 0)]
+    shaded = True
+    collection_2 = ShadeCollection.from_linestring_coords(coords, shaded)
+    line = LineString([(0, 0), (1, 0)])
+    collection_2.remove_linestring(line)
+
+    assert collection_2.length == 1
+    assert collection_2.shaded
+    assert collection_2.is_collinear
+
+
+def test_add_pvsurface_shadecollection():
+    """Check adding linestring element to shade collection"""
+    collection = ShadeCollection(shaded=True)
+    coords = [(0.5, 0), (1.5, 0)]
+    surface = PVSurface(coords, shaded=True)
+    collection.add_pvsurface(surface)
+
+    assert collection.length == 1
+    assert collection.shaded
+    assert collection.is_collinear

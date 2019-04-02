@@ -139,6 +139,36 @@ class ShadeCollection(GeometryCollection):
         for surface in self.list_surfaces:
             surface.plot(ax, color=color)
 
+    def add_linestring(self, linestring):
+        surf = PVSurface(coords=linestring.coords, normal_vector=self.n_vector,
+                         shaded=self.shaded)
+        self.add_pvsurface(surf)
+
+    def add_pvsurface(self, pvsurface):
+        assert pvsurface.shaded == self.shaded
+        self.list_surfaces.append(pvsurface)
+        self.is_collinear = is_collinear(self.list_surfaces)
+        super(ShadeCollection, self).__init__(self.list_surfaces)
+
+    def remove_linestring(self, linestring):
+        new_list_surfaces = []
+        for surface in self.list_surfaces:
+            if surface.intersects(linestring):
+                difference = surface.difference(linestring)
+                # We want to make sure we can iterate on it, as
+                # ``difference`` can be a multi-part geometry or not
+                if not hasattr(difference, '__iter__'):
+                    difference = [difference]
+                for new_geom in difference:
+                    new_surface = PVSurface(new_geom.coords,
+                                            normal_vector=surface.n_vector,
+                                            shaded=surface.shaded)
+                    new_list_surfaces.append(new_surface)
+            else:
+                new_list_surfaces.append(surface)
+        self.list_surfaces = new_list_surfaces
+        super(ShadeCollection, self).__init__(self.list_surfaces)
+
     @property
     def n_vector(self):
         if not self.is_collinear:
@@ -151,7 +181,8 @@ class ShadeCollection(GeometryCollection):
 
     @classmethod
     def from_linestring_coords(cls, coords, shaded, normal_vector=None):
-        surf = PVSurface(coords=coords, normal_vector=normal_vector)
+        surf = PVSurface(coords=coords, normal_vector=normal_vector,
+                         shaded=shaded)
         return cls([surf], shaded=shaded)
 
 
@@ -267,6 +298,18 @@ class PVSegment(GeometryCollection):
              color_illum=COLOR_DIC['pvrow_illum']):
         self._shaded_collection.plot(ax, color=color_shaded)
         self._illum_collection.plot(ax, color=color_illum)
+
+    def cast_shadow(self, linestring):
+        """Split up segment from a linestring object: will rearrange the
+        PV surfaces between the shaded and illuminated collections of the
+        segment"""
+        intersects = self._illum_collection.intersects(linestring)
+        if intersects:
+            # Split up only if interesects the illuminated collection
+            self._shaded_collection.add_linestring(linestring)
+            self._illum_collection.remove_linestring(linestring)
+            super(PVSegment, self).__init__([self._shaded_collection,
+                                             self._illum_collection])
 
     @property
     def n_vector(self):
