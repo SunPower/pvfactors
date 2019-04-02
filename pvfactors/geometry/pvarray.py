@@ -11,6 +11,8 @@ class OrderedPVArray(object):
     and also all equally spaced. These simplifications allow faster and easier
     calculations."""
 
+    y_ground = 0.  # ground will be at height = 0 by default
+
     def __init__(self, list_pvrows=[], ground=None, surface_tilt=None,
                  surface_azimuth=None, axis_azimuth=None, solar_zenith=None,
                  solar_azimuth=None, gcr=None, height=None, distance=None):
@@ -32,7 +34,7 @@ class OrderedPVArray(object):
     def from_dict(cls, parameters):
         """Create ordered PV array from dictionary of parameters"""
         # Create ground
-        ground = PVGround.as_flat()
+        ground = PVGround.as_flat(y_ground=cls.y_ground)
         # Create pvrows
         list_pvrows = []
         width = parameters['pvrow_width']
@@ -40,7 +42,7 @@ class OrderedPVArray(object):
         surface_azimuth = parameters['surface_azimuth']
         axis_azimuth = parameters['axis_azimuth']
         gcr = parameters['gcr']
-        y_center = parameters['pvrow_height']
+        y_center = parameters['pvrow_height'] + cls.y_ground
         distance = width / gcr
         # Discretization params
         cut = parameters.get('cut', {})
