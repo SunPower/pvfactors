@@ -3,6 +3,7 @@
 import numpy as np
 from pvfactors import PVFactorsError
 from pvfactors.config import TOL_COLLINEAR
+from shapely.geometry import Point, GeometryCollection
 
 
 def is_collinear(list_elements):
@@ -41,3 +42,33 @@ def are_2d_vecs_collinear(u1, u2):
     n1 = np.array([-u1[1], u1[0]])
     dot_prod = n1.dot(u2)
     return np.abs(dot_prod) < TOL_COLLINEAR
+
+
+def projection(point, vector, linestring):
+    """Projection of point along vector onto a linestring.
+    Define equations of two lines:
+    - one defined by point and vector: a*x + b*y + c = 0
+    - one defined by linestring: d*x + e*y + f = 0
+
+    then if the lines are not parallel, the interesction is defined by:
+    X = - W^(-1) . B, where X = [x, y], W = [[a, b], [c, d]], B = [c, f]
+
+    Do not use if the two lines are parallel (determinant is 0, W not
+    invertible)
+    """
+    # Define equation a*x + b*y + c = 0
+    a, b = -vector[1], vector[0]
+    c = - (a * point.x + b * point.y)
+    # Define equation d*x + e*y +f = 0
+    b1, b2 = linestring.boundary
+    d, e = - (b2.y - b1.y), b2.x - b1.x
+    f = - (d * b1.x + e * b1.y)
+    # TODO: check that two lines are not parallel
+    W = [[a, b], [d, e]]
+    B = [c, f]
+    x, y = - np.linalg.inv(W).dot(B)
+    pt_intersection = Point(x, y)
+    if linestring.contains(pt_intersection):
+        return pt_intersection
+    else:
+        return GeometryCollection()
