@@ -329,8 +329,7 @@ class PVSegment(GeometryCollection):
             coords, shaded=shaded, normal_vector=normal_vector)
         # Realized that needed to instantiate other_col, otherwise could
         # end up with shared collection among different PV segments
-        other_col = ShadeCollection.from_linestring_coords(
-            [], shaded=not shaded, normal_vector=normal_vector)
+        other_col = ShadeCollection(list_surfaces=[], shaded=not shaded)
         if shaded:
             return cls(illum_collection=other_col,
                        shaded_collection=col, index=index)

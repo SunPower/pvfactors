@@ -4,6 +4,7 @@ from pvfactors.geometry.pvrow import PVRow
 from pvfactors.config import X_ORIGIN_PVROWS, COLOR_DIC, PLOT_FONTSIZE
 from pvfactors.geometry.base import get_solar_2d_vector
 from pvfactors.geometry.utils import projection
+from shapely.geometry import LineString
 
 
 class OrderedPVArray(object):
@@ -81,6 +82,7 @@ class OrderedPVArray(object):
                                 self.ground.original_linestring)
             proj_2 = projection(b2, self.solar_2d_vector,
                                 self.ground.original_linestring)
+            self.ground.cast_shadow(LineString([proj_1, proj_2]))
             # Create shaded using BaseSide method and projections
 
     def plot(self, ax):

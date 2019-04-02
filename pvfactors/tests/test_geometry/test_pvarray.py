@@ -132,4 +132,14 @@ def test_ordered_pvarray_shadow_casting(ordered_pvarray):
 
     ordered_pvarray.cast_shadows()
     assert ordered_pvarray.illum_side == 'front'
-    print(ordered_pvarray.pvrows[0].boundary)
+    # Check shadow casting on ground
+    assert len(ordered_pvarray.ground.list_segments[0]
+               .shaded_collection.list_surfaces) == 3
+    assert len(ordered_pvarray.ground.list_segments[0]
+               .illum_collection.list_surfaces) == 4
+    assert ordered_pvarray.ground.shaded_length == 6.385066634855475
+
+    # import matplotlib.pyplot as plt
+    # f, ax = plt.subplots()
+    # ordered_pvarray.plot(ax)
+    # plt.show()

@@ -12,8 +12,8 @@ class PVRowSide(BaseSide):
     constitue one side of a PV row: a PV row side could for instance be
     "discretized" into multiple segments"""
 
-    def __init__(self, list_pvsegments=[]):
-        super(PVRowSide, self).__init__(list_pvsegments)
+    def __init__(self, list_segments=[]):
+        super(PVRowSide, self).__init__(list_segments)
 
 
 class PVRow(GeometryCollection):
