@@ -119,3 +119,24 @@ def test_add_pvsurface_shadecollection():
     assert collection.length == 1
     assert collection.shaded
     assert collection.is_collinear
+
+
+def test_cast_shadow_side():
+    """Cast shadow on side with 2 segments"""
+    coords = [(0, 0), (2, 0)]
+    side = BaseSide.from_linestring_coords(coords, shaded=False, index=0,
+                                           n_segments=2)
+    assert side.list_segments[0].length == 1
+    assert side.list_segments[1].length == 1
+    assert side.list_segments[0].shaded_length == 0
+    assert side.list_segments[1].shaded_length == 0
+
+    # Cast shadow
+    shadow = LineString([(0.5, 0), (1.5, 0)])
+    side.cast_shadow(shadow)
+
+    assert side.length == 2
+    assert side.list_segments[0].length == 1
+    assert side.list_segments[1].length == 1
+    assert side.list_segments[0].shaded_length == 0.5
+    assert side.list_segments[1].shaded_length == 0.5

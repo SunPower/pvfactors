@@ -216,7 +216,7 @@ class BaseSide(GeometryCollection):
                     new_coords, shaded=shaded, normal_vector=normal_vector,
                     index=index)
                 list_pvsegments.append(pvsegment)
-        return cls(list_pvsegments=list_pvsegments)
+        return cls(list_segments=list_pvsegments)
 
     @property
     def n_vector(self):
@@ -239,29 +239,23 @@ class BaseSide(GeometryCollection):
             segment.plot(ax, color_shaded=color_shaded,
                          color_illum=color_illum)
 
+    def cast_shadow(self, linestring):
+        """Cast designated linestring shadow on PV segments"""
+        for segment in self.list_segments:
+            segment.cast_shadow(linestring)
+
 
 class PVSurface(BaseSurface):
     """Rigid PV surfaces are extensions of base surfaces, as they add PV
     related properties and methods, like reflectivity, shading, etc. They can
     only represent only 1 ``shapely`` :py:class:`LineString` geometry."""
 
-    def __init__(self, coords=None, normal_vector=None, reflectivity=0.03,
-                 shaded=False, index=None):
+    def __init__(self, coords=None, normal_vector=None, shaded=False,
+                 index=None):
 
         super(PVSurface, self).__init__(coords, normal_vector)
-        self.reflectivity = reflectivity
         self.shaded = shaded
         self.index = index
-
-    @classmethod
-    def from_center_tilt_width(cls, center, tilt, width, reflectivity=0.03,
-                               shaded=False):
-        # TODO: Calculate necessary info to instantiate
-        coords = None
-        normal_vector = None
-
-        return cls(coords, normal_vector, reflectivity=reflectivity,
-                   shaded=shaded)
 
 
 class PVSegment(GeometryCollection):
@@ -303,11 +297,14 @@ class PVSegment(GeometryCollection):
         """Split up segment from a linestring object: will rearrange the
         PV surfaces between the shaded and illuminated collections of the
         segment"""
-        intersects = self._illum_collection.intersects(linestring)
-        if intersects:
+        intersection = self._illum_collection.intersection(linestring)
+        if not intersection.is_empty:
             # Split up only if interesects the illuminated collection
-            self._shaded_collection.add_linestring(linestring)
-            self._illum_collection.remove_linestring(linestring)
+            # print(intersection)
+            self._shaded_collection.add_linestring(intersection)
+            # print(self._shaded_collection.length)
+            self._illum_collection.remove_linestring(intersection)
+            # print(self._illum_collection.length)
             super(PVSegment, self).__init__([self._shaded_collection,
                                              self._illum_collection])
 
@@ -330,10 +327,16 @@ class PVSegment(GeometryCollection):
         :py:class:`LineString`"""
         col = ShadeCollection.from_linestring_coords(
             coords, shaded=shaded, normal_vector=normal_vector)
+        # Realized that needed to instantiate other_col, otherwise could
+        # end up with shared collection among different PV segments
+        other_col = ShadeCollection.from_linestring_coords(
+            [], shaded=not shaded, normal_vector=normal_vector)
         if shaded:
-            return cls(shaded_collection=col, index=index)
+            return cls(illum_collection=other_col,
+                       shaded_collection=col, index=index)
         else:
-            return cls(illum_collection=col, index=index)
+            return cls(illum_collection=col,
+                       shaded_collection=other_col, index=index)
 
     @property
     def shaded_collection(self):
