@@ -2,7 +2,7 @@ import numpy as np
 from pvfactors.config import COLOR_DIC
 from pvfactors.geometry.base import \
     BaseSide, coords_from_center_tilt_length
-from shapely.geometry import GeometryCollection
+from shapely.geometry import GeometryCollection, LineString
 
 
 class PVRowSide(BaseSide):
@@ -20,11 +20,12 @@ class PVRow(GeometryCollection):
     """A PV row is made of two PV row sides, a front and a back one"""
 
     def __init__(self, front_side=PVRowSide(), back_side=PVRowSide(),
-                 index=None):
+                 index=None, original_linestring=None):
         """front and back sides are supposed to be deleted"""
         self.front = front_side
         self.back = back_side
         self.index = index
+        self.original_linestring = original_linestring
         super(PVRow, self).__init__([self.front, self.back])
 
     @classmethod
@@ -48,7 +49,8 @@ class PVRow(GeometryCollection):
         back_side = PVRowSide.from_linestring_coords(
             coords, shaded=shaded, normal_vector=back_n_vec,
             index=index_single_segment, n_segments=cut.get('back', 1))
-        return cls(front_side=front_side, back_side=back_side, index=index)
+        return cls(front_side=front_side, back_side=back_side, index=index,
+                   original_linestring=LineString(coords))
 
     @classmethod
     def from_center_tilt_width(cls, xy_center, tilt, width, surface_azimuth,
@@ -65,3 +67,7 @@ class PVRow(GeometryCollection):
 
         self.front.plot(ax, color_shaded=color_shaded, color_illum=color_illum)
         self.back.plot(ax, color_shaded=color_shaded, color_illum=color_illum)
+
+    @property
+    def boundary(self):
+        return self.original_linestring.boundary

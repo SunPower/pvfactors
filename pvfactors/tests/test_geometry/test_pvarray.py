@@ -126,3 +126,10 @@ def test_discretization_ordered_pvarray(discr_params):
     assert len(pvrows[0].front.list_segments) == 5
     assert len(pvrows[0].back.list_segments) == 1
     assert len(pvrows[1].back.list_segments) == 3
+
+
+def test_ordered_pvarray_shadow_casting(ordered_pvarray):
+
+    ordered_pvarray.cast_shadows()
+    assert ordered_pvarray.illum_side == 'front'
+    print(ordered_pvarray.pvrows[0].boundary)

@@ -3,6 +3,7 @@ from pvfactors.geometry.pvground import PVGround
 from pvfactors.geometry.pvrow import PVRow
 from pvfactors.config import X_ORIGIN_PVROWS, COLOR_DIC, PLOT_FONTSIZE
 from pvfactors.geometry.base import get_solar_2d_vector
+from pvfactors.geometry.utils import projection
 
 
 class OrderedPVArray(object):
@@ -28,7 +29,10 @@ class OrderedPVArray(object):
         self.axis_azimuth = axis_azimuth
         self.solar_2d_vector = get_solar_2d_vector(solar_zenith, solar_azimuth,
                                                    axis_azimuth)
+
+        # Initialize shading attributes
         self.illum_side = None
+        self.has_direct_shading = False
 
     @classmethod
     def from_dict(cls, parameters):
@@ -70,6 +74,14 @@ class OrderedPVArray(object):
         self.illum_side = (
             'front' if self.pvrows[0].front.n_vector.dot(
                 self.solar_2d_vector) >= 0 else 'back')
+        # Cast pvrow shadows on ground
+        for pvrow in self.pvrows:
+            b1, b2 = pvrow.boundary
+            proj_1 = projection(b1, self.solar_2d_vector,
+                                self.ground.original_linestring)
+            proj_2 = projection(b2, self.solar_2d_vector,
+                                self.ground.original_linestring)
+            # Create shaded using BaseSide method and projections
 
     def plot(self, ax):
         """Plot PV array"""
