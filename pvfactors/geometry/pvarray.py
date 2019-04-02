@@ -26,9 +26,9 @@ class OrderedPVArray(object):
         self.surface_tilt = surface_tilt
         self.surface_azimuth = surface_azimuth
         self.axis_azimuth = axis_azimuth
-        self.solar_2d_vector = get_solar_2d_vector(solar_zenith,
-                                                   solar_azimuth,
-                                                   surface_azimuth)
+        self.solar_2d_vector = get_solar_2d_vector(solar_zenith, solar_azimuth,
+                                                   axis_azimuth)
+        self.illum_side = None
 
     @classmethod
     def from_dict(cls, parameters):
@@ -67,7 +67,9 @@ class OrderedPVArray(object):
     def cast_shadows(self):
         """Use calculated solar_2d_vector and array configuration to calculate
         shadows being casted in the array"""
-        pass
+        self.illum_side = (
+            'front' if self.pvrows[0].front.n_vector.dot(
+                self.solar_2d_vector) >= 0 else 'back')
 
     def plot(self, ax):
         """Plot PV array"""

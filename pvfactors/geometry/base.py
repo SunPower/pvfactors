@@ -2,41 +2,12 @@
 
 import numpy as np
 from pvfactors import PVFactorsError
-from pvfactors.config import DEFAULT_NORMAL_VEC, TOL_COLLINEAR, COLOR_DIC
+from pvfactors.config import DEFAULT_NORMAL_VEC, COLOR_DIC
 from pvfactors.geometry.plot import plot_coords, plot_bounds, plot_line
+from pvfactors.geometry.utils import \
+    is_collinear, check_collinear, are_2d_vecs_collinear
 from shapely.geometry import GeometryCollection, LineString
 from pvlib.tools import cosd, sind
-
-
-def is_collinear(list_elements):
-    """Check that all :py:class:`~pvfactors.pvsurface.PVSegment`
-    or :py:class:`~pvfactors.pvsurface.PVSurface` objects in list
-    are collinear"""
-    is_col = True
-    u_direction = None  # will be orthogonal to normal vector
-    for element in list_elements:
-        if not element.is_empty:
-            if u_direction is None:
-                # set u_direction if not defined already
-                u_direction = np.array([- element.n_vector[1],
-                                        element.n_vector[0]])
-            else:
-                # check that collinear
-                dot_prod = u_direction.dot(element.n_vector)
-                is_col = np.abs(dot_prod) < TOL_COLLINEAR
-                if not is_col:
-                    return is_col
-    return is_col
-
-
-def check_collinear(list_elements):
-    """Raise error if all :py:class:`~pvfactors.pvsurface.PVSegment`
-    or :py:class:`~pvfactors.pvsurface.PVSurface` objects in list
-    are not collinear"""
-    is_col = is_collinear(list_elements)
-    if not is_col:
-        msg = "All elements should be collinear"
-        raise PVFactorsError(msg)
 
 
 def check_uniform_shading(list_elements):
@@ -51,13 +22,6 @@ def check_uniform_shading(list_elements):
             if not is_uniform:
                 msg = "All elements should have same shading"
                 raise PVFactorsError(msg)
-
-
-def are_2d_vecs_collinear(u1, u2):
-    """Check that two 2D vectors are collinear"""
-    n1 = np.array([-u1[1], u1[0]])
-    dot_prod = n1.dot(u2)
-    return np.abs(dot_prod) < TOL_COLLINEAR
 
 
 def coords_from_center_tilt_length(xy_center, tilt, length,
@@ -96,16 +60,16 @@ def coords_from_center_tilt_length(xy_center, tilt, length,
     return [(x1, y1), (x2, y2)]
 
 
-def get_solar_2d_vector(solar_zenith, solar_azimuth, surface_azimuth):
+def get_solar_2d_vector(solar_zenith, solar_azimuth, axis_azimuth):
     """Projection of 3d solar vector onto the cross section of the systems:
     which is the 2d plane we are considering: needed to calculate shadows
     Remember that the 2D plane is such that the direction of the torque
-    tube vector goes out of (and normal to) the 2D plane, such that
-    positive tilt angles will have the PV surfaces tilted to the LEFT
+    tube vector goes into (and normal to) the 2D plane, such that
+    positive rotation angles will have the PV surfaces tilted to the LEFT
     and vice versa"""
     solar_2d_vector = np.array([
         # a drawing really helps understand the following
-        - sind(solar_zenith) * cosd(surface_azimuth - solar_azimuth),
+        sind(solar_zenith) * cosd(solar_azimuth - axis_azimuth - 90.),
         cosd(solar_zenith)])
 
     return solar_2d_vector
