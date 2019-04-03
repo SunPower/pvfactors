@@ -2,10 +2,9 @@
 
 import numpy as np
 from pvfactors import PVFactorsError
-from pvfactors.config import \
-    TOL_COLLINEAR, DISTANCE_TOLERANCE, THRESHOLD_DISTANCE_TOO_CLOSE
+from pvfactors.config import TOL_COLLINEAR, DISTANCE_TOLERANCE
 from shapely.geometry import \
-    Point, GeometryCollection, LineString, MultiLineString, MultiPoint
+    Point, GeometryCollection, LineString, MultiLineString
 
 
 def difference(u, v):
@@ -22,10 +21,16 @@ def difference(u, v):
         if u_contains_vb2:
             l_tmp = LineString([ub1, vb1])
             if contains(l_tmp, vb2):
-                coords = [MultiPoint([ub1, vb2]), MultiPoint([vb1, ub2])]
+                list_lines = [LineString([ub1, vb2]), LineString([vb1, ub2])]
             else:
-                coords = [MultiPoint([ub1, vb1]), MultiPoint([vb2, ub2])]
-            return MultiLineString(coords)
+                list_lines = [LineString([ub1, vb1]), LineString([vb2, ub2])]
+            # Note that boundary points can be equal, so need to make sure
+            # we're not passing line strings with length 0
+            final_list_lines = [line for line in list_lines if line.length > 0]
+            if len(final_list_lines) > 1:
+                return MultiLineString(final_list_lines)
+            else:
+                return final_list_lines[0]
         elif v_contains_ub1:
             return LineString([vb1, ub2])
         elif v_contains_ub2:
@@ -129,16 +134,6 @@ def projection(point, vector, linestring):
         elif too_close_to_b2:
             return b2
         else:
-            # Need this, otherwise all future intersection and contain
-            # assertions will fail
-            shapely_contains = linestring.contains(pt_intersection)
-            if not shapely_contains:
-                # project pt_intersection onto linestring
-                print("######## PROJECTING")
-                projected_distance = linestring.project(pt_intersection)
-                new_point = linestring.interpolate(projected_distance)
-                return new_point
-            else:
-                return pt_intersection
+            return pt_intersection
     else:
         return GeometryCollection()

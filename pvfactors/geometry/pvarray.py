@@ -4,7 +4,7 @@ from pvfactors.geometry.pvrow import PVRow
 from pvfactors.config import X_ORIGIN_PVROWS, COLOR_DIC, PLOT_FONTSIZE
 from pvfactors.geometry.base import get_solar_2d_vector
 from pvfactors.geometry.utils import projection
-from shapely.geometry import LineString
+from shapely.geometry import LineString, Point
 
 
 class OrderedPVArray(object):
@@ -18,7 +18,7 @@ class OrderedPVArray(object):
     def __init__(self, list_pvrows=[], ground=None, surface_tilt=None,
                  surface_azimuth=None, axis_azimuth=None, solar_zenith=None,
                  solar_azimuth=None, gcr=None, height=None, distance=None):
-        self.pvrows = list_pvrows
+        self.pvrows = list_pvrows  # ordered from left to right
         self.ground = ground
         self.gcr = gcr
         self.height = height
@@ -71,19 +71,57 @@ class OrderedPVArray(object):
 
     def cast_shadows(self):
         """Use calculated solar_2d_vector and array configuration to calculate
-        shadows being casted in the array"""
-        self.illum_side = (
-            'front' if self.pvrows[0].front.n_vector.dot(
-                self.solar_2d_vector) >= 0 else 'back')
+        shadows being casted in the ordered pv array.
+        The logic here will be quite specific to ordered pv arrays"""
+        last_gnd_2 = None
         # Cast pvrow shadows on ground
-        for pvrow in self.pvrows:
+        for idx, pvrow in enumerate(self.pvrows):
             b1, b2 = pvrow.boundary
-            proj_1 = projection(b1, self.solar_2d_vector,
-                                self.ground.original_linestring)
-            proj_2 = projection(b2, self.solar_2d_vector,
-                                self.ground.original_linestring)
-            self.ground.cast_shadow(LineString([proj_1, proj_2]))
-            # Create shaded using BaseSide method and projections
+            gnd_1 = projection(b1, self.solar_2d_vector,
+                               self.ground.original_linestring)
+            gnd_2 = projection(b2, self.solar_2d_vector,
+                               self.ground.original_linestring)
+            self.ground.cast_shadow(LineString([gnd_1, gnd_2]))
+            # Check that there's direct shading
+            if idx == 1:
+                # There's inter-row shading if ground shadows overlap
+                self.has_direct_shading = gnd_1.x < last_gnd_2.x
+            last_gnd_2 = gnd_2
+
+        # Calculate direct shading on pvrows
+        sun_on_the_right = self.solar_2d_vector[0] >= 0
+        if self.has_direct_shading:
+            illum_side = ('front' if self.pvrows[0].front.n_vector.dot(
+                self.solar_2d_vector) >= 0 else 'back')
+            if sun_on_the_right:
+                # right pvrow shades left pvrow
+                shaded_pvrow = self.pvrows[0]
+                front_pvrow = self.pvrows[1]
+                proj_initial = projection(front_pvrow.highest_point,
+                                          self.solar_2d_vector,
+                                          shaded_pvrow.original_linestring)
+                # Use distance translation to cast shadows on pvrows
+                for idx, pvrow in enumerate(self.pvrows[:-1]):
+                    proj = Point(proj_initial.x + idx * self.distance,
+                                 proj_initial.y)
+                    shaded_side = getattr(pvrow, illum_side)
+                    shaded_side.cast_shadow(
+                        LineString([pvrow.lowest_point, proj]))
+            else:
+                # left pvrow shades right pvrow
+                shaded_pvrow = self.pvrows[1]
+                front_pvrow = self.pvrows[0]
+                proj_initial = projection(front_pvrow.highest_point,
+                                          self.solar_2d_vector,
+                                          shaded_pvrow.original_linestring)
+                # Use distance translation to cast shadows on pvrows
+                for idx, pvrow in enumerate(self.pvrows[1:]):
+                    proj = Point(proj_initial.x + idx * self.distance,
+                                 proj_initial.y)
+                    shaded_side = getattr(pvrow, illum_side)
+                    shaded_side.cast_shadow(
+                        LineString([pvrow.lowest_point, proj]))
+            # -----> merge ground shadows, since continuous
 
     def plot(self, ax):
         """Plot PV array"""

@@ -2,10 +2,11 @@
 
 import numpy as np
 from pvfactors import PVFactorsError
-from pvfactors.config import DEFAULT_NORMAL_VEC, COLOR_DIC
+from pvfactors.config import \
+    DEFAULT_NORMAL_VEC, COLOR_DIC, DISTANCE_TOLERANCE
 from pvfactors.geometry.plot import plot_coords, plot_bounds, plot_line
 from pvfactors.geometry.utils import \
-    is_collinear, check_collinear, are_2d_vecs_collinear
+    is_collinear, check_collinear, are_2d_vecs_collinear, difference
 from shapely.geometry import GeometryCollection, LineString
 from pvlib.tools import cosd, sind
 
@@ -108,6 +109,11 @@ class BaseSurface(LineString):
         plot_coords(ax, self)
         plot_bounds(ax, self)
         plot_line(ax, self, color)
+
+    def difference(self, linestring):
+        """Calculate remaining surface after removing part belonging from
+        provided linestring"""
+        return difference(self, linestring)
 
 
 class ShadeCollection(GeometryCollection):
@@ -297,7 +303,11 @@ class PVSegment(GeometryCollection):
         """Split up segment from a linestring object: will rearrange the
         PV surfaces between the shaded and illuminated collections of the
         segment"""
-        intersection = self._illum_collection.intersection(linestring)
+        # Using a buffer may slow things down, but it's quite crucial
+        # in order for shapely to get the intersection accurately see:
+        # https://stackoverflow.com/questions/28028910/how-to-deal-with-rounding-errors-in-shapely
+        intersection = (self._illum_collection.buffer(DISTANCE_TOLERANCE)
+                        .intersection(linestring))
         if not intersection.is_empty:
             # Split up only if interesects the illuminated collection
             # print(intersection)

@@ -71,3 +71,15 @@ class PVRow(GeometryCollection):
     @property
     def boundary(self):
         return self.original_linestring.boundary
+
+    @property
+    def highest_point(self):
+        b1, b2 = self.boundary
+        highest_point = b1 if b1.y > b2.y else b2
+        return highest_point
+
+    @property
+    def lowest_point(self):
+        b1, b2 = self.boundary
+        lowest_point = b1 if b1.y < b2.y else b2
+        return lowest_point

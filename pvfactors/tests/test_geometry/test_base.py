@@ -2,7 +2,8 @@ import pytest
 import numpy as np
 from pvfactors import PVFactorsError
 from pvfactors.geometry import BaseSide, ShadeCollection, PVSurface, PVSegment
-from shapely.geometry import LineString
+from shapely.geometry import LineString, Point
+from pvfactors.geometry.utils import projection
 
 
 def test_baseside(pvsegments):
@@ -135,8 +136,45 @@ def test_cast_shadow_side():
     shadow = LineString([(0.5, 0), (1.5, 0)])
     side.cast_shadow(shadow)
 
-    assert side.length == 2
-    assert side.list_segments[0].length == 1
-    assert side.list_segments[1].length == 1
-    assert side.list_segments[0].shaded_length == 0.5
-    assert side.list_segments[1].shaded_length == 0.5
+    np.testing.assert_almost_equal(side.length, 2)
+    np.testing.assert_almost_equal(side.list_segments[0].length, 1)
+    np.testing.assert_almost_equal(side.list_segments[1].length, 1)
+    np.testing.assert_almost_equal(side.list_segments[0].shaded_length, 0.5)
+    np.testing.assert_almost_equal(side.list_segments[1].shaded_length, 0.5)
+
+
+def test_pvsurface_difference_precision_error():
+    """This would lead to wrong result using shapely ``difference`` method"""
+
+    surf_1 = PVSurface([(0, 0), (3, 2)])
+    surf_2 = PVSurface([surf_1.interpolate(1), Point(6, 4)])
+    diff = surf_1.difference(surf_2)
+    assert diff == LineString([(0, 0),
+                               (0.8320502943378437, 0.5547001962252291)])
+
+
+def test_cast_shadow_segment_precision_error():
+    """Test shadow casting on PVSegment when using inexact projection.
+    In shapely, need to use ``buffer`` method for the intersection to be
+    calculated correctly
+    """
+    coords = [(0, 0), (3, 2)]
+    seg = PVSegment.from_linestring_coords(coords, shaded=False,
+                                           index=0)
+    # Project point on line
+    pt = Point(0, 2)
+    line = seg.illum_collection.list_surfaces[0]  # LineString(coords)
+    vector = [1, -1]
+    proj = projection(pt, vector, line)
+    # Use result of projection to create shadow
+    shadow = LineString([Point(0, 0), proj])
+    seg.cast_shadow(shadow)
+
+    np.testing.assert_almost_equal(seg.length, 3.60555127546)
+    np.testing.assert_almost_equal(seg.shaded_collection.length, 1.44222051019)
+    assert len(seg.shaded_collection.list_surfaces) == 1
+    assert len(seg.illum_collection.list_surfaces) == 1
+    np.testing.assert_almost_equal(
+        seg.shaded_collection.list_surfaces[0].length, 1.44222051019)
+    np.testing.assert_almost_equal(
+        seg.illum_collection.list_surfaces[0].length, 2.1633307652783933)

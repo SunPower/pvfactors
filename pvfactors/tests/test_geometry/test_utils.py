@@ -40,6 +40,7 @@ def test_projection():
 
 
 def test_difference():
+    """Testing own implementation of geometry difference operator"""
 
     # Simple cases
     u = LineString([(0, 0), (2, 0)])
@@ -79,6 +80,10 @@ def test_difference():
     v = LineString([(1, 1), (1, 2)])
     diff = difference(u, v)
     assert diff == u
+
+    v = LineString([(0, 0), (1, 0)])
+    diff = difference(u, v)
+    assert diff == LineString([(1, 0), (2, 0)])
 
     # Case with potentially float error
     u = LineString([(0, 0), (3, 2)])
