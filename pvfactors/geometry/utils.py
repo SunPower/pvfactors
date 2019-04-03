@@ -2,7 +2,8 @@
 
 import numpy as np
 from pvfactors import PVFactorsError
-from pvfactors.config import TOL_COLLINEAR
+from pvfactors.config import \
+    TOL_COLLINEAR, DISTANCE_TOLERANCE, THRESHOLD_DISTANCE_TOO_CLOSE
 from shapely.geometry import Point, GeometryCollection
 
 
@@ -68,7 +69,25 @@ def projection(point, vector, linestring):
     B = [c, f]
     x, y = - np.linalg.inv(W).dot(B)
     pt_intersection = Point(x, y)
-    if linestring.contains(pt_intersection):
-        return pt_intersection
+    length_linestring = linestring.length
+    # For the following, using linestring.contains(pt_intersection) leads
+    # to wrong assessments sometimes, probably because of round off errors
+    distance_to_b1 = b1.distance(pt_intersection)
+    distance_to_b2 = b2.distance(pt_intersection)
+    contained_by_linestring = (
+        (linestring.distance(pt_intersection) < DISTANCE_TOLERANCE) and
+        (distance_to_b1 <= length_linestring) and
+        (distance_to_b2 <= length_linestring))
+    if contained_by_linestring:
+        # Check that the intersection is not too close to a boundary: if it
+        # is it can create a "memory access error" it seems
+        too_close_to_b1 = distance_to_b1 < DISTANCE_TOLERANCE
+        too_close_to_b2 = distance_to_b2 < DISTANCE_TOLERANCE
+        if too_close_to_b1:
+            return b1
+        elif too_close_to_b2:
+            return b2
+        else:
+            return pt_intersection
     else:
         return GeometryCollection()

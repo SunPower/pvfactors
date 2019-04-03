@@ -23,3 +23,7 @@ COLOR_DIC = {
     'ground_illum': '#FFBB33'
 }
 PLOT_FONTSIZE = 20
+
+# Tolerance and thresholds to use from experience getting errors with shapely
+DISTANCE_TOLERANCE = 1e-8
+THRESHOLD_DISTANCE_TOO_CLOSE = 1e-10
