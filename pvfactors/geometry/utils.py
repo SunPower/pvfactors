@@ -4,7 +4,48 @@ import numpy as np
 from pvfactors import PVFactorsError
 from pvfactors.config import \
     TOL_COLLINEAR, DISTANCE_TOLERANCE, THRESHOLD_DISTANCE_TOO_CLOSE
-from shapely.geometry import Point, GeometryCollection
+from shapely.geometry import \
+    Point, GeometryCollection, LineString, MultiLineString, MultiPoint
+
+
+def difference(u, v):
+    """Calculate difference between two lines, avoiding shapely float
+    precision errors"""
+    ub1, ub2 = u.boundary
+    vb1, vb2 = v.boundary
+    u_contains_vb1 = contains(u, vb1)
+    u_contains_vb2 = contains(u, vb2)
+    v_contains_ub1 = contains(v, ub1)
+    v_contains_ub2 = contains(v, ub2)
+
+    if u_contains_vb1:
+        if u_contains_vb2:
+            l_tmp = LineString([ub1, vb1])
+            if contains(l_tmp, vb2):
+                coords = [MultiPoint([ub1, vb2]), MultiPoint([vb1, ub2])]
+            else:
+                coords = [MultiPoint([ub1, vb1]), MultiPoint([vb2, ub2])]
+            return MultiLineString(coords)
+        elif v_contains_ub1:
+            return LineString([vb1, ub2])
+        elif v_contains_ub2:
+            return LineString([ub1, vb1])
+        else:
+            return u
+    elif u_contains_vb2:
+        if v_contains_ub1:
+            return LineString([vb2, ub2])
+        elif v_contains_ub2:
+            return LineString([ub1, vb2])
+        else:
+            return u
+    else:
+        return u
+
+
+def contains(linestring, point, tol_distance=DISTANCE_TOLERANCE):
+    """Fixing floating point errors obtained in shapely for contains"""
+    return linestring.distance(point) < tol_distance
 
 
 def is_collinear(list_elements):
@@ -88,6 +129,16 @@ def projection(point, vector, linestring):
         elif too_close_to_b2:
             return b2
         else:
-            return pt_intersection
+            # Need this, otherwise all future intersection and contain
+            # assertions will fail
+            shapely_contains = linestring.contains(pt_intersection)
+            if not shapely_contains:
+                # project pt_intersection onto linestring
+                print("######## PROJECTING")
+                projected_distance = linestring.project(pt_intersection)
+                new_point = linestring.interpolate(projected_distance)
+                return new_point
+            else:
+                return pt_intersection
     else:
         return GeometryCollection()

@@ -1,5 +1,5 @@
-from pvfactors.geometry.utils import projection
-from shapely.geometry import Point, LineString
+from pvfactors.geometry.utils import projection, difference
+from shapely.geometry import Point, LineString, MultiLineString
 
 
 def test_projection():
@@ -37,3 +37,51 @@ def test_projection():
     pt_4 = Point(0 - 1e-9, 1)
     inter = projection(pt_4, vector, line_3)
     assert inter.is_empty
+
+
+def test_difference():
+
+    # Simple cases
+    u = LineString([(0, 0), (2, 0)])
+
+    v = LineString([(1, 0), (3, 0)])
+    diff = difference(u, v)
+    assert diff == LineString([(0, 0), (1, 0)])
+
+    v = LineString([(3, 0), (1, 0)])
+    diff = difference(u, v)
+    assert diff == LineString([(0, 0), (1, 0)])
+
+    v = LineString([(-1, 0), (1, 0)])
+    diff = difference(u, v)
+    assert diff == LineString([(1, 0), (2, 0)])
+
+    v = LineString([(1, 0), (-1, 0)])
+    diff = difference(u, v)
+    assert diff == LineString([(1, 0), (2, 0)])
+
+    v = LineString([(0.5, 0), (1.5, 0)])
+    diff = difference(u, v)
+    assert diff == MultiLineString([((0, 0), (0.5, 0)), ((1.5, 0), (2, 0))])
+
+    v = LineString([(1.5, 0), (0.5, 0)])
+    diff = difference(u, v)
+    assert diff == MultiLineString([((0, 0), (0.5, 0)), ((1.5, 0), (2, 0))])
+
+    v = LineString([(1, 0), (1, 1)])
+    diff = difference(u, v)
+    assert diff == u
+
+    v = LineString([(1, 1), (1, 0)])
+    diff = difference(u, v)
+    assert diff == u
+
+    v = LineString([(1, 1), (1, 2)])
+    diff = difference(u, v)
+    assert diff == u
+
+    # Case with potentially float error
+    u = LineString([(0, 0), (3, 2)])
+    v = LineString([(0, 0), u.interpolate(0.5, normalized=True)])
+    diff = difference(u, v)
+    assert diff.length == u.length / 2.
