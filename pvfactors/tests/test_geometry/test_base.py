@@ -184,13 +184,14 @@ def test_merge_shadecollection():
     """Test shadecollection merger feature: all contained pv surfaces should be
     merged"""
     surf_1 = PVSurface([(0, 0), (1, 0)], shaded=True)
-    surf_2 = PVSurface([(1, 0), (2, 0)], shaded=True)
+    surf_2 = PVSurface([(1.1, 0), (2, 0)], shaded=True)
     col = ShadeCollection(list_surfaces=[surf_1, surf_2])
     col.merge_surfaces()
 
     assert col.length == 2
     assert len(col.list_surfaces) == 1
     assert col.shaded
+    assert len(col.list_surfaces[0].coords) == 2
 
 
 def test_merge_shaded_areas_side():

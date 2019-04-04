@@ -189,11 +189,13 @@ class ShadeCollection(GeometryCollection):
         self._geom, self._ndim = geos_geometrycollection_from_py(list_surfaces)
 
     def merge_surfaces(self):
-        """Merge all surfaces in the shade collection"""
+        """Merge all surfaces in the shade collection, even if they're not
+        contiguous, by using bounds, into one contiguous surface"""
         if len(self.list_surfaces) > 1:
             merged_lines = linemerge(self.list_surfaces)
+            minx, miny, maxx, maxy = merged_lines.bounds
             new_pvsurf = PVSurface(
-                coords=merged_lines.boundary,
+                coords=[(minx, miny), (maxx, maxy)],
                 shaded=self.shaded,
                 normal_vector=self.list_surfaces[0].n_vector)
             self.list_surfaces = [new_pvsurf]
