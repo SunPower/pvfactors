@@ -9,6 +9,7 @@ from pvfactors.geometry.utils import \
     is_collinear, check_collinear, are_2d_vecs_collinear, difference
 from shapely.geometry import GeometryCollection, LineString
 from shapely.geometry.collection import geos_geometrycollection_from_py
+from shapely.ops import linemerge
 from pvlib.tools import cosd, sind
 
 
@@ -187,6 +188,17 @@ class ShadeCollection(GeometryCollection):
         """
         self._geom, self._ndim = geos_geometrycollection_from_py(list_surfaces)
 
+    def merge_surfaces(self):
+        """Merge all surfaces in the shade collection"""
+        if len(self.list_surfaces) > 1:
+            merged_lines = linemerge(self.list_surfaces)
+            new_pvsurf = PVSurface(
+                coords=merged_lines.boundary,
+                shaded=self.shaded,
+                normal_vector=self.list_surfaces[0].n_vector)
+            self.list_surfaces = [new_pvsurf]
+            self.update_geom_collection(self.list_surfaces)
+
     @property
     def n_vector(self):
         if not self.is_collinear:
@@ -261,6 +273,11 @@ class BaseSide(GeometryCollection):
         """Cast designated linestring shadow on PV segments"""
         for segment in self.list_segments:
             segment.cast_shadow(linestring)
+
+    def merge_shaded_areas(self):
+        """Merge shaded areas of all pvsegments"""
+        for seg in self.list_segments:
+            seg._shaded_collection.merge_surfaces()
 
 
 class PVSurface(BaseSurface):

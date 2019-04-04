@@ -178,3 +178,43 @@ def test_cast_shadow_segment_precision_error():
         seg.shaded_collection.list_surfaces[0].length, 1.44222051019)
     np.testing.assert_almost_equal(
         seg.illum_collection.list_surfaces[0].length, 2.1633307652783933)
+
+
+def test_merge_shadecollection():
+    """Test shadecollection merger feature: all contained pv surfaces should be
+    merged"""
+    surf_1 = PVSurface([(0, 0), (1, 0)], shaded=True)
+    surf_2 = PVSurface([(1, 0), (2, 0)], shaded=True)
+    col = ShadeCollection(list_surfaces=[surf_1, surf_2])
+    col.merge_surfaces()
+
+    assert col.length == 2
+    assert len(col.list_surfaces) == 1
+    assert col.shaded
+
+
+def test_merge_shaded_areas_side():
+    """All segments should have merge shaded collections"""
+    coords = [(0, 0), (2, 0)]
+    side = BaseSide.from_linestring_coords(coords, shaded=False,
+                                           n_segments=2)
+    shadow_1 = LineString([(0.5, 0), (0.75, 0)])
+    shadow_2 = LineString([(0.75, 0), (1.5, 0)])
+    side.cast_shadow(shadow_1)
+    side.cast_shadow(shadow_2)
+
+    segments = side.list_segments
+    assert len(segments[0].shaded_collection.list_surfaces) == 2
+    assert len(segments[1].shaded_collection.list_surfaces) == 1
+    np.testing.assert_almost_equal(side.shaded_length, 1)
+    np.testing.assert_almost_equal(segments[0].shaded_length, 0.5)
+    np.testing.assert_almost_equal(segments[1].shaded_length, 0.5)
+
+    # Merge shaded areas
+    side.merge_shaded_areas()
+
+    assert len(segments[0].shaded_collection.list_surfaces) == 1
+    assert len(segments[1].shaded_collection.list_surfaces) == 1
+    np.testing.assert_almost_equal(side.shaded_length, 1)
+    np.testing.assert_almost_equal(segments[0].shaded_length, 0.5)
+    np.testing.assert_almost_equal(segments[1].shaded_length, 0.5)

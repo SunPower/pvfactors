@@ -135,6 +135,7 @@ def test_discretization_ordered_pvarray(discr_params):
 
 
 def test_ordered_pvarray_gnd_shadow_casting(params):
+    """Test shadow casting on ground, no inter-row shading"""
 
     # Test front shading on right
     ordered_pvarray = OrderedPVArray.from_dict(params)
@@ -155,7 +156,7 @@ def test_ordered_pvarray_gnd_pvrow_shadow_casting_right(params_direct_shading):
     ordered_pvarray.cast_shadows()
     # Check shadow casting on ground
     assert len(ordered_pvarray.ground.list_segments[0]
-               .shaded_collection.list_surfaces) == 3
+               .shaded_collection.list_surfaces) == 1
     assert len(ordered_pvarray.ground.list_segments[0]
                .illum_collection.list_surfaces) == 2
     assert ordered_pvarray.ground.length == MAX_X_GROUND - MIN_X_GROUND
@@ -184,7 +185,7 @@ def test_ordered_pvarray_gnd_pvrow_shadow_casting_left(params_direct_shading):
     ordered_pvarray.cast_shadows()
     # Check shadow casting on ground
     assert len(ordered_pvarray.ground.list_segments[0]
-               .shaded_collection.list_surfaces) == 3
+               .shaded_collection.list_surfaces) == 1
     assert len(ordered_pvarray.ground.list_segments[0]
                .illum_collection.list_surfaces) == 2
     assert ordered_pvarray.ground.length == MAX_X_GROUND - MIN_X_GROUND
@@ -215,7 +216,7 @@ def test_ordered_pvarray_gnd_pvrow_shadow_casting_back(params_direct_shading):
     assert ordered_pvarray.illum_side == 'back'
     # Check shadow casting on ground
     assert len(ordered_pvarray.ground.list_segments[0]
-               .shaded_collection.list_surfaces) == 3
+               .shaded_collection.list_surfaces) == 1
     assert len(ordered_pvarray.ground.list_segments[0]
                .illum_collection.list_surfaces) == 2
     assert ordered_pvarray.ground.length == MAX_X_GROUND - MIN_X_GROUND
@@ -245,7 +246,7 @@ def test_ordered_pvarray_gnd_pvrow_shadow_casting_right_n_seg(
     ordered_pvarray.cast_shadows()
     # Check shadow casting on ground
     assert len(ordered_pvarray.ground.list_segments[0]
-               .shaded_collection.list_surfaces) == 3
+               .shaded_collection.list_surfaces) == 1
     assert len(ordered_pvarray.ground.list_segments[0]
                .illum_collection.list_surfaces) == 2
     assert ordered_pvarray.ground.length == MAX_X_GROUND - MIN_X_GROUND
@@ -292,7 +293,7 @@ def test_ordered_pvarray_gnd_pvrow_shadow_casting_back_n_seg(
     ordered_pvarray.cast_shadows()
     # Check shadow casting on ground
     assert len(ordered_pvarray.ground.list_segments[0]
-               .shaded_collection.list_surfaces) == 3
+               .shaded_collection.list_surfaces) == 1
     assert len(ordered_pvarray.ground.list_segments[0]
                .illum_collection.list_surfaces) == 2
     assert ordered_pvarray.ground.length == MAX_X_GROUND - MIN_X_GROUND

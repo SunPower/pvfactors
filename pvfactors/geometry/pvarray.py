@@ -85,7 +85,7 @@ class OrderedPVArray(object):
             gnd_2 = projection(b2, self.solar_2d_vector,
                                self.ground.original_linestring)
             self.ground.cast_shadow(LineString([gnd_1, gnd_2]))
-            # Check that there's direct shading
+            # Check if there's direct shading
             if idx == 1:
                 # There's inter-row shading if ground shadows overlap
                 if self.illum_side == 'front':
@@ -105,13 +105,7 @@ class OrderedPVArray(object):
                 proj_initial = projection(front_pvrow.highest_point,
                                           self.solar_2d_vector,
                                           shaded_pvrow.original_linestring)
-                # Use distance translation to cast shadows on pvrows
-                for idx, pvrow in enumerate(self.pvrows[:-1]):
-                    proj = Point(proj_initial.x + idx * self.distance,
-                                 proj_initial.y)
-                    shaded_side = getattr(pvrow, self.illum_side)
-                    shaded_side.cast_shadow(
-                        LineString([pvrow.lowest_point, proj]))
+                list_pvrows_to_shade = self.pvrows[:-1]
             else:
                 # left pvrow shades right pvrow
                 shaded_pvrow = self.pvrows[1]
@@ -119,14 +113,18 @@ class OrderedPVArray(object):
                 proj_initial = projection(front_pvrow.highest_point,
                                           self.solar_2d_vector,
                                           shaded_pvrow.original_linestring)
-                # Use distance translation to cast shadows on pvrows
-                for idx, pvrow in enumerate(self.pvrows[1:]):
-                    proj = Point(proj_initial.x + idx * self.distance,
-                                 proj_initial.y)
-                    shaded_side = getattr(pvrow, self.illum_side)
-                    shaded_side.cast_shadow(
-                        LineString([pvrow.lowest_point, proj]))
-            # -----> merge ground shadows, since continuous
+                list_pvrows_to_shade = self.pvrows[1:]
+
+            # Use distance translation to cast shadows on pvrows
+            for idx, pvrow in enumerate(list_pvrows_to_shade):
+                proj = Point(proj_initial.x + idx * self.distance,
+                             proj_initial.y)
+                shaded_side = getattr(pvrow, self.illum_side)
+                shaded_side.cast_shadow(
+                    LineString([pvrow.lowest_point, proj]))
+
+            # Merge ground shaded surfaces
+            self.ground.merge_shaded_areas()
 
     def plot(self, ax):
         """Plot PV array"""
