@@ -8,6 +8,7 @@ from pvfactors.geometry.plot import plot_coords, plot_bounds, plot_line
 from pvfactors.geometry.utils import \
     is_collinear, check_collinear, are_2d_vecs_collinear, difference
 from shapely.geometry import GeometryCollection, LineString
+from shapely.geometry.collection import geos_geometrycollection_from_py
 from pvlib.tools import cosd, sind
 
 
@@ -159,21 +160,32 @@ class ShadeCollection(GeometryCollection):
     def remove_linestring(self, linestring):
         new_list_surfaces = []
         for surface in self.list_surfaces:
-            if surface.intersects(linestring):
+            # Need to use buffer for intersects bc of floating point precision
+            # errors in shapely
+            if surface.buffer(DISTANCE_TOLERANCE).intersects(linestring):
                 difference = surface.difference(linestring)
                 # We want to make sure we can iterate on it, as
                 # ``difference`` can be a multi-part geometry or not
                 if not hasattr(difference, '__iter__'):
                     difference = [difference]
                 for new_geom in difference:
-                    new_surface = PVSurface(new_geom.coords,
-                                            normal_vector=surface.n_vector,
-                                            shaded=surface.shaded)
-                    new_list_surfaces.append(new_surface)
+                    if not new_geom.is_empty:
+                        new_surface = PVSurface(new_geom.coords,
+                                                normal_vector=surface.n_vector,
+                                                shaded=surface.shaded)
+                        new_list_surfaces.append(new_surface)
             else:
                 new_list_surfaces.append(surface)
+
         self.list_surfaces = new_list_surfaces
-        super(ShadeCollection, self).__init__(self.list_surfaces)
+        # Force update, even if list is empty
+        self.update_geom_collection(self.list_surfaces)
+
+    def update_geom_collection(self, list_surfaces):
+        """Force update of geometry collection, even if list is empty
+        https://github.com/Toblerity/Shapely/blob/master/shapely/geometry/collection.py#L42
+        """
+        self._geom, self._ndim = geos_geometrycollection_from_py(list_surfaces)
 
     @property
     def n_vector(self):

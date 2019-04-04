@@ -234,3 +234,96 @@ def test_ordered_pvarray_gnd_pvrow_shadow_casting_back(params_direct_shading):
         ordered_pvarray.pvrows[1].front.shaded_length, 0.)
     np.testing.assert_almost_equal(
         ordered_pvarray.pvrows[0].front.shaded_length, 0.)
+
+
+def test_ordered_pvarray_gnd_pvrow_shadow_casting_right_n_seg(
+        params_direct_shading):
+
+    params_direct_shading.update({'cut': {1: {'front': 7}}})
+    # Test front shading on right
+    ordered_pvarray = OrderedPVArray.from_dict(params_direct_shading)
+    ordered_pvarray.cast_shadows()
+    # Check shadow casting on ground
+    assert len(ordered_pvarray.ground.list_segments[0]
+               .shaded_collection.list_surfaces) == 3
+    assert len(ordered_pvarray.ground.list_segments[0]
+               .illum_collection.list_surfaces) == 2
+    assert ordered_pvarray.ground.length == MAX_X_GROUND - MIN_X_GROUND
+
+    assert ordered_pvarray.illum_side == 'front'
+    # Test pvrow sides: should be the same as without segments
+    np.testing.assert_almost_equal(
+        ordered_pvarray.pvrows[0].front.shaded_length, 0.33333333333333254)
+    np.testing.assert_almost_equal(
+        ordered_pvarray.pvrows[1].front.shaded_length, 0.33333333333333254)
+    np.testing.assert_almost_equal(
+        ordered_pvarray.pvrows[2].front.shaded_length, 0.)
+    np.testing.assert_almost_equal(
+        ordered_pvarray.pvrows[0].back.shaded_length, 0.)
+    np.testing.assert_almost_equal(
+        ordered_pvarray.pvrows[1].back.shaded_length, 0.)
+    np.testing.assert_almost_equal(
+        ordered_pvarray.pvrows[2].back.shaded_length, 0.)
+
+    # Test individual segments
+    center_row = ordered_pvarray.pvrows[1]
+    list_pvsegments = center_row.front.list_segments
+    fully_shaded_segment = list_pvsegments[-1]
+    partial_shaded_segment = list_pvsegments[-2]
+    assert fully_shaded_segment.illum_collection.is_empty
+    np.testing.assert_almost_equal(
+        fully_shaded_segment.shaded_collection.length,
+        list_pvsegments[0].length)
+    assert partial_shaded_segment.shaded_collection.length > 0
+    assert partial_shaded_segment.illum_collection.length > 0
+    sum_lengths = (partial_shaded_segment.illum_collection.length +
+                   partial_shaded_segment.shaded_collection.length)
+    np.testing.assert_almost_equal(sum_lengths, list_pvsegments[0].length)
+
+
+def test_ordered_pvarray_gnd_pvrow_shadow_casting_back_n_seg(
+        params_direct_shading):
+
+    params_direct_shading.update({'cut': {1: {'back': 7}},
+                                  'solar_azimuth': 270,
+                                  'surface_tilt': 120})
+    # Test front shading on right
+    ordered_pvarray = OrderedPVArray.from_dict(params_direct_shading)
+    ordered_pvarray.cast_shadows()
+    # Check shadow casting on ground
+    assert len(ordered_pvarray.ground.list_segments[0]
+               .shaded_collection.list_surfaces) == 3
+    assert len(ordered_pvarray.ground.list_segments[0]
+               .illum_collection.list_surfaces) == 2
+    assert ordered_pvarray.ground.length == MAX_X_GROUND - MIN_X_GROUND
+
+    assert ordered_pvarray.illum_side == 'back'
+    # Shading length should be identical as in previous test for front surface,
+    # but now with back surface
+    np.testing.assert_almost_equal(
+        ordered_pvarray.pvrows[2].back.shaded_length, 0.33333333333333254)
+    np.testing.assert_almost_equal(
+        ordered_pvarray.pvrows[1].back.shaded_length, 0.33333333333333254)
+    np.testing.assert_almost_equal(
+        ordered_pvarray.pvrows[0].back.shaded_length, 0.)
+    np.testing.assert_almost_equal(
+        ordered_pvarray.pvrows[2].front.shaded_length, 0.)
+    np.testing.assert_almost_equal(
+        ordered_pvarray.pvrows[1].front.shaded_length, 0.)
+    np.testing.assert_almost_equal(
+        ordered_pvarray.pvrows[0].front.shaded_length, 0.)
+
+    # Test individual segments
+    center_row = ordered_pvarray.pvrows[1]
+    list_pvsegments = center_row.back.list_segments
+    fully_shaded_segment = list_pvsegments[-1]
+    partial_shaded_segment = list_pvsegments[-2]
+    assert fully_shaded_segment.illum_collection.is_empty
+    np.testing.assert_almost_equal(
+        fully_shaded_segment.shaded_collection.length,
+        list_pvsegments[0].length)
+    assert partial_shaded_segment.shaded_collection.length > 0
+    assert partial_shaded_segment.illum_collection.length > 0
+    sum_lengths = (partial_shaded_segment.illum_collection.length +
+                   partial_shaded_segment.shaded_collection.length)
+    np.testing.assert_almost_equal(sum_lengths, list_pvsegments[0].length)
