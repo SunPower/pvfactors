@@ -26,7 +26,8 @@ def difference(u, v):
                 list_lines = [LineString([ub1, vb1]), LineString([vb2, ub2])]
             # Note that boundary points can be equal, so need to make sure
             # we're not passing line strings with length 0
-            final_list_lines = [line for line in list_lines if line.length > 0]
+            final_list_lines = [line for line in list_lines
+                                if line.length > DISTANCE_TOLERANCE]
             if len(final_list_lines) > 1:
                 return MultiLineString(final_list_lines)
             else:

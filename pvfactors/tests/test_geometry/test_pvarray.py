@@ -145,9 +145,10 @@ def test_ordered_pvarray_gnd_shadow_casting(params):
     assert len(ordered_pvarray.ground.list_segments[0]
                .illum_collection.list_surfaces) == 4
     assert ordered_pvarray.ground.shaded_length == 6.385066634855475
+    assert ordered_pvarray.illum_side == 'front'
 
 
-def test_ordered_pvarray_gnd_pvrow_shadow_casting(params_direct_shading):
+def test_ordered_pvarray_gnd_pvrow_shadow_casting_right(params_direct_shading):
 
     # Test front shading on right
     ordered_pvarray = OrderedPVArray.from_dict(params_direct_shading)
@@ -156,9 +157,10 @@ def test_ordered_pvarray_gnd_pvrow_shadow_casting(params_direct_shading):
     assert len(ordered_pvarray.ground.list_segments[0]
                .shaded_collection.list_surfaces) == 3
     assert len(ordered_pvarray.ground.list_segments[0]
-               .illum_collection.list_surfaces) == 4
+               .illum_collection.list_surfaces) == 2
     assert ordered_pvarray.ground.length == MAX_X_GROUND - MIN_X_GROUND
 
+    assert ordered_pvarray.illum_side == 'front'
     np.testing.assert_almost_equal(
         ordered_pvarray.pvrows[0].front.shaded_length, 0.33333333333333254)
     np.testing.assert_almost_equal(
@@ -171,3 +173,64 @@ def test_ordered_pvarray_gnd_pvrow_shadow_casting(params_direct_shading):
         ordered_pvarray.pvrows[1].back.shaded_length, 0.)
     np.testing.assert_almost_equal(
         ordered_pvarray.pvrows[2].back.shaded_length, 0.)
+
+
+def test_ordered_pvarray_gnd_pvrow_shadow_casting_left(params_direct_shading):
+
+    params_direct_shading.update({'solar_azimuth': 270,
+                                  'surface_azimuth': 270})
+    # Test front shading on right
+    ordered_pvarray = OrderedPVArray.from_dict(params_direct_shading)
+    ordered_pvarray.cast_shadows()
+    # Check shadow casting on ground
+    assert len(ordered_pvarray.ground.list_segments[0]
+               .shaded_collection.list_surfaces) == 3
+    assert len(ordered_pvarray.ground.list_segments[0]
+               .illum_collection.list_surfaces) == 2
+    assert ordered_pvarray.ground.length == MAX_X_GROUND - MIN_X_GROUND
+
+    assert ordered_pvarray.illum_side == 'front'
+    np.testing.assert_almost_equal(
+        ordered_pvarray.pvrows[2].front.shaded_length, 0.33333333333333254)
+    np.testing.assert_almost_equal(
+        ordered_pvarray.pvrows[1].front.shaded_length, 0.33333333333333254)
+    np.testing.assert_almost_equal(
+        ordered_pvarray.pvrows[0].front.shaded_length, 0.)
+    np.testing.assert_almost_equal(
+        ordered_pvarray.pvrows[2].back.shaded_length, 0.)
+    np.testing.assert_almost_equal(
+        ordered_pvarray.pvrows[1].back.shaded_length, 0.)
+    np.testing.assert_almost_equal(
+        ordered_pvarray.pvrows[0].back.shaded_length, 0.)
+
+
+def test_ordered_pvarray_gnd_pvrow_shadow_casting_back(params_direct_shading):
+
+    params_direct_shading.update({'solar_azimuth': 270,
+                                  'surface_tilt': 120})
+
+    # Test front shading on right
+    ordered_pvarray = OrderedPVArray.from_dict(params_direct_shading)
+    ordered_pvarray.cast_shadows()
+    assert ordered_pvarray.illum_side == 'back'
+    # Check shadow casting on ground
+    assert len(ordered_pvarray.ground.list_segments[0]
+               .shaded_collection.list_surfaces) == 3
+    assert len(ordered_pvarray.ground.list_segments[0]
+               .illum_collection.list_surfaces) == 2
+    assert ordered_pvarray.ground.length == MAX_X_GROUND - MIN_X_GROUND
+
+    # Shading length should be identical as in previous test for front surface,
+    # but now with back surface
+    np.testing.assert_almost_equal(
+        ordered_pvarray.pvrows[2].back.shaded_length, 0.33333333333333254)
+    np.testing.assert_almost_equal(
+        ordered_pvarray.pvrows[1].back.shaded_length, 0.33333333333333254)
+    np.testing.assert_almost_equal(
+        ordered_pvarray.pvrows[0].back.shaded_length, 0.)
+    np.testing.assert_almost_equal(
+        ordered_pvarray.pvrows[2].front.shaded_length, 0.)
+    np.testing.assert_almost_equal(
+        ordered_pvarray.pvrows[1].front.shaded_length, 0.)
+    np.testing.assert_almost_equal(
+        ordered_pvarray.pvrows[0].front.shaded_length, 0.)

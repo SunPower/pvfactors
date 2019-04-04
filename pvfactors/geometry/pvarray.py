@@ -73,7 +73,10 @@ class OrderedPVArray(object):
         """Use calculated solar_2d_vector and array configuration to calculate
         shadows being casted in the ordered pv array.
         The logic here will be quite specific to ordered pv arrays"""
+        self.illum_side = ('front' if self.pvrows[0].front.n_vector.dot(
+            self.solar_2d_vector) >= 0 else 'back')
         last_gnd_2 = None
+        last_gnd_1 = None
         # Cast pvrow shadows on ground
         for idx, pvrow in enumerate(self.pvrows):
             b1, b2 = pvrow.boundary
@@ -85,14 +88,16 @@ class OrderedPVArray(object):
             # Check that there's direct shading
             if idx == 1:
                 # There's inter-row shading if ground shadows overlap
-                self.has_direct_shading = gnd_1.x < last_gnd_2.x
+                if self.illum_side == 'front':
+                    self.has_direct_shading = gnd_1.x < last_gnd_2.x
+                else:
+                    self.has_direct_shading = gnd_2.x < last_gnd_1.x
             last_gnd_2 = gnd_2
+            last_gnd_1 = gnd_1
 
         # Calculate direct shading on pvrows
         sun_on_the_right = self.solar_2d_vector[0] >= 0
         if self.has_direct_shading:
-            illum_side = ('front' if self.pvrows[0].front.n_vector.dot(
-                self.solar_2d_vector) >= 0 else 'back')
             if sun_on_the_right:
                 # right pvrow shades left pvrow
                 shaded_pvrow = self.pvrows[0]
@@ -104,7 +109,7 @@ class OrderedPVArray(object):
                 for idx, pvrow in enumerate(self.pvrows[:-1]):
                     proj = Point(proj_initial.x + idx * self.distance,
                                  proj_initial.y)
-                    shaded_side = getattr(pvrow, illum_side)
+                    shaded_side = getattr(pvrow, self.illum_side)
                     shaded_side.cast_shadow(
                         LineString([pvrow.lowest_point, proj]))
             else:
@@ -118,7 +123,7 @@ class OrderedPVArray(object):
                 for idx, pvrow in enumerate(self.pvrows[1:]):
                     proj = Point(proj_initial.x + idx * self.distance,
                                  proj_initial.y)
-                    shaded_side = getattr(pvrow, illum_side)
+                    shaded_side = getattr(pvrow, self.illum_side)
                     shaded_side.cast_shadow(
                         LineString([pvrow.lowest_point, proj]))
             # -----> merge ground shadows, since continuous
