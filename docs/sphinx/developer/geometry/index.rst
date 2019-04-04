@@ -14,11 +14,9 @@ The geometry sub-package of pvfactors implements multiple classes that make the 
 geometry.base
 -------------
 
-
 .. automodule:: base
    :no-members:
    :no-inherited-members:
-
 
 .. autosummary::
    :toctree: generated/
@@ -29,3 +27,46 @@ geometry.base
    base.ShadeCollection
    base.PVSegment
    base.BaseSide
+
+
+geometry.pvrow
+--------------
+
+.. automodule:: pvrow
+   :no-members:
+   :no-inherited-members:
+
+.. autosummary::
+   :toctree: generated/
+   :nosignatures:
+
+   pvrow.PVRowSide
+   pvrow.PVRow
+
+
+geometry.pvground
+-----------------
+
+.. automodule:: pvground
+   :no-members:
+   :no-inherited-members:
+
+.. autosummary::
+   :toctree: generated/
+   :nosignatures:
+
+   pvground.PVGround
+
+
+geometry.pvarray
+----------------
+
+.. automodule:: pvarray
+   :no-members:
+   :no-inherited-members:
+
+.. autosummary::
+   :toctree: generated/
+   :nosignatures:
+
+   pvarray.OrderedPVArray

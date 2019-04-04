@@ -1,3 +1,5 @@
+"""Class related to PV row geometries"""
+
 import numpy as np
 from pvfactors.config import COLOR_DIC
 from pvfactors.geometry.base import \
