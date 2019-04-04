@@ -90,3 +90,8 @@ def test_difference():
     v = LineString([(0, 0), u.interpolate(0.5, normalized=True)])
     diff = difference(u, v)
     assert diff.length == u.length / 2.
+
+    # Case were should return empty geoemtry
+    diff = difference(u, u)
+    assert isinstance(diff, LineString)
+    assert diff.is_empty

@@ -28,10 +28,13 @@ def difference(u, v):
             # we're not passing line strings with length 0
             final_list_lines = [line for line in list_lines
                                 if line.length > DISTANCE_TOLERANCE]
-            if len(final_list_lines) > 1:
+            len_final_list = len(final_list_lines)
+            if len_final_list == 2:
                 return MultiLineString(final_list_lines)
-            else:
+            elif len_final_list == 1:
                 return final_list_lines[0]
+            else:
+                return LineString()
         elif v_contains_ub1:
             return LineString([vb1, ub2])
         elif v_contains_ub2:
