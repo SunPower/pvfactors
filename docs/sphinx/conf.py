@@ -21,10 +21,12 @@ from pvfactors import __version__
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 # sys.path.insert(0, os.path.abspath('.'))
-pvfactors_dir = os.path.abspath(os.path.join('..'))
-project_dir = os.path.abspath(os.path.join('..\..'))
-sys.path.insert(0, pvfactors_dir)
+project_dir = os.path.abspath(os.path.join('..', '..'))
+pvfactors_dir = os.path.join(project_dir, 'pvfactors')
+geometry_dir = os.path.join(pvfactors_dir, 'geometry')
 sys.path.insert(0, project_dir)
+sys.path.insert(0, pvfactors_dir)
+sys.path.insert(0, geometry_dir)
 # -- General configuration ------------------------------------------------
 
 # If your documentation needs a minimal Sphinx version, state it here.
@@ -60,7 +62,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'pvfactors'
-copyright = u'Copyright 2016, SunPower Corporation'
+copyright = u'2016, SunPower Corporation'
 author = u'SunPower Corporation'
 
 # The version info for the project you're documenting, acts as replacement for

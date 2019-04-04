@@ -24,3 +24,4 @@ dist/
 pvfactors/docs/developer/generated/*
 docs/sphinx/_build/
 docs/sphinx/developer/generated/
+*generated/

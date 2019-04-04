@@ -118,6 +118,19 @@ class BaseSurface(LineString):
         return difference(self, linestring)
 
 
+class PVSurface(BaseSurface):
+    """Rigid PV surfaces are extensions of base surfaces, as they add PV
+    related properties and methods, like reflectivity, shading, etc. They can
+    only represent only 1 ``shapely`` :py:class:`LineString` geometry."""
+
+    def __init__(self, coords=None, normal_vector=None, shaded=False,
+                 index=None):
+
+        super(PVSurface, self).__init__(coords, normal_vector)
+        self.shaded = shaded
+        self.index = index
+
+
 class ShadeCollection(GeometryCollection):
     """A group :py:class:`~pvfactors.pvsurface.PVSurface`
     objects that have the same shading status. The pv surfaces are not
@@ -216,83 +229,6 @@ class ShadeCollection(GeometryCollection):
         surf = PVSurface(coords=coords, normal_vector=normal_vector,
                          shaded=shaded)
         return cls([surf], shaded=shaded)
-
-
-class BaseSide(GeometryCollection):
-    """A side represents a fixed collection of
-    :py:class:`~pvfactors.pvsurfaces.PVSegment` objects that should
-    all be collinear, with the same normal vector"""
-
-    def __init__(self, list_segments=[]):
-        check_collinear(list_segments)
-        self.list_segments = tuple(list_segments)
-        super(BaseSide, self).__init__(list_segments)
-
-    @classmethod
-    def from_linestring_coords(cls, coords, shaded=False, normal_vector=None,
-                               index=None, n_segments=1):
-        if n_segments == 1:
-            list_pvsegments = [PVSegment.from_linestring_coords(
-                coords, shaded=shaded, normal_vector=normal_vector,
-                index=index)]
-        else:
-            # Discretize coords and create segments accordingly
-            linestring = LineString(coords)
-            fractions = np.linspace(0., 1., num=n_segments + 1)
-            list_points = [linestring.interpolate(fraction, normalized=True)
-                           for fraction in fractions]
-            list_pvsegments = []
-            for idx in range(n_segments):
-                new_coords = list_points[idx:idx + 2]
-                pvsegment = PVSegment.from_linestring_coords(
-                    new_coords, shaded=shaded, normal_vector=normal_vector,
-                    index=index)
-                list_pvsegments.append(pvsegment)
-        return cls(list_segments=list_pvsegments)
-
-    @property
-    def n_vector(self):
-        if len(self.list_segments):
-            return self.list_segments[0].n_vector
-        else:
-            return DEFAULT_NORMAL_VEC
-
-    @property
-    def shaded_length(self):
-        shaded_length = 0.
-        for segment in self.list_segments:
-            shaded_length += segment.shaded_length
-        return shaded_length
-
-    def plot(self, ax, color_shaded=COLOR_DIC['pvrow_shaded'],
-             color_illum=COLOR_DIC['pvrow_illum']):
-        """Plot all PV segments in side object"""
-        for segment in self.list_segments:
-            segment.plot(ax, color_shaded=color_shaded,
-                         color_illum=color_illum)
-
-    def cast_shadow(self, linestring):
-        """Cast designated linestring shadow on PV segments"""
-        for segment in self.list_segments:
-            segment.cast_shadow(linestring)
-
-    def merge_shaded_areas(self):
-        """Merge shaded areas of all pvsegments"""
-        for seg in self.list_segments:
-            seg._shaded_collection.merge_surfaces()
-
-
-class PVSurface(BaseSurface):
-    """Rigid PV surfaces are extensions of base surfaces, as they add PV
-    related properties and methods, like reflectivity, shading, etc. They can
-    only represent only 1 ``shapely`` :py:class:`LineString` geometry."""
-
-    def __init__(self, coords=None, normal_vector=None, shaded=False,
-                 index=None):
-
-        super(PVSurface, self).__init__(coords, normal_vector)
-        self.shaded = shaded
-        self.index = index
 
 
 class PVSegment(GeometryCollection):
@@ -415,3 +351,68 @@ class PVSegment(GeometryCollection):
     @property
     def shaded_length(self):
         return self._shaded_collection.length
+
+
+class BaseSide(GeometryCollection):
+    """A side represents a fixed collection of
+    :py:class:`~pvfactors.pvsurfaces.PVSegment` objects that should
+    all be collinear, with the same normal vector"""
+
+    def __init__(self, list_segments=[]):
+        """Create a side geometry."""
+        check_collinear(list_segments)
+        self.list_segments = tuple(list_segments)
+        super(BaseSide, self).__init__(list_segments)
+
+    @classmethod
+    def from_linestring_coords(cls, coords, shaded=False, normal_vector=None,
+                               index=None, n_segments=1):
+        if n_segments == 1:
+            list_pvsegments = [PVSegment.from_linestring_coords(
+                coords, shaded=shaded, normal_vector=normal_vector,
+                index=index)]
+        else:
+            # Discretize coords and create segments accordingly
+            linestring = LineString(coords)
+            fractions = np.linspace(0., 1., num=n_segments + 1)
+            list_points = [linestring.interpolate(fraction, normalized=True)
+                           for fraction in fractions]
+            list_pvsegments = []
+            for idx in range(n_segments):
+                new_coords = list_points[idx:idx + 2]
+                pvsegment = PVSegment.from_linestring_coords(
+                    new_coords, shaded=shaded, normal_vector=normal_vector,
+                    index=index)
+                list_pvsegments.append(pvsegment)
+        return cls(list_segments=list_pvsegments)
+
+    @property
+    def n_vector(self):
+        if len(self.list_segments):
+            return self.list_segments[0].n_vector
+        else:
+            return DEFAULT_NORMAL_VEC
+
+    @property
+    def shaded_length(self):
+        shaded_length = 0.
+        for segment in self.list_segments:
+            shaded_length += segment.shaded_length
+        return shaded_length
+
+    def plot(self, ax, color_shaded=COLOR_DIC['pvrow_shaded'],
+             color_illum=COLOR_DIC['pvrow_illum']):
+        """Plot all PV segments in side object"""
+        for segment in self.list_segments:
+            segment.plot(ax, color_shaded=color_shaded,
+                         color_illum=color_illum)
+
+    def cast_shadow(self, linestring):
+        """Cast designated linestring shadow on PV segments"""
+        for segment in self.list_segments:
+            segment.cast_shadow(linestring)
+
+    def merge_shaded_areas(self):
+        """Merge shaded areas of all pvsegments"""
+        for seg in self.list_segments:
+            seg._shaded_collection.merge_surfaces()
