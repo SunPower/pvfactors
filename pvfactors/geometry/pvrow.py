@@ -28,6 +28,7 @@ class PVRow(GeometryCollection):
         self.back = back_side
         self.index = index
         self.original_linestring = original_linestring
+        self._all_surfaces = None
         super(PVRow, self).__init__([self.front, self.back])
 
     @classmethod
@@ -85,3 +86,11 @@ class PVRow(GeometryCollection):
         b1, b2 = self.boundary
         lowest_point = b1 if b1.y < b2.y else b2
         return lowest_point
+
+    @property
+    def all_surfaces(self):
+        if self._all_surfaces is None:
+            self._all_surfaces = []
+            self._all_surfaces += self.front.all_surfaces
+            self._all_surfaces += self.back.all_surfaces
+        return self._all_surfaces

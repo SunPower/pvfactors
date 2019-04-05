@@ -1,7 +1,7 @@
 import os
 import pytest
 import numpy as np
-from pvfactors.geometry import OrderedPVArray, PVGround
+from pvfactors.geometry import OrderedPVArray, PVGround, PVSurface
 from pvfactors.config import MAX_X_GROUND, MIN_X_GROUND
 
 
@@ -342,3 +342,14 @@ def test_ordered_pvarray_cut_ground_for_pvrow_view(ordered_pvarray):
 
     assert n_surfaces_1 == n_surfaces_0 + 3
     assert len_1 == len_0
+
+
+def test_ordered_pvarray_list_surfaces(ordered_pvarray):
+    """Check that getting a correct list of surfaces"""
+    ordered_pvarray.cast_shadows()
+    n_surfaces = ordered_pvarray.n_surfaces
+    list_surfaces = ordered_pvarray.all_surfaces
+
+    assert isinstance(list_surfaces, list)
+    assert len(list_surfaces) == n_surfaces
+    assert isinstance(list_surfaces[0], PVSurface)

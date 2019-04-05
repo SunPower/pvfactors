@@ -31,6 +31,7 @@ class OrderedPVArray(object):
         self.axis_azimuth = axis_azimuth
         self.solar_2d_vector = get_solar_2d_vector(solar_zenith, solar_azimuth,
                                                    axis_azimuth)
+        self._all_surfaces = None
 
         # Initialize shading attributes
         self.illum_side = None
@@ -160,3 +161,22 @@ class OrderedPVArray(object):
         ax.set_ylim(- self.height, 2 * self.height)
         ax.set_xlabel("x [m]", fontsize=PLOT_FONTSIZE)
         ax.set_ylabel("y [m]", fontsize=PLOT_FONTSIZE)
+
+    @property
+    def all_surfaces(self):
+        if self._all_surfaces is None:
+            list_surfaces = []
+            list_surfaces += self.ground.all_surfaces
+            for pvrow in self.pvrows:
+                list_surfaces += pvrow.all_surfaces
+            self._all_surfaces = list_surfaces
+        return self._all_surfaces
+
+    @property
+    def n_surfaces(self):
+        n_surfaces = 0
+        n_surfaces += self.ground.n_surfaces
+        for pvrow in self.pvrows:
+            n_surfaces += pvrow.front.n_surfaces
+            n_surfaces += pvrow.back.n_surfaces
+        return n_surfaces

@@ -277,6 +277,7 @@ class PVSegment(GeometryCollection):
         self._shaded_collection = shaded_collection
         self._illum_collection = illum_collection
         self.index = index
+        self._all_surfaces = None
         super(PVSegment, self).__init__([self._shaded_collection,
                                          self._illum_collection])
 
@@ -396,6 +397,14 @@ class PVSegment(GeometryCollection):
     def shaded_length(self):
         return self._shaded_collection.length
 
+    @property
+    def all_surfaces(self):
+        if self._all_surfaces is None:
+            self._all_surfaces = []
+            self._all_surfaces += self._illum_collection.list_surfaces
+            self._all_surfaces += self._shaded_collection.list_surfaces
+        return self._all_surfaces
+
 
 class BaseSide(GeometryCollection):
     """A side represents a fixed collection of
@@ -406,6 +415,7 @@ class BaseSide(GeometryCollection):
         """Create a side geometry."""
         check_collinear(list_segments)
         self.list_segments = tuple(list_segments)
+        self._all_surfaces = None
         super(BaseSide, self).__init__(list_segments)
 
     @classmethod
@@ -450,6 +460,14 @@ class BaseSide(GeometryCollection):
         for segment in self.list_segments:
             n_surfaces += segment.n_surfaces
         return n_surfaces
+
+    @property
+    def all_surfaces(self):
+        if self._all_surfaces is None:
+            self._all_surfaces = []
+            for segment in self.list_segments:
+                self._all_surfaces += segment.all_surfaces
+        return self._all_surfaces
 
     def plot(self, ax, color_shaded=COLOR_DIC['pvrow_shaded'],
              color_illum=COLOR_DIC['pvrow_illum']):
