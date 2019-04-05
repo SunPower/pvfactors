@@ -13,3 +13,4 @@ Contents:
    pvfactors_demo
    api_reference
    how_to
+   geometry/index.rst

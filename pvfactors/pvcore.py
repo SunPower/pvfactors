@@ -1,5 +1,6 @@
 """ Some utility functions and classes for pvfactors """
 
+from pvfactors.config import Y_GROUND
 from shapely.geometry import Point
 from pvfactors import PVFactorsError
 import numpy as np
@@ -10,9 +11,6 @@ LOGGER = logging.getLogger(__name__)
 LOGGER.setLevel(logging.INFO)
 
 # TODO: hard coding these values is not ideal
-MAX_X_GROUND = 1e2
-MIN_X_GROUND = - MAX_X_GROUND
-Y_GROUND = 0.
 THRESHOLD_EDGE_POINT = 1e3
 RADIUS_CIRCUMSOLAR = 1.
 

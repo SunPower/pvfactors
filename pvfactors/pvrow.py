@@ -1,7 +1,8 @@
 """Classes representing pv row geometries"""
 
 from pvfactors import PVFactorsError
-from pvfactors.pvcore import LinePVArray, Y_GROUND
+from pvfactors.config import Y_GROUND
+from pvfactors.pvcore import LinePVArray
 from shapely.geometry import LineString, Point
 from shapely.affinity import affine_transform
 import numpy as np
@@ -10,9 +11,8 @@ import numpy as np
 class PVRowBase(object):
     """``PVRowBase`` exists for future developments of the model. It is the
     base class for PV Rows that will contain all the boiler plate code
-    shared by sub classes like :class:`PVRowLine`, or for instance
+    shared by sub classes like :py:class:`PVRowLine`, or for instance
     ``PVRowRoof``.
-
     """
 
     def __init__(self):

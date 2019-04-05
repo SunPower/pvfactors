@@ -15,15 +15,11 @@ import numpy as np
 import pandas as pd
 from shapely.geometry import LineString, Point
 from pvfactors import PVFactorsError
+from pvfactors.config import DISTANCE_TOLERANCE, THRESHOLD_DISTANCE_TOO_CLOSE
 import logging
 
 LOGGER = logging.getLogger(__name__)
 LOGGER.setLevel(logging.INFO)
-
-
-# TODO: remove hard-coding if possible
-DISTANCE_TOLERANCE = 1e-8
-THRESHOLD_DISTANCE_TOO_CLOSE = 1e-10
 
 
 @pd.api.extensions.register_dataframe_accessor("pvgeometry")

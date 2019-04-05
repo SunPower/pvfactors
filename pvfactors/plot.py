@@ -2,20 +2,10 @@
 
 import numpy as np
 from pvfactors import logging
+from pvfactors.config import COLOR_DIC
 
 LOGGER = logging.getLogger(__name__)
 LOGGER.setLevel(logging.INFO)
-
-# Define colors used for plotting the 2D arrays
-COLOR_dic = {
-    'i': '#FFBB33',
-    's': '#A7A49D',
-    't': '#6699cc',
-    'pvrow_illum': '#6699cc',
-    'pvrow_shaded': '#ff0000',
-    'ground_shaded': '#A7A49D',
-    'ground_illum': '#FFBB33'
-}
 
 
 def plot_array_from_registry(ax, registry, line_types_selected=None,
@@ -163,10 +153,10 @@ def plot_line(ax, ob, line_style, line_color):
     """
     try:
         x, y = ob.xy
-        ax.plot(x, y, color=COLOR_dic[line_color], ls=line_style, alpha=0.7,
+        ax.plot(x, y, color=COLOR_DIC[line_color], ls=line_style, alpha=0.7,
                 linewidth=3, solid_capstyle='round', zorder=2)
     except NotImplementedError:
         for line in ob:
             x, y = line.xy
-            ax.plot(x, y, color=COLOR_dic[line_color], ls=line_style,
+            ax.plot(x, y, color=COLOR_DIC[line_color], ls=line_style,
                     alpha=0.7, linewidth=3, solid_capstyle='round', zorder=2)

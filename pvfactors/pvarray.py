@@ -4,9 +4,10 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 from pvfactors import PVFactorsArrayUpdateException
+from pvfactors.config import \
+    Y_GROUND, MAX_X_GROUND, MIN_X_GROUND, X_ORIGIN_PVROWS
 from pvfactors.pvcore import (LinePVArray,
-                              find_edge_point, Y_GROUND,
-                              MAX_X_GROUND, MIN_X_GROUND,
+                              find_edge_point,
                               calculate_circumsolar_shading,
                               calculate_horizon_band_shading)
 from pvfactors.pvrow import PVRowLine
@@ -26,7 +27,6 @@ import copy
 LOGGER = logging.getLogger(__name__)
 LOGGER.setLevel(logging.INFO)
 
-X_ORIGIN_PVROWS = 0.
 DEFAULT_EDGE_PT_X = X_ORIGIN_PVROWS
 DELTA_MAX_MIN_GROUND_WHEN_TOO_SMALL_BIG = 1
 DEFAULT_CIRCUMSOLAR_ANGLE = 30.
@@ -361,12 +361,12 @@ class Array(ArrayBase):
         # --- Assign terms to surfaces
         # Illuminated ground
         self.surface_registry.loc[
-            ~ self.surface_registry.shaded
-            & (self.surface_registry.line_type == 'ground'),
+            ~ self.surface_registry.shaded &
+            (self.surface_registry.line_type == 'ground'),
             'direct_term'] = dni_ground
         self.surface_registry.loc[
-            ~ self.surface_registry.shaded
-            & (self.surface_registry.line_type == 'ground'),
+            ~ self.surface_registry.shaded &
+            (self.surface_registry.line_type == 'ground'),
             'circumsolar_term'] = circumsolar_ground
 
         # -- PVRow surfaces
@@ -389,14 +389,14 @@ class Array(ArrayBase):
             dni_pvrow = dni * cosd(aoi_frontsurface)
             circumsolar_pvrow = poa_circumsolar
             self.surface_registry.loc[
-                ~ self.surface_registry.shaded
-                & (self.surface_registry.line_type == 'pvrow')
-                & (self.surface_registry.surface_side == 'front'),
+                ~ self.surface_registry.shaded &
+                (self.surface_registry.line_type == 'pvrow') &
+                (self.surface_registry.surface_side == 'front'),
                 'direct_term'] = dni_pvrow
             self.surface_registry.loc[
-                ~ self.surface_registry.shaded
-                & (self.surface_registry.line_type == 'pvrow')
-                & (self.surface_registry.surface_side == 'front'),
+                ~ self.surface_registry.shaded &
+                (self.surface_registry.line_type == 'pvrow') &
+                (self.surface_registry.surface_side == 'front'),
                 'circumsolar_term'] = circumsolar_pvrow
             if self.calculate_front_circ_horizon_shading:
                 self.apply_front_circumsolar_horizon_shading()
@@ -404,26 +404,26 @@ class Array(ArrayBase):
             # Direct light is incident on back side of pvrows
             aoi_backsurface = 180. - aoi_frontsurface
             dni_pvrow = dni * cosd(aoi_backsurface)
-            vf_circumsolar_backsurface = (cosd(aoi_backsurface)
-                                          / cosd(solar_zenith))
-            circumsolar_pvrow = (luminance_circumsolar
-                                 * vf_circumsolar_backsurface)
+            vf_circumsolar_backsurface = (cosd(aoi_backsurface) /
+                                          cosd(solar_zenith))
+            circumsolar_pvrow = (luminance_circumsolar *
+                                 vf_circumsolar_backsurface)
             self.surface_registry.loc[
-                ~ self.surface_registry.shaded
-                & (self.surface_registry.line_type == 'pvrow')
-                & (self.surface_registry.surface_side == 'back'),
+                ~ self.surface_registry.shaded &
+                (self.surface_registry.line_type == 'pvrow') &
+                (self.surface_registry.surface_side == 'back'),
                 'direct_term'] = dni_pvrow
             self.surface_registry.loc[
-                ~ self.surface_registry.shaded
-                & (self.surface_registry.line_type == 'pvrow')
-                & (self.surface_registry.surface_side == 'back'),
+                ~ self.surface_registry.shaded &
+                (self.surface_registry.line_type == 'pvrow') &
+                (self.surface_registry.surface_side == 'back'),
                 'circumsolar_term'] = circumsolar_pvrow
 
         # Sum up the terms
         self.surface_registry['irradiance_term'] = (
-            self.surface_registry['direct_term']
-            + self.surface_registry['circumsolar_term']
-            + self.surface_registry['horizon_term']
+            self.surface_registry['direct_term'] +
+            self.surface_registry['circumsolar_term'] +
+            self.surface_registry['horizon_term']
         )
 
         # Set up irradiance terms vector
@@ -444,9 +444,9 @@ class Array(ArrayBase):
         """
 
         slice_registry = self.surface_registry.loc[
-            (self.surface_registry.line_type == 'pvrow')
-            & (self.surface_registry.surface_side == pvrow_side)
-            & notnull(self.surface_registry.index_pvrow_neighbor), :]
+            (self.surface_registry.line_type == 'pvrow') &
+            (self.surface_registry.surface_side == pvrow_side) &
+            notnull(self.surface_registry.index_pvrow_neighbor), :]
 
         # Calculate the shading angle in 2D plane for each back surface
         for index, row in slice_registry.iterrows():
@@ -454,8 +454,8 @@ class Array(ArrayBase):
             neighbor_point = self.pvrows[
                 int(row.index_pvrow_neighbor)].highest_point
             shading_angle = np.abs(np.arctan(
-                (neighbor_point.y - row_point.y)
-                / (neighbor_point.x - row_point.x))
+                (neighbor_point.y - row_point.y) /
+                (neighbor_point.x - row_point.x))
             ) * 180. / np.pi
             # shading_angle = 0.
             percent_horizon_shading = calculate_horizon_band_shading(
@@ -474,15 +474,15 @@ class Array(ArrayBase):
         """
 
         slice_registry = self.surface_registry.loc[
-            (self.surface_registry.surface_side == 'front')
-            & notnull(self.surface_registry.index_pvrow_neighbor), :]
+            (self.surface_registry.surface_side == 'front') &
+            notnull(self.surface_registry.index_pvrow_neighbor), :]
 
         # Calculate the solar and circumsolar elevation angles in 2D plane
         solar_2d_elevation = np.abs(
             np.arctan(self.solar_2d_vector[1] / self.solar_2d_vector[0])
         ) * 180. / np.pi
-        lower_angle_circumsolar = (solar_2d_elevation
-                                   - self.circumsolar_angle / 2.)
+        lower_angle_circumsolar = (solar_2d_elevation -
+                                   self.circumsolar_angle / 2.)
 
         # Calculate the shading angle in 2D plane as well for each surface
         for index, row in slice_registry.iterrows():
@@ -490,12 +490,12 @@ class Array(ArrayBase):
             neighbor_point = self.pvrows[
                 int(row.index_pvrow_neighbor)].highest_point
             shading_angle = np.abs(np.arctan(
-                (neighbor_point.y - row_point.y)
-                / (neighbor_point.x - row_point.x))
+                (neighbor_point.y - row_point.y) /
+                (neighbor_point.x - row_point.x))
             ) * 180. / np.pi
             percentage_circ_angle_covered = ((shading_angle -
-                                              lower_angle_circumsolar)
-                                             / self.circumsolar_angle) * 100.
+                                              lower_angle_circumsolar) /
+                                             self.circumsolar_angle) * 100.
             percent_circ_shading = calculate_circumsolar_shading(
                 percentage_circ_angle_covered, model=self.circumsolar_model)
             percent_horizon_shading = calculate_horizon_band_shading(
@@ -521,12 +521,12 @@ class Array(ArrayBase):
             self.surface_registry.line_type == 'ground',
             'reflectivity'] = self.rho_ground
         self.surface_registry.loc[
-            (self.surface_registry.line_type == 'pvrow')
-            & (self.surface_registry.surface_side == 'front'),
+            (self.surface_registry.line_type == 'pvrow') &
+            (self.surface_registry.surface_side == 'front'),
             'reflectivity'] = self.rho_front_pvrow
         self.surface_registry.loc[
-            (self.surface_registry.line_type == 'pvrow')
-            & (self.surface_registry.surface_side == 'back'),
+            (self.surface_registry.line_type == 'pvrow') &
+            (self.surface_registry.surface_side == 'back'),
             'reflectivity'] = self.rho_back_pvrow
         # Create inv reflectivity matrix
         self.inv_reflectivity_matrix = np.diag(
@@ -608,12 +608,12 @@ class Array(ArrayBase):
         """
 
         # FIXME: not very robust, make sure to have a test for it
-        self.surface_registry['isotropic_term'] = (self.vf_matrix[:-1, -1]
-                                                   * self.irradiance_terms[-1])
+        self.surface_registry['isotropic_term'] = (self.vf_matrix[:-1, -1] *
+                                                   self.irradiance_terms[-1])
         self.surface_registry['reflection_term'] = (
-            self.surface_registry['qinc']
-            - self.surface_registry['irradiance_term']
-            - self.surface_registry['isotropic_term']
+            self.surface_registry['qinc'] -
+            self.surface_registry['irradiance_term'] -
+            self.surface_registry['isotropic_term']
         )
 
 # ------- Line creation
@@ -737,8 +737,8 @@ class Array(ArrayBase):
         to right.
         """
         df_bounds_shadows = (self.line_registry
-                             .loc[(self.line_registry['line_type'] == 'ground')
-                                  & self.line_registry.shaded]
+                             .loc[(self.line_registry['line_type'] == 'ground') &
+                                  self.line_registry.shaded]
                              .pvgeometry.bounds)
         shadow_indices = df_bounds_shadows.index
         self.illum_ground_indices = []
@@ -794,8 +794,8 @@ class Array(ArrayBase):
             new_edge_points = []
             for i in range(len(self.pvrows) - 1):
                 for edge_pt in edge_points:
-                    new_point = Point(edge_pt.x + (i + 1)
-                                      * self.pvrow_distance,
+                    new_point = Point(edge_pt.x + (i + 1) *
+                                      self.pvrow_distance,
                                       edge_pt.y)
                     # FIXME: this is not going to work if not single line
                     self.line_registry.loc[
@@ -829,8 +829,8 @@ class Array(ArrayBase):
 
         # Find bounds of shadows
         df_bounds_shadows = (self.line_registry
-                             .loc[(self.line_registry['line_type'] == 'ground')
-                                  & self.line_registry.shaded]
+                             .loc[(self.line_registry['line_type'] == 'ground') &
+                                  self.line_registry.shaded]
                              .pvgeometry.bounds)
         shadow_indices = df_bounds_shadows.index
 
@@ -838,8 +838,8 @@ class Array(ArrayBase):
         # ground areas that are not between shadows
         # On the left side:
         min_x_ground = min(MIN_X_GROUND,
-                           df_bounds_shadows.loc[shadow_indices[0], 'minx']
-                           - DELTA_MAX_MIN_GROUND_WHEN_TOO_SMALL_BIG)
+                           df_bounds_shadows.loc[shadow_indices[0], 'minx'] -
+                           DELTA_MAX_MIN_GROUND_WHEN_TOO_SMALL_BIG)
         geometry_left = LineString([
             (min(x_min_edge_points, min_x_ground), Y_GROUND),
             (df_bounds_shadows.loc[shadow_indices[0], 'minx'],
@@ -850,8 +850,8 @@ class Array(ArrayBase):
                                    shaded=False)
         # On the right side
         max_x_ground = max(MAX_X_GROUND,
-                           df_bounds_shadows.loc[shadow_indices[-1], 'maxx']
-                           + DELTA_MAX_MIN_GROUND_WHEN_TOO_SMALL_BIG)
+                           df_bounds_shadows.loc[shadow_indices[-1], 'maxx'] +
+                           DELTA_MAX_MIN_GROUND_WHEN_TOO_SMALL_BIG)
         geometry_right = LineString([
             (df_bounds_shadows.loc[shadow_indices[-1], 'maxx'],
              df_bounds_shadows.loc[shadow_indices[-1], 'maxy']),
@@ -1000,11 +1000,11 @@ class Array(ArrayBase):
 
         # All surface indices need to be grouped and tracked for simplification
         indices_front_pvrows = self.surface_registry.loc[
-            (self.surface_registry.line_type == 'pvrow')
-            & (self.surface_registry.surface_side == 'front')].index.values
+            (self.surface_registry.line_type == 'pvrow') &
+            (self.surface_registry.surface_side == 'front')].index.values
         indices_back_pvrows = self.surface_registry.loc[
-            (self.surface_registry.line_type == 'pvrow')
-            & (self.surface_registry.surface_side == 'back')].index.values
+            (self.surface_registry.line_type == 'pvrow') &
+            (self.surface_registry.surface_side == 'back')].index.values
         indices_ground = self.surface_registry.loc[
             self.surface_registry.line_type == 'ground'
         ].index.values
@@ -1053,12 +1053,12 @@ class Array(ArrayBase):
             for idx, pvrow in enumerate(self.pvrows):
                 # Get indices specific to pvrow
                 indices_back_pvrow = self.surface_registry.loc[
-                    (self.surface_registry.pvrow_index == idx)
-                    & (self.surface_registry.surface_side == 'back')
+                    (self.surface_registry.pvrow_index == idx) &
+                    (self.surface_registry.surface_side == 'back')
                 ].index.values
                 indices_front_pvrow = self.surface_registry.loc[
-                    (self.surface_registry.pvrow_index == idx)
-                    & (self.surface_registry.surface_side == 'front')
+                    (self.surface_registry.pvrow_index == idx) &
+                    (self.surface_registry.surface_side == 'front')
                 ].index.values
 
                 # --- Find the lines that front and back see on the ground
@@ -1092,14 +1092,14 @@ class Array(ArrayBase):
                 # Save the PV row neighbor index values
                 if right_neighbor_pvrow is not None:
                     self.surface_registry.loc[
-                        (self.surface_registry.pvrow_index == pvrow.index)
-                        & (self.surface_registry.surface_side == 'back'),
+                        (self.surface_registry.pvrow_index == pvrow.index) &
+                        (self.surface_registry.surface_side == 'back'),
                         'index_pvrow_neighbor'
                     ] = right_neighbor_pvrow.index
                 if left_neighbor_pvrow is not None:
                     self.surface_registry.loc[
-                        (self.surface_registry.pvrow_index == pvrow.index)
-                        & (self.surface_registry.surface_side == 'front'),
+                        (self.surface_registry.pvrow_index == pvrow.index) &
+                        (self.surface_registry.surface_side == 'front'),
                         'index_pvrow_neighbor'
                     ] = left_neighbor_pvrow.index
 
