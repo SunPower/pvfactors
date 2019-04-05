@@ -3,7 +3,7 @@
 import numpy as np
 from pvfactors import PVFactorsError
 from pvfactors.config import \
-    DEFAULT_NORMAL_VEC, COLOR_DIC, DISTANCE_TOLERANCE
+    DEFAULT_NORMAL_VEC, COLOR_DIC, DISTANCE_TOLERANCE, PLOT_FONTSIZE
 from pvfactors.geometry.plot import plot_coords, plot_bounds, plot_line
 from pvfactors.geometry.utils import \
     is_collinear, check_collinear, are_2d_vecs_collinear, difference, contains
@@ -494,3 +494,52 @@ class BaseSide(GeometryCollection):
                 # Nothing will happen to the segments that do not contain
                 # the point
                 segment.cut_at_point(point)
+
+
+class BasePVArray(object):
+    """Base class for PV arrays in pvfactors"""
+
+    def __init__(self, list_pvrows=[], ground=None):
+        self.pvrows = list_pvrows
+        self.ground = ground
+        self.distance = None
+        self.height = None
+
+    def plot(self, ax):
+        """Plot PV array"""
+        # Plot pv array structures
+        self.ground.plot(ax, color_shaded=COLOR_DIC['ground_shaded'],
+                         color_illum=COLOR_DIC['ground_illum'])
+        for pvrow in self.pvrows:
+            pvrow.plot(ax, color_shaded=COLOR_DIC['pvrow_shaded'],
+                       color_illum=COLOR_DIC['pvrow_illum'])
+
+        # Plot formatting
+        ax.axis('equal')
+        if self.distance is not None:
+            n_pvrows = len(self.pvrows)
+            ax.set_xlim(- 0.5 * self.distance,
+                        (n_pvrows - 0.5) * self.distance)
+        if self.height is not None:
+            ax.set_ylim(- self.height, 2 * self.height)
+        ax.set_xlabel("x [m]", fontsize=PLOT_FONTSIZE)
+        ax.set_ylabel("y [m]", fontsize=PLOT_FONTSIZE)
+
+    @property
+    def all_surfaces(self):
+        if self._all_surfaces is None:
+            list_surfaces = []
+            list_surfaces += self.ground.all_surfaces
+            for pvrow in self.pvrows:
+                list_surfaces += pvrow.all_surfaces
+            self._all_surfaces = list_surfaces
+        return self._all_surfaces
+
+    @property
+    def n_surfaces(self):
+        n_surfaces = 0
+        n_surfaces += self.ground.n_surfaces
+        for pvrow in self.pvrows:
+            n_surfaces += pvrow.front.n_surfaces
+            n_surfaces += pvrow.back.n_surfaces
+        return n_surfaces

@@ -2,13 +2,13 @@
 import numpy as np
 from pvfactors.geometry.pvground import PVGround
 from pvfactors.geometry.pvrow import PVRow
-from pvfactors.config import X_ORIGIN_PVROWS, COLOR_DIC, PLOT_FONTSIZE
-from pvfactors.geometry.base import get_solar_2d_vector
+from pvfactors.config import X_ORIGIN_PVROWS
+from pvfactors.geometry.base import get_solar_2d_vector, BasePVArray
 from pvfactors.geometry.utils import projection
 from shapely.geometry import LineString, Point
 
 
-class OrderedPVArray(object):
+class OrderedPVArray(BasePVArray):
     """An ordered PV array has a flat horizontal ground, and pv rows which
     are all at the same height, with the same surface tilt and azimuth angles,
     and also all equally spaced. These simplifications allow faster and easier
@@ -69,9 +69,6 @@ class OrderedPVArray(object):
                    solar_zenith=parameters['solar_zenith'],
                    solar_azimuth=parameters['solar_azimuth'],
                    gcr=gcr, height=y_center, distance=distance)
-
-    def update_tilt(self, new_tilt):
-        pass
 
     def cast_shadows(self):
         """Use calculated solar_2d_vector and array configuration to calculate
@@ -144,39 +141,3 @@ class OrderedPVArray(object):
                 edge_point = projection(b1, u_direction,
                                         self.ground.original_linestring)
                 self.ground.cut_at_point(edge_point)
-
-    def plot(self, ax):
-        """Plot PV array"""
-        # Plot pv array structures
-        self.ground.plot(ax, color_shaded=COLOR_DIC['ground_shaded'],
-                         color_illum=COLOR_DIC['ground_illum'])
-        for pvrow in self.pvrows:
-            pvrow.plot(ax, color_shaded=COLOR_DIC['pvrow_shaded'],
-                       color_illum=COLOR_DIC['pvrow_illum'])
-
-        # Plot formatting
-        ax.axis('equal')
-        n_pvrows = len(self.pvrows)
-        ax.set_xlim(- 0.5 * self.distance, (n_pvrows - 0.5) * self.distance)
-        ax.set_ylim(- self.height, 2 * self.height)
-        ax.set_xlabel("x [m]", fontsize=PLOT_FONTSIZE)
-        ax.set_ylabel("y [m]", fontsize=PLOT_FONTSIZE)
-
-    @property
-    def all_surfaces(self):
-        if self._all_surfaces is None:
-            list_surfaces = []
-            list_surfaces += self.ground.all_surfaces
-            for pvrow in self.pvrows:
-                list_surfaces += pvrow.all_surfaces
-            self._all_surfaces = list_surfaces
-        return self._all_surfaces
-
-    @property
-    def n_surfaces(self):
-        n_surfaces = 0
-        n_surfaces += self.ground.n_surfaces
-        for pvrow in self.pvrows:
-            n_surfaces += pvrow.front.n_surfaces
-            n_surfaces += pvrow.back.n_surfaces
-        return n_surfaces
