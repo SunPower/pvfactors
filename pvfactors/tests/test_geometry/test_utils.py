@@ -1,4 +1,5 @@
-from pvfactors.geometry.utils import projection, difference
+from pvfactors.geometry.utils import projection, difference, contains
+from pvfactors.geometry.base import BaseSide
 from shapely.geometry import Point, LineString, MultiLineString
 
 
@@ -95,3 +96,11 @@ def test_difference():
     diff = difference(u, u)
     assert isinstance(diff, LineString)
     assert diff.is_empty
+
+
+def test_contains_on_side():
+    """Check that ``contains`` function works on a BaseSide instance"""
+    coords = [(0, 0), (2, 0)]
+    side = BaseSide.from_linestring_coords(coords)
+    point = Point(1, 0)
+    assert contains(side, point)

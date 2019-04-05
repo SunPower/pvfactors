@@ -6,7 +6,7 @@ from pvfactors.config import \
     DEFAULT_NORMAL_VEC, COLOR_DIC, DISTANCE_TOLERANCE
 from pvfactors.geometry.plot import plot_coords, plot_bounds, plot_line
 from pvfactors.geometry.utils import \
-    is_collinear, check_collinear, are_2d_vecs_collinear, difference
+    is_collinear, check_collinear, are_2d_vecs_collinear, difference, contains
 from shapely.geometry import GeometryCollection, LineString
 from shapely.geometry.collection import geos_geometrycollection_from_py
 from shapely.ops import linemerge
@@ -214,6 +214,31 @@ class ShadeCollection(GeometryCollection):
             self.list_surfaces = [new_pvsurf]
             self.update_geom_collection(self.list_surfaces)
 
+    def cut_at_point(self, point):
+        """Cut collection at point if contains it"""
+        for idx, surface in enumerate(self.list_surfaces):
+            if contains(surface, point):
+                # Make sure that not hitting a boundary
+                b1, b2 = surface.boundary
+                not_hitting_b1 = b1.distance(point) > DISTANCE_TOLERANCE
+                not_hitting_b2 = b2.distance(point) > DISTANCE_TOLERANCE
+                if not_hitting_b1 and not_hitting_b2:
+                    coords_1 = [b1, point]
+                    coords_2 = [point, b2]
+                    # TODO: not sure what to do about index yet
+                    new_surf_1 = PVSurface(coords_1,
+                                           normal_vector=surface.n_vector,
+                                           shaded=surface.shaded)
+                    new_surf_2 = PVSurface(coords_2,
+                                           normal_vector=surface.n_vector,
+                                           shaded=surface.shaded)
+                    # Now update collection
+                    self.list_surfaces[idx] = new_surf_1
+                    self.list_surfaces.append(new_surf_2)
+                    self.update_geom_collection(self.list_surfaces)
+                    # No need to continue the loop
+                    break
+
     @property
     def n_vector(self):
         if not self.is_collinear:
@@ -284,6 +309,14 @@ class PVSegment(GeometryCollection):
             # print(self._illum_collection.length)
             super(PVSegment, self).__init__([self._shaded_collection,
                                              self._illum_collection])
+
+    def cut_at_point(self, point):
+        """Cut segment at a given point, only if contained by segment"""
+        if contains(self, point):
+            if contains(self._illum_collection, point):
+                self._illum_collection.cut_at_point(self, point)
+            else:
+                self._shaded_collection.cut_at_point(self, point)
 
     @property
     def n_vector(self):
@@ -416,3 +449,12 @@ class BaseSide(GeometryCollection):
         """Merge shaded areas of all pvsegments"""
         for seg in self.list_segments:
             seg._shaded_collection.merge_surfaces()
+
+    def cut_at_point(self, point):
+        """Cut side geometry at a given point, making sure that the point
+        is contained by the side beforehand"""
+        if contains(self, point):
+            for segment in self.list_segments:
+                # Nothing will happen to the segments that do not contain
+                # the point
+                segment.cut_at_point(point)

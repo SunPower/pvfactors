@@ -219,3 +219,32 @@ def test_merge_shaded_areas_side():
     np.testing.assert_almost_equal(side.shaded_length, 1)
     np.testing.assert_almost_equal(segments[0].shaded_length, 0.5)
     np.testing.assert_almost_equal(segments[1].shaded_length, 0.5)
+
+
+def test_shadecol_cut_at_point():
+    """Test that shade collection correctly cut surfaces at point"""
+    surf_1 = PVSurface([(0, 0), (1, 1)], shaded=True)
+    surf_2 = PVSurface([(1, 1), (2, 2)], shaded=True)
+    col = ShadeCollection(list_surfaces=[surf_1, surf_2])
+    length = col.length
+
+    # Hitting boundary, should not cut
+    point = Point(1, 1)
+    col.cut_at_point(point)
+    assert len(col.list_surfaces) == 2
+    assert col.length == length
+
+    # Not contained should not cut
+    point = Point(1, 2)
+    col.cut_at_point(point)
+    assert len(col.list_surfaces) == 2
+    assert col.length == length
+
+    # Should cut
+    point = Point(0.5, 0.5)
+    col.cut_at_point(point)
+    assert len(col.list_surfaces) == 3
+    assert col.list_surfaces[0].length == length / 4
+    assert col.list_surfaces[-1].length == length / 4
+    assert col.list_surfaces[1].length == length / 2
+    assert col.length == length
