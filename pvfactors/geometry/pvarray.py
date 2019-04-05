@@ -1,4 +1,5 @@
 """Implement PV array classes, which will use PV rows and ground geometries"""
+import numpy as np
 from pvfactors.geometry.pvground import PVGround
 from pvfactors.geometry.pvrow import PVRow
 from pvfactors.config import X_ORIGIN_PVROWS, COLOR_DIC, PLOT_FONTSIZE
@@ -34,6 +35,8 @@ class OrderedPVArray(object):
         # Initialize shading attributes
         self.illum_side = None
         self.has_direct_shading = False
+        # For view factors
+        self.edge_points = None
 
     @classmethod
     def from_dict(cls, parameters):
@@ -125,6 +128,21 @@ class OrderedPVArray(object):
 
             # Merge ground shaded surfaces
             self.ground.merge_shaded_areas()
+
+    def cut_ground_for_pvrow_view(self):
+        """When not flat, the PV row sides will only see a part of the ground,
+        so we need to mark these limits called "edge points" and cut the ground
+        surface accordingly"""
+        if self.surface_tilt != 0:
+            # find u_vector direction of the pvrows
+            b1, b2 = self.pvrows[0].boundary
+            u_direction = np.array([b2.x - b1.x, b2.y - b1.y])
+            for pvrow in self.pvrows:
+                b1 = pvrow.boundary[0]
+                # Edge point should always exist when pvrows not flat
+                edge_point = projection(b1, u_direction,
+                                        self.ground.original_linestring)
+                self.ground.cut_at_point(edge_point)
 
     def plot(self, ax):
         """Plot PV array"""

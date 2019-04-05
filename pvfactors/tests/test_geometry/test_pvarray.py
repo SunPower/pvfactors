@@ -328,3 +328,17 @@ def test_ordered_pvarray_gnd_pvrow_shadow_casting_back_n_seg(
     sum_lengths = (partial_shaded_segment.illum_collection.length +
                    partial_shaded_segment.shaded_collection.length)
     np.testing.assert_almost_equal(sum_lengths, list_pvsegments[0].length)
+
+
+def test_ordered_pvarray_cut_ground_for_pvrow_view(ordered_pvarray):
+    """Test that pvarray ground is cut correctly"""
+
+    ordered_pvarray.cast_shadows()
+    n_surfaces_0 = ordered_pvarray.ground.n_surfaces
+    len_0 = ordered_pvarray.ground.length
+    ordered_pvarray.cut_ground_for_pvrow_view()
+    n_surfaces_1 = ordered_pvarray.ground.n_surfaces
+    len_1 = ordered_pvarray.ground.length
+
+    assert n_surfaces_1 == n_surfaces_0 + 3
+    assert len_1 == len_0

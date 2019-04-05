@@ -249,6 +249,11 @@ class ShadeCollection(GeometryCollection):
         else:
             return DEFAULT_NORMAL_VEC
 
+    @property
+    def n_surfaces(self):
+        """Number of surfaces in collection"""
+        return len(self.list_surfaces)
+
     @classmethod
     def from_linestring_coords(cls, coords, shaded, normal_vector=None):
         surf = PVSurface(coords=coords, normal_vector=normal_vector,
@@ -314,9 +319,9 @@ class PVSegment(GeometryCollection):
         """Cut segment at a given point, only if contained by segment"""
         if contains(self, point):
             if contains(self._illum_collection, point):
-                self._illum_collection.cut_at_point(self, point)
+                self._illum_collection.cut_at_point(point)
             else:
-                self._shaded_collection.cut_at_point(self, point)
+                self._shaded_collection.cut_at_point(point)
 
     @property
     def n_vector(self):
@@ -329,6 +334,12 @@ class PVSegment(GeometryCollection):
             return self.shaded_collection.n_vector
         else:
             return DEFAULT_NORMAL_VEC
+
+    @property
+    def n_surfaces(self):
+        n_surfaces = self._illum_collection.n_surfaces \
+            + self._shaded_collection.n_surfaces
+        return n_surfaces
 
     @classmethod
     def from_linestring_coords(cls, coords, shaded=False, normal_vector=None,
@@ -432,6 +443,13 @@ class BaseSide(GeometryCollection):
         for segment in self.list_segments:
             shaded_length += segment.shaded_length
         return shaded_length
+
+    @property
+    def n_surfaces(self):
+        n_surfaces = 0
+        for segment in self.list_segments:
+            n_surfaces += segment.n_surfaces
+        return n_surfaces
 
     def plot(self, ax, color_shaded=COLOR_DIC['pvrow_shaded'],
              color_illum=COLOR_DIC['pvrow_illum']):

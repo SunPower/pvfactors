@@ -248,3 +248,17 @@ def test_shadecol_cut_at_point():
     assert col.list_surfaces[-1].length == length / 4
     assert col.list_surfaces[1].length == length / 2
     assert col.length == length
+
+
+def test_side_cut_at_point():
+    """Test that can cut side at point correctly"""
+    coords = [(0, 0), (2, 0)]
+    side = BaseSide.from_linestring_coords(coords, shaded=False,
+                                           n_segments=2)
+
+    # should cut
+    point = Point(0.5, 0)
+    side.cut_at_point(point)
+    assert side.length == 2
+    assert len(side.list_segments[0].illum_collection.list_surfaces) == 2
+    assert len(side.list_segments[1].illum_collection.list_surfaces) == 1
