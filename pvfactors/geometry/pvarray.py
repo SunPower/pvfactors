@@ -19,11 +19,11 @@ class OrderedPVArray(BasePVArray):
     def __init__(self, list_pvrows=[], ground=None, surface_tilt=None,
                  surface_azimuth=None, axis_azimuth=None, solar_zenith=None,
                  solar_azimuth=None, gcr=None, height=None, distance=None):
-        self.pvrows = list_pvrows  # ordered from left to right
-        self.ground = ground
+        """List PV rows need to be ordered from left to right"""
+        super(OrderedPVArray, self).__init__(list_pvrows=list_pvrows,
+                                             ground=ground, distance=distance,
+                                             height=height)
         self.gcr = gcr
-        self.height = height
-        self.distance = distance
         self.solar_zenith = solar_zenith
         self.solar_azimuth = solar_azimuth
         self.surface_tilt = surface_tilt
@@ -31,7 +31,6 @@ class OrderedPVArray(BasePVArray):
         self.axis_azimuth = axis_azimuth
         self.solar_2d_vector = get_solar_2d_vector(solar_zenith, solar_azimuth,
                                                    axis_azimuth)
-        self._all_surfaces = None
 
         # Initialize shading attributes
         self.illum_side = None

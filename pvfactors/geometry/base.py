@@ -1,6 +1,7 @@
 """Base classes for geometry subpackage."""
 
 import numpy as np
+import pandas as pd
 from pvfactors import PVFactorsError
 from pvfactors.config import \
     DEFAULT_NORMAL_VEC, COLOR_DIC, DISTANCE_TOLERANCE, PLOT_FONTSIZE
@@ -499,11 +500,17 @@ class BaseSide(GeometryCollection):
 class BasePVArray(object):
     """Base class for PV arrays in pvfactors"""
 
-    def __init__(self, list_pvrows=[], ground=None):
+    registry_cols = ['object', 'type', 'pvrow_index', 'side',
+                     'pvsegment_index', 'shaded']
+
+    def __init__(self, list_pvrows=[], ground=None, distance=None,
+                 height=None):
         self.pvrows = list_pvrows
         self.ground = ground
-        self.distance = None
-        self.height = None
+        self._all_surfaces = None
+        self._surface_registry = None
+        self.distance = distance
+        self.height = height
 
     def plot(self, ax):
         """Plot PV array"""
@@ -543,3 +550,87 @@ class BasePVArray(object):
             n_surfaces += pvrow.front.n_surfaces
             n_surfaces += pvrow.back.n_surfaces
         return n_surfaces
+
+    @property
+    def surface_registry(self):
+        if self._surface_registry is None:
+            self._surface_registry = self._build_surface_registry()
+        return self._surface_registry
+
+    def _build_surface_registry(self):
+        dict_registry = {k: [] for k in self.registry_cols}
+        # Fill up registry with ground surfaces
+        surf_type = 'ground'
+        pvrow_index = np.nan
+        side = np.nan
+        for idx_seg, gnd_seg in enumerate(self.ground.list_segments):
+            pvsegment_index = idx_seg
+            # Illuminated collection
+            shaded = False
+            for surf in gnd_seg.illum_collection.list_surfaces:
+                dict_registry['type'].append(surf_type)
+                dict_registry['pvsegment_index'].append(pvsegment_index)
+                dict_registry['pvrow_index'].append(pvrow_index)
+                dict_registry['side'].append(side)
+                dict_registry['shaded'].append(shaded)
+                dict_registry['object'].append(surf)
+            shaded = True
+            for surf in gnd_seg.shaded_collection.list_surfaces:
+                dict_registry['type'].append(surf_type)
+                dict_registry['pvsegment_index'].append(pvsegment_index)
+                dict_registry['pvrow_index'].append(pvrow_index)
+                dict_registry['side'].append(side)
+                dict_registry['shaded'].append(shaded)
+                dict_registry['object'].append(surf)
+        # Fill up registry with pvrow surfaces
+        surf_type = 'pvrow'
+        for idx_pvrow, pvrow in enumerate(self.pvrows):
+            pvrow_index = idx_pvrow
+            # Front side
+            side = 'front'
+            for idx_seg, seg in enumerate(pvrow.front.list_segments):
+                pvsegment_index = idx_seg
+                # Illuminated
+                shaded = False
+                for surf in seg.illum_collection.list_surfaces:
+                    dict_registry['type'].append(surf_type)
+                    dict_registry['pvsegment_index'].append(pvsegment_index)
+                    dict_registry['pvrow_index'].append(pvrow_index)
+                    dict_registry['side'].append(side)
+                    dict_registry['shaded'].append(shaded)
+                    dict_registry['object'].append(surf)
+                # Shaded
+                shaded = True
+                for surf in seg.shaded_collection.list_surfaces:
+                    dict_registry['type'].append(surf_type)
+                    dict_registry['pvsegment_index'].append(pvsegment_index)
+                    dict_registry['pvrow_index'].append(pvrow_index)
+                    dict_registry['side'].append(side)
+                    dict_registry['shaded'].append(shaded)
+                    dict_registry['object'].append(surf)
+            # Back side
+            side = 'back'
+            for idx_seg, seg in enumerate(pvrow.back.list_segments):
+                pvsegment_index = idx_seg
+                # Illuminated
+                shaded = False
+                for surf in seg.illum_collection.list_surfaces:
+                    dict_registry['type'].append(surf_type)
+                    dict_registry['pvsegment_index'].append(pvsegment_index)
+                    dict_registry['pvrow_index'].append(pvrow_index)
+                    dict_registry['side'].append(side)
+                    dict_registry['shaded'].append(shaded)
+                    dict_registry['object'].append(surf)
+                # Shaded
+                shaded = True
+                for surf in seg.shaded_collection.list_surfaces:
+                    dict_registry['type'].append(surf_type)
+                    dict_registry['pvsegment_index'].append(pvsegment_index)
+                    dict_registry['pvrow_index'].append(pvrow_index)
+                    dict_registry['side'].append(side)
+                    dict_registry['shaded'].append(shaded)
+                    dict_registry['object'].append(surf)
+
+        # Make dataframe
+        surface_registry = pd.DataFrame.from_dict(dict_registry)
+        return surface_registry
