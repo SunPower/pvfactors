@@ -146,26 +146,27 @@ class OrderedPVArray(BasePVArray):
         """The surface indices used in the view matrix should be the same
         as the ones in the surface_registry"""
 
-        # Get the surface registry
-        surface_registry = self.surface_registry
+        # Index all surfaces if not done already
+        if not self._surfaces_indexed:
+            self.index_all_surfaces()
 
         # Initialize matrices
-        n_surfaces_array = surface_registry.shape[0]
+        n_surfaces_array = self.n_surfaces
         n_surfaces = n_surfaces_array + 1  # counting sky
         view_matrix = np.zeros((n_surfaces, n_surfaces), dtype=int)
         obstr_matrix = np.zeros((n_surfaces, n_surfaces), dtype=object)
         obstr_matrix[:] = None
 
         # All surface indices need to be grouped and tracked for simplification
-        indices_front_pvrows = surface_registry.loc[
-            (surface_registry.line_type == 'pvrow') &
-            (surface_registry.side == 'front')].index.values
-        indices_back_pvrows = surface_registry.loc[
-            (surface_registry.line_type == 'pvrow') &
-            (surface_registry.side == 'back')].index.values
-        indices_ground = surface_registry.loc[
-            surface_registry.line_type == 'ground'
-        ].index.values
+        indices_front_pvrows = []
+        indices_back_pvrows = []
+        for pvrow in self.pvrows:
+            indices_front_pvrows += pvrow.front.surface_indices
+            indices_back_pvrows += pvrow.back.surface_indices
+        indices_front_pvrows = np.array(indices_front_pvrows)
+        indices_back_pvrows = np.array(indices_back_pvrows)
+
+        indices_ground = np.array(self.ground.surface_indices)
         index_sky_dome = np.array([view_matrix.shape[0] - 1])
 
         # The ground will always see the sky

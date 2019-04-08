@@ -532,6 +532,7 @@ class BasePVArray(object):
         self._all_surfaces = None
         self._surface_registry = None
         self._view_matrix = None
+        self._surfaces_indexed = False
 
     def plot(self, ax):
         """Plot PV array"""
@@ -599,6 +600,7 @@ class BasePVArray(object):
         """Add unique indices to all surfaces"""
         for idx, surface in enumerate(self.all_surfaces):
             surface.index = idx
+        self._surfaces_indexed = True
 
     def _build_view_matrix(self):
         raise NotImplementedError

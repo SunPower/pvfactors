@@ -399,3 +399,41 @@ def test_view_matrix_flat(params):
 
     assert vm.shape[0] == pvarray.n_surfaces + 1
     np.testing.assert_array_equal(vm, vm_flat_orderedpvarray)
+
+
+def test_view_matrix(params):
+
+    # Create pvarray
+    pvarray = OrderedPVArray.from_dict(params)
+
+    # Create shadows and pvrow cuts
+    pvarray.cast_shadows()
+    pvarray.cuts_for_pvrow_view()
+
+    # Build view matrixa
+    vm = pvarray.view_matrix
+
+    assert vm.shape[0] == pvarray.n_surfaces + 1
+    print(vm)
+    print(pvarray.surface_registry)
+
+
+def test_time_ordered_pvarray(params):
+
+    params.update({'surface_tilt': 0})
+
+    import time
+    n = 100
+    list_elapsed = []
+    for _ in range(n):
+        tic = time.time()
+        pvarray = OrderedPVArray.from_dict(params)
+        pvarray.cast_shadows()
+        pvarray.cuts_for_pvrow_view()
+        pvarray.index_all_surfaces()
+        # sr = pvarray.surface_registry
+        vm = pvarray.view_matrix
+        toc = time.time()
+        list_elapsed.append(toc - tic)
+
+    print("\nAvg time elapsed: {} ms".format(np.mean(list_elapsed)))
