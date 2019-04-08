@@ -3,7 +3,8 @@ import pytest
 import numpy as np
 from pvfactors.geometry import OrderedPVArray, PVGround, PVSurface
 from pvfactors.config import MAX_X_GROUND, MIN_X_GROUND
-from pvfactors.tests.test_geometry.test_data import vm_flat_orderedpvarray
+from pvfactors.tests.test_geometry.test_data import \
+    vm_flat_orderedpvarray, vm_right_orderedpvarray
 
 
 @pytest.fixture(scope='function')
@@ -403,6 +404,8 @@ def test_view_matrix_flat(params):
 
 def test_view_matrix(params):
 
+    params.update({'surface_azimuth': 270})
+
     # Create pvarray
     pvarray = OrderedPVArray.from_dict(params)
 
@@ -414,13 +417,12 @@ def test_view_matrix(params):
     vm = pvarray.view_matrix
 
     assert vm.shape[0] == pvarray.n_surfaces + 1
-    print(vm)
-    print(pvarray.surface_registry)
+    np.testing.assert_array_equal(vm, vm_right_orderedpvarray)
 
 
 def test_time_ordered_pvarray(params):
 
-    params.update({'surface_tilt': 0})
+    # params.update({'surface_tilt': 0})
 
     import time
     n = 100
@@ -432,7 +434,7 @@ def test_time_ordered_pvarray(params):
         pvarray.cuts_for_pvrow_view()
         pvarray.index_all_surfaces()
         # sr = pvarray.surface_registry
-        vm = pvarray.view_matrix
+        # vm = pvarray.view_matrix
         toc = time.time()
         list_elapsed.append(toc - tic)
 
