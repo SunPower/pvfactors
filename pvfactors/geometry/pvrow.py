@@ -66,10 +66,12 @@ class PVRow(GeometryCollection):
                                           index=index, cut=cut)
 
     def plot(self, ax, color_shaded=COLOR_DIC['pvrow_shaded'],
-             color_illum=COLOR_DIC['pvrow_illum']):
+             color_illum=COLOR_DIC['pvrow_illum'], with_index=False):
 
-        self.front.plot(ax, color_shaded=color_shaded, color_illum=color_illum)
-        self.back.plot(ax, color_shaded=color_shaded, color_illum=color_illum)
+        self.front.plot(ax, color_shaded=color_shaded, color_illum=color_illum,
+                        with_index=with_index)
+        self.back.plot(ax, color_shaded=color_shaded, color_illum=color_illum,
+                       with_index=with_index)
 
     @property
     def boundary(self):

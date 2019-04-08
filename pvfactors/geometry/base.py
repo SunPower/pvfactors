@@ -3,8 +3,9 @@
 import numpy as np
 import pandas as pd
 from pvfactors import PVFactorsError
-from pvfactors.config import \
-    DEFAULT_NORMAL_VEC, COLOR_DIC, DISTANCE_TOLERANCE, PLOT_FONTSIZE
+from pvfactors.config import (
+    DEFAULT_NORMAL_VEC, COLOR_DIC, DISTANCE_TOLERANCE, PLOT_FONTSIZE,
+    ALPHA_TEXT)
 from pvfactors.geometry.plot import plot_coords, plot_bounds, plot_line
 from pvfactors.geometry.utils import \
     is_collinear, check_collinear, are_2d_vecs_collinear, difference, contains
@@ -84,7 +85,7 @@ class BaseSurface(LineString):
     but adding an orientation to it. So two surfaces could use the same
     linestring, but have opposite orientations."""
 
-    def __init__(self, coords, normal_vector=None):
+    def __init__(self, coords, normal_vector=None, index=None):
         """Normal vector can have two directions for a given LineString,
         so the user can provide it in order to be specific,
         otherwise it will be automatically
@@ -97,6 +98,7 @@ class BaseSurface(LineString):
             self.n_vector = self._calculate_n_vector()
         else:
             self.n_vector = np.array(normal_vector)
+        self.index = index
 
     def _calculate_n_vector(self):
         """Calculate normal vector of the surface if not empty"""
@@ -108,10 +110,21 @@ class BaseSurface(LineString):
         else:
             return DEFAULT_NORMAL_VEC
 
-    def plot(self, ax, color=None):
+    def plot(self, ax, color=None, with_index=False):
         plot_coords(ax, self)
         plot_bounds(ax, self)
         plot_line(ax, self, color)
+        if with_index:
+            # Prepare text location
+            v = self.n_vector
+            v_norm = v / np.linalg.norm(v)
+            centroid = self.centroid
+            alpha = ALPHA_TEXT
+            x = centroid.x + alpha * v_norm[0]
+            y = centroid.y + alpha * v_norm[1]
+            # Add text
+            ax.text(x, y, '{}'.format(self.index),
+                    verticalalignment='center', horizontalalignment='center')
 
     def difference(self, linestring):
         """Calculate remaining surface after removing part belonging from
@@ -127,9 +140,8 @@ class PVSurface(BaseSurface):
     def __init__(self, coords=None, normal_vector=None, shaded=False,
                  index=None):
 
-        super(PVSurface, self).__init__(coords, normal_vector)
+        super(PVSurface, self).__init__(coords, normal_vector, index=index)
         self.shaded = shaded
-        self.index = index
 
 
 class ShadeCollection(GeometryCollection):
@@ -157,9 +169,9 @@ class ShadeCollection(GeometryCollection):
         else:
             return shaded
 
-    def plot(self, ax, color=None):
+    def plot(self, ax, color=None, with_index=False):
         for surface in self.list_surfaces:
-            surface.plot(ax, color=color)
+            surface.plot(ax, color=color, with_index=with_index)
 
     def add_linestring(self, linestring):
         surf = PVSurface(coords=linestring.coords, normal_vector=self.n_vector,
@@ -298,9 +310,11 @@ class PVSegment(GeometryCollection):
             assert are_2d_vecs_collinear(n_vec_ill, n_vec_shaded)
 
     def plot(self, ax, color_shaded=COLOR_DIC['pvrow_shaded'],
-             color_illum=COLOR_DIC['pvrow_illum']):
-        self._shaded_collection.plot(ax, color=color_shaded)
-        self._illum_collection.plot(ax, color=color_illum)
+             color_illum=COLOR_DIC['pvrow_illum'], with_index=False):
+        self._shaded_collection.plot(ax, color=color_shaded,
+                                     with_index=with_index)
+        self._illum_collection.plot(ax, color=color_illum,
+                                    with_index=with_index)
 
     def cast_shadow(self, linestring):
         """Split up segment from a linestring object: will rearrange the
@@ -489,11 +503,11 @@ class BaseSide(GeometryCollection):
         return list_indices
 
     def plot(self, ax, color_shaded=COLOR_DIC['pvrow_shaded'],
-             color_illum=COLOR_DIC['pvrow_illum']):
+             color_illum=COLOR_DIC['pvrow_illum'], with_index=False):
         """Plot all PV segments in side object"""
         for segment in self.list_segments:
             segment.plot(ax, color_shaded=color_shaded,
-                         color_illum=color_illum)
+                         color_illum=color_illum, with_index=with_index)
 
     def cast_shadow(self, linestring):
         """Cast designated linestring shadow on PV segments"""
@@ -534,14 +548,16 @@ class BasePVArray(object):
         self._view_matrix = None
         self._surfaces_indexed = False
 
-    def plot(self, ax):
+    def plot(self, ax, with_index=False):
         """Plot PV array"""
         # Plot pv array structures
         self.ground.plot(ax, color_shaded=COLOR_DIC['ground_shaded'],
-                         color_illum=COLOR_DIC['ground_illum'])
+                         color_illum=COLOR_DIC['ground_illum'],
+                         with_index=with_index)
         for pvrow in self.pvrows:
             pvrow.plot(ax, color_shaded=COLOR_DIC['pvrow_shaded'],
-                       color_illum=COLOR_DIC['pvrow_illum'])
+                       color_illum=COLOR_DIC['pvrow_illum'],
+                       with_index=with_index)
 
         # Plot formatting
         ax.axis('equal')

@@ -143,22 +143,19 @@ class OrderedPVArray(BasePVArray):
                 self.edge_points.append(edge_point)
 
     def _build_view_matrix(self):
-        """The surface indices used in the view matrix should be the same
-        as the ones in the surface_registry"""
+        """Calculate the pv array view matrix: using rules specific to
+        ordered pv arrays to build relationship matrix"""
 
         # Index all surfaces if not done already
         if not self._surfaces_indexed:
             self.index_all_surfaces()
 
         # Initialize matrices
-        n_pvrows = len(self.pvrows)
         n_surfaces_array = self.n_surfaces
         n_surfaces = n_surfaces_array + 1  # counting sky
         view_matrix = np.zeros((n_surfaces, n_surfaces), dtype=int)
         obstr_matrix = np.zeros((n_surfaces, n_surfaces), dtype=object)
         obstr_matrix[:] = None
-
-        # All surface indices need to be grouped and tracked for simplification
 
         indices_ground = np.array(self.ground.surface_indices)
         index_sky_dome = np.array([view_matrix.shape[0] - 1])
