@@ -190,39 +190,81 @@ class OrderedPVArray(BasePVArray):
             # Setting up row neighbors
             list_left_neighbors = [None] + self.pvrows[:-1]
             list_right_neighbors = self.pvrows[1:] + [None]
+            # List ground surfaces
+            ground_surfaces = self.ground.all_surfaces
+            gnd_centroids = [surf.centroid for surf in ground_surfaces]
 
-            # PVRow <---> PVRow
             rotated_to_left = self.pvrows[0].front.n_vector[0] < 0
             for idx_pvrow, pvrow in enumerate(self.pvrows):
+                front_indices = np.array(pvrow.front.surface_indices)
+                back_indices = np.array(pvrow.back.surface_indices)
                 left_neighbor = list_left_neighbors[idx_pvrow]
                 right_neighbor = list_right_neighbors[idx_pvrow]
+                edge_point = self.edge_points[idx_pvrow]
+
                 if rotated_to_left:
+                    # PVRow <---> PVRow
                     if left_neighbor is not None:
-                        front_indices = np.array(pvrow.front.surface_indices)
                         left_n_indices = np.array(left_neighbor
                                                   .back.surface_indices)
                         view_matrix[front_indices[:, np.newaxis],
                                     left_n_indices] = VIEW_DICT["pvrows"]
                     if right_neighbor is not None:
-                        back_indices = np.array(pvrow.back.surface_indices)
                         right_n_indices = np.array(right_neighbor
                                                    .front.surface_indices)
                         view_matrix[back_indices[:, np.newaxis],
                                     right_n_indices] = VIEW_DICT["pvrows"]
+
+                    # PVRow <---> Ground
+                    gnd_that_front_sees = []
+                    gnd_that_back_sees = []
+                    for idx_gnd, gnd_surface in enumerate(ground_surfaces):
+                        gnd_surface_on_the_right = \
+                            gnd_centroids[idx_gnd].x > edge_point.x
+                        if gnd_surface_on_the_right:
+                            gnd_that_back_sees.append(gnd_surface.index)
+                        else:
+                            gnd_that_front_sees.append(gnd_surface.index)
+
                 else:   # rotated to right
+                    # PVRow <---> PVRow
                     if left_neighbor is not None:
-                        back_indices = np.array(pvrow.back.surface_indices)
                         left_n_indices = np.array(left_neighbor
                                                   .front.surface_indices)
                         view_matrix[back_indices[:, np.newaxis],
                                     left_n_indices] = VIEW_DICT["pvrows"]
                     if right_neighbor is not None:
-                        front_indices = np.array(pvrow.front.surface_indices)
                         right_n_indices = np.array(right_neighbor
                                                    .back.surface_indices)
                         view_matrix[front_indices[:, np.newaxis],
                                     right_n_indices] = VIEW_DICT["pvrows"]
 
-            # PVRow <---> PVGround
+                    # PVRow <---> Ground
+                    gnd_that_front_sees = []
+                    gnd_that_back_sees = []
+                    for idx_gnd, gnd_surface in enumerate(ground_surfaces):
+                        gnd_surface_on_the_right = \
+                            gnd_centroids[idx_gnd].x > edge_point.x
+                        if gnd_surface_on_the_right:
+                            gnd_that_front_sees.append(gnd_surface.index)
+                        else:
+                            gnd_that_back_sees.append(gnd_surface.index)
 
+                # PVRow <---> Ground: update views
+                gnd_that_back_sees = np.array(gnd_that_back_sees)
+                gnd_that_front_sees = np.array(gnd_that_front_sees)
+                view_matrix[back_indices[:, np.newaxis],
+                            gnd_that_back_sees] = VIEW_DICT["back_gnd_obst"]
+                view_matrix[gnd_that_back_sees[:, np.newaxis],
+                            back_indices] = VIEW_DICT["gnd_back_obst"]
+                view_matrix[front_indices[:, np.newaxis],
+                            gnd_that_front_sees] = VIEW_DICT["front_gnd_obst"]
+                view_matrix[gnd_that_front_sees[:, np.newaxis],
+                            front_indices] = VIEW_DICT["gnd_front_obst"]
+
+                # PVRow <---> Sky
+                view_matrix[back_indices[:, np.newaxis],
+                            index_sky_dome] = VIEW_DICT["back_sky"]
+                view_matrix[front_indices[:, np.newaxis],
+                            index_sky_dome] = VIEW_DICT["front_sky"]
         return view_matrix
