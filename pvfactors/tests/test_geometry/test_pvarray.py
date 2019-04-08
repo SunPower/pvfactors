@@ -366,6 +366,22 @@ def test_build_surface_registry(ordered_pvarray):
     assert reg.shape[1] == len(ordered_pvarray.registry_cols)
 
 
+def test_get_all_surface_indices(ordered_pvarray):
+
+    # Complete array
+    ordered_pvarray.cast_shadows()
+    ordered_pvarray.cuts_for_pvrow_view()
+
+    # Check surface indices before indexing
+    surf_indices = ordered_pvarray.surface_indices
+    assert surf_indices == [None] * ordered_pvarray.n_surfaces
+
+    # Check surface indices after indexing
+    ordered_pvarray.index_all_surfaces()
+    surf_indices = ordered_pvarray.surface_indices
+    assert surf_indices == range(ordered_pvarray.n_surfaces)
+
+
 def test_view_matrix_flat(params):
 
     # Make flat

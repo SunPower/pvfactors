@@ -94,3 +94,10 @@ class PVRow(GeometryCollection):
             self._all_surfaces += self.front.all_surfaces
             self._all_surfaces += self.back.all_surfaces
         return self._all_surfaces
+
+    @property
+    def surface_indices(self):
+        list_indices = []
+        list_indices += self.front.surface_indices
+        list_indices += self.back.surface_indices
+        return list_indices

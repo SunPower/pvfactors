@@ -36,7 +36,7 @@ class OrderedPVArray(BasePVArray):
         self.illum_side = None
         self.has_direct_shading = False
         # For view factors
-        self.edge_points = None
+        self.edge_points = []
 
     @classmethod
     def from_dict(cls, parameters):
@@ -140,6 +140,7 @@ class OrderedPVArray(BasePVArray):
                 edge_point = projection(b1, u_direction,
                                         self.ground.original_linestring)
                 self.ground.cut_at_point(edge_point)
+                self.edge_points.append(edge_point)
 
     def _build_view_matrix(self):
         """The surface indices used in the view matrix should be the same
