@@ -151,6 +151,7 @@ class OrderedPVArray(BasePVArray):
             self.index_all_surfaces()
 
         # Initialize matrices
+        n_pvrows = len(self.pvrows)
         n_surfaces_array = self.n_surfaces
         n_surfaces = n_surfaces_array + 1  # counting sky
         view_matrix = np.zeros((n_surfaces, n_surfaces), dtype=int)
@@ -158,13 +159,6 @@ class OrderedPVArray(BasePVArray):
         obstr_matrix[:] = None
 
         # All surface indices need to be grouped and tracked for simplification
-        indices_front_pvrows = []
-        indices_back_pvrows = []
-        for pvrow in self.pvrows:
-            indices_front_pvrows += pvrow.front.surface_indices
-            indices_back_pvrows += pvrow.back.surface_indices
-        indices_front_pvrows = np.array(indices_front_pvrows)
-        indices_back_pvrows = np.array(indices_back_pvrows)
 
         indices_ground = np.array(self.ground.surface_indices)
         index_sky_dome = np.array([view_matrix.shape[0] - 1])
@@ -175,6 +169,15 @@ class OrderedPVArray(BasePVArray):
 
         pvrows_are_flat = (self.surface_tilt == 0.)
         if pvrows_are_flat:
+            # Getting all front and back pvrow surface indices
+            indices_front_pvrows = []
+            indices_back_pvrows = []
+            for pvrow in self.pvrows:
+                indices_front_pvrows += pvrow.front.surface_indices
+                indices_back_pvrows += pvrow.back.surface_indices
+            indices_front_pvrows = np.array(indices_front_pvrows)
+            indices_back_pvrows = np.array(indices_back_pvrows)
+
             # Only back surface can see the ground
             view_matrix[indices_back_pvrows[:, np.newaxis],
                         indices_ground] = VIEW_DICT["back_gnd"]
@@ -184,6 +187,42 @@ class OrderedPVArray(BasePVArray):
             view_matrix[indices_front_pvrows[:, np.newaxis],
                         index_sky_dome] = VIEW_DICT["front_sky"]
         else:
-            pass
+            # Setting up row neighbors
+            list_left_neighbors = [None] + self.pvrows[:-1]
+            list_right_neighbors = self.pvrows[1:] + [None]
+
+            # PVRow <---> PVRow
+            rotated_to_left = self.pvrows[0].front.n_vector[0] < 0
+            for idx_pvrow, pvrow in enumerate(self.pvrows):
+                left_neighbor = list_left_neighbors[idx_pvrow]
+                right_neighbor = list_right_neighbors[idx_pvrow]
+                if rotated_to_left:
+                    if left_neighbor is not None:
+                        front_indices = np.array(pvrow.front.surface_indices)
+                        left_n_indices = np.array(left_neighbor
+                                                  .back.surface_indices)
+                        view_matrix[front_indices[:, np.newaxis],
+                                    left_n_indices] = VIEW_DICT["pvrows"]
+                    if right_neighbor is not None:
+                        back_indices = np.array(pvrow.back.surface_indices)
+                        right_n_indices = np.array(right_neighbor
+                                                   .front.surface_indices)
+                        view_matrix[back_indices[:, np.newaxis],
+                                    right_n_indices] = VIEW_DICT["pvrows"]
+                else:   # rotated to right
+                    if left_neighbor is not None:
+                        back_indices = np.array(pvrow.back.surface_indices)
+                        left_n_indices = np.array(left_neighbor
+                                                  .front.surface_indices)
+                        view_matrix[back_indices[:, np.newaxis],
+                                    left_n_indices] = VIEW_DICT["pvrows"]
+                    if right_neighbor is not None:
+                        front_indices = np.array(pvrow.front.surface_indices)
+                        right_n_indices = np.array(right_neighbor
+                                                   .back.surface_indices)
+                        view_matrix[front_indices[:, np.newaxis],
+                                    right_n_indices] = VIEW_DICT["pvrows"]
+
+            # PVRow <---> PVGround
 
         return view_matrix
