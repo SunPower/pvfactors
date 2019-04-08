@@ -380,7 +380,8 @@ def test_get_all_surface_indices(ordered_pvarray):
     # Check surface indices after indexing
     ordered_pvarray.index_all_surfaces()
     surf_indices = ordered_pvarray.surface_indices
-    assert surf_indices == range(ordered_pvarray.n_surfaces)
+    np.testing.assert_array_equal(surf_indices,
+                                  range(ordered_pvarray.n_surfaces))
 
 
 def test_view_matrix_flat(params):
@@ -418,6 +419,10 @@ def test_view_matrix(params):
 
     assert vm.shape[0] == pvarray.n_surfaces + 1
     np.testing.assert_array_equal(vm, vm_right_orderedpvarray)
+    # The view matrix mask should be symmetric
+    mask = np.where(vm != 0, 1, 0)
+    np.testing.assert_array_equal(mask[:-1, :-1], mask.T[:-1, :-1])
+    # Removing sky row and column because didn't fill the last row
 
 
 def test_time_ordered_pvarray(params):
