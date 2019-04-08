@@ -2,7 +2,7 @@
 import numpy as np
 from pvfactors.geometry.pvground import PVGround
 from pvfactors.geometry.pvrow import PVRow
-from pvfactors.config import X_ORIGIN_PVROWS
+from pvfactors.config import X_ORIGIN_PVROWS, VIEW_DICT
 from pvfactors.geometry.base import get_solar_2d_vector, BasePVArray
 from pvfactors.geometry.utils import projection
 from shapely.geometry import LineString, Point
@@ -126,7 +126,7 @@ class OrderedPVArray(BasePVArray):
             # Merge ground shaded surfaces
             self.ground.merge_shaded_areas()
 
-    def cut_ground_for_pvrow_view(self):
+    def cuts_for_pvrow_view(self):
         """When not flat, the PV row sides will only see a part of the ground,
         so we need to mark these limits called "edge points" and cut the ground
         surface accordingly"""
@@ -140,3 +140,48 @@ class OrderedPVArray(BasePVArray):
                 edge_point = projection(b1, u_direction,
                                         self.ground.original_linestring)
                 self.ground.cut_at_point(edge_point)
+
+    def _build_view_matrix(self):
+        """The surface indices used in the view matrix should be the same
+        as the ones in the surface_registry"""
+
+        # Get the surface registry
+        surface_registry = self.surface_registry
+
+        # Initialize matrices
+        n_surfaces_array = surface_registry.shape[0]
+        n_surfaces = n_surfaces_array + 1  # counting sky
+        view_matrix = np.zeros((n_surfaces, n_surfaces), dtype=int)
+        obstr_matrix = np.zeros((n_surfaces, n_surfaces), dtype=object)
+        obstr_matrix[:] = None
+
+        # All surface indices need to be grouped and tracked for simplification
+        indices_front_pvrows = surface_registry.loc[
+            (surface_registry.line_type == 'pvrow') &
+            (surface_registry.side == 'front')].index.values
+        indices_back_pvrows = surface_registry.loc[
+            (surface_registry.line_type == 'pvrow') &
+            (surface_registry.side == 'back')].index.values
+        indices_ground = surface_registry.loc[
+            surface_registry.line_type == 'ground'
+        ].index.values
+        index_sky_dome = np.array([view_matrix.shape[0] - 1])
+
+        # The ground will always see the sky
+        view_matrix[indices_ground[:, np.newaxis],
+                    index_sky_dome] = VIEW_DICT["ground_sky"]
+
+        pvrows_are_flat = (self.surface_tilt == 0.)
+        if pvrows_are_flat:
+            # Only back surface can see the ground
+            view_matrix[indices_back_pvrows[:, np.newaxis],
+                        indices_ground] = VIEW_DICT["back_gnd"]
+            view_matrix[indices_ground[:, np.newaxis],
+                        indices_back_pvrows] = VIEW_DICT["gnd_back"]
+            # The front side only sees the sky
+            view_matrix[indices_front_pvrows[:, np.newaxis],
+                        index_sky_dome] = VIEW_DICT["front_sky"]
+        else:
+            pass
+
+        return view_matrix

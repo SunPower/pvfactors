@@ -500,17 +500,20 @@ class BaseSide(GeometryCollection):
 class BasePVArray(object):
     """Base class for PV arrays in pvfactors"""
 
-    registry_cols = ['object', 'type', 'pvrow_index', 'side',
+    registry_cols = ['object', 'line_type', 'pvrow_index', 'side',
                      'pvsegment_index', 'shaded']
 
     def __init__(self, list_pvrows=[], ground=None, distance=None,
                  height=None):
         self.pvrows = list_pvrows
         self.ground = ground
-        self._all_surfaces = None
-        self._surface_registry = None
         self.distance = distance
         self.height = height
+
+        # Property related attributes: will not be built unless called
+        self._all_surfaces = None
+        self._surface_registry = None
+        self._view_matrix = None
 
     def plot(self, ax):
         """Plot PV array"""
@@ -557,10 +560,22 @@ class BasePVArray(object):
             self._surface_registry = self._build_surface_registry()
         return self._surface_registry
 
+    @property
+    def view_matrix(self):
+        """How to build the view matrix will be specific to the pv array
+        considered, so ``_build_view_matrix()`` needs to be implemented in
+        the child class"""
+        if self._view_matrix is None:
+            self._view_matrix = self._build_view_matrix()
+        return self._view_matrix
+
+    def _build_view_matrix(self):
+        raise NotImplementedError
+
     def _build_surface_registry(self):
         dict_registry = {k: [] for k in self.registry_cols}
         # Fill up registry with ground surfaces
-        surf_type = 'ground'
+        surf_line_type = 'ground'
         pvrow_index = np.nan
         side = np.nan
         for idx_seg, gnd_seg in enumerate(self.ground.list_segments):
@@ -568,7 +583,7 @@ class BasePVArray(object):
             # Illuminated collection
             shaded = False
             for surf in gnd_seg.illum_collection.list_surfaces:
-                dict_registry['type'].append(surf_type)
+                dict_registry['line_type'].append(surf_line_type)
                 dict_registry['pvsegment_index'].append(pvsegment_index)
                 dict_registry['pvrow_index'].append(pvrow_index)
                 dict_registry['side'].append(side)
@@ -576,14 +591,14 @@ class BasePVArray(object):
                 dict_registry['object'].append(surf)
             shaded = True
             for surf in gnd_seg.shaded_collection.list_surfaces:
-                dict_registry['type'].append(surf_type)
+                dict_registry['line_type'].append(surf_line_type)
                 dict_registry['pvsegment_index'].append(pvsegment_index)
                 dict_registry['pvrow_index'].append(pvrow_index)
                 dict_registry['side'].append(side)
                 dict_registry['shaded'].append(shaded)
                 dict_registry['object'].append(surf)
         # Fill up registry with pvrow surfaces
-        surf_type = 'pvrow'
+        surf_line_type = 'pvrow'
         for idx_pvrow, pvrow in enumerate(self.pvrows):
             pvrow_index = idx_pvrow
             # Front side
@@ -593,7 +608,7 @@ class BasePVArray(object):
                 # Illuminated
                 shaded = False
                 for surf in seg.illum_collection.list_surfaces:
-                    dict_registry['type'].append(surf_type)
+                    dict_registry['line_type'].append(surf_line_type)
                     dict_registry['pvsegment_index'].append(pvsegment_index)
                     dict_registry['pvrow_index'].append(pvrow_index)
                     dict_registry['side'].append(side)
@@ -602,7 +617,7 @@ class BasePVArray(object):
                 # Shaded
                 shaded = True
                 for surf in seg.shaded_collection.list_surfaces:
-                    dict_registry['type'].append(surf_type)
+                    dict_registry['line_type'].append(surf_line_type)
                     dict_registry['pvsegment_index'].append(pvsegment_index)
                     dict_registry['pvrow_index'].append(pvrow_index)
                     dict_registry['side'].append(side)
@@ -615,7 +630,7 @@ class BasePVArray(object):
                 # Illuminated
                 shaded = False
                 for surf in seg.illum_collection.list_surfaces:
-                    dict_registry['type'].append(surf_type)
+                    dict_registry['line_type'].append(surf_line_type)
                     dict_registry['pvsegment_index'].append(pvsegment_index)
                     dict_registry['pvrow_index'].append(pvrow_index)
                     dict_registry['side'].append(side)
@@ -624,7 +639,7 @@ class BasePVArray(object):
                 # Shaded
                 shaded = True
                 for surf in seg.shaded_collection.list_surfaces:
-                    dict_registry['type'].append(surf_type)
+                    dict_registry['line_type'].append(surf_line_type)
                     dict_registry['pvsegment_index'].append(pvsegment_index)
                     dict_registry['pvrow_index'].append(pvrow_index)
                     dict_registry['side'].append(side)

@@ -5,13 +5,13 @@ from __future__ import division
 from __future__ import print_function
 from pvfactors import PVFactorsArrayUpdateException
 from pvfactors.config import \
-    Y_GROUND, MAX_X_GROUND, MIN_X_GROUND, X_ORIGIN_PVROWS
+    Y_GROUND, MAX_X_GROUND, MIN_X_GROUND, X_ORIGIN_PVROWS, VIEW_DICT
 from pvfactors.pvcore import (LinePVArray,
                               find_edge_point,
                               calculate_circumsolar_shading,
                               calculate_horizon_band_shading)
 from pvfactors.pvrow import PVRowLine
-from pvfactors.view_factors import ViewFactorCalculator, VIEW_DICT
+from pvfactors.view_factors import ViewFactorCalculator
 from shapely.geometry import LineString, Point
 import numpy as np
 import pandas as pd

@@ -3,6 +3,7 @@ import pytest
 import numpy as np
 from pvfactors.geometry import OrderedPVArray, PVGround, PVSurface
 from pvfactors.config import MAX_X_GROUND, MIN_X_GROUND
+from pvfactors.tests.test_geometry.test_data import vm_flat_orderedpvarray
 
 
 @pytest.fixture(scope='function')
@@ -330,13 +331,13 @@ def test_ordered_pvarray_gnd_pvrow_shadow_casting_back_n_seg(
     np.testing.assert_almost_equal(sum_lengths, list_pvsegments[0].length)
 
 
-def test_ordered_pvarray_cut_ground_for_pvrow_view(ordered_pvarray):
+def test_ordered_pvarray_cuts_for_pvrow_view(ordered_pvarray):
     """Test that pvarray ground is cut correctly"""
 
     ordered_pvarray.cast_shadows()
     n_surfaces_0 = ordered_pvarray.ground.n_surfaces
     len_0 = ordered_pvarray.ground.length
-    ordered_pvarray.cut_ground_for_pvrow_view()
+    ordered_pvarray.cuts_for_pvrow_view()
     n_surfaces_1 = ordered_pvarray.ground.n_surfaces
     len_1 = ordered_pvarray.ground.length
 
@@ -363,3 +364,22 @@ def test_build_surface_registry(ordered_pvarray):
 
     assert reg.shape[0] == ordered_pvarray.n_surfaces
     assert reg.shape[1] == len(ordered_pvarray.registry_cols)
+
+
+def test_view_matrix_flat(params):
+
+    # Make flat
+    params.update({'surface_tilt': 0})
+
+    # Create pvarray
+    pvarray = OrderedPVArray.from_dict(params)
+
+    # Create shadows and pvrow cuts
+    pvarray.cast_shadows()
+    pvarray.cuts_for_pvrow_view()
+
+    # Build view matrix
+    vm = pvarray.view_matrix
+
+    assert vm.shape[0] == pvarray.n_surfaces + 1
+    np.testing.assert_array_equal(vm, vm_flat_orderedpvarray)
