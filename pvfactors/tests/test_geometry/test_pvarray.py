@@ -400,4 +400,4 @@ def test_time_ordered_pvarray(params):
         toc = time.time()
         list_elapsed.append(toc - tic)
 
-    print("\nAvg time elapsed: {} ms".format(np.mean(list_elapsed)))
+    print("\nAvg time elapsed: {} s".format(np.mean(list_elapsed)))

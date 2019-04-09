@@ -3,14 +3,13 @@
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
-from shapely.geometry import LineString
+from shapely.geometry import LineString, Polygon
 from pvfactors.config import REVERSE_VIEW_DICT, THRESHOLD_VF_12
 import numpy as np
 import logging
 
 LOGGER = logging.getLogger(__name__)
 LOGGER.setLevel(logging.INFO)
-
 
 np.set_printoptions(suppress=True)
 
@@ -75,6 +74,7 @@ class VFCalculator(object):
                 obstructing_pvrow = list_pvrow[obstr_matrix[idx]]
             else:
                 obstructing_pvrow = None
+            # The following line takes the most time to execute (looped)
             view_factors[idx] = self.mapper.function_mapping[view](
                 line_i, line_j, obstructing_pvrow)
 
@@ -91,13 +91,11 @@ class VFCalculator(object):
         total_matrix_reciprocity = (upper_matrix_reciprocity +
                                     upper_matrix_reciprocity.T)
         finite_vf_matrix = np.dot(matrix_areas_inv, total_matrix_reciprocity)
-        view_factors[:n_finite_surfaces, :n_finite_surfaces] = \
-            finite_vf_matrix
+        view_factors[:n_finite_surfaces, :n_finite_surfaces] = finite_vf_matrix
 
         # --- Then do the calculations for the sky, which is the remaining
         # portion of the hemisphere
         view_factors[:-1, -1] = 1. - np.sum(view_factors[:-1, :-1], axis=1)
-
         return view_factors
 
     def get_viewfactors(self, surface_idx):
@@ -146,13 +144,13 @@ class VFMapperOrderedPVArray(object):
         # FIXME: specific to pvlinestring
         obs_1 = obstructing_line
         # Implement the Hottel method
-        b1_line1 = line_1.boundary[0]
-        b2_line1 = line_1.boundary[1]
+        b1_line1, b2_line1 = line_1.boundary
         a_1 = line_1.length
 
-        b1_line2 = line_2.boundary[0]
-        b2_line2 = line_2.boundary[1]
+        b1_line2, b2_line2 = line_2.boundary
 
+        # TODO: Speed up this calculation
+        # calculation of intersects takes a lot of time in length_string
         uncrossed_length1, state_1 = self.length_string(b1_line1, b1_line2,
                                                         obs_1)
         uncrossed_length2, state_2 = self.length_string(b2_line1, b2_line2,
@@ -161,7 +159,6 @@ class VFMapperOrderedPVArray(object):
                                                       obs_1)
         crossed_length2, state_4 = self.length_string(b2_line1, b1_line2,
                                                       obs_1)
-
         logging.debug("... obstruction of uncrossed string 1: %s", state_1)
         logging.debug("... obstruction of uncrossed string 2: %s", state_2)
         logging.debug("... obstruction of crossed string 1: %s", state_3)
@@ -211,6 +208,8 @@ class VFMapperOrderedPVArray(object):
         b1_line2 = line_2.boundary[0]
         b2_line2 = line_2.boundary[1]
 
+        # TODO: Speed up this calculation
+        # calculation of intersects takes a lot of time in length_string
         uncrossed_length1, state_1 = self.length_string(b1_line1, b2_line2,
                                                         obs_1)
         uncrossed_length2, state_2 = self.length_string(b2_line1, b1_line2,
@@ -311,9 +310,9 @@ class VFMapperOrderedPVArray(object):
         """
         # FIXME: specific to pvlinestrings, and assumes b1_obstruction should
         # be used if obstruction
-        string = LineString([(pt1.x, pt1.y), (pt2.x, pt2.y)])
         is_obstructing = False
         if obstruction is not None:
+            string = LineString([pt1, pt2])
             is_obstructing = string.intersects(obstruction.original_linestring)
         if is_obstructing:
             b1_obstruction = obstruction.lowest_point
