@@ -86,7 +86,8 @@ class BaseSurface(LineString):
     but adding an orientation to it. So two surfaces could use the same
     linestring, but have opposite orientations."""
 
-    def __init__(self, coords, normal_vector=None, index=None):
+    def __init__(self, coords, normal_vector=None, index=None,
+                 surface_params=[]):
         """Normal vector can have two directions for a given LineString,
         so the user can provide it in order to be specific,
         otherwise it will be automatically
@@ -100,6 +101,8 @@ class BaseSurface(LineString):
         else:
             self.n_vector = np.array(normal_vector)
         self.index = index
+        self.surface_params = surface_params
+        self.params = dict.fromkeys(self.surface_params)
 
     def _calculate_n_vector(self):
         """Calculate normal vector of the surface if not empty"""
@@ -132,6 +135,26 @@ class BaseSurface(LineString):
         provided linestring"""
         return difference(self, linestring)
 
+    def get_param(self, param):
+        """
+        Parameters
+        ----------
+        param : str
+            Surface parameter to return
+        """
+        return self.params[param]
+
+    def set_param(self, param, value):
+        """
+        Parameters
+        ----------
+        param : str
+            Surface parameter to return
+        value : float
+            Value to assign to parameter
+        """
+        self.params[param] = value
+
 
 class PVSurface(BaseSurface):
     """Rigid PV surfaces are extensions of base surfaces, as they add PV
@@ -139,9 +162,10 @@ class PVSurface(BaseSurface):
     only represent only 1 ``shapely`` :py:class:`LineString` geometry."""
 
     def __init__(self, coords=None, normal_vector=None, shaded=False,
-                 index=None):
+                 index=None, surface_params=[]):
 
-        super(PVSurface, self).__init__(coords, normal_vector, index=index)
+        super(PVSurface, self).__init__(coords, normal_vector, index=index,
+                                        surface_params=surface_params)
         self.shaded = shaded
 
 
@@ -150,7 +174,7 @@ class ShadeCollection(GeometryCollection):
     objects that have the same shading status. The pv surfaces are not
     necessarily contiguous or collinear."""
 
-    def __init__(self, list_surfaces=[], shaded=None):
+    def __init__(self, list_surfaces=[], shaded=None, surface_params=[]):
         """
         Parameters
         ----------
@@ -161,6 +185,7 @@ class ShadeCollection(GeometryCollection):
         self.list_surfaces = list_surfaces
         self.shaded = self._get_shading(shaded)
         self.is_collinear = is_collinear(list_surfaces)
+        self.surface_params = surface_params
         super(ShadeCollection, self).__init__(list_surfaces)
 
     def _get_shading(self, shaded):
@@ -176,7 +201,8 @@ class ShadeCollection(GeometryCollection):
 
     def add_linestring(self, linestring):
         surf = PVSurface(coords=linestring.coords, normal_vector=self.n_vector,
-                         shaded=self.shaded)
+                         shaded=self.shaded,
+                         surface_params=self.surface_params)
         self.add_pvsurface(surf)
 
     def add_pvsurface(self, pvsurface):
@@ -198,9 +224,10 @@ class ShadeCollection(GeometryCollection):
                     difference = [difference]
                 for new_geom in difference:
                     if not new_geom.is_empty:
-                        new_surface = PVSurface(new_geom.coords,
-                                                normal_vector=surface.n_vector,
-                                                shaded=surface.shaded)
+                        new_surface = PVSurface(
+                            new_geom.coords, normal_vector=surface.n_vector,
+                            shaded=surface.shaded,
+                            surface_params=surface.surface_params)
                         new_list_surfaces.append(new_surface)
             else:
                 new_list_surfaces.append(surface)
@@ -221,10 +248,11 @@ class ShadeCollection(GeometryCollection):
         if len(self.list_surfaces) > 1:
             merged_lines = linemerge(self.list_surfaces)
             minx, miny, maxx, maxy = merged_lines.bounds
+            surf_1 = self.list_surfaces[0]
             new_pvsurf = PVSurface(
                 coords=[(minx, miny), (maxx, maxy)],
-                shaded=self.shaded,
-                normal_vector=self.list_surfaces[0].n_vector)
+                shaded=self.shaded, normal_vector=surf_1.n_vector,
+                surface_params=surf_1.surface_params)
             self.list_surfaces = [new_pvsurf]
             self.update_geom_collection(self.list_surfaces)
 
@@ -240,18 +268,54 @@ class ShadeCollection(GeometryCollection):
                     coords_1 = [b1, point]
                     coords_2 = [point, b2]
                     # TODO: not sure what to do about index yet
-                    new_surf_1 = PVSurface(coords_1,
-                                           normal_vector=surface.n_vector,
-                                           shaded=surface.shaded)
-                    new_surf_2 = PVSurface(coords_2,
-                                           normal_vector=surface.n_vector,
-                                           shaded=surface.shaded)
+                    new_surf_1 = PVSurface(
+                        coords_1, normal_vector=surface.n_vector,
+                        shaded=surface.shaded,
+                        surface_params=surface.surface_params)
+                    new_surf_2 = PVSurface(
+                        coords_2, normal_vector=surface.n_vector,
+                        shaded=surface.shaded,
+                        surface_params=surface.surface_params)
                     # Now update collection
                     self.list_surfaces[idx] = new_surf_1
                     self.list_surfaces.append(new_surf_2)
                     self.update_geom_collection(self.list_surfaces)
                     # No need to continue the loop
                     break
+
+    def get_param_weighted(self, param):
+        """
+        Parameters
+        ----------
+        param : str
+            Surface parameter to return
+        """
+        value = self.get_param_ww(param) / self.length
+        return value
+
+    def get_param_ww(self, param):
+        """Get with weight
+        Parameters
+        ----------
+        param : str
+            Surface parameter to return
+        """
+        value = 0
+        for surf in self.list_surfaces:
+            value += surf.get_param(param) * surf.length
+        return value
+
+    def set_param(self, param, value):
+        """
+        Parameters
+        ----------
+        param : str
+            Surface parameter to return
+        value : float
+            Value to assign to parameter
+        """
+        for surf in self.list_surfaces:
+            surf.set_param(param, value)
 
     @property
     def n_vector(self):
@@ -273,10 +337,11 @@ class ShadeCollection(GeometryCollection):
         return [surf.index for surf in self.list_surfaces]
 
     @classmethod
-    def from_linestring_coords(cls, coords, shaded, normal_vector=None):
+    def from_linestring_coords(cls, coords, shaded, normal_vector=None,
+                               surface_params=[]):
         surf = PVSurface(coords=coords, normal_vector=normal_vector,
-                         shaded=shaded)
-        return cls([surf], shaded=shaded)
+                         shaded=shaded, surface_params=surface_params)
+        return cls([surf], shaded=shaded, surface_params=surface_params)
 
 
 class PVSegment(GeometryCollection):
@@ -344,6 +409,40 @@ class PVSegment(GeometryCollection):
             else:
                 self._shaded_collection.cut_at_point(point)
 
+    def get_param_weighted(self, param):
+        """
+        Parameters
+        ----------
+        param : str
+            Surface parameter to return
+        """
+        value = self.get_param_ww(param) / self.length
+        return value
+
+    def get_param_ww(self, param):
+        """Get with weight
+        Parameters
+        ----------
+        param : str
+            Surface parameter to return
+        """
+        value = 0
+        value += self._shaded_collection.get_param_ww(param)
+        value += self._illum_collection.get_param_ww(param)
+        return value
+
+    def set_param(self, param, value):
+        """
+        Parameters
+        ----------
+        param : str
+            Surface parameter to return
+        value : float
+            Value to assign to parameter
+        """
+        self._shaded_collection.set_param(param, value)
+        self._illum_collection.set_param(param, value)
+
     @property
     def n_vector(self):
         """Since shaded and illum surfaces are supposed to be collinear,
@@ -371,14 +470,16 @@ class PVSegment(GeometryCollection):
 
     @classmethod
     def from_linestring_coords(cls, coords, shaded=False, normal_vector=None,
-                               index=None):
+                               index=None, surface_params=[]):
         """Create a PVSegment from the coordinates of a single ``shapely``
         :py:class:`LineString`"""
         col = ShadeCollection.from_linestring_coords(
-            coords, shaded=shaded, normal_vector=normal_vector)
+            coords, shaded=shaded, normal_vector=normal_vector,
+            surface_params=surface_params)
         # Realized that needed to instantiate other_col, otherwise could
         # end up with shared collection among different PV segments
-        other_col = ShadeCollection(list_surfaces=[], shaded=not shaded)
+        other_col = ShadeCollection(list_surfaces=[], shaded=not shaded,
+                                    surface_params=surface_params)
         if shaded:
             return cls(illum_collection=other_col,
                        shaded_collection=col, index=index)
@@ -447,11 +548,11 @@ class BaseSide(GeometryCollection):
 
     @classmethod
     def from_linestring_coords(cls, coords, shaded=False, normal_vector=None,
-                               index=None, n_segments=1):
+                               index=None, n_segments=1, surface_params=[]):
         if n_segments == 1:
             list_pvsegments = [PVSegment.from_linestring_coords(
                 coords, shaded=shaded, normal_vector=normal_vector,
-                index=index)]
+                index=index, surface_params=surface_params)]
         else:
             # Discretize coords and create segments accordingly
             linestring = LineString(coords)
@@ -463,7 +564,7 @@ class BaseSide(GeometryCollection):
                 new_coords = list_points[idx:idx + 2]
                 pvsegment = PVSegment.from_linestring_coords(
                     new_coords, shaded=shaded, normal_vector=normal_vector,
-                    index=index)
+                    index=index, surface_params=surface_params)
                 list_pvsegments.append(pvsegment)
         return cls(list_segments=list_pvsegments)
 
@@ -528,6 +629,40 @@ class BaseSide(GeometryCollection):
                 # Nothing will happen to the segments that do not contain
                 # the point
                 segment.cut_at_point(point)
+
+    def get_param_weighted(self, param):
+        """
+        Parameters
+        ----------
+        param : str
+            Surface parameter to return
+        """
+        value = self.get_param_ww(param) / self.length
+        return value
+
+    def get_param_ww(self, param):
+        """Get with weight
+        Parameters
+        ----------
+        param : str
+            Surface parameter to return
+        """
+        value = 0
+        for seg in self.list_segments:
+            value += seg.get_param_ww(param)
+        return value
+
+    def set_param(self, param, value):
+        """
+        Parameters
+        ----------
+        param : str
+            Surface parameter to return
+        value : float
+            Value to assign to parameter
+        """
+        for seg in self.list_segments:
+            seg.set_param(param, value)
 
 
 class BasePVArray(object):

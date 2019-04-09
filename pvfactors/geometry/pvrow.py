@@ -33,7 +33,7 @@ class PVRow(GeometryCollection):
 
     @classmethod
     def from_linestring_coords(cls, coords, shaded=False, normal_vector=None,
-                               index=None, cut={}):
+                               index=None, cut={}, surface_params=[]):
         """
         Parameters
         ----------
@@ -44,26 +44,29 @@ class PVRow(GeometryCollection):
         index_single_segment = 0
         front_side = PVRowSide.from_linestring_coords(
             coords, shaded=shaded, normal_vector=normal_vector,
-            index=index_single_segment, n_segments=cut.get('front', 1))
+            index=index_single_segment, n_segments=cut.get('front', 1),
+            surface_params=surface_params)
         if normal_vector is not None:
             back_n_vec = - np.array(normal_vector)
         else:
             back_n_vec = - front_side.n_vector
         back_side = PVRowSide.from_linestring_coords(
             coords, shaded=shaded, normal_vector=back_n_vec,
-            index=index_single_segment, n_segments=cut.get('back', 1))
+            index=index_single_segment, n_segments=cut.get('back', 1),
+            surface_params=surface_params)
         return cls(front_side=front_side, back_side=back_side, index=index,
                    original_linestring=LineString(coords))
 
     @classmethod
     def from_center_tilt_width(cls, xy_center, tilt, width, surface_azimuth,
                                axis_azimuth, shaded=False, normal_vector=None,
-                               index=None, cut={}):
+                               index=None, cut={}, surface_params=[]):
         coords = coords_from_center_tilt_length(xy_center, tilt, width,
                                                 surface_azimuth, axis_azimuth)
         return cls.from_linestring_coords(coords, shaded=shaded,
                                           normal_vector=normal_vector,
-                                          index=index, cut=cut)
+                                          index=index, cut=cut,
+                                          surface_params=surface_params)
 
     def plot(self, ax, color_shaded=COLOR_DIC['pvrow_shaded'],
              color_illum=COLOR_DIC['pvrow_illum'], with_index=False):

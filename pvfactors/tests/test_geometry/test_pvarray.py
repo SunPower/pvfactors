@@ -1,5 +1,4 @@
 import os
-import pytest
 import numpy as np
 from pvfactors.geometry import OrderedPVArray, PVGround, PVSurface
 from pvfactors.config import MAX_X_GROUND, MIN_X_GROUND
@@ -372,6 +371,44 @@ def test_view_matrix(params):
     # The obstruction matrix should be symmetric
     np.testing.assert_array_equal(om, om.T)
     # TODO: test values against saved array
+
+
+def test_surface_params(params):
+
+    surface_params = ['qinc']
+    pvarray = OrderedPVArray.from_dict(params, surface_params=surface_params)
+    pvarray.cast_shadows()
+    pvarray.cuts_for_pvrow_view()
+
+    # Set all surfaces parameters to 1
+    pvarray.ground.set_param('qinc', 1)
+    for pvrow in pvarray.pvrows:
+        pvrow.front.set_param('qinc', 1)
+        pvrow.back.set_param('qinc', 1)
+
+    # Check that all surfaces of the correct surface params
+    all_surfaces = pvarray.all_surfaces
+    for surf in all_surfaces:
+        assert surf.surface_params == surface_params
+        assert surf.get_param('qinc') == 1
+
+    # Check weighted values
+    np.testing.assert_almost_equal(
+        pvarray.ground.get_param_weighted('qinc'), 1)
+    np.testing.assert_almost_equal(
+        pvarray.ground.get_param_ww('qinc'),
+        pvarray.ground.length)
+    for pvrow in pvarray.pvrows:
+        # Front
+        np.testing.assert_almost_equal(
+            pvrow.front.get_param_weighted('qinc'), 1)
+        np.testing.assert_almost_equal(
+            pvrow.front.get_param_ww('qinc'), pvrow.front.length)
+        # Back
+        np.testing.assert_almost_equal(
+            pvrow.back.get_param_weighted('qinc'), 1)
+        np.testing.assert_almost_equal(
+            pvrow.back.get_param_ww('qinc'), pvrow.back.length)
 
 
 def test_time_ordered_pvarray(params):

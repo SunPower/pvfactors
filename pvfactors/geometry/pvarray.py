@@ -39,10 +39,11 @@ class OrderedPVArray(BasePVArray):
         self.edge_points = []
 
     @classmethod
-    def from_dict(cls, parameters):
+    def from_dict(cls, parameters, surface_params=[]):
         """Create ordered PV array from dictionary of parameters"""
         # Create ground
-        ground = PVGround.as_flat(y_ground=cls.y_ground)
+        ground = PVGround.as_flat(y_ground=cls.y_ground,
+                                  surface_params=surface_params)
         # Create pvrows
         list_pvrows = []
         width = parameters['pvrow_width']
@@ -60,7 +61,8 @@ class OrderedPVArray(BasePVArray):
             x_center = X_ORIGIN_PVROWS + idx * distance
             pvrow = PVRow.from_center_tilt_width(
                 (x_center, y_center), tilt, width, surface_azimuth,
-                axis_azimuth, index=idx, cut=cut.get(idx, {}))
+                axis_azimuth, index=idx, cut=cut.get(idx, {}),
+                surface_params=surface_params)
             list_pvrows.append(pvrow)
         return cls(list_pvrows=list_pvrows, ground=ground, surface_tilt=tilt,
                    surface_azimuth=surface_azimuth,
