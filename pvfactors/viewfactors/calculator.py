@@ -64,7 +64,7 @@ class VFCalculator(object):
         indices_views_finite = np.where(view_matrix_upper_finite_surfaces)
 
         n_views = len(indices_views_finite[0])
-        geometries = geom_dict.values()
+        geometries = list(geom_dict.values())
         for i in range(n_views):
             idx = (indices_views_finite[0][i], indices_views_finite[1][i])
             view = REVERSE_VIEW_DICT[view_matrix[idx]]
