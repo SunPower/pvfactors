@@ -414,15 +414,19 @@ def test_view_matrix(params):
     pvarray.cast_shadows()
     pvarray.cuts_for_pvrow_view()
 
-    # Build view matrixa
-    vm = pvarray.view_matrix
+    # Build view matrix and obstruction matrix
+    vm, om = pvarray.view_matrix
 
     assert vm.shape[0] == pvarray.n_surfaces + 1
     np.testing.assert_array_equal(vm, vm_right_orderedpvarray)
     # The view matrix mask should be symmetric
-    mask = np.where(vm != 0, 1, 0)
-    np.testing.assert_array_equal(mask[:-1, :-1], mask.T[:-1, :-1])
+    mask_vm = np.where(vm != 0, 1, 0)
+    np.testing.assert_array_equal(mask_vm[:-1, :-1], mask_vm.T[:-1, :-1])
     # Removing sky row and column because didn't fill the last row
+
+    # The obstruction matrix should be symmetric
+    np.testing.assert_array_equal(om, om.T)
+    # TODO: test values against saved array
 
 
 def test_time_ordered_pvarray(params):

@@ -199,18 +199,24 @@ class OrderedPVArray(BasePVArray):
                 right_neighbor = list_right_neighbors[idx_pvrow]
                 edge_point = self.edge_points[idx_pvrow]
 
+                # Will save index of pvrows obstructing front and back
+                front_obstruction = None
+                back_obstruction = None
+
                 if rotated_to_left:
-                    # PVRow <---> PVRow
+                    # PVRow <---> PVRow + obstruction to ground
                     if left_neighbor is not None:
                         left_n_indices = np.array(left_neighbor
                                                   .back.surface_indices)
                         view_matrix[front_indices[:, np.newaxis],
                                     left_n_indices] = VIEW_DICT["pvrows"]
+                        front_obstruction = left_neighbor.index
                     if right_neighbor is not None:
                         right_n_indices = np.array(right_neighbor
                                                    .front.surface_indices)
                         view_matrix[back_indices[:, np.newaxis],
                                     right_n_indices] = VIEW_DICT["pvrows"]
+                        back_obstruction = right_neighbor.index
 
                     # PVRow <---> Ground
                     gnd_that_front_sees = []
@@ -224,17 +230,19 @@ class OrderedPVArray(BasePVArray):
                             gnd_that_front_sees.append(gnd_surface.index)
 
                 else:   # rotated to right
-                    # PVRow <---> PVRow
+                    # PVRow <---> PVRow + obstruction to ground
                     if left_neighbor is not None:
                         left_n_indices = np.array(left_neighbor
                                                   .front.surface_indices)
                         view_matrix[back_indices[:, np.newaxis],
                                     left_n_indices] = VIEW_DICT["pvrows"]
+                        back_obstruction = left_neighbor.index
                     if right_neighbor is not None:
                         right_n_indices = np.array(right_neighbor
                                                    .back.surface_indices)
                         view_matrix[front_indices[:, np.newaxis],
                                     right_n_indices] = VIEW_DICT["pvrows"]
+                        front_obstruction = right_neighbor.index
 
                     # PVRow <---> Ground
                     gnd_that_front_sees = []
@@ -259,9 +267,19 @@ class OrderedPVArray(BasePVArray):
                 view_matrix[gnd_that_front_sees[:, np.newaxis],
                             front_indices] = VIEW_DICT["gnd_front_obst"]
 
+                # PVRow <---> Ground: obstruction
+                obstr_matrix[back_indices[:, np.newaxis],
+                             gnd_that_back_sees] = back_obstruction
+                obstr_matrix[gnd_that_back_sees[:, np.newaxis],
+                             back_indices] = back_obstruction
+                obstr_matrix[front_indices[:, np.newaxis],
+                             gnd_that_front_sees] = front_obstruction
+                obstr_matrix[gnd_that_front_sees[:, np.newaxis],
+                             front_indices] = front_obstruction
+
                 # PVRow <---> Sky
                 view_matrix[back_indices[:, np.newaxis],
                             index_sky_dome] = VIEW_DICT["back_sky"]
                 view_matrix[front_indices[:, np.newaxis],
                             index_sky_dome] = VIEW_DICT["front_sky"]
-        return view_matrix
+        return view_matrix, obstr_matrix

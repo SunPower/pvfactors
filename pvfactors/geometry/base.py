@@ -546,6 +546,7 @@ class BasePVArray(object):
         self._all_surfaces = None
         self._surface_registry = None
         self._view_matrix = None
+        self._obstr_matrix = None
         self._surfaces_indexed = False
 
     def plot(self, ax, with_index=False):
@@ -601,8 +602,15 @@ class BasePVArray(object):
         considered, so ``_build_view_matrix()`` needs to be implemented in
         the child class"""
         if self._view_matrix is None:
-            self._view_matrix = self._build_view_matrix()
+            self._view_matrix, self._obstr_matrix = self._build_view_matrix()
         return self._view_matrix
+
+    @property
+    def obstr_matrix(self):
+        """Get obstruction matrix"""
+        if self._obstr_matrix is None:
+            self._view_matrix, self._obstr_matrix = self._build_view_matrix()
+        return self._obstr_matrix
 
     @property
     def surface_indices(self):
