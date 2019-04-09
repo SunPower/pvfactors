@@ -28,6 +28,7 @@ class PVRow(GeometryCollection):
         self.back = back_side
         self.index = index
         self.original_linestring = original_linestring
+        self._all_surfaces = None
         super(PVRow, self).__init__([self.front, self.back])
 
     @classmethod
@@ -65,10 +66,12 @@ class PVRow(GeometryCollection):
                                           index=index, cut=cut)
 
     def plot(self, ax, color_shaded=COLOR_DIC['pvrow_shaded'],
-             color_illum=COLOR_DIC['pvrow_illum']):
+             color_illum=COLOR_DIC['pvrow_illum'], with_index=False):
 
-        self.front.plot(ax, color_shaded=color_shaded, color_illum=color_illum)
-        self.back.plot(ax, color_shaded=color_shaded, color_illum=color_illum)
+        self.front.plot(ax, color_shaded=color_shaded, color_illum=color_illum,
+                        with_index=with_index)
+        self.back.plot(ax, color_shaded=color_shaded, color_illum=color_illum,
+                       with_index=with_index)
 
     @property
     def boundary(self):
@@ -85,3 +88,18 @@ class PVRow(GeometryCollection):
         b1, b2 = self.boundary
         lowest_point = b1 if b1.y < b2.y else b2
         return lowest_point
+
+    @property
+    def all_surfaces(self):
+        if self._all_surfaces is None:
+            self._all_surfaces = []
+            self._all_surfaces += self.front.all_surfaces
+            self._all_surfaces += self.back.all_surfaces
+        return self._all_surfaces
+
+    @property
+    def surface_indices(self):
+        list_indices = []
+        list_indices += self.front.surface_indices
+        list_indices += self.back.surface_indices
+        return list_indices

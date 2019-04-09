@@ -2,13 +2,13 @@
 import numpy as np
 from pvfactors.geometry.pvground import PVGround
 from pvfactors.geometry.pvrow import PVRow
-from pvfactors.config import X_ORIGIN_PVROWS, COLOR_DIC, PLOT_FONTSIZE
-from pvfactors.geometry.base import get_solar_2d_vector
+from pvfactors.config import X_ORIGIN_PVROWS, VIEW_DICT
+from pvfactors.geometry.base import get_solar_2d_vector, BasePVArray
 from pvfactors.geometry.utils import projection
 from shapely.geometry import LineString, Point
 
 
-class OrderedPVArray(object):
+class OrderedPVArray(BasePVArray):
     """An ordered PV array has a flat horizontal ground, and pv rows which
     are all at the same height, with the same surface tilt and azimuth angles,
     and also all equally spaced. These simplifications allow faster and easier
@@ -19,11 +19,11 @@ class OrderedPVArray(object):
     def __init__(self, list_pvrows=[], ground=None, surface_tilt=None,
                  surface_azimuth=None, axis_azimuth=None, solar_zenith=None,
                  solar_azimuth=None, gcr=None, height=None, distance=None):
-        self.pvrows = list_pvrows  # ordered from left to right
-        self.ground = ground
+        """List PV rows need to be ordered from left to right"""
+        super(OrderedPVArray, self).__init__(list_pvrows=list_pvrows,
+                                             ground=ground, distance=distance,
+                                             height=height)
         self.gcr = gcr
-        self.height = height
-        self.distance = distance
         self.solar_zenith = solar_zenith
         self.solar_azimuth = solar_azimuth
         self.surface_tilt = surface_tilt
@@ -36,7 +36,7 @@ class OrderedPVArray(object):
         self.illum_side = None
         self.has_direct_shading = False
         # For view factors
-        self.edge_points = None
+        self.edge_points = []
 
     @classmethod
     def from_dict(cls, parameters):
@@ -68,9 +68,6 @@ class OrderedPVArray(object):
                    solar_zenith=parameters['solar_zenith'],
                    solar_azimuth=parameters['solar_azimuth'],
                    gcr=gcr, height=y_center, distance=distance)
-
-    def update_tilt(self, new_tilt):
-        pass
 
     def cast_shadows(self):
         """Use calculated solar_2d_vector and array configuration to calculate
@@ -129,7 +126,7 @@ class OrderedPVArray(object):
             # Merge ground shaded surfaces
             self.ground.merge_shaded_areas()
 
-    def cut_ground_for_pvrow_view(self):
+    def cuts_for_pvrow_view(self):
         """When not flat, the PV row sides will only see a part of the ground,
         so we need to mark these limits called "edge points" and cut the ground
         surface accordingly"""
@@ -143,20 +140,146 @@ class OrderedPVArray(object):
                 edge_point = projection(b1, u_direction,
                                         self.ground.original_linestring)
                 self.ground.cut_at_point(edge_point)
+                self.edge_points.append(edge_point)
 
-    def plot(self, ax):
-        """Plot PV array"""
-        # Plot pv array structures
-        self.ground.plot(ax, color_shaded=COLOR_DIC['ground_shaded'],
-                         color_illum=COLOR_DIC['ground_illum'])
-        for pvrow in self.pvrows:
-            pvrow.plot(ax, color_shaded=COLOR_DIC['pvrow_shaded'],
-                       color_illum=COLOR_DIC['pvrow_illum'])
+    def _build_view_matrix(self):
+        """Calculate the pv array view matrix: using rules specific to
+        ordered pv arrays to build relationship matrix"""
 
-        # Plot formatting
-        ax.axis('equal')
-        n_pvrows = len(self.pvrows)
-        ax.set_xlim(- 0.5 * self.distance, (n_pvrows - 0.5) * self.distance)
-        ax.set_ylim(- self.height, 2 * self.height)
-        ax.set_xlabel("x [m]", fontsize=PLOT_FONTSIZE)
-        ax.set_ylabel("y [m]", fontsize=PLOT_FONTSIZE)
+        # Index all surfaces if not done already
+        if not self._surfaces_indexed:
+            self.index_all_surfaces()
+
+        # Initialize matrices
+        n_surfaces_array = self.n_surfaces
+        n_surfaces = n_surfaces_array + 1  # counting sky
+        view_matrix = np.zeros((n_surfaces, n_surfaces), dtype=int)
+        obstr_matrix = np.zeros((n_surfaces, n_surfaces), dtype=object)
+        obstr_matrix[:] = None
+
+        indices_ground = np.array(self.ground.surface_indices)
+        index_sky_dome = np.array([view_matrix.shape[0] - 1])
+
+        # The ground will always see the sky
+        view_matrix[indices_ground[:, np.newaxis],
+                    index_sky_dome] = VIEW_DICT["ground_sky"]
+
+        pvrows_are_flat = (self.surface_tilt == 0.)
+        if pvrows_are_flat:
+            # Getting all front and back pvrow surface indices
+            indices_front_pvrows = []
+            indices_back_pvrows = []
+            for pvrow in self.pvrows:
+                indices_front_pvrows += pvrow.front.surface_indices
+                indices_back_pvrows += pvrow.back.surface_indices
+            indices_front_pvrows = np.array(indices_front_pvrows)
+            indices_back_pvrows = np.array(indices_back_pvrows)
+
+            # Only back surface can see the ground
+            view_matrix[indices_back_pvrows[:, np.newaxis],
+                        indices_ground] = VIEW_DICT["back_gnd"]
+            view_matrix[indices_ground[:, np.newaxis],
+                        indices_back_pvrows] = VIEW_DICT["gnd_back"]
+            # The front side only sees the sky
+            view_matrix[indices_front_pvrows[:, np.newaxis],
+                        index_sky_dome] = VIEW_DICT["front_sky"]
+        else:
+            # Setting up row neighbors
+            list_left_neighbors = [None] + self.pvrows[:-1]
+            list_right_neighbors = self.pvrows[1:] + [None]
+            # List ground surfaces
+            ground_surfaces = self.ground.all_surfaces
+            gnd_centroids = [surf.centroid for surf in ground_surfaces]
+
+            rotated_to_left = self.pvrows[0].front.n_vector[0] < 0
+            for idx_pvrow, pvrow in enumerate(self.pvrows):
+                front_indices = np.array(pvrow.front.surface_indices)
+                back_indices = np.array(pvrow.back.surface_indices)
+                left_neighbor = list_left_neighbors[idx_pvrow]
+                right_neighbor = list_right_neighbors[idx_pvrow]
+                edge_point = self.edge_points[idx_pvrow]
+
+                # Will save index of pvrows obstructing front and back
+                front_obstruction = None
+                back_obstruction = None
+
+                if rotated_to_left:
+                    # PVRow <---> PVRow + obstruction to ground
+                    if left_neighbor is not None:
+                        left_n_indices = np.array(left_neighbor
+                                                  .back.surface_indices)
+                        view_matrix[front_indices[:, np.newaxis],
+                                    left_n_indices] = VIEW_DICT["pvrows"]
+                        front_obstruction = left_neighbor.index
+                    if right_neighbor is not None:
+                        right_n_indices = np.array(right_neighbor
+                                                   .front.surface_indices)
+                        view_matrix[back_indices[:, np.newaxis],
+                                    right_n_indices] = VIEW_DICT["pvrows"]
+                        back_obstruction = right_neighbor.index
+
+                    # PVRow <---> Ground
+                    gnd_that_front_sees = []
+                    gnd_that_back_sees = []
+                    for idx_gnd, gnd_surface in enumerate(ground_surfaces):
+                        gnd_surface_on_the_right = \
+                            gnd_centroids[idx_gnd].x > edge_point.x
+                        if gnd_surface_on_the_right:
+                            gnd_that_back_sees.append(gnd_surface.index)
+                        else:
+                            gnd_that_front_sees.append(gnd_surface.index)
+
+                else:   # rotated to right
+                    # PVRow <---> PVRow + obstruction to ground
+                    if left_neighbor is not None:
+                        left_n_indices = np.array(left_neighbor
+                                                  .front.surface_indices)
+                        view_matrix[back_indices[:, np.newaxis],
+                                    left_n_indices] = VIEW_DICT["pvrows"]
+                        back_obstruction = left_neighbor.index
+                    if right_neighbor is not None:
+                        right_n_indices = np.array(right_neighbor
+                                                   .back.surface_indices)
+                        view_matrix[front_indices[:, np.newaxis],
+                                    right_n_indices] = VIEW_DICT["pvrows"]
+                        front_obstruction = right_neighbor.index
+
+                    # PVRow <---> Ground
+                    gnd_that_front_sees = []
+                    gnd_that_back_sees = []
+                    for idx_gnd, gnd_surface in enumerate(ground_surfaces):
+                        gnd_surface_on_the_right = \
+                            gnd_centroids[idx_gnd].x > edge_point.x
+                        if gnd_surface_on_the_right:
+                            gnd_that_front_sees.append(gnd_surface.index)
+                        else:
+                            gnd_that_back_sees.append(gnd_surface.index)
+
+                # PVRow <---> Ground: update views
+                gnd_that_back_sees = np.array(gnd_that_back_sees)
+                gnd_that_front_sees = np.array(gnd_that_front_sees)
+                view_matrix[back_indices[:, np.newaxis],
+                            gnd_that_back_sees] = VIEW_DICT["back_gnd_obst"]
+                view_matrix[gnd_that_back_sees[:, np.newaxis],
+                            back_indices] = VIEW_DICT["gnd_back_obst"]
+                view_matrix[front_indices[:, np.newaxis],
+                            gnd_that_front_sees] = VIEW_DICT["front_gnd_obst"]
+                view_matrix[gnd_that_front_sees[:, np.newaxis],
+                            front_indices] = VIEW_DICT["gnd_front_obst"]
+
+                # PVRow <---> Ground: obstruction
+                obstr_matrix[back_indices[:, np.newaxis],
+                             gnd_that_back_sees] = back_obstruction
+                obstr_matrix[gnd_that_back_sees[:, np.newaxis],
+                             back_indices] = back_obstruction
+                obstr_matrix[front_indices[:, np.newaxis],
+                             gnd_that_front_sees] = front_obstruction
+                obstr_matrix[gnd_that_front_sees[:, np.newaxis],
+                             front_indices] = front_obstruction
+
+                # PVRow <---> Sky
+                view_matrix[back_indices[:, np.newaxis],
+                            index_sky_dome] = VIEW_DICT["back_sky"]
+                view_matrix[front_indices[:, np.newaxis],
+                            index_sky_dome] = VIEW_DICT["front_sky"]
+        return view_matrix, obstr_matrix

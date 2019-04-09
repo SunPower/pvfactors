@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from pvfactors.geometry import \
-    ShadeCollection, PVSegment, PVSurface, PVRowSide
+    ShadeCollection, PVSegment, PVSurface, PVRowSide, OrderedPVArray
 import pytest
 import os
 import pandas as pd
@@ -137,3 +137,58 @@ def shade_collections():
 def pvrow_side(pvsegments):
     side = PVRowSide(pvsegments)
     yield side
+
+
+@pytest.fixture(scope='function')
+def params():
+
+    pvarray_parameters = {
+        'n_pvrows': 3,
+        'pvrow_height': 2.5,
+        'pvrow_width': 2.,
+        'surface_azimuth': 90.,  # east oriented modules
+        'axis_azimuth': 0.,  # axis of rotation towards North
+        'surface_tilt': 20.,
+        'gcr': 0.4,
+        'solar_zenith': 20.,
+        'solar_azimuth': 90.,  # sun located in the east
+        'rho_ground': 0.2,
+        'rho_front_pvrow': 0.01,
+        'rho_back_pvrow': 0.03
+    }
+
+    yield pvarray_parameters
+
+
+@pytest.fixture(scope='function')
+def discr_params():
+    """Discretized parameters, should have 5 segments on front of first PV row,
+    and 3 segments on back of second PV row"""
+    params = {
+        'n_pvrows': 3,
+        'pvrow_height': 1.5,
+        'pvrow_width': 1.,
+        'surface_tilt': 20.,
+        'surface_azimuth': 180.,
+        'gcr': 0.4,
+        'solar_zenith': 20.,
+        'solar_azimuth': 90.,  # sun located in the east
+        'axis_azimuth': 0.,  # axis of rotation towards North
+        'rho_ground': 0.2,
+        'rho_front_pvrow': 0.01,
+        'rho_back_pvrow': 0.03,
+        'cut': {0: {'front': 5}, 1: {'back': 3}}
+    }
+    yield params
+
+
+@pytest.fixture(scope='function')
+def params_direct_shading(params):
+    params.update({'gcr': 0.6, 'surface_tilt': 60, 'solar_zenith': 60})
+    yield params
+
+
+@pytest.fixture(scope='function')
+def ordered_pvarray(params):
+    pvarray = OrderedPVArray.from_dict(params)
+    yield pvarray

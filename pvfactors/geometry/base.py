@@ -1,9 +1,12 @@
 """Base classes for geometry subpackage."""
 
 import numpy as np
+import pandas as pd
+from collections import OrderedDict
 from pvfactors import PVFactorsError
-from pvfactors.config import \
-    DEFAULT_NORMAL_VEC, COLOR_DIC, DISTANCE_TOLERANCE
+from pvfactors.config import (
+    DEFAULT_NORMAL_VEC, COLOR_DIC, DISTANCE_TOLERANCE, PLOT_FONTSIZE,
+    ALPHA_TEXT)
 from pvfactors.geometry.plot import plot_coords, plot_bounds, plot_line
 from pvfactors.geometry.utils import \
     is_collinear, check_collinear, are_2d_vecs_collinear, difference, contains
@@ -83,7 +86,7 @@ class BaseSurface(LineString):
     but adding an orientation to it. So two surfaces could use the same
     linestring, but have opposite orientations."""
 
-    def __init__(self, coords, normal_vector=None):
+    def __init__(self, coords, normal_vector=None, index=None):
         """Normal vector can have two directions for a given LineString,
         so the user can provide it in order to be specific,
         otherwise it will be automatically
@@ -96,6 +99,7 @@ class BaseSurface(LineString):
             self.n_vector = self._calculate_n_vector()
         else:
             self.n_vector = np.array(normal_vector)
+        self.index = index
 
     def _calculate_n_vector(self):
         """Calculate normal vector of the surface if not empty"""
@@ -107,10 +111,21 @@ class BaseSurface(LineString):
         else:
             return DEFAULT_NORMAL_VEC
 
-    def plot(self, ax, color=None):
+    def plot(self, ax, color=None, with_index=False):
         plot_coords(ax, self)
         plot_bounds(ax, self)
         plot_line(ax, self, color)
+        if with_index:
+            # Prepare text location
+            v = self.n_vector
+            v_norm = v / np.linalg.norm(v)
+            centroid = self.centroid
+            alpha = ALPHA_TEXT
+            x = centroid.x + alpha * v_norm[0]
+            y = centroid.y + alpha * v_norm[1]
+            # Add text
+            ax.text(x, y, '{}'.format(self.index),
+                    verticalalignment='center', horizontalalignment='center')
 
     def difference(self, linestring):
         """Calculate remaining surface after removing part belonging from
@@ -126,9 +141,8 @@ class PVSurface(BaseSurface):
     def __init__(self, coords=None, normal_vector=None, shaded=False,
                  index=None):
 
-        super(PVSurface, self).__init__(coords, normal_vector)
+        super(PVSurface, self).__init__(coords, normal_vector, index=index)
         self.shaded = shaded
-        self.index = index
 
 
 class ShadeCollection(GeometryCollection):
@@ -156,9 +170,9 @@ class ShadeCollection(GeometryCollection):
         else:
             return shaded
 
-    def plot(self, ax, color=None):
+    def plot(self, ax, color=None, with_index=False):
         for surface in self.list_surfaces:
-            surface.plot(ax, color=color)
+            surface.plot(ax, color=color, with_index=with_index)
 
     def add_linestring(self, linestring):
         surf = PVSurface(coords=linestring.coords, normal_vector=self.n_vector,
@@ -254,6 +268,10 @@ class ShadeCollection(GeometryCollection):
         """Number of surfaces in collection"""
         return len(self.list_surfaces)
 
+    @property
+    def surface_indices(self):
+        return [surf.index for surf in self.list_surfaces]
+
     @classmethod
     def from_linestring_coords(cls, coords, shaded, normal_vector=None):
         surf = PVSurface(coords=coords, normal_vector=normal_vector,
@@ -277,6 +295,7 @@ class PVSegment(GeometryCollection):
         self._shaded_collection = shaded_collection
         self._illum_collection = illum_collection
         self.index = index
+        self._all_surfaces = None
         super(PVSegment, self).__init__([self._shaded_collection,
                                          self._illum_collection])
 
@@ -292,9 +311,11 @@ class PVSegment(GeometryCollection):
             assert are_2d_vecs_collinear(n_vec_ill, n_vec_shaded)
 
     def plot(self, ax, color_shaded=COLOR_DIC['pvrow_shaded'],
-             color_illum=COLOR_DIC['pvrow_illum']):
-        self._shaded_collection.plot(ax, color=color_shaded)
-        self._illum_collection.plot(ax, color=color_illum)
+             color_illum=COLOR_DIC['pvrow_illum'], with_index=False):
+        self._shaded_collection.plot(ax, color=color_shaded,
+                                     with_index=with_index)
+        self._illum_collection.plot(ax, color=color_illum,
+                                    with_index=with_index)
 
     def cast_shadow(self, linestring):
         """Split up segment from a linestring object: will rearrange the
@@ -340,6 +361,13 @@ class PVSegment(GeometryCollection):
         n_surfaces = self._illum_collection.n_surfaces \
             + self._shaded_collection.n_surfaces
         return n_surfaces
+
+    @property
+    def surface_indices(self):
+        list_indices = []
+        list_indices += self._illum_collection.surface_indices
+        list_indices += self._shaded_collection.surface_indices
+        return list_indices
 
     @classmethod
     def from_linestring_coords(cls, coords, shaded=False, normal_vector=None,
@@ -396,6 +424,14 @@ class PVSegment(GeometryCollection):
     def shaded_length(self):
         return self._shaded_collection.length
 
+    @property
+    def all_surfaces(self):
+        if self._all_surfaces is None:
+            self._all_surfaces = []
+            self._all_surfaces += self._illum_collection.list_surfaces
+            self._all_surfaces += self._shaded_collection.list_surfaces
+        return self._all_surfaces
+
 
 class BaseSide(GeometryCollection):
     """A side represents a fixed collection of
@@ -406,6 +442,7 @@ class BaseSide(GeometryCollection):
         """Create a side geometry."""
         check_collinear(list_segments)
         self.list_segments = tuple(list_segments)
+        self._all_surfaces = None
         super(BaseSide, self).__init__(list_segments)
 
     @classmethod
@@ -451,12 +488,27 @@ class BaseSide(GeometryCollection):
             n_surfaces += segment.n_surfaces
         return n_surfaces
 
+    @property
+    def all_surfaces(self):
+        if self._all_surfaces is None:
+            self._all_surfaces = []
+            for segment in self.list_segments:
+                self._all_surfaces += segment.all_surfaces
+        return self._all_surfaces
+
+    @property
+    def surface_indices(self):
+        list_indices = []
+        for seg in self.list_segments:
+            list_indices += seg.surface_indices
+        return list_indices
+
     def plot(self, ax, color_shaded=COLOR_DIC['pvrow_shaded'],
-             color_illum=COLOR_DIC['pvrow_illum']):
+             color_illum=COLOR_DIC['pvrow_illum'], with_index=False):
         """Plot all PV segments in side object"""
         for segment in self.list_segments:
             segment.plot(ax, color_shaded=color_shaded,
-                         color_illum=color_illum)
+                         color_illum=color_illum, with_index=with_index)
 
     def cast_shadow(self, linestring):
         """Cast designated linestring shadow on PV segments"""
@@ -476,3 +528,199 @@ class BaseSide(GeometryCollection):
                 # Nothing will happen to the segments that do not contain
                 # the point
                 segment.cut_at_point(point)
+
+
+class BasePVArray(object):
+    """Base class for PV arrays in pvfactors"""
+
+    registry_cols = ['geom', 'line_type', 'pvrow_index', 'side',
+                     'pvsegment_index', 'shaded', 'surface_index']
+
+    def __init__(self, list_pvrows=[], ground=None, distance=None,
+                 height=None):
+        self.pvrows = list_pvrows
+        self.ground = ground
+        self.distance = distance
+        self.height = height
+
+        # Property related attributes: will not be built unless called
+        self._all_surfaces = None
+        self._dict_surfaces = None
+        self._surface_registry = None
+        self._view_matrix = None
+        self._obstr_matrix = None
+        self._surfaces_indexed = False
+
+    def plot(self, ax, with_index=False):
+        """Plot PV array"""
+        # Plot pv array structures
+        self.ground.plot(ax, color_shaded=COLOR_DIC['ground_shaded'],
+                         color_illum=COLOR_DIC['ground_illum'],
+                         with_index=with_index)
+        for pvrow in self.pvrows:
+            pvrow.plot(ax, color_shaded=COLOR_DIC['pvrow_shaded'],
+                       color_illum=COLOR_DIC['pvrow_illum'],
+                       with_index=with_index)
+
+        # Plot formatting
+        ax.axis('equal')
+        if self.distance is not None:
+            n_pvrows = len(self.pvrows)
+            ax.set_xlim(- 0.5 * self.distance,
+                        (n_pvrows - 0.5) * self.distance)
+        if self.height is not None:
+            ax.set_ylim(- self.height, 2 * self.height)
+        ax.set_xlabel("x [m]", fontsize=PLOT_FONTSIZE)
+        ax.set_ylabel("y [m]", fontsize=PLOT_FONTSIZE)
+
+    @property
+    def all_surfaces(self):
+        if self._all_surfaces is None:
+            list_surfaces = []
+            list_surfaces += self.ground.all_surfaces
+            for pvrow in self.pvrows:
+                list_surfaces += pvrow.all_surfaces
+            self._all_surfaces = list_surfaces
+        return self._all_surfaces
+
+    @property
+    def n_surfaces(self):
+        n_surfaces = 0
+        n_surfaces += self.ground.n_surfaces
+        for pvrow in self.pvrows:
+            n_surfaces += pvrow.front.n_surfaces
+            n_surfaces += pvrow.back.n_surfaces
+        return n_surfaces
+
+    @property
+    def surface_registry(self):
+        if self._surface_registry is None:
+            self._surface_registry = self._build_surface_registry()
+        return self._surface_registry
+
+    @property
+    def view_matrix(self):
+        """How to build the view matrix will be specific to the pv array
+        considered, so ``_build_view_matrix()`` needs to be implemented in
+        the child class"""
+        if self._view_matrix is None:
+            self._view_matrix, self._obstr_matrix = self._build_view_matrix()
+        return self._view_matrix
+
+    @property
+    def obstr_matrix(self):
+        """Get obstruction matrix"""
+        if self._obstr_matrix is None:
+            self._view_matrix, self._obstr_matrix = self._build_view_matrix()
+        return self._obstr_matrix
+
+    @property
+    def surface_indices(self):
+        list_indices = []
+        list_indices += self.ground.surface_indices
+        for pvrow in self.pvrows:
+            list_indices += pvrow.surface_indices
+        return list_indices
+
+    @property
+    def dict_surfaces(self):
+        if self._dict_surfaces is None:
+            if not self._surfaces_indexed:
+                self.index_all_surfaces()
+            all_surfaces = self.all_surfaces
+            dict_surf = {surf.index: surf for surf in all_surfaces}
+            self._dict_surfaces = OrderedDict(dict_surf)
+        return self._dict_surfaces
+
+    def index_all_surfaces(self):
+        """Add unique indices to all surfaces"""
+        for idx, surface in enumerate(self.all_surfaces):
+            surface.index = idx
+        self._surfaces_indexed = True
+
+    def _build_view_matrix(self):
+        raise NotImplementedError
+
+    def _build_surface_registry(self):
+        dict_registry = {k: [] for k in self.registry_cols}
+        # Fill up registry with ground surfaces
+        surf_line_type = 'ground'
+        pvrow_index = np.nan
+        side = np.nan
+        for idx_seg, gnd_seg in enumerate(self.ground.list_segments):
+            pvsegment_index = idx_seg
+            # Illuminated collection
+            shaded = False
+            for surf in gnd_seg.illum_collection.list_surfaces:
+                dict_registry['line_type'].append(surf_line_type)
+                dict_registry['pvsegment_index'].append(pvsegment_index)
+                dict_registry['pvrow_index'].append(pvrow_index)
+                dict_registry['side'].append(side)
+                dict_registry['shaded'].append(shaded)
+                dict_registry['geom'].append(surf)
+                dict_registry['surface_index'].append(surf.index)
+            shaded = True
+            for surf in gnd_seg.shaded_collection.list_surfaces:
+                dict_registry['line_type'].append(surf_line_type)
+                dict_registry['pvsegment_index'].append(pvsegment_index)
+                dict_registry['pvrow_index'].append(pvrow_index)
+                dict_registry['side'].append(side)
+                dict_registry['shaded'].append(shaded)
+                dict_registry['geom'].append(surf)
+                dict_registry['surface_index'].append(surf.index)
+        # Fill up registry with pvrow surfaces
+        surf_line_type = 'pvrow'
+        for idx_pvrow, pvrow in enumerate(self.pvrows):
+            pvrow_index = idx_pvrow
+            # Front side
+            side = 'front'
+            for idx_seg, seg in enumerate(pvrow.front.list_segments):
+                pvsegment_index = idx_seg
+                # Illuminated
+                shaded = False
+                for surf in seg.illum_collection.list_surfaces:
+                    dict_registry['line_type'].append(surf_line_type)
+                    dict_registry['pvsegment_index'].append(pvsegment_index)
+                    dict_registry['pvrow_index'].append(pvrow_index)
+                    dict_registry['side'].append(side)
+                    dict_registry['shaded'].append(shaded)
+                    dict_registry['geom'].append(surf)
+                    dict_registry['surface_index'].append(surf.index)
+                # Shaded
+                shaded = True
+                for surf in seg.shaded_collection.list_surfaces:
+                    dict_registry['line_type'].append(surf_line_type)
+                    dict_registry['pvsegment_index'].append(pvsegment_index)
+                    dict_registry['pvrow_index'].append(pvrow_index)
+                    dict_registry['side'].append(side)
+                    dict_registry['shaded'].append(shaded)
+                    dict_registry['geom'].append(surf)
+                    dict_registry['surface_index'].append(surf.index)
+            # Back side
+            side = 'back'
+            for idx_seg, seg in enumerate(pvrow.back.list_segments):
+                pvsegment_index = idx_seg
+                # Illuminated
+                shaded = False
+                for surf in seg.illum_collection.list_surfaces:
+                    dict_registry['line_type'].append(surf_line_type)
+                    dict_registry['pvsegment_index'].append(pvsegment_index)
+                    dict_registry['pvrow_index'].append(pvrow_index)
+                    dict_registry['side'].append(side)
+                    dict_registry['shaded'].append(shaded)
+                    dict_registry['geom'].append(surf)
+                    dict_registry['surface_index'].append(surf.index)
+                # Shaded
+                shaded = True
+                for surf in seg.shaded_collection.list_surfaces:
+                    dict_registry['line_type'].append(surf_line_type)
+                    dict_registry['pvsegment_index'].append(pvsegment_index)
+                    dict_registry['pvrow_index'].append(pvrow_index)
+                    dict_registry['side'].append(side)
+                    dict_registry['shaded'].append(shaded)
+                    dict_registry['geom'].append(surf)
+                    dict_registry['surface_index'].append(surf.index)
+
+        # Make dataframe
+        surface_registry = pd.DataFrame.from_dict(dict_registry)
+        return surface_registry

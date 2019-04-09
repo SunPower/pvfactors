@@ -1,63 +1,10 @@
 import os
 import pytest
 import numpy as np
-from pvfactors.geometry import OrderedPVArray, PVGround
+from pvfactors.geometry import OrderedPVArray, PVGround, PVSurface
 from pvfactors.config import MAX_X_GROUND, MIN_X_GROUND
-
-
-@pytest.fixture(scope='function')
-def params():
-
-    pvarray_parameters = {
-        'n_pvrows': 3,
-        'pvrow_height': 2.5,
-        'pvrow_width': 2.,
-        'surface_azimuth': 90.,  # east oriented modules
-        'axis_azimuth': 0.,  # axis of rotation towards North
-        'surface_tilt': 20.,
-        'gcr': 0.4,
-        'solar_zenith': 20.,
-        'solar_azimuth': 90.,  # sun located in the east
-        'rho_ground': 0.2,
-        'rho_front_pvrow': 0.01,
-        'rho_back_pvrow': 0.03
-    }
-
-    yield pvarray_parameters
-
-
-@pytest.fixture(scope='function')
-def discr_params():
-    """Discretized parameters, should have 5 segments on front of first PV row,
-    and 3 segments on back of second PV row"""
-    params = {
-        'n_pvrows': 3,
-        'pvrow_height': 1.5,
-        'pvrow_width': 1.,
-        'surface_tilt': 20.,
-        'surface_azimuth': 180.,
-        'gcr': 0.4,
-        'solar_zenith': 20.,
-        'solar_azimuth': 90.,  # sun located in the east
-        'axis_azimuth': 0.,  # axis of rotation towards North
-        'rho_ground': 0.2,
-        'rho_front_pvrow': 0.01,
-        'rho_back_pvrow': 0.03,
-        'cut': {0: {'front': 5}, 1: {'back': 3}}
-    }
-    yield params
-
-
-@pytest.fixture(scope='function')
-def params_direct_shading(params):
-    params.update({'gcr': 0.6, 'surface_tilt': 60, 'solar_zenith': 60})
-    yield params
-
-
-@pytest.fixture(scope='function')
-def ordered_pvarray(params):
-    pvarray = OrderedPVArray.from_dict(params)
-    yield pvarray
+from pvfactors.tests.test_geometry.test_data import \
+    vm_flat_orderedpvarray, vm_right_orderedpvarray
 
 
 def test_ordered_pvarray_from_dict(params):
@@ -330,15 +277,127 @@ def test_ordered_pvarray_gnd_pvrow_shadow_casting_back_n_seg(
     np.testing.assert_almost_equal(sum_lengths, list_pvsegments[0].length)
 
 
-def test_ordered_pvarray_cut_ground_for_pvrow_view(ordered_pvarray):
+def test_ordered_pvarray_cuts_for_pvrow_view(ordered_pvarray):
     """Test that pvarray ground is cut correctly"""
 
     ordered_pvarray.cast_shadows()
     n_surfaces_0 = ordered_pvarray.ground.n_surfaces
     len_0 = ordered_pvarray.ground.length
-    ordered_pvarray.cut_ground_for_pvrow_view()
+    ordered_pvarray.cuts_for_pvrow_view()
     n_surfaces_1 = ordered_pvarray.ground.n_surfaces
     len_1 = ordered_pvarray.ground.length
 
     assert n_surfaces_1 == n_surfaces_0 + 3
     assert len_1 == len_0
+
+
+def test_ordered_pvarray_list_surfaces(ordered_pvarray):
+    """Check that getting a correct list of surfaces"""
+    ordered_pvarray.cast_shadows()
+    n_surfaces = ordered_pvarray.n_surfaces
+    list_surfaces = ordered_pvarray.all_surfaces
+
+    assert isinstance(list_surfaces, list)
+    assert len(list_surfaces) == n_surfaces
+    assert isinstance(list_surfaces[0], PVSurface)
+
+
+def test_build_surface_registry(ordered_pvarray):
+    """Test that building surface registry correctly"""
+
+    ordered_pvarray.cast_shadows()
+    reg = ordered_pvarray.surface_registry
+
+    assert reg.shape[0] == ordered_pvarray.n_surfaces
+    assert reg.shape[1] == len(ordered_pvarray.registry_cols)
+
+
+def test_get_all_surface_indices(ordered_pvarray):
+
+    # Complete array
+    ordered_pvarray.cast_shadows()
+    ordered_pvarray.cuts_for_pvrow_view()
+
+    # Check surface indices before indexing
+    surf_indices = ordered_pvarray.surface_indices
+    assert surf_indices == [None] * ordered_pvarray.n_surfaces
+
+    # Check surface indices after indexing
+    ordered_pvarray.index_all_surfaces()
+    surf_indices = ordered_pvarray.surface_indices
+    np.testing.assert_array_equal(surf_indices,
+                                  range(ordered_pvarray.n_surfaces))
+
+
+def test_view_matrix_flat(params):
+
+    # Make flat
+    params.update({'surface_tilt': 0})
+
+    # Create pvarray
+    pvarray = OrderedPVArray.from_dict(params)
+
+    # Create shadows and pvrow cuts
+    pvarray.cast_shadows()
+    pvarray.cuts_for_pvrow_view()
+
+    # Build view matrix
+    vm = pvarray.view_matrix
+
+    assert vm.shape[0] == pvarray.n_surfaces + 1
+    np.testing.assert_array_equal(vm, vm_flat_orderedpvarray)
+
+
+def test_view_matrix(params):
+
+    params.update({'surface_azimuth': 270})
+
+    # Create pvarray
+    pvarray = OrderedPVArray.from_dict(params)
+
+    # Create shadows and pvrow cuts
+    pvarray.cast_shadows()
+    pvarray.cuts_for_pvrow_view()
+
+    # Build view matrix and obstruction matrix
+    vm, om = pvarray._build_view_matrix()
+
+    assert vm.shape[0] == pvarray.n_surfaces + 1
+    np.testing.assert_array_equal(vm, vm_right_orderedpvarray)
+    # The view matrix mask should be symmetric
+    mask_vm = np.where(vm != 0, 1, 0)
+    np.testing.assert_array_equal(mask_vm[:-1, :-1], mask_vm.T[:-1, :-1])
+    # Removing sky row and column because didn't fill the last row
+
+    # The obstruction matrix should be symmetric
+    np.testing.assert_array_equal(om, om.T)
+    # TODO: test values against saved array
+
+
+def test_time_ordered_pvarray(params):
+
+    # params.update({'surface_tilt': 0})
+    from pvfactors.viewfactors import VFCalculator
+
+    import time
+    n = 100
+    list_elapsed = []
+    for _ in range(n):
+        tic = time.time()
+        pvarray = OrderedPVArray.from_dict(params)
+        pvarray.cast_shadows()  # time consuming in pvarray creation
+        pvarray.cuts_for_pvrow_view()
+        pvarray.index_all_surfaces()
+        # sr = pvarray.surface_registry
+        # vm = pvarray.view_matrix
+        vm, om = pvarray._build_view_matrix()
+        geom_dict = pvarray.dict_surfaces
+
+        calculator = VFCalculator()
+        # number 1 time consuming, triples run time
+        vf_matrix = calculator.get_vf_matrix(geom_dict, vm, om,
+                                             pvarray.pvrows)
+        toc = time.time()
+        list_elapsed.append(toc - tic)
+
+    print("\nAvg time elapsed: {} s".format(np.mean(list_elapsed)))
