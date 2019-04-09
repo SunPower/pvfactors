@@ -377,6 +377,7 @@ def test_view_matrix(params):
 def test_time_ordered_pvarray(params):
 
     # params.update({'surface_tilt': 0})
+    from pvfactors.viewfactors import VFCalculator
 
     import time
     n = 100
@@ -384,11 +385,18 @@ def test_time_ordered_pvarray(params):
     for _ in range(n):
         tic = time.time()
         pvarray = OrderedPVArray.from_dict(params)
-        pvarray.cast_shadows()
+        pvarray.cast_shadows()  # time consuming in pvarray creation
         pvarray.cuts_for_pvrow_view()
         pvarray.index_all_surfaces()
         # sr = pvarray.surface_registry
         # vm = pvarray.view_matrix
+        vm, om = pvarray._build_view_matrix()
+        geom_dict = pvarray.dict_surfaces
+
+        calculator = VFCalculator()
+        # number 1 time consuming, triples run time
+        vf_matrix = calculator.get_vf_matrix(geom_dict, vm, om,
+                                             pvarray.pvrows)
         toc = time.time()
         list_elapsed.append(toc - tic)
 

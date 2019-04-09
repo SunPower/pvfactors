@@ -2,6 +2,7 @@
 
 import numpy as np
 import pandas as pd
+from collections import OrderedDict
 from pvfactors import PVFactorsError
 from pvfactors.config import (
     DEFAULT_NORMAL_VEC, COLOR_DIC, DISTANCE_TOLERANCE, PLOT_FONTSIZE,
@@ -544,6 +545,7 @@ class BasePVArray(object):
 
         # Property related attributes: will not be built unless called
         self._all_surfaces = None
+        self._dict_surfaces = None
         self._surface_registry = None
         self._view_matrix = None
         self._obstr_matrix = None
@@ -619,6 +621,16 @@ class BasePVArray(object):
         for pvrow in self.pvrows:
             list_indices += pvrow.surface_indices
         return list_indices
+
+    @property
+    def dict_surfaces(self):
+        if self._dict_surfaces is None:
+            if not self._surfaces_indexed:
+                self.index_all_surfaces()
+            all_surfaces = self.all_surfaces
+            dict_surf = {surf.index: surf for surf in all_surfaces}
+            self._dict_surfaces = OrderedDict(dict_surf)
+        return self._dict_surfaces
 
     def index_all_surfaces(self):
         """Add unique indices to all surfaces"""
