@@ -79,13 +79,12 @@ class HybridPerezOrdered(BaseModel):
 
     params = ['direct', 'isotropic', 'circumsolar', 'horizon']
 
-    def __init__(self, DNI=[], DHI=[]):
+    def __init__(self):
         pass
 
-    def apply_irradiance(self, pvarray):
+    def fit(self, DNI, DHI, solar_zenith, solar_azimuth, surface_tilt,
+            surface_azimuth):
         pass
 
-    @staticmethod
-    def get_luminance(DNI, DHI, solar_zenith, solar_azimuth,
-                      surface_tilt, surface_azimuth):
+    def transform(self, pvarray, idx=0):
         pass
