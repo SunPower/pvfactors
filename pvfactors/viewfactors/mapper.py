@@ -4,7 +4,7 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 from shapely.geometry import LineString
-from pvfactors.config import REVERSE_VIEW_DICT, THRESHOLD_VF_12
+from pvfactors.config import REVERSE_VIEW_DICT
 import numpy as np
 import logging
 LOGGER = logging.getLogger(__name__)
@@ -24,72 +24,15 @@ class VFMapperOrderedPVArray(object):
 
     def __init__(self):
         self.function_mapping = {
-            "back_gnd": self.vf_hottel_pvrowline_back,
-            "gnd_back": self.vf_hottel_pvrowline_back,
-            "back_gnd_obst": self.vf_hottel_pvrowline_back,
-            "gnd_back_obst": self.vf_hottel_pvrowline_back,
-            "front_gnd_obst": self.vf_hottel_pvrowline_front,
-            "gnd_front_obst": self.vf_hottel_pvrowline_front,
+            "back_gnd": self.vf_hottel_pvrow_ground,
+            "gnd_back": self.vf_hottel_pvrow_ground,
+            "back_gnd_obst": self.vf_hottel_pvrow_ground,
+            "gnd_back_obst": self.vf_hottel_pvrow_ground,
+            "front_gnd_obst": self.vf_hottel_pvrow_ground,
+            "gnd_front_obst": self.vf_hottel_pvrow_ground,
             "pvrows": self.vf_trk_to_trk}
 
-    def vf_hottel_pvrowline_back(self, line_1, line_2, obstructing_line):
-        """Use Hottel method to calculate view factor between PV row back-surface
-        and the ground. Can account for obstructing object.
-
-        Parameters
-        ----------
-        line_1 : ``shapely.LineString``
-            Line for surface 1: pv row or ground
-        line_2 : ``shapely.LineString``
-            Line for surface 2: pv row or ground
-        obstructing_line : ``shapely.LineString``
-            Line for obstructing the view between line_1 and line_2
-
-        Returns
-        -------
-        float
-            calculated view factor vf_12
-
-        """
-        # FIXME: specific to pvlinestring
-        obs_1 = obstructing_line
-        # Implement the Hottel method
-        b1_line1, b2_line1 = line_1.boundary
-        a_1 = line_1.length
-
-        b1_line2, b2_line2 = line_2.boundary
-
-        # TODO: Speed up this calculation
-        # calculation of intersects takes a lot of time in length_string
-        uncrossed_length1, state_1 = self.length_string(b1_line1, b1_line2,
-                                                        obs_1)
-        uncrossed_length2, state_2 = self.length_string(b2_line1, b2_line2,
-                                                        obs_1)
-        crossed_length1, state_3 = self.length_string(b1_line1, b2_line2,
-                                                      obs_1)
-        crossed_length2, state_4 = self.length_string(b2_line1, b1_line2,
-                                                      obs_1)
-        logging.debug("... obstruction of uncrossed string 1: %s", state_1)
-        logging.debug("... obstruction of uncrossed string 2: %s", state_2)
-        logging.debug("... obstruction of crossed string 1: %s", state_3)
-        logging.debug("... obstruction of crossed string 2: %s", state_4)
-
-        if state_1 * state_2 * state_3 * state_4:
-            # Complete obstruction: can happen when direct shading and when
-            # considering top segments of the pv string line
-            logging.info("Hottel back: View is completely obstructed")
-            vf_12 = 0.
-        else:
-            vf_12 = 1. / (2. * a_1) * (crossed_length1 + crossed_length2 -
-                                       uncrossed_length1 - uncrossed_length2)
-
-        if vf_12 < 0:
-            LOGGER.debug("Hottel pvrow front: unexpected value for "
-                         "vf_12 = %.4f" % vf_12)
-
-        return vf_12
-
-    def vf_hottel_pvrowline_front(self, line_1, line_2, obstructing_line):
+    def vf_hottel_pvrow_ground(self, line_1, line_2, obstructing_line):
         """Use Hottel method to calculate view factor between PV row front-surface
         and the ground. Can account for obstructing object.
 
@@ -120,14 +63,10 @@ class VFMapperOrderedPVArray(object):
 
         # TODO: Speed up this calculation
         # calculation of intersects takes a lot of time in length_string
-        uncrossed_length1, state_1 = self.length_string(b1_line1, b2_line2,
-                                                        obs_1)
-        uncrossed_length2, state_2 = self.length_string(b2_line1, b1_line2,
-                                                        obs_1)
-        crossed_length1, state_3 = self.length_string(b1_line1, b1_line2,
-                                                      obs_1)
-        crossed_length2, state_4 = self.length_string(b2_line1, b2_line2,
-                                                      obs_1)
+        length_x_1, state_1 = self.length_string(b1_line1, b2_line2, obs_1)
+        length_x_2, state_2 = self.length_string(b2_line1, b1_line2, obs_1)
+        length_1, state_3 = self.length_string(b1_line1, b1_line2, obs_1)
+        length_2, state_4 = self.length_string(b2_line1, b2_line2, obs_1)
 
         logging.debug("... obstruction of uncrossed string 1: %s", state_1)
         logging.debug("... obstruction of uncrossed string 2: %s", state_2)
@@ -140,16 +79,11 @@ class VFMapperOrderedPVArray(object):
             logging.info("Hottel front: View is completely obstructed")
             vf_12 = 0.
         else:
-            vf_12 = 1. / (2. * a_1) * (crossed_length1 + crossed_length2 -
-                                       uncrossed_length1 - uncrossed_length2)
-            # FIXME: temporary fix, I'm getting negative values smaller that
-            # 5e-5 when ran in a notebook
-            if (vf_12 < 0) and (vf_12 > - THRESHOLD_VF_12):
-                vf_12 = 0.
-
-        if vf_12 < 0:
-            LOGGER.debug("Hottel pvrow front: unexpected value for "
-                         "vf_12 = %.4f" % vf_12)
+            list_sums = [length_x_1 + length_x_2, length_1 + length_2]
+            sum_crossed = max(list_sums)
+            sum_uncrossed = min(list_sums)
+            vf_12 = 1. / (2. * a_1) * (sum_crossed - sum_uncrossed)
+            # Must be positive
 
         return vf_12
 
