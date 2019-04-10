@@ -33,10 +33,7 @@ class OrderedPVArray(BasePVArray):
                                                    axis_azimuth)
 
         # Initialize shading attributes
-        self.illum_side = None
         self.has_direct_shading = False
-        # For view factors
-        self.edge_points = []
 
     @classmethod
     def from_dict(cls, parameters, surface_params=[]):

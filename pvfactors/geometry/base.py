@@ -678,6 +678,11 @@ class BasePVArray(object):
         self.distance = distance
         self.height = height
 
+        # Initialize shading attributes
+        self.illum_side = None
+        # For view factors
+        self.edge_points = []
+
         # Property related attributes: will not be built unless called
         self._all_surfaces = None
         self._dict_surfaces = None
@@ -766,6 +771,19 @@ class BasePVArray(object):
             dict_surf = {surf.index: surf for surf in all_surfaces}
             self._dict_surfaces = OrderedDict(dict_surf)
         return self._dict_surfaces
+
+    def set_param(self, param, value):
+        """
+        Parameters
+        ----------
+        param : str
+            Surface parameter to return
+        value : float
+            Value to assign to parameter
+        """
+        self.ground.set_param(param, value)
+        for pvrow in self.pvrows:
+            pvrow.set_param(param, value)
 
     def index_all_surfaces(self):
         """Add unique indices to all surfaces"""
