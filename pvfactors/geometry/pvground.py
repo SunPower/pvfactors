@@ -11,7 +11,8 @@ class PVGround(BaseSide):
         super(PVGround, self).__init__(list_segments)
 
     @classmethod
-    def as_flat(cls, x_min_max=None, shaded=False, y_ground=Y_GROUND):
+    def as_flat(cls, x_min_max=None, shaded=False, y_ground=Y_GROUND,
+                surface_params=[]):
         """Build a horizontal flat ground surface"""
         # Get ground boundaries
         if x_min_max is None:
@@ -19,7 +20,8 @@ class PVGround(BaseSide):
         # Create PV segment for flat ground
         coords = [(x_min, y_ground), (x_max, y_ground)]
         seg = PVSegment.from_linestring_coords(coords, shaded=shaded,
-                                               normal_vector=[0., 1.])
+                                               normal_vector=[0., 1.],
+                                               surface_params=surface_params)
         return cls(list_segments=[seg], original_linestring=LineString(coords))
 
     @property
