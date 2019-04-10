@@ -199,9 +199,11 @@ class ShadeCollection(GeometryCollection):
         for surface in self.list_surfaces:
             surface.plot(ax, color=color, with_index=with_index)
 
-    def add_linestring(self, linestring):
-        surf = PVSurface(coords=linestring.coords, normal_vector=self.n_vector,
-                         shaded=self.shaded,
+    def add_linestring(self, linestring, normal_vector=None):
+        if normal_vector is None:
+            normal_vector = self.n_vector
+        surf = PVSurface(coords=linestring.coords,
+                         normal_vector=normal_vector, shaded=self.shaded,
                          surface_params=self.surface_params)
         self.add_pvsurface(surf)
 
@@ -394,7 +396,8 @@ class PVSegment(GeometryCollection):
         if not intersection.is_empty:
             # Split up only if interesects the illuminated collection
             # print(intersection)
-            self._shaded_collection.add_linestring(intersection)
+            self._shaded_collection.add_linestring(intersection,
+                                                   normal_vector=self.n_vector)
             # print(self._shaded_collection.length)
             self._illum_collection.remove_linestring(intersection)
             # print(self._illum_collection.length)
