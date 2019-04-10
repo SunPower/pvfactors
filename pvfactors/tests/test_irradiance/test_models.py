@@ -38,11 +38,28 @@ def test_isotropic_model_front(params_isotropic):
 
     # Apply irradiance model
     DNI = 1000.
-    IsotropicOrdered.apply_irradiance(pvarray, DNI)
+    irr_model = IsotropicOrdered()
+    irr_model.fit(DNI,
+                  params_isotropic['solar_zenith'],
+                  params_isotropic['solar_azimuth'],
+                  params_isotropic['surface_tilt'],
+                  params_isotropic['surface_azimuth'])
 
-    # Checks
+    # Expected values
     expected_dni_pvrow = DNI * cosd(45)
     expected_dni_ground = DNI * cosd(65)
+
+    # Check fitting
+    np.testing.assert_almost_equal(irr_model.dni_ground[0],
+                                   expected_dni_ground)
+    np.testing.assert_almost_equal(irr_model.dni_front_pvrow[0],
+                                   expected_dni_pvrow)
+    assert irr_model.dni_back_pvrow[0] == 0.
+
+    # Transform
+    irr_model.transform(pvarray)
+
+    # Check transform
     # pvrow
     np.testing.assert_almost_equal(
         pvarray.pvrows[2].front.get_param_weighted('direct'),
@@ -80,11 +97,27 @@ def test_isotropic_model_back(params_isotropic):
 
     # Apply irradiance model
     DNI = 1000.
-    IsotropicOrdered.apply_irradiance(pvarray, DNI)
+    irr_model = IsotropicOrdered()
+    irr_model.fit(DNI,
+                  params_isotropic['solar_zenith'],
+                  params_isotropic['solar_azimuth'],
+                  params_isotropic['surface_tilt'],
+                  params_isotropic['surface_azimuth'])
 
-    # Checks
+    # Expected values
     expected_dni_pvrow = DNI * cosd(45)
     expected_dni_ground = DNI * cosd(65)
+
+    # Check fitting
+    np.testing.assert_almost_equal(irr_model.dni_ground[0],
+                                   expected_dni_ground)
+    np.testing.assert_almost_equal(irr_model.dni_back_pvrow[0],
+                                   expected_dni_pvrow)
+    assert irr_model.dni_front_pvrow[0] == 0.
+
+    # Transform
+    irr_model.transform(pvarray)
+
     # pvrow
     np.testing.assert_almost_equal(
         pvarray.pvrows[2].back.get_param_weighted('direct'),

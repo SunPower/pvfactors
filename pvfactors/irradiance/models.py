@@ -1,6 +1,7 @@
 """Module containing irradiance models used with pv array geometries"""
-from pvlib.tools import cosd, sind
+from pvlib.tools import cosd
 from pvlib.irradiance import aoi as aoi_function
+import numpy as np
 
 
 class BaseModel(object):
@@ -9,7 +10,10 @@ class BaseModel(object):
     def __init__(self):
         pass
 
-    def apply_irradiance(self, pvarray, DNI, DHI):
+    def fit(self):
+        raise NotImplementedError
+
+    def transform(self):
         raise NotImplementedError
 
 
@@ -20,45 +24,52 @@ class IsotropicOrdered(BaseModel):
     params = ['direct']
 
     def __init__(self):
-        pass
+        self.dni_ground = None
+        self.dni_front_pvrow = None
+        self.dni_back_pvrow = None
 
-    @staticmethod
-    def apply_irradiance(pvarray, DNI):
+    def fit(self, DNI, solar_zenith, solar_azimuth, surface_tilt,
+            surface_azimuth):
+        """Use vectorization to calculate values used for irradiance model"""
+        # Make sure getting array-like values
+        if np.isscalar(DNI):
+            DNI = np.array([DNI])
+            solar_zenith = np.array([solar_zenith])
+            solar_azimuth = np.array([solar_azimuth])
+            surface_tilt = np.array([surface_tilt])
+            surface_azimuth = np.array([surface_azimuth])
 
-        if not pvarray._surfaces_indexed:
-            pvarray.index_all_surfaces()
+        # DNI seen by ground illuminated surfaces
+        self.dni_ground = DNI * cosd(solar_zenith)
 
-        # --- Fit
-        zenith = pvarray.solar_zenith
-        tilt = pvarray.surface_tilt
-        solar_azimuth = pvarray.solar_azimuth
-        surface_azimuth = pvarray.surface_azimuth
+        # Calculate AOI on front pvrow using pvlib implementation
+        aoi_front_pvrow = aoi_function(
+            surface_tilt, surface_azimuth, solar_zenith, solar_azimuth)
 
-        # Beam components
-        dni_ground = DNI * cosd(zenith)
-        dni_front_pvrow = 0
-        dni_back_pvrow = 0
+        # DNI seen by pvrow illuminated surfaces
+        front_is_illum = aoi_front_pvrow <= 90
+        self.dni_front_pvrow = np.where(front_is_illum,
+                                        DNI * cosd(aoi_front_pvrow), 0.)
+        self.dni_back_pvrow = np.where(~front_is_illum,
+                                       DNI * cosd(180. - aoi_front_pvrow), 0.)
 
-        aoi_front_pvrow = aoi_function(tilt, surface_azimuth, zenith,
-                                       solar_azimuth)
-        if pvarray.illum_side == 'front':
-            dni_front_pvrow = DNI * cosd(aoi_front_pvrow)
-        else:
-            dni_back_pvrow = DNI * cosd(180. - aoi_front_pvrow)
+    def transform(self, pvarray, idx=0):
+        """Apply calculated irradiance values to PV array"""
 
-        # --- Apply
         for seg in pvarray.ground.list_segments:
-            seg._illum_collection.set_param('direct', dni_ground)
+            seg._illum_collection.set_param('direct', self.dni_ground[idx])
             seg._shaded_collection.set_param('direct', 0.)
 
         for pvrow in pvarray.pvrows:
             # Front
             for seg in pvrow.front.list_segments:
-                seg._illum_collection.set_param('direct', dni_front_pvrow)
+                seg._illum_collection.set_param('direct',
+                                                self.dni_front_pvrow[idx])
                 seg._shaded_collection.set_param('direct', 0.)
             # Back
             for seg in pvrow.back.list_segments:
-                seg._illum_collection.set_param('direct', dni_back_pvrow)
+                seg._illum_collection.set_param('direct',
+                                                self.dni_back_pvrow[idx])
                 seg._shaded_collection.set_param('direct', 0.)
 
 
