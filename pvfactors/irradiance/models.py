@@ -28,7 +28,7 @@ class IsotropicOrdered(BaseModel):
         self.dni_front_pvrow = None
         self.dni_back_pvrow = None
 
-    def fit(self, DNI, solar_zenith, solar_azimuth, surface_tilt,
+    def fit(self, DNI, DHI, solar_zenith, solar_azimuth, surface_tilt,
             surface_azimuth):
         """Use vectorization to calculate values used for irradiance model"""
         # Make sure getting array-like values

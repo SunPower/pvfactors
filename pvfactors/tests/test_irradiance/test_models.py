@@ -38,8 +38,9 @@ def test_isotropic_model_front(params_isotropic):
 
     # Apply irradiance model
     DNI = 1000.
+    DHI = None
     irr_model = IsotropicOrdered()
-    irr_model.fit(DNI,
+    irr_model.fit(DNI, DHI,
                   params_isotropic['solar_zenith'],
                   params_isotropic['solar_azimuth'],
                   params_isotropic['surface_tilt'],
@@ -97,8 +98,9 @@ def test_isotropic_model_back(params_isotropic):
 
     # Apply irradiance model
     DNI = 1000.
+    DHI = None
     irr_model = IsotropicOrdered()
-    irr_model.fit(DNI,
+    irr_model.fit(DNI, DHI,
                   params_isotropic['solar_zenith'],
                   params_isotropic['solar_azimuth'],
                   params_isotropic['surface_tilt'],
