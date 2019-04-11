@@ -56,8 +56,8 @@ def perez_diffuse_luminance(timestamps, surface_tilt, surface_azimuth,
          'dni': dni, 'dhi': dhi},
         index=pd.DatetimeIndex(timestamps))
 
-    dni_et = irradiance.extraradiation(df_inputs.index.dayofyear)
-    am = atmosphere.relativeairmass(df_inputs.solar_zenith)
+    dni_et = irradiance.get_extra_radiation(df_inputs.index.dayofyear)
+    am = atmosphere.get_relative_airmass(df_inputs.solar_zenith)
 
     # Need to treat the case when the sun is hitting the back surface of pvrow
     aoi_proj = irradiance.aoi_projection(

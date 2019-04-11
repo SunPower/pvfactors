@@ -180,6 +180,10 @@ def test_hybridperez_ordered_front(params_irr):
     # Expected values
     expected_dni_pvrow = DNI * cosd(45)
     expected_dni_ground = DNI * cosd(65)
+    expected_circ_pvrow = 61.542748619313045
+    # FIXME: it doesn't seem right that circumsolar stronger on ground
+    expected_circ_ground = 63.21759296298243
+    expected_hor_pvrow = 7.2486377533042452
 
     # Check fitting
     np.testing.assert_almost_equal(irr_model.direct['ground'][0],
@@ -190,4 +194,61 @@ def test_hybridperez_ordered_front(params_irr):
 
     # Transform
     irradiance_vec = irr_model.transform(pvarray)
-    print(irradiance_vec)
+
+    # Check transform
+    expected_irradiance_vec = [
+        485.8358547, 485.8358547, 485.8358547,
+        485.8358547, 485.8358547, 0.,
+        775.89816756, 7.24863775, 7.24863775, 775.89816756, 7.24863775,
+        7.24863775, 775.89816756, 7.24863775, 36.78240704]
+    # pvrow direct
+    np.testing.assert_almost_equal(
+        pvarray.pvrows[2].front.get_param_weighted('direct'),
+        expected_dni_pvrow)
+    np.testing.assert_almost_equal(
+        pvarray.pvrows[1].front.list_segments[0]
+        .illum_collection.get_param_weighted('direct'), expected_dni_pvrow)
+    np.testing.assert_almost_equal(
+        pvarray.pvrows[1].front.list_segments[0]
+        .shaded_collection.get_param_weighted('direct'), 0.)
+    np.testing.assert_almost_equal(
+        pvarray.pvrows[0].back.get_param_weighted('direct'), 0.)
+    # pvrow circumsolar
+    np.testing.assert_almost_equal(
+        pvarray.pvrows[2].front.get_param_weighted('circumsolar'),
+        expected_circ_pvrow)
+    np.testing.assert_almost_equal(
+        pvarray.pvrows[1].front.list_segments[0]
+        .illum_collection.get_param_weighted('circumsolar'),
+        expected_circ_pvrow)
+    np.testing.assert_almost_equal(
+        pvarray.pvrows[1].front.list_segments[0]
+        .shaded_collection.get_param_weighted('circumsolar'), 0.)
+    np.testing.assert_almost_equal(
+        pvarray.pvrows[1].back.list_segments[0]
+        .illum_collection.get_param_weighted('circumsolar'), 0.)
+    # pvrow horizon
+    np.testing.assert_almost_equal(
+        pvarray.pvrows[1].front.list_segments[0]
+        .illum_collection.get_param_weighted('horizon'), expected_hor_pvrow)
+    np.testing.assert_almost_equal(
+        pvarray.pvrows[1].front.list_segments[0]
+        .shaded_collection.get_param_weighted('horizon'), expected_hor_pvrow)
+    np.testing.assert_almost_equal(
+        pvarray.pvrows[1].back.list_segments[0]
+        .illum_collection.get_param_weighted('horizon'), expected_hor_pvrow)
+    # ground
+    np.testing.assert_almost_equal(
+        pvarray.ground.get_param_weighted('horizon'), 0.)
+    np.testing.assert_almost_equal(
+        pvarray.ground.list_segments[0]
+        .illum_collection.get_param_weighted('direct'), expected_dni_ground)
+    np.testing.assert_almost_equal(
+        pvarray.ground.list_segments[0]
+        .illum_collection.get_param_weighted('circumsolar'),
+        expected_circ_ground)
+    np.testing.assert_almost_equal(
+        pvarray.ground.list_segments[0]
+        .shaded_collection.get_param_weighted('direct'), 0.)
+    np.testing.assert_array_almost_equal(expected_irradiance_vec,
+                                         irradiance_vec)
