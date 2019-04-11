@@ -43,7 +43,7 @@ class IsotropicOrdered(BaseModel):
 
     def __init__(self):
         self.direct = dict.fromkeys(self.cats)
-        self.DHI = None
+        self.isotropic_luminance = None
 
     def fit(self, DNI, DHI, solar_zenith, solar_azimuth, surface_tilt,
             surface_azimuth):
@@ -58,7 +58,7 @@ class IsotropicOrdered(BaseModel):
             surface_azimuth = np.array([surface_azimuth])
 
         # Save diffuse light
-        self.DHI = DHI
+        self.isotropic_luminance = DHI
 
         # DNI seen by ground illuminated surfaces
         self.direct['ground'] = DNI * cosd(solar_zenith)
@@ -79,25 +79,25 @@ class IsotropicOrdered(BaseModel):
         """Apply calculated irradiance values to PV array"""
 
         for seg in pvarray.ground.list_segments:
-            seg._illum_collection.set_param('direct',
-                                            self.direct['ground'][idx])
-            seg._shaded_collection.set_param('direct', 0.)
+            seg._illum_collection.update_params(
+                {'direct': self.direct['ground'][idx]})
+            seg._shaded_collection.update_params({'direct': 0.})
 
         for pvrow in pvarray.pvrows:
             # Front
             for seg in pvrow.front.list_segments:
-                seg._illum_collection.set_param(
-                    'direct', self.direct['front_pvrow'][idx])
-                seg._shaded_collection.set_param('direct', 0.)
+                seg._illum_collection.update_params(
+                    {'direct': self.direct['front_pvrow'][idx]})
+                seg._shaded_collection.update_params({'direct': 0.})
             # Back
             for seg in pvrow.back.list_segments:
-                seg._illum_collection.set_param(
-                    'direct', self.direct['back_pvrow'][idx])
-                seg._shaded_collection.set_param('direct', 0.)
+                seg._illum_collection.update_params(
+                    {'direct': self.direct['back_pvrow'][idx]})
+                seg._shaded_collection.update_params({'direct': 0.})
 
         # Sum up the necessary parameters to form the irradiance vector
         irradiance_vec = self.get_irradiance_vector(pvarray)
-        irradiance_vec.append(self.DHI[idx])
+        irradiance_vec.append(self.isotropic_luminance[idx])
 
         return np.array(irradiance_vec)
 
@@ -170,20 +170,21 @@ class HybridPerezOrdered(BaseModel):
         # self.apply_back_horizon_shading()
 
         for seg in pvarray.ground.list_segments:
-            seg._illum_collection.set_param('direct', self.dni_ground[idx])
-            seg._shaded_collection.set_param('direct', 0.)
+            seg._illum_collection.update_params(
+                {'direct': self.direct['ground'][idx]})
+            seg._shaded_collection.update_params({'direct': 0.})
 
         for pvrow in pvarray.pvrows:
             # Front
             for seg in pvrow.front.list_segments:
-                seg._illum_collection.set_param('direct',
-                                                self.dni_front_pvrow[idx])
-                seg._shaded_collection.set_param('direct', 0.)
+                seg._illum_collection.update_params(
+                    {'direct': self.direct['front_pvrow'][idx]})
+                seg._shaded_collection.update_params({'direct': 0.})
             # Back
             for seg in pvrow.back.list_segments:
-                seg._illum_collection.set_param('direct',
-                                                self.dni_back_pvrow[idx])
-                seg._shaded_collection.set_param('direct', 0.)
+                seg._illum_collection.update_params(
+                    {'direct': self.direct['back_pvrow'][idx]})
+                seg._shaded_collection.update_params({'direct': 0.})
 
         # Sum up the necessary parameters to form the irradiance vector
         irradiance_vec = self.get_irradiance_vector(pvarray)

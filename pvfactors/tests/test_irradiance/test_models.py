@@ -158,8 +158,8 @@ def test_isotropic_model_back(params_irr):
 def test_hybridperez_ordered_front(params_irr):
 
     # pvarray
-    pvarray = OrderedPVArray.from_dict(params_irr,
-                                       surface_params=IsotropicOrdered.params)
+    pvarray = OrderedPVArray.from_dict(
+        params_irr, surface_params=HybridPerezOrdered.params)
     pvarray.cast_shadows()
     pvarray.cuts_for_pvrow_view()
     # there should be some direct shading
