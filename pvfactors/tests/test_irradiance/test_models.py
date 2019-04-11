@@ -3,6 +3,7 @@ from pvfactors.irradiance import IsotropicOrdered, HybridPerezOrdered
 from pvfactors.geometry import OrderedPVArray
 from pvlib.tools import cosd
 import numpy as np
+import datetime as dt
 
 
 @pytest.fixture(scope='function')
@@ -40,7 +41,7 @@ def test_isotropic_model_front(params_irr):
     DNI = 1000.
     DHI = 100.
     irr_model = IsotropicOrdered()
-    irr_model.fit(DNI, DHI,
+    irr_model.fit(None, DNI, DHI,
                   params_irr['solar_zenith'],
                   params_irr['solar_azimuth'],
                   params_irr['surface_tilt'],
@@ -107,7 +108,7 @@ def test_isotropic_model_back(params_irr):
     DNI = 1000.
     DHI = 100.
     irr_model = IsotropicOrdered()
-    irr_model.fit(DNI, DHI,
+    irr_model.fit(None, DNI, DHI,
                   params_irr['solar_zenith'],
                   params_irr['solar_azimuth'],
                   params_irr['surface_tilt'],
@@ -167,9 +168,10 @@ def test_hybridperez_ordered_front(params_irr):
 
     # Apply irradiance model
     DNI = 1000.
-    DHI = None
+    DHI = 100.
+    ts = dt.datetime(2019, 6, 14, 11)
     irr_model = HybridPerezOrdered()
-    irr_model.fit(DNI, DHI,
+    irr_model.fit(ts, DNI, DHI,
                   params_irr['solar_zenith'],
                   params_irr['solar_azimuth'],
                   params_irr['surface_tilt'],
@@ -188,3 +190,4 @@ def test_hybridperez_ordered_front(params_irr):
 
     # Transform
     irradiance_vec = irr_model.transform(pvarray)
+    print(irradiance_vec)

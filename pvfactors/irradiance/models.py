@@ -2,6 +2,7 @@
 from pvlib.tools import cosd
 from pvlib.irradiance import aoi as aoi_function
 import numpy as np
+from pvfactors.irradiance.utils import perez_diffuse_luminance
 
 
 class BaseModel(object):
@@ -45,11 +46,12 @@ class IsotropicOrdered(BaseModel):
         self.direct = dict.fromkeys(self.cats)
         self.isotropic_luminance = None
 
-    def fit(self, DNI, DHI, solar_zenith, solar_azimuth, surface_tilt,
-            surface_azimuth):
+    def fit(self, timestamps, DNI, DHI, solar_zenith, solar_azimuth,
+            surface_tilt, surface_azimuth):
         """Use vectorization to calculate values used for irradiance model"""
         # Make sure getting array-like values
         if np.isscalar(DNI):
+            timestamps = [timestamps]
             DNI = np.array([DNI])
             DHI = np.array([DHI])
             solar_zenith = np.array([solar_zenith])
@@ -116,11 +118,12 @@ class HybridPerezOrdered(BaseModel):
         self.horizon = dict.fromkeys(self.cats)
         self.isotropic_luminance = None
 
-    def fit(self, DNI, DHI, solar_zenith, solar_azimuth, surface_tilt,
-            surface_azimuth):
+    def fit(self, timestamps, DNI, DHI, solar_zenith, solar_azimuth,
+            surface_tilt, surface_azimuth):
         """Use vectorization to calculate values used for irradiance model"""
         # Make sure getting array-like values
         if np.isscalar(DNI):
+            timestamps = [timestamps]
             DNI = np.array([DNI])
             DHI = np.array([DHI])
             solar_zenith = np.array([solar_zenith])
@@ -132,10 +135,11 @@ class HybridPerezOrdered(BaseModel):
 
         # Calculate terms from Perez model
         luminance_circumsolar, luminance_isotropic, poa_horizon, \
-            poa_circumsolar_front, poa_circumsolar_back = \
+            poa_circumsolar_front, poa_circumsolar_back, \
+            aoi_front_pvrow, aoi_back_pvrow = \
             self.calculate_luminance_poa_components(
-                DNI, DHI, solar_zenith, solar_azimuth, surface_tilt,
-                surface_azimuth)
+                timestamps, DNI, DHI, solar_zenith, solar_azimuth,
+                surface_tilt, surface_azimuth)
 
         # Save isotropic luminance
         self.isotropic_luminance = luminance_isotropic
@@ -144,11 +148,6 @@ class HybridPerezOrdered(BaseModel):
         self.direct['ground'] = DNI * cosd(solar_zenith)
         self.circumsolar['ground'] = luminance_circumsolar
         self.horizon['ground'] = np.zeros(n)
-
-        # Calculate AOI on front pvrow using pvlib implementation
-        aoi_front_pvrow = aoi_function(
-            surface_tilt, surface_azimuth, solar_zenith, solar_azimuth)
-        aoi_back_pvrow = 180. - aoi_front_pvrow
 
         # PV row surfaces
         front_is_illum = aoi_front_pvrow <= 90
@@ -209,25 +208,33 @@ class HybridPerezOrdered(BaseModel):
 
     @staticmethod
     def calculate_luminance_poa_components(
-            DNI, DHI, solar_zenith, solar_azimuth, surface_tilt,
+            timestamps, DNI, DHI, solar_zenith, solar_azimuth, surface_tilt,
             surface_azimuth):
 
-        n = len(DNI)
+        # Calculations from util function
+        df_inputs = perez_diffuse_luminance(
+            timestamps, surface_tilt, surface_azimuth, solar_zenith,
+            solar_azimuth, DNI, DHI)
 
-        luminance_isotropic = np.nan * np.ones(n)
-        luminance_circumsolar = np.nan * np.ones(n)
-        poa_horizon = np.nan * np.ones(n)
-        poa_circumsolar_front = np.nan * np.ones(n)
-        poa_circumsolar_back = np.nan * np.ones(n)
+        luminance_isotropic = df_inputs.luminance_isotropic.values
+        luminance_circumsolar = df_inputs.luminance_circumsolar.values
+        poa_horizon = df_inputs.poa_horizon.values
+        poa_circumsolar_front = df_inputs.poa_circumsolar.values
 
-        # # Will be used for back surface adjustments: from Perez model
-        # vf_circumsolar_backsurface = \
-        # cosd(aoi_back_pvrow) / cosd(solar_zenith)
-        # poa_circumsolar_back = \
-        #     luminance_circumsolar * vf_circumsolar_backsurface
+        # Calculate AOI on front pvrow using pvlib implementation
+        aoi_front_pvrow = aoi_function(
+            surface_tilt, surface_azimuth, solar_zenith, solar_azimuth)
+        aoi_back_pvrow = 180. - aoi_front_pvrow
 
-        # # TODO: return only >0 values for poa_horizon
-        # poa_horizon = np.abs(poa_horizon)
+        # Will be used for back surface adjustments: from Perez model
+        vf_circumsolar_backsurface = \
+            cosd(aoi_back_pvrow) / cosd(solar_zenith)
+        poa_circumsolar_back = \
+            luminance_circumsolar * vf_circumsolar_backsurface
+
+        # TODO: return only >0 values for poa_horizon
+        poa_horizon = np.abs(poa_horizon)
 
         return luminance_isotropic, luminance_circumsolar, poa_horizon, \
-            poa_circumsolar_front, poa_circumsolar_back
+            poa_circumsolar_front, poa_circumsolar_back, \
+            aoi_front_pvrow, aoi_back_pvrow
