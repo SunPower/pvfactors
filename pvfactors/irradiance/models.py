@@ -7,6 +7,10 @@ import numpy as np
 class BaseModel(object):
     """Base class for irradiance models"""
 
+    params = None
+    cats = None
+    irradiance_comp = None
+
     def __init__(self):
         pass
 
@@ -16,12 +20,25 @@ class BaseModel(object):
     def transform(self):
         raise NotImplementedError
 
+    def get_irradiance_vector(self, pvarray):
+
+        # TODO: this can probably be speeded up
+        irradiance_vec = []
+        for idx, surface in pvarray.dict_surfaces.items():
+            value = 0.
+            for component in self.irradiance_comp:
+                value += surface.get_param(component)
+            irradiance_vec.append(value)
+
+        return irradiance_vec
+
 
 class IsotropicOrdered(BaseModel):
     """Diffuse isotropic sky model for
     :py:class:`~pvfactors.geometry.OrderedPVArray`"""
 
     params = ['rho', 'direct']
+    irradiance_comp = ['direct']
 
     def __init__(self):
         self.dni_ground = None
@@ -72,6 +89,11 @@ class IsotropicOrdered(BaseModel):
                                                 self.dni_back_pvrow[idx])
                 seg._shaded_collection.set_param('direct', 0.)
 
+        # Sum up the necessary parameters to form the irradiance vector
+        irradiance_vec = self.get_irradiance_vector(pvarray)
+
+        return irradiance_vec
+
 
 class HybridPerezOrdered(BaseModel):
     """Model is based off Perez diffuse light model, but
@@ -79,6 +101,7 @@ class HybridPerezOrdered(BaseModel):
 
     params = ['rho', 'direct', 'isotropic', 'circumsolar', 'horizon']
     cats = ['ground', 'front_pvrow', 'back_pvrow']
+    irradiance_comp = ['direct', 'isotropic', 'circumsolar', 'horizon']
 
     def __init__(self):
         self.direct = dict.fromkeys(self.cats)
@@ -151,10 +174,10 @@ class HybridPerezOrdered(BaseModel):
                                                 self.dni_back_pvrow[idx])
                 seg._shaded_collection.set_param('direct', 0.)
 
-        # Sum up the necessary parameters to form the irradiance terms
-        irradiance_terms = None
+        # Sum up the necessary parameters to form the irradiance vector
+        irradiance_vec = self.get_irradiance_vector(pvarray)
 
-        return irradiance_terms
+        return irradiance_vec
 
     @staticmethod
     def calculate_luminance_poa_components(

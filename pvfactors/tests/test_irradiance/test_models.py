@@ -58,9 +58,14 @@ def test_isotropic_model_front(params_irr):
     assert irr_model.dni_back_pvrow[0] == 0.
 
     # Transform
-    irr_model.transform(pvarray)
+    irradiance_vec = irr_model.transform(pvarray)
 
     # Check transform
+    expected_irradiance_vec = [
+        422.61826174069944, 422.61826174069944, 422.61826174069944,
+        422.61826174069944, 422.61826174069944, 0.0,
+        707.10678118654744, 0.0, 0.0, 707.10678118654744, 0.0, 0.0,
+        707.10678118654744, 0.0]
     # pvrow
     np.testing.assert_almost_equal(
         pvarray.pvrows[2].front.get_param_weighted('direct'),
@@ -80,6 +85,8 @@ def test_isotropic_model_front(params_irr):
     np.testing.assert_almost_equal(
         pvarray.ground.list_segments[0]
         .shaded_collection.get_param_weighted('direct'), 0.)
+    np.testing.assert_array_almost_equal(expected_irradiance_vec,
+                                         irradiance_vec)
 
 
 def test_isotropic_model_back(params_irr):
@@ -118,8 +125,13 @@ def test_isotropic_model_back(params_irr):
     assert irr_model.dni_front_pvrow[0] == 0.
 
     # Transform
-    irr_model.transform(pvarray)
+    irradiance_vec = irr_model.transform(pvarray)
 
+    # Check
+    expected_irradiance_vec = [
+        422.61826174069944, 422.61826174069944, 422.61826174069944,
+        422.61826174069944, 422.61826174069944, 0.0, 0.0, 707.10678118654755,
+        0.0, 0.0, 707.10678118654755, 0.0, 0.0, 707.10678118654755]
     # pvrow
     np.testing.assert_almost_equal(
         pvarray.pvrows[2].back.get_param_weighted('direct'),
@@ -139,6 +151,8 @@ def test_isotropic_model_back(params_irr):
     np.testing.assert_almost_equal(
         pvarray.ground.list_segments[0]
         .shaded_collection.get_param_weighted('direct'), 0.)
+    np.testing.assert_array_almost_equal(expected_irradiance_vec,
+                                         irradiance_vec)
 
 
 def test_hybridperez_ordered_front(params_irr):
