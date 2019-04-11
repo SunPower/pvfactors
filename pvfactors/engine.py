@@ -3,6 +3,7 @@ import numpy as np
 from pvfactors.geometry import OrderedPVArray
 from pvfactors.viewfactors import VFCalculator
 from pvfactors.irradiance import IsotropicOrdered
+from scipy import linalg
 
 
 class PVEngine(object):
@@ -78,4 +79,13 @@ class PVEngine(object):
         irradiance_vec, invrho_vec = \
             self.irradiance.transform(pvarray, idx=idx)
 
-        return pvarray, vf_matrix
+        # Calculate radiosities
+        a_mat = np.diag(invrho_vec) - vf_matrix
+        q0 = linalg.solve(a_mat, irradiance_vec)
+        qinc = np.dot(vf_matrix, q0) + irradiance_vec
+
+        # Update surfaces with values
+        for idx, surface in geom_dict.items():
+            surface.update_params({'q0': q0[idx], 'qinc': qinc[idx]})
+
+        return pvarray, vf_matrix, q0, qinc
