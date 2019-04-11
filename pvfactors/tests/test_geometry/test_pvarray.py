@@ -408,6 +408,22 @@ def test_surface_params(params):
             pvrow.back.get_param_ww('qinc'), pvrow.back.length)
 
 
+def test_orderedpvarray_neighbors(params):
+    """Check that pvrow neighbors are determined correctly"""
+
+    pvarray_right = OrderedPVArray.from_dict(params)
+    params.update({'surface_azimuth': 270})
+    pvarray_left = OrderedPVArray.from_dict(params)
+
+    # Check
+    l1 = [None, 0, 1]
+    l2 = [1, 2, None]
+    np.testing.assert_array_equal(pvarray_right.front_neighbors, l2)
+    np.testing.assert_array_equal(pvarray_right.back_neighbors, l1)
+    np.testing.assert_array_equal(pvarray_left.front_neighbors, l1)
+    np.testing.assert_array_equal(pvarray_left.back_neighbors, l2)
+
+
 def test_time_ordered_pvarray(params):
 
     # params.update({'surface_tilt': 0})

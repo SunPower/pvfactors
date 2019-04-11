@@ -31,6 +31,7 @@ class OrderedPVArray(BasePVArray):
         self.axis_azimuth = axis_azimuth
         self.solar_2d_vector = get_solar_2d_vector(solar_zenith, solar_azimuth,
                                                    axis_azimuth)
+        self.front_neighbors, self.back_neighbors = self.get_neighbors()
 
         # Initialize shading attributes
         self.has_direct_shading = False
@@ -61,12 +62,33 @@ class OrderedPVArray(BasePVArray):
                 axis_azimuth, index=idx, cut=cut.get(idx, {}),
                 surface_params=surface_params)
             list_pvrows.append(pvrow)
+
         return cls(list_pvrows=list_pvrows, ground=ground, surface_tilt=tilt,
                    surface_azimuth=surface_azimuth,
                    axis_azimuth=axis_azimuth,
                    solar_zenith=parameters['solar_zenith'],
                    solar_azimuth=parameters['solar_azimuth'],
                    gcr=gcr, height=y_center, distance=distance)
+
+    def get_neighbors(self):
+        """Determine the pvrows indices of the neighboring pvrow for the front
+        and back surface of each pvrow.
+        """
+        n_pvrows = len(self.pvrows)
+        if n_pvrows:
+            flat = self.surface_tilt == 0
+            rotated_to_left = self.pvrows[0].front.n_vector[0] < 0
+            if flat:
+                front_neighbors = [None] * n_pvrows
+                back_neighbors = [None] * n_pvrows
+            elif rotated_to_left:
+                front_neighbors = [None] + list(range(n_pvrows - 1))
+                back_neighbors = list(range(1, n_pvrows)) + [None]
+            else:  # rotated to right
+                front_neighbors = list(range(1, n_pvrows)) + [None]
+                back_neighbors = [None] + list(range(n_pvrows - 1))
+
+        return front_neighbors, back_neighbors
 
     def cast_shadows(self):
         """Use calculated solar_2d_vector and array configuration to calculate
@@ -221,8 +243,7 @@ class OrderedPVArray(BasePVArray):
                     gnd_that_front_sees = []
                     gnd_that_back_sees = []
                     for idx_gnd, gnd_surface in enumerate(ground_surfaces):
-                        gnd_surface_on_the_right = \
-                            gnd_centroids[idx_gnd].x > edge_point.x
+                        gnd_surface_on_the_right = gnd_centroids[idx_gnd].x > edge_point.x
                         if gnd_surface_on_the_right:
                             gnd_that_back_sees.append(gnd_surface.index)
                         else:
@@ -247,8 +268,7 @@ class OrderedPVArray(BasePVArray):
                     gnd_that_front_sees = []
                     gnd_that_back_sees = []
                     for idx_gnd, gnd_surface in enumerate(ground_surfaces):
-                        gnd_surface_on_the_right = \
-                            gnd_centroids[idx_gnd].x > edge_point.x
+                        gnd_surface_on_the_right = gnd_centroids[idx_gnd].x > edge_point.x
                         if gnd_surface_on_the_right:
                             gnd_that_front_sees.append(gnd_surface.index)
                         else:
