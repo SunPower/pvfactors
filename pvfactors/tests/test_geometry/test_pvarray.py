@@ -381,10 +381,7 @@ def test_surface_params(params):
     pvarray.cuts_for_pvrow_view()
 
     # Set all surfaces parameters to 1
-    pvarray.ground.set_param('qinc', 1)
-    for pvrow in pvarray.pvrows:
-        pvrow.front.set_param('qinc', 1)
-        pvrow.back.set_param('qinc', 1)
+    pvarray.update_params({'qinc': 1})
 
     # Check that all surfaces of the correct surface params
     all_surfaces = pvarray.all_surfaces

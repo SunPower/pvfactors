@@ -144,16 +144,13 @@ class BaseSurface(LineString):
         """
         return self.params[param]
 
-    def set_param(self, param, value):
+    def update_params(self, new_dict):
         """
         Parameters
         ----------
-        param : str
-            Surface parameter to return
-        value : float
-            Value to assign to parameter
+        new_dict : dict
         """
-        self.params[param] = value
+        self.params.update(new_dict)
 
 
 class PVSurface(BaseSurface):
@@ -307,17 +304,14 @@ class ShadeCollection(GeometryCollection):
             value += surf.get_param(param) * surf.length
         return value
 
-    def set_param(self, param, value):
+    def update_params(self, new_dict):
         """
         Parameters
         ----------
-        param : str
-            Surface parameter to return
-        value : float
-            Value to assign to parameter
+        new_dict : dict
         """
         for surf in self.list_surfaces:
-            surf.set_param(param, value)
+            surf.update_params(new_dict)
 
     @property
     def n_vector(self):
@@ -434,17 +428,14 @@ class PVSegment(GeometryCollection):
         value += self._illum_collection.get_param_ww(param)
         return value
 
-    def set_param(self, param, value):
+    def update_params(self, new_dict):
         """
         Parameters
         ----------
-        param : str
-            Surface parameter to return
-        value : float
-            Value to assign to parameter
+        new_dict : dict
         """
-        self._shaded_collection.set_param(param, value)
-        self._illum_collection.set_param(param, value)
+        self._shaded_collection.update_params(new_dict)
+        self._illum_collection.update_params(new_dict)
 
     @property
     def n_vector(self):
@@ -655,17 +646,14 @@ class BaseSide(GeometryCollection):
             value += seg.get_param_ww(param)
         return value
 
-    def set_param(self, param, value):
+    def update_params(self, new_dict):
         """
         Parameters
         ----------
-        param : str
-            Surface parameter to return
-        value : float
-            Value to assign to parameter
+        new_dict : dict
         """
         for seg in self.list_segments:
-            seg.set_param(param, value)
+            seg.update_params(new_dict)
 
 
 class BasePVArray(object):
@@ -775,18 +763,15 @@ class BasePVArray(object):
             self._dict_surfaces = OrderedDict(dict_surf)
         return self._dict_surfaces
 
-    def set_param(self, param, value):
+    def update_params(self, new_dict):
         """
         Parameters
         ----------
-        param : str
-            Surface parameter to return
-        value : float
-            Value to assign to parameter
+        new_dict : dict
         """
-        self.ground.set_param(param, value)
+        self.ground.update_params(new_dict)
         for pvrow in self.pvrows:
-            pvrow.set_param(param, value)
+            pvrow.update_params(new_dict)
 
     def index_all_surfaces(self):
         """Add unique indices to all surfaces"""
