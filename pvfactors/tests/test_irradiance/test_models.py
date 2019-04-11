@@ -1,12 +1,12 @@
 import pytest
-from pvfactors.irradiance import IsotropicOrdered
+from pvfactors.irradiance import IsotropicOrdered, HybridPerezOrdered
 from pvfactors.geometry import OrderedPVArray
 from pvlib.tools import cosd
 import numpy as np
 
 
 @pytest.fixture(scope='function')
-def params_isotropic():
+def params_irr():
 
     pvarray_parameters = {
         'n_pvrows': 3,
@@ -25,11 +25,11 @@ def params_isotropic():
     yield pvarray_parameters
 
 
-def test_isotropic_model_front(params_isotropic):
+def test_isotropic_model_front(params_irr):
     """Direct shading on front surface"""
 
     # pvarray
-    pvarray = OrderedPVArray.from_dict(params_isotropic,
+    pvarray = OrderedPVArray.from_dict(params_irr,
                                        surface_params=IsotropicOrdered.params)
     pvarray.cast_shadows()
     pvarray.cuts_for_pvrow_view()
@@ -38,12 +38,13 @@ def test_isotropic_model_front(params_isotropic):
 
     # Apply irradiance model
     DNI = 1000.
+    DHI = None
     irr_model = IsotropicOrdered()
-    irr_model.fit(DNI,
-                  params_isotropic['solar_zenith'],
-                  params_isotropic['solar_azimuth'],
-                  params_isotropic['surface_tilt'],
-                  params_isotropic['surface_azimuth'])
+    irr_model.fit(DNI, DHI,
+                  params_irr['solar_zenith'],
+                  params_irr['solar_azimuth'],
+                  params_irr['surface_tilt'],
+                  params_irr['surface_azimuth'])
 
     # Expected values
     expected_dni_pvrow = DNI * cosd(45)
@@ -81,14 +82,14 @@ def test_isotropic_model_front(params_isotropic):
         .shaded_collection.get_param_weighted('direct'), 0.)
 
 
-def test_isotropic_model_back(params_isotropic):
+def test_isotropic_model_back(params_irr):
     """Direct shading on back surface"""
 
-    params_isotropic.update({'surface_azimuth': 270,
-                             'surface_tilt': 160})
+    params_irr.update({'surface_azimuth': 270,
+                       'surface_tilt': 160})
 
     # pvarray
-    pvarray = OrderedPVArray.from_dict(params_isotropic,
+    pvarray = OrderedPVArray.from_dict(params_irr,
                                        surface_params=IsotropicOrdered.params)
     pvarray.cast_shadows()
     pvarray.cuts_for_pvrow_view()
@@ -97,12 +98,13 @@ def test_isotropic_model_back(params_isotropic):
 
     # Apply irradiance model
     DNI = 1000.
+    DHI = None
     irr_model = IsotropicOrdered()
-    irr_model.fit(DNI,
-                  params_isotropic['solar_zenith'],
-                  params_isotropic['solar_azimuth'],
-                  params_isotropic['surface_tilt'],
-                  params_isotropic['surface_azimuth'])
+    irr_model.fit(DNI, DHI,
+                  params_irr['solar_zenith'],
+                  params_irr['solar_azimuth'],
+                  params_irr['surface_tilt'],
+                  params_irr['surface_azimuth'])
 
     # Expected values
     expected_dni_pvrow = DNI * cosd(45)
@@ -137,3 +139,35 @@ def test_isotropic_model_back(params_isotropic):
     np.testing.assert_almost_equal(
         pvarray.ground.list_segments[0]
         .shaded_collection.get_param_weighted('direct'), 0.)
+
+
+def test_hybridperez_ordered_front(params_irr):
+
+    # pvarray
+    pvarray = OrderedPVArray.from_dict(params_irr,
+                                       surface_params=IsotropicOrdered.params)
+    pvarray.cast_shadows()
+    pvarray.cuts_for_pvrow_view()
+    # there should be some direct shading
+    assert pvarray.pvrows[0].front.shaded_length
+
+    # Apply irradiance model
+    DNI = 1000.
+    DHI = None
+    irr_model = HybridPerezOrdered()
+    irr_model.fit(DNI, DHI,
+                  params_irr['solar_zenith'],
+                  params_irr['solar_azimuth'],
+                  params_irr['surface_tilt'],
+                  params_irr['surface_azimuth'])
+
+    # Expected values
+    expected_dni_pvrow = DNI * cosd(45)
+    expected_dni_ground = DNI * cosd(65)
+
+    # Check fitting
+    np.testing.assert_almost_equal(irr_model.dni_ground[0],
+                                   expected_dni_ground)
+    np.testing.assert_almost_equal(irr_model.dni_front_pvrow[0],
+                                   expected_dni_pvrow)
+    assert irr_model.dni_back_pvrow[0] == 0.
