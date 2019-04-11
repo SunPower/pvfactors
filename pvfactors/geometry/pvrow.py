@@ -107,14 +107,11 @@ class PVRow(GeometryCollection):
         list_indices += self.back.surface_indices
         return list_indices
 
-    def set_param(self, param, value):
+    def update_params(self, new_dict):
         """
         Parameters
         ----------
-        param : str
-            Surface parameter to return
-        value : float
-            Value to assign to parameter
+        new_dict : dict
         """
-        self.front.set_param(param, value)
-        self.back.set_param(param, value)
+        self.front.update_params(new_dict)
+        self.back.update_params(new_dict)

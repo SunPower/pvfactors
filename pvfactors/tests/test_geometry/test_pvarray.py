@@ -381,10 +381,7 @@ def test_surface_params(params):
     pvarray.cuts_for_pvrow_view()
 
     # Set all surfaces parameters to 1
-    pvarray.ground.set_param('qinc', 1)
-    for pvrow in pvarray.pvrows:
-        pvrow.front.set_param('qinc', 1)
-        pvrow.back.set_param('qinc', 1)
+    pvarray.update_params({'qinc': 1})
 
     # Check that all surfaces of the correct surface params
     all_surfaces = pvarray.all_surfaces
@@ -409,6 +406,22 @@ def test_surface_params(params):
             pvrow.back.get_param_weighted('qinc'), 1)
         np.testing.assert_almost_equal(
             pvrow.back.get_param_ww('qinc'), pvrow.back.length)
+
+
+def test_orderedpvarray_neighbors(params):
+    """Check that pvrow neighbors are determined correctly"""
+
+    pvarray_right = OrderedPVArray.from_dict(params)
+    params.update({'surface_azimuth': 270})
+    pvarray_left = OrderedPVArray.from_dict(params)
+
+    # Check
+    l1 = [None, 0, 1]
+    l2 = [1, 2, None]
+    np.testing.assert_array_equal(pvarray_right.front_neighbors, l2)
+    np.testing.assert_array_equal(pvarray_right.back_neighbors, l1)
+    np.testing.assert_array_equal(pvarray_left.front_neighbors, l1)
+    np.testing.assert_array_equal(pvarray_left.back_neighbors, l2)
 
 
 def test_time_ordered_pvarray(params):
