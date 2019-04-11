@@ -2,36 +2,10 @@
 from pvlib.tools import cosd
 from pvlib.irradiance import aoi as aoi_function
 import numpy as np
-from pvfactors.irradiance.utils import perez_diffuse_luminance
-
-
-class BaseModel(object):
-    """Base class for irradiance models"""
-
-    params = None
-    cats = None
-    irradiance_comp = None
-
-    def __init__(self):
-        pass
-
-    def fit(self):
-        raise NotImplementedError
-
-    def transform(self):
-        raise NotImplementedError
-
-    def get_irradiance_vector(self, pvarray):
-
-        # TODO: this can probably be speeded up
-        irradiance_vec = []
-        for idx, surface in pvarray.dict_surfaces.items():
-            value = 0.
-            for component in self.irradiance_comp:
-                value += surface.get_param(component)
-            irradiance_vec.append(value)
-
-        return irradiance_vec
+from pvfactors.irradiance.utils import \
+    perez_diffuse_luminance, calculate_horizon_band_shading
+from pvfactors.irradiance.base import BaseModel
+from pvfactors.config import DEFAULT_HORIZON_BAND_ANGLE
 
 
 class IsotropicOrdered(BaseModel):
@@ -112,11 +86,12 @@ class HybridPerezOrdered(BaseModel):
     cats = ['ground', 'front_pvrow', 'back_pvrow']
     irradiance_comp = ['direct', 'circumsolar', 'horizon']
 
-    def __init__(self):
+    def __init__(self, horizon_band_angle=DEFAULT_HORIZON_BAND_ANGLE):
         self.direct = dict.fromkeys(self.cats)
         self.circumsolar = dict.fromkeys(self.cats)
         self.horizon = dict.fromkeys(self.cats)
         self.isotropic_luminance = None
+        self.horizon_band_angle = horizon_band_angle
 
     def fit(self, timestamps, DNI, DHI, solar_zenith, solar_azimuth,
             surface_tilt, surface_azimuth):
@@ -131,6 +106,7 @@ class HybridPerezOrdered(BaseModel):
             surface_tilt = np.array([surface_tilt])
             surface_azimuth = np.array([surface_azimuth])
 
+        # Size of timeseries values
         n = len(DNI)
 
         # Calculate terms from Perez model
@@ -178,7 +154,8 @@ class HybridPerezOrdered(BaseModel):
                  'circumsolar': 0.,
                  'horizon': 0.})
 
-        for pvrow in pvarray.pvrows:
+        pvrows = pvarray.pvrows
+        for idx_pvrow, pvrow in enumerate(pvarray.pvrows):
             # Front
             for seg in pvrow.front.list_segments:
                 seg._illum_collection.update_params(
@@ -189,22 +166,51 @@ class HybridPerezOrdered(BaseModel):
                     {'direct': 0.,
                      'circumsolar': 0.,
                      'horizon': self.horizon['front_pvrow'][idx]})
-            # Back
+            # Back: apply back surface horizon shading
             for seg in pvrow.back.list_segments:
-                seg._illum_collection.update_params(
-                    {'direct': self.direct['back_pvrow'][idx],
-                     'circumsolar': self.circumsolar['back_pvrow'][idx],
-                     'horizon': self.horizon['back_pvrow'][idx]})
-                seg._shaded_collection.update_params(
-                    {'direct': 0.,
-                     'circumsolar': 0.,
-                     'horizon': self.horizon['back_pvrow'][idx]})
+                # Illum
+                idx_neighbor = pvarray.back_neighbors[idx_pvrow]
+                for surf in seg._illum_collection.list_surfaces:
+                    hor_shd_pct = self.calculate_hor_shd_pct(
+                        surf, idx_neighbor, pvrows)
+                    surf.update_params(
+                        {'direct': self.direct['back_pvrow'][idx],
+                         'circumsolar': self.circumsolar['back_pvrow'][idx],
+                         'horizon': self.horizon['back_pvrow'][idx] *
+                         (1. - hor_shd_pct / 100.),
+                         'horizon_shd_pct': hor_shd_pct})
+                # Shaded
+                for surf in seg._shaded_collection.list_surfaces:
+                    hor_shd_pct = self.calculate_hor_shd_pct(
+                        surf, idx_neighbor, pvrows)
+                    surf.update_params(
+                        {'direct': 0.,
+                         'circumsolar': 0.,
+                         'horizon': self.horizon['back_pvrow'][idx] *
+                         (1. - hor_shd_pct / 100.),
+                         'horizon_shd_pct': hor_shd_pct})
 
         # Sum up the necessary parameters to form the irradiance vector
         irradiance_vec = self.get_irradiance_vector(pvarray)
         irradiance_vec.append(self.isotropic_luminance[idx])
 
         return np.array(irradiance_vec)
+
+    def calculate_hor_shd_pct(self, surface, idx_neighbor, pvrows):
+        """Calculate horizon band shading percentage"""
+
+        horizon_shading_pct = 0.
+        if idx_neighbor is not None:
+            centroid = surface.centroid
+            neighbor_point = pvrows[idx_neighbor].highest_point
+            shading_angle = np.abs(np.arctan(
+                (neighbor_point.y - centroid.y) /
+                (neighbor_point.x - centroid.x))
+            ) * 180. / np.pi
+            horizon_shading_pct = calculate_horizon_band_shading(
+                shading_angle, self.horizon_band_angle)
+
+        return horizon_shading_pct
 
     @staticmethod
     def calculate_luminance_poa_components(
