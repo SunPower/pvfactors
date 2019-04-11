@@ -25,6 +25,7 @@ class PVEngine(object):
         self.solar_azimuth = None
         self.surface_tilt = None
         self.surface_azimuth = None
+        self.n_points = None
 
     def fit(self, timestamps, DNI, DHI, solar_zenith, solar_azimuth,
             surface_tilt, surface_azimuth, albedo):
@@ -38,9 +39,9 @@ class PVEngine(object):
             solar_azimuth = np.array([solar_azimuth])
             surface_tilt = np.array([surface_tilt])
             surface_azimuth = np.array([surface_azimuth])
-        n = len(DNI)
+        self.n_points = len(DNI)
         if np.isscalar(albedo):
-            albedo = albedo * np.ones(n)
+            albedo = albedo * np.ones(self.n_points)
 
         # Save timeseries values
         self.solar_zenith = solar_zenith
@@ -89,3 +90,7 @@ class PVEngine(object):
             surface.update_params({'q0': q0[idx], 'qinc': qinc[idx]})
 
         return pvarray, vf_matrix, q0, qinc
+
+    def run_all_timesteps(self):
+
+        pass
