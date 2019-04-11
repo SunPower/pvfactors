@@ -108,7 +108,7 @@ class HybridPerezOrdered(BaseModel):
 
     params = ['rho', 'direct', 'isotropic', 'circumsolar', 'horizon']
     cats = ['ground', 'front_pvrow', 'back_pvrow']
-    irradiance_comp = ['direct', 'isotropic', 'circumsolar', 'horizon']
+    irradiance_comp = ['direct', 'circumsolar', 'horizon']
 
     def __init__(self):
         self.direct = dict.fromkeys(self.cats)
@@ -171,20 +171,35 @@ class HybridPerezOrdered(BaseModel):
 
         for seg in pvarray.ground.list_segments:
             seg._illum_collection.update_params(
-                {'direct': self.direct['ground'][idx]})
-            seg._shaded_collection.update_params({'direct': 0.})
+                {'direct': self.direct['ground'][idx],
+                 'circumsolar': self.circumsolar['ground'][idx],
+                 'horizon': 0.})
+            seg._shaded_collection.update_params(
+                {'direct': 0.,
+                 'circumsolar': 0.,
+                 'horizon': 0.})
 
         for pvrow in pvarray.pvrows:
             # Front
             for seg in pvrow.front.list_segments:
                 seg._illum_collection.update_params(
-                    {'direct': self.direct['front_pvrow'][idx]})
-                seg._shaded_collection.update_params({'direct': 0.})
+                    {'direct': self.direct['front_pvrow'][idx],
+                     'circumsolar': self.circumsolar['front_pvrow'][idx],
+                     'horizon': self.horizon['front_pvrow'][idx]})
+                seg._shaded_collection.update_params(
+                    {'direct': 0.,
+                     'circumsolar': 0.,
+                     'horizon': self.horizon['front_pvrow'][idx]})
             # Back
             for seg in pvrow.back.list_segments:
                 seg._illum_collection.update_params(
-                    {'direct': self.direct['back_pvrow'][idx]})
-                seg._shaded_collection.update_params({'direct': 0.})
+                    {'direct': self.direct['back_pvrow'][idx],
+                     'circumsolar': self.circumsolar['back_pvrow'][idx],
+                     'horizon': self.horizon['back_pvrow'][idx]})
+                seg._shaded_collection.update_params(
+                    {'direct': 0.,
+                     'circumsolar': 0.,
+                     'horizon': self.horizon['back_pvrow'][idx]})
 
         # Sum up the necessary parameters to form the irradiance vector
         irradiance_vec = self.get_irradiance_vector(pvarray)
@@ -197,11 +212,13 @@ class HybridPerezOrdered(BaseModel):
             DNI, DHI, solar_zenith, solar_azimuth, surface_tilt,
             surface_azimuth):
 
-        luminance_isotropic = np.nan
-        luminance_circumsolar = np.nan
-        poa_horizon = np.nan
-        poa_circumsolar_front = np.nan
-        poa_circumsolar_back = np.nan
+        n = len(DNI)
+
+        luminance_isotropic = np.nan * np.ones(n)
+        luminance_circumsolar = np.nan * np.ones(n)
+        poa_horizon = np.nan * np.ones(n)
+        poa_circumsolar_front = np.nan * np.ones(n)
+        poa_circumsolar_back = np.nan * np.ones(n)
 
         # # Will be used for back surface adjustments: from Perez model
         # vf_circumsolar_backsurface = \

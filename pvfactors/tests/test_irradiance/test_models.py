@@ -185,3 +185,6 @@ def test_hybridperez_ordered_front(params_irr):
     np.testing.assert_almost_equal(irr_model.direct['front_pvrow'][0],
                                    expected_dni_pvrow)
     assert irr_model.direct['back_pvrow'][0] == 0.
+
+    # Transform
+    irradiance_vec = irr_model.transform(pvarray)
