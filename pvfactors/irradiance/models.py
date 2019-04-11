@@ -211,7 +211,7 @@ class HybridPerezOrdered(BaseModel):
             timestamps, DNI, DHI, solar_zenith, solar_azimuth, surface_tilt,
             surface_azimuth):
 
-        # Calculations from util function
+        # Calculations from utils function
         df_inputs = perez_diffuse_luminance(
             timestamps, surface_tilt, surface_azimuth, solar_zenith,
             solar_azimuth, DNI, DHI)
@@ -227,6 +227,7 @@ class HybridPerezOrdered(BaseModel):
         aoi_back_pvrow = 180. - aoi_front_pvrow
 
         # Will be used for back surface adjustments: from Perez model
+        # FIXME: pvlib clips the angle values to calculate vf -> adjust here
         vf_circumsolar_backsurface = \
             cosd(aoi_back_pvrow) / cosd(solar_zenith)
         poa_circumsolar_back = \
