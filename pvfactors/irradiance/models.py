@@ -5,23 +5,26 @@ import numpy as np
 from pvfactors.irradiance.utils import \
     perez_diffuse_luminance, calculate_horizon_band_shading
 from pvfactors.irradiance.base import BaseModel
-from pvfactors.config import DEFAULT_HORIZON_BAND_ANGLE
+from pvfactors.config import DEFAULT_HORIZON_BAND_ANGLE, SKY_REFLECTIVITY_DUMMY
 
 
 class IsotropicOrdered(BaseModel):
     """Diffuse isotropic sky model for
     :py:class:`~pvfactors.geometry.OrderedPVArray`"""
 
-    params = ['rho', 'direct']
+    params = ['rho', 'inv_rho', 'direct']
     cats = ['ground', 'front_pvrow', 'back_pvrow']
     irradiance_comp = ['direct']
 
     def __init__(self):
         self.direct = dict.fromkeys(self.cats)
         self.isotropic_luminance = None
+        self.rho_front = None
+        self.rho_back = None
+        self.albedo = None
 
     def fit(self, timestamps, DNI, DHI, solar_zenith, solar_azimuth,
-            surface_tilt, surface_azimuth):
+            surface_tilt, surface_azimuth, rho_front, rho_back, albedo):
         """Use vectorization to calculate values used for irradiance model"""
         # Make sure getting array-like values
         if np.isscalar(DNI):
@@ -32,9 +35,17 @@ class IsotropicOrdered(BaseModel):
             solar_azimuth = np.array([solar_azimuth])
             surface_tilt = np.array([surface_tilt])
             surface_azimuth = np.array([surface_azimuth])
+        # Length of arrays
+        n = len(DNI)
+        # Make sure that albedo is a vector
+        if np.isscalar(albedo):
+            albedo = albedo * np.ones(n)
 
         # Save diffuse light
         self.isotropic_luminance = DHI
+        self.rho_front = rho_front
+        self.rho_back = rho_back
+        self.albedo = albedo
 
         # DNI seen by ground illuminated surfaces
         self.direct['ground'] = DNI * cosd(solar_zenith)
@@ -56,33 +67,52 @@ class IsotropicOrdered(BaseModel):
 
         for seg in pvarray.ground.list_segments:
             seg._illum_collection.update_params(
-                {'direct': self.direct['ground'][idx]})
-            seg._shaded_collection.update_params({'direct': 0.})
+                {'direct': self.direct['ground'][idx],
+                 'rho': self.albedo[idx],
+                 'inv_rho': 1. / self.albedo[idx]})
+            seg._shaded_collection.update_params(
+                {'direct': 0.,
+                 'rho': self.albedo[idx],
+                 'inv_rho': 1. / self.albedo[idx]})
 
         for pvrow in pvarray.pvrows:
             # Front
             for seg in pvrow.front.list_segments:
                 seg._illum_collection.update_params(
-                    {'direct': self.direct['front_pvrow'][idx]})
-                seg._shaded_collection.update_params({'direct': 0.})
+                    {'direct': self.direct['front_pvrow'][idx],
+                     'rho': self.rho_front,
+                     'inv_rho': 1. / self.rho_front})
+                seg._shaded_collection.update_params(
+                    {'direct': 0.,
+                     'rho': self.rho_front,
+                     'inv_rho': 1. / self.rho_front})
             # Back
             for seg in pvrow.back.list_segments:
                 seg._illum_collection.update_params(
-                    {'direct': self.direct['back_pvrow'][idx]})
-                seg._shaded_collection.update_params({'direct': 0.})
+                    {'direct': self.direct['back_pvrow'][idx],
+                     'rho': self.rho_back,
+                     'inv_rho': 1. / self.rho_back})
+                seg._shaded_collection.update_params(
+                    {'direct': 0.,
+                     'rho': self.rho_back,
+                     'inv_rho': 1. / self.rho_back})
 
         # Sum up the necessary parameters to form the irradiance vector
-        irradiance_vec = self.get_irradiance_vector(pvarray)
+        irradiance_vec, inv_rho_vec = \
+            self.get_irradiance_invrho_vector(pvarray)
+        # Add sky values
         irradiance_vec.append(self.isotropic_luminance[idx])
+        inv_rho_vec.append(SKY_REFLECTIVITY_DUMMY)
 
-        return np.array(irradiance_vec)
+        return np.array(irradiance_vec), np.array(inv_rho_vec)
 
 
 class HybridPerezOrdered(BaseModel):
     """Model is based off Perez diffuse light model, but
     applied to pvfactors :py:class:`~pvfactors.geometry.OrderedPVArray`"""
 
-    params = ['rho', 'direct', 'isotropic', 'circumsolar', 'horizon']
+    params = ['rho', 'inv_rho', 'direct', 'isotropic', 'circumsolar',
+              'horizon']
     cats = ['ground', 'front_pvrow', 'back_pvrow']
     irradiance_comp = ['direct', 'circumsolar', 'horizon']
 
@@ -92,9 +122,12 @@ class HybridPerezOrdered(BaseModel):
         self.horizon = dict.fromkeys(self.cats)
         self.isotropic_luminance = None
         self.horizon_band_angle = horizon_band_angle
+        self.rho_front = None
+        self.rho_back = None
+        self.albedo = None
 
     def fit(self, timestamps, DNI, DHI, solar_zenith, solar_azimuth,
-            surface_tilt, surface_azimuth):
+            surface_tilt, surface_azimuth, rho_front, rho_back, albedo):
         """Use vectorization to calculate values used for irradiance model"""
         # Make sure getting array-like values
         if np.isscalar(DNI):
@@ -105,9 +138,11 @@ class HybridPerezOrdered(BaseModel):
             solar_azimuth = np.array([solar_azimuth])
             surface_tilt = np.array([surface_tilt])
             surface_azimuth = np.array([surface_azimuth])
-
-        # Size of timeseries values
+        # Length of arrays
         n = len(DNI)
+        # Make sure that albedo is a vector
+        if np.isscalar(albedo):
+            albedo = albedo * np.ones(n)
 
         # Calculate terms from Perez model
         luminance_circumsolar, luminance_isotropic, poa_horizon, \
@@ -119,6 +154,9 @@ class HybridPerezOrdered(BaseModel):
 
         # Save isotropic luminance
         self.isotropic_luminance = luminance_isotropic
+        self.rho_front = rho_front
+        self.rho_back = rho_back
+        self.albedo = albedo
 
         # Ground surfaces
         self.direct['ground'] = DNI * cosd(solar_zenith)
@@ -139,20 +177,22 @@ class HybridPerezOrdered(BaseModel):
         self.horizon['back_pvrow'] = poa_horizon
 
     def transform(self, pvarray, idx=0):
-        """Apply calculated irradiance values to PV array"""
-
-        # TODO: calculate horizon band shading on the back surface
-        # self.apply_back_horizon_shading()
+        """Apply calculated irradiance values to PV array, as well as
+        horizon band shading on pvrow back sides"""
 
         for seg in pvarray.ground.list_segments:
             seg._illum_collection.update_params(
                 {'direct': self.direct['ground'][idx],
                  'circumsolar': self.circumsolar['ground'][idx],
-                 'horizon': 0.})
+                 'horizon': 0.,
+                 'rho': self.albedo[idx],
+                 'inv_rho': 1. / self.albedo[idx]})
             seg._shaded_collection.update_params(
                 {'direct': 0.,
                  'circumsolar': 0.,
-                 'horizon': 0.})
+                 'horizon': 0.,
+                 'rho': self.albedo[idx],
+                 'inv_rho': 1. / self.albedo[idx]})
 
         pvrows = pvarray.pvrows
         for idx_pvrow, pvrow in enumerate(pvarray.pvrows):
@@ -161,11 +201,15 @@ class HybridPerezOrdered(BaseModel):
                 seg._illum_collection.update_params(
                     {'direct': self.direct['front_pvrow'][idx],
                      'circumsolar': self.circumsolar['front_pvrow'][idx],
-                     'horizon': self.horizon['front_pvrow'][idx]})
+                     'horizon': self.horizon['front_pvrow'][idx],
+                     'rho': self.rho_front,
+                     'inv_rho': 1. / self.rho_front})
                 seg._shaded_collection.update_params(
                     {'direct': 0.,
                      'circumsolar': 0.,
-                     'horizon': self.horizon['front_pvrow'][idx]})
+                     'horizon': self.horizon['front_pvrow'][idx],
+                     'rho': self.rho_front,
+                     'inv_rho': 1. / self.rho_front})
             # Back: apply back surface horizon shading
             for seg in pvrow.back.list_segments:
                 # Illum
@@ -178,7 +222,9 @@ class HybridPerezOrdered(BaseModel):
                          'circumsolar': self.circumsolar['back_pvrow'][idx],
                          'horizon': self.horizon['back_pvrow'][idx] *
                          (1. - hor_shd_pct / 100.),
-                         'horizon_shd_pct': hor_shd_pct})
+                         'horizon_shd_pct': hor_shd_pct,
+                         'rho': self.rho_back,
+                         'inv_rho': 1. / self.rho_back})
                 # Shaded
                 for surf in seg._shaded_collection.list_surfaces:
                     hor_shd_pct = self.calculate_hor_shd_pct(
@@ -188,13 +234,18 @@ class HybridPerezOrdered(BaseModel):
                          'circumsolar': 0.,
                          'horizon': self.horizon['back_pvrow'][idx] *
                          (1. - hor_shd_pct / 100.),
-                         'horizon_shd_pct': hor_shd_pct})
+                         'horizon_shd_pct': hor_shd_pct,
+                         'rho': self.rho_back,
+                         'inv_rho': 1. / self.rho_back})
 
         # Sum up the necessary parameters to form the irradiance vector
-        irradiance_vec = self.get_irradiance_vector(pvarray)
+        irradiance_vec, inv_rho_vec = \
+            self.get_irradiance_invrho_vector(pvarray)
+        # Add sky values
         irradiance_vec.append(self.isotropic_luminance[idx])
+        inv_rho_vec.append(SKY_REFLECTIVITY_DUMMY)
 
-        return np.array(irradiance_vec)
+        return np.array(irradiance_vec), np.array(inv_rho_vec)
 
     def calculate_hor_shd_pct(self, surface, idx_neighbor, pvrows):
         """Calculate horizon band shading percentage"""
@@ -234,8 +285,7 @@ class HybridPerezOrdered(BaseModel):
 
         # Will be used for back surface adjustments: from Perez model
         # FIXME: pvlib clips the angle values to calculate vf -> adjust here
-        vf_circumsolar_backsurface = \
-            cosd(aoi_back_pvrow) / cosd(solar_zenith)
+        vf_circumsolar_backsurface = cosd(aoi_back_pvrow) / cosd(solar_zenith)
         poa_circumsolar_back = \
             luminance_circumsolar * vf_circumsolar_backsurface
 

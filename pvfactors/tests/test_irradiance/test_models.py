@@ -45,7 +45,10 @@ def test_isotropic_model_front(params_irr):
                   params_irr['solar_zenith'],
                   params_irr['solar_azimuth'],
                   params_irr['surface_tilt'],
-                  params_irr['surface_azimuth'])
+                  params_irr['surface_azimuth'],
+                  params_irr['rho_front_pvrow'],
+                  params_irr['rho_back_pvrow'],
+                  params_irr['rho_ground'])
 
     # Expected values
     expected_dni_pvrow = DNI * cosd(45)
@@ -59,7 +62,7 @@ def test_isotropic_model_front(params_irr):
     assert irr_model.direct['back_pvrow'][0] == 0.
 
     # Transform
-    irradiance_vec = irr_model.transform(pvarray)
+    irradiance_vec, invrho_vec = irr_model.transform(pvarray)
 
     # Check transform
     expected_irradiance_vec = [
@@ -88,6 +91,21 @@ def test_isotropic_model_front(params_irr):
         .shaded_collection.get_param_weighted('direct'), 0.)
     np.testing.assert_array_almost_equal(expected_irradiance_vec,
                                          irradiance_vec)
+    # Check invrho_vec
+    expected_invrho_vec = np.array([
+        5., 5., 5., 5., 5.,
+        5., 100., 100., 33.333333, 100.,
+        100., 33.333333, 100., 33.333333, 1.])
+    np.testing.assert_array_almost_equal(invrho_vec, expected_invrho_vec)
+    np.testing.assert_almost_equal(
+        pvarray.pvrows[0].front.get_param_weighted('rho'),
+        params_irr['rho_front_pvrow'])
+    np.testing.assert_almost_equal(
+        pvarray.pvrows[0].back.get_param_weighted('rho'),
+        params_irr['rho_back_pvrow'])
+    np.testing.assert_almost_equal(
+        pvarray.ground.get_param_weighted('rho'),
+        params_irr['rho_ground'])
 
 
 def test_isotropic_model_back(params_irr):
@@ -112,7 +130,10 @@ def test_isotropic_model_back(params_irr):
                   params_irr['solar_zenith'],
                   params_irr['solar_azimuth'],
                   params_irr['surface_tilt'],
-                  params_irr['surface_azimuth'])
+                  params_irr['surface_azimuth'],
+                  params_irr['rho_front_pvrow'],
+                  params_irr['rho_back_pvrow'],
+                  params_irr['rho_ground'])
 
     # Expected values
     expected_dni_pvrow = DNI * cosd(45)
@@ -126,7 +147,7 @@ def test_isotropic_model_back(params_irr):
     assert irr_model.direct['front_pvrow'][0] == 0.
 
     # Transform
-    irradiance_vec = irr_model.transform(pvarray)
+    irradiance_vec, invrho_vec = irr_model.transform(pvarray)
 
     # Check
     expected_irradiance_vec = [
@@ -154,6 +175,20 @@ def test_isotropic_model_back(params_irr):
         .shaded_collection.get_param_weighted('direct'), 0.)
     np.testing.assert_array_almost_equal(expected_irradiance_vec,
                                          irradiance_vec)
+    # Check invrho_vec
+    expected_invrho_vec = np.array([5., 5., 5., 5., 5.,
+                                    5., 100., 33.333333, 33.333333, 100.,
+                                    33.333333, 33.333333, 100., 33.333333, 1.])
+    np.testing.assert_array_almost_equal(invrho_vec, expected_invrho_vec)
+    np.testing.assert_almost_equal(
+        pvarray.pvrows[0].front.get_param_weighted('rho'),
+        params_irr['rho_front_pvrow'])
+    np.testing.assert_almost_equal(
+        pvarray.pvrows[0].back.get_param_weighted('rho'),
+        params_irr['rho_back_pvrow'])
+    np.testing.assert_almost_equal(
+        pvarray.ground.get_param_weighted('rho'),
+        params_irr['rho_ground'])
 
 
 def test_hybridperez_ordered_front(params_irr):
@@ -175,7 +210,10 @@ def test_hybridperez_ordered_front(params_irr):
                   params_irr['solar_zenith'],
                   params_irr['solar_azimuth'],
                   params_irr['surface_tilt'],
-                  params_irr['surface_azimuth'])
+                  params_irr['surface_azimuth'],
+                  params_irr['rho_front_pvrow'],
+                  params_irr['rho_back_pvrow'],
+                  params_irr['rho_ground'])
 
     # Expected values
     expected_dni_pvrow = DNI * cosd(45)
@@ -195,7 +233,7 @@ def test_hybridperez_ordered_front(params_irr):
     assert irr_model.direct['back_pvrow'][0] == 0.
 
     # Transform
-    irradiance_vec = irr_model.transform(pvarray)
+    irradiance_vec, invrho_vec = irr_model.transform(pvarray)
 
     # Check transform
     expected_irradiance_vec = [
@@ -265,6 +303,21 @@ def test_hybridperez_ordered_front(params_irr):
         .shaded_collection.get_param_weighted('direct'), 0.)
     np.testing.assert_array_almost_equal(expected_irradiance_vec,
                                          irradiance_vec)
+    # Check invrho_vec
+    expected_invrho_vec = np.array([
+        5., 5., 5., 5., 5.,
+        5., 100., 100., 33.333333, 100.,
+        100., 33.333333, 100., 33.333333, 1.])
+    np.testing.assert_array_almost_equal(invrho_vec, expected_invrho_vec)
+    np.testing.assert_almost_equal(
+        pvarray.pvrows[0].front.get_param_weighted('rho'),
+        params_irr['rho_front_pvrow'])
+    np.testing.assert_almost_equal(
+        pvarray.pvrows[0].back.get_param_weighted('rho'),
+        params_irr['rho_back_pvrow'])
+    np.testing.assert_almost_equal(
+        pvarray.ground.get_param_weighted('rho'),
+        params_irr['rho_ground'])
 
 
 def test_hybridperez_ordered_back(params_irr):
@@ -289,7 +342,10 @@ def test_hybridperez_ordered_back(params_irr):
                   params_irr['solar_zenith'],
                   params_irr['solar_azimuth'],
                   params_irr['surface_tilt'],
-                  params_irr['surface_azimuth'])
+                  params_irr['surface_azimuth'],
+                  params_irr['rho_front_pvrow'],
+                  params_irr['rho_back_pvrow'],
+                  params_irr['rho_ground'])
 
     # Expected values
     expected_dni_pvrow = DNI * cosd(45)
@@ -311,7 +367,7 @@ def test_hybridperez_ordered_back(params_irr):
     assert irr_model.direct['front_pvrow'][0] == 0.
 
     # Transform
-    irradiance_vec = irr_model.transform(pvarray)
+    irradiance_vec, invrho_vec = irr_model.transform(pvarray)
 
     # Check transform
     expected_irradiance_vec = [
@@ -387,3 +443,17 @@ def test_hybridperez_ordered_back(params_irr):
         .shaded_collection.get_param_weighted('direct'), 0.)
     np.testing.assert_array_almost_equal(expected_irradiance_vec,
                                          irradiance_vec)
+    # Check invrho_vec
+    expected_invrho_vec = np.array([5., 5., 5., 5., 5.,
+                                    5., 100., 33.333333, 33.333333, 100.,
+                                    33.333333, 33.333333, 100., 33.333333, 1.])
+    np.testing.assert_array_almost_equal(invrho_vec, expected_invrho_vec)
+    np.testing.assert_almost_equal(
+        pvarray.pvrows[0].front.get_param_weighted('rho'),
+        params_irr['rho_front_pvrow'])
+    np.testing.assert_almost_equal(
+        pvarray.pvrows[0].back.get_param_weighted('rho'),
+        params_irr['rho_back_pvrow'])
+    np.testing.assert_almost_equal(
+        pvarray.ground.get_param_weighted('rho'),
+        params_irr['rho_ground'])

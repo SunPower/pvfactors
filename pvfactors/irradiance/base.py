@@ -17,14 +17,18 @@ class BaseModel(object):
     def transform(self):
         raise NotImplementedError
 
-    def get_irradiance_vector(self, pvarray):
+    def get_irradiance_invrho_vector(self, pvarray):
+        """Get vector of summed up irradiance values, and inverse reflectivity
+        values"""
 
         # TODO: this can probably be speeded up
         irradiance_vec = []
+        invrho_vec = []
         for idx, surface in pvarray.dict_surfaces.items():
             value = 0.
             for component in self.irradiance_comp:
                 value += surface.get_param(component)
             irradiance_vec.append(value)
+            invrho_vec.append(surface.get_param('inv_rho'))
 
-        return irradiance_vec
+        return irradiance_vec, invrho_vec
