@@ -19,31 +19,39 @@ class PVEngine(object):
         self.irradiance = irradiance_model
         self.cls_pvarray = cls_pvarray
 
-        # Required parameters
+        # Required timeseries values
         self.solar_zenith = None
         self.solar_azimuth = None
         self.surface_tilt = None
         self.surface_azimuth = None
 
-    def fit(self, DNI, DHI, solar_zenith, solar_azimuth, surface_tilt,
-            surface_azimuth):
+    def fit(self, timestamps, DNI, DHI, solar_zenith, solar_azimuth,
+            surface_tilt, surface_azimuth, albedo):
         """Save timeseries angle data and fit the irradiance model"""
         # Save
         if np.isscalar(DNI):
+            timestamps = [timestamps]
             DNI = np.array([DNI])
             DHI = np.array([DHI])
             solar_zenith = np.array([solar_zenith])
             solar_azimuth = np.array([solar_azimuth])
             surface_tilt = np.array([surface_tilt])
             surface_azimuth = np.array([surface_azimuth])
+        n = len(DNI)
+        if np.isscalar(albedo):
+            albedo = albedo * np.ones(n)
+
+        # Save timeseries values
         self.solar_zenith = solar_zenith
         self.solar_azimuth = solar_azimuth
         self.surface_tilt = surface_tilt
         self.surface_azimuth = surface_azimuth
 
         # Fit irradiance model
-        self.irradiance.fit(DNI, DHI, solar_zenith, solar_azimuth,
-                            surface_tilt, surface_azimuth)
+        self.irradiance.fit(timestamps, DNI, DHI, solar_zenith, solar_azimuth,
+                            surface_tilt, surface_azimuth,
+                            self.params['rho_front_pvrow'],
+                            self.params['rho_back_pvrow'], albedo)
 
     def run_timestep(self, idx):
         """Run timestep"""
@@ -67,6 +75,7 @@ class PVEngine(object):
             pvarray.pvrows)
 
         # Apply irradiance terms to pvarray
-        self.irradiance.transform(pvarray, idx=idx)
+        irradiance_vec, invrho_vec = \
+            self.irradiance.transform(pvarray, idx=idx)
 
         return pvarray, vf_matrix
