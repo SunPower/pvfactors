@@ -4,6 +4,7 @@ from pvfactors.geometry import OrderedPVArray
 from pvfactors.viewfactors import VFCalculator
 from pvfactors.irradiance import IsotropicOrdered
 from scipy import linalg
+from tqdm import tqdm
 
 
 class PVEngine(object):
@@ -93,4 +94,5 @@ class PVEngine(object):
 
     def run_all_timesteps(self):
 
-        pass
+        for idx in tqdm(range(self.n_points)):
+            pvarray, vf_matrix, q0, qinc = self.run_timestep(idx)
