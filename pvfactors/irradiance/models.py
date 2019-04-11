@@ -38,12 +38,12 @@ class IsotropicOrdered(BaseModel):
     :py:class:`~pvfactors.geometry.OrderedPVArray`"""
 
     params = ['rho', 'direct']
+    cats = ['ground', 'front_pvrow', 'back_pvrow']
     irradiance_comp = ['direct']
 
     def __init__(self):
-        self.dni_ground = None
-        self.dni_front_pvrow = None
-        self.dni_back_pvrow = None
+        self.direct = dict.fromkeys(self.cats)
+        self.DHI = None
 
     def fit(self, DNI, DHI, solar_zenith, solar_azimuth, surface_tilt,
             surface_azimuth):
@@ -51,48 +51,55 @@ class IsotropicOrdered(BaseModel):
         # Make sure getting array-like values
         if np.isscalar(DNI):
             DNI = np.array([DNI])
+            DHI = np.array([DHI])
             solar_zenith = np.array([solar_zenith])
             solar_azimuth = np.array([solar_azimuth])
             surface_tilt = np.array([surface_tilt])
             surface_azimuth = np.array([surface_azimuth])
 
+        # Save diffuse light
+        self.DHI = DHI
+
         # DNI seen by ground illuminated surfaces
-        self.dni_ground = DNI * cosd(solar_zenith)
+        self.direct['ground'] = DNI * cosd(solar_zenith)
 
         # Calculate AOI on front pvrow using pvlib implementation
         aoi_front_pvrow = aoi_function(
             surface_tilt, surface_azimuth, solar_zenith, solar_azimuth)
+        aoi_back_pvrow = 180. - aoi_front_pvrow
 
         # DNI seen by pvrow illuminated surfaces
         front_is_illum = aoi_front_pvrow <= 90
-        self.dni_front_pvrow = np.where(front_is_illum,
-                                        DNI * cosd(aoi_front_pvrow), 0.)
-        self.dni_back_pvrow = np.where(~front_is_illum,
-                                       DNI * cosd(180. - aoi_front_pvrow), 0.)
+        self.direct['front_pvrow'] = np.where(
+            front_is_illum, DNI * cosd(aoi_front_pvrow), 0.)
+        self.direct['back_pvrow'] = np.where(
+            ~front_is_illum, DNI * cosd(aoi_back_pvrow), 0.)
 
     def transform(self, pvarray, idx=0):
         """Apply calculated irradiance values to PV array"""
 
         for seg in pvarray.ground.list_segments:
-            seg._illum_collection.set_param('direct', self.dni_ground[idx])
+            seg._illum_collection.set_param('direct',
+                                            self.direct['ground'][idx])
             seg._shaded_collection.set_param('direct', 0.)
 
         for pvrow in pvarray.pvrows:
             # Front
             for seg in pvrow.front.list_segments:
-                seg._illum_collection.set_param('direct',
-                                                self.dni_front_pvrow[idx])
+                seg._illum_collection.set_param(
+                    'direct', self.direct['front_pvrow'][idx])
                 seg._shaded_collection.set_param('direct', 0.)
             # Back
             for seg in pvrow.back.list_segments:
-                seg._illum_collection.set_param('direct',
-                                                self.dni_back_pvrow[idx])
+                seg._illum_collection.set_param(
+                    'direct', self.direct['back_pvrow'][idx])
                 seg._shaded_collection.set_param('direct', 0.)
 
         # Sum up the necessary parameters to form the irradiance vector
         irradiance_vec = self.get_irradiance_vector(pvarray)
+        irradiance_vec.append(self.DHI[idx])
 
-        return irradiance_vec
+        return np.array(irradiance_vec)
 
 
 class HybridPerezOrdered(BaseModel):
@@ -107,6 +114,7 @@ class HybridPerezOrdered(BaseModel):
         self.direct = dict.fromkeys(self.cats)
         self.circumsolar = dict.fromkeys(self.cats)
         self.horizon = dict.fromkeys(self.cats)
+        self.isotropic_luminance = None
 
     def fit(self, DNI, DHI, solar_zenith, solar_azimuth, surface_tilt,
             surface_azimuth):
@@ -128,6 +136,9 @@ class HybridPerezOrdered(BaseModel):
             self.calculate_luminance_poa_components(
                 DNI, DHI, solar_zenith, solar_azimuth, surface_tilt,
                 surface_azimuth)
+
+        # Save isotropic luminance
+        self.isotropic_luminance = luminance_isotropic
 
         # Ground surfaces
         self.direct['ground'] = DNI * cosd(solar_zenith)
@@ -176,8 +187,9 @@ class HybridPerezOrdered(BaseModel):
 
         # Sum up the necessary parameters to form the irradiance vector
         irradiance_vec = self.get_irradiance_vector(pvarray)
+        irradiance_vec.append(self.isotropic_luminance[idx])
 
-        return irradiance_vec
+        return np.array(irradiance_vec)
 
     @staticmethod
     def calculate_luminance_poa_components(
