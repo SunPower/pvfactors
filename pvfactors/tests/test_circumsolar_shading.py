@@ -5,33 +5,14 @@ Test the implementatio of circumsolar shading, for front diffuse shading
 calculations
 """
 
-from pvfactors.pvcore import calculate_circumsolar_shading
 from pvfactors.timeseries import (calculate_radiosities_serially_perez,
                                   breakup_df_inputs)
 import pandas as pd
 import os
-import numpy as np
 
 TEST_DIR = os.path.dirname(__file__)
 TEST_DATA = os.path.join(TEST_DIR, 'test_files')
 idx_slice = pd.IndexSlice
-
-
-def test_calculate_circumsolar_shading():
-    """
-    Test that the disk shading function stays consistent
-    """
-    # Test for one value of 20% of the diameter being covered
-    percentage_distance_covered = 20.
-    percent_shading = calculate_circumsolar_shading(
-        percentage_distance_covered, model='uniform_disk')
-
-    # Compare to expected
-    expected_disk_shading_perc = 14.2378489933
-    atol = 0
-    rtol = 1e-8
-    np.testing.assert_allclose(expected_disk_shading_perc, percent_shading,
-                               atol=atol, rtol=rtol)
 
 
 def test_serial_circumsolar_shading_calculation():

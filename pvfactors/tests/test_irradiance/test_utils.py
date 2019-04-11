@@ -1,6 +1,6 @@
 import numpy as np
 from pvfactors.irradiance.utils import \
-    perez_diffuse_luminance, breakup_df_inputs
+    perez_diffuse_luminance, breakup_df_inputs, calculate_circumsolar_shading
 
 
 def test_perez_diffuse_luminance(df_perez_luminance):
@@ -22,3 +22,20 @@ def test_perez_diffuse_luminance(df_perez_luminance):
     np.testing.assert_allclose(df_outputs.values,
                                df_perez_luminance[col_order].values,
                                atol=0, rtol=tol)
+
+
+def test_calculate_circumsolar_shading():
+    """
+    Test that the disk shading function stays consistent
+    """
+    # Test for one value of 20% of the diameter being covered
+    percentage_distance_covered = 20.
+    percent_shading = calculate_circumsolar_shading(
+        percentage_distance_covered, model='uniform_disk')
+
+    # Compare to expected
+    expected_disk_shading_perc = 14.2378489933
+    atol = 0
+    rtol = 1e-8
+    np.testing.assert_allclose(expected_disk_shading_perc, percent_shading,
+                               atol=atol, rtol=rtol)
