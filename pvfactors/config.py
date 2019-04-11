@@ -1,9 +1,10 @@
 """This module contains the default values and constants used in pvfactors """
 from future.utils import iteritems
+import numpy as np
 
+# Geometry params
 DEFAULT_NORMAL_VEC = None
 TOL_COLLINEAR = 1e-5
-
 
 # Ground params
 MAX_X_GROUND = 1e2
@@ -48,3 +49,16 @@ VIEW_DICT = {
     "pvrows": 10}
 REVERSE_VIEW_DICT = {v: k for (k, v) in iteritems(VIEW_DICT)}
 THRESHOLD_VF_12 = 5e-5
+
+
+# Gaussian shading default parameters: TOTAL_GAUSSIAN_AREA dependent on these
+SIGMA = 1. / np.sqrt(2.)
+N_SIGMA = 3.
+GAUSSIAN_DIAMETER_CIRCUMSOLAR = 2. * N_SIGMA * SIGMA
+RADIUS_CIRCUMSOLAR = 1.
+DEFAULT_CIRCUMSOLAR_ANGLE = 30.
+
+# Horizon band shading
+DEFAULT_HORIZON_BAND_ANGLE = 6.5
+
+SKY_REFLECTIVITY_DUMMY = 1.
