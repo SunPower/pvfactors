@@ -67,37 +67,45 @@ def run_parallel_engine(report_builder, pvarray_parameters,
     folds_cls_engine = [cls_engine] * n_processes
     folds_cls_irradiance = [cls_irradiance] * n_processes
     folds_cls_vf = [cls_vf] * n_processes
+    report_indices = list(range(n_processes))
 
     # Zip all the folds together
     list_folds = zip(*(folds_report_builder, folds_params, folds_timestamps,
                        folds_dni, folds_dhi, folds_solar_zenith,
                        folds_solar_azimuth, folds_surface_tilt,
                        folds_surface_azimuth, folds_albedo, folds_cls_pvarray,
-                       folds_cls_engine, folds_cls_irradiance, folds_cls_vf))
+                       folds_cls_engine, folds_cls_irradiance, folds_cls_vf,
+                       report_indices))
 
     # Start multiprocessing
     pool = Pool(n_processes)
     start = time()
-    reports = pool.map(_run_serially, list_folds)
+    indexed_reports = pool.map(_run_serially, list_folds)
     end = time()
     pool.close()
     pool.join()
+    sorted_indexed_reports = sorted(indexed_reports, key=lambda tup: tup[1])
+    sorted_reports = [tup[0] for tup in sorted_indexed_reports]
 
     LOGGER.info("Parallel calculation elapsed time: %s sec" % str(end - start))
 
-    report = report_builder.merge(reports)
+    report = report_builder.merge(sorted_reports)
 
     return report
 
 
 # Utility function for parallel run
-def _run_serially((report_builder, pvarray_parameters,
-                   timestamps, dni, dhi, solar_zenith, solar_azimuth,
-                   surface_tilt, surface_azimuth, albedo, cls_pvarray,
-                   cls_engine, cls_irradiance, cls_vf)):
-    return run_timeseries_engine(
+def _run_serially(args):
+    """Helper function used to run calculations in parallel"""
+    report_builder, pvarray_parameters, timestamps, dni, dhi, \
+        solar_zenith, solar_azimuth, surface_tilt, surface_azimuth,\
+        albedo, cls_pvarray, cls_engine, cls_irradiance, cls_vf, idx = args
+
+    report = run_timeseries_engine(
         report_builder.build, pvarray_parameters,
         timestamps, dni, dhi, solar_zenith, solar_azimuth,
         surface_tilt, surface_azimuth, albedo,
         cls_pvarray=cls_pvarray, cls_engine=cls_engine,
         cls_irradiance=cls_irradiance, cls_vf=cls_vf)
+
+    return report, idx
