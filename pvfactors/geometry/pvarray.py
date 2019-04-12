@@ -105,16 +105,19 @@ class OrderedPVArray(BasePVArray):
                                self.ground.original_linestring)
             gnd_2 = projection(b2, self.solar_2d_vector,
                                self.ground.original_linestring)
-            self.ground.cast_shadow(LineString([gnd_1, gnd_2]))
-            # Check if there's direct shading
-            if idx == 1:
-                # There's inter-row shading if ground shadows overlap
-                if self.illum_side == 'front':
-                    self.has_direct_shading = gnd_1.x < last_gnd_2.x
-                else:
-                    self.has_direct_shading = gnd_2.x < last_gnd_1.x
-            last_gnd_2 = gnd_2
-            last_gnd_1 = gnd_1
+            # Following can happen because the ground geometry is not infinite
+            shadow_is_too_far = gnd_1.is_empty or gnd_2.is_empty
+            if not shadow_is_too_far:
+                self.ground.cast_shadow(LineString([gnd_1, gnd_2]))
+                # Check if there's direct shading
+                if idx == 1:
+                    # There's inter-row shading if ground shadows overlap
+                    if self.illum_side == 'front':
+                        self.has_direct_shading = gnd_1.x < last_gnd_2.x
+                    else:
+                        self.has_direct_shading = gnd_2.x < last_gnd_1.x
+                last_gnd_2 = gnd_2
+                last_gnd_1 = gnd_1
 
         # Calculate direct shading on pvrows
         sun_on_the_right = self.solar_2d_vector[0] >= 0
@@ -159,7 +162,8 @@ class OrderedPVArray(BasePVArray):
                 b1 = pvrow.boundary[0]
                 # Edge point should always exist when pvrows not flat
                 edge_point = projection(b1, u_direction,
-                                        self.ground.original_linestring)
+                                        self.ground.original_linestring,
+                                        must_contain=False)
                 self.ground.cut_at_point(edge_point)
                 self.edge_points.append(edge_point)
 
@@ -243,7 +247,8 @@ class OrderedPVArray(BasePVArray):
                     gnd_that_front_sees = []
                     gnd_that_back_sees = []
                     for idx_gnd, gnd_surface in enumerate(ground_surfaces):
-                        gnd_surface_on_the_right = gnd_centroids[idx_gnd].x > edge_point.x
+                        gnd_surface_on_the_right = \
+                            gnd_centroids[idx_gnd].x > edge_point.x
                         if gnd_surface_on_the_right:
                             gnd_that_back_sees.append(gnd_surface.index)
                         else:
@@ -268,37 +273,45 @@ class OrderedPVArray(BasePVArray):
                     gnd_that_front_sees = []
                     gnd_that_back_sees = []
                     for idx_gnd, gnd_surface in enumerate(ground_surfaces):
-                        gnd_surface_on_the_right = gnd_centroids[idx_gnd].x > edge_point.x
+                        gnd_surface_on_the_right = \
+                            gnd_centroids[idx_gnd].x > edge_point.x
                         if gnd_surface_on_the_right:
                             gnd_that_front_sees.append(gnd_surface.index)
                         else:
                             gnd_that_back_sees.append(gnd_surface.index)
 
-                # PVRow <---> Ground: update views
+                # Update views to ground
                 gnd_that_back_sees = np.array(gnd_that_back_sees)
                 gnd_that_front_sees = np.array(gnd_that_front_sees)
-                view_matrix[back_indices[:, np.newaxis],
-                            gnd_that_back_sees] = VIEW_DICT["back_gnd_obst"]
-                view_matrix[gnd_that_back_sees[:, np.newaxis],
-                            back_indices] = VIEW_DICT["gnd_back_obst"]
-                view_matrix[front_indices[:, np.newaxis],
-                            gnd_that_front_sees] = VIEW_DICT["front_gnd_obst"]
-                view_matrix[gnd_that_front_sees[:, np.newaxis],
-                            front_indices] = VIEW_DICT["gnd_front_obst"]
-
-                # PVRow <---> Ground: obstruction
-                obstr_matrix[back_indices[:, np.newaxis],
-                             gnd_that_back_sees] = back_obstruction
-                obstr_matrix[gnd_that_back_sees[:, np.newaxis],
-                             back_indices] = back_obstruction
-                obstr_matrix[front_indices[:, np.newaxis],
-                             gnd_that_front_sees] = front_obstruction
-                obstr_matrix[gnd_that_front_sees[:, np.newaxis],
-                             front_indices] = front_obstruction
+                if len(gnd_that_back_sees):
+                    # PVRow <---> Ground: update views
+                    view_matrix[back_indices[:, np.newaxis],
+                                gnd_that_back_sees] = \
+                        VIEW_DICT["back_gnd_obst"]
+                    view_matrix[gnd_that_back_sees[:, np.newaxis],
+                                back_indices] = VIEW_DICT["gnd_back_obst"]
+                    # PVRow <---> Ground: obstruction
+                    obstr_matrix[back_indices[:, np.newaxis],
+                                 gnd_that_back_sees] = back_obstruction
+                    obstr_matrix[gnd_that_back_sees[:, np.newaxis],
+                                 back_indices] = back_obstruction
+                if len(gnd_that_front_sees):
+                    # PVRow <---> Ground: update views
+                    view_matrix[front_indices[:, np.newaxis],
+                                gnd_that_front_sees] = \
+                        VIEW_DICT["front_gnd_obst"]
+                    view_matrix[gnd_that_front_sees[:, np.newaxis],
+                                front_indices] = VIEW_DICT["gnd_front_obst"]
+                    # PVRow <---> Ground: obstruction
+                    obstr_matrix[front_indices[:, np.newaxis],
+                                 gnd_that_front_sees] = front_obstruction
+                    obstr_matrix[gnd_that_front_sees[:, np.newaxis],
+                                 front_indices] = front_obstruction
 
                 # PVRow <---> Sky
                 view_matrix[back_indices[:, np.newaxis],
                             index_sky_dome] = VIEW_DICT["back_sky"]
                 view_matrix[front_indices[:, np.newaxis],
                             index_sky_dome] = VIEW_DICT["front_sky"]
+
         return view_matrix, obstr_matrix
