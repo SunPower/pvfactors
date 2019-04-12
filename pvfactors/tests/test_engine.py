@@ -5,6 +5,7 @@ from pvfactors.irradiance.utils import breakup_df_inputs
 import numpy as np
 import datetime as dt
 import pytest
+from collections import OrderedDict
 
 
 def test_pvengine_float_inputs_iso(params):
@@ -29,13 +30,15 @@ def test_pvengine_float_inputs_iso(params):
     np.testing.assert_almost_equal(eng.irradiance.direct['front_pvrow'], DNI)
 
     # Run timestep
-    pvarray, vf_matrix, q0, qinc = eng.run_timestep(0)
+    pvarray = eng.run_timestep(0)
     # Checks
     assert isinstance(pvarray, OrderedPVArray)
-    assert vf_matrix.shape[0] == pvarray.n_surfaces + 1
-    print(pvarray.pvrows[0].front.get_param_weighted('qinc'))
-    print(pvarray.pvrows[1].front.get_param_weighted('qinc'))
-    print(pvarray.pvrows[2].front.get_param_weighted('qinc'))
+    np.testing.assert_almost_equal(
+        pvarray.pvrows[0].front.get_param_weighted('qinc'), 1099.22245374)
+    np.testing.assert_almost_equal(
+        pvarray.pvrows[1].front.get_param_weighted('qinc'), 1099.6948573)
+    np.testing.assert_almost_equal(
+        pvarray.pvrows[2].front.get_param_weighted('qinc'), 1102.76149246)
 
 
 def test_pvengine_float_inputs_perez(params):
@@ -60,13 +63,15 @@ def test_pvengine_float_inputs_perez(params):
     np.testing.assert_almost_equal(eng.irradiance.direct['front_pvrow'], DNI)
 
     # Run timestep
-    pvarray, vf_matrix, q0, qinc = eng.run_timestep(0)
+    pvarray = eng.run_timestep(0)
     # Checks
     assert isinstance(pvarray, OrderedPVArray)
-    assert vf_matrix.shape[0] == pvarray.n_surfaces + 1
-    print(pvarray.pvrows[0].front.get_param_weighted('qinc'))
-    print(pvarray.pvrows[1].front.get_param_weighted('qinc'))
-    print(pvarray.pvrows[2].front.get_param_weighted('qinc'))
+    np.testing.assert_almost_equal(
+        pvarray.pvrows[0].front.get_param_weighted('qinc'), 1122.38723433)
+    np.testing.assert_almost_equal(
+        pvarray.pvrows[1].front.get_param_weighted('qinc'), 1122.86505181)
+    np.testing.assert_almost_equal(
+        pvarray.pvrows[2].front.get_param_weighted('qinc'), 1124.93948059)
 
 
 @pytest.fixture(scope='function')
@@ -107,5 +112,40 @@ def test_pvengine_ts_inputs_perez(params_serial,
     eng.fit(timestamps, dni, dhi, solar_zenith, solar_azimuth, surface_tilt,
             surface_azimuth, albedo)
 
+    # Define function that will build the report
+    def fn_report(report, pvarray):
+        # Initialize the report
+        if report is None:
+            list_keys = ['qinc_front', 'qinc_back', 'iso_front', 'iso_back']
+            report = OrderedDict({key: [] for key in list_keys})
+        # Add elements to the report
+        if pvarray is not None:
+            pvrow = pvarray.pvrows[1]  # use center pvrow
+            report['qinc_front'].append(
+                pvrow.front.get_param_weighted('qinc'))
+            report['qinc_back'].append(
+                pvrow.back.get_param_weighted('qinc'))
+            report['iso_front'].append(
+                pvrow.front.get_param_weighted('isotropic'))
+            report['iso_back'].append(
+                pvrow.back.get_param_weighted('isotropic'))
+        else:
+            # No calculation was performed, because sun was down
+            report['qinc_front'].append(np.nan)
+            report['qinc_back'].append(np.nan)
+            report['iso_front'].append(np.nan)
+            report['iso_back'].append(np.nan)
+        return report
+
     # Run timestep
-    eng.run_all_timesteps()
+    report = eng.run_all_timesteps(fn_build_report=fn_report)
+
+    # Check values
+    np.testing.assert_array_almost_equal(
+        report['qinc_front'], [1066.9716724773091, 1066.8000713864162])
+    np.testing.assert_array_almost_equal(
+        report['qinc_back'], [135.94887929717575, 136.07375526982389])
+    np.testing.assert_array_almost_equal(
+        report['iso_front'], [43.515922835469098, 43.600460681412407])
+    np.testing.assert_array_almost_equal(
+        report['iso_back'], [1.7555186253932977, 1.7596394859882367])

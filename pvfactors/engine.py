@@ -58,41 +58,62 @@ class PVEngine(object):
 
     def run_timestep(self, idx):
         """Run timestep"""
-        # Update parameters
-        self.params.update(
-            {'solar_zenith': self.solar_zenith[idx],
-             'solar_azimuth': self.solar_azimuth[idx],
-             'surface_tilt': self.surface_tilt[idx],
-             'surface_azimuth': self.surface_azimuth[idx]})
 
-        # Create pv array
-        pvarray = self.cls_pvarray.from_dict(
-            self.params, surface_params=self.irradiance.params)
-        pvarray.cast_shadows()
-        pvarray.cuts_for_pvrow_view()
+        # Check that the sun is up, if not do not run calculations
+        solar_zenith = self.solar_zenith[idx]
+        sun_is_up = solar_zenith <= 90
 
-        # Calculate view factors
-        geom_dict = pvarray.dict_surfaces
-        vf_matrix = self.vf_calculator.get_vf_matrix(
-            geom_dict, pvarray.view_matrix, pvarray.obstr_matrix,
-            pvarray.pvrows)
+        if sun_is_up:
+            # Update parameters
+            self.params.update(
+                {'solar_zenith': solar_zenith,
+                 'solar_azimuth': self.solar_azimuth[idx],
+                 'surface_tilt': self.surface_tilt[idx],
+                 'surface_azimuth': self.surface_azimuth[idx]})
 
-        # Apply irradiance terms to pvarray
-        irradiance_vec, invrho_vec = \
-            self.irradiance.transform(pvarray, idx=idx)
+            # Create pv array
+            pvarray = self.cls_pvarray.from_dict(
+                self.params, surface_params=self.irradiance.params)
+            pvarray.cast_shadows()
+            pvarray.cuts_for_pvrow_view()
 
-        # Calculate radiosities
-        a_mat = np.diag(invrho_vec) - vf_matrix
-        q0 = linalg.solve(a_mat, irradiance_vec)
-        qinc = np.dot(vf_matrix, q0) + irradiance_vec
+            # Calculate view factors
+            geom_dict = pvarray.dict_surfaces
+            vf_matrix = self.vf_calculator.get_vf_matrix(
+                geom_dict, pvarray.view_matrix, pvarray.obstr_matrix,
+                pvarray.pvrows)
 
-        # Update surfaces with values
-        for idx, surface in geom_dict.items():
-            surface.update_params({'q0': q0[idx], 'qinc': qinc[idx]})
+            # Apply irradiance terms to pvarray
+            irradiance_vec, invrho_vec = \
+                self.irradiance.transform(pvarray, idx=idx)
 
-        return pvarray, vf_matrix, q0, qinc
+            # Calculate radiosities
+            invrho_mat = np.diag(invrho_vec)
+            a_mat = invrho_mat - vf_matrix
+            q0 = linalg.solve(a_mat, irradiance_vec)
+            qinc = np.dot(invrho_mat, q0)
 
-    def run_all_timesteps(self):
+            # Calculate other terms
+            isotropic_vec = vf_matrix[:-1, -1] * irradiance_vec[-1]
+            reflection_vec = qinc[:-1] - irradiance_vec[:-1] - isotropic_vec
 
+            # Update surfaces with values
+            for idx, surface in geom_dict.items():
+                surface.update_params({'q0': q0[idx], 'qinc': qinc[idx],
+                                       'isotropic': isotropic_vec[idx],
+                                       'reflection': reflection_vec[idx]})
+        else:
+            pvarray = None
+
+        return pvarray
+
+    def run_all_timesteps(self, fn_build_report=None):
+        """Run all simulation timesteps and return report"""
+
+        report = None
         for idx in tqdm(range(self.n_points)):
-            pvarray, vf_matrix, q0, qinc = self.run_timestep(idx)
+            pvarray = self.run_timestep(idx)
+            if fn_build_report is not None:
+                report = fn_build_report(report, pvarray)
+
+        return report
