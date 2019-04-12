@@ -99,6 +99,8 @@ class OrderedPVArray(BasePVArray):
         last_gnd_2 = None
         last_gnd_1 = None
         # Cast pvrow shadows on ground
+        a_shadow_was_casted_on_ground = False
+        stop_checking_for_direct_shading = False
         for idx, pvrow in enumerate(self.pvrows):
             b1, b2 = pvrow.boundary
             gnd_1 = projection(b1, self.solar_2d_vector,
@@ -110,14 +112,17 @@ class OrderedPVArray(BasePVArray):
             if not shadow_is_too_far:
                 self.ground.cast_shadow(LineString([gnd_1, gnd_2]))
                 # Check if there's direct shading
-                if idx == 1:
+                if a_shadow_was_casted_on_ground \
+                   and not stop_checking_for_direct_shading:
                     # There's inter-row shading if ground shadows overlap
                     if self.illum_side == 'front':
                         self.has_direct_shading = gnd_1.x < last_gnd_2.x
                     else:
                         self.has_direct_shading = gnd_2.x < last_gnd_1.x
+                    stop_checking_for_direct_shading = True
                 last_gnd_2 = gnd_2
                 last_gnd_1 = gnd_1
+                a_shadow_was_casted_on_ground = True
 
         # Calculate direct shading on pvrows
         sun_on_the_right = self.solar_2d_vector[0] >= 0
