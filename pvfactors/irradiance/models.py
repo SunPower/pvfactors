@@ -12,7 +12,7 @@ class IsotropicOrdered(BaseModel):
     """Diffuse isotropic sky model for
     :py:class:`~pvfactors.geometry.OrderedPVArray`"""
 
-    params = ['rho', 'inv_rho', 'direct']
+    params = ['rho', 'inv_rho', 'direct', 'isotropic', 'reflection']
     cats = ['ground', 'front_pvrow', 'back_pvrow']
     irradiance_comp = ['direct']
 
@@ -112,7 +112,7 @@ class HybridPerezOrdered(BaseModel):
     applied to pvfactors :py:class:`~pvfactors.geometry.OrderedPVArray`"""
 
     params = ['rho', 'inv_rho', 'direct', 'isotropic', 'circumsolar',
-              'horizon']
+              'horizon', 'reflection']
     cats = ['ground', 'front_pvrow', 'back_pvrow']
     irradiance_comp = ['direct', 'circumsolar', 'horizon']
 

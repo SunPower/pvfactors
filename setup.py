@@ -1,12 +1,16 @@
-#!/usr/bin/env python
+""" Install pvfactors """
 
 from setuptools import setup
 import versioneer
 
-DESCRIPTION = ('2D View Factor Model to calculate the irradiance incident on '
-               + 'various surfaces of PV arrays')
+DESCRIPTION = (
+    '2D View Factor Model to calculate the irradiance incident on ' +
+    'various surfaces of PV arrays')
 with open('README.md', 'r') as f:
     LONG_DESCRIPTION = f.read()
+with open('requirements.txt', 'r') as f:
+    INSTALL_REQUIRES = list(f)
+
 DISTNAME = 'pvfactors'
 AUTHOR = 'SunPower'
 MAINTAINER_EMAIL = 'marc.abouanoma@sunpowercorp.com'
@@ -23,15 +27,6 @@ CLASSIFIERS = [
     'Programming Language :: Python :: 3.6',
     'Topic :: Scientific/Engineering',
 ]
-
-INSTALL_REQUIRES = ['numpy>=1.13.1',
-                    'scipy>=0.19.1',
-                    'pandas>=0.23.3',
-                    'shapely>=1.6.1',
-                    'pvlib>=0.6.0',
-                    'matplotlib>=2.1.0',
-                    'future>=0.16.0',
-                    'six>=1.11.0']
 
 TESTS_REQUIRES = ['pytest>=3.2.1', 'pytest-mock>=1.10.0']
 
