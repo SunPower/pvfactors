@@ -1,6 +1,7 @@
 import os
 import numpy as np
 from pvfactors.geometry import OrderedPVArray, PVGround, PVSurface
+from pvfactors.geometry.utils import contains
 from pvfactors.config import MAX_X_GROUND, MIN_X_GROUND
 from pvfactors.tests.test_geometry.test_data import \
     vm_flat_orderedpvarray, vm_right_orderedpvarray
@@ -422,6 +423,50 @@ def test_orderedpvarray_neighbors(params):
     np.testing.assert_array_equal(pvarray_right.back_neighbors, l1)
     np.testing.assert_array_equal(pvarray_left.front_neighbors, l1)
     np.testing.assert_array_equal(pvarray_left.back_neighbors, l2)
+
+
+def test_orderedpvarray_almost_flat():
+    """Making sure that things are correct when the pvarray is almost flat
+    and the sun is very low, which means that the shadows on the ground, and
+    the edge points will be outside of ground range (since not infinite)"""
+
+    params = {
+        'n_pvrows': 3,
+        'pvrow_height': 2.5,
+        'pvrow_width': 2.,
+        'surface_azimuth': 90.,  # east oriented modules
+        'axis_azimuth': 0.,      # axis of rotation towards North
+        'surface_tilt': 0.01,    # almost flat
+        'gcr': 0.4,
+        'solar_zenith': 89.9,    # sun super low
+        'solar_azimuth': 90.,    # sun located in the east
+    }
+
+    pvarray = OrderedPVArray.from_dict(params)
+    pvarray.cast_shadows()
+    pvarray.cuts_for_pvrow_view()
+    view_matrix = pvarray.view_matrix
+
+    ground_seg = pvarray.ground.list_segments[0]
+    # there should be no visible shadow on the ground
+    assert len(ground_seg.shaded_collection.list_surfaces) == 0
+    # all of the edge points should be outside of range of ground geometry
+    for edge_pt in pvarray.edge_points:
+        assert not contains(pvarray.ground.original_linestring, edge_pt)
+
+    # Check values of view matrix mask, to make sure that front does not
+    # see the ground
+    vm_mask = np.where(view_matrix > 0, 1, 0)
+    expected_vm_mask = [
+        [0, 0, 1, 0, 1, 0, 1, 1],  # ground
+        [0, 0, 0, 0, 1, 0, 0, 1],  # front
+        [1, 0, 0, 0, 0, 0, 0, 1],  # back
+        [0, 0, 0, 0, 0, 0, 1, 1],  # front
+        [1, 1, 0, 0, 0, 0, 0, 1],  # back
+        [0, 0, 0, 0, 0, 0, 0, 1],  # front
+        [1, 0, 0, 1, 0, 0, 0, 1],  # back
+        [0, 0, 0, 0, 0, 0, 0, 0]]
+    np.testing.assert_array_equal(vm_mask, expected_vm_mask)
 
 
 def test_time_ordered_pvarray(params):

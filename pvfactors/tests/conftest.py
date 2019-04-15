@@ -7,6 +7,8 @@ import os
 import pandas as pd
 import numpy as np
 import datetime as dt
+from collections import OrderedDict
+import pvlib
 
 DIR_TEST = os.path.dirname(__file__)
 DIR_TEST_DATA = os.path.join(DIR_TEST, 'test_files')
@@ -192,3 +194,97 @@ def params_direct_shading(params):
 def ordered_pvarray(params):
     pvarray = OrderedPVArray.from_dict(params)
     yield pvarray
+
+
+@pytest.fixture(scope='function')
+def params_serial():
+    arguments = {
+        'n_pvrows': 2,
+        'pvrow_height': 1.5,
+        'pvrow_width': 1.,
+        'axis_azimuth': 0.,
+        'surface_tilt': 20.,
+        'surface_azimuth': 90,
+        'gcr': 0.3,
+        'solar_zenith': 30.,
+        'solar_azimuth': 90.,
+        'rho_ground': 0.22,
+        'rho_front_pvrow': 0.01,
+        'rho_back_pvrow': 0.03
+    }
+    yield arguments
+
+
+@pytest.fixture(scope='function')
+def fn_report_example():
+    def fn_report(report, pvarray):
+        # Initialize the report
+        if report is None:
+            list_keys = ['qinc_front', 'qinc_back', 'iso_front', 'iso_back']
+            report = OrderedDict({key: [] for key in list_keys})
+        # Add elements to the report
+        if pvarray is not None:
+            pvrow = pvarray.pvrows[1]  # use center pvrow
+            report['qinc_front'].append(
+                pvrow.front.get_param_weighted('qinc'))
+            report['qinc_back'].append(
+                pvrow.back.get_param_weighted('qinc'))
+            report['iso_front'].append(
+                pvrow.front.get_param_weighted('isotropic'))
+            report['iso_back'].append(
+                pvrow.back.get_param_weighted('isotropic'))
+        else:
+            # No calculation was performed, because sun was down
+            report['qinc_front'].append(np.nan)
+            report['qinc_back'].append(np.nan)
+            report['iso_front'].append(np.nan)
+            report['iso_back'].append(np.nan)
+        return report
+    yield fn_report
+
+
+def generate_tucson_clrsky_met_data():
+    """Helper function to generate timeseries data, taken from pvlib
+    documentation"""
+    # Define site and timestamps
+    latitude, longitude, tz, altitude = 32.2, -111, 'US/Arizona', 700
+    times = pd.date_range(start='2019-01-01 01:00', end='2020-01-01',
+                          freq='60Min', tz=tz)
+    gcr = 0.3
+    max_angle = 50
+    # Calculate MET data
+    solpos = pvlib.solarposition.get_solarposition(times, latitude, longitude)
+    apparent_zenith = solpos['apparent_zenith']
+    azimuth = solpos['azimuth']
+    airmass = pvlib.atmosphere.get_relative_airmass(apparent_zenith)
+    pressure = pvlib.atmosphere.alt2pres(altitude)
+    airmass = pvlib.atmosphere.get_absolute_airmass(airmass, pressure)
+    linke_turbidity = pvlib.clearsky.lookup_linke_turbidity(times, latitude,
+                                                            longitude)
+    dni_extra = pvlib.irradiance.get_extra_radiation(times)
+    ineichen = pvlib.clearsky.ineichen(
+        apparent_zenith, airmass, linke_turbidity, altitude, dni_extra)
+    # Calculate single axis tracking data
+    trk = pvlib.tracking.singleaxis(apparent_zenith, azimuth,
+                                    max_angle=max_angle, gcr=gcr,
+                                    backtrack=True)
+
+    # Get outputs
+    df_inputs = pd.concat(
+        [ineichen[['dni', 'dhi']], solpos[['apparent_zenith', 'azimuth']],
+         trk[['surface_tilt', 'surface_azimuth']]],
+        axis=1).rename(columns={'apparent_zenith': 'solar_zenith',
+                                'azimuth': 'solar_azimuth'})
+
+    print(df_inputs.head())
+
+    df_inputs.to_csv('test_df_inputs_MET_clearsky_tucson.csv')
+
+
+@pytest.fixture(scope='function')
+def df_inputs_clearsky_8760():
+    tz = 'US/Arizona'
+    fp = os.path.join(DIR_TEST_DATA, 'test_df_inputs_MET_clearsky_tucson.csv')
+    df = pd.read_csv(fp, index_col=0)
+    df.index = pd.DatetimeIndex(df.index).tz_localize('UTC').tz_convert(tz)
+    yield df

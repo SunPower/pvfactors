@@ -95,7 +95,7 @@ def are_2d_vecs_collinear(u1, u2):
     return np.abs(dot_prod) < TOL_COLLINEAR
 
 
-def projection(point, vector, linestring):
+def projection(point, vector, linestring, must_contain=True):
     """Projection of point along vector onto a linestring.
     Define equations of two lines:
     - one defined by point and vector: a*x + b*y + c = 0
@@ -133,7 +133,10 @@ def projection(point, vector, linestring):
             (linestring.distance(pt_intersection) < DISTANCE_TOLERANCE) and
             (distance_to_b1 <= length_linestring) and
             (distance_to_b2 <= length_linestring))
-        if contained_by_linestring:
+        if not must_contain:
+            # No need for the geometry to contain it
+            return pt_intersection
+        elif contained_by_linestring:
             # Check that the intersection is not too close to a boundary: if it
             # is it can create a "memory access error" it seems
             too_close_to_b1 = distance_to_b1 < DISTANCE_TOLERANCE
