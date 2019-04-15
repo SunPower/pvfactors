@@ -3,9 +3,12 @@ from pvlib.tools import cosd
 from pvlib.irradiance import aoi as aoi_function
 import numpy as np
 from pvfactors.irradiance.utils import \
-    perez_diffuse_luminance, calculate_horizon_band_shading
+    perez_diffuse_luminance, calculate_horizon_band_shading, \
+    calculate_circumsolar_shading
 from pvfactors.irradiance.base import BaseModel
-from pvfactors.config import DEFAULT_HORIZON_BAND_ANGLE, SKY_REFLECTIVITY_DUMMY
+from pvfactors.config import \
+    DEFAULT_HORIZON_BAND_ANGLE, SKY_REFLECTIVITY_DUMMY, \
+    DEFAULT_CIRCUMSOLAR_ANGLE
 
 
 class IsotropicOrdered(BaseModel):
@@ -116,12 +119,16 @@ class HybridPerezOrdered(BaseModel):
     cats = ['ground', 'front_pvrow', 'back_pvrow']
     irradiance_comp = ['direct', 'circumsolar', 'horizon']
 
-    def __init__(self, horizon_band_angle=DEFAULT_HORIZON_BAND_ANGLE):
+    def __init__(self, horizon_band_angle=DEFAULT_HORIZON_BAND_ANGLE,
+                 circumsolar_angle=DEFAULT_CIRCUMSOLAR_ANGLE,
+                 circumsolar_model='uniform_disk'):
         self.direct = dict.fromkeys(self.cats)
         self.circumsolar = dict.fromkeys(self.cats)
         self.horizon = dict.fromkeys(self.cats)
         self.isotropic_luminance = None
         self.horizon_band_angle = horizon_band_angle
+        self.circumsolar_angle = circumsolar_angle
+        self.circumsolar_model = circumsolar_model
         self.rho_front = None
         self.rho_back = None
         self.albedo = None
@@ -215,7 +222,7 @@ class HybridPerezOrdered(BaseModel):
                 # Illum
                 idx_neighbor = pvarray.back_neighbors[idx_pvrow]
                 for surf in seg._illum_collection.list_surfaces:
-                    hor_shd_pct = self.calculate_hor_shd_pct(
+                    hor_shd_pct = self.calculate_horizon_shading_pct(
                         surf, idx_neighbor, pvrows)
                     surf.update_params(
                         {'direct': self.direct['back_pvrow'][idx],
@@ -227,7 +234,7 @@ class HybridPerezOrdered(BaseModel):
                          'inv_rho': 1. / self.rho_back})
                 # Shaded
                 for surf in seg._shaded_collection.list_surfaces:
-                    hor_shd_pct = self.calculate_hor_shd_pct(
+                    hor_shd_pct = self.calculate_horizon_shading_pct(
                         surf, idx_neighbor, pvrows)
                     surf.update_params(
                         {'direct': 0.,
@@ -247,8 +254,12 @@ class HybridPerezOrdered(BaseModel):
 
         return np.array(irradiance_vec), np.array(inv_rho_vec)
 
-    def calculate_hor_shd_pct(self, surface, idx_neighbor, pvrows):
-        """Calculate horizon band shading percentage"""
+    def calculate_horizon_shading_pct(self, surface, idx_neighbor, pvrows):
+        """Calculate horizon band shading percentage on surfaces of ordered
+        PV array.
+        This needs to be merged with circumsolar shading"""
+
+        # TODO: should be applied to all pvrow surfaces
 
         horizon_shading_pct = 0.
         if idx_neighbor is not None:
@@ -262,6 +273,34 @@ class HybridPerezOrdered(BaseModel):
                 shading_angle, self.horizon_band_angle)
 
         return horizon_shading_pct
+
+    def calculate_circumsolar_shading_pct(self, surface, idx_neighbor, pvrows,
+                                          solar_2d_vector):
+        """Model method to calculate circumsolar shading on surfaces of
+        ordered PV array.
+        This needs to be merged with horizon shading"""
+
+        # TODO: should be applied to all pvrow surfaces
+
+        if idx_neighbor is not None:
+            # Calculate the solar and circumsolar elevation angles in 2D plane
+            solar_2d_elevation = np.abs(
+                np.arctan(solar_2d_vector[1] / solar_2d_vector[0])
+            ) * 180. / np.pi
+            lower_angle_circumsolar = (solar_2d_elevation -
+                                       self.circumsolar_angle / 2.)
+            centroid = surface.centroid
+            neighbor_point = pvrows[idx_neighbor].highest_point
+            shading_angle = np.abs(np.arctan(
+                (neighbor_point.y - centroid.y) /
+                (neighbor_point.x - centroid.x))) * 180. / np.pi
+            percentage_circ_angle_covered = \
+                (shading_angle - lower_angle_circumsolar) \
+                / self.circumsolar_angle * 100.
+            circ_shading_pct = calculate_circumsolar_shading(
+                percentage_circ_angle_covered, model=self.circumsolar_model)
+
+        return circ_shading_pct
 
     @staticmethod
     def calculate_luminance_poa_components(

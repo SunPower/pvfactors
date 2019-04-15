@@ -1,6 +1,6 @@
 import pytest
 from pvfactors.irradiance import IsotropicOrdered, HybridPerezOrdered
-from pvfactors.geometry import OrderedPVArray
+from pvfactors.geometry import OrderedPVArray, PVSurface, PVRow
 from pvlib.tools import cosd
 import numpy as np
 import datetime as dt
@@ -462,3 +462,21 @@ def test_hybridperez_ordered_back(params_irr):
     np.testing.assert_almost_equal(
         pvarray.ground.get_param_weighted('rho'),
         params_irr['rho_ground'])
+
+
+def test_hybridperez_circ_shading():
+    """Check that the function works and returns expected outputs"""
+    circumsolar_angle = 30.
+    circumsolar_model = 'uniform_disk'
+    irr_model = HybridPerezOrdered(circumsolar_angle=circumsolar_angle,
+                                   circumsolar_model=circumsolar_model)
+
+    surf = PVSurface(coords=[(0, -1), (0, 1)])
+    pvrows = [PVRow.from_linestring_coords([(1, -1), (1, 1)])]
+    solar_2d_vector = [1.2, 1]  # <45 deg elevation so should have >50% shading
+    idx_neighbor = 0
+
+    circ_shading_pct = irr_model.calculate_circumsolar_shading_pct(
+        surf, idx_neighbor, pvrows, solar_2d_vector)
+
+    np.testing.assert_almost_equal(circ_shading_pct, 71.5969299216)
