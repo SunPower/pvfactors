@@ -1,11 +1,12 @@
 from pvfactors.run import run_timeseries_engine, run_parallel_engine
 from pvfactors.report import ExampleReportBuilder
+import numpy as np
 
 
 def test_run_timeseries_engine(fn_report_example, params_serial,
                                df_inputs_clearsky_8760):
 
-    df_inputs = df_inputs_clearsky_8760.iloc[:100, :]
+    df_inputs = df_inputs_clearsky_8760.iloc[:24, :]
     n = df_inputs.shape[0]
 
     # Get MET data
@@ -23,12 +24,15 @@ def test_run_timeseries_engine(fn_report_example, params_serial,
         surface_azimuth, params_serial['rho_ground'])
 
     assert len(report['qinc_front']) == n
+    # Test value consistency
+    np.testing.assert_almost_equal(np.nansum(report['qinc_back']),
+                                   531.910943995)
 
 
 def test_run_parallel_engine(params_serial,
                              df_inputs_clearsky_8760):
 
-    df_inputs = df_inputs_clearsky_8760.iloc[:100, :]
+    df_inputs = df_inputs_clearsky_8760.iloc[:24, :]
     n = df_inputs.shape[0]
 
     # Get MET data
@@ -47,3 +51,8 @@ def test_run_parallel_engine(params_serial,
         surface_azimuth, params_serial['rho_ground'], n_processes=n_processes)
 
     assert len(report['qinc_front']) == n
+    # Check that the reports were sorted
+    np.testing.assert_almost_equal(report['qinc_back'][7],
+                                   11.194963444217375)
+    np.testing.assert_almost_equal(report['qinc_back'][-8],
+                                   8.6595692531927568)

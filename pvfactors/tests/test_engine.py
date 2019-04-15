@@ -4,8 +4,6 @@ from pvfactors.irradiance import IsotropicOrdered, HybridPerezOrdered
 from pvfactors.irradiance.utils import breakup_df_inputs
 import numpy as np
 import datetime as dt
-import pytest
-from collections import OrderedDict
 
 
 def test_pvengine_float_inputs_iso(params):
