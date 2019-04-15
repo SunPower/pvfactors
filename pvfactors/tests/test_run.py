@@ -26,7 +26,7 @@ def test_run_timeseries_engine(fn_report_example, params_serial,
     assert len(report['qinc_front']) == n
     # Test value consistency
     np.testing.assert_almost_equal(np.nansum(report['qinc_back']),
-                                   531.910943995)
+                                   541.71158706765289)
 
 
 def test_run_parallel_engine(params_serial,
@@ -51,8 +51,12 @@ def test_run_parallel_engine(params_serial,
         surface_azimuth, params_serial['rho_ground'], n_processes=n_processes)
 
     assert len(report['qinc_front']) == n
-    # Check that the reports were sorted
+    # Test value consistency: not sure exactly why value is not exactly equal
+    # to one in serial test, but difference not significant
+    np.testing.assert_almost_equal(np.nansum(report['qinc_back']),
+                                   541.71158706765289, decimal=3)
+    # Check that the reports were sorted correctly
     np.testing.assert_almost_equal(report['qinc_back'][7],
-                                   11.194963444217375)
+                                   11.160305804865603)
     np.testing.assert_almost_equal(report['qinc_back'][-8],
-                                   8.6595692531927568)
+                                   8.6428542068175016)
