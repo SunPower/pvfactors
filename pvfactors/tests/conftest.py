@@ -197,13 +197,14 @@ def generate_tucson_clrsky_met_data():
 
     print(df_inputs.head())
 
-    df_inputs.to_csv('test_df_inputs_MET_clearsky_tucson.csv')
+    df_inputs.to_csv('file_test_inputs_MET_clearsky_tucson.csv')
 
 
 @pytest.fixture(scope='function')
 def df_inputs_clearsky_8760():
     tz = 'US/Arizona'
-    fp = os.path.join(DIR_TEST_DATA, 'test_df_inputs_MET_clearsky_tucson.csv')
+    fp = os.path.join(DIR_TEST_DATA,
+                      'file_test_inputs_MET_clearsky_tucson.csv')
     df = pd.read_csv(fp, index_col=0)
     df.index = pd.DatetimeIndex(df.index).tz_localize('UTC').tz_convert(tz)
     yield df
