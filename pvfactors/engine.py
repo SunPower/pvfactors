@@ -2,7 +2,7 @@
 import numpy as np
 from pvfactors.geometry import OrderedPVArray
 from pvfactors.viewfactors import VFCalculator
-from pvfactors.irradiance import IsotropicOrdered
+from pvfactors.irradiance import HybridPerezOrdered
 from scipy import linalg
 from tqdm import tqdm
 
@@ -13,7 +13,7 @@ class PVEngine(object):
     """
 
     def __init__(self, params, vf_calculator=VFCalculator(),
-                 irradiance_model=IsotropicOrdered(),
+                 irradiance_model=HybridPerezOrdered(),
                  cls_pvarray=OrderedPVArray):
         """Create pv engine class, and initialize timeseries parameters"""
         self.params = params

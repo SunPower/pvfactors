@@ -1,6 +1,6 @@
 import pytest
 from pvfactors.irradiance import IsotropicOrdered, HybridPerezOrdered
-from pvfactors.geometry import OrderedPVArray
+from pvfactors.geometry import OrderedPVArray, PVSurface, PVRow
 from pvlib.tools import cosd
 import numpy as np
 import datetime as dt
@@ -220,7 +220,7 @@ def test_hybridperez_ordered_front(params_irr):
     expected_dni_ground = DNI * cosd(65)
     expected_circ_pvrow = 61.542748619313045
     # FIXME: it doesn't seem right that circumsolar stronger on ground
-    expected_circ_ground = 63.21759296298243
+    expected_circ_ground = 36.782407037017585
     expected_hor_pvrow_no_shad = 7.2486377533042452
     expected_hor_pvrow_w_shad = 2.1452692285058985
     horizon_shading_pct = 70.404518731426592
@@ -235,12 +235,14 @@ def test_hybridperez_ordered_front(params_irr):
     # Transform
     irradiance_vec, invrho_vec = irr_model.transform(pvarray)
 
+    # Test isotropic_luminance
+    np.testing.assert_almost_equal(irr_model.isotropic_luminance,
+                                   63.21759296)
     # Check transform
     expected_irradiance_vec = [
-        485.8358547, 485.8358547, 485.8358547,
-        485.8358547, 485.8358547, 0.,
-        775.89816756, 7.24863775, 7.24863775, 775.89816756, 7.24863775,
-        2.145269, 775.89816756, 2.145269, 36.78240704]
+        459.400669, 459.400669, 459.400669, 459.400669, 459.400669,
+        0., 775.898168, 7.248638, 7.248638, 775.898168,
+        7.248638, 2.145269, 775.898168, 2.145269, 63.217593]
     # pvrow direct
     np.testing.assert_almost_equal(
         pvarray.pvrows[2].front.get_param_weighted('direct'),
@@ -352,7 +354,7 @@ def test_hybridperez_ordered_back(params_irr):
     expected_dni_ground = DNI * cosd(65)
     expected_circ_pvrow = 61.542748619313045
     # FIXME: it doesn't seem right that circumsolar stronger on ground
-    expected_circ_ground = 63.21759296298243
+    expected_circ_ground = 36.782407037017585
     expected_hor_pvrow_no_shad = 7.2486377533042452
     expected_hor_pvrow_w_shad_1 = 6.0760257690033654
     expected_hor_pvrow_w_shad_2 = 3.6101632102156898
@@ -369,11 +371,14 @@ def test_hybridperez_ordered_back(params_irr):
     # Transform
     irradiance_vec, invrho_vec = irr_model.transform(pvarray)
 
+    # Test isotropic_luminance
+    np.testing.assert_almost_equal(irr_model.isotropic_luminance,
+                                   63.21759296)
     # Check transform
     expected_irradiance_vec = [
-        485.8358547, 485.8358547, 485.8358547, 485.8358547, 485.8358547, 0.,
-        7.24863775, 774.725556, 3.610163, 7.24863775, 774.725556,
-        3.610163, 7.24863775, 775.89816756, 36.78240704]
+        459.400669, 459.400669, 459.400669, 459.400669, 459.400669,
+        0., 7.248638, 774.725556, 3.610163, 7.248638,
+        774.725556, 3.610163, 7.248638, 775.898168, 63.217593]
     # pvrow direct
     np.testing.assert_almost_equal(
         pvarray.pvrows[2].back.get_param_weighted('direct'),
@@ -457,3 +462,21 @@ def test_hybridperez_ordered_back(params_irr):
     np.testing.assert_almost_equal(
         pvarray.ground.get_param_weighted('rho'),
         params_irr['rho_ground'])
+
+
+def test_hybridperez_circ_shading():
+    """Check that the function works and returns expected outputs"""
+    circumsolar_angle = 30.
+    circumsolar_model = 'uniform_disk'
+    irr_model = HybridPerezOrdered(circumsolar_angle=circumsolar_angle,
+                                   circumsolar_model=circumsolar_model)
+
+    surf = PVSurface(coords=[(0, -1), (0, 1)])
+    pvrows = [PVRow.from_linestring_coords([(1, -1), (1, 1)])]
+    solar_2d_vector = [1.2, 1]  # <45 deg elevation so should have >50% shading
+    idx_neighbor = 0
+
+    circ_shading_pct = irr_model.calculate_circumsolar_shading_pct(
+        surf, idx_neighbor, pvrows, solar_2d_vector)
+
+    np.testing.assert_almost_equal(circ_shading_pct, 71.5969299216)
