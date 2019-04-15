@@ -145,7 +145,7 @@ class HybridPerezOrdered(BaseModel):
             albedo = albedo * np.ones(n)
 
         # Calculate terms from Perez model
-        luminance_circumsolar, luminance_isotropic, poa_horizon, \
+        luminance_isotropic, luminance_circumsolar, poa_horizon, \
             poa_circumsolar_front, poa_circumsolar_back, \
             aoi_front_pvrow, aoi_back_pvrow = \
             self.calculate_luminance_poa_components(
@@ -289,7 +289,7 @@ class HybridPerezOrdered(BaseModel):
         poa_circumsolar_back = \
             luminance_circumsolar * vf_circumsolar_backsurface
 
-        # TODO: return only >0 values for poa_horizon
+        # Return only >0 values for poa_horizon
         poa_horizon = np.abs(poa_horizon)
 
         return luminance_isotropic, luminance_circumsolar, poa_horizon, \
