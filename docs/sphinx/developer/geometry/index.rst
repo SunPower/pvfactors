@@ -2,8 +2,8 @@
 
 .. currentmodule:: pvfactors.geometry
 
-Geometry API
-============
+geometry
+========
 
 The geometry sub-package of pvfactors implements multiple classes that make the construction of a 2D geometry for a PV array intuitive and scalable. It is meant to be decoupled from irradiance and view factor calculations so that it can be used independently for other purposes, like visualization for instance. The following schematics summarizes the organization of the classes in this sub-package.
 
@@ -11,8 +11,8 @@ The geometry sub-package of pvfactors implements multiple classes that make the 
    :align: center
    :width: 80%
 
-geometry.base
--------------
+base
+----
 
 .. automodule:: base
    :no-members:
@@ -29,8 +29,8 @@ geometry.base
    base.BaseSide
 
 
-geometry.pvrow
---------------
+pvrow
+-----
 
 .. automodule:: pvrow
    :no-members:
@@ -44,8 +44,8 @@ geometry.pvrow
    pvrow.PVRow
 
 
-geometry.pvground
------------------
+pvground
+--------
 
 .. automodule:: pvground
    :no-members:
@@ -58,8 +58,8 @@ geometry.pvground
    pvground.PVGround
 
 
-geometry.pvarray
-----------------
+pvarray
+--------
 
 .. automodule:: pvarray
    :no-members:

@@ -1,16 +1,18 @@
 .. pvfactors documentation
 
-Developer
-=========
+Developer API
+=============
 
 This part describes how to use the model and perform additional developments.
 
 Contents:
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
 
-   pvfactors_demo
-   api_reference
-   how_to
+   engine.rst
+   run.rst
    geometry/index.rst
+   viewfactors.rst
+   irradiance.rst
+   report.rst
