@@ -12,7 +12,8 @@ Contents:
    :maxdepth: 2
 
    intro.rst
-   getting_started/index.rst
+   installation/index.rst
+   tutorials/index.rst
    theory/index.rst
    developer/index.rst
    whatsnew.rst
