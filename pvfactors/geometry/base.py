@@ -6,7 +6,7 @@ from collections import OrderedDict
 from pvfactors import PVFactorsError
 from pvfactors.config import (
     DEFAULT_NORMAL_VEC, COLOR_DIC, DISTANCE_TOLERANCE, PLOT_FONTSIZE,
-    ALPHA_TEXT)
+    ALPHA_TEXT, MAX_X_GROUND)
 from pvfactors.geometry.plot import plot_coords, plot_bounds, plot_line
 from pvfactors.geometry.utils import \
     is_collinear, check_collinear, are_2d_vecs_collinear, difference, contains
@@ -127,8 +127,11 @@ class BaseSurface(LineString):
             x = centroid.x + alpha * v_norm[0]
             y = centroid.y + alpha * v_norm[1]
             # Add text
-            ax.text(x, y, '{}'.format(self.index),
-                    verticalalignment='center', horizontalalignment='center')
+            # FIXME: hack to get a nice plot in jupyter notebook
+            if np.abs(x) < MAX_X_GROUND / 2.:
+                ax.text(x, y, '{}'.format(self.index),
+                        verticalalignment='center',
+                        horizontalalignment='center')
 
     def difference(self, linestring):
         """Calculate remaining surface after removing part belonging from
