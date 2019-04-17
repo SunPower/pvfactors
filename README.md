@@ -1,5 +1,5 @@
-pvfactors: irradiance modeling made easy
-========================================
+pvfactors: irradiance modeling made simple
+==========================================
 
 [![CircleCI](https://circleci.com/gh/SunPower/pvfactors.svg?style=shield)](https://circleci.com/gh/SunPower/pvfactors)
 [![license](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg)](https://github.com/SunPower/pvfactors/blob/master/LICENSE)
@@ -7,7 +7,7 @@ pvfactors: irradiance modeling made easy
 pvfactors is a tool designed for PV professionals to calculate the
 irradiance incident on surfaces of a photovoltaic array. It relies on the use of
 2D geometries and view factors integrated mathematically into a linear system of
-equations.
+equations to account for reflections between surfaces.
 
 This package is the open-source fork of the original 'vf_model' package developed
 by SunPower, and which had over 300 commits. The package was used for all the
@@ -18,41 +18,11 @@ Documentation
 -------------
 
 The documentation can be found [here](https://sunpower.github.io/pvfactors).
-Please refer to the TL;DR section below to find a quick start tutorial.
+It includes a lot of [tutorials](https://sunpower.github.io/pvfactors/tutorials/index.html) that describe many ways of using the package.
 
 
-Installation
-------------
-
-pvfactors is currently compatible and tested with Python versions 2.7 and 3.6, and is available in [PyPI](https://pypi.org/project/pvfactors/).
-
-The easiest way to install pvfactors is to use [pip](https://pip.pypa.io/en/stable/) as follows:
-
-    $ pip install pvfactors
-
-The package wheel files are also available in the [release section](https://github.com/SunPower/pvfactors/releases) of the Github repository.
-
-
-Requirements
-------------
-
-Requirements are included in the ``setup.py`` file of the package. Here is
-a list of important dependencies:
-* [shapely](https://pypi.python.org/pypi/Shapely)
-* [numpy](https://pypi.python.org/pypi/numpy)
-* [scipy](https://pypi.python.org/pypi/scipy)
-* [pandas](https://pypi.python.org/pypi/pandas)
-* [pvlib-python](https://pypi.python.org/pypi/pvlib)
-
-
-Notebook demo
--------------
-
-The following Jupyter notebook is a good way to get a quick overview: [notebook](http://sunpower.github.io/pvfactors/developer/pvfactors_demo.html)
-
-
-TL;DR - Quick Start
--------------------
+Quick Start
+-----------
 
 Given some timeseries inputs:
 
@@ -245,12 +215,35 @@ plt.show()
 ![png](https://raw.githubusercontent.com/SunPower/pvfactors/master/docs/sphinx/_static/pvarray.png)
 
 
+Installation
+------------
+
+pvfactors is currently compatible and tested with Python versions 2.7 and 3.6, and is available in [PyPI](https://pypi.org/project/pvfactors/).
+
+The easiest way to install pvfactors is to use [pip](https://pip.pypa.io/en/stable/) as follows:
+
+    $ pip install pvfactors
+
+The package wheel files are also available in the [release section](https://github.com/SunPower/pvfactors/releases) of the Github repository.
+
+
+Requirements
+------------
+
+Requirements are included in the ``setup.py`` file of the package. Here is
+a list of important dependencies:
+* [shapely](https://pypi.python.org/pypi/Shapely)
+* [numpy](https://pypi.python.org/pypi/numpy)
+* [scipy](https://pypi.python.org/pypi/scipy)
+* [pandas](https://pypi.python.org/pypi/pandas)
+* [pvlib-python](https://pypi.python.org/pypi/pvlib)
+
 
 Contributing
 ------------
 
-Contributions are much needed in order to improve this package.
-If you wish to contribute, you can start by forking the repository and installing pvfactors using [pip](https://pip.pypa.io/en/stable/) in the root folder of the package:
+Contributions are needed in order to improve this package.
+If you wish to contribute, you can start by forking and cloning the repository, and then installing pvfactors using [pip](https://pip.pypa.io/en/stable/) in the root folder of the package:
 
     $ pip install .
 
