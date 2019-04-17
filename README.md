@@ -1,7 +1,8 @@
-pvfactors (open-source fork of vf_model)
+pvfactors: irradiance modeling made easy
 ========================================
 
 [![CircleCI](https://circleci.com/gh/SunPower/pvfactors.svg?style=shield)](https://circleci.com/gh/SunPower/pvfactors)
+[![license](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg)](https://github.com/SunPower/pvfactors/blob/master/LICENSE)
 
 pvfactors is a tool designed for PV professionals to calculate the
 irradiance incident on surfaces of a photovoltaic array. It relies on the use of
