@@ -3,7 +3,8 @@
 Tutorials
 =========
 
-Here is a list of tutorials to help users get started using ``pvfactors``. The notebooks for these tutorials are located in the tutorials_ section of the Github repository.
+| Here is a list of tutorials to help users get started using ``pvfactors``.
+| The notebooks for these tutorials are located in the tutorials_ section of the Github repository.
 
 .. _tutorials: https://github.com/SunPower/pvfactors/tree/master/docs/tutorials
 
@@ -14,3 +15,4 @@ Here is a list of tutorials to help users get started using ``pvfactors``. The n
    PVArray_introduction
    Create_discretized_pvarray
    Run_timeseries_simulations
+   Run_parallel_simulations
