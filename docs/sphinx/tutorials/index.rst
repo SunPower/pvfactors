@@ -14,5 +14,6 @@ Tutorials
    Getting_started
    PVArray_introduction
    Create_discretized_pvarray
+   Calculate_view_factors
    Run_timeseries_simulations
    Run_parallel_simulations
