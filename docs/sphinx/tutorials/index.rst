@@ -11,3 +11,4 @@ Here is a list of tutorials to help users get started using ``pvfactors``:
    Getting_started
    PVArray_introduction
    Create_discretized_pvarray
+   Run_timeseries_simulations
