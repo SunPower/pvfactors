@@ -7,6 +7,7 @@ from pvfactors.viewfactors import VFCalculator
 from pvfactors.engine import PVEngine
 from multiprocessing import Pool, cpu_count
 import numpy as np
+import pandas as pd
 from time import time
 
 
@@ -53,6 +54,10 @@ def run_parallel_engine(report_builder, pvarray_parameters,
     # Make sure albedo is iterable
     if np.isscalar(albedo):
         albedo = albedo * np.ones(len(dni))
+
+    # Fix: np.array_split doesn't work well on pd.DatetimeIndex objects
+    if isinstance(timestamps, pd.DatetimeIndex):
+        timestamps = timestamps.to_pydatetime()
 
     # Split all arguments according to number of processes
     (folds_timestamps, folds_surface_azimuth, folds_surface_tilt,

@@ -27,6 +27,13 @@ def test_run_timeseries_engine(fn_report_example, params_serial,
     # Test value consistency
     np.testing.assert_almost_equal(np.nansum(report['qinc_back']),
                                    541.71158706765289)
+    np.testing.assert_almost_equal(np.nansum(report['iso_back']),
+                                   18.050083142438311)
+    # Check a couple values
+    np.testing.assert_almost_equal(report['qinc_back'][7],
+                                   11.160305804865603)
+    np.testing.assert_almost_equal(report['qinc_back'][-8],
+                                   8.6428525983703732)
 
 
 def test_run_parallel_engine(params_serial,
@@ -54,9 +61,11 @@ def test_run_parallel_engine(params_serial,
     # Test value consistency: not sure exactly why value is not exactly equal
     # to one in serial test, but difference not significant
     np.testing.assert_almost_equal(np.nansum(report['qinc_back']),
-                                   541.71158706765289, decimal=3)
+                                   541.71158706765289)
+    np.testing.assert_almost_equal(np.nansum(report['iso_back']),
+                                   18.050083142438311)
     # Check that the reports were sorted correctly
     np.testing.assert_almost_equal(report['qinc_back'][7],
                                    11.160305804865603)
     np.testing.assert_almost_equal(report['qinc_back'][-8],
-                                   8.6428542068175016)
+                                   8.6428525983703732)
