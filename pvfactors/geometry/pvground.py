@@ -17,6 +17,8 @@ class PVGround(BaseSide):
         # Get ground boundaries
         if x_min_max is None:
             x_min, x_max = MIN_X_GROUND, MAX_X_GROUND
+        else:
+            x_min, x_max = x_min_max
         # Create PV segment for flat ground
         coords = [(x_min, y_ground), (x_max, y_ground)]
         seg = PVSegment.from_linestring_coords(coords, shaded=shaded,

@@ -3,6 +3,10 @@
 Welcome to the pvfactors documentation!
 =======================================
 
+.. figure:: _static/logo.png
+   :align: center
+   :width: 60%
+
 | pvfactors is an open-source irradiance modeling python package used by photovoltaic professionals to calculate incident irradiance on various surfaces of a PV array, while accounting for reflections between all of them. pvfactors was originally ported from the SunPower developed vf_model package which was first presented at the IEEE PV Specialist Conference 44 [#vf_paper]_ .
 | You can find explanations on how to install the package in the :ref:`installation` section, and learn how to use it using both the :ref:`tutorials` and :ref:`developer_api` sections.
 
