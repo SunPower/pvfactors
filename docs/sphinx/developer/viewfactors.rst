@@ -14,6 +14,11 @@ calculator
    :no-members:
    :no-inherited-members:
 
+.. autosummary::
+   :toctree: generated/
+   :nosignatures:
+
+   calculator.VFCalculator
 
 mapper
 ^^^^^^
@@ -21,3 +26,9 @@ mapper
 .. automodule:: mapper
    :no-members:
    :no-inherited-members:
+
+.. autosummary::
+   :toctree: generated/
+   :nosignatures:
+
+   mapper.VFMapperOrderedPVArray

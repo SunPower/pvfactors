@@ -28,6 +28,7 @@ base
    base.ShadeCollection
    base.PVSegment
    base.BaseSide
+   base.BasePVArray
 
 
 pvrow
