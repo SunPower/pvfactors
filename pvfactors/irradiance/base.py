@@ -9,17 +9,35 @@ class BaseModel(object):
     irradiance_comp = None
 
     def __init__(self):
-        pass
+        """Not implemented"""
+        raise NotImplementedError
 
     def fit(self):
+        """Not implemented"""
         raise NotImplementedError
 
     def transform(self):
+        """Not implemented"""
         raise NotImplementedError
 
     def get_irradiance_invrho_vector(self, pvarray):
-        """Get vector of summed up irradiance values, and inverse reflectivity
-        values"""
+        """Get vector of summed up irradiance values from a PV array, as well
+        as the inverse reflectivity values (the latter need to be named
+        "inv_rho").
+
+        Parameters
+        ----------
+        pvarray : PV array object
+            PV array with the irradiance and reflectivity values
+
+        Returns
+        -------
+        irradiance_vec : list
+            List of summed up irradiance values
+        invrho_vec : list
+            List of inverse reflectivity values
+
+        """
 
         # TODO: this can probably be speeded up
         irradiance_vec = []
