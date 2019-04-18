@@ -5,16 +5,27 @@ import numpy as np
 
 
 class VFCalculator(object):
+    """This calculator class will be used for the calculation of view factors
+    for PV arrays"""
 
     def __init__(self, mapper=None):
+        """Initialize the view factor mapper that will be used.
+
+        Parameters
+        ----------
+        mapper : VF mapper object, optional
+            View factor mapper, which will map elements of the PV array view
+            matrix to methods calculating view factors (Default =
+            :py:class:`~pvfactors.viewfactors.mapper.VFMapperOrderedPVArray`)
+        """
         if mapper is None:
             mapper = VFMapperOrderedPVArray()
         self.mapper = mapper
 
     def get_vf_matrix(self, geom_dict, view_matrix, obstr_matrix, list_pvrow):
-        """Calculate the view factors based on the inputs of the
-        :py:class:`~pvfactors.pvarray.Array` class, and using a mapping of
-        "view types" with view factor calculation methods.
+        """Calculate the view factors based on the surfaces of the PV array
+        object, and using a mapping of "view types" in the view matrix,
+        to the view factor calculation methods.
         The method uses a faster implementation by only calculating half of the
         view factors, and uses the symmetry property of the transformed view
         factor matrix to calculate the other half.
@@ -25,20 +36,21 @@ class VFCalculator(object):
         Parameters
         ----------
         geom_dict : ``OrderedDictionary``
-            Ordered dictionary of all indexed PV surfaces
-        view_matrix : ``numpy.ndarray``
-            This matrix specifies what surfaces each surface views, and
+            Ordered dictionary of all the indexed PV surfaces from the PV
+            array
+        view_matrix : ``numpy.ndarray`` of int
+            This matrix specifies which surfaces each surface views, and
             also what type of view it is
-        obstr_matrix : ``numpy.ndarray``
+        obstr_matrix : ``numpy.ndarray`` of int and ``None``
             Complementing ``view_matrix`` by providing
             additional arguments for the calculations; i.e. what pvrows are
             obstructing the view between surface i and surface j
-        list_pvrows : list
-            List of pvrows that can obstruct views
+        list_pvrows : list of :py:class:`~pvfactors.geometry.pvrow.PVRow`s
+            List of pvrows that can obstruct views between surfaces
 
         Returns
         -------
-        ``numpy.ndarray``
+        ``numpy.ndarray`` of float
             matrix of view factors (values from 0 to 1 in theory)
 
         """
