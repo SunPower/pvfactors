@@ -1,12 +1,12 @@
-.. tutorials
+.. _tutorials:
 
 Tutorials
 =========
 
 | Here is a list of tutorials to help users get started using ``pvfactors``.
-| The notebooks for these tutorials are located in the tutorials_ section of the Github repository.
+| The notebooks for these tutorials are located in the `tutorials folder`_ of the Github repository.
 
-.. _tutorials: https://github.com/SunPower/pvfactors/tree/master/docs/tutorials
+.. _`tutorials folder`: https://github.com/SunPower/pvfactors/tree/master/docs/tutorials
 
 .. toctree::
    :maxdepth: 1

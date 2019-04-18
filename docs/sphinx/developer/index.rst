@@ -1,4 +1,4 @@
-.. pvfactors documentation
+.. _developer_api:
 
 Developer API
 =============
