@@ -11,14 +11,14 @@ irradiance incident on surfaces of a photovoltaic array. It relies on the use of
 2D geometries and view factors integrated mathematically into a linear system of
 equations to account for reflections between all of the surfaces.
 
-pvfactors was originally ported from the SunPower developed 'vf_model' package, which was originally presented at the IEEE PV Specialist Conference 44 2017 (see [1] and [link](https://pdfs.semanticscholar.org/ebb2/35e3c3796b158e1a3c45b40954e60d876ea9.pdf) to paper).
+pvfactors was originally ported from the SunPower developed 'vf_model' package, which was introduced at the IEEE PV Specialist Conference 44 2017 (see [1] and [link](https://pdfs.semanticscholar.org/ebb2/35e3c3796b158e1a3c45b40954e60d876ea9.pdf) to paper).
 
 
 Documentation
 -------------
 
 The documentation can be found [here](https://sunpower.github.io/pvfactors).
-It includes a lot of [tutorials](https://sunpower.github.io/pvfactors/tutorials/index.html) that describe many ways of using the package.
+It includes a lot of [tutorials](https://sunpower.github.io/pvfactors/tutorials/index.html) that describe many ways of using pvfactors.
 
 
 Quick Start
@@ -48,19 +48,6 @@ df_inputs
 
 
 <div>
-<style scoped>
-    .dataframe tbody tr th:only-of-type {
-        vertical-align: middle;
-    }
-
-    .dataframe tbody tr th {
-        vertical-align: top;
-    }
-
-    .dataframe thead th {
-        text-align: right;
-    }
-</style>
 <table border="1" class="dataframe">
   <thead>
     <tr style="text-align: right;">
@@ -162,9 +149,9 @@ print("Isotropic irradiance on back surface of right pv row: {} W/m2"
       .format(pvarray.pvrows[2].back.get_param_weighted('isotropic')))
 ```
 
-    Incident irradiance on front surface of middle pv row: 811.659035577 W/m2
-    Reflected irradiance on back surface of left pv row: 90.2456106239 W/m2
-    Isotropic irradiance on back surface of right pv row: 9.28395608072 W/m2
+    Incident irradiance on front surface of middle pv row: 811.7 W/m2
+    Reflected irradiance on back surface of left pv row: 90.2 W/m2
+    Isotropic irradiance on back surface of right pv row: 9.3 W/m2
 
 
 The users can also run simulations for all timestamps, and obtain a "report" that will look like whatever the users want, and which will rely on the simple geometry API shown above.
@@ -188,21 +175,7 @@ df_report
 
 
 
-
 <div>
-<style scoped>
-    .dataframe tbody tr th:only-of-type {
-        vertical-align: middle;
-    }
-
-    .dataframe tbody tr th {
-        vertical-align: top;
-    }
-
-    .dataframe thead th {
-        text-align: right;
-    }
-</style>
 <table border="1" class="dataframe">
   <thead>
     <tr style="text-align: right;">
@@ -249,7 +222,7 @@ The package wheel files are also available in the [release section](https://gith
 Requirements
 ------------
 
-Requirements are included in the ``setup.py`` file of the package. Here is
+Requirements are included in the ``requirements.txt`` file of the package. Here is
 a list of important dependencies:
 * [shapely](https://pypi.python.org/pypi/Shapely)
 * [numpy](https://pypi.python.org/pypi/numpy)
@@ -264,7 +237,10 @@ Citing pvfactors
 We appreciate your use of pvfactors.
 If you use pvfactors in a published work, we kindly ask that you cite:
 
-   Anoma, M., Jacob, D., Bourne, B.C., Scholl, J.A., Riley, D.M. and Hansen, C.W., 2017. View Factor Model and Validation for Bifacial PV and Diffuse Shade on Single-Axis Trackers. In 44th IEEE Photovoltaic Specialist Conference.
+```
+Anoma, M., Jacob, D., Bourne, B.C., Scholl, J.A., Riley, D.M. and Hansen, C.W., 2017. View Factor Model and Validation for Bifacial PV and Diffuse Shade on Single-Axis Trackers. In 44th IEEE Photovoltaic Specialist Conference.
+
+```
 
 
 Contributing
