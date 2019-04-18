@@ -3,7 +3,7 @@
 .. currentmodule:: pvfactors.geometry
 
 geometry
-========
+--------
 
 The geometry sub-package of pvfactors implements multiple classes that make the construction of a 2D geometry for a PV array intuitive and scalable. It is meant to be decoupled from irradiance and view factor calculations so that it can be used independently for other purposes, like visualization for instance. The following schematics summarizes the organization of the classes in this sub-package.
 
@@ -12,7 +12,7 @@ The geometry sub-package of pvfactors implements multiple classes that make the 
    :width: 80%
 
 base
-----
+^^^^
 
 .. automodule:: base
    :no-members:
@@ -21,6 +21,7 @@ base
 .. autosummary::
    :toctree: generated/
    :nosignatures:
+   :template: class_no_base.rst
 
    base.BaseSurface
    base.PVSurface
@@ -30,7 +31,7 @@ base
 
 
 pvrow
------
+^^^^^
 
 .. automodule:: pvrow
    :no-members:
@@ -46,7 +47,7 @@ pvrow
 
 
 pvground
---------
+^^^^^^^^
 
 .. automodule:: pvground
    :no-members:
@@ -55,12 +56,13 @@ pvground
 .. autosummary::
    :toctree: generated/
    :nosignatures:
+   :template: class_no_base.rst
 
    pvground.PVGround
 
 
 pvarray
---------
+^^^^^^^
 
 .. automodule:: pvarray
    :no-members:
@@ -69,5 +71,6 @@ pvarray
 .. autosummary::
    :toctree: generated/
    :nosignatures:
+   :template: class_no_base.rst
 
    pvarray.OrderedPVArray

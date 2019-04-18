@@ -3,7 +3,7 @@
 .. currentmodule:: pvfactors
 
 run
-===
+---
 
 .. automodule:: run
    :no-members:

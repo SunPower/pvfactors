@@ -3,7 +3,7 @@
 .. currentmodule:: pvfactors
 
 report
-======
+------
 
 .. automodule:: report
    :no-members:

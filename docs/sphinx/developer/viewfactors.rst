@@ -3,12 +3,12 @@
 .. currentmodule:: pvfactors.viewfactors
 
 viewfactors
-===========
+-----------
 
 The viewfactors sub-package of pvfactors implements the methods used to calculate view factors from pvfactors PV array objects.
 
 calculator
-----------
+^^^^^^^^^^
 
 .. automodule:: calculator
    :no-members:
@@ -16,7 +16,7 @@ calculator
 
 
 mapper
-------
+^^^^^^
 
 .. automodule:: mapper
    :no-members:
