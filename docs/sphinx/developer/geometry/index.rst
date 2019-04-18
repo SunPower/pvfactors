@@ -39,6 +39,7 @@ pvrow
 .. autosummary::
    :toctree: generated/
    :nosignatures:
+   :template: class_no_base.rst
 
    pvrow.PVRowSide
    pvrow.PVRow
