@@ -87,9 +87,3 @@ class VFCalculator(object):
         # portion of the hemisphere
         view_factors[:-1, -1] = 1. - np.sum(view_factors[:-1, :-1], axis=1)
         return view_factors
-
-    def get_viewfactors(self, surface_idx):
-        raise NotImplementedError
-
-    def get_viewfactor(self, surf_1_idx, surf_2_idx):
-        raise NotImplementedError

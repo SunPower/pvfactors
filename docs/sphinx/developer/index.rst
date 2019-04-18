@@ -1,16 +1,19 @@
-.. pvfactors documentation
+.. _developer_api:
 
-Developer
-=========
+Developer API
+=============
 
-This part describes how to use the model and perform additional developments.
+This is the class and function reference of pvfactors.
+For clarity and simplicity, all inherited methods and attributes have been removed from the class descriptions as there were often too many irrelevant ones coming from base packages like shapely.
 
-Contents:
+.. include:: geometry.rst
 
-.. toctree::
-   :maxdepth: 2
+.. include:: viewfactors.rst
 
-   pvfactors_demo
-   api_reference
-   how_to
-   geometry/index.rst
+.. include:: irradiance.rst
+
+.. include:: engine.rst
+
+.. include:: run.rst
+
+.. include:: report.rst

@@ -24,8 +24,12 @@ from pvfactors import __version__
 project_dir = os.path.abspath(os.path.join('..', '..'))
 pvfactors_dir = os.path.join(project_dir, 'pvfactors')
 geometry_dir = os.path.join(pvfactors_dir, 'geometry')
+irradiance_dir = os.path.join(pvfactors_dir, 'irradiance')
+viewfactors_dir = os.path.join(pvfactors_dir, 'viewfactors')
 sys.path.insert(0, project_dir)
 sys.path.insert(0, pvfactors_dir)
+sys.path.insert(0, irradiance_dir)
+sys.path.insert(0, viewfactors_dir)
 sys.path.insert(0, geometry_dir)
 # -- General configuration ------------------------------------------------
 
@@ -154,7 +158,7 @@ rst_prolog = """
 
 # The name of an image file (relative to this directory) to place at the top
 # of the sidebar.
-html_logo = '_static/sp_2014_logo_all_white_LARGE.png'
+html_logo = '_static/logo.png'
 
 # The name of an image file (within the static path) to use as favicon of the
 # docs.  This file should be a Windows icon file (.ico) being 16x16 or 32x32

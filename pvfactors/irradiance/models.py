@@ -1,4 +1,5 @@
 """Module containing irradiance models used with pv array geometries"""
+
 from pvlib.tools import cosd
 from pvlib.irradiance import aoi as aoi_function
 import numpy as np
