@@ -1,9 +1,26 @@
-"""Module containing example of report builder functions and classes"""
+"""Module containing examples of report builder functions and classes."""
+
 from collections import OrderedDict
 import numpy as np
 
 
 def example_fn_build_report(report, pvarray):
+    """Example function that builds a report when used in the
+    :py:class:`~pvfactors.engine.PVEngine`. Here it will be a dictionary
+    with lists of calculated values.
+
+    Parameters
+    ----------
+    report : dict
+        Initially ``None``, this will be passed and updated by the function
+    pvarray : PV array object
+        PV array with updated calculation values
+
+    Returns
+    -------
+    report : dict
+        Report updated with newly calculated values
+    """
     # Initialize the report
     if report is None:
         list_keys = ['qinc_front', 'qinc_back', 'iso_front', 'iso_back']
@@ -35,11 +52,39 @@ class ExampleReportBuilder(object):
 
     @staticmethod
     def build(report, pvarray):
+        """Method that will build the simulation report. Here we're using the
+        previously defined
+        :py:function:`~pvfactors.report.example_fn_build_report`.
+
+        Parameters
+        ----------
+        report : dict
+            Initially ``None``, this will be passed and updated by the function
+        pvarray : PV array object
+            PV array with updated calculation values
+
+        Returns
+        -------
+        report : dict
+            Report updated with newly calculated values
+        """
         return example_fn_build_report(report, pvarray)
 
     @staticmethod
     def merge(reports):
-        """Works for dictionary reports"""
+        """Method used to merge multiple reports together. Here it simply
+        concatenates the lists of values saved in the different reports.
+
+        Parameters
+        ----------
+        reports : list of dict
+            List of reports that need to be concatenated together
+
+        Returns
+        -------
+        report : dict
+            Final report with all concatenated values
+        """
         report = reports[0]
         # Merge only if more than 1 report
         if len(reports) > 1:
