@@ -47,8 +47,12 @@ extensions = [
     'sphinx.ext.todo',
     'sphinx.ext.coverage',
     'nbsphinx',
-    'sphinxcontrib.napoleon'
+    'sphinxcontrib.napoleon',
+    'sphinxcontrib_github_alt'
 ]
+
+# For sphinxcontrib_github_alt
+github_project_url = "https://github.com/SunPower/pvfactors"
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
