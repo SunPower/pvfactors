@@ -1,4 +1,4 @@
-"""Base classes for geometry subpackage."""
+"""Base classes for pvfactors geometry subpackage."""
 
 import numpy as np
 import pandas as pd
