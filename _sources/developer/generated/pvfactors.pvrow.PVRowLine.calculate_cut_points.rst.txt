@@ -1,6 +1,0 @@
-pvfactors.pvrow.PVRowLine.calculate\_cut\_points
-================================================
-
-.. currentmodule:: pvfactors.pvrow
-
-.. automethod:: PVRowLine.calculate_cut_points

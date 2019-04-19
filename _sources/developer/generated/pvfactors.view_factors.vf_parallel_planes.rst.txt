@@ -1,6 +1,0 @@
-pvfactors.view\_factors.vf\_parallel\_planes
-============================================
-
-.. currentmodule:: pvfactors.view_factors
-
-.. autofunction:: vf_parallel_planes

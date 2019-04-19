@@ -1,6 +1,0 @@
-pvfactors.pvarray.Array.apply\_horizon\_band\_shading
-=====================================================
-
-.. currentmodule:: pvfactors.pvarray
-
-.. automethod:: Array.apply_horizon_band_shading

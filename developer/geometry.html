@@ -1,0 +1,328 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>geometry &mdash; pvfactors 1.0.0 documentation</title>
+  
+
+  
+  
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+        <script type="text/javascript" src="../_static/language_data.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> pvfactors
+          
+
+          
+            
+            <img src="../_static/logo.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.0.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../installation/index.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/index.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../theory/index.html">Theory</a></li>
+<li class="toctree-l1"><a class="reference internal" href="index.html">Developer API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../whatsnew.html">What’s New</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">pvfactors</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+      <li>geometry</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            
+              <!-- User defined GitHub URL -->
+              <a href="https://github.com/SunPower/pvfactors/" class="fa fa-github"> Edit on GitHub</a>
+            
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast,
+.nboutput.nblast {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast + .nbinput {
+    margin-top: -19px;
+}
+
+/* nice headers on first paragraph of info/warning boxes */
+.admonition .first {
+    margin: -12px;
+    padding: 6px 12px;
+    margin-bottom: 12px;
+    color: #fff;
+    line-height: 1;
+    display: block;
+}
+.admonition.warning .first {
+    background: #f0b37e;
+}
+.admonition.note .first {
+    background: #6ab0de;
+}
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+</style>
+<div class="section" id="geometry">
+<h1>geometry<a class="headerlink" href="#geometry" title="Permalink to this headline">¶</a></h1>
+<p>The geometry sub-package of pvfactors implements multiple classes that make the construction of a 2D geometry for a PV array intuitive and scalable. It is meant to be decoupled from irradiance and view factor calculations so that it can be used independently for other purposes, like visualization for instance. The following schematics summarizes the organization of the classes in this sub-package.</p>
+<div class="figure align-center">
+<a class="reference internal image-reference" href="../_images/class_organization.png"><img alt="../_images/class_organization.png" src="../_images/class_organization.png" style="width: 80%;" /></a>
+</div>
+<div class="section" id="module-base">
+<span id="base"></span><h2>base<a class="headerlink" href="#module-base" title="Permalink to this headline">¶</a></h2>
+<p>Base classes for pvfactors geometry subpackage.</p>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="generated/base.BaseSurface.html#base.BaseSurface" title="base.BaseSurface"><code class="xref py py-obj docutils literal notranslate"><span class="pre">base.BaseSurface</span></code></a></td>
+<td>Base surfaces will be extensions of <code class="xref py py-class docutils literal notranslate"><span class="pre">LineString</span></code> classes, but adding an orientation to it (normal vector).</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="generated/base.PVSurface.html#base.PVSurface" title="base.PVSurface"><code class="xref py py-obj docutils literal notranslate"><span class="pre">base.PVSurface</span></code></a></td>
+<td>PV surfaces inherit from <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseSurface</span></code>.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="generated/base.ShadeCollection.html#base.ShadeCollection" title="base.ShadeCollection"><code class="xref py py-obj docutils literal notranslate"><span class="pre">base.ShadeCollection</span></code></a></td>
+<td>A group of <code class="xref py py-class docutils literal notranslate"><span class="pre">PVSurface</span></code> objects that all have the same shading status.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="generated/base.PVSegment.html#base.PVSegment" title="base.PVSegment"><code class="xref py py-obj docutils literal notranslate"><span class="pre">base.PVSegment</span></code></a></td>
+<td>A PV segment will be a collection of 2 collinear and contiguous shade collections, a shaded one and an illuminated one.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="generated/base.BaseSide.html#base.BaseSide" title="base.BaseSide"><code class="xref py py-obj docutils literal notranslate"><span class="pre">base.BaseSide</span></code></a></td>
+<td>A side represents a fixed collection of PV segments objects that should all be collinear, with the same normal vector</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="generated/base.BasePVArray.html#base.BasePVArray" title="base.BasePVArray"><code class="xref py py-obj docutils literal notranslate"><span class="pre">base.BasePVArray</span></code></a></td>
+<td>Base class for PV arrays in pvfactors.</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="module-pvrow">
+<span id="pvrow"></span><h2>pvrow<a class="headerlink" href="#module-pvrow" title="Permalink to this headline">¶</a></h2>
+<p>Module will classes related to PV row geometries</p>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="generated/pvrow.PVRowSide.html#pvrow.PVRowSide" title="pvrow.PVRowSide"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pvrow.PVRowSide</span></code></a></td>
+<td>A PV row side represents the whole surface of one side of a PV row.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="generated/pvrow.PVRow.html#pvrow.PVRow" title="pvrow.PVRow"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pvrow.PVRow</span></code></a></td>
+<td>A PV row is made of two PV row sides, a front and a back one.</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="module-pvground">
+<span id="pvground"></span><h2>pvground<a class="headerlink" href="#module-pvground" title="Permalink to this headline">¶</a></h2>
+<p>Classes for implementation of ground geometry</p>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="generated/pvground.PVGround.html#pvground.PVGround" title="pvground.PVGround"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pvground.PVGround</span></code></a></td>
+<td>Class that defines the ground in PV arrays.</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="module-pvarray">
+<span id="pvarray"></span><h2>pvarray<a class="headerlink" href="#module-pvarray" title="Permalink to this headline">¶</a></h2>
+<p>Module containing PV array classes, which will use PV rows and ground
+geometries.</p>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="generated/pvarray.OrderedPVArray.html#pvarray.OrderedPVArray" title="pvarray.OrderedPVArray"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pvarray.OrderedPVArray</span></code></a></td>
+<td>An ordered PV array has a flat horizontal ground, and pv rows which are all at the same height, with the same surface tilt and azimuth angles, and also all equally spaced.</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2016, SunPower Corporation
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

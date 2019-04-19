@@ -1,6 +1,0 @@
-pvfactors.timeseries.calculate\_radiosities\_serially\_perez
-============================================================
-
-.. currentmodule:: pvfactors.timeseries
-
-.. autofunction:: calculate_radiosities_serially_perez

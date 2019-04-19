@@ -1,0 +1,337 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>models.HybridPerezOrdered &mdash; pvfactors 1.0.0 documentation</title>
+  
+
+  
+  
+    <link rel="shortcut icon" href="../../_static/favicon.ico"/>
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../_static/doctools.js"></script>
+        <script type="text/javascript" src="../../_static/language_data.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/css/custom.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="engine.PVEngine" href="engine.PVEngine.html" />
+    <link rel="prev" title="models.IsotropicOrdered" href="models.IsotropicOrdered.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> pvfactors
+          
+
+          
+            
+            <img src="../../_static/logo.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.0.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../installation/index.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorials/index.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../theory/index.html">Theory</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../index.html">Developer API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../whatsnew.html">What’s New</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">pvfactors</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Developer API</a> &raquo;</li>
+        
+      <li>models.HybridPerezOrdered</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            
+              <!-- User defined GitHub URL -->
+              <a href="https://github.com/SunPower/pvfactors/" class="fa fa-github"> Edit on GitHub</a>
+            
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast,
+.nboutput.nblast {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast + .nbinput {
+    margin-top: -19px;
+}
+
+/* nice headers on first paragraph of info/warning boxes */
+.admonition .first {
+    margin: -12px;
+    padding: 6px 12px;
+    margin-bottom: 12px;
+    color: #fff;
+    line-height: 1;
+    display: block;
+}
+.admonition.warning .first {
+    background: #f0b37e;
+}
+.admonition.note .first {
+    background: #6ab0de;
+}
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+</style>
+<div class="section" id="models-hybridperezordered">
+<h1>models.HybridPerezOrdered<a class="headerlink" href="#models-hybridperezordered" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="models.HybridPerezOrdered">
+<em class="property">class </em><code class="descclassname">models.</code><code class="descname">HybridPerezOrdered</code><span class="sig-paren">(</span><em>horizon_band_angle=6.5</em>, <em>circumsolar_angle=30.0</em>, <em>circumsolar_model='uniform_disk'</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/models.html#HybridPerezOrdered"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#models.HybridPerezOrdered" title="Permalink to this definition">¶</a></dt>
+<dd><p>Model is based off Perez diffuse light model, and
+applied to pvfactors <code class="xref py py-class docutils literal notranslate"><span class="pre">OrderedPVArray</span></code>
+objects.
+The model applies direct, circumsolar, and horizon irradiance to the PV
+array surfaces.</p>
+<dl class="method">
+<dt id="models.HybridPerezOrdered.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>horizon_band_angle=6.5</em>, <em>circumsolar_angle=30.0</em>, <em>circumsolar_model='uniform_disk'</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/models.html#HybridPerezOrdered.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#models.HybridPerezOrdered.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize irradiance model values that will be saved later on.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>horizon_band_angle</strong> (<em>float</em><em>, </em><em>optional</em>) – Width of the horizon band in [deg] (Default =
+DEFAULT_HORIZON_BAND_ANGLE)</li>
+<li><strong>circumsolar_angle</strong> (<em>float</em><em>, </em><em>optional</em>) – Diameter of the circumsolar area in [deg] (Default =
+DEFAULT_CIRCUMSOLAR_ANGLE)</li>
+<li><strong>circumsolar_model</strong> (<em>str</em>) – Circumsolar shading model to use (Default = ‘uniform_disk’)</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<p class="rubric">Methods</p>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="#models.HybridPerezOrdered.__init__" title="models.HybridPerezOrdered.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>([horizon_band_angle,&nbsp;…])</td>
+<td>Initialize irradiance model values that will be saved later on.</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">calculate_circumsolar_shading_pct</span></code>(surface,&nbsp;…)</td>
+<td>Model method to calculate circumsolar shading on surfaces of the ordered PV array.</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">calculate_horizon_shading_pct</span></code>(surface,&nbsp;…)</td>
+<td>Calculate horizon band shading percentage on surfaces of the ordered PV array.</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">calculate_luminance_poa_components</span></code>(…)</td>
+<td>Calculate Perez-like luminance and plane-of-array irradiance values.</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">fit</span></code>(timestamps,&nbsp;DNI,&nbsp;DHI,&nbsp;solar_zenith,&nbsp;…)</td>
+<td>Use vectorization to calculate values used for the hybrid Perez irradiance model.</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_irradiance_invrho_vector</span></code>(pvarray)</td>
+<td>Get vector of summed up irradiance values from a PV array, as well as the inverse reflectivity values (the latter need to be named “inv_rho”).</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">transform</span></code>(pvarray[,&nbsp;idx])</td>
+<td>Apply calculated irradiance values to PV array, as well as horizon band shading on pvrow back sides.</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Attributes</p>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">cats</span></code></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">irradiance_comp</span></code></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">params</span></code></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="engine.PVEngine.html" class="btn btn-neutral float-right" title="engine.PVEngine" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="models.IsotropicOrdered.html" class="btn btn-neutral float-left" title="models.IsotropicOrdered" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2016, SunPower Corporation
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

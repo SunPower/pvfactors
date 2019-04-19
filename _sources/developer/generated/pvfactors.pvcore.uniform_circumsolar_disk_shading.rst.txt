@@ -1,6 +1,0 @@
-pvfactors.pvcore.uniform\_circumsolar\_disk\_shading
-====================================================
-
-.. currentmodule:: pvfactors.pvcore
-
-.. autofunction:: uniform_circumsolar_disk_shading

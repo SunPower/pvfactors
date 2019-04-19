@@ -1,0 +1,55 @@
+pvarray.OrderedPVArray
+======================
+
+.. currentmodule:: pvarray
+
+.. autoclass:: OrderedPVArray
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      
+         ~OrderedPVArray.__init__
+      
+      
+         ~OrderedPVArray.cast_shadows
+      
+      
+         ~OrderedPVArray.cuts_for_pvrow_view
+      
+      
+         ~OrderedPVArray.from_dict
+      
+      
+         ~OrderedPVArray.get_neighbors
+      
+      
+      
+      
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      
+      
+      
+      
+      
+      
+      
+      
+      
+         ~OrderedPVArray.y_ground
+      
+   
+   

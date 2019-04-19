@@ -1,6 +1,0 @@
-pvfactors.pvarray.Array.create\_ill\_ground
-===========================================
-
-.. currentmodule:: pvfactors.pvarray
-
-.. automethod:: Array.create_ill_ground

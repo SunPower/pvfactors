@@ -1,0 +1,36 @@
+models.HybridPerezOrdered
+=========================
+
+.. currentmodule:: models
+
+.. autoclass:: HybridPerezOrdered
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~HybridPerezOrdered.__init__
+      ~HybridPerezOrdered.calculate_circumsolar_shading_pct
+      ~HybridPerezOrdered.calculate_horizon_shading_pct
+      ~HybridPerezOrdered.calculate_luminance_poa_components
+      ~HybridPerezOrdered.fit
+      ~HybridPerezOrdered.get_irradiance_invrho_vector
+      ~HybridPerezOrdered.transform
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~HybridPerezOrdered.cats
+      ~HybridPerezOrdered.irradiance_comp
+      ~HybridPerezOrdered.params
+   
+   

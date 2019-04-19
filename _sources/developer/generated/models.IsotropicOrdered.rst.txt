@@ -1,0 +1,33 @@
+models.IsotropicOrdered
+=======================
+
+.. currentmodule:: models
+
+.. autoclass:: IsotropicOrdered
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~IsotropicOrdered.__init__
+      ~IsotropicOrdered.fit
+      ~IsotropicOrdered.get_irradiance_invrho_vector
+      ~IsotropicOrdered.transform
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~IsotropicOrdered.cats
+      ~IsotropicOrdered.irradiance_comp
+      ~IsotropicOrdered.params
+   
+   

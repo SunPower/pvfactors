@@ -1,6 +1,0 @@
-pvfactors.pvgeometry.PVGeometry.area
-====================================
-
-.. currentmodule:: pvfactors.pvgeometry
-
-.. autoattribute:: PVGeometry.area

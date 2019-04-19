@@ -1,0 +1,560 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>pvarray &mdash; pvfactors 1.0.0 documentation</title>
+  
+
+  
+  
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+        <script type="text/javascript" src="../_static/language_data.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> pvfactors
+          
+
+          
+            
+            <img src="../_static/logo.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.0.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../installation/index.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/index.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../theory/index.html">Theory</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../developer/index.html">Developer API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../whatsnew.html">What’s New</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">pvfactors</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="index.html">Module code</a> &raquo;</li>
+        
+      <li>pvarray</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for pvarray</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Module containing PV array classes, which will use PV rows and ground</span>
+<span class="sd">geometries.&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">pvfactors.geometry.pvground</span> <span class="k">import</span> <span class="n">PVGround</span>
+<span class="kn">from</span> <span class="nn">pvfactors.geometry.pvrow</span> <span class="k">import</span> <span class="n">PVRow</span>
+<span class="kn">from</span> <span class="nn">pvfactors.config</span> <span class="k">import</span> <span class="n">X_ORIGIN_PVROWS</span><span class="p">,</span> <span class="n">VIEW_DICT</span>
+<span class="kn">from</span> <span class="nn">pvfactors.geometry.base</span> <span class="k">import</span> <span class="n">get_solar_2d_vector</span><span class="p">,</span> <span class="n">BasePVArray</span>
+<span class="kn">from</span> <span class="nn">pvfactors.geometry.utils</span> <span class="k">import</span> <span class="n">projection</span>
+<span class="kn">from</span> <span class="nn">shapely.geometry</span> <span class="k">import</span> <span class="n">LineString</span><span class="p">,</span> <span class="n">Point</span>
+
+
+<div class="viewcode-block" id="OrderedPVArray"><a class="viewcode-back" href="../developer/generated/pvarray.OrderedPVArray.html#pvarray.OrderedPVArray">[docs]</a><span class="k">class</span> <span class="nc">OrderedPVArray</span><span class="p">(</span><span class="n">BasePVArray</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;An ordered PV array has a flat horizontal ground, and pv rows which</span>
+<span class="sd">    are all at the same height, with the same surface tilt and azimuth angles,</span>
+<span class="sd">    and also all equally spaced. These simplifications allow faster and easier</span>
+<span class="sd">    calculations.&quot;&quot;&quot;</span>
+
+    <span class="n">y_ground</span> <span class="o">=</span> <span class="mf">0.</span>  <span class="c1"># ground will be at height = 0 by default</span>
+
+<div class="viewcode-block" id="OrderedPVArray.__init__"><a class="viewcode-back" href="../developer/generated/pvarray.OrderedPVArray.html#pvarray.OrderedPVArray.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">list_pvrows</span><span class="o">=</span><span class="p">[],</span> <span class="n">ground</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">surface_tilt</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">surface_azimuth</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">axis_azimuth</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">solar_zenith</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">solar_azimuth</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">gcr</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">distance</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Initialize ordered PV array.</span>
+<span class="sd">        List of PV rows will be ordered from left to right.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        list_pvrows : list of :py:class:`~pvfactors.geometry.pvrow.PVRow`, optional</span>
+<span class="sd">            List of PV rows in the PV array</span>
+<span class="sd">            (Default = [])</span>
+<span class="sd">        ground : :py:class:`~pvfactors.geometry.pvground.PVGround`, optional</span>
+<span class="sd">            Ground geometry for the PV array</span>
+<span class="sd">        surface_tilt : float, optional</span>
+<span class="sd">            Surface tilt angles, from 0 to 180 [deg] (Default = None)</span>
+<span class="sd">        surface_azimuth : float, optional</span>
+<span class="sd">            Surface azimuth angles [deg] (Default = None)</span>
+<span class="sd">        axis_azimuth : float, optional</span>
+<span class="sd">            Azimuth angle of rotation axis [deg] (Default = None)</span>
+<span class="sd">        solar_zenith : array-like, optional</span>
+<span class="sd">            Solar zenith angles [deg] (Default = None)</span>
+<span class="sd">        solar_azimuth : array-like, optional</span>
+<span class="sd">            Solar azimuth angles [deg] (Default = None)</span>
+<span class="sd">        gcr : float, optional</span>
+<span class="sd">            Ground coverage ratio (Default = None)</span>
+<span class="sd">        height : float, optional</span>
+<span class="sd">            Unique height of all PV rows (Default = None)</span>
+<span class="sd">        distance : float, optional</span>
+<span class="sd">            Unique distance between PV rows (Default = None)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">OrderedPVArray</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">list_pvrows</span><span class="o">=</span><span class="n">list_pvrows</span><span class="p">,</span>
+                                             <span class="n">ground</span><span class="o">=</span><span class="n">ground</span><span class="p">,</span> <span class="n">distance</span><span class="o">=</span><span class="n">distance</span><span class="p">,</span>
+                                             <span class="n">height</span><span class="o">=</span><span class="n">height</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">gcr</span> <span class="o">=</span> <span class="n">gcr</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">solar_zenith</span> <span class="o">=</span> <span class="n">solar_zenith</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">solar_azimuth</span> <span class="o">=</span> <span class="n">solar_azimuth</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">surface_tilt</span> <span class="o">=</span> <span class="n">surface_tilt</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">surface_azimuth</span> <span class="o">=</span> <span class="n">surface_azimuth</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">axis_azimuth</span> <span class="o">=</span> <span class="n">axis_azimuth</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">solar_2d_vector</span> <span class="o">=</span> <span class="n">get_solar_2d_vector</span><span class="p">(</span><span class="n">solar_zenith</span><span class="p">,</span> <span class="n">solar_azimuth</span><span class="p">,</span>
+                                                   <span class="n">axis_azimuth</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">front_neighbors</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">back_neighbors</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_neighbors</span><span class="p">()</span>
+
+        <span class="c1"># Initialize shading attributes</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">has_direct_shading</span> <span class="o">=</span> <span class="kc">False</span></div>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">from_dict</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">parameters</span><span class="p">,</span> <span class="n">surface_params</span><span class="o">=</span><span class="p">[]):</span>
+        <span class="sd">&quot;&quot;&quot;Create ordered PV array from dictionary of parameters</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        parameters : dict</span>
+<span class="sd">            The parameters defining the PV array</span>
+<span class="sd">        surface_params : list of str, optional</span>
+<span class="sd">            List of parameter names to pass to surfaces (Default = [])</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Create ground</span>
+        <span class="n">ground</span> <span class="o">=</span> <span class="n">PVGround</span><span class="o">.</span><span class="n">as_flat</span><span class="p">(</span><span class="n">y_ground</span><span class="o">=</span><span class="bp">cls</span><span class="o">.</span><span class="n">y_ground</span><span class="p">,</span>
+                                  <span class="n">surface_params</span><span class="o">=</span><span class="n">surface_params</span><span class="p">)</span>
+        <span class="c1"># Create pvrows</span>
+        <span class="n">list_pvrows</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">width</span> <span class="o">=</span> <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;pvrow_width&#39;</span><span class="p">]</span>
+        <span class="n">tilt</span> <span class="o">=</span> <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;surface_tilt&#39;</span><span class="p">]</span>
+        <span class="n">surface_azimuth</span> <span class="o">=</span> <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;surface_azimuth&#39;</span><span class="p">]</span>
+        <span class="n">axis_azimuth</span> <span class="o">=</span> <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;axis_azimuth&#39;</span><span class="p">]</span>
+        <span class="n">gcr</span> <span class="o">=</span> <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;gcr&#39;</span><span class="p">]</span>
+        <span class="n">y_center</span> <span class="o">=</span> <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;pvrow_height&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="bp">cls</span><span class="o">.</span><span class="n">y_ground</span>
+        <span class="n">distance</span> <span class="o">=</span> <span class="n">width</span> <span class="o">/</span> <span class="n">gcr</span>
+        <span class="c1"># Discretization params</span>
+        <span class="n">cut</span> <span class="o">=</span> <span class="n">parameters</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;cut&#39;</span><span class="p">,</span> <span class="p">{})</span>
+        <span class="c1"># Loop for pvrow creation</span>
+        <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;n_pvrows&#39;</span><span class="p">]):</span>
+            <span class="c1"># Make equally spaced pv rows</span>
+            <span class="n">x_center</span> <span class="o">=</span> <span class="n">X_ORIGIN_PVROWS</span> <span class="o">+</span> <span class="n">idx</span> <span class="o">*</span> <span class="n">distance</span>
+            <span class="n">pvrow</span> <span class="o">=</span> <span class="n">PVRow</span><span class="o">.</span><span class="n">from_center_tilt_width</span><span class="p">(</span>
+                <span class="p">(</span><span class="n">x_center</span><span class="p">,</span> <span class="n">y_center</span><span class="p">),</span> <span class="n">tilt</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">surface_azimuth</span><span class="p">,</span>
+                <span class="n">axis_azimuth</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">idx</span><span class="p">,</span> <span class="n">cut</span><span class="o">=</span><span class="n">cut</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="p">{}),</span>
+                <span class="n">surface_params</span><span class="o">=</span><span class="n">surface_params</span><span class="p">)</span>
+            <span class="n">list_pvrows</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pvrow</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">list_pvrows</span><span class="o">=</span><span class="n">list_pvrows</span><span class="p">,</span> <span class="n">ground</span><span class="o">=</span><span class="n">ground</span><span class="p">,</span> <span class="n">surface_tilt</span><span class="o">=</span><span class="n">tilt</span><span class="p">,</span>
+                   <span class="n">surface_azimuth</span><span class="o">=</span><span class="n">surface_azimuth</span><span class="p">,</span>
+                   <span class="n">axis_azimuth</span><span class="o">=</span><span class="n">axis_azimuth</span><span class="p">,</span>
+                   <span class="n">solar_zenith</span><span class="o">=</span><span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;solar_zenith&#39;</span><span class="p">],</span>
+                   <span class="n">solar_azimuth</span><span class="o">=</span><span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;solar_azimuth&#39;</span><span class="p">],</span>
+                   <span class="n">gcr</span><span class="o">=</span><span class="n">gcr</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="n">y_center</span><span class="p">,</span> <span class="n">distance</span><span class="o">=</span><span class="n">distance</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">get_neighbors</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Determine the pvrows indices of the neighboring pvrow for the front</span>
+<span class="sd">        and back surface of each pvrow.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">n_pvrows</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pvrows</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">n_pvrows</span><span class="p">:</span>
+            <span class="n">flat</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">surface_tilt</span> <span class="o">==</span> <span class="mi">0</span>
+            <span class="n">rotated_to_left</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pvrows</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">front</span><span class="o">.</span><span class="n">n_vector</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">0</span>
+            <span class="k">if</span> <span class="n">flat</span><span class="p">:</span>
+                <span class="n">front_neighbors</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="n">n_pvrows</span>
+                <span class="n">back_neighbors</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="n">n_pvrows</span>
+            <span class="k">elif</span> <span class="n">rotated_to_left</span><span class="p">:</span>
+                <span class="n">front_neighbors</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">n_pvrows</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span>
+                <span class="n">back_neighbors</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">n_pvrows</span><span class="p">))</span> <span class="o">+</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>  <span class="c1"># rotated to right</span>
+                <span class="n">front_neighbors</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">n_pvrows</span><span class="p">))</span> <span class="o">+</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span>
+                <span class="n">back_neighbors</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">n_pvrows</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="n">front_neighbors</span><span class="p">,</span> <span class="n">back_neighbors</span>
+
+    <span class="k">def</span> <span class="nf">cast_shadows</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Use calculated solar_2d_vector and array configuration to calculate</span>
+<span class="sd">        shadows being casted in the ordered pv array.</span>
+<span class="sd">        The logic here is quite specific to ordered pv arrays&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">illum_side</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;front&#39;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">pvrows</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">front</span><span class="o">.</span><span class="n">n_vector</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">solar_2d_vector</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">0</span> <span class="k">else</span> <span class="s1">&#39;back&#39;</span><span class="p">)</span>
+        <span class="n">last_gnd_2</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">last_gnd_1</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="c1"># Cast pvrow shadows on ground</span>
+        <span class="n">a_shadow_was_casted_on_ground</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">stop_checking_for_direct_shading</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">pvrow</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pvrows</span><span class="p">):</span>
+            <span class="n">b1</span><span class="p">,</span> <span class="n">b2</span> <span class="o">=</span> <span class="n">pvrow</span><span class="o">.</span><span class="n">boundary</span>
+            <span class="n">gnd_1</span> <span class="o">=</span> <span class="n">projection</span><span class="p">(</span><span class="n">b1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">solar_2d_vector</span><span class="p">,</span>
+                               <span class="bp">self</span><span class="o">.</span><span class="n">ground</span><span class="o">.</span><span class="n">original_linestring</span><span class="p">)</span>
+            <span class="n">gnd_2</span> <span class="o">=</span> <span class="n">projection</span><span class="p">(</span><span class="n">b2</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">solar_2d_vector</span><span class="p">,</span>
+                               <span class="bp">self</span><span class="o">.</span><span class="n">ground</span><span class="o">.</span><span class="n">original_linestring</span><span class="p">)</span>
+            <span class="c1"># Following can happen because the ground geometry is not infinite</span>
+            <span class="n">shadow_is_too_far</span> <span class="o">=</span> <span class="n">gnd_1</span><span class="o">.</span><span class="n">is_empty</span> <span class="ow">or</span> <span class="n">gnd_2</span><span class="o">.</span><span class="n">is_empty</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">shadow_is_too_far</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">ground</span><span class="o">.</span><span class="n">cast_shadow</span><span class="p">(</span><span class="n">LineString</span><span class="p">([</span><span class="n">gnd_1</span><span class="p">,</span> <span class="n">gnd_2</span><span class="p">]))</span>
+                <span class="c1"># Check if there&#39;s direct shading</span>
+                <span class="k">if</span> <span class="n">a_shadow_was_casted_on_ground</span> \
+                   <span class="ow">and</span> <span class="ow">not</span> <span class="n">stop_checking_for_direct_shading</span><span class="p">:</span>
+                    <span class="c1"># There&#39;s inter-row shading if ground shadows overlap</span>
+                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">illum_side</span> <span class="o">==</span> <span class="s1">&#39;front&#39;</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">has_direct_shading</span> <span class="o">=</span> <span class="n">gnd_1</span><span class="o">.</span><span class="n">x</span> <span class="o">&lt;</span> <span class="n">last_gnd_2</span><span class="o">.</span><span class="n">x</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">has_direct_shading</span> <span class="o">=</span> <span class="n">gnd_2</span><span class="o">.</span><span class="n">x</span> <span class="o">&lt;</span> <span class="n">last_gnd_1</span><span class="o">.</span><span class="n">x</span>
+                    <span class="n">stop_checking_for_direct_shading</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="n">last_gnd_2</span> <span class="o">=</span> <span class="n">gnd_2</span>
+                <span class="n">last_gnd_1</span> <span class="o">=</span> <span class="n">gnd_1</span>
+                <span class="n">a_shadow_was_casted_on_ground</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="c1"># Calculate direct shading on pvrows</span>
+        <span class="n">sun_on_the_right</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">solar_2d_vector</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="mi">0</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">has_direct_shading</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">sun_on_the_right</span><span class="p">:</span>
+                <span class="c1"># right pvrow shades left pvrow</span>
+                <span class="n">shaded_pvrow</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pvrows</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">front_pvrow</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pvrows</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+                <span class="n">proj_initial</span> <span class="o">=</span> <span class="n">projection</span><span class="p">(</span><span class="n">front_pvrow</span><span class="o">.</span><span class="n">highest_point</span><span class="p">,</span>
+                                          <span class="bp">self</span><span class="o">.</span><span class="n">solar_2d_vector</span><span class="p">,</span>
+                                          <span class="n">shaded_pvrow</span><span class="o">.</span><span class="n">original_linestring</span><span class="p">)</span>
+                <span class="n">list_pvrows_to_shade</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pvrows</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># left pvrow shades right pvrow</span>
+                <span class="n">shaded_pvrow</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pvrows</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+                <span class="n">front_pvrow</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pvrows</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">proj_initial</span> <span class="o">=</span> <span class="n">projection</span><span class="p">(</span><span class="n">front_pvrow</span><span class="o">.</span><span class="n">highest_point</span><span class="p">,</span>
+                                          <span class="bp">self</span><span class="o">.</span><span class="n">solar_2d_vector</span><span class="p">,</span>
+                                          <span class="n">shaded_pvrow</span><span class="o">.</span><span class="n">original_linestring</span><span class="p">)</span>
+                <span class="n">list_pvrows_to_shade</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pvrows</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+
+            <span class="c1"># Use distance translation to cast shadows on pvrows</span>
+            <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">pvrow</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">list_pvrows_to_shade</span><span class="p">):</span>
+                <span class="n">proj</span> <span class="o">=</span> <span class="n">Point</span><span class="p">(</span><span class="n">proj_initial</span><span class="o">.</span><span class="n">x</span> <span class="o">+</span> <span class="n">idx</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">distance</span><span class="p">,</span>
+                             <span class="n">proj_initial</span><span class="o">.</span><span class="n">y</span><span class="p">)</span>
+                <span class="n">shaded_side</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">pvrow</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">illum_side</span><span class="p">)</span>
+                <span class="n">shaded_side</span><span class="o">.</span><span class="n">cast_shadow</span><span class="p">(</span>
+                    <span class="n">LineString</span><span class="p">([</span><span class="n">pvrow</span><span class="o">.</span><span class="n">lowest_point</span><span class="p">,</span> <span class="n">proj</span><span class="p">]))</span>
+
+            <span class="c1"># Merge ground shaded surfaces</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ground</span><span class="o">.</span><span class="n">merge_shaded_areas</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">cuts_for_pvrow_view</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;When not flat, the PV row sides will only see a part of the ground,</span>
+<span class="sd">        so we need to mark these limits called &quot;edge points&quot; and cut the ground</span>
+<span class="sd">        surface accordingly&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">surface_tilt</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="c1"># find u_vector direction of the pvrows</span>
+            <span class="n">b1</span><span class="p">,</span> <span class="n">b2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pvrows</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">boundary</span>
+            <span class="n">u_direction</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">b2</span><span class="o">.</span><span class="n">x</span> <span class="o">-</span> <span class="n">b1</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">b2</span><span class="o">.</span><span class="n">y</span> <span class="o">-</span> <span class="n">b1</span><span class="o">.</span><span class="n">y</span><span class="p">])</span>
+            <span class="k">for</span> <span class="n">pvrow</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">pvrows</span><span class="p">:</span>
+                <span class="n">b1</span> <span class="o">=</span> <span class="n">pvrow</span><span class="o">.</span><span class="n">boundary</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="c1"># Edge point should always exist when pvrows not flat</span>
+                <span class="n">edge_point</span> <span class="o">=</span> <span class="n">projection</span><span class="p">(</span><span class="n">b1</span><span class="p">,</span> <span class="n">u_direction</span><span class="p">,</span>
+                                        <span class="bp">self</span><span class="o">.</span><span class="n">ground</span><span class="o">.</span><span class="n">original_linestring</span><span class="p">,</span>
+                                        <span class="n">must_contain</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">ground</span><span class="o">.</span><span class="n">cut_at_point</span><span class="p">(</span><span class="n">edge_point</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">edge_points</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">edge_point</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_build_view_matrix</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Calculate the pv array view matrix: using rules specific to</span>
+<span class="sd">        ordered pv arrays to build relationship matrix&quot;&quot;&quot;</span>
+
+        <span class="c1"># Index all surfaces if not done already</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_surfaces_indexed</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">index_all_surfaces</span><span class="p">()</span>
+
+        <span class="c1"># Initialize matrices</span>
+        <span class="n">n_surfaces_array</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_surfaces</span>
+        <span class="n">n_surfaces</span> <span class="o">=</span> <span class="n">n_surfaces_array</span> <span class="o">+</span> <span class="mi">1</span>  <span class="c1"># counting sky</span>
+        <span class="n">view_matrix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">n_surfaces</span><span class="p">,</span> <span class="n">n_surfaces</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+        <span class="n">obstr_matrix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">n_surfaces</span><span class="p">,</span> <span class="n">n_surfaces</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">object</span><span class="p">)</span>
+        <span class="n">obstr_matrix</span><span class="p">[:]</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="n">indices_ground</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ground</span><span class="o">.</span><span class="n">surface_indices</span><span class="p">)</span>
+        <span class="n">index_sky_dome</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">view_matrix</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">])</span>
+
+        <span class="c1"># The ground will always see the sky</span>
+        <span class="n">view_matrix</span><span class="p">[</span><span class="n">indices_ground</span><span class="p">[:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">],</span>
+                    <span class="n">index_sky_dome</span><span class="p">]</span> <span class="o">=</span> <span class="n">VIEW_DICT</span><span class="p">[</span><span class="s2">&quot;ground_sky&quot;</span><span class="p">]</span>
+
+        <span class="n">pvrows_are_flat</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">surface_tilt</span> <span class="o">==</span> <span class="mf">0.</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">pvrows_are_flat</span><span class="p">:</span>
+            <span class="c1"># Getting all front and back pvrow surface indices</span>
+            <span class="n">indices_front_pvrows</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">indices_back_pvrows</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">pvrow</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">pvrows</span><span class="p">:</span>
+                <span class="n">indices_front_pvrows</span> <span class="o">+=</span> <span class="n">pvrow</span><span class="o">.</span><span class="n">front</span><span class="o">.</span><span class="n">surface_indices</span>
+                <span class="n">indices_back_pvrows</span> <span class="o">+=</span> <span class="n">pvrow</span><span class="o">.</span><span class="n">back</span><span class="o">.</span><span class="n">surface_indices</span>
+            <span class="n">indices_front_pvrows</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">indices_front_pvrows</span><span class="p">)</span>
+            <span class="n">indices_back_pvrows</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">indices_back_pvrows</span><span class="p">)</span>
+
+            <span class="c1"># Only back surface can see the ground</span>
+            <span class="n">view_matrix</span><span class="p">[</span><span class="n">indices_back_pvrows</span><span class="p">[:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">],</span>
+                        <span class="n">indices_ground</span><span class="p">]</span> <span class="o">=</span> <span class="n">VIEW_DICT</span><span class="p">[</span><span class="s2">&quot;back_gnd&quot;</span><span class="p">]</span>
+            <span class="n">view_matrix</span><span class="p">[</span><span class="n">indices_ground</span><span class="p">[:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">],</span>
+                        <span class="n">indices_back_pvrows</span><span class="p">]</span> <span class="o">=</span> <span class="n">VIEW_DICT</span><span class="p">[</span><span class="s2">&quot;gnd_back&quot;</span><span class="p">]</span>
+            <span class="c1"># The front side only sees the sky</span>
+            <span class="n">view_matrix</span><span class="p">[</span><span class="n">indices_front_pvrows</span><span class="p">[:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">],</span>
+                        <span class="n">index_sky_dome</span><span class="p">]</span> <span class="o">=</span> <span class="n">VIEW_DICT</span><span class="p">[</span><span class="s2">&quot;front_sky&quot;</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Setting up row neighbors</span>
+            <span class="n">list_left_neighbors</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">pvrows</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">list_right_neighbors</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pvrows</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="o">+</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span>
+            <span class="c1"># List ground surfaces</span>
+            <span class="n">ground_surfaces</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ground</span><span class="o">.</span><span class="n">all_surfaces</span>
+            <span class="n">gnd_centroids</span> <span class="o">=</span> <span class="p">[</span><span class="n">surf</span><span class="o">.</span><span class="n">centroid</span> <span class="k">for</span> <span class="n">surf</span> <span class="ow">in</span> <span class="n">ground_surfaces</span><span class="p">]</span>
+
+            <span class="n">rotated_to_left</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pvrows</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">front</span><span class="o">.</span><span class="n">n_vector</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">0</span>
+            <span class="k">for</span> <span class="n">idx_pvrow</span><span class="p">,</span> <span class="n">pvrow</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pvrows</span><span class="p">):</span>
+                <span class="n">front_indices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">pvrow</span><span class="o">.</span><span class="n">front</span><span class="o">.</span><span class="n">surface_indices</span><span class="p">)</span>
+                <span class="n">back_indices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">pvrow</span><span class="o">.</span><span class="n">back</span><span class="o">.</span><span class="n">surface_indices</span><span class="p">)</span>
+                <span class="n">left_neighbor</span> <span class="o">=</span> <span class="n">list_left_neighbors</span><span class="p">[</span><span class="n">idx_pvrow</span><span class="p">]</span>
+                <span class="n">right_neighbor</span> <span class="o">=</span> <span class="n">list_right_neighbors</span><span class="p">[</span><span class="n">idx_pvrow</span><span class="p">]</span>
+                <span class="n">edge_point</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">edge_points</span><span class="p">[</span><span class="n">idx_pvrow</span><span class="p">]</span>
+
+                <span class="c1"># Will save index of pvrows obstructing front and back</span>
+                <span class="n">front_obstruction</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="n">back_obstruction</span> <span class="o">=</span> <span class="kc">None</span>
+
+                <span class="k">if</span> <span class="n">rotated_to_left</span><span class="p">:</span>
+                    <span class="c1"># PVRow &lt;---&gt; PVRow + obstruction to ground</span>
+                    <span class="k">if</span> <span class="n">left_neighbor</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                        <span class="n">left_n_indices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">left_neighbor</span>
+                                                  <span class="o">.</span><span class="n">back</span><span class="o">.</span><span class="n">surface_indices</span><span class="p">)</span>
+                        <span class="n">view_matrix</span><span class="p">[</span><span class="n">front_indices</span><span class="p">[:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">],</span>
+                                    <span class="n">left_n_indices</span><span class="p">]</span> <span class="o">=</span> <span class="n">VIEW_DICT</span><span class="p">[</span><span class="s2">&quot;pvrows&quot;</span><span class="p">]</span>
+                        <span class="n">front_obstruction</span> <span class="o">=</span> <span class="n">left_neighbor</span><span class="o">.</span><span class="n">index</span>
+                    <span class="k">if</span> <span class="n">right_neighbor</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                        <span class="n">right_n_indices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">right_neighbor</span>
+                                                   <span class="o">.</span><span class="n">front</span><span class="o">.</span><span class="n">surface_indices</span><span class="p">)</span>
+                        <span class="n">view_matrix</span><span class="p">[</span><span class="n">back_indices</span><span class="p">[:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">],</span>
+                                    <span class="n">right_n_indices</span><span class="p">]</span> <span class="o">=</span> <span class="n">VIEW_DICT</span><span class="p">[</span><span class="s2">&quot;pvrows&quot;</span><span class="p">]</span>
+                        <span class="n">back_obstruction</span> <span class="o">=</span> <span class="n">right_neighbor</span><span class="o">.</span><span class="n">index</span>
+
+                    <span class="c1"># PVRow &lt;---&gt; Ground</span>
+                    <span class="n">gnd_that_front_sees</span> <span class="o">=</span> <span class="p">[]</span>
+                    <span class="n">gnd_that_back_sees</span> <span class="o">=</span> <span class="p">[]</span>
+                    <span class="k">for</span> <span class="n">idx_gnd</span><span class="p">,</span> <span class="n">gnd_surface</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">ground_surfaces</span><span class="p">):</span>
+                        <span class="n">gnd_surface_on_the_right</span> <span class="o">=</span> \
+                            <span class="n">gnd_centroids</span><span class="p">[</span><span class="n">idx_gnd</span><span class="p">]</span><span class="o">.</span><span class="n">x</span> <span class="o">&gt;</span> <span class="n">edge_point</span><span class="o">.</span><span class="n">x</span>
+                        <span class="k">if</span> <span class="n">gnd_surface_on_the_right</span><span class="p">:</span>
+                            <span class="n">gnd_that_back_sees</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">gnd_surface</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">gnd_that_front_sees</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">gnd_surface</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
+
+                <span class="k">else</span><span class="p">:</span>   <span class="c1"># rotated to right</span>
+                    <span class="c1"># PVRow &lt;---&gt; PVRow + obstruction to ground</span>
+                    <span class="k">if</span> <span class="n">left_neighbor</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                        <span class="n">left_n_indices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">left_neighbor</span>
+                                                  <span class="o">.</span><span class="n">front</span><span class="o">.</span><span class="n">surface_indices</span><span class="p">)</span>
+                        <span class="n">view_matrix</span><span class="p">[</span><span class="n">back_indices</span><span class="p">[:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">],</span>
+                                    <span class="n">left_n_indices</span><span class="p">]</span> <span class="o">=</span> <span class="n">VIEW_DICT</span><span class="p">[</span><span class="s2">&quot;pvrows&quot;</span><span class="p">]</span>
+                        <span class="n">back_obstruction</span> <span class="o">=</span> <span class="n">left_neighbor</span><span class="o">.</span><span class="n">index</span>
+                    <span class="k">if</span> <span class="n">right_neighbor</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                        <span class="n">right_n_indices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">right_neighbor</span>
+                                                   <span class="o">.</span><span class="n">back</span><span class="o">.</span><span class="n">surface_indices</span><span class="p">)</span>
+                        <span class="n">view_matrix</span><span class="p">[</span><span class="n">front_indices</span><span class="p">[:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">],</span>
+                                    <span class="n">right_n_indices</span><span class="p">]</span> <span class="o">=</span> <span class="n">VIEW_DICT</span><span class="p">[</span><span class="s2">&quot;pvrows&quot;</span><span class="p">]</span>
+                        <span class="n">front_obstruction</span> <span class="o">=</span> <span class="n">right_neighbor</span><span class="o">.</span><span class="n">index</span>
+
+                    <span class="c1"># PVRow &lt;---&gt; Ground</span>
+                    <span class="n">gnd_that_front_sees</span> <span class="o">=</span> <span class="p">[]</span>
+                    <span class="n">gnd_that_back_sees</span> <span class="o">=</span> <span class="p">[]</span>
+                    <span class="k">for</span> <span class="n">idx_gnd</span><span class="p">,</span> <span class="n">gnd_surface</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">ground_surfaces</span><span class="p">):</span>
+                        <span class="n">gnd_surface_on_the_right</span> <span class="o">=</span> \
+                            <span class="n">gnd_centroids</span><span class="p">[</span><span class="n">idx_gnd</span><span class="p">]</span><span class="o">.</span><span class="n">x</span> <span class="o">&gt;</span> <span class="n">edge_point</span><span class="o">.</span><span class="n">x</span>
+                        <span class="k">if</span> <span class="n">gnd_surface_on_the_right</span><span class="p">:</span>
+                            <span class="n">gnd_that_front_sees</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">gnd_surface</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">gnd_that_back_sees</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">gnd_surface</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
+
+                <span class="c1"># Update views to ground</span>
+                <span class="n">gnd_that_back_sees</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">gnd_that_back_sees</span><span class="p">)</span>
+                <span class="n">gnd_that_front_sees</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">gnd_that_front_sees</span><span class="p">)</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">gnd_that_back_sees</span><span class="p">):</span>
+                    <span class="c1"># PVRow &lt;---&gt; Ground: update views</span>
+                    <span class="n">view_matrix</span><span class="p">[</span><span class="n">back_indices</span><span class="p">[:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">],</span>
+                                <span class="n">gnd_that_back_sees</span><span class="p">]</span> <span class="o">=</span> \
+                        <span class="n">VIEW_DICT</span><span class="p">[</span><span class="s2">&quot;back_gnd_obst&quot;</span><span class="p">]</span>
+                    <span class="n">view_matrix</span><span class="p">[</span><span class="n">gnd_that_back_sees</span><span class="p">[:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">],</span>
+                                <span class="n">back_indices</span><span class="p">]</span> <span class="o">=</span> <span class="n">VIEW_DICT</span><span class="p">[</span><span class="s2">&quot;gnd_back_obst&quot;</span><span class="p">]</span>
+                    <span class="c1"># PVRow &lt;---&gt; Ground: obstruction</span>
+                    <span class="n">obstr_matrix</span><span class="p">[</span><span class="n">back_indices</span><span class="p">[:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">],</span>
+                                 <span class="n">gnd_that_back_sees</span><span class="p">]</span> <span class="o">=</span> <span class="n">back_obstruction</span>
+                    <span class="n">obstr_matrix</span><span class="p">[</span><span class="n">gnd_that_back_sees</span><span class="p">[:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">],</span>
+                                 <span class="n">back_indices</span><span class="p">]</span> <span class="o">=</span> <span class="n">back_obstruction</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">gnd_that_front_sees</span><span class="p">):</span>
+                    <span class="c1"># PVRow &lt;---&gt; Ground: update views</span>
+                    <span class="n">view_matrix</span><span class="p">[</span><span class="n">front_indices</span><span class="p">[:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">],</span>
+                                <span class="n">gnd_that_front_sees</span><span class="p">]</span> <span class="o">=</span> \
+                        <span class="n">VIEW_DICT</span><span class="p">[</span><span class="s2">&quot;front_gnd_obst&quot;</span><span class="p">]</span>
+                    <span class="n">view_matrix</span><span class="p">[</span><span class="n">gnd_that_front_sees</span><span class="p">[:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">],</span>
+                                <span class="n">front_indices</span><span class="p">]</span> <span class="o">=</span> <span class="n">VIEW_DICT</span><span class="p">[</span><span class="s2">&quot;gnd_front_obst&quot;</span><span class="p">]</span>
+                    <span class="c1"># PVRow &lt;---&gt; Ground: obstruction</span>
+                    <span class="n">obstr_matrix</span><span class="p">[</span><span class="n">front_indices</span><span class="p">[:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">],</span>
+                                 <span class="n">gnd_that_front_sees</span><span class="p">]</span> <span class="o">=</span> <span class="n">front_obstruction</span>
+                    <span class="n">obstr_matrix</span><span class="p">[</span><span class="n">gnd_that_front_sees</span><span class="p">[:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">],</span>
+                                 <span class="n">front_indices</span><span class="p">]</span> <span class="o">=</span> <span class="n">front_obstruction</span>
+
+                <span class="c1"># PVRow &lt;---&gt; Sky</span>
+                <span class="n">view_matrix</span><span class="p">[</span><span class="n">back_indices</span><span class="p">[:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">],</span>
+                            <span class="n">index_sky_dome</span><span class="p">]</span> <span class="o">=</span> <span class="n">VIEW_DICT</span><span class="p">[</span><span class="s2">&quot;back_sky&quot;</span><span class="p">]</span>
+                <span class="n">view_matrix</span><span class="p">[</span><span class="n">front_indices</span><span class="p">[:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">],</span>
+                            <span class="n">index_sky_dome</span><span class="p">]</span> <span class="o">=</span> <span class="n">VIEW_DICT</span><span class="p">[</span><span class="s2">&quot;front_sky&quot;</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="n">view_matrix</span><span class="p">,</span> <span class="n">obstr_matrix</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2016, SunPower Corporation
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

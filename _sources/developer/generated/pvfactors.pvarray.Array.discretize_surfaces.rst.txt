@@ -1,6 +1,0 @@
-pvfactors.pvarray.Array.discretize\_surfaces
-============================================
-
-.. currentmodule:: pvfactors.pvarray
-
-.. automethod:: Array.discretize_surfaces

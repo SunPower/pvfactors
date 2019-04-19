@@ -1,0 +1,126 @@
+base.ShadeCollection
+====================
+
+.. currentmodule:: base
+
+.. autoclass:: ShadeCollection
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      
+         ~ShadeCollection.__init__
+      
+      
+         ~ShadeCollection.add_linestring
+      
+      
+         ~ShadeCollection.add_pvsurface
+      
+      
+      
+      
+      
+      
+      
+         ~ShadeCollection.cut_at_point
+      
+      
+      
+      
+      
+      
+      
+      
+         ~ShadeCollection.from_linestring_coords
+      
+      
+      
+         ~ShadeCollection.get_param_weighted
+      
+      
+         ~ShadeCollection.get_param_ww
+      
+      
+      
+      
+      
+      
+         ~ShadeCollection.merge_surfaces
+      
+      
+      
+         ~ShadeCollection.plot
+      
+      
+      
+      
+      
+         ~ShadeCollection.remove_linestring
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+         ~ShadeCollection.update_geom_collection
+      
+      
+         ~ShadeCollection.update_params
+      
+      
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+         ~ShadeCollection.n_surfaces
+      
+      
+         ~ShadeCollection.n_vector
+      
+      
+         ~ShadeCollection.surface_indices
+      
+      
+      
+      
+      
+      
+   
+   

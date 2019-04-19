@@ -1,6 +1,0 @@
-pvfactors.pvgeometry.PVGeometry.split\_pvrow\_geometry
-======================================================
-
-.. currentmodule:: pvfactors.pvgeometry
-
-.. automethod:: PVGeometry.split_pvrow_geometry

@@ -1,6 +1,0 @@
-pvfactors.timeseries.get\_pvrow\_segment\_outputs
-=================================================
-
-.. currentmodule:: pvfactors.timeseries
-
-.. autofunction:: get_pvrow_segment_outputs

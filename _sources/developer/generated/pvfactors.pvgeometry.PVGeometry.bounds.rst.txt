@@ -1,6 +1,0 @@
-pvfactors.pvgeometry.PVGeometry.bounds
-======================================
-
-.. currentmodule:: pvfactors.pvgeometry
-
-.. autoattribute:: PVGeometry.bounds

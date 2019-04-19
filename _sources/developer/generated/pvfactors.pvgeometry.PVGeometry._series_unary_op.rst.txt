@@ -1,6 +1,0 @@
-pvfactors.pvgeometry.PVGeometry.\_series\_unary\_op
-===================================================
-
-.. currentmodule:: pvfactors.pvgeometry
-
-.. automethod:: PVGeometry._series_unary_op

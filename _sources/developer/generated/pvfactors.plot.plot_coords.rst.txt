@@ -1,6 +1,0 @@
-pvfactors.plot.plot\_coords
-===========================
-
-.. currentmodule:: pvfactors.plot
-
-.. autofunction:: plot_coords

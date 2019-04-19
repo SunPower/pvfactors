@@ -1,6 +1,0 @@
-pvfactors.plot.plot\_array\_from\_registry
-==========================================
-
-.. currentmodule:: pvfactors.plot
-
-.. autofunction:: plot_array_from_registry

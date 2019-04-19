@@ -1,6 +1,0 @@
-pvfactors.pvgeometry.PVGeometry.add
-===================================
-
-.. currentmodule:: pvfactors.pvgeometry
-
-.. automethod:: PVGeometry.add

@@ -1,0 +1,33 @@
+irradiance.base.BaseModel
+=========================
+
+.. currentmodule:: irradiance.base
+
+.. autoclass:: BaseModel
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~BaseModel.__init__
+      ~BaseModel.fit
+      ~BaseModel.get_irradiance_invrho_vector
+      ~BaseModel.transform
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~BaseModel.cats
+      ~BaseModel.irradiance_comp
+      ~BaseModel.params
+   
+   

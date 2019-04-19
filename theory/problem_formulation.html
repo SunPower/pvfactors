@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Mathematical Model &mdash; pvfactors 0.1.5+24.g5ce1047 documentation</title>
+  <title>Mathematical Model &mdash; pvfactors 1.0.0 documentation</title>
   
 
   
@@ -39,7 +39,7 @@
   <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Developer" href="../developer/index.html" />
+    <link rel="next" title="Developer API" href="../developer/index.html" />
     <link rel="prev" title="View Factors" href="view_factors.html" /> 
 </head>
 
@@ -59,7 +59,7 @@
 
           
             
-            <img src="../_static/sp_2014_logo_all_white_LARGE.png" class="logo" alt="Logo"/>
+            <img src="../_static/logo.png" class="logo" alt="Logo"/>
           
           </a>
 
@@ -67,7 +67,7 @@
             
             
               <div class="version">
-                0.1.5
+                1.0.0
               </div>
             
           
@@ -92,14 +92,15 @@
             
             
               <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="../intro.html">Introduction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../getting_started/index.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation/index.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/index.html">Tutorials</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">Theory</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="intro.html">Introduction</a></li>
 <li class="toctree-l2"><a class="reference internal" href="view_factors.html">View Factors</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Mathematical Model</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="../developer/index.html">Developer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../developer/index.html">Developer API</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../whatsnew.html">What’s New</a></li>
 </ul>
 
@@ -208,10 +209,10 @@
 </style>
 <div class="section" id="mathematical-model">
 <span id="problem-formulation"></span><h1>Mathematical Model<a class="headerlink" href="#mathematical-model" title="Permalink to this headline">¶</a></h1>
-<p>In order to use the view factors as follows, we need to assume that the surfaces considered are diffuse (lambertian). Which means that their optical properties are independent of the angle of the rays (incident, reflected, or emitted). This is an important assumption that prevents the usage of AOI loss factors for instance.</p>
+<p>In order to use the view factors as follows, we need to assume that the surfaces considered are diffuse (lambertian). Which means that their optical properties are independent of the angle of the rays (incident, reflected, or emitted).</p>
 <p>The current version of the view factor model only addresses PV rows that are made out of straight lines (no “dual-tilt” for instance). But the PV array can have any azimuth or tilt angle for the simulations. Below is the 2D representation of such a PV array.</p>
 <div class="figure align-center">
-<a class="reference internal image-reference" href="../_images/Array_example_clean.png"><img alt="../_images/Array_example_clean.png" src="../_images/Array_example_clean.png" style="width: 60%;" /></a>
+<a class="reference internal image-reference" href="../_images/pvarray.png"><img alt="../_images/pvarray.png" src="../_images/pvarray.png" style="width: 80%;" /></a>
 </div>
 <p>By making some assumptions, it is possible to represent the calculation of irradiance terms on each surface with a linear system. The dimension of this system changes depending on the number of surfaces considered. But we can formulate it for the general case of <code class="docutils literal notranslate"><span class="pre">n</span></code> surfaces.</p>
 <p>For a surface <code class="docutils literal notranslate"><span class="pre">i</span></code> we can write that:</p>
@@ -288,7 +289,7 @@ Irr_n\\
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="../developer/index.html" class="btn btn-neutral float-right" title="Developer" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="../developer/index.html" class="btn btn-neutral float-right" title="Developer API" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="view_factors.html" class="btn btn-neutral float-left" title="View Factors" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
@@ -300,7 +301,7 @@ Irr_n\\
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright Copyright 2016, SunPower Corporation
+        &copy; Copyright 2016, SunPower Corporation
 
     </p>
   </div>

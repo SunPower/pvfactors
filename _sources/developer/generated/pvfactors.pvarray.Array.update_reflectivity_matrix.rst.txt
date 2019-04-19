@@ -1,6 +1,0 @@
-pvfactors.pvarray.Array.update\_reflectivity\_matrix
-====================================================
-
-.. currentmodule:: pvfactors.pvarray
-
-.. automethod:: Array.update_reflectivity_matrix

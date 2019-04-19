@@ -1,6 +1,0 @@
-pvfactors.pvrow.PVRowLine.create\_lines
-=======================================
-
-.. currentmodule:: pvfactors.pvrow
-
-.. automethod:: PVRowLine.create_lines

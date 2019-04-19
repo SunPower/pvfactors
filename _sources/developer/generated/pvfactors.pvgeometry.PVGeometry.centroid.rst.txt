@@ -1,6 +1,0 @@
-pvfactors.pvgeometry.PVGeometry.centroid
-========================================
-
-.. currentmodule:: pvfactors.pvgeometry
-
-.. autoattribute:: PVGeometry.centroid

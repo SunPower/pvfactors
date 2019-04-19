@@ -1,6 +1,0 @@
-pvfactors.pvgeometry.PVGeometry.cut\_linestring
-===============================================
-
-.. currentmodule:: pvfactors.pvgeometry
-
-.. automethod:: PVGeometry.cut_linestring

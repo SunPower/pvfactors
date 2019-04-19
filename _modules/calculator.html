@@ -1,0 +1,303 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>calculator &mdash; pvfactors 1.0.0 documentation</title>
+  
+
+  
+  
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+        <script type="text/javascript" src="../_static/language_data.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> pvfactors
+          
+
+          
+            
+            <img src="../_static/logo.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.0.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../installation/index.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/index.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../theory/index.html">Theory</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../developer/index.html">Developer API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../whatsnew.html">What’s New</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">pvfactors</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="index.html">Module code</a> &raquo;</li>
+        
+      <li>calculator</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for calculator</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Module with classes and functions to calculate views and view factors&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">pvfactors.viewfactors.mapper</span> <span class="k">import</span> <span class="n">VFMapperOrderedPVArray</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+
+<div class="viewcode-block" id="VFCalculator"><a class="viewcode-back" href="../developer/generated/calculator.VFCalculator.html#calculator.VFCalculator">[docs]</a><span class="k">class</span> <span class="nc">VFCalculator</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;This calculator class will be used for the calculation of view factors</span>
+<span class="sd">    for PV arrays&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="VFCalculator.__init__"><a class="viewcode-back" href="../developer/generated/calculator.VFCalculator.html#calculator.VFCalculator.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mapper</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Initialize the view factor mapper that will be used.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        mapper : VF mapper object, optional</span>
+<span class="sd">            View factor mapper, which will map elements of the PV array view</span>
+<span class="sd">            matrix to methods calculating view factors (Default =</span>
+<span class="sd">            :py:class:`~pvfactors.viewfactors.mapper.VFMapperOrderedPVArray`)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">mapper</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">mapper</span> <span class="o">=</span> <span class="n">VFMapperOrderedPVArray</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mapper</span> <span class="o">=</span> <span class="n">mapper</span></div>
+
+    <span class="k">def</span> <span class="nf">get_vf_matrix</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">geom_dict</span><span class="p">,</span> <span class="n">view_matrix</span><span class="p">,</span> <span class="n">obstr_matrix</span><span class="p">,</span> <span class="n">list_pvrow</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Calculate the view factors based on the surfaces of the PV array</span>
+<span class="sd">        object, and using a mapping of &quot;view types&quot; in the view matrix,</span>
+<span class="sd">        to the view factor calculation methods.</span>
+<span class="sd">        The method uses a faster implementation by only calculating half of the</span>
+<span class="sd">        view factors, and uses the symmetry property of the transformed view</span>
+<span class="sd">        factor matrix to calculate the other half.</span>
+<span class="sd">        The symmetry property comes from the reciprocity property of view</span>
+<span class="sd">        factors: :math:`A_1 * VF_{1-2} = A_2 * VF_{2-1}`,</span>
+<span class="sd">        where A_i is the area of surface i</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        geom_dict : ``OrderedDictionary``</span>
+<span class="sd">            Ordered dictionary of all the indexed PV surfaces from the PV</span>
+<span class="sd">            array</span>
+<span class="sd">        view_matrix : ``numpy.ndarray`` of int</span>
+<span class="sd">            This matrix specifies which surfaces each surface views, and</span>
+<span class="sd">            also what type of view it is</span>
+<span class="sd">        obstr_matrix : ``numpy.ndarray`` of int and ``None``</span>
+<span class="sd">            Complementing ``view_matrix`` by providing</span>
+<span class="sd">            additional arguments for the calculations; i.e. what pvrows are</span>
+<span class="sd">            obstructing the view between surface i and surface j</span>
+<span class="sd">        list_pvrows : list of :py:class:`~pvfactors.geometry.pvrow.PVRow`s</span>
+<span class="sd">            List of pvrows that can obstruct views between surfaces</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        ``numpy.ndarray`` of float</span>
+<span class="sd">            matrix of view factors (values from 0 to 1 in theory)</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">n_all_surfaces</span> <span class="o">=</span> <span class="n">view_matrix</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">view_factors</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">n_all_surfaces</span><span class="p">,</span> <span class="n">n_all_surfaces</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+
+        <span class="c1"># --- First deal with finite surfaces from the registry, and treat only</span>
+        <span class="c1"># half of the views because symmetry will be used next</span>
+        <span class="n">n_finite_surfaces</span> <span class="o">=</span> <span class="n">n_all_surfaces</span> <span class="o">-</span> <span class="mi">1</span>  <span class="c1"># no sky</span>
+        <span class="n">view_matrix_upper_finite_surfaces</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">triu</span><span class="p">(</span>
+            <span class="n">view_matrix</span><span class="p">[:</span><span class="n">n_finite_surfaces</span><span class="p">,</span> <span class="p">:</span><span class="n">n_finite_surfaces</span><span class="p">])</span>
+        <span class="n">indices_views_finite</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">view_matrix_upper_finite_surfaces</span><span class="p">)</span>
+
+        <span class="n">n_views</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">indices_views_finite</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">geometries</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">geom_dict</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_views</span><span class="p">):</span>
+            <span class="n">idx</span> <span class="o">=</span> <span class="p">(</span><span class="n">indices_views_finite</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">i</span><span class="p">],</span> <span class="n">indices_views_finite</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="n">i</span><span class="p">])</span>
+            <span class="n">view</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mapper</span><span class="o">.</span><span class="n">reverse_view</span><span class="p">[</span><span class="n">view_matrix</span><span class="p">[</span><span class="n">idx</span><span class="p">]]</span>
+            <span class="n">line_i</span> <span class="o">=</span> <span class="n">geometries</span><span class="p">[</span><span class="n">idx</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+            <span class="n">line_j</span> <span class="o">=</span> <span class="n">geometries</span><span class="p">[</span><span class="n">idx</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span>
+            <span class="n">obstr_index</span> <span class="o">=</span> <span class="n">obstr_matrix</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">obstr_index</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">obstructing_pvrow</span> <span class="o">=</span> <span class="n">list_pvrow</span><span class="p">[</span><span class="n">obstr_matrix</span><span class="p">[</span><span class="n">idx</span><span class="p">]]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">obstructing_pvrow</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="c1"># The following line takes the most time to execute (looped)</span>
+            <span class="n">view_factors</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mapper</span><span class="o">.</span><span class="n">function_mapping</span><span class="p">[</span><span class="n">view</span><span class="p">](</span>
+                <span class="n">line_i</span><span class="p">,</span> <span class="n">line_j</span><span class="p">,</span> <span class="n">obstructing_pvrow</span><span class="p">)</span>
+
+        <span class="c1"># Use the reciprocity property of view factors to speed up the</span>
+        <span class="c1"># vfactor calculation: A_1 * F_1-2 = A_2 * F_2-1 ==&gt; symmetric matrx</span>
+        <span class="n">areas</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">surf</span><span class="o">.</span><span class="n">length</span> <span class="k">for</span> <span class="n">surf</span> <span class="ow">in</span> <span class="n">geometries</span><span class="p">])</span>
+        <span class="n">matrix_areas</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">areas</span><span class="p">)</span>
+        <span class="n">matrix_areas_inv</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="mf">1.</span> <span class="o">/</span> <span class="n">areas</span><span class="p">)</span>
+
+        <span class="n">upper_matrix_reciprocity</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">matrix_areas</span><span class="p">,</span>
+                                          <span class="n">view_factors</span><span class="p">[:</span><span class="n">n_finite_surfaces</span><span class="p">,</span>
+                                                       <span class="p">:</span><span class="n">n_finite_surfaces</span><span class="p">])</span>
+
+        <span class="n">total_matrix_reciprocity</span> <span class="o">=</span> <span class="p">(</span><span class="n">upper_matrix_reciprocity</span> <span class="o">+</span>
+                                    <span class="n">upper_matrix_reciprocity</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+        <span class="n">finite_vf_matrix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">matrix_areas_inv</span><span class="p">,</span> <span class="n">total_matrix_reciprocity</span><span class="p">)</span>
+        <span class="n">view_factors</span><span class="p">[:</span><span class="n">n_finite_surfaces</span><span class="p">,</span> <span class="p">:</span><span class="n">n_finite_surfaces</span><span class="p">]</span> <span class="o">=</span> <span class="n">finite_vf_matrix</span>
+
+        <span class="c1"># --- Then do the calculations for the sky, which is the remaining</span>
+        <span class="c1"># portion of the hemisphere</span>
+        <span class="n">view_factors</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">view_factors</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">view_factors</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2016, SunPower Corporation
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

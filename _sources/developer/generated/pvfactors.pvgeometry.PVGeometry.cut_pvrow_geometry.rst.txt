@@ -1,6 +1,0 @@
-pvfactors.pvgeometry.PVGeometry.cut\_pvrow\_geometry
-====================================================
-
-.. currentmodule:: pvfactors.pvgeometry
-
-.. automethod:: PVGeometry.cut_pvrow_geometry

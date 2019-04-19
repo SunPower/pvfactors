@@ -1,0 +1,23 @@
+report.ExampleReportBuilder
+===========================
+
+.. currentmodule:: report
+
+.. autoclass:: ExampleReportBuilder
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~ExampleReportBuilder.build
+      ~ExampleReportBuilder.merge
+   
+   
+
+   
+   
+   

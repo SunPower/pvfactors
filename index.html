@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Welcome to the pvfactors documentation! &mdash; pvfactors 0.1.5+24.g5ce1047 documentation</title>
+  <title>Welcome to the pvfactors documentation! &mdash; pvfactors 1.0.0 documentation</title>
   
 
   
@@ -39,7 +39,7 @@
   <link rel="stylesheet" href="_static/css/custom.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Introduction" href="intro.html" /> 
+    <link rel="next" title="Installation" href="installation/index.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -58,7 +58,7 @@
 
           
             
-            <img src="_static/sp_2014_logo_all_white_LARGE.png" class="logo" alt="Logo"/>
+            <img src="_static/logo.png" class="logo" alt="Logo"/>
           
           </a>
 
@@ -66,7 +66,7 @@
             
             
               <div class="version">
-                0.1.5
+                1.0.0
               </div>
             
           
@@ -91,10 +91,10 @@
             
             
               <ul>
-<li class="toctree-l1"><a class="reference internal" href="intro.html">Introduction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="getting_started/index.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation/index.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorials/index.html">Tutorials</a></li>
 <li class="toctree-l1"><a class="reference internal" href="theory/index.html">Theory</a></li>
-<li class="toctree-l1"><a class="reference internal" href="developer/index.html">Developer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="developer/index.html">Developer API</a></li>
 <li class="toctree-l1"><a class="reference internal" href="whatsnew.html">What’s New</a></li>
 </ul>
 
@@ -201,30 +201,56 @@
 </style>
 <div class="section" id="welcome-to-the-pvfactors-documentation">
 <h1>Welcome to the pvfactors documentation!<a class="headerlink" href="#welcome-to-the-pvfactors-documentation" title="Permalink to this headline">¶</a></h1>
-<p>This is the documentation of the Python view factor model presented at the IEEE
-PV Specialist Conference 44 <a class="footnote-reference" href="#vf-paper" id="id1">[1]</a> .</p>
-<p>Contents:</p>
+<div class="figure align-center">
+<a class="reference internal image-reference" href="_images/logo.png"><img alt="_images/logo.png" src="_images/logo.png" style="width: 60%;" /></a>
+</div>
+<div class="line-block">
+<div class="line">pvfactors is an open-source irradiance modeling python package used by photovoltaic professionals to calculate incident irradiance on various surfaces of a PV array, while accounting for reflections between all of them. pvfactors was originally ported from the SunPower developed vf_model package which was first presented at the IEEE PV Specialist Conference 44 (<a class="footnote-reference" href="#vf-paper" id="id1">[1]</a>, <a class="reference external" href="https://pdfs.semanticscholar.org/ebb2/35e3c3796b158e1a3c45b40954e60d876ea9.pdf">link</a> to paper).</div>
+<div class="line">You can find explanations on how to install the package in the <a class="reference internal" href="installation/index.html#installation"><span class="std std-ref">Installation</span></a> section, and learn how to use it using both the <a class="reference internal" href="tutorials/index.html#tutorials"><span class="std std-ref">Tutorials</span></a> and <a class="reference internal" href="developer/index.html#developer-api"><span class="std std-ref">Developer API</span></a> sections.</div>
+</div>
+<div class="section" id="citing-pvfactors">
+<h2>Citing pvfactors<a class="headerlink" href="#citing-pvfactors" title="Permalink to this headline">¶</a></h2>
+<p>We appreciate your use of pvfactors.
+If you use pvfactors in a published work, we kindly ask that you cite:</p>
+<blockquote>
+<div>Anoma, M., Jacob, D., Bourne, B.C., Scholl, J.A., Riley, D.M. and Hansen, C.W., 2017. View Factor Model and Validation for Bifacial PV and Diffuse Shade on Single-Axis Trackers. In 44th IEEE Photovoltaic Specialist Conference.</div></blockquote>
+</div>
+<div class="section" id="contents">
+<h2>Contents<a class="headerlink" href="#contents" title="Permalink to this headline">¶</a></h2>
 <div class="toctree-wrapper compound">
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="intro.html">Introduction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="getting_started/index.html">Getting started</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="getting_started/index.html#installation">Installation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="getting_started/index.html#quick-start">Quick start</a></li>
-<li class="toctree-l2"><a class="reference internal" href="getting_started/index.html#pvlib-implementation">pvlib implementation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation/index.html">Installation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="installation/index.html#install-with-pip">Install with pip</a></li>
+<li class="toctree-l2"><a class="reference internal" href="installation/index.html#pvlib-implementation">pvlib implementation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="installation/index.html#contributing">Contributing</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="tutorials/index.html">Tutorials</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="tutorials/Getting_started.html">Getting started</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorials/PVArray_introduction.html">PV Array geometry introduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorials/Create_discretized_pvarray.html">Discretize PV row sides and indexing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorials/Calculate_view_factors.html">Calculate view factors</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorials/Run_timeseries_simulations.html">Run timeseries simulations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorials/Run_parallel_simulations.html">Run timeseries simulations in parallel</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="theory/index.html">Theory</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="theory/intro.html">Introduction</a></li>
 <li class="toctree-l2"><a class="reference internal" href="theory/view_factors.html">View Factors</a></li>
 <li class="toctree-l2"><a class="reference internal" href="theory/problem_formulation.html">Mathematical Model</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="developer/index.html">Developer</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="developer/pvfactors_demo.html">pvfactors: Jupyter notebook guide</a></li>
-<li class="toctree-l2"><a class="reference internal" href="developer/api_reference.html">API Reference</a></li>
-<li class="toctree-l2"><a class="reference internal" href="developer/how_to.html">General modeling flow for single-point calculation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="developer/index.html">Developer API</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="developer/index.html#geometry">geometry</a></li>
+<li class="toctree-l2"><a class="reference internal" href="developer/index.html#viewfactors">viewfactors</a></li>
+<li class="toctree-l2"><a class="reference internal" href="developer/index.html#irradiance">irradiance</a></li>
+<li class="toctree-l2"><a class="reference internal" href="developer/index.html#module-engine">engine</a></li>
+<li class="toctree-l2"><a class="reference internal" href="developer/index.html#module-run">run</a></li>
+<li class="toctree-l2"><a class="reference internal" href="developer/index.html#module-report">report</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="whatsnew.html">What’s New</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="whatsnew.html#v1-0-0-april-19-2019">v1.0.0 (April 19, 2019)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="whatsnew.html#v0-1-5-december-14-2018">v0.1.5 (December 14, 2018)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="whatsnew.html#v0-1-4-november-22-2018">v0.1.4 (November 22, 2018)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="whatsnew.html#v0-1-3-september-13-2018">v0.1.3 (September 13, 2018)</a></li>
@@ -237,7 +263,7 @@ PV Specialist Conference 44 <a class="footnote-reference" href="#vf-paper" id="i
 </div>
 </div>
 <div class="section" id="indices-and-tables">
-<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h1>
+<h2>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></li>
 <li><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></li>
@@ -251,6 +277,7 @@ PV Specialist Conference 44 <a class="footnote-reference" href="#vf-paper" id="i
 </tbody>
 </table>
 </div>
+</div>
 
 
            </div>
@@ -260,7 +287,7 @@ PV Specialist Conference 44 <a class="footnote-reference" href="#vf-paper" id="i
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="intro.html" class="btn btn-neutral float-right" title="Introduction" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="installation/index.html" class="btn btn-neutral float-right" title="Installation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
     </div>
@@ -270,7 +297,7 @@ PV Specialist Conference 44 <a class="footnote-reference" href="#vf-paper" id="i
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright Copyright 2016, SunPower Corporation
+        &copy; Copyright 2016, SunPower Corporation
 
     </p>
   </div>

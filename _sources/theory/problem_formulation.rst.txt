@@ -3,13 +3,13 @@
 Mathematical Model
 ==================
 
-In order to use the view factors as follows, we need to assume that the surfaces considered are diffuse (lambertian). Which means that their optical properties are independent of the angle of the rays (incident, reflected, or emitted). This is an important assumption that prevents the usage of AOI loss factors for instance.
+In order to use the view factors as follows, we need to assume that the surfaces considered are diffuse (lambertian). Which means that their optical properties are independent of the angle of the rays (incident, reflected, or emitted).
 
 The current version of the view factor model only addresses PV rows that are made out of straight lines (no "dual-tilt" for instance). But the PV array can have any azimuth or tilt angle for the simulations. Below is the 2D representation of such a PV array.
 
 
-.. figure:: /theory/problem_formulation_pictures/Array_example_clean.png
-   :width: 60%
+.. figure:: /_static/pvarray.png
+   :width: 80%
    :align: center
 
 By making some assumptions, it is possible to represent the calculation of irradiance terms on each surface with a linear system. The dimension of this system changes depending on the number of surfaces considered. But we can formulate it for the general case of ``n`` surfaces.

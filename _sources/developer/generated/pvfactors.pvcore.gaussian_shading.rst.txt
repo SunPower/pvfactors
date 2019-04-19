@@ -1,6 +1,0 @@
-pvfactors.pvcore.gaussian\_shading
-==================================
-
-.. currentmodule:: pvfactors.pvcore
-
-.. autofunction:: gaussian_shading

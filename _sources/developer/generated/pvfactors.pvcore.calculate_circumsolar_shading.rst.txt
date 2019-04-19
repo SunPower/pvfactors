@@ -1,6 +1,0 @@
-pvfactors.pvcore.calculate\_circumsolar\_shading
-================================================
-
-.. currentmodule:: pvfactors.pvcore
-
-.. autofunction:: calculate_circumsolar_shading

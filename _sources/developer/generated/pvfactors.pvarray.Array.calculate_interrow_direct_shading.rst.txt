@@ -1,6 +1,0 @@
-pvfactors.pvarray.Array.calculate\_interrow\_direct\_shading
-============================================================
-
-.. currentmodule:: pvfactors.pvarray
-
-.. automethod:: Array.calculate_interrow_direct_shading

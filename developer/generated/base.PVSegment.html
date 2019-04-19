@@ -1,0 +1,351 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>base.PVSegment &mdash; pvfactors 1.0.0 documentation</title>
+  
+
+  
+  
+    <link rel="shortcut icon" href="../../_static/favicon.ico"/>
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../_static/doctools.js"></script>
+        <script type="text/javascript" src="../../_static/language_data.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/css/custom.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="base.BaseSide" href="base.BaseSide.html" />
+    <link rel="prev" title="base.ShadeCollection" href="base.ShadeCollection.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> pvfactors
+          
+
+          
+            
+            <img src="../../_static/logo.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.0.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../installation/index.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorials/index.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../theory/index.html">Theory</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../index.html">Developer API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../whatsnew.html">What’s New</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">pvfactors</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Developer API</a> &raquo;</li>
+        
+      <li>base.PVSegment</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            
+              <!-- User defined GitHub URL -->
+              <a href="https://github.com/SunPower/pvfactors/" class="fa fa-github"> Edit on GitHub</a>
+            
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast,
+.nboutput.nblast {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast + .nbinput {
+    margin-top: -19px;
+}
+
+/* nice headers on first paragraph of info/warning boxes */
+.admonition .first {
+    margin: -12px;
+    padding: 6px 12px;
+    margin-bottom: 12px;
+    color: #fff;
+    line-height: 1;
+    display: block;
+}
+.admonition.warning .first {
+    background: #f0b37e;
+}
+.admonition.note .first {
+    background: #6ab0de;
+}
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+</style>
+<div class="section" id="base-pvsegment">
+<h1>base.PVSegment<a class="headerlink" href="#base-pvsegment" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="base.PVSegment">
+<em class="property">class </em><code class="descclassname">base.</code><code class="descname">PVSegment</code><span class="sig-paren">(</span><em>illum_collection=&lt;base.ShadeCollection object&gt;</em>, <em>shaded_collection=&lt;base.ShadeCollection object&gt;</em>, <em>index=None</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/base.html#PVSegment"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#base.PVSegment" title="Permalink to this definition">¶</a></dt>
+<dd><p>A PV segment will be a collection of 2 collinear and contiguous
+shade collections, a shaded one and an illuminated one. It inherits from
+<code class="xref py py-class docutils literal notranslate"><span class="pre">shapely.geometry.GeometryCollection</span></code>  so that users can still
+call basic geometrical methods and properties on it, eg call length, etc.</p>
+<dl class="method">
+<dt id="base.PVSegment.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>illum_collection=&lt;base.ShadeCollection object&gt;</em>, <em>shaded_collection=&lt;base.ShadeCollection object&gt;</em>, <em>index=None</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/base.html#PVSegment.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#base.PVSegment.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize PV segment.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>illum_collection</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">ShadeCollection</span></code>, optional) – Illuminated collection of the PV segment (Default = empty shade
+collection with no shading)</li>
+<li><strong>shaded_collection</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">ShadeCollection</span></code>, optional) – Shaded collection of the PV segment (Default = empty shade
+collection with shading)</li>
+<li><strong>index</strong> (<em>int</em><em>, </em><em>optional</em>) – Index of the PV segment (Default = None)</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<p class="rubric">Methods</p>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="#base.PVSegment.__init__" title="base.PVSegment.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>([illum_collection,&nbsp;…])</td>
+<td>Initialize PV segment.</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">cast_shadow</span></code>(linestring)</td>
+<td>Cast shadow on PV segment using linestring: will rearrange the PV surfaces between the shaded and illuminated collections of the segment</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">cut_at_point</span></code>(point)</td>
+<td>Cut PV segment at point if the segment contains it.</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">from_linestring_coords</span></code>(coords[,&nbsp;shaded,&nbsp;…])</td>
+<td>Create a PV segment with a single PV surface.</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_param_weighted</span></code>(param)</td>
+<td>Get the parameter from the segment’s surfaces, after weighting by surface length.</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_param_ww</span></code>(param)</td>
+<td>Get the parameter from the segment’s surfaces with weight, i.e.</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot</span></code>(ax[,&nbsp;color_shaded,&nbsp;color_illum,&nbsp;with_index])</td>
+<td>Plot the surfaces in the PV Segment.</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_params</span></code>(new_dict)</td>
+<td>Update surface parameters in the collection.</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Attributes</p>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">all_surfaces</span></code></td>
+<td>List of all the <code class="xref py py-class docutils literal notranslate"><span class="pre">pvfactors.geometry.base.PVSurface</span></code></td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">illum_collection</span></code></td>
+<td>Illuminated collection of the PV segment.</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">n_surfaces</span></code></td>
+<td>Number of surfaces in collection.</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">n_vector</span></code></td>
+<td>Since shaded and illum surfaces are supposed to be collinear, this should return either surfaces’ normal vector.</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">shaded_collection</span></code></td>
+<td>Shaded collection of the PV segment</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">shaded_length</span></code></td>
+<td>Length of the shaded collection of the PV segment.</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">surface_indices</span></code></td>
+<td>Indices of the surfaces in the PV segment.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="base.BaseSide.html" class="btn btn-neutral float-right" title="base.BaseSide" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="base.ShadeCollection.html" class="btn btn-neutral float-left" title="base.ShadeCollection" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2016, SunPower Corporation
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

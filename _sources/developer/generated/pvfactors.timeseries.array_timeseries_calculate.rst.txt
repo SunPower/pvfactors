@@ -1,6 +1,0 @@
-pvfactors.timeseries.array\_timeseries\_calculate
-=================================================
-
-.. currentmodule:: pvfactors.timeseries
-
-.. autofunction:: array_timeseries_calculate

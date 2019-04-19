@@ -1,6 +1,0 @@
-pvfactors.pvarray.Array.create\_view\_matrix
-============================================
-
-.. currentmodule:: pvfactors.pvarray
-
-.. automethod:: Array.create_view_matrix

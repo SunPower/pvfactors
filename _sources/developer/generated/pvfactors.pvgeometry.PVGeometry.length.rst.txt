@@ -1,6 +1,0 @@
-pvfactors.pvgeometry.PVGeometry.length
-======================================
-
-.. currentmodule:: pvfactors.pvgeometry
-
-.. autoattribute:: PVGeometry.length

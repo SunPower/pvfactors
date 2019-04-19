@@ -1,6 +1,0 @@
-pvfactors.timeseries.add\_df\_registries\_nans
-==============================================
-
-.. currentmodule:: pvfactors.timeseries
-
-.. autofunction:: add_df_registries_nans

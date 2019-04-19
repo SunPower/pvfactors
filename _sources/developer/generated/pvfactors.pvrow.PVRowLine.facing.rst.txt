@@ -1,6 +1,0 @@
-pvfactors.pvrow.PVRowLine.facing
-================================
-
-.. currentmodule:: pvfactors.pvrow
-
-.. autoattribute:: PVRowLine.facing
