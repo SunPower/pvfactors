@@ -1,4 +1,6 @@
-"""Implement PV array classes, which will use PV rows and ground geometries"""
+"""Module containing PV array classes, which will use PV rows and ground
+geometries."""
+
 import numpy as np
 from pvfactors.geometry.pvground import PVGround
 from pvfactors.geometry.pvrow import PVRow
@@ -19,7 +21,33 @@ class OrderedPVArray(BasePVArray):
     def __init__(self, list_pvrows=[], ground=None, surface_tilt=None,
                  surface_azimuth=None, axis_azimuth=None, solar_zenith=None,
                  solar_azimuth=None, gcr=None, height=None, distance=None):
-        """List PV rows need to be ordered from left to right"""
+        """Initialize ordered PV array.
+        List of PV rows will be ordered from left to right.
+
+        Parameters
+        ----------
+        list_pvrows : list of :py:class:`~pvfactors.geometry.pvrow.PVRow`, optional
+            List of PV rows in the PV array
+            (Default = [])
+        ground : :py:class:`~pvfactors.geometry.pvground.PVGround`, optional
+            Ground geometry for the PV array
+        surface_tilt : float, optional
+            Surface tilt angles, from 0 to 180 [deg] (Default = None)
+        surface_azimuth : float, optional
+            Surface azimuth angles [deg] (Default = None)
+        axis_azimuth : float, optional
+            Azimuth angle of rotation axis [deg] (Default = None)
+        solar_zenith : array-like, optional
+            Solar zenith angles [deg] (Default = None)
+        solar_azimuth : array-like, optional
+            Solar azimuth angles [deg] (Default = None)
+        gcr : float, optional
+            Ground coverage ratio (Default = None)
+        height : float, optional
+            Unique height of all PV rows (Default = None)
+        distance : float, optional
+            Unique distance between PV rows (Default = None)
+        """
         super(OrderedPVArray, self).__init__(list_pvrows=list_pvrows,
                                              ground=ground, distance=distance,
                                              height=height)
@@ -38,7 +66,15 @@ class OrderedPVArray(BasePVArray):
 
     @classmethod
     def from_dict(cls, parameters, surface_params=[]):
-        """Create ordered PV array from dictionary of parameters"""
+        """Create ordered PV array from dictionary of parameters
+
+        Parameters
+        ----------
+        parameters : dict
+            The parameters defining the PV array
+        surface_params : list of str, optional
+            List of parameter names to pass to surfaces (Default = [])
+        """
         # Create ground
         ground = PVGround.as_flat(y_ground=cls.y_ground,
                                   surface_params=surface_params)
@@ -93,7 +129,7 @@ class OrderedPVArray(BasePVArray):
     def cast_shadows(self):
         """Use calculated solar_2d_vector and array configuration to calculate
         shadows being casted in the ordered pv array.
-        The logic here will be quite specific to ordered pv arrays"""
+        The logic here is quite specific to ordered pv arrays"""
         self.illum_side = ('front' if self.pvrows[0].front.n_vector.dot(
             self.solar_2d_vector) >= 0 else 'back')
         last_gnd_2 = None
