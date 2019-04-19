@@ -9,7 +9,20 @@ from shapely.geometry import \
 
 def difference(u, v):
     """Calculate difference between two lines, avoiding shapely float
-    precision errors"""
+    precision errors
+
+    Parameters
+    ----------
+    u : :py:class:`shapely.geometry.LineString`-like
+        Line string from which ``v`` will be removed
+    v : :py:class:`shapely.geometry.LineString`-like
+        Line string to remove from ``u``
+
+    Returns
+    -------
+    :py:class:`shapely.geometry.LineString`
+       Resulting difference of current surface minus given linestring
+    """
     ub1, ub2 = u.boundary
     vb1, vb2 = v.boundary
     u_contains_vb1 = contains(u, vb1)
