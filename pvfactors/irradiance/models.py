@@ -14,13 +14,16 @@ from pvfactors.config import \
 
 class IsotropicOrdered(BaseModel):
     """Diffuse isotropic sky model for
-    :py:class:`~pvfactors.geometry.OrderedPVArray`"""
+    :py:class:`~pvfactors.geometry.pvarray.OrderedPVArray`. It will
+    calculate the appropriate values for an isotropic sky dome and apply
+    it to the PV array."""
 
     params = ['rho', 'inv_rho', 'direct', 'isotropic', 'reflection']
     cats = ['ground', 'front_pvrow', 'back_pvrow']
     irradiance_comp = ['direct']
 
     def __init__(self):
+        """Initialize irradiance model values that will be saved later on."""
         self.direct = dict.fromkeys(self.cats)
         self.isotropic_luminance = None
         self.rho_front = None
@@ -29,7 +32,32 @@ class IsotropicOrdered(BaseModel):
 
     def fit(self, timestamps, DNI, DHI, solar_zenith, solar_azimuth,
             surface_tilt, surface_azimuth, rho_front, rho_back, albedo):
-        """Use vectorization to calculate values used for irradiance model"""
+        """Use vectorization to calculate values used for the isotropic
+        irradiance model.
+
+        Parameters
+        ----------
+        timestamps : array-like
+            List of timestamps of the simulation.
+        DNI : array-like
+            Direct normal irradiance values [W/m2]
+        DHI : array-like
+            Diffuse horizontal irradiance values [W/m2]
+        solar_zenith : array-like
+            Solar zenith angles [deg]
+        solar_azimuth : array-like
+            Solar azimuth angles [deg]
+        surface_tilt : array-like
+            Surface tilt angles, from 0 to 180 [deg]
+        surface_azimuth : array-like
+            Surface azimuth angles [deg]
+        rho_front : float
+            Reflectivity of the front side of the PV rows
+        rho_back : float
+            Reflectivity of the back side of the PV rows
+        albedo : array-like
+            Albedo values (or ground reflectivity)
+        """
         # Make sure getting array-like values
         if np.isscalar(DNI):
             timestamps = [timestamps]
@@ -67,7 +95,17 @@ class IsotropicOrdered(BaseModel):
             ~front_is_illum, DNI * cosd(aoi_back_pvrow), 0.)
 
     def transform(self, pvarray, idx=0):
-        """Apply calculated irradiance values to PV array"""
+        """Apply calculated irradiance values to PV array.
+
+        Parameters
+        ----------
+        pvarray : PV array object
+            PV array on which the calculated irradiance values will be applied
+        idx : int, optional
+            Index of the irradiance values to apply to the PV array (in the
+            whole timeseries values)
+
+        """
 
         for seg in pvarray.ground.list_segments:
             seg._illum_collection.update_params(
@@ -112,8 +150,12 @@ class IsotropicOrdered(BaseModel):
 
 
 class HybridPerezOrdered(BaseModel):
-    """Model is based off Perez diffuse light model, but
-    applied to pvfactors :py:class:`~pvfactors.geometry.OrderedPVArray`"""
+    """Model is based off Perez diffuse light model, and
+    applied to pvfactors :py:class:`~pvfactors.geometry.OrderedPVArray`
+    objects.
+    The model applies direct, circumsolar, and horizon irradiance to the PV
+    array surfaces.
+    """
 
     params = ['rho', 'inv_rho', 'direct', 'isotropic', 'circumsolar',
               'horizon', 'reflection']
@@ -123,6 +165,19 @@ class HybridPerezOrdered(BaseModel):
     def __init__(self, horizon_band_angle=DEFAULT_HORIZON_BAND_ANGLE,
                  circumsolar_angle=DEFAULT_CIRCUMSOLAR_ANGLE,
                  circumsolar_model='uniform_disk'):
+        """Initialize irradiance model values that will be saved later on.
+
+        Parameters
+        ----------
+        horizon_band_angle : float, optional
+            Width of the horizon band in [deg] (Default =
+            DEFAULT_HORIZON_BAND_ANGLE)
+        circumsolar_angle : float, optional
+            Diameter of the circumsolar area in [deg] (Default =
+            DEFAULT_CIRCUMSOLAR_ANGLE)
+        circumsolar_model : str
+            Circumsolar shading model to use (Default = 'uniform_disk')
+        """
         self.direct = dict.fromkeys(self.cats)
         self.circumsolar = dict.fromkeys(self.cats)
         self.horizon = dict.fromkeys(self.cats)
@@ -136,7 +191,32 @@ class HybridPerezOrdered(BaseModel):
 
     def fit(self, timestamps, DNI, DHI, solar_zenith, solar_azimuth,
             surface_tilt, surface_azimuth, rho_front, rho_back, albedo):
-        """Use vectorization to calculate values used for irradiance model"""
+        """Use vectorization to calculate values used for the hybrid Perez
+        irradiance model.
+
+        Parameters
+        ----------
+        timestamps : array-like
+            List of timestamps of the simulation.
+        DNI : array-like
+            Direct normal irradiance values [W/m2]
+        DHI : array-like
+            Diffuse horizontal irradiance values [W/m2]
+        solar_zenith : array-like
+            Solar zenith angles [deg]
+        solar_azimuth : array-like
+            Solar azimuth angles [deg]
+        surface_tilt : array-like
+            Surface tilt angles, from 0 to 180 [deg]
+        surface_azimuth : array-like
+            Surface azimuth angles [deg]
+        rho_front : float
+            Reflectivity of the front side of the PV rows
+        rho_back : float
+            Reflectivity of the back side of the PV rows
+        albedo : array-like
+            Albedo values (or ground reflectivity)
+        """
         # Make sure getting array-like values
         if np.isscalar(DNI):
             timestamps = [timestamps]
@@ -186,7 +266,17 @@ class HybridPerezOrdered(BaseModel):
 
     def transform(self, pvarray, idx=0):
         """Apply calculated irradiance values to PV array, as well as
-        horizon band shading on pvrow back sides"""
+        horizon band shading on pvrow back sides.
+
+        Parameters
+        ----------
+        pvarray : PV array object
+            PV array on which the calculated irradiance values will be applied
+        idx : int, optional
+            Index of the irradiance values to apply to the PV array (in the
+            whole timeseries values)
+
+        """
 
         for seg in pvarray.ground.list_segments:
             seg._illum_collection.update_params(
@@ -256,9 +346,24 @@ class HybridPerezOrdered(BaseModel):
         return np.array(irradiance_vec), np.array(inv_rho_vec)
 
     def calculate_horizon_shading_pct(self, surface, idx_neighbor, pvrows):
-        """Calculate horizon band shading percentage on surfaces of ordered
+        """Calculate horizon band shading percentage on surfaces of the ordered
         PV array.
-        This needs to be merged with circumsolar shading"""
+        TODO: This needs to be merged with circumsolar shading for performance
+
+        Parameters
+        ----------
+        surface : :py:class:`~pvfactors.geometry.base.PVSurface` object
+            PV surface for which some horizon band shading will occur
+        idx_neighbor : int
+            Index of the neighboring PV row (can be ``None``)
+        pvrows : list of :py:class:`~pvfactors.geometry.pvrow.PVRow` objects
+            List of PV rows on which ``idx_neighbor`` will be used
+
+        Returns
+        -------
+        horizon_shading_pct : float
+            Percentage of horizon band irradiance shaded (from 0 to 100)
+        """
 
         # TODO: should be applied to all pvrow surfaces
 
@@ -278,8 +383,25 @@ class HybridPerezOrdered(BaseModel):
     def calculate_circumsolar_shading_pct(self, surface, idx_neighbor, pvrows,
                                           solar_2d_vector):
         """Model method to calculate circumsolar shading on surfaces of
-        ordered PV array.
-        This needs to be merged with horizon shading"""
+        the ordered PV array.
+        TODO: This needs to be merged with horizon shading for performance
+
+        Parameters
+        ----------
+        surface : :py:class:`~pvfactors.geometry.base.PVSurface` object
+            PV surface for which some horizon band shading will occur
+        idx_neighbor : int
+            Index of the neighboring PV row (can be ``None``)
+        pvrows : list of :py:class:`~pvfactors.geometry.pvrow.PVRow` objects
+            List of PV rows on which ``idx_neighbor`` will be used
+        solar_2d_vector : list
+            Solar vector in the 2D PV array representation
+
+        Returns
+        -------
+        circ_shading_pct : float
+            Percentage of circumsolar irradiance shaded (from 0 to 100)
+        """
 
         # TODO: should be applied to all pvrow surfaces
 
@@ -307,6 +429,45 @@ class HybridPerezOrdered(BaseModel):
     def calculate_luminance_poa_components(
             timestamps, DNI, DHI, solar_zenith, solar_azimuth, surface_tilt,
             surface_azimuth):
+        """Calculate Perez-like luminance and plane-of-array irradiance values.
+
+        Parameters
+        ----------
+        timestamps : array-like
+            List of timestamps of the simulation.
+        DNI : array-like
+            Direct normal irradiance values [W/m2]
+        DHI : array-like
+            Diffuse horizontal irradiance values [W/m2]
+        solar_zenith : array-like
+            Solar zenith angles [deg]
+        solar_azimuth : array-like
+            Solar azimuth angles [deg]
+        surface_tilt : array-like
+            Surface tilt angles, from 0 to 180 [deg]
+        surface_azimuth : array-like
+            Surface azimuth angles [deg]
+
+        Returns
+        -------
+        luminance_isotropic : numpy array
+            Luminance values of the isotropic sky dome area
+        luminance_circumsolar : numpy array
+            Luminance values of the circumsolar area
+        poa_horizon : numpy array
+            Plane-of-array irradiance coming from horizon band and incident on
+            the sides of the PV rows [W/m2]
+        poa_circumsolar_front : numpy array
+            Plane-of-array irradiance coming from the circumsolar area and
+            incident on the front side of the PV rows [W/m2]
+        poa_circumsolar_back : numpy array
+            Plane-of-array irradiance coming from the circumsolar area and
+            incident on the back side of the PV rows [W/m2]
+        aoi_front_pvrow : numpy array
+            Angle of incidence of direct light on front side of PV rows [deg]
+        aoi_back_pvrow : numpy array
+            Angle of incidence of direct light on back side of PV rows [deg]
+        """
 
         # Calculations from utils function
         df_inputs = perez_diffuse_luminance(

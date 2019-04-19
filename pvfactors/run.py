@@ -1,5 +1,6 @@
 """Module containing the functions to run engine calculations in normal or
-parallel model"""
+parallel mode."""
+
 from pvfactors import logging
 from pvfactors.geometry import OrderedPVArray
 from pvfactors.irradiance import HybridPerezOrdered
@@ -21,7 +22,53 @@ def run_timeseries_engine(fn_build_report, pvarray_parameters,
                           cls_pvarray=OrderedPVArray, cls_engine=PVEngine,
                           cls_irradiance=HybridPerezOrdered,
                           cls_vf=VFCalculator):
-    """Run timeseries simulation using the provided pvfactors classes"""
+    """Run timeseries simulation in normal mode, and using the specified
+    classes.
+
+    Parameters
+    ----------
+    fn_build_report : function
+        Function that will build the report of the simulation
+    pvarray_parameters : dict
+        The parameters defining the PV array
+    timestamps : array-like
+        List of timestamps of the simulation.
+    dni : array-like
+        Direct normal irradiance values [W/m2]
+    dhi : array-like
+        Diffuse horizontal irradiance values [W/m2]
+    solar_zenith : array-like
+        Solar zenith angles [deg]
+    solar_azimuth : array-like
+        Solar azimuth angles [deg]
+    surface_tilt : array-like
+        Surface tilt angles, from 0 to 180 [deg]
+    surface_azimuth : array-like
+        Surface azimuth angles [deg]
+    albedo : array-like
+        Albedo values (or ground reflectivity)
+    cls_pvarray : class of PV array, optional
+        Class that will be used to build the PV array
+        (Default =
+        :py:class:`~pvfactors.geometry.pvarray.OrderedPVArray` class)
+    cls_engine : class of PV engine, optional
+        Class of the engine to use to run the simulations (Default =
+        :py:class:`~pvfactors.engine.PVEngine` class)
+    cls_irradiance : class of irradiance model, optional
+        The irradiance model that will be applied to the PV array
+        (Default =
+        :py:class:`~pvfactors.irradiance.models.HybridPerezOrdered` class)
+    cls_vf : class of VF calculator, optional
+        Calculator that will be used to calculate the view factor matrices
+        (Default =
+        :py:class:`~pvfactors.viewfactors.calculator.VFCalculator` class)
+
+    Returns
+    -------
+    report
+        Saved results from the simulation, as specified by user's report
+        function
+    """
 
     # Instantiate classes and engine
     irradiance_model = cls_irradiance()
@@ -46,7 +93,57 @@ def run_parallel_engine(report_builder, pvarray_parameters,
                         cls_pvarray=OrderedPVArray, cls_engine=PVEngine,
                         cls_irradiance=HybridPerezOrdered,
                         cls_vf=VFCalculator, n_processes=2):
-    """Run timeseries simulation using multiprocessing"""
+    """Run timeseries simulation using multiprocessing. Here, instead of a
+    function that will build the report, the users will need to pass a class
+    (or an object).
+
+    Parameters
+    ----------
+    report_builder : class or object
+        Class or object that will build and merge the reports. It **must**
+        have a ``build()`` and a ``merge()`` method that perform the tasks
+    pvarray_parameters : dict
+        The parameters defining the PV array
+    timestamps : array-like
+        List of timestamps of the simulation.
+    dni : array-like
+        Direct normal irradiance values [W/m2]
+    dhi : array-like
+        Diffuse horizontal irradiance values [W/m2]
+    solar_zenith : array-like
+        Solar zenith angles [deg]
+    solar_azimuth : array-like
+        Solar azimuth angles [deg]
+    surface_tilt : array-like
+        Surface tilt angles, from 0 to 180 [deg]
+    surface_azimuth : array-like
+        Surface azimuth angles [deg]
+    albedo : array-like
+        Albedo values (or ground reflectivity)
+    cls_pvarray : class of PV array, optional
+        Class that will be used to build the PV array
+        (Default =
+        :py:class:`~pvfactors.geometry.pvarray.OrderedPVArray` class)
+    cls_engine : class of PV engine, optional
+        Class of the engine to use to run the simulations (Default =
+        :py:class:`~pvfactors.engine.PVEngine` class)
+    cls_irradiance : class of irradiance model, optional
+        The irradiance model that will be applied to the PV array
+        (Default =
+        :py:class:`~pvfactors.irradiance.models.HybridPerezOrdered` class)
+    cls_vf : class of VF calculator, optional
+        Calculator that will be used to calculate the view factor matrices
+        (Default =
+        :py:class:`~pvfactors.viewfactors.calculator.VFCalculator` class)
+    n_processes : int, optional
+        Number of parallel processes to run for the calculation (Default = 2)
+
+    Returns
+    -------
+    report
+        Saved results from the simulation, as specified by user's report
+        class (or object)
+    """
     # Choose number of workers
     if n_processes == -1:
         n_processes = cpu_count()
@@ -101,7 +198,24 @@ def run_parallel_engine(report_builder, pvarray_parameters,
 
 # Utility function for parallel run
 def _run_serially(args):
-    """Helper function used to run calculations in parallel"""
+    """Helper function used to run calculations in parallel
+
+    Parameters
+    ----------
+    args : tuple
+        List of arguments where most will be used in
+        :py:function:`~pvfactors.run.run_timeseries_engine`
+
+    Returns
+    -------
+    report
+        Saved results from the simulation, as specified by user's report
+        class (or object)
+    idx : int
+        Index of the report, which will be used to sort the final list of
+        reports after all the parallel simulations are over
+
+    """
     report_builder, pvarray_parameters, timestamps, dni, dhi, \
         solar_zenith, solar_azimuth, surface_tilt, surface_azimuth,\
         albedo, cls_pvarray, cls_engine, cls_irradiance, cls_vf, idx = args

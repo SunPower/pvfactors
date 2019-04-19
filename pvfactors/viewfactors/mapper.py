@@ -7,22 +7,25 @@ from shapely.geometry import LineString
 from pvfactors.config import REVERSE_VIEW_DICT
 import numpy as np
 import logging
+
 LOGGER = logging.getLogger(__name__)
 LOGGER.setLevel(logging.INFO)
-
 
 np.set_printoptions(suppress=True)
 
 
 class VFMapperOrderedPVArray(object):
-    """This class calculates the view factors based on the surface registry of
-    :py:class:`~pvfactors.pvarray.Array` class. Its only attribute is a mapping
-    between "view types" and the "low-level" view factor calculation functions
-
+    """This class maps the "view types" of the
+    :py:class:`~pvfactors.geometry.pvarray.OrderedPVArray` ``view_matrix``
+    property to some view factor calculation functions.
+    For instance, the method to calculate the view factor between 2 PV row
+    surfaces will be different than between a PV row surface and a ground one.
     """
     reverse_view = REVERSE_VIEW_DICT
 
     def __init__(self):
+        """Initialize the mapping between "view types" and calculation methods.
+        """
         self.function_mapping = {
             "back_gnd": self.vf_hottel_pvrow_ground,
             "gnd_back": self.vf_hottel_pvrow_ground,
@@ -33,16 +36,16 @@ class VFMapperOrderedPVArray(object):
             "pvrows": self.vf_trk_to_trk}
 
     def vf_hottel_pvrow_ground(self, line_1, line_2, obstructing_line):
-        """Use Hottel method to calculate view factor between PV row front-surface
+        """Use Hottel method to calculate view factor between PV row surface
         and the ground. Can account for obstructing object.
 
         Parameters
         ----------
-        line_1 : ``shapely.LineString``
+        line_1: ``shapely.LineString``
             Line for surface 1: pv row or ground
-        line_2 : ``shapely.LineString``
+        line_2: ``shapely.LineString``
             Line for surface 2: pv row or ground
-        obstructing_line : ``shapely.LineString``
+        obstructing_line: :py:class:`~pvfactors.geometry.pvrow.PVRow` object
             Line for obstructing the view between line_1 and line_2
 
         Returns
@@ -89,17 +92,19 @@ class VFMapperOrderedPVArray(object):
 
     def vf_trk_to_trk(self, line_1, line_2, *args):
         """Use parallel plane formula to calculate view factor between PV rows.
-        This assumes that pv row #2 is just a translation along the x-axis of
-        pv row #1; meaning that only their x-values are different and they have
-        the same elevation or rotation angle.
+        This assumes that pv row  # 2 is just a translation along the x-axis of
+        pv row  # 1; meaning that only their x-values are different and they
+        have the same elevation and rotation angle.
 
         Parameters
         ----------
-        line_1 : ``shapely.LineString``
+        line_1: ``shapely.LineString``
             Line for surface 1: pv row or ground
-        line_2 : ``shapely.LineString``
+        line_2: ``shapely.LineString``
             Line for surface 2: pv row or ground
-        *args : tuple
+        *args: tuple
+            Will not be used: here for convenience and consistency of arguments
+            between all view factor calculation methods
 
         Returns
         -------
@@ -130,24 +135,24 @@ class VFMapperOrderedPVArray(object):
         lines as defined in the Hottel method. This accounts for potentially
         obstructing objects.
         It assumes that the obstructing line is a
-        :py:class:`~pvfactors.pvrow.PVRowLine`
+        :py:class:`~pvfactors.geometry.pvrow.PVRow` object
         and that it has a ``lowest_point`` attribute in order to calculate the
         Hottel string length when there is obstruction.
 
         Parameters
         ----------
-        pt1 : ``shapely.Point``
+        pt1: ``shapely.Point``
             a point from line 1
-        pt2 : ``shapely.Point``
+        pt2: ``shapely.Point``
             a point from line 2
-        obstruction : ``shapely.LineString``
-            Line obstructing the view between line_1 and line_2
+        obstruction: :py:class:`~pvfactors.geometry.pvrow.PVRow` object
+            PV row obstructing the view between line_1 and line_2
 
         Returns
         -------
-        length : float
+        length: float
             the length of the Hottel string
-        is_obstructing : bool
+        is_obstructing: bool
             boolean flag specifying if there's obstruction or not between the
             two points
 
@@ -173,16 +178,15 @@ class VFMapperOrderedPVArray(object):
 
         Parameters
         ----------
-        length_1 : float
+        length_1: float
 
-        length_2 : float
+        length_2: float
 
-        length_3 : float
+        length_3: float
 
-        length_4 : float
+        length_4: float
 
-        w1 : float
-
+        w1: float
 
         Returns
         -------
