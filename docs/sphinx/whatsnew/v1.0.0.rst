@@ -4,7 +4,7 @@ v1.0.0 (April 19, 2019)
 =======================
 
 Major release for pvfactors. The whole code base was revamped, which led to a 5x speed increase in computational speed. The package API has now also been completely upgraded, with a seperation and uncoupling between geometry, irradiance, and view factor modeling. All of these items are now unified into an engine and also some run functions to run full or partial simulations, and inspect the results.
-The documentation has been completely revamped as well, with a new tutorial section containing lots of examples to familiarize with pvfactors, and also a developer API section that documents all of the classes and functions of the package.
+The documentation was completely revamped as well, with a new tutorial section containing lots of examples to get familiar with pvfactors, and also a developer API section that documents all of the classes and functions of the package.
 
 * Fix pvlib version in order to create conda build (#26)
 * Update docs: reorganize, clean up, and add API (#27)
