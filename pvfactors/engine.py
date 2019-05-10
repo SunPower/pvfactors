@@ -142,6 +142,7 @@ class PVEngine(object):
             vf_matrix = self.vf_calculator.get_vf_matrix(
                 geom_dict, pvarray.view_matrix, pvarray.obstr_matrix,
                 pvarray.pvrows)
+            pvarray.vf_matrix = vf_matrix
 
             # Apply irradiance terms to pvarray
             irradiance_vec, invrho_vec = \
