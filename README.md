@@ -1,7 +1,7 @@
 pvfactors: irradiance modeling made simple
 ==========================================
 
-<img src="docs/sphinx/_static/logo.png" style="width: 60%;">
+<img src="https://raw.githubusercontent.com/SunPower/pvfactors/master/docs/sphinx/_static/logo.png" style="width: 60%;">
 
 [![CircleCI](https://circleci.com/gh/SunPower/pvfactors.svg?style=shield)](https://circleci.com/gh/SunPower/pvfactors)
 [![license](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg)](https://github.com/SunPower/pvfactors/blob/master/LICENSE)
@@ -134,7 +134,7 @@ pvarray.plot(ax)
 plt.show()
 ```
 
-<img src="docs/sphinx/_static/pvarray.png">
+<img src="https://raw.githubusercontent.com/SunPower/pvfactors/master/docs/sphinx/_static/pvarray.png">
 
 
 The user can inspect the results very easily thanks to the simple geometry API
