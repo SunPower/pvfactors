@@ -98,7 +98,7 @@ def discr_params():
         'rho_ground': 0.2,
         'rho_front_pvrow': 0.01,
         'rho_back_pvrow': 0.03,
-        'cut': {0: {'front': 5}, 1: {'back': 3}}
+        'cut': {0: {'front': 5}, 1: {'back': 3, 'front': 2}}
     }
     yield params
 
