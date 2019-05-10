@@ -49,14 +49,20 @@ def difference(u, v):
             else:
                 return LineString()
         elif v_contains_ub1:
-            return LineString([vb1, ub2])
+            if v_contains_ub2:
+                return LineString()
+            else:
+                return LineString([vb1, ub2])
         elif v_contains_ub2:
             return LineString([ub1, vb1])
         else:
             return u
     elif u_contains_vb2:
         if v_contains_ub1:
-            return LineString([vb2, ub2])
+            if v_contains_ub2:
+                return LineString()
+            else:
+                return LineString([vb2, ub2])
         elif v_contains_ub2:
             return LineString([ub1, vb2])
         else:

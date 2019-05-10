@@ -372,7 +372,6 @@ class ShadeCollection(GeometryCollection):
         pvsurface : :py:class:`~pvfactors.geometry.base.PVSurface`
             PV Surface to add to collection
         """
-        assert pvsurface.shaded == self.shaded
         self.list_surfaces.append(pvsurface)
         self.is_collinear = is_collinear(self.list_surfaces)
         super(ShadeCollection, self).__init__(self.list_surfaces)

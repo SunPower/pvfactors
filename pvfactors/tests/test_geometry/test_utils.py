@@ -97,6 +97,19 @@ def test_difference():
     assert isinstance(diff, LineString)
     assert diff.is_empty
 
+    # Special case that caused crash
+    u = LineString([(1, 0), (0, 0)])
+    v = LineString([(0, 0), (2, 0)])
+    diff = difference(u, v)
+    assert diff.is_empty
+
+    # Special case that caused crash
+    u = LineString([(1, 0), (0, 0)])
+    v = LineString([(-2, 0), (1, 0)])
+    diff = difference(u, v)
+    print(diff.wkt)
+    assert diff.is_empty
+
 
 def test_contains_on_side():
     """Check that ``contains`` function works on a BaseSide instance"""
