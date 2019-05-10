@@ -79,6 +79,7 @@ def test_discretization_ordered_pvarray(discr_params):
     assert len(pvrows[0].front.list_segments) == 5
     assert len(pvrows[0].back.list_segments) == 1
     assert len(pvrows[1].back.list_segments) == 3
+    assert len(pvrows[1].front.list_segments) == 2
 
 
 def test_ordered_pvarray_gnd_shadow_casting(params):
