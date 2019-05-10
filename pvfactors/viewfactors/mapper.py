@@ -194,6 +194,9 @@ class VFMapperOrderedPVArray(object):
             view factor between the two parallel lines
 
         """
-        vf_1_to_2 = (length_1 + length_2 - length_3 - length_4) / (2. * w1)
+        list_sums = [length_1 + length_2, length_3 + length_4]
+        sum_crossed = max(list_sums)
+        sum_uncrossed = min(list_sums)
+        vf_1_to_2 = (sum_crossed - sum_uncrossed) / (2. * w1)
 
         return vf_1_to_2
