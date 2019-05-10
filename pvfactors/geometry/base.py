@@ -1127,6 +1127,9 @@ class BasePVArray(object):
         self._obstr_matrix = None
         self._surfaces_indexed = False
 
+        # Initialize view factor matrix
+        self.vf_matrix = None  # needs to be calculated externally
+
     def plot(self, ax, with_index=False):
         """Plot all the PV rows and the ground in the PV array.
 
