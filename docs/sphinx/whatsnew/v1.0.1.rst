@@ -1,0 +1,16 @@
+.. _whatsnew_1010:
+
+v1.0.1 (May 14, 2019)
+=======================
+
+A number of small fixes. And also newer and correct build for this version.
+
+* Fix small negative vf between pvrows (#45)
+* Passing calculated view factor matrix to pv array for use in reports (#46)
+* Small fixes (#44)
+* Fix "difference" calculation method for linestrings (#47)
+
+Contributors
+------------
+
+* Marc Anoma (:ghuser:`anomam`)
