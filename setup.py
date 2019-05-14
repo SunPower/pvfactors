@@ -15,7 +15,8 @@ DISTNAME = 'pvfactors'
 AUTHOR = 'SunPower'
 MAINTAINER_EMAIL = 'marc.abouanoma@sunpowercorp.com'
 URL = 'https://github.com/SunPower/pvfactors'
-PACKAGES = ['pvfactors']
+PACKAGES = ['pvfactors', 'pvfactors.geometry', 'pvfactors.irradiance',
+            'pvfactors.viewfactors']
 LICENSE = 'BSD 3-Clause'
 CLASSIFIERS = [
     'Development Status :: 3 - Alpha',
