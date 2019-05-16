@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>mapper &mdash; pvfactors 1.0.0 documentation</title>
+  <title>mapper &mdash; pvfactors 1.0.1+0.gb9e42db.dirty documentation</title>
   
 
   
@@ -57,7 +57,7 @@
 
           
             
-            <img src="../_static/logo.png" class="logo" alt="Logo"/>
+            <img src="../_static/logo_small.png" class="logo" alt="Logo"/>
           
           </a>
 
@@ -65,7 +65,7 @@
             
             
               <div class="version">
-                1.0.0
+                1.0.1
               </div>
             
           
@@ -354,7 +354,10 @@
 <span class="sd">            view factor between the two parallel lines</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">vf_1_to_2</span> <span class="o">=</span> <span class="p">(</span><span class="n">length_1</span> <span class="o">+</span> <span class="n">length_2</span> <span class="o">-</span> <span class="n">length_3</span> <span class="o">-</span> <span class="n">length_4</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mf">2.</span> <span class="o">*</span> <span class="n">w1</span><span class="p">)</span>
+        <span class="n">list_sums</span> <span class="o">=</span> <span class="p">[</span><span class="n">length_1</span> <span class="o">+</span> <span class="n">length_2</span><span class="p">,</span> <span class="n">length_3</span> <span class="o">+</span> <span class="n">length_4</span><span class="p">]</span>
+        <span class="n">sum_crossed</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">list_sums</span><span class="p">)</span>
+        <span class="n">sum_uncrossed</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">list_sums</span><span class="p">)</span>
+        <span class="n">vf_1_to_2</span> <span class="o">=</span> <span class="p">(</span><span class="n">sum_crossed</span> <span class="o">-</span> <span class="n">sum_uncrossed</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mf">2.</span> <span class="o">*</span> <span class="n">w1</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">vf_1_to_2</span></div>
 </pre></div>
