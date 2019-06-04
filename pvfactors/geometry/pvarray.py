@@ -153,7 +153,6 @@ class OrderedPVArray(BasePVArray):
                    and not stop_checking_for_direct_shading:
                     # There's inter-row shading if ground shadows overlap
                     if self.illum_side == 'front':
-                        # print(f'has direct shading:{gnd_1.x - last_gnd_2.x}')
                         self.has_direct_shading = gnd_1.x + tol < last_gnd_2.x 
                     else:
                         self.has_direct_shading = gnd_2.x + tol < last_gnd_1.x
