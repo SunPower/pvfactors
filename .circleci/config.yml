@@ -25,7 +25,7 @@ jobs:
             - v1-dep-{{ .Branch }}-
             - v1-dep-master-
             - v1-dep-
-      - run: sudo pip install pytest numpy scipy pandas shapely pvlib future six pytest-mock tqdm
+      - run: sudo pip install pytest scipy shapely pvlib future six pytest-mock tqdm
       - save_cache:
           key: v1-dep-{{ .Branch }}-{{ epoch }}
           paths:
