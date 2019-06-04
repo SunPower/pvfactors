@@ -206,5 +206,5 @@ def df_inputs_clearsky_8760():
     fp = os.path.join(DIR_TEST_DATA,
                       'file_test_inputs_MET_clearsky_tucson.csv')
     df = pd.read_csv(fp, index_col=0)
-    df.index = pd.DatetimeIndex(df.index).tz_localize('UTC').tz_convert(tz)
+    df.index = pd.DatetimeIndex(df.index).tz_convert(tz)
     yield df
