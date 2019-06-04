@@ -4,7 +4,9 @@ workflows:
   test:
     jobs:
       - test-python-2.7
+      - test-python-3.5
       - test-python-3.6
+      - test-python-3.7
 jobs:
   test-python-2.7: &test-template
     working_directory: ~/SunPower/pvfactors
@@ -42,7 +44,15 @@ jobs:
           path: /tmp/circleci-artifacts
       - store_artifacts:
           path: /tmp/circleci-test-results
+  test-python-3.5:
+    <<: *test-template
+    docker:
+      - image: circleci/python:3.5.7-stretch
   test-python-3.6:
     <<: *test-template
     docker:
       - image: circleci/python:3.6.6-stretch
+  test-python-3.7:
+    <<: *test-template
+    docker:
+      - image: circleci/python:3.7.3-stretch
