@@ -130,6 +130,7 @@ class OrderedPVArray(BasePVArray):
         """Use calculated solar_2d_vector and array configuration to calculate
         shadows being casted in the ordered pv array.
         The logic here is quite specific to ordered pv arrays"""
+        tol=1e-5
         self.illum_side = ('front' if self.pvrows[0].front.n_vector.dot(
             self.solar_2d_vector) >= 0 else 'back')
         last_gnd_2 = None
@@ -152,9 +153,10 @@ class OrderedPVArray(BasePVArray):
                    and not stop_checking_for_direct_shading:
                     # There's inter-row shading if ground shadows overlap
                     if self.illum_side == 'front':
-                        self.has_direct_shading = gnd_1.x < last_gnd_2.x
+                        # print(f'has direct shading:{gnd_1.x - last_gnd_2.x}')
+                        self.has_direct_shading = gnd_1.x + tol < last_gnd_2.x 
                     else:
-                        self.has_direct_shading = gnd_2.x < last_gnd_1.x
+                        self.has_direct_shading = gnd_2.x + tol < last_gnd_1.x
                     stop_checking_for_direct_shading = True
                 last_gnd_2 = gnd_2
                 last_gnd_1 = gnd_1
