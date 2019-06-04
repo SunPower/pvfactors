@@ -130,7 +130,7 @@ class OrderedPVArray(BasePVArray):
         """Use calculated solar_2d_vector and array configuration to calculate
         shadows being casted in the ordered pv array.
         The logic here is quite specific to ordered pv arrays"""
-        tol=1e-5
+        tol=1e-6
         self.illum_side = ('front' if self.pvrows[0].front.n_vector.dot(
             self.solar_2d_vector) >= 0 else 'back')
         last_gnd_2 = None
