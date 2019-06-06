@@ -151,6 +151,8 @@ class PVEngine(object):
                 # pvrows
                 list_surface_indices = pvarray.pvrows[
                     self.fast_mode_pvrow_index].back.surface_indices
+
+                # TODO: can cut calculation time using a subset of view_matrix
                 # Calculate view factors
                 vf_matrix_subset = self.vf_calculator.get_vf_matrix_subset(
                     geom_dict, pvarray.view_matrix, pvarray.obstr_matrix,
@@ -158,6 +160,25 @@ class PVEngine(object):
                 pvarray.vf_matrix = vf_matrix_subset
 
                 # Apply irradiance terms to pvarray
+                irradiance_vec, invrho_vec, total_perez_vec = \
+                    self.irradiance.transform(pvarray, idx=idx)
+
+                irradiance_vec_subset = irradiance_vec[list_surface_indices]
+                # In fast mode, will not care to calculate q0
+                qinc = vf_matrix_subset.dot(total_perez_vec) \
+                    + irradiance_vec_subset
+
+                # Calculate other terms
+                isotropic_vec = vf_matrix_subset[:-1, -1] * total_perez_vec[-1]
+                reflection_vec = qinc - irradiance_vec_subset \
+                    - isotropic_vec
+
+                # Update surfaces with values
+                for i, surf_idx in enumerate(list_surface_indices):
+                    surface = geom_dict[surf_idx]
+                    surface.update_params({'qinc': qinc[i],
+                                           'isotropic': isotropic_vec[i],
+                                           'reflection': reflection_vec[i]})
 
             else:
                 # Calculate view factors
