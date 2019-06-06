@@ -176,7 +176,8 @@ class IsotropicOrdered(BaseModel):
         total_perez_vec.append(self.isotropic_luminance[idx])
         inv_rho_vec.append(SKY_REFLECTIVITY_DUMMY)
 
-        return np.array(irradiance_vec), np.array(inv_rho_vec)
+        return np.array(irradiance_vec), np.array(inv_rho_vec), \
+            np.array(total_perez_vec)
 
 
 class HybridPerezOrdered(BaseModel):
@@ -402,7 +403,8 @@ class HybridPerezOrdered(BaseModel):
         total_perez_vec.append(self.isotropic_luminance[idx])
         inv_rho_vec.append(SKY_REFLECTIVITY_DUMMY)
 
-        return np.array(irradiance_vec), np.array(inv_rho_vec)
+        return np.array(irradiance_vec), np.array(inv_rho_vec), \
+            np.array(total_perez_vec)
 
     def calculate_horizon_shading_pct(self, surface, idx_neighbor, pvrows):
         """Calculate horizon band shading percentage on surfaces of the ordered

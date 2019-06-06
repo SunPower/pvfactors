@@ -168,7 +168,7 @@ class PVEngine(object):
                 pvarray.vf_matrix = vf_matrix
 
                 # Apply irradiance terms to pvarray
-                irradiance_vec, invrho_vec = \
+                irradiance_vec, invrho_vec, total_perez_vec = \
                     self.irradiance.transform(pvarray, idx=idx)
 
                 # Calculate radiosities
