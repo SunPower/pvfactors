@@ -4,7 +4,7 @@ geometries."""
 import numpy as np
 from pvfactors.geometry.pvground import PVGround
 from pvfactors.geometry.pvrow import PVRow
-from pvfactors.config import X_ORIGIN_PVROWS, VIEW_DICT
+from pvfactors.config import X_ORIGIN_PVROWS, VIEW_DICT, DISTANCE_TOLERANCE
 from pvfactors.geometry.base import get_solar_2d_vector, BasePVArray
 from pvfactors.geometry.utils import projection
 from shapely.geometry import LineString, Point
@@ -152,9 +152,9 @@ class OrderedPVArray(BasePVArray):
                    and not stop_checking_for_direct_shading:
                     # There's inter-row shading if ground shadows overlap
                     if self.illum_side == 'front':
-                        self.has_direct_shading = gnd_1.x < last_gnd_2.x
+                        self.has_direct_shading = gnd_1.x + DISTANCE_TOLERANCE < last_gnd_2.x 
                     else:
-                        self.has_direct_shading = gnd_2.x < last_gnd_1.x
+                        self.has_direct_shading = gnd_2.x + DISTANCE_TOLERANCE < last_gnd_1.x
                     stop_checking_for_direct_shading = True
                 last_gnd_2 = gnd_2
                 last_gnd_1 = gnd_1

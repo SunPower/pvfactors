@@ -497,3 +497,16 @@ def test_time_ordered_pvarray(params):
         list_elapsed.append(toc - tic)
 
     print("\nAvg time elapsed: {} s".format(np.mean(list_elapsed)))
+
+def test_ordered_pvarray_gnd_shadow_casting_tolerance():
+    params = {'axis_azimuth': 0, 
+            'gcr': 0.3,
+            'n_pvrows': 3,
+            'pvrow_height': 1.8,
+            'pvrow_width': 1.98,
+            'solar_azimuth': 263.99310644558074,
+            'solar_zenith': 73.91658668648401, 
+            'surface_azimuth': 270.0, 
+            'surface_tilt': 51.98206680806641}
+    pvarray_w_direct_shading = OrderedPVArray.from_dict(params)
+    pvarray_w_direct_shading.cast_shadows()
