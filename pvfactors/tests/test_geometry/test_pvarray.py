@@ -498,15 +498,27 @@ def test_time_ordered_pvarray(params):
 
     print("\nAvg time elapsed: {} s".format(np.mean(list_elapsed)))
 
+
 def test_ordered_pvarray_gnd_shadow_casting_tolerance():
-    params = {'axis_azimuth': 0, 
-            'gcr': 0.3,
-            'n_pvrows': 3,
-            'pvrow_height': 1.8,
-            'pvrow_width': 1.98,
-            'solar_azimuth': 263.99310644558074,
-            'solar_zenith': 73.91658668648401, 
-            'surface_azimuth': 270.0, 
-            'surface_tilt': 51.98206680806641}
+    """It seems that there are roundoff errors when running shadow casting
+    on some computers, test that this case works."""
+
+    params = {'axis_azimuth': 0,
+              'gcr': 0.3,
+              'n_pvrows': 3,
+              'pvrow_height': 1.8,
+              'pvrow_width': 1.98,
+              'solar_azimuth': 263.99310644558074,
+              'solar_zenith': 73.91658668648401,
+              'surface_azimuth': 270.0,
+              'surface_tilt': 51.98206680806641}
     pvarray_w_direct_shading = OrderedPVArray.from_dict(params)
     pvarray_w_direct_shading.cast_shadows()
+
+    # Check that 3 shadows on ground
+    assert (pvarray_w_direct_shading.ground.list_segments[0]
+            .shaded_collection.n_surfaces) == 3
+    # Check that there is no shading on the center pv row
+    pvrow = pvarray_w_direct_shading.pvrows[1]
+    assert (pvrow.front.list_segments[0]
+            .shaded_collection.n_surfaces) == 0
