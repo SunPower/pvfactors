@@ -145,10 +145,15 @@ class PVEngine(object):
             pvarray.cast_shadows()
             pvarray.cuts_for_pvrow_view()
 
+            # Prepare inputs
+            geom_dict = pvarray.dict_surfaces
+
+            # Apply irradiance terms to pvarray
+            irradiance_vec, invrho_vec, total_perez_vec = \
+                self.irradiance.transform(pvarray, idx=idx)
+
             if self.is_fast_mode:
-                geom_dict = pvarray.dict_surfaces
-                # Get the indices of the surfaces of the back of the selected
-                # pvrows
+                # Indices of the surfaces of the back of the selected pvrows
                 list_surface_indices = pvarray.pvrows[
                     self.fast_mode_pvrow_index].back.surface_indices
 
@@ -158,10 +163,6 @@ class PVEngine(object):
                     geom_dict, pvarray.view_matrix, pvarray.obstr_matrix,
                     pvarray.pvrows, list_surface_indices)
                 pvarray.vf_matrix = vf_matrix_subset
-
-                # Apply irradiance terms to pvarray
-                irradiance_vec, invrho_vec, total_perez_vec = \
-                    self.irradiance.transform(pvarray, idx=idx)
 
                 irradiance_vec_subset = irradiance_vec[list_surface_indices]
                 # In fast mode, will not care to calculate q0
@@ -173,7 +174,7 @@ class PVEngine(object):
                 reflection_vec = qinc - irradiance_vec_subset \
                     - isotropic_vec
 
-                # Update surfaces with values
+                # Update selected surfaces with values
                 for i, surf_idx in enumerate(list_surface_indices):
                     surface = geom_dict[surf_idx]
                     surface.update_params({'qinc': qinc[i],
@@ -182,15 +183,10 @@ class PVEngine(object):
 
             else:
                 # Calculate view factors
-                geom_dict = pvarray.dict_surfaces
                 vf_matrix = self.vf_calculator.get_vf_matrix(
                     geom_dict, pvarray.view_matrix, pvarray.obstr_matrix,
                     pvarray.pvrows)
                 pvarray.vf_matrix = vf_matrix
-
-                # Apply irradiance terms to pvarray
-                irradiance_vec, invrho_vec, total_perez_vec = \
-                    self.irradiance.transform(pvarray, idx=idx)
 
                 # Calculate radiosities
                 invrho_mat = np.diag(invrho_vec)
