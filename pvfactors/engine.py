@@ -170,7 +170,7 @@ class PVEngine(object):
                     + irradiance_vec_subset
 
                 # Calculate other terms
-                isotropic_vec = vf_matrix_subset[:-1, -1] * total_perez_vec[-1]
+                isotropic_vec = vf_matrix_subset[:, -1] * total_perez_vec[-1]
                 reflection_vec = qinc - irradiance_vec_subset \
                     - isotropic_vec
 

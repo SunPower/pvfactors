@@ -54,7 +54,6 @@ class VFCalculator(object):
             # Add sky value
             vf_matrix_subset[i, -1] = 1. - sum_finite_vfs
 
-        print(vf_matrix_subset)
         return vf_matrix_subset
 
     def get_surface_vf_vector(self, geom_dict, view_vec, obstr_vec,
