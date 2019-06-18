@@ -12,7 +12,14 @@ The current version of the view factor model only addresses PV rows that are mad
    :width: 80%
    :align: center
 
-By making some assumptions, it is possible to represent the calculation of irradiance terms on each surface with a linear system. The dimension of this system changes depending on the number of surfaces considered. But we can formulate it for the general case of ``n`` surfaces.
+
+The mathematical model used in pvfactors simulations is different depending on the simulation type that is run. In "full simulations", all of the reflections between the modeled surfaces are taken into account in the calculations. In "fast simulations", assumptions are made on the reflected irradiance from the environment surrounding the surface of interest.
+
+
+Full simulations
+----------------
+
+When making some assumptions, it is possible to represent the calculation of irradiance terms on each surface with a linear system. The dimension of this system changes depending on the number of surfaces considered. But we can formulate it for the general case of ``n`` surfaces.
 
 For a surface ``i`` we can write that:
 
@@ -87,3 +94,68 @@ Or, for a system of ``n`` surfaces:
 	\end{pmatrix}
 
 After solving this system and finding all of the radiosities, it is very easy to deduce values of interest like back side or front side incident irradiance.
+
+Fast simulations
+----------------
+
+In the case of fast simulations and when interested in back side surfaces only, we can make additional assumptions that allow us to calculate the incident irradiance on back side surfaces without solving a linear system of equations.
+
+In the full simulation case, we defined a vector of incident irradiance on all surfaces as follows:
+
+
+.. math::
+
+	\mathbf{q_{inc}} = \mathbf{F} . \mathbf{q_o} + \mathbf{Irr}
+
+
+And we realized that we needed to solve for :math:`\mathbf{q_o}` in order to find :math:`\mathbf{q_{inc}}`. But with the following assumptions, we can find an approximation of :math:`\mathbf{q_{inc}}` for back side surfaces without having to solve a linear system of equations:
+
+1) we can assume that the radiosity of the surfaces is equal to their reflectivity multiplied by the incident irradiance on the surfaces as calculated by the Perez transposition model, which only works for front side surfaces. I.e.
+
+.. math::
+
+	\mathbf{q_{o}} ≈ \mathbf{R} . \mathbf{q_{perez}}
+
+Here, :math:`\mathbf{q_{perez}}` can have values equal to zero for back side surfaces, which will lead to a good assumption if the back side surfaces don't see each other.
+
+2) we can then also reduce the calculation of view factors to the ones of the back side surfaces of interest, leading to the following:
+
+
+.. math::
+
+	\mathbf{q_{inc-back}} ≈ \mathbf{F_{back}} . \mathbf{R} . \mathbf{q_{perez}} + \mathbf{Irr_{back}}
+
+
+Example
+^^^^^^^
+
+For instance, if we are interested in back side surfaces with indices ``3`` and ``7``, this will look like this:
+
+.. math::
+
+	\begin{pmatrix}
+	q_{inc, 3}\\
+	q_{inc, 7}\\
+	\end{pmatrix}
+	=
+	\begin{pmatrix}
+	F_{3,1}      & F_{3,2}      & F_{3,3}      & \cdots   & F_{3,n}\\
+	F_{7,1}      & F_{7,2}      & F_{7,3}      & \cdots   & F_{7,n}\\
+	\end{pmatrix} .
+	\begin{pmatrix}
+	{\rho_1}      & 0             & 0      & \cdots   & 0\\
+	0             & {\rho_2}      & 0      & \cdots   & 0\\
+	\vdots        & \vdots        & \vdots & \ddots   & \vdots\\
+	0             & 0             & 0      & \cdots   & {\rho_n}\\
+	\end{pmatrix} .
+	\begin{pmatrix}
+	q_{perez, 1}\\
+	q_{perez, 2}\\
+	\vdots\\
+	q_{perez, n}\\
+	\end{pmatrix}
+	+
+	\begin{pmatrix}
+	Irr_3\\
+	Irr_7\\
+	\end{pmatrix}
