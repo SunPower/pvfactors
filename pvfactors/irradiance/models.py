@@ -127,6 +127,18 @@ class IsotropicOrdered(BaseModel):
             Index of the irradiance values to apply to the PV array (in the
             whole timeseries values)
 
+        Returns
+        -------
+        irradiance_vec : numpy array
+            List of summed up non-reflective irradiance values for all surfaces
+            and sky
+        rho_vec : numpy array
+            List of reflectivity values for all surfaces and sky
+        invrho_vec : numpy array
+            List of inverse reflectivity for all surfaces and sky
+        total_perez_vec : numpy array
+            List of total perez transposed irradiance values for all surfaces
+            and sky
         """
 
         for seg in pvarray.ground.list_segments:
@@ -169,15 +181,16 @@ class IsotropicOrdered(BaseModel):
                      'total_perez': 0.})
 
         # Sum up the necessary parameters to form the irradiance vector
-        irradiance_vec, inv_rho_vec, total_perez_vec = \
+        irradiance_vec, rho_vec, inv_rho_vec, total_perez_vec = \
             self.get_modeling_vectors(pvarray)
         # Add sky values
         irradiance_vec.append(self.isotropic_luminance[idx])
         total_perez_vec.append(self.isotropic_luminance[idx])
+        rho_vec.append(SKY_REFLECTIVITY_DUMMY)
         inv_rho_vec.append(SKY_REFLECTIVITY_DUMMY)
 
-        return np.array(irradiance_vec), np.array(inv_rho_vec), \
-            np.array(total_perez_vec)
+        return np.array(irradiance_vec), np.array(rho_vec), \
+            np.array(inv_rho_vec), np.array(total_perez_vec)
 
 
 class HybridPerezOrdered(BaseModel):
@@ -328,6 +341,18 @@ class HybridPerezOrdered(BaseModel):
             Index of the irradiance values to apply to the PV array (in the
             whole timeseries values)
 
+        Returns
+        -------
+        irradiance_vec : numpy array
+            List of summed up non-reflective irradiance values for all surfaces
+            and sky
+        rho_vec : numpy array
+            List of reflectivity values for all surfaces and sky
+        invrho_vec : numpy array
+            List of inverse reflectivity for all surfaces and sky
+        total_perez_vec : numpy array
+            List of total perez transposed irradiance values for all surfaces
+            and sky
         """
 
         for seg in pvarray.ground.list_segments:
@@ -396,15 +421,16 @@ class HybridPerezOrdered(BaseModel):
                          'total_perez': 0.})
 
         # Sum up the necessary parameters to form the irradiance vector
-        irradiance_vec, inv_rho_vec, total_perez_vec = \
+        irradiance_vec, rho_vec, inv_rho_vec, total_perez_vec = \
             self.get_modeling_vectors(pvarray)
         # Add sky values
         irradiance_vec.append(self.isotropic_luminance[idx])
         total_perez_vec.append(self.isotropic_luminance[idx])
+        rho_vec.append(SKY_REFLECTIVITY_DUMMY)
         inv_rho_vec.append(SKY_REFLECTIVITY_DUMMY)
 
-        return np.array(irradiance_vec), np.array(inv_rho_vec), \
-            np.array(total_perez_vec)
+        return np.array(irradiance_vec), np.array(rho_vec), \
+            np.array(inv_rho_vec), np.array(total_perez_vec)
 
     def calculate_horizon_shading_pct(self, surface, idx_neighbor, pvrows):
         """Calculate horizon band shading percentage on surfaces of the ordered

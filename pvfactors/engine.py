@@ -149,7 +149,7 @@ class PVEngine(object):
             geom_dict = pvarray.dict_surfaces
 
             # Apply irradiance terms to pvarray
-            irradiance_vec, invrho_vec, total_perez_vec = \
+            irradiance_vec, rho_vec, invrho_vec, total_perez_vec = \
                 self.irradiance.transform(pvarray, idx=idx)
 
             if self.is_fast_mode:
@@ -166,7 +166,7 @@ class PVEngine(object):
 
                 irradiance_vec_subset = irradiance_vec[list_surface_indices]
                 # In fast mode, will not care to calculate q0
-                qinc = vf_matrix_subset.dot(total_perez_vec) \
+                qinc = vf_matrix_subset.dot(rho_vec * total_perez_vec) \
                     + irradiance_vec_subset
 
                 # Calculate other terms

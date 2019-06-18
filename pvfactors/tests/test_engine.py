@@ -70,6 +70,8 @@ def test_pvengine_float_inputs_perez(params):
         pvarray.pvrows[1].front.get_param_weighted('qinc'), 1110.595903991)
     np.testing.assert_almost_equal(
         pvarray.pvrows[2].front.get_param_weighted('qinc'), 1112.37717553)
+    np.testing.assert_almost_equal(
+        pvarray.pvrows[1].back.get_param_weighted('qinc'), 116.49050349491208)
 
 
 def test_pvengine_ts_inputs_perez(params_serial,
@@ -137,4 +139,4 @@ def test_fast_pvengine_float_inputs_perez(params):
     # Checks
     assert isinstance(pvarray, OrderedPVArray)
     np.testing.assert_almost_equal(
-        pvarray.pvrows[1].back.get_param_weighted('qinc'), 634.0541965872724)
+        pvarray.pvrows[1].back.get_param_weighted('qinc'), 123.7087347744459)

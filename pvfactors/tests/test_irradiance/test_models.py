@@ -62,7 +62,8 @@ def test_isotropic_model_front(params_irr):
     assert irr_model.direct['back_pvrow'][0] == 0.
 
     # Transform
-    irradiance_vec, invrho_vec, total_perez_vec = irr_model.transform(pvarray)
+    irradiance_vec, rho_vec, invrho_vec, total_perez_vec = \
+        irr_model.transform(pvarray)
 
     # Check transform
     expected_irradiance_vec = [
@@ -155,7 +156,8 @@ def test_isotropic_model_back(params_irr):
     assert irr_model.direct['front_pvrow'][0] == 0.
 
     # Transform
-    irradiance_vec, invrho_vec, total_perez_vec = irr_model.transform(pvarray)
+    irradiance_vec, rho_vec, invrho_vec, total_perez_vec = \
+        irr_model.transform(pvarray)
 
     # Check
     expected_irradiance_vec = [
@@ -249,7 +251,8 @@ def test_hybridperez_ordered_front(params_irr):
     assert irr_model.direct['back_pvrow'][0] == 0.
 
     # Transform
-    irradiance_vec, invrho_vec, total_perez_vec = irr_model.transform(pvarray)
+    irradiance_vec, rho_vec, invrho_vec, total_perez_vec = \
+        irr_model.transform(pvarray)
 
     # Test isotropic_luminance
     np.testing.assert_almost_equal(irr_model.isotropic_luminance,
@@ -393,7 +396,8 @@ def test_hybridperez_ordered_back(params_irr):
     assert irr_model.direct['front_pvrow'][0] == 0.
 
     # Transform
-    irradiance_vec, invrho_vec, total_perez_vec = irr_model.transform(pvarray)
+    irradiance_vec, rho_vec, invrho_vec, total_perez_vec = \
+        irr_model.transform(pvarray)
 
     # Test isotropic_luminance
     np.testing.assert_almost_equal(irr_model.isotropic_luminance,

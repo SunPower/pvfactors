@@ -33,16 +33,20 @@ class BaseModel(object):
         Returns
         -------
         irradiance_vec : list
-            List of summed up irradiance values
+            List of summed up non-reflective irradiance values for all surfaces
+            and sky
+        rho_vec : list
+            List of reflectivity values for all surfaces and sky
         invrho_vec : list
-            List of inverse reflectivity values
+            List of inverse reflectivity for all surfaces and sky
         total_perez_vec : list
-            List of total perez transposed irradiance values
-
+            List of total perez transposed irradiance values for all surfaces
+            and sky
         """
 
         # TODO: this can probably be speeded up
         irradiance_vec = []
+        rho_vec = []
         invrho_vec = []
         total_perez_vec = []
         for idx, surface in pvarray.dict_surfaces.items():
@@ -51,6 +55,7 @@ class BaseModel(object):
                 value += surface.get_param(component)
             irradiance_vec.append(value)
             invrho_vec.append(surface.get_param('inv_rho'))
+            rho_vec.append(surface.get_param('rho'))
             total_perez_vec.append(surface.get_param('total_perez'))
 
-        return irradiance_vec, invrho_vec, total_perez_vec
+        return irradiance_vec, rho_vec, invrho_vec, total_perez_vec
