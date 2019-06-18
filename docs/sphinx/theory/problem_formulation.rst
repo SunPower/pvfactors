@@ -13,7 +13,7 @@ The current version of the view factor model only addresses PV rows that are mad
    :align: center
 
 
-The mathematical model used in pvfactors simulations is different depending on the simulation type that is run. In "full simulations", all of the reflections between the modeled surfaces are taken into account in the calculations. In "fast simulations", assumptions are made on the reflected irradiance from the environment surrounding the surface of interest.
+The mathematical model used in pvfactors simulations is different depending on the simulation type that is run. In "full simulations", all of the reflections between the modeled surfaces are taken into account in the calculations. In "fast simulations", assumptions are made on the reflected irradiance from the environment surrounding the surfaces of interest.
 
 
 Full simulations
@@ -110,7 +110,7 @@ In the full simulation case, we defined a vector of incident irradiance on all s
 
 And we realized that we needed to solve for :math:`\mathbf{q_o}` in order to find :math:`\mathbf{q_{inc}}`. But with the following assumptions, we can find an approximation of :math:`\mathbf{q_{inc}}` for back side surfaces without having to solve a linear system of equations:
 
-1) we can assume that the radiosity of the surfaces is equal to their reflectivity multiplied by the incident irradiance on the surfaces as calculated by the Perez transposition model, which only works for front side surfaces. I.e.
+1) we can assume that the radiosity of the surfaces is equal to their reflectivity multiplied by the incident irradiance on the surfaces as calculated by the Perez transposition model [#perez_paper]_, which only works for front side surfaces. I.e.
 
 .. math::
 
@@ -159,3 +159,7 @@ For instance, if we are interested in back side surfaces with indices ``3`` and 
 	Sky_3\\
 	Sky_7\\
 	\end{pmatrix}
+
+.. rubric:: Footnotes
+
+.. [#perez_paper] Perez, R., Seals, R., Ineichen, P., Stewart, R. and Menicucci, D., 1987. A new simplified version of the Perez diffuse irradiance model for tilted surfaces. Solar energy, 39(3), pp.221-231.
