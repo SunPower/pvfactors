@@ -48,20 +48,20 @@ where:
 
 We can further develop this expression and involve configuration factors as well as irradiance terms as follows:
 
-.. math:: q_{reflected, i} = {\rho_i} * ({\sum_{j} q_{o, j} * F_{i, j}} + Irr_i)
+.. math:: q_{reflected, i} = {\rho_i} * ({\sum_{j} q_{o, j} * F_{i, j}} + Sky_i)
 
 | where:
 | * :math:`{\sum_{j} q_{o, j} * F_{i, j}}` is the contribution of all the surfaces ``j`` surrounding ``i`` to the incident radiative flux onto surface ``i``.
 | * :math:`F_{i, j}` is the configuration factor (or view factor) of surface ``i`` to surface ``j``.
-| * :math:`Irr_i` is an irradiance term specific to surface ``i`` which contributes to the incident radiative flux  :math:`q_{incident, i}`. For instance, it will be equal to the :math:`DNI_{POA}` for the front side of the modules.
+| * :math:`Sky_i` is a sky irradiance term specific to surface ``i`` which contributes to the incident radiative flux  :math:`q_{incident, i}`, and associated with irradiance terms not represented in the geometrical model. For instance, it will be equal to :math:`DNI_{POA} + circumsolar_{POA} + horizon_{POA}` for the front side of the modules.
 
 This results into a linear system that can be written as follows:
 
 .. math::
 
-	\mathbf{q_o} = \mathbf{R} . (\mathbf{F} . \mathbf{q_o} + \mathbf{Irr})
+	\mathbf{q_o} = \mathbf{R} . (\mathbf{F} . \mathbf{q_o} + \mathbf{Sky})
 
-	(\mathbf{R}^{-1} - \mathbf{F}).\mathbf{q_o} = \mathbf{Irr}
+	(\mathbf{R}^{-1} - \mathbf{F}).\mathbf{q_o} = \mathbf{Sky}
 
 Or, for a system of ``n`` surfaces:
 
@@ -87,10 +87,10 @@ Or, for a system of ``n`` surfaces:
 	\end{pmatrix}
 	=
 	\begin{pmatrix}
-	Irr_1\\
-	Irr_2\\
+	Sky_1\\
+	Sky_2\\
 	\vdots\\
-	Irr_n\\
+	Sky_n\\
 	\end{pmatrix}
 
 After solving this system and finding all of the radiosities, it is very easy to deduce values of interest like back side or front side incident irradiance.
@@ -105,7 +105,7 @@ In the full simulation case, we defined a vector of incident irradiance on all s
 
 .. math::
 
-	\mathbf{q_{inc}} = \mathbf{F} . \mathbf{q_o} + \mathbf{Irr}
+	\mathbf{q_{inc}} = \mathbf{F} . \mathbf{q_o} + \mathbf{Sky}
 
 
 And we realized that we needed to solve for :math:`\mathbf{q_o}` in order to find :math:`\mathbf{q_{inc}}`. But with the following assumptions, we can find an approximation of :math:`\mathbf{q_{inc}}` for back side surfaces without having to solve a linear system of equations:
@@ -123,7 +123,7 @@ Here, :math:`\mathbf{q_{perez}}` can have values equal to zero for back side sur
 
 .. math::
 
-	\mathbf{q_{inc-back}} ≈ \mathbf{F_{back}} . \mathbf{R} . \mathbf{q_{perez}} + \mathbf{Irr_{back}}
+	\mathbf{q_{inc-back}} ≈ \mathbf{F_{back}} . \mathbf{R} . \mathbf{q_{perez}} + \mathbf{Sky_{back}}
 
 
 Example
@@ -156,6 +156,6 @@ For instance, if we are interested in back side surfaces with indices ``3`` and 
 	\end{pmatrix}
 	+
 	\begin{pmatrix}
-	Irr_3\\
-	Irr_7\\
+	Sky_3\\
+	Sky_7\\
 	\end{pmatrix}
