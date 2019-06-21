@@ -8,7 +8,7 @@ workflows:
       - test-python-3.6
       - test-python-3.7
 jobs:
-  test-python-2.7: &test-template
+  test-python-2.7: &build-template
     working_directory: ~/SunPower/pvfactors
     parallelism: 1
     shell: /bin/bash --login
@@ -25,7 +25,9 @@ jobs:
             - v1-dep-{{ .Branch }}-
             - v1-dep-master-
             - v1-dep-
-      - run: sudo pip install pytest scipy shapely pvlib future six pytest-mock tqdm
+      - run: sudo apt-get install -y pandoc
+      - run: sudo pip install --progress-bar=off .[testing,docs]
+      - run: python setup.py build_sphinx
       - save_cache:
           key: v1-dep-{{ .Branch }}-{{ epoch }}
           paths:
@@ -44,15 +46,18 @@ jobs:
           path: /tmp/circleci-artifacts
       - store_artifacts:
           path: /tmp/circleci-test-results
+      - store_artifacts:
+          path: build/sphinx/html
+          destination: docs
   test-python-3.5:
-    <<: *test-template
+    <<: *build-template
     docker:
       - image: circleci/python:3.5.7-stretch
   test-python-3.6:
-    <<: *test-template
+    <<: *build-template
     docker:
       - image: circleci/python:3.6.6-stretch
   test-python-3.7:
-    <<: *test-template
+    <<: *build-template
     docker:
       - image: circleci/python:3.7.3-stretch
