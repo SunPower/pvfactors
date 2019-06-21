@@ -157,8 +157,8 @@ class PVEngine(object):
                 list_surface_indices = pvarray.pvrows[
                     self.fast_mode_pvrow_index].back.surface_indices
 
-                # TODO: can cut calculation time using a subset of view_matrix
-                # Calculate view factors
+                # Calculate view factors using a subset of view_matrix to
+                # gain in calculation speed
                 vf_matrix_subset = self.vf_calculator.get_vf_matrix_subset(
                     geom_dict, pvarray.view_matrix, pvarray.obstr_matrix,
                     pvarray.pvrows, list_surface_indices)

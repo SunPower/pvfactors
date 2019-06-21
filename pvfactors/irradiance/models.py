@@ -92,7 +92,6 @@ class IsotropicOrdered(BaseModel):
         perez_front_pvrow = get_total_irradiance(
             surface_tilt, surface_azimuth, solar_zenith, solar_azimuth,
             DNI, GHI, DHI, albedo=albedo)
-        total_perez_front_pvrow = perez_front_pvrow['poa_global']
 
         # Save diffuse light
         self.isotropic_luminance = DHI
@@ -114,7 +113,7 @@ class IsotropicOrdered(BaseModel):
             front_is_illum, DNI * cosd(aoi_front_pvrow), 0.)
         self.direct['back_pvrow'] = np.where(
             ~front_is_illum, DNI * cosd(aoi_back_pvrow), 0.)
-        self.total_perez['front_pvrow'] = total_perez_front_pvrow
+        self.total_perez['front_pvrow'] = perez_front_pvrow['poa_global']
 
     def transform(self, pvarray, idx=0):
         """Apply calculated irradiance values to PV array.

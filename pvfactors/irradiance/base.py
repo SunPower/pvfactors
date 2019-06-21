@@ -49,7 +49,7 @@ class BaseModel(object):
         rho_vec = []
         invrho_vec = []
         total_perez_vec = []
-        for idx, surface in pvarray.dict_surfaces.items():
+        for _, surface in pvarray.dict_surfaces.items():
             value = 0.
             for component in self.irradiance_comp:
                 value += surface.get_param(component)
