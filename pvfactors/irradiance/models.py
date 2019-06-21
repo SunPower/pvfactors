@@ -141,12 +141,12 @@ class IsotropicOrdered(BaseModel):
         """
 
         for seg in pvarray.ground.list_segments:
-            seg._illum_collection.update_params(
+            seg.illum_collection.update_params(
                 {'direct': self.direct['ground'][idx],
                  'rho': self.albedo[idx],
                  'inv_rho': 1. / self.albedo[idx],
                  'total_perez': self.GHI[idx]})
-            seg._shaded_collection.update_params(
+            seg.shaded_collection.update_params(
                 {'direct': 0.,
                  'rho': self.albedo[idx],
                  'inv_rho': 1. / self.albedo[idx],
@@ -155,12 +155,12 @@ class IsotropicOrdered(BaseModel):
         for pvrow in pvarray.pvrows:
             # Front
             for seg in pvrow.front.list_segments:
-                seg._illum_collection.update_params(
+                seg.illum_collection.update_params(
                     {'direct': self.direct['front_pvrow'][idx],
                      'rho': self.rho_front,
                      'inv_rho': 1. / self.rho_front,
                      'total_perez': self.total_perez['front_pvrow'][idx]})
-                seg._shaded_collection.update_params(
+                seg.shaded_collection.update_params(
                     {'direct': 0.,
                      'rho': self.rho_front,
                      'inv_rho': 1. / self.rho_front,
@@ -168,12 +168,12 @@ class IsotropicOrdered(BaseModel):
                      self.direct['front_pvrow'][idx]})
             # Back
             for seg in pvrow.back.list_segments:
-                seg._illum_collection.update_params(
+                seg.illum_collection.update_params(
                     {'direct': self.direct['back_pvrow'][idx],
                      'rho': self.rho_back,
                      'inv_rho': 1. / self.rho_back,
                      'total_perez': 0.})
-                seg._shaded_collection.update_params(
+                seg.shaded_collection.update_params(
                     {'direct': 0.,
                      'rho': self.rho_back,
                      'inv_rho': 1. / self.rho_back,
@@ -355,14 +355,14 @@ class HybridPerezOrdered(BaseModel):
         """
 
         for seg in pvarray.ground.list_segments:
-            seg._illum_collection.update_params(
+            seg.illum_collection.update_params(
                 {'direct': self.direct['ground'][idx],
                  'circumsolar': self.circumsolar['ground'][idx],
                  'horizon': 0.,
                  'rho': self.albedo[idx],
                  'inv_rho': 1. / self.albedo[idx],
                  'total_perez': self.GHI[idx]})
-            seg._shaded_collection.update_params(
+            seg.shaded_collection.update_params(
                 {'direct': 0.,
                  'circumsolar': 0.,
                  'horizon': 0.,
@@ -374,14 +374,14 @@ class HybridPerezOrdered(BaseModel):
         for idx_pvrow, pvrow in enumerate(pvarray.pvrows):
             # Front
             for seg in pvrow.front.list_segments:
-                seg._illum_collection.update_params(
+                seg.illum_collection.update_params(
                     {'direct': self.direct['front_pvrow'][idx],
                      'circumsolar': self.circumsolar['front_pvrow'][idx],
                      'horizon': self.horizon['front_pvrow'][idx],
                      'rho': self.rho_front,
                      'inv_rho': 1. / self.rho_front,
                      'total_perez': self.total_perez['front_pvrow'][idx]})
-                seg._shaded_collection.update_params(
+                seg.shaded_collection.update_params(
                     {'direct': 0.,
                      'circumsolar': 0.,
                      'horizon': self.horizon['front_pvrow'][idx],
@@ -393,7 +393,7 @@ class HybridPerezOrdered(BaseModel):
             for seg in pvrow.back.list_segments:
                 # Illum
                 idx_neighbor = pvarray.back_neighbors[idx_pvrow]
-                for surf in seg._illum_collection.list_surfaces:
+                for surf in seg.illum_collection.list_surfaces:
                     hor_shd_pct = self.calculate_horizon_shading_pct(
                         surf, idx_neighbor, pvrows)
                     surf.update_params(
@@ -406,7 +406,7 @@ class HybridPerezOrdered(BaseModel):
                          'inv_rho': 1. / self.rho_back,
                          'total_perez': 0.})
                 # Shaded
-                for surf in seg._shaded_collection.list_surfaces:
+                for surf in seg.shaded_collection.list_surfaces:
                     hor_shd_pct = self.calculate_horizon_shading_pct(
                         surf, idx_neighbor, pvrows)
                     surf.update_params(
