@@ -25,7 +25,8 @@ jobs:
             - v1-dep-{{ .Branch }}-
             - v1-dep-master-
             - v1-dep-
-      - run: sudo pip install pytest scipy shapely pvlib future six pytest-mock tqdm
+      - run: sudo pip install --progress-bar=off .[testing,docs]
+      - run: python setup.py build_sphinx
       - save_cache:
           key: v1-dep-{{ .Branch }}-{{ epoch }}
           paths:
@@ -44,6 +45,9 @@ jobs:
           path: /tmp/circleci-artifacts
       - store_artifacts:
           path: /tmp/circleci-test-results
+      - store_artifacts:
+          path: build/sphinx/html
+          destination: docs
   test-python-3.5:
     <<: *test-template
     docker:
