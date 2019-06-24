@@ -16,7 +16,8 @@ class PVEngine(object):
 
     def __init__(self, params, vf_calculator=VFCalculator(),
                  irradiance_model=HybridPerezOrdered(),
-                 cls_pvarray=OrderedPVArray):
+                 cls_pvarray=OrderedPVArray,
+                 fast_mode_pvrow_index=None):
         """Create pv engine class, and initialize timeseries parameters.
 
         Parameters
@@ -36,12 +37,19 @@ class PVEngine(object):
             Class that will be used to build the PV array
             (Default =
             :py:class:`~pvfactors.geometry.pvarray.OrderedPVArray` class)
+        fast_mode_pvrow_index : int, optional
+            If a valid pvrow index is passed, then the PVEngine fast mode
+            will be activated and the engine calculation will be done only
+            for the back surface of the selected pvrow (Default = None)
 
         """
         self.params = params
         self.vf_calculator = vf_calculator
         self.irradiance = irradiance_model
         self.cls_pvarray = cls_pvarray
+        self.is_fast_mode = isinstance(fast_mode_pvrow_index, int) \
+            and fast_mode_pvrow_index < params['n_pvrows']
+        self.fast_mode_pvrow_index = fast_mode_pvrow_index
 
         # Required timeseries values
         self.solar_zenith = None
@@ -137,32 +145,65 @@ class PVEngine(object):
             pvarray.cast_shadows()
             pvarray.cuts_for_pvrow_view()
 
-            # Calculate view factors
+            # Prepare inputs
             geom_dict = pvarray.dict_surfaces
-            vf_matrix = self.vf_calculator.get_vf_matrix(
-                geom_dict, pvarray.view_matrix, pvarray.obstr_matrix,
-                pvarray.pvrows)
-            pvarray.vf_matrix = vf_matrix
 
             # Apply irradiance terms to pvarray
-            irradiance_vec, invrho_vec = \
+            irradiance_vec, rho_vec, invrho_vec, total_perez_vec = \
                 self.irradiance.transform(pvarray, idx=idx)
 
-            # Calculate radiosities
-            invrho_mat = np.diag(invrho_vec)
-            a_mat = invrho_mat - vf_matrix
-            q0 = linalg.solve(a_mat, irradiance_vec)
-            qinc = np.dot(invrho_mat, q0)
+            if self.is_fast_mode:
+                # Indices of the surfaces of the back of the selected pvrows
+                list_surface_indices = pvarray.pvrows[
+                    self.fast_mode_pvrow_index].back.surface_indices
 
-            # Calculate other terms
-            isotropic_vec = vf_matrix[:-1, -1] * irradiance_vec[-1]
-            reflection_vec = qinc[:-1] - irradiance_vec[:-1] - isotropic_vec
+                # Calculate view factors using a subset of view_matrix to
+                # gain in calculation speed
+                vf_matrix_subset = self.vf_calculator.get_vf_matrix_subset(
+                    geom_dict, pvarray.view_matrix, pvarray.obstr_matrix,
+                    pvarray.pvrows, list_surface_indices)
+                pvarray.vf_matrix = vf_matrix_subset
 
-            # Update surfaces with values
-            for idx, surface in geom_dict.items():
-                surface.update_params({'q0': q0[idx], 'qinc': qinc[idx],
-                                       'isotropic': isotropic_vec[idx],
-                                       'reflection': reflection_vec[idx]})
+                irradiance_vec_subset = irradiance_vec[list_surface_indices]
+                # In fast mode, will not care to calculate q0
+                qinc = vf_matrix_subset.dot(rho_vec * total_perez_vec) \
+                    + irradiance_vec_subset
+
+                # Calculate other terms
+                isotropic_vec = vf_matrix_subset[:, -1] * total_perez_vec[-1]
+                reflection_vec = qinc - irradiance_vec_subset \
+                    - isotropic_vec
+
+                # Update selected surfaces with values
+                for i, surf_idx in enumerate(list_surface_indices):
+                    surface = geom_dict[surf_idx]
+                    surface.update_params({'qinc': qinc[i],
+                                           'isotropic': isotropic_vec[i],
+                                           'reflection': reflection_vec[i]})
+
+            else:
+                # Calculate view factors
+                vf_matrix = self.vf_calculator.get_vf_matrix(
+                    geom_dict, pvarray.view_matrix, pvarray.obstr_matrix,
+                    pvarray.pvrows)
+                pvarray.vf_matrix = vf_matrix
+
+                # Calculate radiosities
+                invrho_mat = np.diag(invrho_vec)
+                a_mat = invrho_mat - vf_matrix
+                q0 = linalg.solve(a_mat, irradiance_vec)
+                qinc = np.dot(invrho_mat, q0)
+
+                # Calculate other terms
+                isotropic_vec = vf_matrix[:-1, -1] * irradiance_vec[-1]
+                reflection_vec = qinc[:-1] \
+                    - irradiance_vec[:-1] - isotropic_vec
+
+                # Update surfaces with values
+                for idx, surface in geom_dict.items():
+                    surface.update_params({'q0': q0[idx], 'qinc': qinc[idx],
+                                           'isotropic': isotropic_vec[idx],
+                                           'reflection': reflection_vec[idx]})
         else:
             pvarray = None
 

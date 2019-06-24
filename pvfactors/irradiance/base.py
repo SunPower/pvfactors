@@ -20,10 +20,10 @@ class BaseModel(object):
         """Not implemented"""
         raise NotImplementedError
 
-    def get_irradiance_invrho_vector(self, pvarray):
+    def get_modeling_vectors(self, pvarray):
         """Get vector of summed up irradiance values from a PV array, as well
         as the inverse reflectivity values (the latter need to be named
-        "inv_rho").
+        "inv_rho"), and the total perez irradiance values.
 
         Parameters
         ----------
@@ -33,20 +33,29 @@ class BaseModel(object):
         Returns
         -------
         irradiance_vec : list
-            List of summed up irradiance values
+            List of summed up non-reflective irradiance values for all surfaces
+            and sky
+        rho_vec : list
+            List of reflectivity values for all surfaces and sky
         invrho_vec : list
-            List of inverse reflectivity values
-
+            List of inverse reflectivity for all surfaces and sky
+        total_perez_vec : list
+            List of total perez transposed irradiance values for all surfaces
+            and sky
         """
 
         # TODO: this can probably be speeded up
         irradiance_vec = []
+        rho_vec = []
         invrho_vec = []
-        for idx, surface in pvarray.dict_surfaces.items():
+        total_perez_vec = []
+        for _, surface in pvarray.dict_surfaces.items():
             value = 0.
             for component in self.irradiance_comp:
                 value += surface.get_param(component)
             irradiance_vec.append(value)
             invrho_vec.append(surface.get_param('inv_rho'))
+            rho_vec.append(surface.get_param('rho'))
+            total_perez_vec.append(surface.get_param('total_perez'))
 
-        return irradiance_vec, invrho_vec
+        return irradiance_vec, rho_vec, invrho_vec, total_perez_vec

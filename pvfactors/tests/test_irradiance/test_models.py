@@ -62,7 +62,8 @@ def test_isotropic_model_front(params_irr):
     assert irr_model.direct['back_pvrow'][0] == 0.
 
     # Transform
-    irradiance_vec, invrho_vec = irr_model.transform(pvarray)
+    irradiance_vec, rho_vec, invrho_vec, total_perez_vec = \
+        irr_model.transform(pvarray)
 
     # Check transform
     expected_irradiance_vec = [
@@ -107,6 +108,14 @@ def test_isotropic_model_front(params_irr):
         pvarray.ground.get_param_weighted('rho'),
         params_irr['rho_ground'])
 
+    # Check total perez vec
+    expected_total_perez_vec = [
+        522.61826174, 522.61826174, 522.61826174, 522.61826174, 522.61826174,
+        100., 807.243186, 100.13640481, 0., 807.243186,
+        100.13640481, 0., 807.243186, 0., 100.]
+    np.testing.assert_array_almost_equal(total_perez_vec,
+                                         expected_total_perez_vec)
+
 
 def test_isotropic_model_back(params_irr):
     """Direct shading on back surface"""
@@ -147,7 +156,8 @@ def test_isotropic_model_back(params_irr):
     assert irr_model.direct['front_pvrow'][0] == 0.
 
     # Transform
-    irradiance_vec, invrho_vec = irr_model.transform(pvarray)
+    irradiance_vec, rho_vec, invrho_vec, total_perez_vec = \
+        irr_model.transform(pvarray)
 
     # Check
     expected_irradiance_vec = [
@@ -189,6 +199,14 @@ def test_isotropic_model_back(params_irr):
     np.testing.assert_almost_equal(
         pvarray.ground.get_param_weighted('rho'),
         params_irr['rho_ground'])
+
+    # Check total perez vec
+    expected_total_perez_vec = [
+        522.618262, 522.618262, 522.618262, 522.618262, 522.618262,
+        100., 104.387248, 0., 0., 104.387248,
+        0., 0., 104.387248, 0., 100.]
+    np.testing.assert_array_almost_equal(total_perez_vec,
+                                         expected_total_perez_vec)
 
 
 def test_hybridperez_ordered_front(params_irr):
@@ -233,7 +251,8 @@ def test_hybridperez_ordered_front(params_irr):
     assert irr_model.direct['back_pvrow'][0] == 0.
 
     # Transform
-    irradiance_vec, invrho_vec = irr_model.transform(pvarray)
+    irradiance_vec, rho_vec, invrho_vec, total_perez_vec = \
+        irr_model.transform(pvarray)
 
     # Test isotropic_luminance
     np.testing.assert_almost_equal(irr_model.isotropic_luminance,
@@ -321,6 +340,14 @@ def test_hybridperez_ordered_front(params_irr):
         pvarray.ground.get_param_weighted('rho'),
         params_irr['rho_ground'])
 
+    # Check total perez vec
+    expected_total_perez_vec = [
+        522.618262, 522.618262, 522.618262, 522.618262, 522.618262,
+        100., 807.243186, 100.136405, 0., 807.243186,
+        100.136405, 0., 807.243186, 0., 63.217593]
+    np.testing.assert_array_almost_equal(total_perez_vec,
+                                         expected_total_perez_vec)
+
 
 def test_hybridperez_ordered_back(params_irr):
 
@@ -369,7 +396,8 @@ def test_hybridperez_ordered_back(params_irr):
     assert irr_model.direct['front_pvrow'][0] == 0.
 
     # Transform
-    irradiance_vec, invrho_vec = irr_model.transform(pvarray)
+    irradiance_vec, rho_vec, invrho_vec, total_perez_vec = \
+        irr_model.transform(pvarray)
 
     # Test isotropic_luminance
     np.testing.assert_almost_equal(irr_model.isotropic_luminance,
@@ -462,6 +490,14 @@ def test_hybridperez_ordered_back(params_irr):
     np.testing.assert_almost_equal(
         pvarray.ground.get_param_weighted('rho'),
         params_irr['rho_ground'])
+
+    # Check total perez vec
+    expected_total_perez_vec = [
+        522.618262, 522.618262, 522.618262, 522.618262, 522.618262,
+        100., 104.387248, 0., 0., 104.387248,
+        0., 0., 104.387248, 0., 63.217593]
+    np.testing.assert_array_almost_equal(total_perez_vec,
+                                         expected_total_perez_vec)
 
 
 def test_hybridperez_circ_shading():
