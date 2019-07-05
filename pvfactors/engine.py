@@ -57,6 +57,7 @@ class PVEngine(object):
         self.surface_tilt = None
         self.surface_azimuth = None
         self.n_points = None
+        self.skip_step = None
 
     def fit(self, timestamps, DNI, DHI, solar_zenith, solar_azimuth,
             surface_tilt, surface_azimuth, albedo):
@@ -111,6 +112,13 @@ class PVEngine(object):
                             self.params['rho_front_pvrow'],
                             self.params['rho_back_pvrow'], albedo)
 
+        # Determine timesteps to skip when:
+        #    - solar zenith > 90, ie the sun is down
+        #    - DNI or DHI is negative, which does not make sense
+        #    - DNI and DHI are both zero
+        self.skip_step = (solar_zenith > 90) | (DNI < 0) | (DHI < 0) \
+            | ((DNI == 0) & (DHI == 0))
+
     def run_timestep(self, idx):
         """Run simulation for a single timestep index.
 
@@ -127,14 +135,12 @@ class PVEngine(object):
 
         """
 
-        # Check that the sun is up, if not do not run calculations
-        solar_zenith = self.solar_zenith[idx]
-        sun_is_up = solar_zenith <= 90
-
-        if sun_is_up:
+        if self.skip_step[idx]:
+            pvarray = None
+        else:
             # Update parameters
             self.params.update(
-                {'solar_zenith': solar_zenith,
+                {'solar_zenith': self.solar_zenith[idx],
                  'solar_azimuth': self.solar_azimuth[idx],
                  'surface_tilt': self.surface_tilt[idx],
                  'surface_azimuth': self.surface_azimuth[idx]})
@@ -204,8 +210,6 @@ class PVEngine(object):
                     surface.update_params({'q0': q0[idx], 'qinc': qinc[idx],
                                            'isotropic': isotropic_vec[idx],
                                            'reflection': reflection_vec[idx]})
-        else:
-            pvarray = None
 
         return pvarray
 
