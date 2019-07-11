@@ -31,7 +31,7 @@ CLASSIFIERS = [
     'Topic :: Scientific/Engineering',
 ]
 
-TESTS_REQUIRES = ['pytest>=3.2.1', 'pytest-mock>=1.10.0']
+TESTS_REQUIRES = ['pytest>=3.2.1', 'pytest-mock>=1.10.0', 'mock']
 
 setup(name=DISTNAME,
       description=DESCRIPTION,
