@@ -1,0 +1,15 @@
+.. _whatsnew_1030:
+
+v1.0.3 (July 12, 2019)
+======================
+
+Enhancement: users can now pass irradiance model arguments to run functions. This was only possible when using the PV engine directly until now.
+
+
+* Pass irradiance model params to run functions (#57)
+
+
+Contributors
+------------
+
+* Marc Anoma (:ghuser:`anomam`)

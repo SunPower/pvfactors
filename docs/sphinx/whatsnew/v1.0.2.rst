@@ -1,7 +1,7 @@
 .. _whatsnew_1020:
 
 v1.0.2 (July 5, 2019)
-=======================
+=====================
 
 Some bug fixes and enhancements. Now the PVEngine can run simulations using a "fast-mode" with observed speed gain of around 30% and accuracy drop of around 4% compared to the full mode.
 
