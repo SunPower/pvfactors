@@ -22,7 +22,8 @@ def run_timeseries_engine(fn_build_report, pvarray_parameters,
                           cls_pvarray=OrderedPVArray, cls_engine=PVEngine,
                           cls_irradiance=HybridPerezOrdered,
                           cls_vf=VFCalculator,
-                          fast_mode_pvrow_index=None):
+                          fast_mode_pvrow_index=None,
+                          irradiance_model_params={}):
     """Run timeseries simulation in normal mode, and using the specified
     classes.
 
@@ -67,6 +68,9 @@ def run_timeseries_engine(fn_build_report, pvarray_parameters,
         If a valid pvrow index is passed, then the PVEngine fast mode
         will be activated and the engine calculation will be done only
         for the back surface of the selected pvrow (Default = None)
+    irradiance_model_params : dict, optional
+        Dictionary of parameters that will be passed to the irradiance model
+        class as kwargs at instantiation (Default = {})
 
     Returns
     -------
@@ -76,7 +80,7 @@ def run_timeseries_engine(fn_build_report, pvarray_parameters,
     """
 
     # Instantiate classes and engine
-    irradiance_model = cls_irradiance()
+    irradiance_model = cls_irradiance(**irradiance_model_params)
     vf_calculator = cls_vf()
     eng = cls_engine(pvarray_parameters, cls_pvarray=cls_pvarray,
                      irradiance_model=irradiance_model,
@@ -99,7 +103,7 @@ def run_parallel_engine(report_builder, pvarray_parameters,
                         cls_pvarray=OrderedPVArray, cls_engine=PVEngine,
                         cls_irradiance=HybridPerezOrdered,
                         cls_vf=VFCalculator, fast_mode_pvrow_index=None,
-                        n_processes=2):
+                        irradiance_model_params={}, n_processes=2):
     """Run timeseries simulation using multiprocessing. Here, instead of a
     function that will build the report, the users will need to pass a class
     (or an object).
@@ -146,6 +150,9 @@ def run_parallel_engine(report_builder, pvarray_parameters,
         If a valid pvrow index is passed, then the PVEngine fast mode
         will be activated and the engine calculation will be done only
         for the back surface of the selected pvrow (Default = None)
+    irradiance_model_params : dict, optional
+        Dictionary of parameters that will be passed to the irradiance model
+        class as kwargs at instantiation (Default = {})
     n_processes : int, optional
         Number of parallel processes to run for the calculation (Default = 2)
 
@@ -181,6 +188,7 @@ def run_parallel_engine(report_builder, pvarray_parameters,
     folds_cls_irradiance = [cls_irradiance] * n_processes
     folds_cls_vf = [cls_vf] * n_processes
     folds_fast_mode_pvrow_index = [fast_mode_pvrow_index] * n_processes
+    folds_irradiance_model_params = [irradiance_model_params] * n_processes
     report_indices = list(range(n_processes))
 
     # Zip all the folds together
@@ -189,7 +197,8 @@ def run_parallel_engine(report_builder, pvarray_parameters,
                        folds_solar_azimuth, folds_surface_tilt,
                        folds_surface_azimuth, folds_albedo, folds_cls_pvarray,
                        folds_cls_engine, folds_cls_irradiance, folds_cls_vf,
-                       folds_fast_mode_pvrow_index, report_indices))
+                       folds_fast_mode_pvrow_index,
+                       folds_irradiance_model_params, report_indices))
 
     # Start multiprocessing
     pool = Pool(n_processes)
@@ -231,7 +240,7 @@ def _run_serially(args):
     report_builder, pvarray_parameters, timestamps, dni, dhi, \
         solar_zenith, solar_azimuth, surface_tilt, surface_azimuth,\
         albedo, cls_pvarray, cls_engine, cls_irradiance, cls_vf, \
-        fast_mode_pvrow_index, idx = args
+        fast_mode_pvrow_index, irradiance_model_params, idx = args
 
     report = run_timeseries_engine(
         report_builder.build, pvarray_parameters,
@@ -239,6 +248,7 @@ def _run_serially(args):
         surface_tilt, surface_azimuth, albedo,
         cls_pvarray=cls_pvarray, cls_engine=cls_engine,
         cls_irradiance=cls_irradiance, cls_vf=cls_vf,
-        fast_mode_pvrow_index=fast_mode_pvrow_index)
+        fast_mode_pvrow_index=fast_mode_pvrow_index,
+        irradiance_model_params=irradiance_model_params)
 
     return report, idx
