@@ -1,7 +1,6 @@
 from pvfactors.run import run_timeseries_engine, run_parallel_engine
 from pvfactors.report import ExampleReportBuilder
 import numpy as np
-import pytest
 import mock
 
 
