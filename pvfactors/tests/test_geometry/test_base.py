@@ -3,7 +3,7 @@ import numpy as np
 from pvfactors import PVFactorsError
 from pvfactors.geometry.base import \
     BaseSide, ShadeCollection, PVSurface, PVSegment, \
-    coords_from_center_tilt_length
+    coords_from_center_tilt_length, get_solar_2d_vector
 from shapely.geometry import LineString, Point
 from pvfactors.geometry.utils import projection
 
@@ -305,3 +305,20 @@ def test_coords_from_center_tilt_length_vec():
         ([0.98480775, 0.70710678], [-0.17364818, 0.70710678])]
 
     np.testing.assert_almost_equal(coords, expected_coords)
+
+
+def test_solar_2_vectors():
+    """Test that can calculate solar vector with inputs as arrays"""
+    # Prepare inputs
+    solar_zenith = np.array([20., 45.])
+    solar_azimuth = np.array([70., 200.])
+    axis_azimuth = 0.
+
+    # Calculate solar vectors for the 2 times
+    solar_vectors = get_solar_2d_vector(solar_zenith, solar_azimuth,
+                                        axis_azimuth)
+
+    expected_solar_vectors = [[0.3213938, -0.24184476],
+                              [0.93969262, 0.70710678]]
+
+    np.testing.assert_almost_equal(solar_vectors, expected_solar_vectors)
