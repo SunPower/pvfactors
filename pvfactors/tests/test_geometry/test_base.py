@@ -1,7 +1,9 @@
 import pytest
 import numpy as np
 from pvfactors import PVFactorsError
-from pvfactors.geometry import BaseSide, ShadeCollection, PVSurface, PVSegment
+from pvfactors.geometry.base import \
+    BaseSide, ShadeCollection, PVSurface, PVSegment, \
+    coords_from_center_tilt_length
 from shapely.geometry import LineString, Point
 from pvfactors.geometry.utils import projection
 
@@ -262,3 +264,44 @@ def test_side_cut_at_point():
     assert side.length == 2
     assert len(side.list_segments[0].illum_collection.list_surfaces) == 2
     assert len(side.list_segments[1].illum_collection.list_surfaces) == 1
+
+
+def test_coords_from_center_tilt_length_float():
+    """Test that can calculate PV row coords from inputs as scalars"""
+
+    # Float inputs
+    xy_center = (0, 0)
+    length = 2.
+    axis_azimuth = 0.
+    tilt = 10.
+    surface_azimuth = 90.
+
+    coords = coords_from_center_tilt_length(xy_center, tilt, length,
+                                            surface_azimuth, axis_azimuth)
+
+    expected_coords = [(-0.984807753012208, 0.17364817766693028),
+                       (0.984807753012208, -0.17364817766693033)]
+
+    np.testing.assert_almost_equal(coords, expected_coords)
+
+
+def test_coords_from_center_tilt_length_vec():
+    """Test that can calculate PV row coords from angle inputs as vectors"""
+
+    # Float inputs
+    xy_center = (0, 0)
+    length = 2.
+    axis_azimuth = 0.
+
+    # Vector inputs
+    tilt = np.array([10, 45])
+    surface_azimuth = np.array([90, 270])
+
+    coords = coords_from_center_tilt_length(xy_center, tilt, length,
+                                            surface_azimuth, axis_azimuth)
+
+    expected_coords = [
+        ([-0.98480775, -0.70710678], [0.17364818, -0.70710678]),
+        ([0.98480775, 0.70710678], [-0.17364818, 0.70710678])]
+
+    np.testing.assert_almost_equal(coords, expected_coords)

@@ -43,7 +43,7 @@ def check_uniform_shading(list_elements):
 def coords_from_center_tilt_length(xy_center, tilt, length,
                                    surface_azimuth, axis_azimuth):
     """Calculate ``shapely`` :py:class:`LineString` coordinate from
-    center coords, surface tilt angle and length of line.
+    center coords, surface angles and length of line.
     The axis azimuth indicates the axis of rotation of the pvrows (if single-
     axis trackers). In the 2D plane, the axis of rotation will be the vector
     normal to that 2D plane and going into the 2D plane (when plotting it).
@@ -64,12 +64,12 @@ def coords_from_center_tilt_length(xy_center, tilt, length,
     ----------
     xy_center : tuple
         x, y coordinates of center point of desired linestring
-    tilt : float
-        surface tilt angle desired [deg]
+    tilt : float or np.ndarray
+        Surface tilt angles desired [deg]. Values should all be positive.
     length : float
         desired length of linestring [m]
-    surface_azimuth : float
-        Surface azimuth of PV surface [deg]
+    surface_azimuth : float or np.ndarray
+        Surface azimuth angles of PV surface [deg]
     axis_azimuth : float
         Axis azimuth of the PV surface, i.e. direction of axis of rotation
         [deg]
@@ -77,17 +77,16 @@ def coords_from_center_tilt_length(xy_center, tilt, length,
     Returns
     -------
     list
-        List of linestring coordinates obtained from inputs
+        List of linestring coordinates obtained from inputs (could be vectors)
+        in the form of [(x1, y1), (x2, y2)]
     """
-    is_pointing_right = ((surface_azimuth - axis_azimuth) % 360.) > 180.
-    if is_pointing_right:
-        # system should be rotated to the right: so negative rotation angle
-        rotation = tilt
-    else:
-        # need positive rotation angle for system to point to the left
-        rotation = - tilt
+    # PV row params
     x_center, y_center = xy_center
     radius = length / 2.
+    # Calculate rotation of PV row (signed tilt angle)
+    is_pointing_right = ((surface_azimuth - axis_azimuth) % 360.) > 180.
+    rotation = np.where(is_pointing_right, tilt, -tilt)
+    # Calculate coords
     x1 = radius * cosd(rotation + 180.) + x_center
     y1 = radius * sind(rotation + 180.) + y_center
     x2 = radius * cosd(rotation) + x_center
