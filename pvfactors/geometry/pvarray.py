@@ -401,6 +401,7 @@ class FastOrderedPVArray(BasePVArray):
         # These parameters will be defined at fitting time
         self.solar_2d_vectors = None
         self.pvrow_coords = []
+        self.ground_shadow_coords = []
         self.n_states = None
         self.has_direct_shading = None
 
@@ -425,6 +426,22 @@ class FastOrderedPVArray(BasePVArray):
                 coords_from_center_tilt_length(
                     xy_center, surface_tilt, self.width, surface_azimuth,
                     self.axis_azimuth))
+
+        # Calculate the angle made by 2D sun vector and x-axis
+        alpha_vec = np.arctan2(self.solar_2d_vectors[1],
+                               self.solar_2d_vectors[0])
+        # Calculate coords of ground shadows
+        for pvrow_coord in self.pvrow_coords:
+            x1s_pvrow = pvrow_coord[0][0][0]
+            y1s_pvrow = pvrow_coord[0][0][1]
+            x2s_pvrow = pvrow_coord[0][1][0]
+            y2s_pvrow = pvrow_coord[0][1][1]
+            self.ground_shadow_coords.append([
+                (x1s_pvrow + np.tan(alpha_vec) * y1s_pvrow,
+                 self.y_ground * np.ones(self.n_states)),
+                (x2s_pvrow + np.tan(alpha_vec) * y2s_pvrow,
+                 self.y_ground * np.ones(self.n_states))
+            ])
 
         # Other
         # self.front_neighbors, self.back_neighbors = self.get_neighbors()

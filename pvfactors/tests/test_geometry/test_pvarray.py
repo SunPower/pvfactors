@@ -563,3 +563,36 @@ def test_plot_fast_ordered_pvarray():
         f, ax = plt.subplots()
         ordered_pvarray.plot(ax)
         plt.show()
+
+
+def test_coords_ground_shadows():
+
+    # Create base params
+    params = {
+        'axis_azimuth': 0,
+        'n_pvrows': 2,
+        'pvrow_height': 2.5,
+        'pvrow_width': 2.,
+        'gcr': 0.4,
+        'cut': {0: {'front': 5}, 1: {'back': 3}}
+    }
+
+    # Timeseries parameters for testing
+    solar_zenith = np.array([20., 45.])
+    solar_azimuth = np.array([70., 200.])
+    surface_tilt = np.array([10., 70.])
+    surface_azimuth = np.array([90., 270.])
+
+    # Plot simple ordered pv array
+    ordered_pvarray = FastOrderedPVArray(**params)
+    ordered_pvarray.fit(solar_zenith, solar_azimuth, surface_tilt,
+                        surface_azimuth)
+
+    expected_gnd_shadow_coords = [
+        [([-1.98480775, 0.01519225], [0., 0.]),
+         ([7.23568176, -1.8883854], [0., 0.])],
+        [([17.63421425, -9.60382975], [0., 0.]),
+         ([7.23568176, -1.8883854], [0., 0.])]
+    ]
+    np.testing.assert_almost_equal(
+        expected_gnd_shadow_coords, ordered_pvarray.ground_shadow_coords)
