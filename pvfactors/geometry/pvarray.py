@@ -432,14 +432,16 @@ class FastOrderedPVArray(BasePVArray):
                                self.solar_2d_vectors[0])
         # Calculate coords of ground shadows
         for pvrow_coord in self.pvrow_coords:
-            x1s_pvrow = pvrow_coord[0][0][0]
-            y1s_pvrow = pvrow_coord[0][0][1]
-            x2s_pvrow = pvrow_coord[0][1][0]
-            y2s_pvrow = pvrow_coord[0][1][1]
+            x1s_pvrow = pvrow_coord[0][0]
+            y1s_pvrow = pvrow_coord[0][1]
+            x2s_pvrow = pvrow_coord[1][0]
+            y2s_pvrow = pvrow_coord[1][1]
+            # import pdb
+            # pdb.set_trace()
             self.ground_shadow_coords.append([
-                (x1s_pvrow + np.tan(alpha_vec) * y1s_pvrow,
+                (x1s_pvrow - (y1s_pvrow - self.y_ground) / np.tan(alpha_vec),
                  self.y_ground * np.ones(self.n_states)),
-                (x2s_pvrow + np.tan(alpha_vec) * y2s_pvrow,
+                (x2s_pvrow - (y2s_pvrow - self.y_ground) / np.tan(alpha_vec),
                  self.y_ground * np.ones(self.n_states))
             ])
 
