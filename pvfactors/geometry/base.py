@@ -1091,29 +1091,17 @@ class BasePVArray(object):
     registry_cols = ['geom', 'line_type', 'pvrow_index', 'side',
                      'pvsegment_index', 'shaded', 'surface_index']
 
-    def __init__(self, list_pvrows=[], ground=None, distance=None,
-                 height=None):
-        """Initialize PV array.
+    def __init__(self, axis_azimuth=None):
+        """Initialize Base of PV array.
 
         Parameters
         ----------
-        list_pvrows : list of :py:class:`~pvfactors.geometry.pvrow.PVRow`, optional
-            List of PV rows in the PV array
-            (Default = [])
-        ground : :py:class:`~pvfactors.geometry.pvground.PVGround`, optional
-            Ground geometry for the PV array
-        distance : float, optional
-            Unique distance between PV rows, if exists (Default = None)
-        height : float, optional
-            Unique height of all PV rows, if exists (Default = None)
+        axis_azimuth : float, optional
+            Azimuth angle of rotation axis [deg] (Default = None)
         """
-        self.pvrows = list_pvrows
-        self.ground = ground
-        self.distance = distance
-        self.height = height
+        # All PV arrays should have a fixed axis azimuth in pvfactors
+        self.axis_azimuth = axis_azimuth
 
-        # Initialize shading attributes
-        self.illum_side = None
         # For view factors
         self.edge_points = []
 

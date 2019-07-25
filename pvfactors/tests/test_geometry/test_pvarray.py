@@ -1,6 +1,7 @@
 import os
 import numpy as np
 from pvfactors.geometry import OrderedPVArray, PVGround, PVSurface
+from pvfactors.geometry.pvarray import FastOrderedPVArray
 from pvfactors.geometry.utils import contains
 from pvfactors.config import MAX_X_GROUND, MIN_X_GROUND
 from pvfactors.tests.test_geometry.test_data import \
@@ -522,3 +523,43 @@ def test_ordered_pvarray_gnd_shadow_casting_tolerance():
     pvrow = pvarray_w_direct_shading.pvrows[1]
     assert (pvrow.front.list_segments[0]
             .shaded_collection.n_surfaces) == 0
+
+
+def test_plot_fast_ordered_pvarray():
+    """Test that ordered pv array plotting works correctly"""
+    is_ci = os.environ.get('CI', False)
+    if not is_ci:
+        import matplotlib.pyplot as plt
+
+        # Create base params
+        params = {
+            'axis_azimuth': 0,
+            'n_pvrows': 3,
+            'pvrow_height': 2.5,
+            'pvrow_width': 2.,
+            'gcr': 0.4,
+            'cut': {0: {'front': 5}, 1: {'back': 3}}
+        }
+
+        # Timeseries parameters for testing
+        solar_zenith = np.array([20., 45.])
+        solar_azimuth = np.array([70., 200.])
+        surface_tilt = np.array([10., 70.])
+        surface_azimuth = np.array([90., 270.])
+
+        # Plot simple ordered pv array
+        ordered_pvarray = FastOrderedPVArray(**params)
+        ordered_pvarray.fit(solar_zenith, solar_azimuth, surface_tilt,
+                            surface_azimuth)
+
+        # plot
+        ordered_pvarray.transform(0)
+        f, ax = plt.subplots()
+        ordered_pvarray.plot(ax)
+        plt.show()
+
+        # plot
+        ordered_pvarray.transform(1)
+        f, ax = plt.subplots()
+        ordered_pvarray.plot(ax)
+        plt.show()

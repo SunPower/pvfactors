@@ -5,7 +5,8 @@ import numpy as np
 from pvfactors.geometry.pvground import PVGround
 from pvfactors.geometry.pvrow import PVRow
 from pvfactors.config import X_ORIGIN_PVROWS, VIEW_DICT, DISTANCE_TOLERANCE
-from pvfactors.geometry.base import get_solar_2d_vector, BasePVArray
+from pvfactors.geometry.base import \
+    get_solar_2d_vector, BasePVArray, coords_from_center_tilt_length
 from pvfactors.geometry.utils import projection
 from shapely.geometry import LineString, Point
 
@@ -48,9 +49,11 @@ class OrderedPVArray(BasePVArray):
         distance : float, optional
             Unique distance between PV rows (Default = None)
         """
-        super(OrderedPVArray, self).__init__(list_pvrows=list_pvrows,
-                                             ground=ground, distance=distance,
-                                             height=height)
+        super(OrderedPVArray, self).__init__(axis_azimuth=axis_azimuth)
+        self.pvrows = list_pvrows
+        self.ground = ground
+        self.distance = distance
+        self.height = height
         self.gcr = gcr
         self.solar_zenith = solar_zenith
         self.solar_azimuth = solar_azimuth
@@ -152,7 +155,7 @@ class OrderedPVArray(BasePVArray):
                    and not stop_checking_for_direct_shading:
                     # There's inter-row shading if ground shadows overlap
                     if self.illum_side == 'front':
-                        self.has_direct_shading = gnd_1.x + DISTANCE_TOLERANCE < last_gnd_2.x 
+                        self.has_direct_shading = gnd_1.x + DISTANCE_TOLERANCE < last_gnd_2.x
                     else:
                         self.has_direct_shading = gnd_2.x + DISTANCE_TOLERANCE < last_gnd_1.x
                     stop_checking_for_direct_shading = True
@@ -356,3 +359,82 @@ class OrderedPVArray(BasePVArray):
                             index_sky_dome] = VIEW_DICT["front_sky"]
 
         return view_matrix, obstr_matrix
+
+
+class FastOrderedPVArray(BasePVArray):
+
+    y_ground = 0.  # ground will be at height = 0 by default
+
+    def __init__(self, axis_azimuth=None, gcr=None, pvrow_height=None,
+                 n_pvrows=None, pvrow_width=None, surface_params=[], cut={}):
+        """Initialize ordered PV array.
+        List of PV rows will be ordered from left to right.
+
+        Parameters
+        ----------
+        axis_azimuth : float, optional
+            Azimuth angle of rotation axis [deg] (Default = None)
+        gcr : float, optional
+            Ground coverage ratio (Default = None)
+        height : float, optional
+            Unique height of all PV rows (Default = None)
+        n_pvrows
+        width
+        surface_params
+        cut
+        """
+        # Initialize base parameters: common to all sorts of PV arrays
+        super(FastOrderedPVArray, self).__init__(axis_azimuth=axis_azimuth)
+
+        # These are the invariant parameters of the PV array
+        self.gcr = gcr
+        self.height = pvrow_height
+        self.distance = pvrow_width / gcr \
+            if (pvrow_width is not None) and (gcr is not None) \
+            else None
+        self.width = pvrow_width
+        self.n_pvrows = n_pvrows
+        self.surface_params = surface_params
+        self.cut = cut
+
+        # These parameters will be defined at fitting time
+        self.solar_2d_vectors = None
+        self.pvrow_coords = []
+        self.has_direct_shading = None
+
+        # These attributes will be transformed at each iteration
+        self.pvrows = None
+        self.ground = None
+
+    def fit(self, solar_zenith, solar_azimuth, surface_tilt, surface_azimuth):
+
+        # Calculate the solar 2D vectors for all timestamps
+        self.solar_2d_vectors = get_solar_2d_vector(
+            solar_zenith, solar_azimuth, self.axis_azimuth)
+
+        # Calculate the coordinates of all PV rows for all timestamps
+        xy_centers = [(X_ORIGIN_PVROWS + idx * self.distance,
+                       self.height + self.y_ground)
+                      for idx in range(self.n_pvrows)]
+        for xy_center in xy_centers:
+            self.pvrow_coords.append(
+                coords_from_center_tilt_length(
+                    xy_center, surface_tilt, self.width, surface_azimuth,
+                    self.axis_azimuth))
+
+        # Other
+        # self.front_neighbors, self.back_neighbors = self.get_neighbors()
+
+    def transform(self, idx):
+
+        # Create list of PV rows from calculated pvrow coordinates
+        self.pvrows = [
+            PVRow.from_linestring_coords(
+                [(pvrow_coord[0][0][idx], pvrow_coord[0][1][idx]),
+                 (pvrow_coord[1][0][idx], pvrow_coord[1][1][idx])],
+                index=pvrow_idx, cut=self.cut.get(pvrow_idx, {}),
+                surface_params=self.surface_params)
+            for pvrow_idx, pvrow_coord in enumerate(self.pvrow_coords)]
+        # Create ground geometry
+        self.ground = PVGround.as_flat(y_ground=self.y_ground,
+                                       surface_params=self.surface_params)
