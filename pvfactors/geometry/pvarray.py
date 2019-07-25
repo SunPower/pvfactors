@@ -9,6 +9,7 @@ from pvfactors.geometry.base import \
     get_solar_2d_vector, BasePVArray, coords_from_center_tilt_length
 from pvfactors.geometry.utils import projection
 from shapely.geometry import LineString, Point
+from pvfactors import PVFactorsError
 
 
 class OrderedPVArray(BasePVArray):
@@ -400,6 +401,7 @@ class FastOrderedPVArray(BasePVArray):
         # These parameters will be defined at fitting time
         self.solar_2d_vectors = None
         self.pvrow_coords = []
+        self.n_states = None
         self.has_direct_shading = None
 
         # These attributes will be transformed at each iteration
@@ -407,6 +409,8 @@ class FastOrderedPVArray(BasePVArray):
         self.ground = None
 
     def fit(self, solar_zenith, solar_azimuth, surface_tilt, surface_azimuth):
+
+        self.n_states = len(solar_zenith)
 
         # Calculate the solar 2D vectors for all timestamps
         self.solar_2d_vectors = get_solar_2d_vector(
@@ -427,14 +431,19 @@ class FastOrderedPVArray(BasePVArray):
 
     def transform(self, idx):
 
-        # Create list of PV rows from calculated pvrow coordinates
-        self.pvrows = [
-            PVRow.from_linestring_coords(
-                [(pvrow_coord[0][0][idx], pvrow_coord[0][1][idx]),
-                 (pvrow_coord[1][0][idx], pvrow_coord[1][1][idx])],
-                index=pvrow_idx, cut=self.cut.get(pvrow_idx, {}),
-                surface_params=self.surface_params)
-            for pvrow_idx, pvrow_coord in enumerate(self.pvrow_coords)]
-        # Create ground geometry
-        self.ground = PVGround.as_flat(y_ground=self.y_ground,
-                                       surface_params=self.surface_params)
+        if idx < self.n_states:
+            # Create list of PV rows from calculated pvrow coordinates
+            self.pvrows = [
+                PVRow.from_linestring_coords(
+                    [(pvrow_coord[0][0][idx], pvrow_coord[0][1][idx]),
+                     (pvrow_coord[1][0][idx], pvrow_coord[1][1][idx])],
+                    index=pvrow_idx, cut=self.cut.get(pvrow_idx, {}),
+                    surface_params=self.surface_params)
+                for pvrow_idx, pvrow_coord in enumerate(self.pvrow_coords)]
+            # Create ground geometry
+            self.ground = PVGround.as_flat(y_ground=self.y_ground,
+                                           surface_params=self.surface_params)
+        else:
+            msg = "Index {} is out of range: [0 to {}]".format(
+                idx, self.n_states - 1)
+            raise PVFactorsError(msg)
