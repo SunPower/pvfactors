@@ -83,9 +83,9 @@ def coords_from_center_tilt_length(xy_center, tilt, length,
     # PV row params
     x_center, y_center = xy_center
     radius = length / 2.
-    # Calculate rotation of PV row (signed tilt angle)
-    is_pointing_right = ((surface_azimuth - axis_azimuth) % 360.) > 180.
-    rotation = np.where(is_pointing_right, tilt, -tilt)
+    # Get rotation
+    rotation = get_rotation_from_tilt_azimuth(surface_azimuth, axis_azimuth,
+                                              tilt)
     # Calculate coords
     x1 = radius * cosd(rotation + 180.) + x_center
     y1 = radius * sind(rotation + 180.) + y_center
@@ -93,6 +93,15 @@ def coords_from_center_tilt_length(xy_center, tilt, length,
     y2 = radius * sind(rotation) + y_center
 
     return [[x1, y1], [x2, y2]]
+
+
+def get_rotation_from_tilt_azimuth(surface_azimuth, axis_azimuth, tilt):
+
+    # Calculate rotation of PV row (signed tilt angle)
+    is_pointing_right = ((surface_azimuth - axis_azimuth) % 360.) > 180.
+    rotation = np.where(is_pointing_right, tilt, -tilt)
+
+    return rotation
 
 
 def get_solar_2d_vector(solar_zenith, solar_azimuth, axis_azimuth):

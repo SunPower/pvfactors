@@ -597,3 +597,34 @@ def test_coords_ground_shadows():
 
     np.testing.assert_almost_equal(
         expected_gnd_shadow_coords, ordered_pvarray.ground_shadow_coords)
+
+
+def test_coords_cut_points():
+
+    # Create base params
+    params = {
+        'axis_azimuth': 0,
+        'n_pvrows': 2,
+        'pvrow_height': 2.5,
+        'pvrow_width': 2.,
+        'gcr': 0.4,
+        'cut': {0: {'front': 5}, 1: {'back': 3}}
+    }
+
+    # Timeseries parameters for testing
+    solar_zenith = np.array([20., 45.])
+    solar_azimuth = np.array([70., 200.])
+    surface_tilt = np.array([10., 70.])
+    surface_azimuth = np.array([90., 270.])
+
+    # Plot simple ordered pv array
+    ordered_pvarray = FastOrderedPVArray(**params)
+    ordered_pvarray.fit(solar_zenith, solar_azimuth, surface_tilt,
+                        surface_azimuth)
+
+    expected_cut_point_coords = [
+        [[3.13889631, -1.61890931], [0., 0.]],
+        [[8.13889631, 3.38109069], [0., 0.]]]
+
+    np.testing.assert_almost_equal(
+        expected_cut_point_coords, ordered_pvarray.cut_point_coords)

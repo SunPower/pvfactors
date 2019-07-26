@@ -6,7 +6,8 @@ from pvfactors.geometry.pvground import PVGround
 from pvfactors.geometry.pvrow import PVRow
 from pvfactors.config import X_ORIGIN_PVROWS, VIEW_DICT, DISTANCE_TOLERANCE
 from pvfactors.geometry.base import \
-    get_solar_2d_vector, BasePVArray, coords_from_center_tilt_length
+    get_solar_2d_vector, BasePVArray, coords_from_center_tilt_length, \
+    get_rotation_from_tilt_azimuth
 from pvfactors.geometry.utils import projection
 from shapely.geometry import LineString, Point
 from pvfactors import PVFactorsError
@@ -402,6 +403,7 @@ class FastOrderedPVArray(BasePVArray):
         self.solar_2d_vectors = None
         self.pvrow_coords = []
         self.ground_shadow_coords = []
+        self.cut_point_coords = []
         self.n_states = None
         self.has_direct_shading = None
 
@@ -431,13 +433,17 @@ class FastOrderedPVArray(BasePVArray):
         # Calculate the angle made by 2D sun vector and x-axis
         alpha_vec = np.arctan2(self.solar_2d_vectors[1],
                                self.solar_2d_vectors[0])
-        # Calculate coords of ground shadows
+        # Calculate rotation angles
+        rotation_vec = get_rotation_from_tilt_azimuth(
+            surface_azimuth, self.axis_azimuth, surface_tilt)
+        # Calculate coords of ground shadows and cutting points
         for pvrow_coord in self.pvrow_coords:
             # Get pvrow coords
             x1s_pvrow = pvrow_coord[0][0]
             y1s_pvrow = pvrow_coord[0][1]
             x2s_pvrow = pvrow_coord[1][0]
             y2s_pvrow = pvrow_coord[1][1]
+            # --- Shadow coords calculation
             # Calculate x coords of shadow
             x1s_shadow = x1s_pvrow \
                 - (y1s_pvrow - self.y_ground) / np.tan(alpha_vec)
@@ -451,6 +457,11 @@ class FastOrderedPVArray(BasePVArray):
             self.ground_shadow_coords.append(
                 [[xs_left_shadow, self.y_ground * np.ones(self.n_states)],
                  [xs_right_shadow, self.y_ground * np.ones(self.n_states)]])
+            # --- Cutting points coords calculation
+            dx = (y1s_pvrow - self.y_ground) / np.tan(rotation_vec)
+            self.cut_point_coords.append(
+                [x1s_pvrow - dx, self.y_ground * np.ones(self.n_states)])
+
         self.ground_shadow_coords = np.array(self.ground_shadow_coords)
 
         # Determine when there's direct shading
@@ -461,7 +472,6 @@ class FastOrderedPVArray(BasePVArray):
                 self.ground_shadow_coords[1][0][0]
                 - self.ground_shadow_coords[0][1][0] < DISTANCE_TOLERANCE)
 
-        print(self.ground_shadow_coords)
         # Other
         # self.front_neighbors, self.back_neighbors = self.get_neighbors()
 
