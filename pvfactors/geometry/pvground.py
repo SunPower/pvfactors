@@ -54,9 +54,9 @@ class PVGround(BaseSide):
         return cls(list_segments=[seg], original_linestring=LineString(coords))
 
     @classmethod
-    def from_ordered_shadow_coords(cls, x_min_max=None, y_ground=Y_GROUND,
-                                   ordered_shadow_coords=[],
-                                   surface_params=[]):
+    def from_ordered_shadow_and_cut_pt_coords(
+        cls, x_min_max=None, y_ground=Y_GROUND, ordered_shadow_coords=[],
+            cut_point_coords=[], surface_params=[]):
         # Get ground boundaries
         if x_min_max is None:
             x_min, x_max = MIN_X_GROUND, MAX_X_GROUND
@@ -67,59 +67,9 @@ class PVGround(BaseSide):
         # Create the list of illuminated and shaded PV surfaces
         list_shaded_surfaces = []
         list_illum_surfaces = []
-        if len(ordered_shadow_coords) == 0:
-            # The whole ground is illuminated
-            illum = PVSurface(coords=full_extent_coords, shaded=False,
-                              surface_params=surface_params)
-            list_illum_surfaces.append(illum)
-        else:
-            # There are shadows and illuminated areas
-            # x_illum_left is the left x coord of the potential left illum area
-            # wrt the shadow
-            x_illum_left = x_min
-            for shadow_coord in ordered_shadow_coords:
-                [[x1, y1], [x2, y2]] = shadow_coord
-                if x1 < x_min:
-                    if x2 > x_min + DISTANCE_TOLERANCE:
-                        # Shadow is cropped in the picture
-                        coord = [[x_min, y1], [x2, y2]]
-                        shadow = PVSurface(coords=coord, shaded=True,
-                                           surface_params=surface_params)
-                        list_shaded_surfaces.append(shadow)
-                        # Update x_illum_left to right x coord of shadow
-                        x_illum_left = x2
-                elif x2 > x_max:
-                    if x1 + DISTANCE_TOLERANCE < x_max:
-                        # Shadow is cropped in the picture
-                        coord = [[x1, y1], [x_max, y2]]
-                        shadow = PVSurface(coords=coord, shaded=True,
-                                           surface_params=surface_params)
-                        list_shaded_surfaces.append(shadow)
-                        if x_illum_left + DISTANCE_TOLERANCE < x1:
-                            coord = [[x_illum_left, y1], [x1, y1]]
-                            illum = PVSurface(coords=coord, shaded=False,
-                                              surface_params=surface_params)
-                            list_illum_surfaces.append(illum)
-                        # Update x_illum_left to right x coord of shadow
-                        x_illum_left = x_max
-                else:
-                    # Shadow is fully in the picture
-                    shadow = PVSurface(coords=shadow_coord, shaded=True,
-                                       surface_params=surface_params)
-                    list_shaded_surfaces.append(shadow)
-                    if x_illum_left + DISTANCE_TOLERANCE < x1:
-                        coord = [[x_illum_left, y1], [x1, y1]]
-                        illum = PVSurface(coords=coord, shaded=False,
-                                          surface_params=surface_params)
-                        list_illum_surfaces.append(illum)
-                    # Update x_illum_left to right x coord of shadow
-                    x_illum_left = x2
-            # Add right illum area if exist
-            if x_illum_left + DISTANCE_TOLERANCE < x_max:
-                coord = [[x_illum_left, y1], [x_max, y1]]
-                illum = PVSurface(coords=coord, shaded=False,
-                                  surface_params=surface_params)
-                list_illum_surfaces.append(illum)
+        recurse_on_cut_points(list_shaded_surfaces, list_illum_surfaces,
+                              ordered_shadow_coords, cut_point_coords,
+                              x_min, x_max, y_ground, surface_params)
 
         # Create the shade collections
         shaded_collection = ShadeCollection(
@@ -140,3 +90,100 @@ class PVGround(BaseSide):
     def boundary(self):
         """Boundaries of the ground's original linestring."""
         return self.original_linestring.boundary
+
+
+def recurse_on_cut_points(
+        list_shaded_surfaces, list_illum_surfaces,
+        ordered_shadow_coords, cut_point_coords,
+        x_min, x_max, y_ground, surface_params):
+    """Solve recursively the problem of building the lists of shaded and
+    illuminated surfaces when cut points might exist"""
+
+    if len(cut_point_coords) == 0:
+        build_list_illum_shadow_surfaces(
+            list_shaded_surfaces, list_illum_surfaces, ordered_shadow_coords,
+            x_min, x_max, y_ground, surface_params)
+    else:
+        # Get leftmost cut point
+        cut_point = cut_point_coords[0]
+        # Remove that point from the cut point list
+        cut_point_coords = cut_point_coords[1:]
+        # Now try to solve in the smaller picture case
+        is_cut_pt_in_picture = (cut_point[0] > x_min + DISTANCE_TOLERANCE) \
+            and (cut_point[0] < x_max - DISTANCE_TOLERANCE)
+        if is_cut_pt_in_picture:
+            # Reduce picture frame
+            new_x_max = cut_point[0]
+            # TODO: try to reduce list of shadow coords as well
+            build_list_illum_shadow_surfaces(
+                list_shaded_surfaces, list_illum_surfaces,
+                ordered_shadow_coords, x_min, new_x_max, y_ground,
+                surface_params)
+            # New x_min should be at the cut point
+            x_min = new_x_max
+        # Now move to the next [x_min, x_max] frame
+        recurse_on_cut_points(list_shaded_surfaces, list_illum_surfaces,
+                              ordered_shadow_coords, cut_point_coords,
+                              x_min, x_max, y_ground, surface_params)
+
+
+def build_list_illum_shadow_surfaces(
+        list_shaded_surfaces, list_illum_surfaces, ordered_shadow_coords,
+        x_min, x_max, y_ground, surface_params):
+    """Build lists of shaded and illuminated surfaces in the case when
+    there are no cut points."""
+    if len(ordered_shadow_coords) == 0:
+        if x_min + DISTANCE_TOLERANCE < x_max:
+            # The whole ground is illuminated
+            full_extent_coords = [(x_min, y_ground), (x_max, y_ground)]
+            illum = PVSurface(coords=full_extent_coords, shaded=False,
+                              surface_params=surface_params)
+            list_illum_surfaces.append(illum)
+    else:
+        # There are shadows and illuminated areas
+        # x_illum_left is the left x coord of the potential left illum area
+        # wrt the shadow
+        x_illum_left = x_min
+        for shadow_coord in ordered_shadow_coords:
+            [[x1, y1], [x2, y2]] = shadow_coord
+            if x1 < x_min:
+                if x2 > x_min + DISTANCE_TOLERANCE:
+                    # Shadow is cropped in the picture
+                    coord = [[x_min, y1], [x2, y2]]
+                    shadow = PVSurface(coords=coord, shaded=True,
+                                       surface_params=surface_params)
+                    list_shaded_surfaces.append(shadow)
+                    # Update x_illum_left to right x coord of shadow
+                    x_illum_left = x2
+            elif x2 > x_max:
+                if x1 + DISTANCE_TOLERANCE < x_max:
+                    # Shadow is cropped in the picture
+                    coord = [[x1, y1], [x_max, y2]]
+                    shadow = PVSurface(coords=coord, shaded=True,
+                                       surface_params=surface_params)
+                    list_shaded_surfaces.append(shadow)
+                    if x_illum_left + DISTANCE_TOLERANCE < x1:
+                        coord = [[x_illum_left, y1], [x1, y1]]
+                        illum = PVSurface(coords=coord, shaded=False,
+                                          surface_params=surface_params)
+                        list_illum_surfaces.append(illum)
+                    # Update x_illum_left to right x coord of shadow
+                    x_illum_left = x_max
+            else:
+                # Shadow is fully in the picture
+                shadow = PVSurface(coords=shadow_coord, shaded=True,
+                                   surface_params=surface_params)
+                list_shaded_surfaces.append(shadow)
+                if x_illum_left + DISTANCE_TOLERANCE < x1:
+                    coord = [[x_illum_left, y1], [x1, y1]]
+                    illum = PVSurface(coords=coord, shaded=False,
+                                      surface_params=surface_params)
+                    list_illum_surfaces.append(illum)
+                # Update x_illum_left to right x coord of shadow
+                x_illum_left = x2
+        # Add right illum area if exist
+        if x_illum_left + DISTANCE_TOLERANCE < x_max:
+            coord = [[x_illum_left, y1], [x_max, y1]]
+            illum = PVSurface(coords=coord, shaded=False,
+                              surface_params=surface_params)
+            list_illum_surfaces.append(illum)

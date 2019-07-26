@@ -463,6 +463,7 @@ class FastOrderedPVArray(BasePVArray):
                 [x1s_pvrow - dx, self.y_ground * np.ones(self.n_states)])
 
         self.ground_shadow_coords = np.array(self.ground_shadow_coords)
+        self.cut_point_coords = np.array(self.cut_point_coords)
 
         # Determine when there's direct shading
         self.has_direct_shading = np.zeros(self.n_states, dtype=bool)
@@ -491,9 +492,10 @@ class FastOrderedPVArray(BasePVArray):
                 # Just consider 1 larger shadow area on the ground
                 shadow_coords = [[shadow_coords[0][0][:],
                                   shadow_coords[-1][1][:]]]
-            self.ground = PVGround.from_ordered_shadow_coords(
+            self.ground = PVGround.from_ordered_shadow_and_cut_pt_coords(
                 y_ground=self.y_ground, surface_params=self.surface_params,
-                ordered_shadow_coords=shadow_coords)
+                ordered_shadow_coords=shadow_coords,
+                cut_point_coords=self.cut_point_coords[:, :, idx])
         else:
             msg = "Index {} is out of range: [0 to {}]".format(
                 idx, self.n_states - 1)
