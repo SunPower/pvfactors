@@ -623,8 +623,8 @@ def test_coords_cut_points():
                         surface_azimuth)
 
     expected_cut_point_coords = [
-        [[3.13889631, -1.61890931], [0., 0.]],
-        [[8.13889631, 3.38109069], [0., 0.]]]
+        [[14.17820455, -0.90992559], [0., 0.]],
+        [[19.17820455, 4.09007441], [0., 0.]]]
 
     np.testing.assert_almost_equal(
         expected_cut_point_coords, ordered_pvarray.cut_point_coords)

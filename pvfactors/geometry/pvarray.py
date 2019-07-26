@@ -436,6 +436,7 @@ class FastOrderedPVArray(BasePVArray):
         # Calculate rotation angles
         rotation_vec = get_rotation_from_tilt_azimuth(
             surface_azimuth, self.axis_azimuth, surface_tilt)
+        rotation_vec = np.deg2rad(rotation_vec)
         # Calculate coords of ground shadows and cutting points
         for pvrow_coord in self.pvrow_coords:
             # Get pvrow coords
