@@ -78,7 +78,7 @@ def coords_from_center_tilt_length(xy_center, tilt, length,
     -------
     list
         List of linestring coordinates obtained from inputs (could be vectors)
-        in the form of [(x1, y1), (x2, y2)]
+        in the form of [[x1, y1], [x2, y2]]
     """
     # PV row params
     x_center, y_center = xy_center
@@ -92,7 +92,7 @@ def coords_from_center_tilt_length(xy_center, tilt, length,
     x2 = radius * cosd(rotation) + x_center
     y2 = radius * sind(rotation) + y_center
 
-    return [(x1, y1), (x2, y2)]
+    return [[x1, y1], [x2, y2]]
 
 
 def get_solar_2d_vector(solar_zenith, solar_azimuth, axis_azimuth):

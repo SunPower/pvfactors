@@ -426,6 +426,7 @@ class FastOrderedPVArray(BasePVArray):
                 coords_from_center_tilt_length(
                     xy_center, surface_tilt, self.width, surface_azimuth,
                     self.axis_azimuth))
+        self.pvrow_coords = np.array(self.pvrow_coords)
 
         # Calculate the angle made by 2D sun vector and x-axis
         alpha_vec = np.arctan2(self.solar_2d_vectors[1],
@@ -469,8 +470,7 @@ class FastOrderedPVArray(BasePVArray):
             # Create list of PV rows from calculated pvrow coordinates
             self.pvrows = [
                 PVRow.from_linestring_coords(
-                    [(pvrow_coord[0][0][idx], pvrow_coord[0][1][idx]),
-                     (pvrow_coord[1][0][idx], pvrow_coord[1][1][idx])],
+                    pvrow_coord[:, :, idx],
                     index=pvrow_idx, cut=self.cut.get(pvrow_idx, {}),
                     surface_params=self.surface_params)
                 for pvrow_idx, pvrow_coord in enumerate(self.pvrow_coords)]
