@@ -432,18 +432,33 @@ class FastOrderedPVArray(BasePVArray):
                                self.solar_2d_vectors[0])
         # Calculate coords of ground shadows
         for pvrow_coord in self.pvrow_coords:
+            # Get pvrow coords
             x1s_pvrow = pvrow_coord[0][0]
             y1s_pvrow = pvrow_coord[0][1]
             x2s_pvrow = pvrow_coord[1][0]
             y2s_pvrow = pvrow_coord[1][1]
-            # import pdb
-            # pdb.set_trace()
-            self.ground_shadow_coords.append([
-                (x1s_pvrow - (y1s_pvrow - self.y_ground) / np.tan(alpha_vec),
-                 self.y_ground * np.ones(self.n_states)),
-                (x2s_pvrow - (y2s_pvrow - self.y_ground) / np.tan(alpha_vec),
-                 self.y_ground * np.ones(self.n_states))
-            ])
+            # Calculate x coords of shadow
+            x1s_shadow = x1s_pvrow \
+                - (y1s_pvrow - self.y_ground) / np.tan(alpha_vec)
+            x2s_shadow = x2s_pvrow \
+                - (y2s_pvrow - self.y_ground) / np.tan(alpha_vec)
+            # Order x coords from left to right
+            x1s_on_left = x1s_shadow <= x2s_shadow
+            xs_left_shadow = np.where(x1s_on_left, x1s_shadow, x2s_shadow)
+            xs_right_shadow = np.where(x1s_on_left, x2s_shadow, x1s_shadow)
+            # Append shadow coords to list
+            self.ground_shadow_coords.append(
+                [[xs_left_shadow, self.y_ground * np.ones(self.n_states)],
+                 [xs_right_shadow, self.y_ground * np.ones(self.n_states)]])
+        self.ground_shadow_coords = np.array(self.ground_shadow_coords)
+
+        # Determine when there's direct shading
+        self.has_direct_shading = np.zeros(self.n_states, dtype=bool)
+        if self.n_pvrows > 1:
+            # If the shadows are crossing (or close), there's direct shading
+            self.has_direct_shading = (
+                self.ground_shadow_coords[0][1][0]
+                - self.ground_shadow_coords[1][0][0] < DISTANCE_TOLERANCE)
 
         # Other
         # self.front_neighbors, self.back_neighbors = self.get_neighbors()
