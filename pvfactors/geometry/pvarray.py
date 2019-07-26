@@ -458,9 +458,10 @@ class FastOrderedPVArray(BasePVArray):
         if self.n_pvrows > 1:
             # If the shadows are crossing (or close), there's direct shading
             self.has_direct_shading = (
-                self.ground_shadow_coords[0][1][0]
-                - self.ground_shadow_coords[1][0][0] < DISTANCE_TOLERANCE)
+                self.ground_shadow_coords[1][0][0]
+                - self.ground_shadow_coords[0][1][0] < DISTANCE_TOLERANCE)
 
+        print(self.ground_shadow_coords)
         # Other
         # self.front_neighbors, self.back_neighbors = self.get_neighbors()
 
@@ -475,8 +476,14 @@ class FastOrderedPVArray(BasePVArray):
                     surface_params=self.surface_params)
                 for pvrow_idx, pvrow_coord in enumerate(self.pvrow_coords)]
             # Create ground geometry
-            self.ground = PVGround.as_flat(y_ground=self.y_ground,
-                                           surface_params=self.surface_params)
+            shadow_coords = self.ground_shadow_coords[:, :, :, idx]
+            if self.has_direct_shading[idx]:
+                # Just consider 1 larger shadow area on the ground
+                shadow_coords = [[shadow_coords[0][0][:],
+                                  shadow_coords[-1][1][:]]]
+            self.ground = PVGround.from_ordered_shadow_coords(
+                y_ground=self.y_ground, surface_params=self.surface_params,
+                ordered_shadow_coords=shadow_coords)
         else:
             msg = "Index {} is out of range: [0 to {}]".format(
                 idx, self.n_states - 1)

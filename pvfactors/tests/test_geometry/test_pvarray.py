@@ -537,13 +537,13 @@ def test_plot_fast_ordered_pvarray():
             'n_pvrows': 3,
             'pvrow_height': 2.5,
             'pvrow_width': 2.,
-            'gcr': 0.4,
+            'gcr': 0.7,
             'cut': {0: {'front': 5}, 1: {'back': 3}}
         }
 
         # Timeseries parameters for testing
-        solar_zenith = np.array([20., 45.])
-        solar_azimuth = np.array([70., 200.])
+        solar_zenith = np.array([20., 75.])
+        solar_azimuth = np.array([70., 270.])
         surface_tilt = np.array([10., 70.])
         surface_azimuth = np.array([90., 270.])
 
