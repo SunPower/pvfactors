@@ -12,7 +12,15 @@ def test_ordered_pvarray_from_dict(params):
     """Test that can successfully create ordered pvarray from parameters dict,
     and that the axis azimuth convention works correctly (via normal vector)
     """
-    pvarray = OrderedPVArray.from_dict(params)
+    pvarray = OrderedPVArray(axis_azimuth=params['axis_azimuth'],
+                             gcr=params['gcr'],
+                             pvrow_height=params['pvrow_height'],
+                             n_pvrows=params['n_pvrows'],
+                             pvrow_width=params['pvrow_width'])
+    pvarray.fit(params['solar_zenith'], params['solar_azimuth'],
+                params['surface_tilt'], params['surface_azimuth'])
+    pvarray.transform(0)
+    # pvarray = OrderedPVArray.from_dict(params)
 
     # Test that ground is created successfully
     assert isinstance(pvarray.ground, PVGround)
@@ -31,8 +39,10 @@ def test_ordered_pvarray_from_dict(params):
     assert pvarray.pvrows[0].front.n_vector[0] > 0
 
     # Orient the array the other way
-    params.update({'surface_azimuth': 270.})
-    pvarray = OrderedPVArray.from_dict(params)
+    new_surface_azimuth = np.array([270.])
+    pvarray.fit(params['solar_zenith'], params['solar_azimuth'],
+                params['surface_tilt'], new_surface_azimuth)
+    pvarray.transform(0)
     assert pvarray.pvrows[0].front.n_vector[0] < 0
 
 

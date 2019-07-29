@@ -21,9 +21,8 @@ class OrderedPVArray(BasePVArray):
 
     y_ground = 0.  # ground will be at height = 0 by default
 
-    def __init__(self, list_pvrows=[], ground=None, surface_tilt=None,
-                 surface_azimuth=None, axis_azimuth=None, solar_zenith=None,
-                 solar_azimuth=None, gcr=None, height=None, distance=None):
+    def __init__(self, axis_azimuth=None, gcr=None, pvrow_height=None,
+                 n_pvrows=None, pvrow_width=None, surface_params=[], cut={}):
         """Initialize ordered PV array.
         List of PV rows will be ordered from left to right.
 
@@ -51,26 +50,61 @@ class OrderedPVArray(BasePVArray):
         distance : float, optional
             Unique distance between PV rows (Default = None)
         """
+        # Initialize base parameters: common to all sorts of PV arrays
         super(OrderedPVArray, self).__init__(axis_azimuth=axis_azimuth)
-        self.pvrows = list_pvrows
-        self.ground = ground
-        self.distance = distance
-        self.height = height
+
+        # These are the invariant parameters of the PV array
         self.gcr = gcr
+        self.height = pvrow_height
+        self.distance = pvrow_width / gcr \
+            if (pvrow_width is not None) and (gcr is not None) \
+            else None
+        self.width = pvrow_width
+        self.n_pvrows = n_pvrows
+        self.surface_params = surface_params
+        self.cut = cut
+
+        # These parameters will be defined at fitting time
+        self.pvrow_coords = []
+        self.ground_shadow_coords = []
+        self.cut_point_coords = []
+        self.n_states = None
+        self.has_direct_shading = None
+        self.solar_zenith = None
+        self.solar_azimuth = None
+        self.surface_tilt = None
+        self.surface_azimuth = None
+
+        # These attributes will be transformed at each iteration
+        self.pvrows = None
+        self.ground = None
+        self.front_neighbors = None
+        self.back_neighbors = None
+        self.solar_2d_vector = None
+
+    def fit(self, solar_zenith, solar_azimuth, surface_tilt, surface_azimuth):
+
+        self.n_states = len(solar_zenith)
+        # Save timeseries parameters that will be used later on
         self.solar_zenith = solar_zenith
         self.solar_azimuth = solar_azimuth
         self.surface_tilt = surface_tilt
         self.surface_azimuth = surface_azimuth
-        self.axis_azimuth = axis_azimuth
-        self.solar_2d_vector = get_solar_2d_vector(solar_zenith, solar_azimuth,
-                                                   axis_azimuth)
+
+    def transform(self, idx):
+
+        self.solar_2d_vector = get_solar_2d_vector(
+            self.solar_zenith[idx], self.solar_azimuth[idx],
+            self.axis_azimuth)
+        # Create ground and pvrows
+        self.ground, self.pvrows = self.build_pvrows_ground(idx)
+        # self.cast_shadows()
+        # self.cuts_for_pvrow_view()
+
+        # Determine front and back pvrow neighbors
         self.front_neighbors, self.back_neighbors = self.get_neighbors()
 
-        # Initialize shading attributes
-        self.has_direct_shading = False
-
-    @classmethod
-    def from_dict(cls, parameters, surface_params=[]):
+    def build_pvrows_ground(self, idx):
         """Create ordered PV array from dictionary of parameters
 
         Parameters
@@ -81,35 +115,24 @@ class OrderedPVArray(BasePVArray):
             List of parameter names to pass to surfaces (Default = [])
         """
         # Create ground
-        ground = PVGround.as_flat(y_ground=cls.y_ground,
-                                  surface_params=surface_params)
+        ground = PVGround.as_flat(y_ground=self.y_ground,
+                                  surface_params=self.surface_params)
         # Create pvrows
         list_pvrows = []
-        width = parameters['pvrow_width']
-        tilt = parameters['surface_tilt']
-        surface_azimuth = parameters['surface_azimuth']
-        axis_azimuth = parameters['axis_azimuth']
-        gcr = parameters['gcr']
-        y_center = parameters['pvrow_height'] + cls.y_ground
-        distance = width / gcr
-        # Discretization params
-        cut = parameters.get('cut', {})
+        y_center = self.height + self.y_ground
+        tilt = self.surface_tilt[idx]
+        surface_azimuth = self.surface_azimuth[idx]
         # Loop for pvrow creation
-        for idx in range(parameters['n_pvrows']):
+        for pvrow_idx in range(self.n_pvrows):
             # Make equally spaced pv rows
-            x_center = X_ORIGIN_PVROWS + idx * distance
+            x_center = X_ORIGIN_PVROWS + idx * self.distance
             pvrow = PVRow.from_center_tilt_width(
-                (x_center, y_center), tilt, width, surface_azimuth,
-                axis_azimuth, index=idx, cut=cut.get(idx, {}),
-                surface_params=surface_params)
+                (x_center, y_center), tilt, self.width, surface_azimuth,
+                self.axis_azimuth, index=pvrow_idx, cut=self.cut.get(idx, {}),
+                surface_params=self.surface_params)
             list_pvrows.append(pvrow)
 
-        return cls(list_pvrows=list_pvrows, ground=ground, surface_tilt=tilt,
-                   surface_azimuth=surface_azimuth,
-                   axis_azimuth=axis_azimuth,
-                   solar_zenith=parameters['solar_zenith'],
-                   solar_azimuth=parameters['solar_azimuth'],
-                   gcr=gcr, height=y_center, distance=distance)
+        return ground, list_pvrows
 
     def get_neighbors(self):
         """Determine the pvrows indices of the neighboring pvrow for the front
