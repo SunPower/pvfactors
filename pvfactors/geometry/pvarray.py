@@ -120,14 +120,14 @@ class OrderedPVArray(BasePVArray):
             self.solar_zenith[idx], self.solar_azimuth[idx],
             self.axis_azimuth)
         # Create ground and pvrows
-        self.ground, self.pvrows = self.build_pvrows_ground(idx)
-        # self.cast_shadows()
-        # self.cuts_for_pvrow_view()
+        self.ground, self.pvrows = self._build_pvrows_ground(idx)
+        self._cast_shadows()
+        self._cuts_for_pvrow_view()
 
         # Determine front and back pvrow neighbors
-        self.front_neighbors, self.back_neighbors = self.get_neighbors()
+        self.front_neighbors, self.back_neighbors = self._get_neighbors()
 
-    def build_pvrows_ground(self, idx):
+    def _build_pvrows_ground(self, idx):
         """Create ordered PV array from dictionary of parameters
 
         Parameters
@@ -158,7 +158,7 @@ class OrderedPVArray(BasePVArray):
 
         return ground, list_pvrows
 
-    def get_neighbors(self):
+    def _get_neighbors(self):
         """Determine the pvrows indices of the neighboring pvrow for the front
         and back surface of each pvrow.
         """
@@ -178,7 +178,7 @@ class OrderedPVArray(BasePVArray):
 
         return front_neighbors, back_neighbors
 
-    def cast_shadows(self):
+    def _cast_shadows(self):
         """Use calculated solar_2d_vector and array configuration to calculate
         shadows being casted in the ordered pv array.
         The logic here is quite specific to ordered pv arrays"""
@@ -243,7 +243,7 @@ class OrderedPVArray(BasePVArray):
             # Merge ground shaded surfaces
             self.ground.merge_shaded_areas()
 
-    def cuts_for_pvrow_view(self):
+    def _cuts_for_pvrow_view(self):
         """When not flat, the PV row sides will only see a part of the ground,
         so we need to mark these limits called "edge points" and cut the ground
         surface accordingly"""
