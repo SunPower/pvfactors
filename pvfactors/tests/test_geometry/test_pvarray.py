@@ -12,7 +12,7 @@ def test_ordered_pvarray_from_dict(params):
     """Test that can successfully create ordered pvarray from parameters dict,
     and that the axis azimuth convention works correctly (via normal vector)
     """
-    pvarray = OrderedPVArray.init_from_dict(params)
+    pvarray = OrderedPVArray.transform_from_dict_of_scalars(params)
 
     # Test that ground is created successfully
     assert isinstance(pvarray.ground, PVGround)

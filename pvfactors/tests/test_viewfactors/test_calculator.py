@@ -14,9 +14,7 @@ def test_vfcalculator(params):
 
     # Prepare pv array
     params.update({'cut': {0: {'front': 3}, 1: {'back': 2}}})
-    pvarray = OrderedPVArray.from_dict(params)
-    pvarray.cast_shadows()
-    pvarray.cuts_for_pvrow_view()
+    pvarray = OrderedPVArray.transform_from_dict_of_scalars(params)
     vm, om = pvarray._build_view_matrix()
     geom_dict = pvarray.dict_surfaces
 
@@ -34,8 +32,9 @@ def test_vf_matrix_subset_calculation(params):
     """Check that the vf matrix subset is calculated correctly"""
     # Run in fast mode
     irradiance_model = HybridPerezOrdered()
+    pvarray = OrderedPVArray.init_from_dict(params)
     fast_mode_pvrow_index = 1
-    eng = PVEngine(params, irradiance_model=irradiance_model,
+    eng = PVEngine(pvarray, irradiance_model=irradiance_model,
                    fast_mode_pvrow_index=fast_mode_pvrow_index)
     timestamps = dt.datetime(2019, 6, 11, 11)
     DNI = 1000.
@@ -51,7 +50,8 @@ def test_vf_matrix_subset_calculation(params):
 
     # Run in full mode
     irradiance_model = HybridPerezOrdered()
-    eng = PVEngine(params, irradiance_model=irradiance_model)
+    pvarray = OrderedPVArray.init_from_dict(params)
+    eng = PVEngine(pvarray, irradiance_model=irradiance_model)
     timestamps = dt.datetime(2019, 6, 11, 11)
     DNI = 1000.
     DHI = 100.
