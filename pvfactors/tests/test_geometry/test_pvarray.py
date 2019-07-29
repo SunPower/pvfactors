@@ -12,7 +12,7 @@ def test_ordered_pvarray_from_dict(params):
     """Test that can successfully create ordered pvarray from parameters dict,
     and that the axis azimuth convention works correctly (via normal vector)
     """
-    pvarray = OrderedPVArray.from_dict_of_scalars(params)
+    pvarray = OrderedPVArray.init_from_dict(params)
 
     # Test that ground is created successfully
     assert isinstance(pvarray.ground, PVGround)
@@ -35,7 +35,7 @@ def test_ordered_pvarray_from_dict(params):
 
     # Orient the array the other way
     params.update({'surface_azimuth': 270.})
-    pvarray = OrderedPVArray.from_dict_of_scalars(params)
+    pvarray = OrderedPVArray.transform_from_dict_of_scalars(params)
     assert pvarray.pvrows[0].front.n_vector[0] < 0
 
 
@@ -62,7 +62,7 @@ def test_plot_ordered_pvarray():
         }
 
         # Plot simple ordered pv array
-        ordered_pvarray = OrderedPVArray.from_dict_of_scalars(params)
+        ordered_pvarray = OrderedPVArray.transform_from_dict_of_scalars(params)
         f, ax = plt.subplots()
         ordered_pvarray.plot(ax)
         plt.show()
@@ -70,14 +70,14 @@ def test_plot_ordered_pvarray():
         # Plot discretized ordered pv array
         params.update({'cut': {0: {'front': 5}, 1: {'back': 3}},
                        'surface_azimuth': 270.})  # point left
-        ordered_pvarray = OrderedPVArray.from_dict_of_scalars(params)
+        ordered_pvarray = OrderedPVArray.transform_from_dict_of_scalars(params)
         f, ax = plt.subplots()
         ordered_pvarray.plot(ax)
         plt.show()
 
 
 def test_discretization_ordered_pvarray(discr_params):
-    pvarray = OrderedPVArray.from_dict_of_scalars(discr_params)
+    pvarray = OrderedPVArray.transform_from_dict_of_scalars(discr_params)
     pvrows = pvarray.pvrows
 
     assert len(pvrows[0].front.list_segments) == 5
@@ -90,7 +90,7 @@ def test_ordered_pvarray_gnd_shadow_casting(params):
     """Test shadow casting on ground, no inter-row shading"""
 
     # Test front shading on right
-    ordered_pvarray = OrderedPVArray.from_dict_of_scalars(params)
+    ordered_pvarray = OrderedPVArray.transform_from_dict_of_scalars(params)
     # Check shadow casting on ground
     assert len(ordered_pvarray.ground.list_segments[0]
                .shaded_collection.list_surfaces) == 3
@@ -103,7 +103,7 @@ def test_ordered_pvarray_gnd_shadow_casting(params):
 def test_ordered_pvarray_gnd_pvrow_shadow_casting_right(params_direct_shading):
 
     # Test front shading on right
-    ordered_pvarray = OrderedPVArray.from_dict_of_scalars(
+    ordered_pvarray = OrderedPVArray.transform_from_dict_of_scalars(
         params_direct_shading)
     # Check shadow casting on ground
     assert len(ordered_pvarray.ground.list_segments[0]
@@ -132,7 +132,7 @@ def test_ordered_pvarray_gnd_pvrow_shadow_casting_left(params_direct_shading):
     params_direct_shading.update({'solar_azimuth': 270,
                                   'surface_azimuth': 270})
     # Test front shading on right
-    ordered_pvarray = OrderedPVArray.from_dict_of_scalars(
+    ordered_pvarray = OrderedPVArray.transform_from_dict_of_scalars(
         params_direct_shading)
     # Check shadow casting on ground
     assert len(ordered_pvarray.ground.list_segments[0]
@@ -162,7 +162,7 @@ def test_ordered_pvarray_gnd_pvrow_shadow_casting_back(params_direct_shading):
                                   'surface_tilt': 120})
 
     # Test front shading on right
-    ordered_pvarray = OrderedPVArray.from_dict_of_scalars(
+    ordered_pvarray = OrderedPVArray.transform_from_dict_of_scalars(
         params_direct_shading)
     assert ordered_pvarray.illum_side == 'back'
     # Check shadow casting on ground
@@ -193,7 +193,7 @@ def test_ordered_pvarray_gnd_pvrow_shadow_casting_right_n_seg(
 
     params_direct_shading.update({'cut': {1: {'front': 7}}})
     # Test front shading on right
-    ordered_pvarray = OrderedPVArray.from_dict_of_scalars(
+    ordered_pvarray = OrderedPVArray.transform_from_dict_of_scalars(
         params_direct_shading)
     # Check shadow casting on ground
     assert len(ordered_pvarray.ground.list_segments[0]
@@ -240,7 +240,7 @@ def test_ordered_pvarray_gnd_pvrow_shadow_casting_back_n_seg(
                                   'solar_azimuth': 270,
                                   'surface_tilt': 120})
     # Test front shading on right
-    ordered_pvarray = OrderedPVArray.from_dict_of_scalars(
+    ordered_pvarray = OrderedPVArray.transform_from_dict_of_scalars(
         params_direct_shading)
     # Check shadow casting on ground
     assert len(ordered_pvarray.ground.list_segments[0]
@@ -331,7 +331,7 @@ def test_view_matrix_flat(params):
     params.update({'surface_tilt': 0})
 
     # Create pvarray
-    pvarray = OrderedPVArray.from_dict_of_scalars(params)
+    pvarray = OrderedPVArray.transform_from_dict_of_scalars(params)
 
     # Build view matrix
     vm = pvarray.view_matrix
@@ -345,7 +345,7 @@ def test_view_matrix(params):
     params.update({'surface_azimuth': 270})
 
     # Create pvarray
-    pvarray = OrderedPVArray.from_dict_of_scalars(params)
+    pvarray = OrderedPVArray.transform_from_dict_of_scalars(params)
 
     # Build view matrix and obstruction matrix
     vm, om = pvarray._build_view_matrix()
@@ -365,7 +365,7 @@ def test_view_matrix(params):
 def test_surface_params(params):
 
     surface_params = ['qinc']
-    pvarray = OrderedPVArray.from_dict_of_scalars(
+    pvarray = OrderedPVArray.transform_from_dict_of_scalars(
         params, surface_params=surface_params)
 
     # Set all surfaces parameters to 1
@@ -399,9 +399,9 @@ def test_surface_params(params):
 def test_orderedpvarray_neighbors(params):
     """Check that pvrow neighbors are determined correctly"""
 
-    pvarray_right = OrderedPVArray.from_dict_of_scalars(params)
+    pvarray_right = OrderedPVArray.transform_from_dict_of_scalars(params)
     params.update({'surface_azimuth': 270})
-    pvarray_left = OrderedPVArray.from_dict_of_scalars(params)
+    pvarray_left = OrderedPVArray.transform_from_dict_of_scalars(params)
 
     # Check
     l1 = [None, 0, 1]
@@ -429,7 +429,7 @@ def test_orderedpvarray_almost_flat():
         'solar_azimuth': 90.,    # sun located in the east
     }
 
-    pvarray = OrderedPVArray.from_dict_of_scalars(params)
+    pvarray = OrderedPVArray.transform_from_dict_of_scalars(params)
     view_matrix = pvarray.view_matrix
 
     ground_seg = pvarray.ground.list_segments[0]
@@ -464,7 +464,7 @@ def test_time_ordered_pvarray(params):
     list_elapsed = []
     for _ in range(n):
         tic = time.time()
-        pvarray = OrderedPVArray.from_dict_of_scalars(params)
+        pvarray = OrderedPVArray.transform_from_dict_of_scalars(params)
         pvarray.index_all_surfaces()
         # sr = pvarray.surface_registry
         # vm = pvarray.view_matrix
@@ -494,7 +494,8 @@ def test_ordered_pvarray_gnd_shadow_casting_tolerance():
               'solar_zenith': 73.91658668648401,
               'surface_azimuth': 270.0,
               'surface_tilt': 51.98206680806641}
-    pvarray_w_direct_shading = OrderedPVArray.from_dict_of_scalars(params)
+    pvarray_w_direct_shading = OrderedPVArray.transform_from_dict_of_scalars(
+        params)
 
     # Check that 3 shadows on ground
     assert (pvarray_w_direct_shading.ground.list_segments[0]

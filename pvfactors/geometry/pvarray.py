@@ -83,14 +83,18 @@ class OrderedPVArray(BasePVArray):
         self.solar_2d_vector = None
 
     @classmethod
-    def from_dict_of_scalars(cls, params, surface_params=[]):
-
-        # Create pv array
-        pvarray = cls(
+    def init_from_dict(cls, params, surface_params=[]):
+        return cls(
             axis_azimuth=params['axis_azimuth'], gcr=params['gcr'],
             pvrow_height=params['pvrow_height'], n_pvrows=params['n_pvrows'],
             pvrow_width=params['pvrow_width'], cut=params.get('cut', {}),
             surface_params=surface_params)
+
+    @classmethod
+    def transform_from_dict_of_scalars(cls, params, surface_params=[]):
+
+        # Create pv array
+        pvarray = cls.init_from_dict(params, surface_params=surface_params)
 
         # Fit pv array to scalar values
         solar_zenith = np.array([params['solar_zenith']])
@@ -121,7 +125,10 @@ class OrderedPVArray(BasePVArray):
             self.axis_azimuth)
         # Create ground and pvrows
         self.ground, self.pvrows = self._build_pvrows_ground(idx)
+        # Cast shadows on ground and pvrows
         self._cast_shadows()
+        # Cut ground according to pvrow views
+        self.is_flat = self.surface_tilt[idx] == 0
         self._cuts_for_pvrow_view()
 
         # Determine front and back pvrow neighbors
@@ -164,9 +171,8 @@ class OrderedPVArray(BasePVArray):
         """
         n_pvrows = len(self.pvrows)
         if n_pvrows:
-            flat = self.surface_tilt == 0
             rotated_to_left = self.pvrows[0].front.n_vector[0] < 0
-            if flat:
+            if self.is_flat:
                 front_neighbors = [None] * n_pvrows
                 back_neighbors = [None] * n_pvrows
             elif rotated_to_left:
@@ -247,7 +253,7 @@ class OrderedPVArray(BasePVArray):
         """When not flat, the PV row sides will only see a part of the ground,
         so we need to mark these limits called "edge points" and cut the ground
         surface accordingly"""
-        if self.surface_tilt != 0:
+        if not self.is_flat:
             # find u_vector direction of the pvrows
             b1, b2 = self.pvrows[0].boundary
             u_direction = np.array([b2.x - b1.x, b2.y - b1.y])
@@ -265,8 +271,7 @@ class OrderedPVArray(BasePVArray):
         ordered pv arrays to build relationship matrix"""
 
         # Index all surfaces if not done already
-        if not self._surfaces_indexed:
-            self.index_all_surfaces()
+        self.index_all_surfaces()
 
         # Initialize matrices
         n_surfaces_array = self.n_surfaces
@@ -282,8 +287,7 @@ class OrderedPVArray(BasePVArray):
         view_matrix[indices_ground[:, np.newaxis],
                     index_sky_dome] = VIEW_DICT["ground_sky"]
 
-        pvrows_are_flat = (self.surface_tilt == 0.)
-        if pvrows_are_flat:
+        if self.is_flat:
             # Getting all front and back pvrow surface indices
             indices_front_pvrows = []
             indices_back_pvrows = []
@@ -461,6 +465,33 @@ class FastOrderedPVArray(BasePVArray):
         self.front_neighbors = None
         self.back_neighbors = None
 
+    @classmethod
+    def init_from_dict(cls, params, surface_params=[]):
+        return cls(
+            axis_azimuth=params['axis_azimuth'], gcr=params['gcr'],
+            pvrow_height=params['pvrow_height'], n_pvrows=params['n_pvrows'],
+            pvrow_width=params['pvrow_width'], cut=params.get('cut', {}),
+            surface_params=surface_params)
+
+    @classmethod
+    def transform_from_dict_of_scalars(cls, params, surface_params=[]):
+
+        # Create pv array
+        pvarray = cls.init_from_dict(params, surface_params=surface_params)
+
+        # Fit pv array to scalar values
+        solar_zenith = np.array([params['solar_zenith']])
+        solar_azimuth = np.array([params['solar_azimuth']])
+        surface_tilt = np.array([params['surface_tilt']])
+        surface_azimuth = np.array([params['surface_azimuth']])
+        pvarray.fit(solar_zenith, solar_azimuth,
+                    surface_tilt, surface_azimuth)
+
+        # Transform pv array to first index
+        pvarray.transform(0)
+
+        return pvarray
+
     def fit(self, solar_zenith, solar_azimuth, surface_tilt, surface_azimuth):
 
         self.n_states = len(solar_zenith)
@@ -548,17 +579,17 @@ class FastOrderedPVArray(BasePVArray):
                 cut_point_coords=self.cut_point_coords[:, :, idx])
             # Calculate inter row shading if any
             if has_direct_shading:
-                self.calculate_interrow_shading(idx)
+                self._calculate_interrow_shading(idx)
 
             # Build lists of pv row neighbors
             self.front_neighbors, self.back_neighbors = \
-                self.get_neighbors(self.surface_tilt[idx])
+                self._get_neighbors(self.surface_tilt[idx])
         else:
             msg = "Index {} is out of range: [0 to {}]".format(
                 idx, self.n_states - 1)
             raise PVFactorsError(msg)
 
-    def calculate_interrow_shading(self, idx):
+    def _calculate_interrow_shading(self, idx):
 
         solar_2d_vector = self.solar_2d_vectors[:, idx]
         illum_side = ('front' if self.pvrows[0].front.n_vector.dot(
@@ -589,7 +620,7 @@ class FastOrderedPVArray(BasePVArray):
             shaded_side.cast_shadow(
                 LineString([pvrow.lowest_point, proj]))
 
-    def get_neighbors(self, surface_tilt):
+    def _get_neighbors(self, surface_tilt):
         """Determine the pvrows indices of the neighboring pvrow for the front
         and back surface of each pvrow.
         """
