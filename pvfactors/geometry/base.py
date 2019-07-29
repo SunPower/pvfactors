@@ -1114,14 +1114,6 @@ class BasePVArray(object):
         # For view factors
         self.edge_points = []
 
-        # Property related attributes: will not be built unless called
-        self._all_surfaces = None
-        self._dict_surfaces = None
-        self._surface_registry = None
-        self._view_matrix = None
-        self._obstr_matrix = None
-        self._surfaces_indexed = False
-
         # Initialize view factor matrix
         self.vf_matrix = None  # needs to be calculated externally
 
@@ -1158,13 +1150,11 @@ class BasePVArray(object):
     @property
     def all_surfaces(self):
         """List of all surfaces in the PV array."""
-        if self._all_surfaces is None:
-            list_surfaces = []
-            list_surfaces += self.ground.all_surfaces
-            for pvrow in self.pvrows:
-                list_surfaces += pvrow.all_surfaces
-            self._all_surfaces = list_surfaces
-        return self._all_surfaces
+        list_surfaces = []
+        list_surfaces += self.ground.all_surfaces
+        for pvrow in self.pvrows:
+            list_surfaces += pvrow.all_surfaces
+        return list_surfaces
 
     @property
     def n_surfaces(self):
@@ -1181,9 +1171,19 @@ class BasePVArray(object):
         """Surface registry of the PV array, build if does not exist yet.
         The surface registry is a pandas DataFrame that contains all the
         indexed surfaces of the PV array, with some of their properties."""
-        if self._surface_registry is None:
-            self._surface_registry = self._build_surface_registry()
-        return self._surface_registry
+        surface_registry = self._build_surface_registry()
+        return surface_registry
+
+    @property
+    def view_obstr_matrices(self):
+        """How to build the view matrix will be specific to the pv array
+        considered, so ``_build_view_matrix()`` needs to be implemented in
+        the child class.
+        The view matrix will represent the views between all the surfaces.
+        The obstruction matrix will represent the obstructions in views
+        between all the surfaces."""
+        view_matrix, obstr_matrix = self._build_view_matrix()
+        return view_matrix, obstr_matrix
 
     @property
     def view_matrix(self):
@@ -1191,9 +1191,8 @@ class BasePVArray(object):
         considered, so ``_build_view_matrix()`` needs to be implemented in
         the child class.
         The view matrix will represent the views between all the surfaces."""
-        if self._view_matrix is None:
-            self._view_matrix, self._obstr_matrix = self._build_view_matrix()
-        return self._view_matrix
+        view_matrix, _ = self._build_view_matrix()
+        return view_matrix
 
     @property
     def obstr_matrix(self):
@@ -1202,9 +1201,8 @@ class BasePVArray(object):
         the child class.
         The obstruction matrix will represent the obstructions in views
         between all the surfaces."""
-        if self._obstr_matrix is None:
-            self._view_matrix, self._obstr_matrix = self._build_view_matrix()
-        return self._obstr_matrix
+        _, obstr_matrix = self._build_view_matrix()
+        return obstr_matrix
 
     @property
     def surface_indices(self):
@@ -1219,13 +1217,11 @@ class BasePVArray(object):
     def dict_surfaces(self):
         """Dictionay of surfaces in the PV array, where keys are the surface
         indices."""
-        if self._dict_surfaces is None:
-            if not self._surfaces_indexed:
-                self.index_all_surfaces()
-            all_surfaces = self.all_surfaces
-            dict_surf = {surf.index: surf for surf in all_surfaces}
-            self._dict_surfaces = OrderedDict(dict_surf)
-        return self._dict_surfaces
+        self.index_all_surfaces()
+        all_surfaces = self.all_surfaces
+        dict_surf = {surf.index: surf for surf in all_surfaces}
+        dict_surfaces = OrderedDict(dict_surf)
+        return dict_surfaces
 
     def update_params(self, new_dict):
         """Update surface parameters in the collection.
@@ -1243,7 +1239,6 @@ class BasePVArray(object):
         """Add unique indices to all surfaces in the PV array."""
         for idx, surface in enumerate(self.all_surfaces):
             surface.index = idx
-        self._surfaces_indexed = True
 
     def _build_view_matrix(self):
         """Not implemented."""
