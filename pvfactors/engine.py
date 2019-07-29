@@ -2,7 +2,6 @@
 timeseries simulations."""
 
 import numpy as np
-from pvfactors.geometry import OrderedPVArray
 from pvfactors.viewfactors import VFCalculator
 from pvfactors.irradiance import HybridPerezOrdered
 from scipy import linalg
@@ -14,9 +13,8 @@ class PVEngine(object):
     as a timeseries when the pvarrays can be build from dictionary parameters
     """
 
-    def __init__(self, params, vf_calculator=VFCalculator(),
+    def __init__(self, pvarray, vf_calculator=VFCalculator(),
                  irradiance_model=HybridPerezOrdered(),
-                 cls_pvarray=OrderedPVArray,
                  fast_mode_pvrow_index=None):
         """Create pv engine class, and initialize timeseries parameters.
 
@@ -43,12 +41,10 @@ class PVEngine(object):
             for the back surface of the selected pvrow (Default = None)
 
         """
-        self.params = params
         self.vf_calculator = vf_calculator
         self.irradiance = irradiance_model
-        self.cls_pvarray = cls_pvarray
-        self.is_fast_mode = isinstance(fast_mode_pvrow_index, int) \
-            and fast_mode_pvrow_index < params['n_pvrows']
+        self.pvarray = pvarray
+        self.is_fast_mode = isinstance(fast_mode_pvrow_index, int)
         self.fast_mode_pvrow_index = fast_mode_pvrow_index
 
         # Required timeseries values
@@ -108,9 +104,11 @@ class PVEngine(object):
 
         # Fit irradiance model
         self.irradiance.fit(timestamps, DNI, DHI, solar_zenith, solar_azimuth,
-                            surface_tilt, surface_azimuth,
-                            self.params['rho_front_pvrow'],
-                            self.params['rho_back_pvrow'], albedo)
+                            surface_tilt, surface_azimuth, albedo)
+
+        # Fit PV array
+        self.pvarray.fit(solar_zenith, solar_azimuth, surface_tilt,
+                         surface_azimuth)
 
         # Determine timesteps to skip when:
         #    - solar zenith > 90, ie the sun is down
@@ -138,25 +136,19 @@ class PVEngine(object):
         if self.skip_step[idx]:
             pvarray = None
         else:
-            # Update parameters
-            self.params.update(
-                {'solar_zenith': self.solar_zenith[idx],
-                 'solar_azimuth': self.solar_azimuth[idx],
-                 'surface_tilt': self.surface_tilt[idx],
-                 'surface_azimuth': self.surface_azimuth[idx]})
+            # To be returned at the end
+            pvarray = self.pvarray
 
-            # Create pv array
-            pvarray = self.cls_pvarray.from_dict(
-                self.params, surface_params=self.irradiance.params)
-            pvarray.cast_shadows()
-            pvarray.cuts_for_pvrow_view()
-
-            # Prepare inputs
-            geom_dict = pvarray.dict_surfaces
+            # Transform pvarray to time step
+            pvarray.transform(idx)
 
             # Apply irradiance terms to pvarray
             irradiance_vec, rho_vec, invrho_vec, total_perez_vec = \
                 self.irradiance.transform(pvarray, idx=idx)
+
+            # Prepare inputs to view factor calculator
+            geom_dict = pvarray.dict_surfaces
+            view_matrix, obstr_matrix = pvarray.view_obstr_matrices
 
             if self.is_fast_mode:
                 # Indices of the surfaces of the back of the selected pvrows
@@ -166,8 +158,8 @@ class PVEngine(object):
                 # Calculate view factors using a subset of view_matrix to
                 # gain in calculation speed
                 vf_matrix_subset = self.vf_calculator.get_vf_matrix_subset(
-                    geom_dict, pvarray.view_matrix, pvarray.obstr_matrix,
-                    pvarray.pvrows, list_surface_indices)
+                    geom_dict, view_matrix, obstr_matrix, pvarray.pvrows,
+                    list_surface_indices)
                 pvarray.vf_matrix = vf_matrix_subset
 
                 irradiance_vec_subset = irradiance_vec[list_surface_indices]
@@ -190,8 +182,7 @@ class PVEngine(object):
             else:
                 # Calculate view factors
                 vf_matrix = self.vf_calculator.get_vf_matrix(
-                    geom_dict, pvarray.view_matrix, pvarray.obstr_matrix,
-                    pvarray.pvrows)
+                    geom_dict, view_matrix, obstr_matrix, pvarray.pvrows)
                 pvarray.vf_matrix = vf_matrix
 
                 # Calculate radiosities
@@ -206,10 +197,12 @@ class PVEngine(object):
                     - irradiance_vec[:-1] - isotropic_vec
 
                 # Update surfaces with values
-                for idx, surface in geom_dict.items():
-                    surface.update_params({'q0': q0[idx], 'qinc': qinc[idx],
-                                           'isotropic': isotropic_vec[idx],
-                                           'reflection': reflection_vec[idx]})
+                for idx_surf, surface in geom_dict.items():
+                    surface.update_params(
+                        {'q0': q0[idx_surf],
+                         'qinc': qinc[idx_surf],
+                         'isotropic': isotropic_vec[idx_surf],
+                         'reflection': reflection_vec[idx_surf]})
 
         return pvarray
 
