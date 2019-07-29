@@ -67,12 +67,12 @@ def params():
         'n_pvrows': 3,
         'pvrow_height': 2.5,
         'pvrow_width': 2.,
-        'surface_azimuth': np.array([90.]),  # east oriented modules
+        'surface_azimuth': 90.,  # east oriented modules
         'axis_azimuth': 0.,  # axis of rotation towards North
-        'surface_tilt': np.array([20.]),
+        'surface_tilt': 20.,
         'gcr': 0.4,
-        'solar_zenith': np.array([20.]),
-        'solar_azimuth': np.array([90.]),  # sun located in the east
+        'solar_zenith': 20.,
+        'solar_azimuth': 90.,  # sun located in the east
         'rho_ground': 0.2,
         'rho_front_pvrow': 0.01,
         'rho_back_pvrow': 0.03
@@ -111,7 +111,7 @@ def params_direct_shading(params):
 
 @pytest.fixture(scope='function')
 def ordered_pvarray(params):
-    pvarray = OrderedPVArray.from_dict(params)
+    pvarray = OrderedPVArray.from_dict_of_scalars(params)
     yield pvarray
 
 

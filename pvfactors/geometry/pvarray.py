@@ -82,6 +82,29 @@ class OrderedPVArray(BasePVArray):
         self.back_neighbors = None
         self.solar_2d_vector = None
 
+    @classmethod
+    def from_dict_of_scalars(cls, params, surface_params=[]):
+
+        # Create pv array
+        pvarray = cls(
+            axis_azimuth=params['axis_azimuth'], gcr=params['gcr'],
+            pvrow_height=params['pvrow_height'], n_pvrows=params['n_pvrows'],
+            pvrow_width=params['pvrow_width'], cut=params.get('cut', {}),
+            surface_params=surface_params)
+
+        # Fit pv array to scalar values
+        solar_zenith = np.array([params['solar_zenith']])
+        solar_azimuth = np.array([params['solar_azimuth']])
+        surface_tilt = np.array([params['surface_tilt']])
+        surface_azimuth = np.array([params['surface_azimuth']])
+        pvarray.fit(solar_zenith, solar_azimuth,
+                    surface_tilt, surface_azimuth)
+
+        # Transform pv array to first index
+        pvarray.transform(0)
+
+        return pvarray
+
     def fit(self, solar_zenith, solar_azimuth, surface_tilt, surface_azimuth):
 
         self.n_states = len(solar_zenith)
@@ -125,10 +148,11 @@ class OrderedPVArray(BasePVArray):
         # Loop for pvrow creation
         for pvrow_idx in range(self.n_pvrows):
             # Make equally spaced pv rows
-            x_center = X_ORIGIN_PVROWS + idx * self.distance
+            x_center = X_ORIGIN_PVROWS + pvrow_idx * self.distance
             pvrow = PVRow.from_center_tilt_width(
                 (x_center, y_center), tilt, self.width, surface_azimuth,
-                self.axis_azimuth, index=pvrow_idx, cut=self.cut.get(idx, {}),
+                self.axis_azimuth, index=pvrow_idx,
+                cut=self.cut.get(pvrow_idx, {}),
                 surface_params=self.surface_params)
             list_pvrows.append(pvrow)
 
