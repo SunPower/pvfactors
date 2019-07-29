@@ -1111,9 +1111,6 @@ class BasePVArray(object):
         # All PV arrays should have a fixed axis azimuth in pvfactors
         self.axis_azimuth = axis_azimuth
 
-        # For view factors
-        self.edge_points = []
-
         # Initialize view factor matrix
         self.vf_matrix = None  # needs to be calculated externally
 

@@ -81,6 +81,7 @@ class OrderedPVArray(BasePVArray):
         self.front_neighbors = None
         self.back_neighbors = None
         self.solar_2d_vector = None
+        self.edge_points = None
 
     @classmethod
     def init_from_dict(cls, params, surface_params=[]):
@@ -253,6 +254,10 @@ class OrderedPVArray(BasePVArray):
         """When not flat, the PV row sides will only see a part of the ground,
         so we need to mark these limits called "edge points" and cut the ground
         surface accordingly"""
+        # Initialize list of edge points
+        self.edge_points = []
+
+        # Add points only if not flat
         if not self.is_flat:
             # find u_vector direction of the pvrows
             b1, b2 = self.pvrows[0].boundary
@@ -464,6 +469,7 @@ class FastOrderedPVArray(BasePVArray):
         self.ground = None
         self.front_neighbors = None
         self.back_neighbors = None
+        self.edge_points = None
 
     @classmethod
     def init_from_dict(cls, params, surface_params=[]):
@@ -569,6 +575,7 @@ class FastOrderedPVArray(BasePVArray):
                 for pvrow_idx, pvrow_coord in enumerate(self.pvrow_coords)]
             # Create ground geometry with its shadows and cut points
             shadow_coords = self.ground_shadow_coords[:, :, :, idx]
+            cut_pt_coords = self.cut_point_coords[:, :, idx]
             if has_direct_shading:
                 # Just consider 1 larger shadow area on the ground
                 shadow_coords = [[shadow_coords[0][0][:],
@@ -576,7 +583,8 @@ class FastOrderedPVArray(BasePVArray):
             self.ground = PVGround.from_ordered_shadow_and_cut_pt_coords(
                 y_ground=self.y_ground, surface_params=self.surface_params,
                 ordered_shadow_coords=shadow_coords,
-                cut_point_coords=self.cut_point_coords[:, :, idx])
+                cut_point_coords=cut_pt_coords)
+            self.edge_points = [Point(coord) for coord in cut_pt_coords]
             # Calculate inter row shading if any
             if has_direct_shading:
                 self._calculate_interrow_shading(idx)

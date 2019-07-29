@@ -42,12 +42,13 @@ def test_params_irradiance_model():
     run_timeseries_engine"""
     mock_irradiance_model = mock.MagicMock()
     mock_engine = mock.MagicMock()
+    mock_pvarray = mock.MagicMock()
     irradiance_params = {'horizon_band_angle': 15.}
 
     _ = run_timeseries_engine(
         None, None,
         None, None, None, None, None, None,
-        None, None, cls_engine=mock_engine,
+        None, None, cls_engine=mock_engine, cls_pvarray=mock_pvarray,
         cls_irradiance=mock_irradiance_model,
         irradiance_model_params=irradiance_params)
 
@@ -60,7 +61,6 @@ def test_run_parallel_engine_with_irradiance_params(params_serial,
     """Test that irradiance model params are passed correctly in parallel
     simulations"""
     df_inputs = df_inputs_clearsky_8760.iloc[:24, :]
-    n = df_inputs.shape[0]
 
     # Get MET data
     timestamps = df_inputs.index

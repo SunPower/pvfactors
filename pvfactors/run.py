@@ -81,9 +81,9 @@ def run_timeseries_engine(fn_build_report, pvarray_parameters,
 
     # Instantiate classes and engine
     irradiance_model = cls_irradiance(**irradiance_model_params)
+    pvarray = cls_pvarray.init_from_dict(pvarray_parameters)
     vf_calculator = cls_vf()
-    eng = cls_engine(pvarray_parameters, cls_pvarray=cls_pvarray,
-                     irradiance_model=irradiance_model,
+    eng = cls_engine(pvarray, irradiance_model=irradiance_model,
                      vf_calculator=vf_calculator,
                      fast_mode_pvrow_index=fast_mode_pvrow_index)
 
