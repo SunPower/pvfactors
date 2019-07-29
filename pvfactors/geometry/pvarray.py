@@ -470,6 +470,7 @@ class FastOrderedPVArray(BasePVArray):
         self.front_neighbors = None
         self.back_neighbors = None
         self.edge_points = None
+        self.is_flat = None
 
     @classmethod
     def init_from_dict(cls, params, surface_params=[]):
@@ -566,6 +567,7 @@ class FastOrderedPVArray(BasePVArray):
 
         if idx < self.n_states:
             has_direct_shading = self.has_direct_shading[idx]
+            self.is_flat = self.surface_tilt[idx] == 0
             # Create list of PV rows from calculated pvrow coordinates
             self.pvrows = [
                 PVRow.from_linestring_coords(
@@ -620,13 +622,16 @@ class FastOrderedPVArray(BasePVArray):
                                       shaded_pvrow.original_linestring)
             list_pvrows_to_shade = self.pvrows[1:]
 
-        # Use distance translation to cast shadows on pvrows
-        for idx, pvrow in enumerate(list_pvrows_to_shade):
-            proj = Point(proj_initial.x + idx * self.distance,
-                         proj_initial.y)
-            shaded_side = getattr(pvrow, illum_side)
-            shaded_side.cast_shadow(
-                LineString([pvrow.lowest_point, proj]))
+        # Fix: sometimes the calculated project can be an empty geom bc of
+        # approximation errors, in this case just skip the direct shading
+        if not proj_initial.is_empty:
+            # Use distance translation to cast shadows on pvrows
+            for idx, pvrow in enumerate(list_pvrows_to_shade):
+                proj = Point(proj_initial.x + idx * self.distance,
+                             proj_initial.y)
+                shaded_side = getattr(pvrow, illum_side)
+                shaded_side.cast_shadow(
+                    LineString([pvrow.lowest_point, proj]))
 
     def _get_neighbors(self, surface_tilt):
         """Determine the pvrows indices of the neighboring pvrow for the front
@@ -653,8 +658,7 @@ class FastOrderedPVArray(BasePVArray):
         ordered pv arrays to build relationship matrix"""
 
         # Index all surfaces if not done already
-        if not self._surfaces_indexed:
-            self.index_all_surfaces()
+        self.index_all_surfaces()
 
         # Initialize matrices
         n_surfaces_array = self.n_surfaces
@@ -670,8 +674,7 @@ class FastOrderedPVArray(BasePVArray):
         view_matrix[indices_ground[:, np.newaxis],
                     index_sky_dome] = VIEW_DICT["ground_sky"]
 
-        pvrows_are_flat = (self.surface_tilt == 0.)
-        if pvrows_are_flat:
+        if self.is_flat:
             # Getting all front and back pvrow surface indices
             indices_front_pvrows = []
             indices_back_pvrows = []
