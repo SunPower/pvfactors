@@ -11,8 +11,7 @@ def test_pvengine_float_inputs_iso(params):
 
     irradiance_model = IsotropicOrdered()
     pvarray = OrderedPVArray.init_from_dict(params)
-    eng = PVEngine(irradiance_model=irradiance_model,
-                   pvarray=pvarray)
+    eng = PVEngine(pvarray, irradiance_model=irradiance_model)
 
     # Irradiance inputs
     timestamps = dt.datetime(2019, 6, 11, 11)

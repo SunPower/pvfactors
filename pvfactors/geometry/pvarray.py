@@ -434,12 +434,18 @@ class OrderedPVArray(BasePVArray):
             Azimuth angle of rotation axis [deg] (Default = None)
         gcr : float, optional
             Ground coverage ratio (Default = None)
-        height : float, optional
+        pvrow_height : float, optional
             Unique height of all PV rows (Default = None)
-        n_pvrows
-        width
-        surface_params
-        cut
+        n_pvrows : int, optional
+            Number of PV rows in the PV array (Default = None)
+        pvrow_width : float, optional
+            Width of the PV rows in the 2D plane (Default = None)
+        surface_params : list of str, optional
+            List of surface parameter names for the PV surfaces
+            (Default = [])
+        cut : dict, optional
+            Nested dictionary that tells if some PV row sides need to be
+            discretized, and how (Default = {})
         """
         # Initialize base parameters: common to all sorts of PV arrays
         super(OrderedPVArray, self).__init__(axis_azimuth=axis_azimuth)
@@ -447,15 +453,15 @@ class OrderedPVArray(BasePVArray):
         # These are the invariant parameters of the PV array
         self.gcr = gcr
         self.height = pvrow_height
-        self.distance = pvrow_width / gcr \
-            if (pvrow_width is not None) and (gcr is not None) \
-            else None
+        self.distance = (pvrow_width / gcr
+                         if (pvrow_width is not None) and (gcr is not None)
+                         else None)
         self.width = pvrow_width
         self.n_pvrows = n_pvrows
         self.surface_params = surface_params
         self.cut = cut
 
-        # These parameters will be defined at fitting time
+        # These attributes will be updated at fitting time
         self.solar_2d_vectors = None
         self.pvrow_coords = []
         self.ground_shadow_coords = []
@@ -519,6 +525,59 @@ class OrderedPVArray(BasePVArray):
                     self.axis_azimuth))
         self.pvrow_coords = np.array(self.pvrow_coords)
 
+        # Calculate ground elements coordinates
+        self._calculate_ground_elements_coords(surface_azimuth, surface_tilt)
+
+        # Determine when there's direct shading
+        self.has_direct_shading = np.zeros(self.n_states, dtype=bool)
+        if self.n_pvrows > 1:
+            # If the shadows are crossing (or close), there's direct shading
+            self.has_direct_shading = (
+                self.ground_shadow_coords[1][0][0] + DISTANCE_TOLERANCE
+                < self.ground_shadow_coords[0][1][0])
+
+    def transform(self, idx):
+
+        if idx < self.n_states:
+            has_direct_shading = self.has_direct_shading[idx]
+            self.is_flat = self.surface_tilt[idx] == 0
+
+            # Create list of PV rows from calculated pvrow coordinates
+            self.pvrows = [
+                PVRow.from_linestring_coords(
+                    pvrow_coord[:, :, idx],
+                    index=pvrow_idx, cut=self.cut.get(pvrow_idx, {}),
+                    surface_params=self.surface_params)
+                for pvrow_idx, pvrow_coord in enumerate(self.pvrow_coords)]
+
+            # Create ground geometry with its shadows and cut points
+            shadow_coords = self.ground_shadow_coords[:, :, :, idx]
+            cut_pt_coords = self.cut_point_coords[:, :, idx]
+            if has_direct_shading:
+                # Shadows are overlaping, so merge them into 1 big shadow
+                shadow_coords = [[shadow_coords[0][0][:],
+                                  shadow_coords[-1][1][:]]]
+            self.ground = PVGround.from_ordered_shadow_and_cut_pt_coords(
+                y_ground=self.y_ground, surface_params=self.surface_params,
+                ordered_shadow_coords=shadow_coords,
+                cut_point_coords=cut_pt_coords)
+            self.edge_points = [Point(coord) for coord in cut_pt_coords]
+
+            # Calculate inter row shading if any
+            if has_direct_shading:
+                self._calculate_interrow_shading(idx)
+
+            # Build lists of pv row neighbors, used to calculate view matrix
+            self.front_neighbors, self.back_neighbors = \
+                self._get_neighbors(self.surface_tilt[idx])
+
+        else:
+            msg = "Step index {} is out of range: [0 to {}]".format(
+                idx, self.n_states - 1)
+            raise PVFactorsError(msg)
+
+    def _calculate_ground_elements_coords(self, surface_azimuth, surface_tilt):
+
         # Calculate the angle made by 2D sun vector and x-axis
         alpha_vec = np.arctan2(self.solar_2d_vectors[1],
                                self.solar_2d_vectors[0])
@@ -554,50 +613,6 @@ class OrderedPVArray(BasePVArray):
 
         self.ground_shadow_coords = np.array(self.ground_shadow_coords)
         self.cut_point_coords = np.array(self.cut_point_coords)
-
-        # Determine when there's direct shading
-        self.has_direct_shading = np.zeros(self.n_states, dtype=bool)
-        if self.n_pvrows > 1:
-            # If the shadows are crossing (or close), there's direct shading
-            self.has_direct_shading = (
-                self.ground_shadow_coords[1][0][0] + DISTANCE_TOLERANCE
-                < self.ground_shadow_coords[0][1][0])
-
-    def transform(self, idx):
-
-        if idx < self.n_states:
-            has_direct_shading = self.has_direct_shading[idx]
-            self.is_flat = self.surface_tilt[idx] == 0
-            # Create list of PV rows from calculated pvrow coordinates
-            self.pvrows = [
-                PVRow.from_linestring_coords(
-                    pvrow_coord[:, :, idx],
-                    index=pvrow_idx, cut=self.cut.get(pvrow_idx, {}),
-                    surface_params=self.surface_params)
-                for pvrow_idx, pvrow_coord in enumerate(self.pvrow_coords)]
-            # Create ground geometry with its shadows and cut points
-            shadow_coords = self.ground_shadow_coords[:, :, :, idx]
-            cut_pt_coords = self.cut_point_coords[:, :, idx]
-            if has_direct_shading:
-                # Just consider 1 larger shadow area on the ground
-                shadow_coords = [[shadow_coords[0][0][:],
-                                  shadow_coords[-1][1][:]]]
-            self.ground = PVGround.from_ordered_shadow_and_cut_pt_coords(
-                y_ground=self.y_ground, surface_params=self.surface_params,
-                ordered_shadow_coords=shadow_coords,
-                cut_point_coords=cut_pt_coords)
-            self.edge_points = [Point(coord) for coord in cut_pt_coords]
-            # Calculate inter row shading if any
-            if has_direct_shading:
-                self._calculate_interrow_shading(idx)
-
-            # Build lists of pv row neighbors
-            self.front_neighbors, self.back_neighbors = \
-                self._get_neighbors(self.surface_tilt[idx])
-        else:
-            msg = "Index {} is out of range: [0 to {}]".format(
-                idx, self.n_states - 1)
-            raise PVFactorsError(msg)
 
     def _calculate_interrow_shading(self, idx):
 

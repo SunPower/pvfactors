@@ -307,7 +307,7 @@ def test_coords_from_center_tilt_length_vec():
     np.testing.assert_almost_equal(coords, expected_coords)
 
 
-def test_solar_2_vectors():
+def test_solar_2d_vectors():
     """Test that can calculate solar vector with inputs as arrays"""
     # Prepare inputs
     solar_zenith = np.array([20., 45.])
