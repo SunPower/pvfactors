@@ -15,6 +15,8 @@ def test_ordered_pvarray_from_dict(params):
 
     # Test that ground is created successfully
     assert isinstance(pvarray.ground, PVGround)
+    # TODO: check why this is not matching exactly: hint = look at length
+    # of ground shaded surfaces, some small tolerance may be chipped away
     np.testing.assert_allclose(pvarray.ground.length,
                                MAX_X_GROUND - MIN_X_GROUND)
 
