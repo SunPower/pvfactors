@@ -560,8 +560,8 @@ class FastOrderedPVArray(BasePVArray):
         if self.n_pvrows > 1:
             # If the shadows are crossing (or close), there's direct shading
             self.has_direct_shading = (
-                self.ground_shadow_coords[1][0][0]
-                - self.ground_shadow_coords[0][1][0] < DISTANCE_TOLERANCE)
+                self.ground_shadow_coords[1][0][0] + DISTANCE_TOLERANCE
+                < self.ground_shadow_coords[0][1][0])
 
     def transform(self, idx):
 
@@ -622,16 +622,13 @@ class FastOrderedPVArray(BasePVArray):
                                       shaded_pvrow.original_linestring)
             list_pvrows_to_shade = self.pvrows[1:]
 
-        # Fix: sometimes the calculated project can be an empty geom bc of
-        # approximation errors, in this case just skip the direct shading
-        if not proj_initial.is_empty:
-            # Use distance translation to cast shadows on pvrows
-            for idx, pvrow in enumerate(list_pvrows_to_shade):
-                proj = Point(proj_initial.x + idx * self.distance,
-                             proj_initial.y)
-                shaded_side = getattr(pvrow, illum_side)
-                shaded_side.cast_shadow(
-                    LineString([pvrow.lowest_point, proj]))
+        # Use distance translation to cast shadows on pvrows
+        for idx, pvrow in enumerate(list_pvrows_to_shade):
+            proj = Point(proj_initial.x + idx * self.distance,
+                         proj_initial.y)
+            shaded_side = getattr(pvrow, illum_side)
+            shaded_side.cast_shadow(
+                LineString([pvrow.lowest_point, proj]))
 
     def _get_neighbors(self, surface_tilt):
         """Determine the pvrows indices of the neighboring pvrow for the front
