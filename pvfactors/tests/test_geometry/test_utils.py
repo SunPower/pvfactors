@@ -107,7 +107,6 @@ def test_difference():
     u = LineString([(1, 0), (0, 0)])
     v = LineString([(-2, 0), (1, 0)])
     diff = difference(u, v)
-    print(diff.wkt)
     assert diff.is_empty
 
 

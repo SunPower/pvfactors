@@ -13,7 +13,7 @@ from shapely.geometry import LineString, Point
 from pvfactors import PVFactorsError
 
 
-class OrderedPVArray(BasePVArray):
+class SlowOrderedPVArray(BasePVArray):
     """An ordered PV array has a flat horizontal ground, and pv rows which
     are all at the same height, with the same surface tilt and azimuth angles,
     and also all equally spaced. These simplifications allow faster and easier
@@ -51,7 +51,7 @@ class OrderedPVArray(BasePVArray):
             Unique distance between PV rows (Default = None)
         """
         # Initialize base parameters: common to all sorts of PV arrays
-        super(OrderedPVArray, self).__init__(axis_azimuth=axis_azimuth)
+        super(SlowOrderedPVArray, self).__init__(axis_azimuth=axis_azimuth)
 
         # These are the invariant parameters of the PV array
         self.gcr = gcr
@@ -419,7 +419,7 @@ class OrderedPVArray(BasePVArray):
         return view_matrix, obstr_matrix
 
 
-class FastOrderedPVArray(BasePVArray):
+class OrderedPVArray(BasePVArray):
 
     y_ground = 0.  # ground will be at height = 0 by default
 
@@ -442,7 +442,7 @@ class FastOrderedPVArray(BasePVArray):
         cut
         """
         # Initialize base parameters: common to all sorts of PV arrays
-        super(FastOrderedPVArray, self).__init__(axis_azimuth=axis_azimuth)
+        super(OrderedPVArray, self).__init__(axis_azimuth=axis_azimuth)
 
         # These are the invariant parameters of the PV array
         self.gcr = gcr

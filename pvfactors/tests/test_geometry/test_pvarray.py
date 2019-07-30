@@ -1,7 +1,6 @@
 import os
 import numpy as np
 from pvfactors.geometry import OrderedPVArray, PVGround, PVSurface
-from pvfactors.geometry.pvarray import FastOrderedPVArray
 from pvfactors.geometry.utils import contains
 from pvfactors.config import MAX_X_GROUND, MIN_X_GROUND
 from pvfactors.tests.test_geometry.test_data import \
@@ -16,7 +15,8 @@ def test_ordered_pvarray_from_dict(params):
 
     # Test that ground is created successfully
     assert isinstance(pvarray.ground, PVGround)
-    assert pvarray.ground.length == (MAX_X_GROUND - MIN_X_GROUND)
+    np.testing.assert_allclose(pvarray.ground.length,
+                               MAX_X_GROUND - MIN_X_GROUND)
 
     # Test the front and back sides
     assert len(pvarray.pvrows) == 3
@@ -25,9 +25,6 @@ def test_ordered_pvarray_from_dict(params):
     assert pvarray.pvrows[0].front.shaded_length == 0
     assert pvarray.gcr == params['gcr']
     assert pvarray.surface_tilt == params['surface_tilt']
-    assert pvarray.surface_azimuth == params['surface_azimuth']
-    assert pvarray.solar_zenith == params['solar_zenith']
-    assert pvarray.solar_azimuth == params['solar_azimuth']
     assert pvarray.pvrows[0].front.n_vector[0] > 0
     distance_between_pvrows = \
         pvarray.pvrows[1].centroid.x - pvarray.pvrows[0].centroid.x
@@ -96,8 +93,7 @@ def test_ordered_pvarray_gnd_shadow_casting(params):
                .shaded_collection.list_surfaces) == 3
     assert len(ordered_pvarray.ground.list_segments[0]
                .illum_collection.list_surfaces) == 7
-    assert ordered_pvarray.ground.shaded_length == 6.385066634855475
-    assert ordered_pvarray.illum_side == 'front'
+    assert ordered_pvarray.ground.shaded_length == 6.385066634855473
 
 
 def test_ordered_pvarray_gnd_pvrow_shadow_casting_right(params_direct_shading):
@@ -110,9 +106,9 @@ def test_ordered_pvarray_gnd_pvrow_shadow_casting_right(params_direct_shading):
                .shaded_collection.list_surfaces) == 2
     assert len(ordered_pvarray.ground.list_segments[0]
                .illum_collection.list_surfaces) == 4
-    assert ordered_pvarray.ground.length == MAX_X_GROUND - MIN_X_GROUND
+    np.testing.assert_allclose(ordered_pvarray.ground.length,
+                               MAX_X_GROUND - MIN_X_GROUND)
 
-    assert ordered_pvarray.illum_side == 'front'
     np.testing.assert_almost_equal(
         ordered_pvarray.pvrows[0].front.shaded_length, 0.33333333333333254)
     np.testing.assert_almost_equal(
@@ -139,9 +135,9 @@ def test_ordered_pvarray_gnd_pvrow_shadow_casting_left(params_direct_shading):
                .shaded_collection.list_surfaces) == 2
     assert len(ordered_pvarray.ground.list_segments[0]
                .illum_collection.list_surfaces) == 4
-    assert ordered_pvarray.ground.length == MAX_X_GROUND - MIN_X_GROUND
+    np.testing.assert_allclose(ordered_pvarray.ground.length,
+                               MAX_X_GROUND - MIN_X_GROUND)
 
-    assert ordered_pvarray.illum_side == 'front'
     np.testing.assert_almost_equal(
         ordered_pvarray.pvrows[2].front.shaded_length, 0.33333333333333254)
     np.testing.assert_almost_equal(
@@ -164,13 +160,13 @@ def test_ordered_pvarray_gnd_pvrow_shadow_casting_back(params_direct_shading):
     # Test front shading on right
     ordered_pvarray = OrderedPVArray.transform_from_dict_of_scalars(
         params_direct_shading)
-    assert ordered_pvarray.illum_side == 'back'
     # Check shadow casting on ground
     assert len(ordered_pvarray.ground.list_segments[0]
                .shaded_collection.list_surfaces) == 2
     assert len(ordered_pvarray.ground.list_segments[0]
                .illum_collection.list_surfaces) == 4
-    assert ordered_pvarray.ground.length == MAX_X_GROUND - MIN_X_GROUND
+    np.testing.assert_allclose(ordered_pvarray.ground.length,
+                               MAX_X_GROUND - MIN_X_GROUND)
 
     # Shading length should be identical as in previous test for front surface,
     # but now with back surface
@@ -200,9 +196,9 @@ def test_ordered_pvarray_gnd_pvrow_shadow_casting_right_n_seg(
                .shaded_collection.list_surfaces) == 2
     assert len(ordered_pvarray.ground.list_segments[0]
                .illum_collection.list_surfaces) == 4
-    assert ordered_pvarray.ground.length == MAX_X_GROUND - MIN_X_GROUND
+    np.testing.assert_allclose(ordered_pvarray.ground.length,
+                               MAX_X_GROUND - MIN_X_GROUND)
 
-    assert ordered_pvarray.illum_side == 'front'
     # Test pvrow sides: should be the same as without segments
     np.testing.assert_almost_equal(
         ordered_pvarray.pvrows[0].front.shaded_length, 0.33333333333333254)
@@ -247,9 +243,9 @@ def test_ordered_pvarray_gnd_pvrow_shadow_casting_back_n_seg(
                .shaded_collection.list_surfaces) == 2
     assert len(ordered_pvarray.ground.list_segments[0]
                .illum_collection.list_surfaces) == 4
-    assert ordered_pvarray.ground.length == MAX_X_GROUND - MIN_X_GROUND
+    np.testing.assert_allclose(ordered_pvarray.ground.length,
+                               MAX_X_GROUND - MIN_X_GROUND)
 
-    assert ordered_pvarray.illum_side == 'back'
     # Shading length should be identical as in previous test for front surface,
     # but now with back surface
     np.testing.assert_almost_equal(
@@ -291,7 +287,7 @@ def test_ordered_pvarray_cuts_for_pvrow_view(ordered_pvarray):
     len_1 = ordered_pvarray.ground.length
 
     assert n_surfaces_1 == n_surfaces_ground_before_cut + 3
-    assert len_1 == ground_length
+    np.testing.assert_allclose(len_1, ground_length)
 
 
 def test_ordered_pvarray_list_surfaces(ordered_pvarray):
@@ -506,46 +502,6 @@ def test_ordered_pvarray_gnd_shadow_casting_tolerance():
             .shaded_collection.n_surfaces) == 0
 
 
-def test_plot_fast_ordered_pvarray():
-    """Test that ordered pv array plotting works correctly"""
-    is_ci = os.environ.get('CI', False)
-    if not is_ci:
-        import matplotlib.pyplot as plt
-
-        # Create base params
-        params = {
-            'axis_azimuth': 0,
-            'n_pvrows': 3,
-            'pvrow_height': 2.5,
-            'pvrow_width': 2.,
-            'gcr': 0.7,
-            'cut': {0: {'front': 5}, 1: {'back': 3}}
-        }
-
-        # Timeseries parameters for testing
-        solar_zenith = np.array([20., 75.])
-        solar_azimuth = np.array([70., 270.])
-        surface_tilt = np.array([10., 70.])
-        surface_azimuth = np.array([90., 270.])
-
-        # Plot simple ordered pv array
-        ordered_pvarray = FastOrderedPVArray(**params)
-        ordered_pvarray.fit(solar_zenith, solar_azimuth, surface_tilt,
-                            surface_azimuth)
-
-        # plot
-        ordered_pvarray.transform(0)
-        f, ax = plt.subplots()
-        ordered_pvarray.plot(ax)
-        plt.show()
-
-        # plot
-        ordered_pvarray.transform(1)
-        f, ax = plt.subplots()
-        ordered_pvarray.plot(ax)
-        plt.show()
-
-
 def test_coords_ground_shadows():
 
     # Create base params
@@ -565,7 +521,7 @@ def test_coords_ground_shadows():
     surface_azimuth = np.array([90., 270.])
 
     # Plot simple ordered pv array
-    ordered_pvarray = FastOrderedPVArray(**params)
+    ordered_pvarray = OrderedPVArray(**params)
     ordered_pvarray.fit(solar_zenith, solar_azimuth, surface_tilt,
                         surface_azimuth)
 
@@ -599,7 +555,7 @@ def test_coords_cut_points():
     surface_azimuth = np.array([90., 270.])
 
     # Plot simple ordered pv array
-    ordered_pvarray = FastOrderedPVArray(**params)
+    ordered_pvarray = OrderedPVArray(**params)
     ordered_pvarray.fit(solar_zenith, solar_azimuth, surface_tilt,
                         surface_azimuth)
 

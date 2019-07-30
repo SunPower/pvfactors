@@ -4,7 +4,7 @@ from pvfactors.irradiance import HybridPerezOrdered
 from pvfactors.engine import PVEngine
 import datetime as dt
 from pvfactors.tests.test_viewfactors.test_data import \
-    vf_matrix_left_cut
+    vf_matrix_left_cut, vf_left_cut_sum_axis_one_rounded
 import numpy as np
 
 np.set_printoptions(precision=3)
@@ -24,8 +24,11 @@ def test_vfcalculator(params):
                                          pvarray.pvrows)
 
     # The values where checked visually by looking at plot of pvarray
-    np.testing.assert_array_equal(np.around(vf_matrix, decimals=3),
-                                  vf_matrix_left_cut)
+    vf_matrix_rounded = np.around(vf_matrix, decimals=3)
+    np.testing.assert_almost_equal(
+        np.sum(vf_matrix_rounded[:, :-1], axis=1),
+        vf_left_cut_sum_axis_one_rounded)
+    np.testing.assert_array_equal(vf_matrix_rounded, vf_matrix_left_cut)
 
 
 def test_vf_matrix_subset_calculation(params):
