@@ -7,7 +7,7 @@ from shapely.geometry import LineString
 
 
 class PVGround(BaseSide):
-    """Class that defines the ground in PV arrays."""
+    """Class that defines the ground geometry in PV arrays."""
 
     def __init__(self, list_segments=[], original_linestring=None):
         """Initialize PV ground geometry.
@@ -40,6 +40,10 @@ class PVGround(BaseSide):
         surface_params : list of str, optional
             Names of the surface parameters, eg reflectivity, total incident
             irradiance, temperature, etc. (Default = [])
+
+        Returns
+        -------
+        PVGround object
         """
         # Get ground boundaries
         if x_min_max is None:
@@ -57,6 +61,34 @@ class PVGround(BaseSide):
     def from_ordered_shadow_and_cut_pt_coords(
         cls, x_min_max=None, y_ground=Y_GROUND, ordered_shadow_coords=[],
             cut_point_coords=[], surface_params=[]):
+        """Build a horizontal flat ground surface, made of 1 PVSegment with
+        shaded areas and "cut points" (reference points used in view factor
+        calculations)
+
+        Parameters
+        ----------
+        x_min_max : tuple, optional
+            List of minimum and maximum x coordinates for the flat surface [m]
+            (Default = None)
+        y_ground : float, optional
+            Location of flat ground on y axis in [m] (Default = Y_GROUND)
+        ordered_shadow_coords : list, optional
+            List of shadow coordinates, ordered from left to right.
+            Shape = (# of shadows, 2 {# of points}, 2 {for xy coords})
+            (Default = [])
+        cut_point_coords : list, optional
+            List of cut point coordinates, ordered from left to right.
+            Shape = (# of cut points, 2 {# of points}, 2 {for xy coords})
+            (Default = [])
+        surface_params : list of str, optional
+            Names of the surface parameters, eg reflectivity, total incident
+            irradiance, temperature, etc. (Default = [])
+
+        Returns
+        -------
+        PVGround object
+            PV ground with shadows, illuminated ground, and cut points
+        """
         # Get ground boundaries
         if x_min_max is None:
             x_min, x_max = MIN_X_GROUND, MAX_X_GROUND
@@ -97,7 +129,30 @@ def recurse_on_cut_points(
         ordered_shadow_coords, cut_point_coords,
         x_min, x_max, y_ground, surface_params):
     """Solve recursively the problem of building the lists of shaded and
-    illuminated surfaces when cut points might exist"""
+    illuminated PV surfaces when cut points and shadows might exist.
+
+    Parameters
+    ----------
+        list_shaded_surfaces : list
+            List of shaded surfaces to add to
+        list_illum_surfaces : list
+            List of illuminated surfaces to add to
+        ordered_shadow_coords : list
+            List of shadow coordinates, ordered from left to right.
+            Shape = (# of shadows, 2 {# of points}, 2 {for xy coords})
+        cut_point_coords : list
+            List of cut point coordinates, ordered from left to right.
+            Shape = (# of cut points, 2 {# of points}, 2 {for xy coords})
+        x_min : float
+            Leftmost x coordinate of the considered ground [m]
+        x_max : float
+            Rightmost x coordinate of the considered ground [m]
+        y_ground : float
+            Location of flat ground on y axis in [m]
+        surface_params : list of str, optional
+            Names of the surface parameters, eg reflectivity, total incident
+            irradiance, temperature, etc.
+    """
 
     if len(cut_point_coords) == 0:
         build_list_illum_shadow_surfaces(
@@ -131,7 +186,27 @@ def build_list_illum_shadow_surfaces(
         list_shaded_surfaces, list_illum_surfaces, ordered_shadow_coords,
         x_min, x_max, y_ground, surface_params):
     """Build lists of shaded and illuminated surfaces in the case when
-    there are no cut points."""
+    there are no cut points.
+
+    Parameters
+    ----------
+        list_shaded_surfaces : list
+            List of shaded surfaces to add to
+        list_illum_surfaces : list
+            List of illuminated surfaces to add to
+        ordered_shadow_coords : list
+            List of shadow coordinates, ordered from left to right.
+            Shape = (# of shadows, 2 {# of points}, 2 {for xy coords})
+        x_min : float
+            Leftmost x coordinate of the considered ground [m]
+        x_max : float
+            Rightmost x coordinate of the considered ground [m]
+        y_ground : float
+            Location of flat ground on y axis in [m]
+        surface_params : list of str, optional
+            Names of the surface parameters, eg reflectivity, total incident
+            irradiance, temperature, etc.
+    """
     if len(ordered_shadow_coords) == 0:
         if x_min + DISTANCE_TOLERANCE < x_max:
             # The whole ground is illuminated
