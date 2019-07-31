@@ -42,7 +42,7 @@ def check_uniform_shading(list_elements):
 
 def coords_from_center_tilt_length(xy_center, tilt, length,
                                    surface_azimuth, axis_azimuth):
-    """Calculate ``shapely`` :py:class:`LineString` coordinate from
+    """Calculate ``shapely`` :py:class:`LineString` coordinates from
     center coords, surface angles and length of line.
     The axis azimuth indicates the axis of rotation of the pvrows (if single-
     axis trackers). In the 2D plane, the axis of rotation will be the vector
@@ -54,10 +54,11 @@ def coords_from_center_tilt_length(xy_center, tilt, length,
     Tilt angles need to always be positive. Given the axis azimuth and surface
     azimuth, a rotation angle will be derived. Positive rotation angles will
     indicate pvrows pointing to the left, and negative rotation angles will
-    indicate pvrows pointing to the right.
+    indicate pvrows pointing to the right (no matter what the the axis azimuth
+    is).
     All of these conventions are necessary to make sure that no matter what
     the tilt and surface angles are, we can still identify correctly
-    the same pv rows: the leftmost PV row will have index 0, and rightmost
+    the same pv rows: the leftmost PV row will have index 0, and the rightmost
     will have index -1.
 
     Parameters
@@ -78,7 +79,8 @@ def coords_from_center_tilt_length(xy_center, tilt, length,
     -------
     list
         List of linestring coordinates obtained from inputs (could be vectors)
-        in the form of [[x1, y1], [x2, y2]]
+        in the form of [[x1, y1], [x2, y2]], where xi and yi could be arrays
+        or scalar values.
     """
     # PV row params
     x_center, y_center = xy_center
@@ -96,6 +98,28 @@ def coords_from_center_tilt_length(xy_center, tilt, length,
 
 
 def get_rotation_from_tilt_azimuth(surface_azimuth, axis_azimuth, tilt):
+    """Calculate the rotation angle using surface azimuth, axis azimuth,
+    and surface tilt angles. While surface tilt angles need to always be
+    positive, rotation angles can be negative.
+    In pvfactors, positive rotation angles will indicate pvrows pointing to the
+    left, and negative rotation angles will indicate pvrows pointing to the
+    right (no matter what the the axis azimuth is).
+
+    Parameters
+    ----------
+    tilt : float or np.ndarray
+        Surface tilt angles desired [deg]. Values should all be positive.
+    surface_azimuth : float or np.ndarray
+        Surface azimuth angles of PV surface [deg]
+    axis_azimuth : float
+        Axis azimuth of the PV surface, i.e. direction of axis of rotation
+        [deg]
+
+    Returns
+    -------
+    float or np.ndarray
+        Calculated rotation angle(s) in [deg]
+    """
 
     # Calculate rotation of PV row (signed tilt angle)
     is_pointing_right = ((surface_azimuth - axis_azimuth) % 360.) > 180.
@@ -104,20 +128,20 @@ def get_rotation_from_tilt_azimuth(surface_azimuth, axis_azimuth, tilt):
     return rotation
 
 
-def get_solar_2d_vector(solar_zenith, solar_azimuth, axis_azimuth):
+def get_solar_2d_vectors(solar_zenith, solar_azimuth, axis_azimuth):
     """Projection of 3d solar vector onto the cross section of the systems:
     which is the 2D plane we are considering.
     This is needed to calculate shadows.
     Remember that the 2D plane is such that the direction of the torque
     tube vector (or rotation axis) goes into (and normal to) the 2D plane,
     such that positive rotation angles will have the PV surfaces tilted to the
-    LEFT and vice versa
+    LEFT and vice versa.
 
     Parameters
     ----------
-    solar_zenith : float
+    solar_zenith : float or numpy array
         Solar zenith angle [deg]
-    solar_azimuth : float
+    solar_azimuth : float or numpy array
         Solar azimuth angle [deg]
     axis_azimuth : float
         Axis azimuth of the PV surface, i.e. direction of axis of rotation
@@ -125,8 +149,9 @@ def get_solar_2d_vector(solar_zenith, solar_azimuth, axis_azimuth):
 
     Returns
     -------
-    solar_2d_vector : list
-        Two vector components of the solar vector in the 2D plane
+    solar_2d_vector : numpy array
+        Two vector components of the solar vector in the 2D plane, with the
+        form [x, y], where x and y can be arrays
     """
     solar_2d_vector = np.array([
         # a drawing really helps understand the following
@@ -1111,8 +1136,9 @@ class BasePVArray(object):
         # All PV arrays should have a fixed axis azimuth in pvfactors
         self.axis_azimuth = axis_azimuth
 
-        # Initialize view factor matrix
-        self.vf_matrix = None  # needs to be calculated externally
+        # Initialize view factor matrix: will be calculated externally,
+        # i.e. not by the PV Array class itself
+        self.vf_matrix = None
 
     def plot(self, ax, with_index=False):
         """Plot all the PV rows and the ground in the PV array.
@@ -1237,12 +1263,14 @@ class BasePVArray(object):
         for idx, surface in enumerate(self.all_surfaces):
             surface.index = idx
 
-    def _build_view_matrix(self):
+    def _build_view_matrix(self, *args, **kwargs):
         """Not implemented."""
         raise NotImplementedError
 
     def _build_surface_registry(self):
-        """Build the surface registry of the PV array."""
+        """Build the surface registry of the PV array, which is a
+        pandas DataFrame with most of the geometry information contained
+        in the class object"""
         dict_registry = {k: [] for k in self.registry_cols}
         # Fill up registry with ground surfaces
         surf_line_type = 'ground'
@@ -1325,3 +1353,11 @@ class BasePVArray(object):
         # Make dataframe
         surface_registry = pd.DataFrame.from_dict(dict_registry)
         return surface_registry
+
+    def fit(self, *args, **kwargs):
+        """Not implemented."""
+        raise NotImplementedError
+
+    def transform(self, *args, **kwargs):
+        """Not implemented."""
+        raise NotImplementedError

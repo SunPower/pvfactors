@@ -3,7 +3,7 @@ import numpy as np
 from pvfactors import PVFactorsError
 from pvfactors.geometry.base import \
     BaseSide, ShadeCollection, PVSurface, PVSegment, \
-    coords_from_center_tilt_length, get_solar_2d_vector
+    coords_from_center_tilt_length, get_solar_2d_vectors
 from shapely.geometry import LineString, Point
 from pvfactors.geometry.utils import projection
 
@@ -315,8 +315,8 @@ def test_solar_2d_vectors():
     axis_azimuth = 0.
 
     # Calculate solar vectors for the 2 times
-    solar_vectors = get_solar_2d_vector(solar_zenith, solar_azimuth,
-                                        axis_azimuth)
+    solar_vectors = get_solar_2d_vectors(solar_zenith, solar_azimuth,
+                                         axis_azimuth)
 
     expected_solar_vectors = [[0.3213938, -0.24184476],
                               [0.93969262, 0.70710678]]

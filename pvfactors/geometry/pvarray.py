@@ -6,7 +6,7 @@ from pvfactors.geometry.pvground import PVGround
 from pvfactors.geometry.pvrow import PVRow
 from pvfactors.config import X_ORIGIN_PVROWS, VIEW_DICT, DISTANCE_TOLERANCE
 from pvfactors.geometry.base import \
-    get_solar_2d_vector, BasePVArray, coords_from_center_tilt_length, \
+    get_solar_2d_vectors, BasePVArray, coords_from_center_tilt_length, \
     get_rotation_from_tilt_azimuth
 from pvfactors.geometry.utils import projection
 from shapely.geometry import LineString, Point
@@ -121,7 +121,7 @@ class SlowOrderedPVArray(BasePVArray):
 
     def transform(self, idx):
 
-        self.solar_2d_vector = get_solar_2d_vector(
+        self.solar_2d_vector = get_solar_2d_vectors(
             self.solar_zenith[idx], self.solar_azimuth[idx],
             self.axis_azimuth)
         # Create ground and pvrows
@@ -511,7 +511,7 @@ class OrderedPVArray(BasePVArray):
         self.surface_tilt = surface_tilt
 
         # Calculate the solar 2D vectors for all timestamps
-        self.solar_2d_vectors = get_solar_2d_vector(
+        self.solar_2d_vectors = get_solar_2d_vectors(
             solar_zenith, solar_azimuth, self.axis_azimuth)
 
         # Calculate the coordinates of all PV rows for all timestamps
