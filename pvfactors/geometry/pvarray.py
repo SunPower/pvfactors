@@ -420,6 +420,11 @@ class SlowOrderedPVArray(BasePVArray):
 
 
 class OrderedPVArray(BasePVArray):
+    """An ordered PV array has a flat horizontal ground, and pv rows which
+    are all at the same height, with the same surface tilt and azimuth angles,
+    and also all equally spaced. These simplifications allow faster and easier
+    calculations. In the ordered PV array, the list of PV rows must be
+    ordered from left to right (along the x-axis) in the 2D geometry."""
 
     y_ground = 0.  # ground will be at height = 0 by default
 
@@ -435,17 +440,19 @@ class OrderedPVArray(BasePVArray):
         gcr : float, optional
             Ground coverage ratio (Default = None)
         pvrow_height : float, optional
-            Unique height of all PV rows (Default = None)
+            Unique height of all PV rows in [m] (Default = None)
         n_pvrows : int, optional
             Number of PV rows in the PV array (Default = None)
         pvrow_width : float, optional
-            Width of the PV rows in the 2D plane (Default = None)
+            Width of the PV rows in the 2D plane in [m] (Default = None)
         surface_params : list of str, optional
             List of surface parameter names for the PV surfaces
             (Default = [])
         cut : dict, optional
             Nested dictionary that tells if some PV row sides need to be
-            discretized, and how (Default = {})
+            discretized, and how (Default = {}).
+            Example: {1: {'front': 5}}, will create 5 segments on the front
+            side of the PV row with index 1
         """
         # Initialize base parameters: common to all sorts of PV arrays
         super(OrderedPVArray, self).__init__(axis_azimuth=axis_azimuth)
@@ -479,33 +486,84 @@ class OrderedPVArray(BasePVArray):
         self.is_flat = None
 
     @classmethod
-    def init_from_dict(cls, params, surface_params=[]):
-        return cls(
-            axis_azimuth=params['axis_azimuth'], gcr=params['gcr'],
-            pvrow_height=params['pvrow_height'], n_pvrows=params['n_pvrows'],
-            pvrow_width=params['pvrow_width'], cut=params.get('cut', {}),
-            surface_params=surface_params)
+    def init_from_dict(cls, pvarray_params, surface_params=[]):
+        """Instantiate ordered PV array from dictionary of parameters
+
+        Parameters
+        ----------
+        pvarray_params : dict
+            The parameters defining the PV array
+        surface_params : list of str, optional
+            List of parameter names to pass to surfaces (Default = [])
+
+        Returns
+        -------
+        OrderedPVArray
+            Initialized Ordered PV Array
+        """
+        return cls(axis_azimuth=pvarray_params['axis_azimuth'],
+                   gcr=pvarray_params['gcr'],
+                   pvrow_height=pvarray_params['pvrow_height'],
+                   n_pvrows=pvarray_params['n_pvrows'],
+                   pvrow_width=pvarray_params['pvrow_width'],
+                   cut=pvarray_params.get('cut', {}),
+                   surface_params=surface_params)
 
     @classmethod
-    def transform_from_dict_of_scalars(cls, params, surface_params=[]):
+    def transform_from_dict_of_scalars(cls, pvarray_params, surface_params=[]):
+        """Instantiate, fit and transform ordered PV array using dictionary
+        of scalar inputs.
+
+        Parameters
+        ----------
+        pvarray_params : dict
+            The parameters used for instantiation, fitting, and transformation
+        surface_params : list of str, optional
+            List of parameter names to pass to surfaces (Default = [])
+
+        Returns
+        -------
+        OrderedPVArray
+            Initialized, fitted, and transformed Ordered PV Array
+        """
 
         # Create pv array
-        pvarray = cls.init_from_dict(params, surface_params=surface_params)
+        pvarray = cls.init_from_dict(pvarray_params,
+                                     surface_params=surface_params)
 
         # Fit pv array to scalar values
-        solar_zenith = np.array([params['solar_zenith']])
-        solar_azimuth = np.array([params['solar_azimuth']])
-        surface_tilt = np.array([params['surface_tilt']])
-        surface_azimuth = np.array([params['surface_azimuth']])
+        solar_zenith = np.array([pvarray_params['solar_zenith']])
+        solar_azimuth = np.array([pvarray_params['solar_azimuth']])
+        surface_tilt = np.array([pvarray_params['surface_tilt']])
+        surface_azimuth = np.array([pvarray_params['surface_azimuth']])
         pvarray.fit(solar_zenith, solar_azimuth,
                     surface_tilt, surface_azimuth)
 
-        # Transform pv array to first index
+        # Transform pv array to first index (since scalar values were passed)
         pvarray.transform(0)
 
         return pvarray
 
     def fit(self, solar_zenith, solar_azimuth, surface_tilt, surface_azimuth):
+        """Fit the ordered PV array to the list of solar and surface angles.
+        All intermediate PV array results necessary to build the geometries
+        will be calculated here using vectorization as much as possible.
+
+        Intemediate results include: PV row coordinates for all timestamps,
+        ground element coordinates for all timestamps, cases of direct
+        shading, ...
+
+        Parameters
+        ----------
+        solar_zenith : array-like or float
+            Solar zenith angles [deg]
+        solar_azimuth : array-like or float
+            Solar azimuth angles [deg]
+        surface_tilt : array-like or float
+            Surface tilt angles, from 0 to 180 [deg]
+        surface_azimuth : array-like or float
+            Surface azimuth angles [deg]
+        """
 
         self.n_states = len(solar_zenith)
         self.surface_tilt = surface_tilt
@@ -526,7 +584,7 @@ class OrderedPVArray(BasePVArray):
         self.pvrow_coords = np.array(self.pvrow_coords)
 
         # Calculate ground elements coordinates
-        self._calculate_ground_elements_coords(surface_azimuth, surface_tilt)
+        self._calculate_ground_elements_coords(surface_tilt, surface_azimuth)
 
         # Determine when there's direct shading
         self.has_direct_shading = np.zeros(self.n_states, dtype=bool)
@@ -537,6 +595,21 @@ class OrderedPVArray(BasePVArray):
                 < self.ground_shadow_coords[0][1][0])
 
     def transform(self, idx):
+        """
+        Transform the ordered PV array for the given index.
+        This means actually building the PV Row and Ground geometries. Note
+        that the list of PV rows will be ordered from left to right in the
+        geometry (along the x-axis), and indexed from 0 to n_pvrows - 1.
+        This can only be run after the ``fit()`` method.
+
+        Object attributes like ``pvrows`` and ``ground`` will be updated each
+        time this method is run.
+
+        Parameters
+        ----------
+        idx : int
+            Index for which to build the simulation.
+        """
 
         if idx < self.n_states:
             has_direct_shading = self.has_direct_shading[idx]
@@ -576,7 +649,20 @@ class OrderedPVArray(BasePVArray):
                 idx, self.n_states - 1)
             raise PVFactorsError(msg)
 
-    def _calculate_ground_elements_coords(self, surface_azimuth, surface_tilt):
+    def _calculate_ground_elements_coords(self, surface_tilt, surface_azimuth):
+        """This private method is run at fitting time to calculate the ground
+        element coordinates: i.e. the coordinates of the ground shadows and
+        cut points.
+        It will update the ``ground_shadow_coords`` and ``cut_point_coords``
+        attributes of the object.
+
+        Parameters
+        ----------
+        surface_tilt : array-like or float
+            Surface tilt angles, from 0 to 180 [deg]
+        surface_azimuth : array-like or float
+            Surface azimuth angles [deg]
+        """
 
         # Calculate the angle made by 2D sun vector and x-axis
         alpha_vec = np.arctan2(self.solar_2d_vectors[1],
@@ -615,6 +701,15 @@ class OrderedPVArray(BasePVArray):
         self.cut_point_coords = np.array(self.cut_point_coords)
 
     def _calculate_interrow_shading(self, idx):
+        """This private method is run at transform time to calculate
+        direct shading between the PV rows, if any.
+        It will update the ``pvrows`` side segments with shadows as needed.
+
+        Parameters
+        ----------
+        idx : int
+            Index for which to calculate inter-row shading
+        """
 
         solar_2d_vector = self.solar_2d_vectors[:, idx]
         illum_side = ('front' if self.pvrows[0].front.n_vector.dot(
@@ -647,7 +742,12 @@ class OrderedPVArray(BasePVArray):
 
     def _get_neighbors(self, surface_tilt):
         """Determine the pvrows indices of the neighboring pvrow for the front
-        and back surface of each pvrow.
+        and back surfaces of each pvrow.
+
+        Parameters
+        ----------
+        surface_tilt : array-like or float
+            Surface tilt angles, from 0 to 180 [deg]
         """
         n_pvrows = len(self.pvrows)
         if n_pvrows:
@@ -667,9 +767,9 @@ class OrderedPVArray(BasePVArray):
 
     def _build_view_matrix(self):
         """Calculate the pv array view matrix: using rules specific to
-        ordered pv arrays to build relationship matrix"""
+        ordered pv arrays to build relational matrix between surfaces."""
 
-        # Index all surfaces if not done already
+        # Index all surfaces
         self.index_all_surfaces()
 
         # Initialize matrices
