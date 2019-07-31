@@ -4,6 +4,7 @@
 *.ipynb_checkpoints
 .cache/
 .idea/
+.vscode/
 
 # files
 *.pyc
@@ -25,3 +26,8 @@ pvfactors/docs/developer/generated/*
 docs/sphinx/_build/
 docs/sphinx/developer/generated/
 *generated/
+.mypy_cache/
+
+# virtual envs
+venv/
+venv3/
