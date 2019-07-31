@@ -20,8 +20,8 @@ class PVEngine(object):
 
         Parameters
         ----------
-        params : dict
-            The parameters defining the PV array
+        pvarray : BasePVArray (or child) object
+            The initialized PV array object that will be used for calculations
         vf_calculator : vf calculator object, optional
             Calculator that will be used to calculate the view factor matrices
             (Default =
@@ -31,14 +31,11 @@ class PVEngine(object):
             (Default =
             :py:class:`~pvfactors.irradiance.models.HybridPerezOrdered`
             object)
-        cls_pvarray : class of PV array, optional
-            Class that will be used to build the PV array
-            (Default =
-            :py:class:`~pvfactors.geometry.pvarray.OrderedPVArray` class)
         fast_mode_pvrow_index : int, optional
-            If a valid pvrow index is passed, then the PVEngine fast mode
+            If a pvrow index is passed, then the PVEngine fast mode
             will be activated and the engine calculation will be done only
-            for the back surface of the selected pvrow (Default = None)
+            for the back surface of the pvrow with the corresponding
+            index (Default = None)
 
         """
         self.vf_calculator = vf_calculator
@@ -47,43 +44,40 @@ class PVEngine(object):
         self.is_fast_mode = isinstance(fast_mode_pvrow_index, int)
         self.fast_mode_pvrow_index = fast_mode_pvrow_index
 
-        # Required timeseries values
-        self.solar_zenith = None
-        self.solar_azimuth = None
-        self.surface_tilt = None
-        self.surface_azimuth = None
+        # These values will be updated at fitting time
         self.n_points = None
         self.skip_step = None
 
     def fit(self, timestamps, DNI, DHI, solar_zenith, solar_azimuth,
             surface_tilt, surface_azimuth, albedo):
         """Fit the timeseries data to the engine. More specifically,
-        save all the parameters that needs to be saved, and perform the
-        irradiance transformations required by the irradiance model.
+        save all the parameters that needs to be saved, and fit the PV array
+        and irradiance models to the data (i.e. perform all the intermediate
+        vector-based calculations).
         Note that all angles follow the pvlib-python angle convention: North -
         0 deg, East - 90 deg, etc.
 
         Parameters
         ----------
-        timestamps : array-like
+        timestamps : array-like or timestamp-like
             List of timestamps of the simulation.
-        DNI : array-like
+        DNI : array-like or float
             Direct normal irradiance values [W/m2]
-        DHI : array-like
+        DHI : array-like or float
             Diffuse horizontal irradiance values [W/m2]
-        solar_zenith : array-like
+        solar_zenith : array-like or float
             Solar zenith angles [deg]
-        solar_azimuth : array-like
+        solar_azimuth : array-like or float
             Solar azimuth angles [deg]
-        surface_tilt : array-like
+        surface_tilt : array-like or float
             Surface tilt angles, from 0 to 180 [deg]
-        surface_azimuth : array-like
+        surface_azimuth : array-like or float
             Surface azimuth angles [deg]
-        albedo : array-like
-            Albedo values (or ground reflectivity)
+        albedo : array-like or float
+            Albedo values (ground reflectivity)
 
         """
-        # Save
+        # Format inputs to numpy arrays if it looks like floats where inputted
         if np.isscalar(DNI):
             timestamps = [timestamps]
             DNI = np.array([DNI])
@@ -92,15 +86,11 @@ class PVEngine(object):
             solar_azimuth = np.array([solar_azimuth])
             surface_tilt = np.array([surface_tilt])
             surface_azimuth = np.array([surface_azimuth])
+
+        # Format albedo
         self.n_points = len(DNI)
         if np.isscalar(albedo):
             albedo = albedo * np.ones(self.n_points)
-
-        # Save timeseries values
-        self.solar_zenith = solar_zenith
-        self.solar_azimuth = solar_azimuth
-        self.surface_tilt = surface_tilt
-        self.surface_azimuth = surface_azimuth
 
         # Fit irradiance model
         self.irradiance.fit(timestamps, DNI, DHI, solar_zenith, solar_azimuth,
@@ -110,7 +100,7 @@ class PVEngine(object):
         self.pvarray.fit(solar_zenith, solar_azimuth, surface_tilt,
                          surface_azimuth)
 
-        # Determine timesteps to skip when:
+        # Skip timesteps when:
         #    - solar zenith > 90, ie the sun is down
         #    - DNI or DHI is negative, which does not make sense
         #    - DNI and DHI are both zero
@@ -119,6 +109,11 @@ class PVEngine(object):
 
     def run_timestep(self, idx):
         """Run simulation for a single timestep index.
+
+        Timestep will be skipped when:
+            - solar zenith > 90, ie the sun is down
+            - DNI or DHI is negative, which does not make sense
+            - DNI and DHI are both zero
 
         Parameters
         ----------
