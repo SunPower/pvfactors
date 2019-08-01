@@ -108,9 +108,12 @@ The users can run a timeseries simulation using the ``PVEngine``
 
 ```python
 from pvfactors.engine import PVEngine
+from pvfactors.geometry import OrderedPVArray
 
+# Create an ordered PV array
+pvarray = OrderedPVArray.init_from_dict(pvarray_parameters)
 # Create engine
-engine = PVEngine(pvarray_parameters)
+engine = PVEngine(pvarray)
 # Fit engine to data
 engine.fit(df_inputs.index, df_inputs.dni, df_inputs.dhi,
            df_inputs.solar_zenith, df_inputs.solar_azimuth,
