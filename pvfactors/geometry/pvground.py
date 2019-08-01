@@ -223,13 +223,20 @@ def build_list_illum_shadow_surfaces(
             [[x1, y1], [x2, y2]] = shadow_coord
             if x1 < x_min:
                 if x2 > x_min + DISTANCE_TOLERANCE:
-                    # Shadow is cropped in the picture
-                    coord = [[x_min, y1], [x2, y2]]
+                    if x2 < x_max - DISTANCE_TOLERANCE:
+                        # Shadow is cropped in the picture
+                        coord = [[x_min, y1], [x2, y2]]
+                        # Update x_illum_left to right x coord of shadow
+                        x_illum_left = x2
+                    else:
+                        # Shadow is covering the whole picture
+                        coord = [[x_min, y1], [x_max, y2]]
+                        # Update x_illum_left to x_max
+                        x_illum_left = x_max
+                    # Create shadow and add it to list
                     shadow = PVSurface(coords=coord, shaded=True,
                                        surface_params=surface_params)
                     list_shaded_surfaces.append(shadow)
-                    # Update x_illum_left to right x coord of shadow
-                    x_illum_left = x2
             elif x2 > x_max:
                 if x1 + DISTANCE_TOLERANCE < x_max:
                     # Shadow is cropped in the picture

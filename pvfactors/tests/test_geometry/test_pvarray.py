@@ -567,3 +567,47 @@ def test_coords_cut_points():
 
     np.testing.assert_almost_equal(
         expected_cut_point_coords, ordered_pvarray.cut_point_coords)
+
+
+def test_ordered_pvarray_from_dict_w_direct_shading():
+    """Test that can successfully create ordered pvarray from parameters dict,
+    and that the axis azimuth convention works correctly (via normal vector),
+    and check that ground surfaces make sense.
+    Came from direct shading case where ground shadows not correctly created
+    """
+    # Specify array parameters
+    params = {
+        'n_pvrows': 3,
+        'pvrow_height': 1,
+        'pvrow_width': 1,
+        'axis_azimuth': 0.,
+        'gcr': 0.4,
+        'rho_front_pvrow': 0.01,
+        'rho_back_pvrow': 0.03,
+        'solar_zenith': 74,
+        'solar_azimuth': 229,
+        'surface_tilt': 50,
+        'surface_azimuth': 270
+    }
+    pvarray = OrderedPVArray.transform_from_dict_of_scalars(params)
+
+    # Test that ground is created successfully
+    assert isinstance(pvarray.ground, PVGround)
+    np.testing.assert_equal(pvarray.ground.length,
+                            MAX_X_GROUND - MIN_X_GROUND)
+    np.testing.assert_equal(pvarray.pvrows[0].length, 2)
+    np.testing.assert_equal(pvarray.pvrows[1].length, 2)
+    np.testing.assert_equal(pvarray.pvrows[2].length, 2)
+
+    # Test the front and back sides
+    assert len(pvarray.pvrows) == 3
+    np.testing.assert_array_equal(
+        pvarray.pvrows[0].front.n_vector, -pvarray.pvrows[0].back.n_vector)
+    np.testing.assert_allclose(pvarray.pvrows[1].front.shaded_length,
+                               0.05979874)
+    assert pvarray.gcr == params['gcr']
+    assert pvarray.surface_tilt == params['surface_tilt']
+    assert pvarray.pvrows[0].front.n_vector[0] < 0
+    distance_between_pvrows = \
+        pvarray.pvrows[1].centroid.x - pvarray.pvrows[0].centroid.x
+    assert distance_between_pvrows == 2.5
