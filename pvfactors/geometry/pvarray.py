@@ -6,8 +6,8 @@ from pvfactors.geometry.pvground import PVGround
 from pvfactors.geometry.pvrow import PVRow
 from pvfactors.config import X_ORIGIN_PVROWS, VIEW_DICT, DISTANCE_TOLERANCE
 from pvfactors.geometry.base import \
-    get_solar_2d_vectors, BasePVArray, coords_from_center_tilt_length, \
-    get_rotation_from_tilt_azimuth
+    _get_solar_2d_vectors, BasePVArray, _coords_from_center_tilt_length, \
+    _get_rotation_from_tilt_azimuth
 from pvfactors.geometry.utils import projection
 from shapely.geometry import LineString, Point
 from pvfactors import PVFactorsError
@@ -163,7 +163,7 @@ class OrderedPVArray(BasePVArray):
         self.surface_tilt = surface_tilt
 
         # Calculate the solar 2D vectors for all timestamps
-        self.solar_2d_vectors = get_solar_2d_vectors(
+        self.solar_2d_vectors = _get_solar_2d_vectors(
             solar_zenith, solar_azimuth, self.axis_azimuth)
 
         # Calculate the coordinates of all PV rows for all timestamps
@@ -172,7 +172,7 @@ class OrderedPVArray(BasePVArray):
                       for idx in range(self.n_pvrows)]
         for xy_center in xy_centers:
             self.pvrow_coords.append(
-                coords_from_center_tilt_length(
+                _coords_from_center_tilt_length(
                     xy_center, surface_tilt, self.width, surface_azimuth,
                     self.axis_azimuth))
         self.pvrow_coords = np.array(self.pvrow_coords)
@@ -262,7 +262,7 @@ class OrderedPVArray(BasePVArray):
         alpha_vec = np.arctan2(self.solar_2d_vectors[1],
                                self.solar_2d_vectors[0])
         # Calculate rotation angles
-        rotation_vec = get_rotation_from_tilt_azimuth(
+        rotation_vec = _get_rotation_from_tilt_azimuth(
             surface_azimuth, self.axis_azimuth, surface_tilt)
         rotation_vec = np.deg2rad(rotation_vec)
         # Calculate coords of ground shadows and cutting points

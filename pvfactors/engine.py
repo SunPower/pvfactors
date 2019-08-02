@@ -41,7 +41,7 @@ class PVEngine(object):
         self.vf_calculator = vf_calculator
         self.irradiance = irradiance_model
         self.pvarray = pvarray
-        self.is_fast_mode = isinstance(fast_mode_pvrow_index, int)
+        self.is_fast_mode = False if fast_mode_pvrow_index is None else True
         self.fast_mode_pvrow_index = fast_mode_pvrow_index
 
         # These values will be updated at fitting time
@@ -122,9 +122,9 @@ class PVEngine(object):
 
         Returns
         -------
-        pvarray : PV array object
+        pvarray : PV array object or None
             PV array object after all the calculations are performed and
-            applied to it
+            applied to it, ``None`` if the timestep is skipped
 
         """
 

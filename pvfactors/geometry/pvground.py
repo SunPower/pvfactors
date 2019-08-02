@@ -133,25 +133,25 @@ def recurse_on_cut_points(
 
     Parameters
     ----------
-        list_shaded_surfaces : list
-            List of shaded surfaces to add to
-        list_illum_surfaces : list
-            List of illuminated surfaces to add to
-        ordered_shadow_coords : list
-            List of shadow coordinates, ordered from left to right.
-            Shape = (# of shadows, 2 {# of points}, 2 {for xy coords})
-        cut_point_coords : list
-            List of cut point coordinates, ordered from left to right.
-            Shape = (# of cut points, 2 {# of points}, 2 {for xy coords})
-        x_min : float
-            Leftmost x coordinate of the considered ground [m]
-        x_max : float
-            Rightmost x coordinate of the considered ground [m]
-        y_ground : float
-            Location of flat ground on y axis in [m]
-        surface_params : list of str, optional
-            Names of the surface parameters, eg reflectivity, total incident
-            irradiance, temperature, etc.
+    list_shaded_surfaces : list
+        List of shaded surfaces to add to
+    list_illum_surfaces : list
+        List of illuminated surfaces to add to
+    ordered_shadow_coords : list
+        List of shadow coordinates, ordered from left to right.
+        Shape = (# of shadows, 2 {# of points}, 2 {for xy coords})
+    cut_point_coords : list
+        List of cut point coordinates, ordered from left to right.
+        Shape = (# of cut points, 2 {# of points}, 2 {for xy coords})
+    x_min : float
+        Leftmost x coordinate of the considered ground [m]
+    x_max : float
+        Rightmost x coordinate of the considered ground [m]
+    y_ground : float
+        Location of flat ground on y axis in [m]
+    surface_params : list of str, optional
+        Names of the surface parameters, eg reflectivity, total incident
+        irradiance, temperature, etc.
     """
 
     if len(cut_point_coords) == 0:
@@ -190,22 +190,22 @@ def build_list_illum_shadow_surfaces(
 
     Parameters
     ----------
-        list_shaded_surfaces : list
-            List of shaded surfaces to add to
-        list_illum_surfaces : list
-            List of illuminated surfaces to add to
-        ordered_shadow_coords : list
-            List of shadow coordinates, ordered from left to right.
-            Shape = (# of shadows, 2 {# of points}, 2 {for xy coords})
-        x_min : float
-            Leftmost x coordinate of the considered ground [m]
-        x_max : float
-            Rightmost x coordinate of the considered ground [m]
-        y_ground : float
-            Location of flat ground on y axis in [m]
-        surface_params : list of str, optional
-            Names of the surface parameters, eg reflectivity, total incident
-            irradiance, temperature, etc.
+    list_shaded_surfaces : list
+        List of shaded surfaces to add to
+    list_illum_surfaces : list
+        List of illuminated surfaces to add to
+    ordered_shadow_coords : list
+        List of shadow coordinates, ordered from left to right.
+        Shape = (# of shadows, 2 {# of points}, 2 {for xy coords})
+    x_min : float
+        Leftmost x coordinate of the considered ground [m]
+    x_max : float
+        Rightmost x coordinate of the considered ground [m]
+    y_ground : float
+        Location of flat ground on y axis in [m]
+    surface_params : list of str, optional
+        Names of the surface parameters, eg reflectivity, total incident
+        irradiance, temperature, etc.
     """
     if len(ordered_shadow_coords) == 0:
         if x_min + DISTANCE_TOLERANCE < x_max:

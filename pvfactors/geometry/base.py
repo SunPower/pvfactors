@@ -2,7 +2,6 @@
 
 import numpy as np
 import pandas as pd
-from collections import OrderedDict
 from pvfactors import PVFactorsError
 from pvfactors.config import (
     DEFAULT_NORMAL_VEC, COLOR_DIC, DISTANCE_TOLERANCE, PLOT_FONTSIZE,
@@ -16,7 +15,7 @@ from shapely.ops import linemerge
 from pvlib.tools import cosd, sind
 
 
-def check_uniform_shading(list_elements):
+def _check_uniform_shading(list_elements):
     """Check that all :py:class:`~pvfactors.geometry.base.PVSurface` objects in
     list have uniform shading
 
@@ -40,8 +39,8 @@ def check_uniform_shading(list_elements):
                 raise PVFactorsError(msg)
 
 
-def coords_from_center_tilt_length(xy_center, tilt, length,
-                                   surface_azimuth, axis_azimuth):
+def _coords_from_center_tilt_length(xy_center, tilt, length,
+                                    surface_azimuth, axis_azimuth):
     """Calculate ``shapely`` :py:class:`LineString` coordinates from
     center coords, surface angles and length of line.
     The axis azimuth indicates the axis of rotation of the pvrows (if single-
@@ -86,8 +85,8 @@ def coords_from_center_tilt_length(xy_center, tilt, length,
     x_center, y_center = xy_center
     radius = length / 2.
     # Get rotation
-    rotation = get_rotation_from_tilt_azimuth(surface_azimuth, axis_azimuth,
-                                              tilt)
+    rotation = _get_rotation_from_tilt_azimuth(surface_azimuth, axis_azimuth,
+                                               tilt)
     # Calculate coords
     x1 = radius * cosd(rotation + 180.) + x_center
     y1 = radius * sind(rotation + 180.) + y_center
@@ -97,7 +96,7 @@ def coords_from_center_tilt_length(xy_center, tilt, length,
     return [[x1, y1], [x2, y2]]
 
 
-def get_rotation_from_tilt_azimuth(surface_azimuth, axis_azimuth, tilt):
+def _get_rotation_from_tilt_azimuth(surface_azimuth, axis_azimuth, tilt):
     """Calculate the rotation angle using surface azimuth, axis azimuth,
     and surface tilt angles. While surface tilt angles need to always be
     positive, rotation angles can be negative.
@@ -128,7 +127,7 @@ def get_rotation_from_tilt_azimuth(surface_azimuth, axis_azimuth, tilt):
     return rotation
 
 
-def get_solar_2d_vectors(solar_zenith, solar_azimuth, axis_azimuth):
+def _get_solar_2d_vectors(solar_zenith, solar_azimuth, axis_azimuth):
     """Projection of 3d solar vector onto the cross section of the systems:
     which is the 2D plane we are considering.
     This is needed to calculate shadows.
@@ -339,7 +338,7 @@ class ShadeCollection(GeometryCollection):
             irradiance, temperature, etc. (Default = [])
 
         """
-        check_uniform_shading(list_surfaces)
+        _check_uniform_shading(list_surfaces)
         self.list_surfaces = list_surfaces
         self.shaded = self._get_shading(shaded)
         self.is_collinear = is_collinear(list_surfaces)
@@ -1194,8 +1193,7 @@ class BasePVArray(object):
         """Surface registry of the PV array, build if does not exist yet.
         The surface registry is a pandas DataFrame that contains all the
         indexed surfaces of the PV array, with some of their properties."""
-        surface_registry = self._build_surface_registry()
-        return surface_registry
+        return self._build_surface_registry()
 
     @property
     def view_obstr_matrices(self):
@@ -1205,8 +1203,7 @@ class BasePVArray(object):
         The view matrix will represent the views between all the surfaces.
         The obstruction matrix will represent the obstructions in views
         between all the surfaces."""
-        view_matrix, obstr_matrix = self._build_view_matrix()
-        return view_matrix, obstr_matrix
+        return self._build_view_matrix()
 
     @property
     def view_matrix(self):
@@ -1241,10 +1238,7 @@ class BasePVArray(object):
         """Dictionay of surfaces in the PV array, where keys are the surface
         indices."""
         self.index_all_surfaces()
-        all_surfaces = self.all_surfaces
-        dict_surf = {surf.index: surf for surf in all_surfaces}
-        dict_surfaces = OrderedDict(dict_surf)
-        return dict_surfaces
+        return {surf.index: surf for surf in self.all_surfaces}
 
     def update_params(self, new_dict):
         """Update surface parameters in the collection.
