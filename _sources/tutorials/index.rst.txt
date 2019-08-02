@@ -17,3 +17,4 @@ Tutorials
    Calculate_view_factors
    Run_timeseries_simulations
    Run_parallel_simulations
+   Run_fast_simulations

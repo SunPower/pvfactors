@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>models.IsotropicOrdered &mdash; pvfactors 1.0.1+0.gb9e42db.dirty documentation</title>
+  <title>models.IsotropicOrdered &mdash; pvfactors 1.1.0 documentation</title>
   
 
   
@@ -28,6 +28,7 @@
         <script type="text/javascript" src="../../_static/doctools.js"></script>
         <script type="text/javascript" src="../../_static/language_data.js"></script>
         <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
     
     <script type="text/javascript" src="../../_static/js/theme.js"></script>
 
@@ -67,7 +68,7 @@
             
             
               <div class="version">
-                1.0.1
+                1.1.0
               </div>
             
           
@@ -183,76 +184,74 @@
     margin-top: -19px;
 }
 
-/* nice headers on first paragraph of info/warning boxes */
-.admonition .first {
-    margin: -12px;
-    padding: 6px 12px;
-    margin-bottom: 12px;
-    color: #fff;
-    line-height: 1;
-    display: block;
-}
-.admonition.warning .first {
-    background: #f0b37e;
-}
-.admonition.note .first {
-    background: #6ab0de;
-}
 .admonition > p:before {
     margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
 }
 </style>
 <div class="section" id="models-isotropicordered">
 <h1>models.IsotropicOrdered<a class="headerlink" href="#models-isotropicordered" title="Permalink to this headline">¶</a></h1>
 <dl class="class">
 <dt id="models.IsotropicOrdered">
-<em class="property">class </em><code class="descclassname">models.</code><code class="descname">IsotropicOrdered</code><a class="reference internal" href="../../_modules/models.html#IsotropicOrdered"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#models.IsotropicOrdered" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">models.</code><code class="sig-name descname">IsotropicOrdered</code><span class="sig-paren">(</span><em class="sig-param">rho_front=0.01</em>, <em class="sig-param">rho_back=0.03</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/models.html#IsotropicOrdered"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#models.IsotropicOrdered" title="Permalink to this definition">¶</a></dt>
 <dd><p>Diffuse isotropic sky model for
 <code class="xref py py-class docutils literal notranslate"><span class="pre">OrderedPVArray</span></code>. It will
 calculate the appropriate values for an isotropic sky dome and apply
 it to the PV array.</p>
 <dl class="method">
 <dt id="models.IsotropicOrdered.__init__">
-<code class="descname">__init__</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/models.html#IsotropicOrdered.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#models.IsotropicOrdered.__init__" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param">rho_front=0.01</em>, <em class="sig-param">rho_back=0.03</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/models.html#IsotropicOrdered.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#models.IsotropicOrdered.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><p>Initialize irradiance model values that will be saved later on.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>rho_front</strong> (<em>float</em><em>, </em><em>optional</em>) – Reflectivity of the front side of the PV rows (default = 0.01)</p></li>
+<li><p><strong>rho_back</strong> (<em>float</em><em>, </em><em>optional</em>) – Reflectivity of the back side of the PV rows (default = 0.03)</p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 <p class="rubric">Methods</p>
-<table border="1" class="longtable docutils">
+<table class="longtable docutils align-default">
 <colgroup>
-<col width="10%" />
-<col width="90%" />
+<col style="width: 10%" />
+<col style="width: 90%" />
 </colgroup>
-<tbody valign="top">
-<tr class="row-odd"><td><a class="reference internal" href="#models.IsotropicOrdered.__init__" title="models.IsotropicOrdered.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>()</td>
-<td>Initialize irradiance model values that will be saved later on.</td>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#models.IsotropicOrdered.__init__" title="models.IsotropicOrdered.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>([rho_front, rho_back])</p></td>
+<td><p>Initialize irradiance model values that will be saved later on.</p></td>
 </tr>
-<tr class="row-even"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">fit</span></code>(timestamps,&nbsp;DNI,&nbsp;DHI,&nbsp;solar_zenith,&nbsp;…)</td>
-<td>Use vectorization to calculate values used for the isotropic irradiance model.</td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">fit</span></code>(timestamps, DNI, DHI, solar_zenith, …)</p></td>
+<td><p>Use vectorization to calculate values used for the isotropic irradiance model.</p></td>
 </tr>
-<tr class="row-odd"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_irradiance_invrho_vector</span></code>(pvarray)</td>
-<td>Get vector of summed up irradiance values from a PV array, as well as the inverse reflectivity values (the latter need to be named “inv_rho”).</td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">IsotropicOrdered.get_irradiance_invrho_vector</span></code></p></td>
+<td><p></p></td>
 </tr>
-<tr class="row-even"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">transform</span></code>(pvarray[,&nbsp;idx])</td>
-<td>Apply calculated irradiance values to PV array.</td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">transform</span></code>(pvarray[, idx])</p></td>
+<td><p>Apply calculated irradiance values to PV array.</p></td>
 </tr>
 </tbody>
 </table>
 <p class="rubric">Attributes</p>
-<table border="1" class="longtable docutils">
+<table class="longtable docutils align-default">
 <colgroup>
-<col width="10%" />
-<col width="90%" />
+<col style="width: 10%" />
+<col style="width: 90%" />
 </colgroup>
-<tbody valign="top">
-<tr class="row-odd"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">cats</span></code></td>
-<td></td>
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">cats</span></code></p></td>
+<td><p></p></td>
 </tr>
-<tr class="row-even"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">irradiance_comp</span></code></td>
-<td></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">irradiance_comp</span></code></p></td>
+<td><p></p></td>
 </tr>
-<tr class="row-odd"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">params</span></code></td>
-<td></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">params</span></code></p></td>
+<td><p></p></td>
 </tr>
 </tbody>
 </table>

@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>report &mdash; pvfactors 1.0.1+0.gb9e42db.dirty documentation</title>
+  <title>report &mdash; pvfactors 1.1.0 documentation</title>
   
 
   
@@ -28,6 +28,7 @@
         <script type="text/javascript" src="../_static/doctools.js"></script>
         <script type="text/javascript" src="../_static/language_data.js"></script>
         <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
     
     <script type="text/javascript" src="../_static/js/theme.js"></script>
 
@@ -65,7 +66,7 @@
             
             
               <div class="version">
-                1.0.1
+                1.1.0
               </div>
             
           
@@ -179,39 +180,29 @@
     margin-top: -19px;
 }
 
-/* nice headers on first paragraph of info/warning boxes */
-.admonition .first {
-    margin: -12px;
-    padding: 6px 12px;
-    margin-bottom: 12px;
-    color: #fff;
-    line-height: 1;
-    display: block;
-}
-.admonition.warning .first {
-    background: #f0b37e;
-}
-.admonition.note .first {
-    background: #6ab0de;
-}
 .admonition > p:before {
     margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
 }
 </style>
 <div class="section" id="module-report">
 <span id="report"></span><h1>report<a class="headerlink" href="#module-report" title="Permalink to this headline">¶</a></h1>
 <p>Module containing examples of report builder functions and classes.</p>
-<table border="1" class="longtable docutils">
+<table class="longtable docutils align-default">
 <colgroup>
-<col width="10%" />
-<col width="90%" />
+<col style="width: 10%" />
+<col style="width: 90%" />
 </colgroup>
-<tbody valign="top">
-<tr class="row-odd"><td><a class="reference internal" href="generated/report.example_fn_build_report.html#report.example_fn_build_report" title="report.example_fn_build_report"><code class="xref py py-obj docutils literal notranslate"><span class="pre">report.example_fn_build_report</span></code></a></td>
-<td>Example function that builds a report when used in the <code class="xref py py-class docutils literal notranslate"><span class="pre">PVEngine</span></code>.</td>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/report.example_fn_build_report.html#report.example_fn_build_report" title="report.example_fn_build_report"><code class="xref py py-obj docutils literal notranslate"><span class="pre">report.example_fn_build_report</span></code></a></p></td>
+<td><p>Example function that builds a report when used in the <code class="xref py py-class docutils literal notranslate"><span class="pre">PVEngine</span></code>.</p></td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="generated/report.ExampleReportBuilder.html#report.ExampleReportBuilder" title="report.ExampleReportBuilder"><code class="xref py py-obj docutils literal notranslate"><span class="pre">report.ExampleReportBuilder</span></code></a></td>
-<td>A class is required to build reports when running calculations with multiprocessing because of python constraints</td>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/report.ExampleReportBuilder.html#report.ExampleReportBuilder" title="report.ExampleReportBuilder"><code class="xref py py-obj docutils literal notranslate"><span class="pre">report.ExampleReportBuilder</span></code></a></p></td>
+<td><p>A class is required to build reports when running calculations with multiprocessing because of python constraints</p></td>
 </tr>
 </tbody>
 </table>

@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>pvrow.PVRow &mdash; pvfactors 1.0.1+0.gb9e42db.dirty documentation</title>
+  <title>pvrow.PVRow &mdash; pvfactors 1.1.0 documentation</title>
   
 
   
@@ -28,6 +28,7 @@
         <script type="text/javascript" src="../../_static/doctools.js"></script>
         <script type="text/javascript" src="../../_static/language_data.js"></script>
         <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
     
     <script type="text/javascript" src="../../_static/js/theme.js"></script>
 
@@ -67,7 +68,7 @@
             
             
               <div class="version">
-                1.0.1
+                1.1.0
               </div>
             
           
@@ -91,11 +92,29 @@
               
             
             
-              <ul>
+              <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../../installation/index.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../tutorials/index.html">Tutorials</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../theory/index.html">Theory</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../index.html">Developer API</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">Developer API</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../index.html#geometry">geometry</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../index.html#module-base">base</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="../index.html#module-pvrow">pvrow</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="pvrow.PVRowSide.html">pvrow.PVRowSide</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">pvrow.PVRow</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../index.html#module-pvground">pvground</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../index.html#module-pvarray">pvarray</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#viewfactors">viewfactors</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#irradiance">irradiance</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#module-engine">engine</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#module-run">run</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#module-report">report</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="../../whatsnew.html">What’s New</a></li>
 </ul>
 
@@ -183,97 +202,83 @@
     margin-top: -19px;
 }
 
-/* nice headers on first paragraph of info/warning boxes */
-.admonition .first {
-    margin: -12px;
-    padding: 6px 12px;
-    margin-bottom: 12px;
-    color: #fff;
-    line-height: 1;
-    display: block;
-}
-.admonition.warning .first {
-    background: #f0b37e;
-}
-.admonition.note .first {
-    background: #6ab0de;
-}
 .admonition > p:before {
     margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
 }
 </style>
 <div class="section" id="pvrow-pvrow">
 <h1>pvrow.PVRow<a class="headerlink" href="#pvrow-pvrow" title="Permalink to this headline">¶</a></h1>
 <dl class="class">
 <dt id="pvrow.PVRow">
-<em class="property">class </em><code class="descclassname">pvrow.</code><code class="descname">PVRow</code><span class="sig-paren">(</span><em>front_side=&lt;pvrow.PVRowSide object&gt;</em>, <em>back_side=&lt;pvrow.PVRowSide object&gt;</em>, <em>index=None</em>, <em>original_linestring=None</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pvrow.html#PVRow"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pvrow.PVRow" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">pvrow.</code><code class="sig-name descname">PVRow</code><span class="sig-paren">(</span><em class="sig-param">front_side=&lt;pvrow.PVRowSide object&gt;</em>, <em class="sig-param">back_side=&lt;pvrow.PVRowSide object&gt;</em>, <em class="sig-param">index=None</em>, <em class="sig-param">original_linestring=None</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pvrow.html#PVRow"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pvrow.PVRow" title="Permalink to this definition">¶</a></dt>
 <dd><p>A PV row is made of two PV row sides, a front and a back one.</p>
 <dl class="method">
 <dt id="pvrow.PVRow.__init__">
-<code class="descname">__init__</code><span class="sig-paren">(</span><em>front_side=&lt;pvrow.PVRowSide object&gt;</em>, <em>back_side=&lt;pvrow.PVRowSide object&gt;</em>, <em>index=None</em>, <em>original_linestring=None</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pvrow.html#PVRow.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pvrow.PVRow.__init__" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param">front_side=&lt;pvrow.PVRowSide object&gt;</em>, <em class="sig-param">back_side=&lt;pvrow.PVRowSide object&gt;</em>, <em class="sig-param">index=None</em>, <em class="sig-param">original_linestring=None</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pvrow.html#PVRow.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pvrow.PVRow.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><p>Initialize PV row.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>front_side</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">PVRowSide</span></code>, optional) – Front side of the PV Row (Default = Empty PVRowSide)</li>
-<li><strong>back_side</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">PVRowSide</span></code>, optional) – Back side of the PV Row (Default = Empty PVRowSide)</li>
-<li><strong>index</strong> (<em>int</em><em>, </em><em>optional</em>) – Index of PV row (Default = None)</li>
-<li><strong>original_linestring</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">shapely.geometry.LineString</span></code>, optional) – Full continuous linestring that the PV row will be made of
-(Default = None)</li>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>front_side</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">PVRowSide</span></code>, optional) – Front side of the PV Row (Default = Empty PVRowSide)</p></li>
+<li><p><strong>back_side</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">PVRowSide</span></code>, optional) – Back side of the PV Row (Default = Empty PVRowSide)</p></li>
+<li><p><strong>index</strong> (<em>int</em><em>, </em><em>optional</em>) – Index of PV row (Default = None)</p></li>
+<li><p><strong>original_linestring</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">shapely.geometry.LineString</span></code>, optional) – Full continuous linestring that the PV row will be made of
+(Default = None)</p></li>
 </ul>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+</dl>
 </dd></dl>
 
 <p class="rubric">Methods</p>
-<table border="1" class="longtable docutils">
+<table class="longtable docutils align-default">
 <colgroup>
-<col width="10%" />
-<col width="90%" />
+<col style="width: 10%" />
+<col style="width: 90%" />
 </colgroup>
-<tbody valign="top">
-<tr class="row-odd"><td><a class="reference internal" href="#pvrow.PVRow.__init__" title="pvrow.PVRow.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>([front_side,&nbsp;back_side,&nbsp;index,&nbsp;…])</td>
-<td>Initialize PV row.</td>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pvrow.PVRow.__init__" title="pvrow.PVRow.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>([front_side, back_side, index, …])</p></td>
+<td><p>Initialize PV row.</p></td>
 </tr>
-<tr class="row-even"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">from_center_tilt_width</span></code>(xy_center,&nbsp;tilt,&nbsp;…)</td>
-<td>Create a PV row using mainly the coordinates of the line center, a tilt angle, and its length.</td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">from_center_tilt_width</span></code>(xy_center, tilt, …)</p></td>
+<td><p>Create a PV row using mainly the coordinates of the line center, a tilt angle, and its length.</p></td>
 </tr>
-<tr class="row-odd"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">from_linestring_coords</span></code>(coords[,&nbsp;shaded,&nbsp;…])</td>
-<td>Create a PV row with a single PV surface and using linestring coordinates.</td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">from_linestring_coords</span></code>(coords[, shaded, …])</p></td>
+<td><p>Create a PV row with a single PV surface and using linestring coordinates.</p></td>
 </tr>
-<tr class="row-even"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot</span></code>(ax[,&nbsp;color_shaded,&nbsp;color_illum,&nbsp;with_index])</td>
-<td>Plot the surfaces of the PV Row.</td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot</span></code>(ax[, color_shaded, color_illum, with_index])</p></td>
+<td><p>Plot the surfaces of the PV Row.</p></td>
 </tr>
-<tr class="row-odd"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_params</span></code>(new_dict)</td>
-<td>Update surface parameters for both front and back sides.</td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_params</span></code>(new_dict)</p></td>
+<td><p>Update surface parameters for both front and back sides.</p></td>
 </tr>
 </tbody>
 </table>
 <p class="rubric">Attributes</p>
-<table border="1" class="longtable docutils">
+<table class="longtable docutils align-default">
 <colgroup>
-<col width="10%" />
-<col width="90%" />
+<col style="width: 10%" />
+<col style="width: 90%" />
 </colgroup>
-<tbody valign="top">
-<tr class="row-odd"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">all_surfaces</span></code></td>
-<td>List of all the surfaces in the PV row.</td>
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">all_surfaces</span></code></p></td>
+<td><p>List of all the surfaces in the PV row.</p></td>
 </tr>
-<tr class="row-even"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">boundary</span></code></td>
-<td>Boundaries of the PV Row’s orginal linestring.</td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">boundary</span></code></p></td>
+<td><p>Boundaries of the PV Row’s orginal linestring.</p></td>
 </tr>
-<tr class="row-odd"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">highest_point</span></code></td>
-<td>Highest point of the PV Row.</td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">highest_point</span></code></p></td>
+<td><p>Highest point of the PV Row.</p></td>
 </tr>
-<tr class="row-even"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">lowest_point</span></code></td>
-<td>Lowest point of the PV Row.</td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">lowest_point</span></code></p></td>
+<td><p>Lowest point of the PV Row.</p></td>
 </tr>
-<tr class="row-odd"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">surface_indices</span></code></td>
-<td>List of all surface indices in the PV Row.</td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">surface_indices</span></code></p></td>
+<td><p>List of all surface indices in the PV Row.</p></td>
 </tr>
 </tbody>
 </table>

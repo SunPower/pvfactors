@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>pvrow &mdash; pvfactors 1.0.1+0.gb9e42db.dirty documentation</title>
+  <title>pvrow &mdash; pvfactors 1.1.0 documentation</title>
   
 
   
@@ -28,6 +28,7 @@
         <script type="text/javascript" src="../_static/doctools.js"></script>
         <script type="text/javascript" src="../_static/language_data.js"></script>
         <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
     
     <script type="text/javascript" src="../_static/js/theme.js"></script>
 
@@ -65,7 +66,7 @@
             
             
               <div class="version">
-                1.0.1
+                1.1.0
               </div>
             
           
@@ -163,7 +164,7 @@
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">pvfactors.config</span> <span class="k">import</span> <span class="n">COLOR_DIC</span>
 <span class="kn">from</span> <span class="nn">pvfactors.geometry.base</span> <span class="k">import</span> \
-    <span class="n">BaseSide</span><span class="p">,</span> <span class="n">coords_from_center_tilt_length</span>
+    <span class="n">BaseSide</span><span class="p">,</span> <span class="n">_coords_from_center_tilt_length</span>
 <span class="kn">from</span> <span class="nn">shapely.geometry</span> <span class="k">import</span> <span class="n">GeometryCollection</span><span class="p">,</span> <span class="n">LineString</span>
 
 
@@ -295,8 +296,8 @@
 <span class="sd">        -------</span>
 <span class="sd">        :py:class:`~pvfactors.geometry.pvrow.PVRow` object</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">coords</span> <span class="o">=</span> <span class="n">coords_from_center_tilt_length</span><span class="p">(</span><span class="n">xy_center</span><span class="p">,</span> <span class="n">tilt</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span>
-                                                <span class="n">surface_azimuth</span><span class="p">,</span> <span class="n">axis_azimuth</span><span class="p">)</span>
+        <span class="n">coords</span> <span class="o">=</span> <span class="n">_coords_from_center_tilt_length</span><span class="p">(</span><span class="n">xy_center</span><span class="p">,</span> <span class="n">tilt</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span>
+                                                 <span class="n">surface_azimuth</span><span class="p">,</span> <span class="n">axis_azimuth</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">from_linestring_coords</span><span class="p">(</span><span class="n">coords</span><span class="p">,</span> <span class="n">shaded</span><span class="o">=</span><span class="n">shaded</span><span class="p">,</span>
                                           <span class="n">normal_vector</span><span class="o">=</span><span class="n">normal_vector</span><span class="p">,</span>
                                           <span class="n">index</span><span class="o">=</span><span class="n">index</span><span class="p">,</span> <span class="n">cut</span><span class="o">=</span><span class="n">cut</span><span class="p">,</span>

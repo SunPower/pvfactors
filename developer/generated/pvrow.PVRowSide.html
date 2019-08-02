@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>pvrow.PVRowSide &mdash; pvfactors 1.0.1+0.gb9e42db.dirty documentation</title>
+  <title>pvrow.PVRowSide &mdash; pvfactors 1.1.0 documentation</title>
   
 
   
@@ -28,6 +28,7 @@
         <script type="text/javascript" src="../../_static/doctools.js"></script>
         <script type="text/javascript" src="../../_static/language_data.js"></script>
         <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
     
     <script type="text/javascript" src="../../_static/js/theme.js"></script>
 
@@ -67,7 +68,7 @@
             
             
               <div class="version">
-                1.0.1
+                1.1.0
               </div>
             
           
@@ -91,11 +92,29 @@
               
             
             
-              <ul>
+              <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../../installation/index.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../tutorials/index.html">Tutorials</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../theory/index.html">Theory</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../index.html">Developer API</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">Developer API</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../index.html#geometry">geometry</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../index.html#module-base">base</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="../index.html#module-pvrow">pvrow</a><ul class="current">
+<li class="toctree-l4 current"><a class="current reference internal" href="#">pvrow.PVRowSide</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pvrow.PVRow.html">pvrow.PVRow</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../index.html#module-pvground">pvground</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../index.html#module-pvarray">pvarray</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#viewfactors">viewfactors</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#irradiance">irradiance</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#module-engine">engine</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#module-run">run</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#module-report">report</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="../../whatsnew.html">What’s New</a></li>
 </ul>
 
@@ -183,30 +202,20 @@
     margin-top: -19px;
 }
 
-/* nice headers on first paragraph of info/warning boxes */
-.admonition .first {
-    margin: -12px;
-    padding: 6px 12px;
-    margin-bottom: 12px;
-    color: #fff;
-    line-height: 1;
-    display: block;
-}
-.admonition.warning .first {
-    background: #f0b37e;
-}
-.admonition.note .first {
-    background: #6ab0de;
-}
 .admonition > p:before {
     margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
 }
 </style>
 <div class="section" id="pvrow-pvrowside">
 <h1>pvrow.PVRowSide<a class="headerlink" href="#pvrow-pvrowside" title="Permalink to this headline">¶</a></h1>
 <dl class="class">
 <dt id="pvrow.PVRowSide">
-<em class="property">class </em><code class="descclassname">pvrow.</code><code class="descname">PVRowSide</code><span class="sig-paren">(</span><em>list_segments=[]</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pvrow.html#PVRowSide"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pvrow.PVRowSide" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">pvrow.</code><code class="sig-name descname">PVRowSide</code><span class="sig-paren">(</span><em class="sig-param">list_segments=[]</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pvrow.html#PVRowSide"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pvrow.PVRowSide" title="Permalink to this definition">¶</a></dt>
 <dd><p>A PV row side represents the whole surface of one side of a PV row.
 At its core it will contain a fixed number of
 <code class="xref py py-class docutils literal notranslate"><span class="pre">PVSegment</span></code> objects that will together
@@ -214,38 +223,35 @@ constitue one side of a PV row: a PV row side can also be
 “discretized” into multiple segments</p>
 <dl class="method">
 <dt id="pvrow.PVRowSide.__init__">
-<code class="descname">__init__</code><span class="sig-paren">(</span><em>list_segments=[]</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pvrow.html#PVRowSide.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pvrow.PVRowSide.__init__" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param">list_segments=[]</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pvrow.html#PVRowSide.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pvrow.PVRowSide.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><p>Initialize PVRowSide using its base class
 <code class="xref py py-class docutils literal notranslate"><span class="pre">pvfactors.geometry.base.BaseSide</span></code></p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>list_segments</strong> (list of <code class="xref py py-class docutils literal notranslate"><span class="pre">PVSegment</span></code>) – List of PV segments for PV row side.</td>
-</tr>
-</tbody>
-</table>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>list_segments</strong> (list of <code class="xref py py-class docutils literal notranslate"><span class="pre">PVSegment</span></code>) – List of PV segments for PV row side.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <p class="rubric">Methods</p>
-<table border="1" class="longtable docutils">
+<table class="longtable docutils align-default">
 <colgroup>
-<col width="10%" />
-<col width="90%" />
+<col style="width: 10%" />
+<col style="width: 90%" />
 </colgroup>
-<tbody valign="top">
-<tr class="row-odd"><td><a class="reference internal" href="#pvrow.PVRowSide.__init__" title="pvrow.PVRowSide.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>([list_segments])</td>
-<td>Initialize PVRowSide using its base class <code class="xref py py-class docutils literal notranslate"><span class="pre">pvfactors.geometry.base.BaseSide</span></code></td>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pvrow.PVRowSide.__init__" title="pvrow.PVRowSide.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>([list_segments])</p></td>
+<td><p>Initialize PVRowSide using its base class <code class="xref py py-class docutils literal notranslate"><span class="pre">pvfactors.geometry.base.BaseSide</span></code></p></td>
 </tr>
 </tbody>
 </table>
 <p class="rubric">Attributes</p>
-<table border="1" class="longtable docutils">
+<table class="longtable docutils align-default">
 <colgroup>
-<col width="10%" />
-<col width="90%" />
+<col style="width: 10%" />
+<col style="width: 90%" />
 </colgroup>
-<tbody valign="top">
+<tbody>
 </tbody>
 </table>
 </dd></dl>

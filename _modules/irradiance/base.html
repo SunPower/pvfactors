@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>irradiance.base &mdash; pvfactors 1.0.1+0.gb9e42db.dirty documentation</title>
+  <title>irradiance.base &mdash; pvfactors 1.1.0 documentation</title>
   
 
   
@@ -28,6 +28,7 @@
         <script type="text/javascript" src="../../_static/doctools.js"></script>
         <script type="text/javascript" src="../../_static/language_data.js"></script>
         <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
     
     <script type="text/javascript" src="../../_static/js/theme.js"></script>
 
@@ -65,7 +66,7 @@
             
             
               <div class="version">
-                1.0.1
+                1.1.0
               </div>
             
           
@@ -180,10 +181,10 @@
         <span class="sd">&quot;&quot;&quot;Not implemented&quot;&quot;&quot;</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span>
 
-    <span class="k">def</span> <span class="nf">get_irradiance_invrho_vector</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pvarray</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">get_modeling_vectors</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pvarray</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Get vector of summed up irradiance values from a PV array, as well</span>
 <span class="sd">        as the inverse reflectivity values (the latter need to be named</span>
-<span class="sd">        &quot;inv_rho&quot;).</span>
+<span class="sd">        &quot;inv_rho&quot;), and the total perez irradiance values.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -193,23 +194,32 @@
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        irradiance_vec : list</span>
-<span class="sd">            List of summed up irradiance values</span>
+<span class="sd">            List of summed up non-reflective irradiance values for all surfaces</span>
+<span class="sd">            and sky</span>
+<span class="sd">        rho_vec : list</span>
+<span class="sd">            List of reflectivity values for all surfaces and sky</span>
 <span class="sd">        invrho_vec : list</span>
-<span class="sd">            List of inverse reflectivity values</span>
-
+<span class="sd">            List of inverse reflectivity for all surfaces and sky</span>
+<span class="sd">        total_perez_vec : list</span>
+<span class="sd">            List of total perez transposed irradiance values for all surfaces</span>
+<span class="sd">            and sky</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1"># TODO: this can probably be speeded up</span>
         <span class="n">irradiance_vec</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">rho_vec</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">invrho_vec</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">surface</span> <span class="ow">in</span> <span class="n">pvarray</span><span class="o">.</span><span class="n">dict_surfaces</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">total_perez_vec</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">surface</span> <span class="ow">in</span> <span class="n">pvarray</span><span class="o">.</span><span class="n">dict_surfaces</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="n">value</span> <span class="o">=</span> <span class="mf">0.</span>
             <span class="k">for</span> <span class="n">component</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">irradiance_comp</span><span class="p">:</span>
                 <span class="n">value</span> <span class="o">+=</span> <span class="n">surface</span><span class="o">.</span><span class="n">get_param</span><span class="p">(</span><span class="n">component</span><span class="p">)</span>
             <span class="n">irradiance_vec</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
             <span class="n">invrho_vec</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">surface</span><span class="o">.</span><span class="n">get_param</span><span class="p">(</span><span class="s1">&#39;inv_rho&#39;</span><span class="p">))</span>
+            <span class="n">rho_vec</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">surface</span><span class="o">.</span><span class="n">get_param</span><span class="p">(</span><span class="s1">&#39;rho&#39;</span><span class="p">))</span>
+            <span class="n">total_perez_vec</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">surface</span><span class="o">.</span><span class="n">get_param</span><span class="p">(</span><span class="s1">&#39;total_perez&#39;</span><span class="p">))</span>
 
-        <span class="k">return</span> <span class="n">irradiance_vec</span><span class="p">,</span> <span class="n">invrho_vec</span></div>
+        <span class="k">return</span> <span class="n">irradiance_vec</span><span class="p">,</span> <span class="n">rho_vec</span><span class="p">,</span> <span class="n">invrho_vec</span><span class="p">,</span> <span class="n">total_perez_vec</span></div>
 </pre></div>
 
            </div>

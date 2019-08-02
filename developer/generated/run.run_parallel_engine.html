@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>run.run_parallel_engine &mdash; pvfactors 1.0.1+0.gb9e42db.dirty documentation</title>
+  <title>run.run_parallel_engine &mdash; pvfactors 1.1.0 documentation</title>
   
 
   
@@ -28,6 +28,7 @@
         <script type="text/javascript" src="../../_static/doctools.js"></script>
         <script type="text/javascript" src="../../_static/language_data.js"></script>
         <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
     
     <script type="text/javascript" src="../../_static/js/theme.js"></script>
 
@@ -67,7 +68,7 @@
             
             
               <div class="version">
-                1.0.1
+                1.1.0
               </div>
             
           
@@ -183,73 +184,64 @@
     margin-top: -19px;
 }
 
-/* nice headers on first paragraph of info/warning boxes */
-.admonition .first {
-    margin: -12px;
-    padding: 6px 12px;
-    margin-bottom: 12px;
-    color: #fff;
-    line-height: 1;
-    display: block;
-}
-.admonition.warning .first {
-    background: #f0b37e;
-}
-.admonition.note .first {
-    background: #6ab0de;
-}
 .admonition > p:before {
     margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
 }
 </style>
 <div class="section" id="run-run-parallel-engine">
 <h1>run.run_parallel_engine<a class="headerlink" href="#run-run-parallel-engine" title="Permalink to this headline">¶</a></h1>
 <dl class="function">
 <dt id="run.run_parallel_engine">
-<code class="descclassname">run.</code><code class="descname">run_parallel_engine</code><span class="sig-paren">(</span><em>report_builder</em>, <em>pvarray_parameters</em>, <em>timestamps</em>, <em>dni</em>, <em>dhi</em>, <em>solar_zenith</em>, <em>solar_azimuth</em>, <em>surface_tilt</em>, <em>surface_azimuth</em>, <em>albedo</em>, <em>cls_pvarray=&lt;class 'pvfactors.geometry.pvarray.OrderedPVArray'&gt;</em>, <em>cls_engine=&lt;class 'pvfactors.engine.PVEngine'&gt;</em>, <em>cls_irradiance=&lt;class 'pvfactors.irradiance.models.HybridPerezOrdered'&gt;</em>, <em>cls_vf=&lt;class 'pvfactors.viewfactors.calculator.VFCalculator'&gt;</em>, <em>n_processes=2</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/run.html#run_parallel_engine"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#run.run_parallel_engine" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">run.</code><code class="sig-name descname">run_parallel_engine</code><span class="sig-paren">(</span><em class="sig-param">report_builder</em>, <em class="sig-param">pvarray_parameters</em>, <em class="sig-param">timestamps</em>, <em class="sig-param">dni</em>, <em class="sig-param">dhi</em>, <em class="sig-param">solar_zenith</em>, <em class="sig-param">solar_azimuth</em>, <em class="sig-param">surface_tilt</em>, <em class="sig-param">surface_azimuth</em>, <em class="sig-param">albedo</em>, <em class="sig-param">cls_pvarray=&lt;class 'pvfactors.geometry.pvarray.OrderedPVArray'&gt;</em>, <em class="sig-param">cls_engine=&lt;class 'pvfactors.engine.PVEngine'&gt;</em>, <em class="sig-param">cls_irradiance=&lt;class 'pvfactors.irradiance.models.HybridPerezOrdered'&gt;</em>, <em class="sig-param">cls_vf=&lt;class 'pvfactors.viewfactors.calculator.VFCalculator'&gt;</em>, <em class="sig-param">fast_mode_pvrow_index=None</em>, <em class="sig-param">irradiance_model_params={}</em>, <em class="sig-param">n_processes=2</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/run.html#run_parallel_engine"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#run.run_parallel_engine" title="Permalink to this definition">¶</a></dt>
 <dd><p>Run timeseries simulation using multiprocessing. Here, instead of a
 function that will build the report, the users will need to pass a class
 (or an object).</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>report_builder</strong> (<em>class</em><em> or </em><em>object</em>) – Class or object that will build and merge the reports. It <strong>must</strong>
-have a <code class="docutils literal notranslate"><span class="pre">build()</span></code> and a <code class="docutils literal notranslate"><span class="pre">merge()</span></code> method that perform the tasks</li>
-<li><strong>pvarray_parameters</strong> (<em>dict</em>) – The parameters defining the PV array</li>
-<li><strong>timestamps</strong> (<em>array-like</em>) – List of timestamps of the simulation.</li>
-<li><strong>dni</strong> (<em>array-like</em>) – Direct normal irradiance values [W/m2]</li>
-<li><strong>dhi</strong> (<em>array-like</em>) – Diffuse horizontal irradiance values [W/m2]</li>
-<li><strong>solar_zenith</strong> (<em>array-like</em>) – Solar zenith angles [deg]</li>
-<li><strong>solar_azimuth</strong> (<em>array-like</em>) – Solar azimuth angles [deg]</li>
-<li><strong>surface_tilt</strong> (<em>array-like</em>) – Surface tilt angles, from 0 to 180 [deg]</li>
-<li><strong>surface_azimuth</strong> (<em>array-like</em>) – Surface azimuth angles [deg]</li>
-<li><strong>albedo</strong> (<em>array-like</em>) – Albedo values (or ground reflectivity)</li>
-<li><strong>cls_pvarray</strong> (<em>class of PV array</em><em>, </em><em>optional</em>) – Class that will be used to build the PV array
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>report_builder</strong> (<em>class</em><em> or </em><em>object</em>) – Class or object that will build and merge the reports. It <strong>must</strong>
+have a <code class="docutils literal notranslate"><span class="pre">build()</span></code> and a <code class="docutils literal notranslate"><span class="pre">merge()</span></code> method that perform the tasks</p></li>
+<li><p><strong>pvarray_parameters</strong> (<em>dict</em>) – The parameters defining the PV array</p></li>
+<li><p><strong>timestamps</strong> (<em>array-like</em>) – List of timestamps of the simulation.</p></li>
+<li><p><strong>dni</strong> (<em>array-like</em>) – Direct normal irradiance values [W/m2]</p></li>
+<li><p><strong>dhi</strong> (<em>array-like</em>) – Diffuse horizontal irradiance values [W/m2]</p></li>
+<li><p><strong>solar_zenith</strong> (<em>array-like</em>) – Solar zenith angles [deg]</p></li>
+<li><p><strong>solar_azimuth</strong> (<em>array-like</em>) – Solar azimuth angles [deg]</p></li>
+<li><p><strong>surface_tilt</strong> (<em>array-like</em>) – Surface tilt angles, from 0 to 180 [deg]</p></li>
+<li><p><strong>surface_azimuth</strong> (<em>array-like</em>) – Surface azimuth angles [deg]</p></li>
+<li><p><strong>albedo</strong> (<em>array-like</em>) – Albedo values (or ground reflectivity)</p></li>
+<li><p><strong>cls_pvarray</strong> (<em>class of PV array</em><em>, </em><em>optional</em>) – Class that will be used to build the PV array
 (Default =
-<code class="xref py py-class docutils literal notranslate"><span class="pre">OrderedPVArray</span></code> class)</li>
-<li><strong>cls_engine</strong> (<em>class of PV engine</em><em>, </em><em>optional</em>) – Class of the engine to use to run the simulations (Default =
-<code class="xref py py-class docutils literal notranslate"><span class="pre">PVEngine</span></code> class)</li>
-<li><strong>cls_irradiance</strong> (<em>class of irradiance model</em><em>, </em><em>optional</em>) – The irradiance model that will be applied to the PV array
+<code class="xref py py-class docutils literal notranslate"><span class="pre">OrderedPVArray</span></code> class)</p></li>
+<li><p><strong>cls_engine</strong> (<em>class of PV engine</em><em>, </em><em>optional</em>) – Class of the engine to use to run the simulations (Default =
+<code class="xref py py-class docutils literal notranslate"><span class="pre">PVEngine</span></code> class)</p></li>
+<li><p><strong>cls_irradiance</strong> (<em>class of irradiance model</em><em>, </em><em>optional</em>) – The irradiance model that will be applied to the PV array
 (Default =
-<code class="xref py py-class docutils literal notranslate"><span class="pre">HybridPerezOrdered</span></code> class)</li>
-<li><strong>cls_vf</strong> (<em>class of VF calculator</em><em>, </em><em>optional</em>) – Calculator that will be used to calculate the view factor matrices
+<code class="xref py py-class docutils literal notranslate"><span class="pre">HybridPerezOrdered</span></code> class)</p></li>
+<li><p><strong>cls_vf</strong> (<em>class of VF calculator</em><em>, </em><em>optional</em>) – Calculator that will be used to calculate the view factor matrices
 (Default =
-<code class="xref py py-class docutils literal notranslate"><span class="pre">VFCalculator</span></code> class)</li>
-<li><strong>n_processes</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of parallel processes to run for the calculation (Default = 2)</li>
+<code class="xref py py-class docutils literal notranslate"><span class="pre">VFCalculator</span></code> class)</p></li>
+<li><p><strong>fast_mode_pvrow_index</strong> (<em>int</em><em>, </em><em>optional</em>) – If a valid pvrow index is passed, then the PVEngine fast mode
+will be activated and the engine calculation will be done only
+for the back surface of the selected pvrow (Default = None)</p></li>
+<li><p><strong>irradiance_model_params</strong> (<em>dict</em><em>, </em><em>optional</em>) – Dictionary of parameters that will be passed to the irradiance model
+class as kwargs at instantiation (Default = {})</p></li>
+<li><p><strong>n_processes</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of parallel processes to run for the calculation (Default = 2)</p></li>
 </ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Saved results from the simulation, as specified by user’s report
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Saved results from the simulation, as specified by user’s report
 class (or object)</p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">report</p>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>report</p>
+</dd>
+</dl>
 </dd></dl>
 
 </div>

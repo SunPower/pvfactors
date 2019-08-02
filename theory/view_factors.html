@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>View Factors &mdash; pvfactors 1.0.1+0.gb9e42db.dirty documentation</title>
+  <title>View Factors &mdash; pvfactors 1.1.0 documentation</title>
   
 
   
@@ -28,6 +28,7 @@
         <script type="text/javascript" src="../_static/doctools.js"></script>
         <script type="text/javascript" src="../_static/language_data.js"></script>
         <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
     
     <script type="text/javascript" src="../_static/js/theme.js"></script>
 
@@ -67,7 +68,7 @@
             
             
               <div class="version">
-                1.0.1
+                1.1.0
               </div>
             
           
@@ -192,23 +193,13 @@
     margin-top: -19px;
 }
 
-/* nice headers on first paragraph of info/warning boxes */
-.admonition .first {
-    margin: -12px;
-    padding: 6px 12px;
-    margin-bottom: 12px;
-    color: #fff;
-    line-height: 1;
-    display: block;
-}
-.admonition.warning .first {
-    background: #f0b37e;
-}
-.admonition.note .first {
-    background: #6ab0de;
-}
 .admonition > p:before {
     margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
 }
 </style>
 <div class="section" id="view-factors">
@@ -264,10 +255,10 @@
 <div class="line">Here are links describing some view factors relevant to PV array geometries.</div>
 </div>
 <ul class="simple">
-<li>View factor of a wedge: <a class="reference external" href="http://www.thermalradiation.net/sectionc/C-5.html">http://www.thermalradiation.net/sectionc/C-5.html</a></li>
-<li>View factor of parallel planes: <a class="reference external" href="http://www.thermalradiation.net/sectionc/C-2a.htm">http://www.thermalradiation.net/sectionc/C-2a.htm</a></li>
-<li>View factor of angled planes: <a class="reference external" href="http://www.thermalradiation.net/sectionc/C-5a.html">http://www.thermalradiation.net/sectionc/C-5a.html</a></li>
-<li>The Hottel method is also widely used in the model</li>
+<li><p>View factor of a wedge: <a class="reference external" href="http://www.thermalradiation.net/sectionc/C-5.html">http://www.thermalradiation.net/sectionc/C-5.html</a></p></li>
+<li><p>View factor of parallel planes: <a class="reference external" href="http://www.thermalradiation.net/sectionc/C-2a.htm">http://www.thermalradiation.net/sectionc/C-2a.htm</a></p></li>
+<li><p>View factor of angled planes: <a class="reference external" href="http://www.thermalradiation.net/sectionc/C-5a.html">http://www.thermalradiation.net/sectionc/C-5a.html</a></p></li>
+<li><p>The Hottel method is also widely used in the model</p></li>
 </ul>
 </div>
 </div>

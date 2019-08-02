@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>engine.PVEngine &mdash; pvfactors 1.0.1+0.gb9e42db.dirty documentation</title>
+  <title>engine.PVEngine &mdash; pvfactors 1.1.0 documentation</title>
   
 
   
@@ -28,6 +28,7 @@
         <script type="text/javascript" src="../../_static/doctools.js"></script>
         <script type="text/javascript" src="../../_static/language_data.js"></script>
         <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
     
     <script type="text/javascript" src="../../_static/js/theme.js"></script>
 
@@ -67,7 +68,7 @@
             
             
               <div class="version">
-                1.0.1
+                1.1.0
               </div>
             
           
@@ -91,11 +92,22 @@
               
             
             
-              <ul>
+              <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../../installation/index.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../tutorials/index.html">Tutorials</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../theory/index.html">Theory</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../index.html">Developer API</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">Developer API</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../index.html#geometry">geometry</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#viewfactors">viewfactors</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#irradiance">irradiance</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../index.html#module-engine">engine</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">engine.PVEngine</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#module-run">run</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#module-report">report</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="../../whatsnew.html">What’s New</a></li>
 </ul>
 
@@ -183,77 +195,64 @@
     margin-top: -19px;
 }
 
-/* nice headers on first paragraph of info/warning boxes */
-.admonition .first {
-    margin: -12px;
-    padding: 6px 12px;
-    margin-bottom: 12px;
-    color: #fff;
-    line-height: 1;
-    display: block;
-}
-.admonition.warning .first {
-    background: #f0b37e;
-}
-.admonition.note .first {
-    background: #6ab0de;
-}
 .admonition > p:before {
     margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
 }
 </style>
 <div class="section" id="engine-pvengine">
 <h1>engine.PVEngine<a class="headerlink" href="#engine-pvengine" title="Permalink to this headline">¶</a></h1>
 <dl class="class">
 <dt id="engine.PVEngine">
-<em class="property">class </em><code class="descclassname">engine.</code><code class="descname">PVEngine</code><span class="sig-paren">(</span><em>params</em>, <em>vf_calculator=&lt;pvfactors.viewfactors.calculator.VFCalculator object&gt;</em>, <em>irradiance_model=&lt;pvfactors.irradiance.models.HybridPerezOrdered object&gt;</em>, <em>cls_pvarray=&lt;class 'pvfactors.geometry.pvarray.OrderedPVArray'&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/engine.html#PVEngine"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#engine.PVEngine" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">engine.</code><code class="sig-name descname">PVEngine</code><span class="sig-paren">(</span><em class="sig-param">pvarray</em>, <em class="sig-param">vf_calculator=&lt;pvfactors.viewfactors.calculator.VFCalculator object&gt;</em>, <em class="sig-param">irradiance_model=&lt;pvfactors.irradiance.models.HybridPerezOrdered object&gt;</em>, <em class="sig-param">fast_mode_pvrow_index=None</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/engine.html#PVEngine"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#engine.PVEngine" title="Permalink to this definition">¶</a></dt>
 <dd><p>Class putting all of the calculations together, and able to run it
 as a timeseries when the pvarrays can be build from dictionary parameters</p>
 <dl class="method">
 <dt id="engine.PVEngine.__init__">
-<code class="descname">__init__</code><span class="sig-paren">(</span><em>params</em>, <em>vf_calculator=&lt;pvfactors.viewfactors.calculator.VFCalculator object&gt;</em>, <em>irradiance_model=&lt;pvfactors.irradiance.models.HybridPerezOrdered object&gt;</em>, <em>cls_pvarray=&lt;class 'pvfactors.geometry.pvarray.OrderedPVArray'&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/engine.html#PVEngine.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#engine.PVEngine.__init__" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param">pvarray</em>, <em class="sig-param">vf_calculator=&lt;pvfactors.viewfactors.calculator.VFCalculator object&gt;</em>, <em class="sig-param">irradiance_model=&lt;pvfactors.irradiance.models.HybridPerezOrdered object&gt;</em>, <em class="sig-param">fast_mode_pvrow_index=None</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/engine.html#PVEngine.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#engine.PVEngine.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create pv engine class, and initialize timeseries parameters.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>params</strong> (<em>dict</em>) – The parameters defining the PV array</li>
-<li><strong>vf_calculator</strong> (<em>vf calculator object</em><em>, </em><em>optional</em>) – Calculator that will be used to calculate the view factor matrices
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>pvarray</strong> (<a class="reference internal" href="base.BasePVArray.html#base.BasePVArray" title="base.BasePVArray"><em>BasePVArray</em></a><em> (or </em><em>child</em><em>) </em><em>object</em>) – The initialized PV array object that will be used for calculations</p></li>
+<li><p><strong>vf_calculator</strong> (<em>vf calculator object</em><em>, </em><em>optional</em>) – Calculator that will be used to calculate the view factor matrices
 (Default =
-<code class="xref py py-class docutils literal notranslate"><span class="pre">VFCalculator</span></code> object)</li>
-<li><strong>irradiance_model</strong> (<em>irradiance model object</em><em>, </em><em>optional</em>) – The irradiance model that will be applied to the PV array
+<code class="xref py py-class docutils literal notranslate"><span class="pre">VFCalculator</span></code> object)</p></li>
+<li><p><strong>irradiance_model</strong> (<em>irradiance model object</em><em>, </em><em>optional</em>) – The irradiance model that will be applied to the PV array
 (Default =
 <code class="xref py py-class docutils literal notranslate"><span class="pre">HybridPerezOrdered</span></code>
-object)</li>
-<li><strong>cls_pvarray</strong> (<em>class of PV array</em><em>, </em><em>optional</em>) – Class that will be used to build the PV array
-(Default =
-<code class="xref py py-class docutils literal notranslate"><span class="pre">OrderedPVArray</span></code> class)</li>
+object)</p></li>
+<li><p><strong>fast_mode_pvrow_index</strong> (<em>int</em><em>, </em><em>optional</em>) – If a pvrow index is passed, then the PVEngine fast mode
+will be activated and the engine calculation will be done only
+for the back surface of the pvrow with the corresponding
+index (Default = None)</p></li>
 </ul>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+</dl>
 </dd></dl>
 
 <p class="rubric">Methods</p>
-<table border="1" class="longtable docutils">
+<table class="longtable docutils align-default">
 <colgroup>
-<col width="10%" />
-<col width="90%" />
+<col style="width: 10%" />
+<col style="width: 90%" />
 </colgroup>
-<tbody valign="top">
-<tr class="row-odd"><td><a class="reference internal" href="#engine.PVEngine.__init__" title="engine.PVEngine.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(params[,&nbsp;vf_calculator,&nbsp;…])</td>
-<td>Create pv engine class, and initialize timeseries parameters.</td>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#engine.PVEngine.__init__" title="engine.PVEngine.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(pvarray[, vf_calculator, …])</p></td>
+<td><p>Create pv engine class, and initialize timeseries parameters.</p></td>
 </tr>
-<tr class="row-even"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">fit</span></code>(timestamps,&nbsp;DNI,&nbsp;DHI,&nbsp;solar_zenith,&nbsp;…)</td>
-<td>Fit the timeseries data to the engine.</td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">fit</span></code>(timestamps, DNI, DHI, solar_zenith, …)</p></td>
+<td><p>Fit the timeseries data to the engine.</p></td>
 </tr>
-<tr class="row-odd"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">run_all_timesteps</span></code>([fn_build_report])</td>
-<td>Run all simulation timesteps and return a report that will be built by the function passed by the user.</td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">run_all_timesteps</span></code>([fn_build_report])</p></td>
+<td><p>Run all simulation timesteps and return a report that will be built by the function passed by the user.</p></td>
 </tr>
-<tr class="row-even"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">run_timestep</span></code>(idx)</td>
-<td>Run simulation for a single timestep index.</td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">run_timestep</span></code>(idx)</p></td>
+<td><p>Run simulation for a single timestep index.</p></td>
 </tr>
 </tbody>
 </table>

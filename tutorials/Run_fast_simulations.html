@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Run timeseries simulations in parallel &mdash; pvfactors 1.1.0 documentation</title>
+  <title>Run “fast” simulations with 8760 annual inputs &mdash; pvfactors 1.1.0 documentation</title>
   
 
   
@@ -40,8 +40,8 @@
   <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Run “fast” simulations with 8760 annual inputs" href="Run_fast_simulations.html" />
-    <link rel="prev" title="Run timeseries simulations" href="Run_timeseries_simulations.html" /> 
+    <link rel="next" title="Theory" href="../theory/index.html" />
+    <link rel="prev" title="Run timeseries simulations in parallel" href="Run_parallel_simulations.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -100,14 +100,18 @@
 <li class="toctree-l2"><a class="reference internal" href="Create_discretized_pvarray.html">Discretize PV row sides and indexing</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Calculate_view_factors.html">Calculate view factors</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Run_timeseries_simulations.html">Run timeseries simulations</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Run timeseries simulations in parallel</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#Get-timeseries-inputs">Get timeseries inputs</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#Prepare-PV-array-parameters">Prepare PV array parameters</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#Run-simulations-in-parallel-with-run_parallel_engine()">Run simulations in parallel with <code class="docutils literal notranslate"><span class="pre">run_parallel_engine()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#Building-a-report-for-parallel-mode">Building a report for parallel mode</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Run_parallel_simulations.html">Run timeseries simulations in parallel</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Run “fast” simulations with 8760 annual inputs</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#Overview-of-&quot;fast&quot;-mode">Overview of “fast” mode</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Running-fast-simulations-in-pvfactors">Running fast simulations in pvfactors</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#Get-timeseries-inputs">Get timeseries inputs</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#Prepare-PV-array-parameters">Prepare PV array parameters</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#Run-&quot;fast&quot;-simulations-in-parallel-with-run_parallel_engine()">Run “fast” simulations in parallel with <code class="docutils literal notranslate"><span class="pre">run_parallel_engine()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#Run-&quot;fast&quot;-simulations-with-the-PVEngine">Run “fast” simulations with the PVEngine</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="Run_fast_simulations.html">Run “fast” simulations with 8760 annual inputs</a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../theory/index.html">Theory</a></li>
@@ -160,14 +164,14 @@
         
           <li><a href="index.html">Tutorials</a> &raquo;</li>
         
-      <li>Run timeseries simulations in parallel</li>
+      <li>Run “fast” simulations with 8760 annual inputs</li>
     
     
       <li class="wy-breadcrumbs-aside">
         
             
             
-              <a href="https://github.com/SunPower/pvfactors/blob/tutorials/Run_parallel_simulations.ipynb" class="fa fa-github"> Edit on GitHub</a>
+              <a href="https://github.com/SunPower/pvfactors/blob/tutorials/Run_fast_simulations.ipynb" class="fa fa-github"> Edit on GitHub</a>
             
           
         
@@ -403,13 +407,14 @@ div.rendered_html tbody tr:hover {
     text-align: unset;
 }
 </style>
-<div class="section" id="Run-timeseries-simulations-in-parallel">
-<h1>Run timeseries simulations in parallel<a class="headerlink" href="#Run-timeseries-simulations-in-parallel" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="Run-&quot;fast&quot;-simulations-with-8760-annual-inputs">
+<h1>Run “fast” simulations with 8760 annual inputs<a class="headerlink" href="#Run-"fast"-simulations-with-8760-annual-inputs" title="Permalink to this headline">¶</a></h1>
 <p>In this section, we will learn how to:</p>
 <ul class="simple">
-<li><p>run timeseries simulations in parallel using the <code class="docutils literal notranslate"><span class="pre">run_parallel_engine()</span></code> function</p></li>
+<li><p>run timeseries simulations with “fast” mode and in parallel using the <code class="docutils literal notranslate"><span class="pre">run_parallel_engine()</span></code> function</p></li>
+<li><p>run timeseries simulations with “fast” mode and using the <code class="docutils literal notranslate"><span class="pre">PVEngine</span></code></p></li>
 </ul>
-<p>Note: for a better understanding, it might help to read the previous tutorial section on running timeseries simulations sequentially before going through the following</p>
+<p>Note: for a better understanding, it might help to read the previous tutorial sections on running timeseries / parallel simulations before going through the following</p>
 <p>Imports and settings</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
@@ -434,21 +439,29 @@ div.rendered_html tbody tr:hover {
 </pre></div>
 </div>
 </div>
+<div class="section" id="Overview-of-&quot;fast&quot;-mode">
+<h2>Overview of “fast” mode<a class="headerlink" href="#Overview-of-"fast"-mode" title="Permalink to this headline">¶</a></h2>
+<p>The fast mode simulation was implemented in pvfactors v1.0.2. It relies on a mathematical simplification (see Theory section of the documentation) of the problem that assumes that we already know the irradiance incident on all front PV row surfaces and ground surfaces thanks to the Perez model. In this mode, we therefore only calculate view factors from PV row back surfaces to the other ones (therefore decreasing the number of view factors to calculate), and we do not need to solve a linear
+system of equations anymore for “ordered” PV arrays since the back surfaces don’t see each other.</p>
+<p>This is an approximation compared to the “full” mode, since we’re not calculating the impact of the multiple reflections on the PV array surfaces. But the initial results show that it still provides a very reasonable estimate of back surface incident irradiance values.</p>
+</div>
+<div class="section" id="Running-fast-simulations-in-pvfactors">
+<h2>Running fast simulations in pvfactors<a class="headerlink" href="#Running-fast-simulations-in-pvfactors" title="Permalink to this headline">¶</a></h2>
 <div class="section" id="Get-timeseries-inputs">
-<h2>Get timeseries inputs<a class="headerlink" href="#Get-timeseries-inputs" title="Permalink to this headline">¶</a></h2>
+<h3>Get timeseries inputs<a class="headerlink" href="#Get-timeseries-inputs" title="Permalink to this headline">¶</a></h3>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython2 notranslate"><div class="highlight"><pre>
-<span></span><span class="k">def</span> <span class="nf">export_data</span><span class="p">(</span><span class="n">fp</span><span class="p">):</span>
+<span></span><span class="k">def</span> <span class="nf">import_data</span><span class="p">(</span><span class="n">fp</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Import 8760 data to run pvfactors simulation&quot;&quot;&quot;</span>
     <span class="n">tz</span> <span class="o">=</span> <span class="s1">&#39;US/Arizona&#39;</span>
     <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">fp</span><span class="p">,</span> <span class="n">index_col</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
     <span class="n">df</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DatetimeIndex</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="p">)</span><span class="o">.</span><span class="n">tz_convert</span><span class="p">(</span><span class="n">tz</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">df</span>
 
-<span class="n">df</span> <span class="o">=</span> <span class="n">export_data</span><span class="p">(</span><span class="n">filepath</span><span class="p">)</span>
-<span class="n">df_inputs</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:</span><span class="mi">48</span><span class="p">,</span> <span class="p">:]</span>
+<span class="n">df_inputs</span> <span class="o">=</span> <span class="n">import_data</span><span class="p">(</span><span class="n">filepath</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -470,7 +483,7 @@ div.rendered_html tbody tr:hover {
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/tutorials_Run_parallel_simulations_6_0.png" src="../_images/tutorials_Run_parallel_simulations_6_0.png" />
+<img alt="../_images/tutorials_Run_fast_simulations_9_0.png" src="../_images/tutorials_Run_fast_simulations_9_0.png" />
 </div>
 </div>
 <div class="nbinput nblast docutils container">
@@ -485,7 +498,7 @@ div.rendered_html tbody tr:hover {
 </div>
 </div>
 <div class="section" id="Prepare-PV-array-parameters">
-<h2>Prepare PV array parameters<a class="headerlink" href="#Prepare-PV-array-parameters" title="Permalink to this headline">¶</a></h2>
+<h3>Prepare PV array parameters<a class="headerlink" href="#Prepare-PV-array-parameters" title="Permalink to this headline">¶</a></h3>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
@@ -504,177 +517,38 @@ div.rendered_html tbody tr:hover {
 </div>
 </div>
 </div>
-<div class="section" id="Run-simulations-in-parallel-with-run_parallel_engine()">
-<h2>Run simulations in parallel with <code class="docutils literal notranslate"><span class="pre">run_parallel_engine()</span></code><a class="headerlink" href="#Run-simulations-in-parallel-with-run_parallel_engine()" title="Permalink to this headline">¶</a></h2>
-<div class="line-block">
-<div class="line">Running timeseries simulations in parallel is done using the <code class="docutils literal notranslate"><span class="pre">run_parallel_engine()</span></code>.</div>
-<div class="line">In the previous tutorial section on running timeseries simulations, we showed that a function needed to be passed in order to build a report out of the timeseries simulation.</div>
-<div class="line">For the parallel mode, it will not be very different but we will need to pass a class (or an object) instead. The reason is that python multiprocessing uses pickling to run different processes, but python functions cannot be pickled, so a class or an object with the necessary methods needs to be passed instead in order to build a report.</div>
-</div>
-<p>An example of a report building class is provided in the <code class="docutils literal notranslate"><span class="pre">report.py</span></code> module of the pvfactors package.</p>
+<div class="section" id="Run-&quot;fast&quot;-simulations-in-parallel-with-run_parallel_engine()">
+<h3>Run “fast” simulations in parallel with <code class="docutils literal notranslate"><span class="pre">run_parallel_engine()</span></code><a class="headerlink" href="#Run-"fast"-simulations-in-parallel-with-run_parallel_engine()" title="Permalink to this headline">¶</a></h3>
+<p>Running fast timeseries simulations in parallel is done using the <code class="docutils literal notranslate"><span class="pre">run_parallel_engine()</span></code>, and the procedure is exactly the same with <code class="docutils literal notranslate"><span class="pre">run_timeseries_engine()</span></code>. There is only one additional keyword argument that needs to be provided to the function, which is <code class="docutils literal notranslate"><span class="pre">fast_mode_pvrow_index</span></code>. In fast mode, the user will be able to calculate rapidly (but with additional approximations) the incident irradiance on the back side of one PV row in the PV array, and the index of that PV row needs to be
+passed as a keyword argument to <code class="docutils literal notranslate"><span class="pre">fast_mode_pvrow_index</span></code>.</p>
+<p><strong>First prepare the report builder class</strong></p>
+<p>Just like in the previous tutorial, we need to prepare a report builder that will log the inputs we’re interested in during the simulation.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython2 notranslate"><div class="highlight"><pre>
-<span></span><span class="c1"># Choose the number of workers</span>
-<span class="n">n_processes</span> <span class="o">=</span> <span class="mi">3</span>
-</pre></div>
-</div>
-</div>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython2 notranslate"><div class="highlight"><pre>
-<span></span><span class="c1"># import function to run simulations in parallel</span>
-<span class="kn">from</span> <span class="nn">pvfactors.run</span> <span class="kn">import</span> <span class="n">run_parallel_engine</span>
-<span class="c1"># import the report building class for the simulation run</span>
-<span class="kn">from</span> <span class="nn">pvfactors.report</span> <span class="kn">import</span> <span class="n">ExampleReportBuilder</span>
-
-<span class="c1"># run simulations in parallel mode</span>
-<span class="n">report</span> <span class="o">=</span> <span class="n">run_parallel_engine</span><span class="p">(</span><span class="n">ExampleReportBuilder</span><span class="p">,</span> <span class="n">pvarray_parameters</span><span class="p">,</span> <span class="n">df_inputs</span><span class="o">.</span><span class="n">index</span><span class="p">,</span>
-                            <span class="n">df_inputs</span><span class="o">.</span><span class="n">dni</span><span class="p">,</span> <span class="n">df_inputs</span><span class="o">.</span><span class="n">dhi</span><span class="p">,</span>
-                            <span class="n">df_inputs</span><span class="o">.</span><span class="n">solar_zenith</span><span class="p">,</span> <span class="n">df_inputs</span><span class="o">.</span><span class="n">solar_azimuth</span><span class="p">,</span>
-                            <span class="n">df_inputs</span><span class="o">.</span><span class="n">surface_tilt</span><span class="p">,</span> <span class="n">df_inputs</span><span class="o">.</span><span class="n">surface_azimuth</span><span class="p">,</span>
-                            <span class="n">albedo</span><span class="p">,</span> <span class="n">n_processes</span><span class="o">=</span><span class="n">n_processes</span><span class="p">)</span>
-
-<span class="c1"># make a dataframe out of the report</span>
-<span class="n">df_report</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">report</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">df_inputs</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
-<span class="n">df_report</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">6</span><span class="p">:</span><span class="mi">11</span><span class="p">,</span> <span class="p">:]</span>
-</pre></div>
-</div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area stderr docutils container">
-<div class="highlight"><pre>
-100%|██████████| 16/16 [00:00&lt;00:00, 78.61it/s]
-100%|██████████| 16/16 [00:00&lt;00:00, 50.41it/s]
-100%|██████████| 16/16 [00:00&lt;00:00, 43.78it/s]
-INFO:pvfactors.run:Parallel calculation elapsed time: 0.486118078232 sec
-</pre></div></div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
-</pre></div>
-</div>
-<div class="output_area rendered_html docutils container">
-<div>
-<style scoped>
-    .dataframe tbody tr th:only-of-type {
-        vertical-align: middle;
-    }
-
-    .dataframe tbody tr th {
-        vertical-align: top;
-    }
-
-    .dataframe thead th {
-        text-align: right;
-    }
-</style>
-<table border="1" class="dataframe">
-  <thead>
-    <tr style="text-align: right;">
-      <th></th>
-      <th>qinc_back</th>
-      <th>iso_back</th>
-      <th>qinc_front</th>
-      <th>iso_front</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <th>2019-01-01 07:00:00-07:00</th>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>NaN</td>
-    </tr>
-    <tr>
-      <th>2019-01-01 08:00:00-07:00</th>
-      <td>9.703829</td>
-      <td>0.076232</td>
-      <td>117.632919</td>
-      <td>5.070103</td>
-    </tr>
-    <tr>
-      <th>2019-01-01 09:00:00-07:00</th>
-      <td>4.959138</td>
-      <td>2.150237</td>
-      <td>587.344229</td>
-      <td>12.087407</td>
-    </tr>
-    <tr>
-      <th>2019-01-01 10:00:00-07:00</th>
-      <td>33.478098</td>
-      <td>3.115967</td>
-      <td>685.115436</td>
-      <td>17.516188</td>
-    </tr>
-    <tr>
-      <th>2019-01-01 11:00:00-07:00</th>
-      <td>52.534503</td>
-      <td>1.697046</td>
-      <td>652.526254</td>
-      <td>24.250780</td>
-    </tr>
-  </tbody>
-</table>
-</div></div>
-</div>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython2 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">f</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
-<span class="n">df_report</span><span class="p">[[</span><span class="s1">&#39;qinc_front&#39;</span><span class="p">,</span> <span class="s1">&#39;qinc_back&#39;</span><span class="p">]]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-<span class="n">df_report</span><span class="p">[[</span><span class="s1">&#39;iso_front&#39;</span><span class="p">,</span> <span class="s1">&#39;iso_back&#39;</span><span class="p">]]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
-</pre></div>
-</div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<img alt="../_images/tutorials_Run_parallel_simulations_15_0.png" src="../_images/tutorials_Run_parallel_simulations_15_0.png" />
-</div>
-</div>
-<p>The results above are consistent with running the simulations without parallel model (this is also tested in the package).</p>
-</div>
-<div class="section" id="Building-a-report-for-parallel-mode">
-<h2>Building a report for parallel mode<a class="headerlink" href="#Building-a-report-for-parallel-mode" title="Permalink to this headline">¶</a></h2>
-<div class="line-block">
-<div class="line">For parallel simulations, a <strong>class</strong> (or object) that builds the report needs to be specified, otherwise nothing will be returned by the simulation.</div>
-<div class="line">Here is an example of a report building class that will return the total incident irradiance (<code class="docutils literal notranslate"><span class="pre">'qinc'</span></code>) on the back surface of the rightmost PV row. A good way to get started building the reporting class is to use the example provided in the <code class="docutils literal notranslate"><span class="pre">report.py</span></code> module of the pvfactors package.</div>
-<div class="line">Another important action of the class is to merge the different reports resulting from the parallel simulations: <strong>since the users decide how the reports are built, the users are also responsible for specifying how to merge the reports after a parallel run</strong>.</div>
-</div>
-<div class="line-block">
-<div class="line">The static method that builds the reports needs to be named <code class="docutils literal notranslate"><span class="pre">build(report,</span> <span class="pre">pvarray)</span></code>.</div>
-<div class="line">And the static method that merges the reports needs to be named <code class="docutils literal notranslate"><span class="pre">merge(reports)</span></code>.</div>
-</div>
-<div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython2 notranslate"><div class="highlight"><pre>
-<span></span><span class="k">class</span> <span class="nc">NewReportBuilder</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<span></span><span class="k">class</span> <span class="nc">ReportBuilder</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;A class is required to build reports when running calculations with</span>
 <span class="sd">    multiprocessing because of python constraints&quot;&quot;&quot;</span>
 
-    <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">build</span><span class="p">(</span><span class="n">report</span><span class="p">,</span> <span class="n">pvarray</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fast_mode_pvrow_index</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Create report builder object for fast mode simulation.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        fast_mode_pvrow_index : int</span>
+<span class="sd">            Index of PV row whose back side irradiance we want to report</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fast_mode_pvrow_index</span> <span class="o">=</span> <span class="n">fast_mode_pvrow_index</span>
+
+    <span class="k">def</span> <span class="nf">build</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">report</span><span class="p">,</span> <span class="n">pvarray</span><span class="p">):</span>
         <span class="c1"># Initialize the report as a dictionary</span>
         <span class="k">if</span> <span class="n">report</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-            <span class="n">list_keys</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;total_inc_back&#39;</span><span class="p">]</span>
-            <span class="n">report</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="p">[]</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">list_keys</span><span class="p">}</span>
+            <span class="n">report</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;total_inc_back&#39;</span><span class="p">:</span> <span class="p">[]}</span>
         <span class="c1"># Add elements to the report</span>
         <span class="k">if</span> <span class="n">pvarray</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-            <span class="n">pvrow</span> <span class="o">=</span> <span class="n">pvarray</span><span class="o">.</span><span class="n">pvrows</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>  <span class="c1"># use rightmost pvrow</span>
+            <span class="n">pvrow</span> <span class="o">=</span> <span class="n">pvarray</span><span class="o">.</span><span class="n">pvrows</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">fast_mode_pvrow_index</span><span class="p">]</span>
             <span class="n">report</span><span class="p">[</span><span class="s1">&#39;total_inc_back&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
                 <span class="n">pvrow</span><span class="o">.</span><span class="n">back</span><span class="o">.</span><span class="n">get_param_weighted</span><span class="p">(</span><span class="s1">&#39;qinc&#39;</span><span class="p">))</span>
         <span class="k">else</span><span class="p">:</span>
@@ -697,20 +571,41 @@ INFO:pvfactors.run:Parallel calculation elapsed time: 0.486118078232 sec
 </pre></div>
 </div>
 </div>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+<p><strong>Run simulation</strong></p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython2 notranslate"><div class="highlight"><pre>
-<span></span><span class="c1"># run simulations in parallel mode using the new reporting class</span>
-<span class="n">new_report</span> <span class="o">=</span> <span class="n">run_parallel_engine</span><span class="p">(</span><span class="n">NewReportBuilder</span><span class="p">,</span> <span class="n">pvarray_parameters</span><span class="p">,</span> <span class="n">df_inputs</span><span class="o">.</span><span class="n">index</span><span class="p">,</span>
-                                <span class="n">df_inputs</span><span class="o">.</span><span class="n">dni</span><span class="p">,</span> <span class="n">df_inputs</span><span class="o">.</span><span class="n">dhi</span><span class="p">,</span>
-                                <span class="n">df_inputs</span><span class="o">.</span><span class="n">solar_zenith</span><span class="p">,</span> <span class="n">df_inputs</span><span class="o">.</span><span class="n">solar_azimuth</span><span class="p">,</span>
-                                <span class="n">df_inputs</span><span class="o">.</span><span class="n">surface_tilt</span><span class="p">,</span> <span class="n">df_inputs</span><span class="o">.</span><span class="n">surface_azimuth</span><span class="p">,</span>
-                                <span class="n">albedo</span><span class="p">,</span> <span class="n">n_processes</span><span class="o">=</span><span class="n">n_processes</span><span class="p">)</span>
+<span></span><span class="c1"># Choose the number of workers</span>
+<span class="n">n_processes</span> <span class="o">=</span> <span class="mi">2</span>
+
+<span class="c1"># Choose center row (index 1) for the fast simulation</span>
+<span class="n">fast_mode_pvrow_index</span> <span class="o">=</span> <span class="mi">1</span>
+
+<span class="c1"># Instantiate report builder</span>
+<span class="n">report_builder</span> <span class="o">=</span> <span class="n">ReportBuilder</span><span class="p">(</span><span class="n">fast_mode_pvrow_index</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython2 notranslate"><div class="highlight"><pre>
+<span></span><span class="c1"># import function to run simulations in parallel</span>
+<span class="kn">from</span> <span class="nn">pvfactors.run</span> <span class="kn">import</span> <span class="n">run_parallel_engine</span><span class="p">,</span> <span class="n">run_timeseries_engine</span>
+
+<span class="c1"># run simulations in parallel mode</span>
+<span class="n">report</span> <span class="o">=</span> <span class="n">run_parallel_engine</span><span class="p">(</span><span class="n">report_builder</span><span class="p">,</span> <span class="n">pvarray_parameters</span><span class="p">,</span> <span class="n">df_inputs</span><span class="o">.</span><span class="n">index</span><span class="p">,</span>
+                             <span class="n">df_inputs</span><span class="o">.</span><span class="n">dni</span><span class="p">,</span> <span class="n">df_inputs</span><span class="o">.</span><span class="n">dhi</span><span class="p">,</span>
+                             <span class="n">df_inputs</span><span class="o">.</span><span class="n">solar_zenith</span><span class="p">,</span> <span class="n">df_inputs</span><span class="o">.</span><span class="n">solar_azimuth</span><span class="p">,</span>
+                             <span class="n">df_inputs</span><span class="o">.</span><span class="n">surface_tilt</span><span class="p">,</span> <span class="n">df_inputs</span><span class="o">.</span><span class="n">surface_azimuth</span><span class="p">,</span>
+                             <span class="n">albedo</span><span class="p">,</span> <span class="n">n_processes</span><span class="o">=</span><span class="n">n_processes</span><span class="p">,</span>
+                             <span class="n">fast_mode_pvrow_index</span><span class="o">=</span><span class="n">fast_mode_pvrow_index</span><span class="p">)</span>  <span class="c1"># new keyword argument</span>
 
 <span class="c1"># make a dataframe out of the report</span>
-<span class="n">df_new_report</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">new_report</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">df_inputs</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
+<span class="n">df_report</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">report</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">df_inputs</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -719,19 +614,18 @@ INFO:pvfactors.run:Parallel calculation elapsed time: 0.486118078232 sec
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-100%|██████████| 16/16 [00:00&lt;00:00, 133.82it/s]
-100%|██████████| 16/16 [00:00&lt;00:00, 53.03it/s]
-
-INFO:pvfactors.run:Parallel calculation elapsed time: 0.475169181824 sec
+100%|██████████| 4380/4380 [00:21&lt;00:00, 207.92it/s]
+100%|██████████| 4380/4380 [00:21&lt;00:00, 212.53it/s]
+INFO:pvfactors.run:Parallel calculation elapsed time: 21.9998040199 sec
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython2 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">f</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
-<span class="n">df_new_report</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">)</span>
+<span></span><span class="n">f</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+<span class="n">df_report</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:</span><span class="mi">72</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </pre></div>
 </div>
@@ -740,10 +634,76 @@ INFO:pvfactors.run:Parallel calculation elapsed time: 0.475169181824 sec
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/tutorials_Run_parallel_simulations_21_0.png" src="../_images/tutorials_Run_parallel_simulations_21_0.png" />
+<img alt="../_images/tutorials_Run_fast_simulations_21_0.png" src="../_images/tutorials_Run_fast_simulations_21_0.png" />
 </div>
 </div>
-<p>The plot above shows that we’re getting the same results we obtained in the previous tutorial section with the new report generating function.</p>
+</div>
+<div class="section" id="Run-&quot;fast&quot;-simulations-with-the-PVEngine">
+<h3>Run “fast” simulations with the PVEngine<a class="headerlink" href="#Run-"fast"-simulations-with-the-PVEngine" title="Permalink to this headline">¶</a></h3>
+<p>The procedure is similar to run fast simulations with the PVEngine. You only need to provide <code class="docutils literal notranslate"><span class="pre">fast_mode_pvrow_index</span></code> as an additional keyword argument to the PV engine at initialization.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython2 notranslate"><div class="highlight"><pre>
+<span></span><span class="c1"># Import PVEngine and OrderedPVArray</span>
+<span class="kn">from</span> <span class="nn">pvfactors.engine</span> <span class="kn">import</span> <span class="n">PVEngine</span>
+<span class="kn">from</span> <span class="nn">pvfactors.geometry</span> <span class="kn">import</span> <span class="n">OrderedPVArray</span>
+
+<span class="c1"># Instantiate PV array</span>
+<span class="n">pvarray</span> <span class="o">=</span> <span class="n">OrderedPVArray</span><span class="o">.</span><span class="n">init_from_dict</span><span class="p">(</span><span class="n">pvarray_parameters</span><span class="p">)</span>
+<span class="c1"># Create PV engine, and specify the index of the PV row for fast mode</span>
+<span class="n">eng</span> <span class="o">=</span> <span class="n">PVEngine</span><span class="p">(</span><span class="n">pvarray</span><span class="p">,</span> <span class="n">fast_mode_pvrow_index</span><span class="o">=</span><span class="n">fast_mode_pvrow_index</span><span class="p">)</span>
+
+<span class="c1"># Fit PV engine to the timeseries data</span>
+<span class="n">eng</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">df_inputs</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">df_inputs</span><span class="o">.</span><span class="n">dni</span><span class="p">,</span> <span class="n">df_inputs</span><span class="o">.</span><span class="n">dhi</span><span class="p">,</span>
+        <span class="n">df_inputs</span><span class="o">.</span><span class="n">solar_zenith</span><span class="p">,</span> <span class="n">df_inputs</span><span class="o">.</span><span class="n">solar_azimuth</span><span class="p">,</span>
+        <span class="n">df_inputs</span><span class="o">.</span><span class="n">surface_tilt</span><span class="p">,</span> <span class="n">df_inputs</span><span class="o">.</span><span class="n">surface_azimuth</span><span class="p">,</span>
+        <span class="n">albedo</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython2 notranslate"><div class="highlight"><pre>
+<span></span><span class="c1"># Run timeseries simulations</span>
+<span class="n">report</span> <span class="o">=</span> <span class="n">eng</span><span class="o">.</span><span class="n">run_all_timesteps</span><span class="p">(</span><span class="n">fn_build_report</span><span class="o">=</span><span class="n">report_builder</span><span class="o">.</span><span class="n">build</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+100%|██████████| 8760/8760 [00:36&lt;00:00, 242.15it/s]
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython2 notranslate"><div class="highlight"><pre>
+<span></span><span class="c1"># make a dataframe out of the report</span>
+<span class="n">df_report</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">report</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">df_inputs</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
+
+<span class="c1"># and plot the results</span>
+<span class="n">f</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+<span class="n">df_report</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:</span><span class="mi">72</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/tutorials_Run_fast_simulations_26_0.png" src="../_images/tutorials_Run_fast_simulations_26_0.png" />
+</div>
+</div>
+</div>
 </div>
 </div>
 
@@ -755,10 +715,10 @@ INFO:pvfactors.run:Parallel calculation elapsed time: 0.475169181824 sec
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="Run_fast_simulations.html" class="btn btn-neutral float-right" title="Run “fast” simulations with 8760 annual inputs" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="../theory/index.html" class="btn btn-neutral float-right" title="Theory" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="Run_timeseries_simulations.html" class="btn btn-neutral float-left" title="Run timeseries simulations" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="Run_parallel_simulations.html" class="btn btn-neutral float-left" title="Run timeseries simulations in parallel" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

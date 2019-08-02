@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>base.BaseSide &mdash; pvfactors 1.0.1+0.gb9e42db.dirty documentation</title>
+  <title>base.BaseSide &mdash; pvfactors 1.1.0 documentation</title>
   
 
   
@@ -28,6 +28,7 @@
         <script type="text/javascript" src="../../_static/doctools.js"></script>
         <script type="text/javascript" src="../../_static/language_data.js"></script>
         <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
     
     <script type="text/javascript" src="../../_static/js/theme.js"></script>
 
@@ -67,7 +68,7 @@
             
             
               <div class="version">
-                1.0.1
+                1.1.0
               </div>
             
           
@@ -91,11 +92,33 @@
               
             
             
-              <ul>
+              <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../../installation/index.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../tutorials/index.html">Tutorials</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../theory/index.html">Theory</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../index.html">Developer API</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">Developer API</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../index.html#geometry">geometry</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="../index.html#module-base">base</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="base.BaseSurface.html">base.BaseSurface</a></li>
+<li class="toctree-l4"><a class="reference internal" href="base.PVSurface.html">base.PVSurface</a></li>
+<li class="toctree-l4"><a class="reference internal" href="base.ShadeCollection.html">base.ShadeCollection</a></li>
+<li class="toctree-l4"><a class="reference internal" href="base.PVSegment.html">base.PVSegment</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">base.BaseSide</a></li>
+<li class="toctree-l4"><a class="reference internal" href="base.BasePVArray.html">base.BasePVArray</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../index.html#module-pvrow">pvrow</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../index.html#module-pvground">pvground</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../index.html#module-pvarray">pvarray</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#viewfactors">viewfactors</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#irradiance">irradiance</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#module-engine">engine</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#module-run">run</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#module-report">report</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="../../whatsnew.html">What’s New</a></li>
 </ul>
 
@@ -183,103 +206,90 @@
     margin-top: -19px;
 }
 
-/* nice headers on first paragraph of info/warning boxes */
-.admonition .first {
-    margin: -12px;
-    padding: 6px 12px;
-    margin-bottom: 12px;
-    color: #fff;
-    line-height: 1;
-    display: block;
-}
-.admonition.warning .first {
-    background: #f0b37e;
-}
-.admonition.note .first {
-    background: #6ab0de;
-}
 .admonition > p:before {
     margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
 }
 </style>
 <div class="section" id="base-baseside">
 <h1>base.BaseSide<a class="headerlink" href="#base-baseside" title="Permalink to this headline">¶</a></h1>
 <dl class="class">
 <dt id="base.BaseSide">
-<em class="property">class </em><code class="descclassname">base.</code><code class="descname">BaseSide</code><span class="sig-paren">(</span><em>list_segments=[]</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/base.html#BaseSide"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#base.BaseSide" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">base.</code><code class="sig-name descname">BaseSide</code><span class="sig-paren">(</span><em class="sig-param">list_segments=None</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/base.html#BaseSide"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#base.BaseSide" title="Permalink to this definition">¶</a></dt>
 <dd><p>A side represents a fixed collection of PV segments objects that should
 all be collinear, with the same normal vector</p>
 <dl class="method">
 <dt id="base.BaseSide.__init__">
-<code class="descname">__init__</code><span class="sig-paren">(</span><em>list_segments=[]</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/base.html#BaseSide.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#base.BaseSide.__init__" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param">list_segments=None</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/base.html#BaseSide.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#base.BaseSide.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create a side geometry.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>list_segments</strong> (list of <code class="xref py py-class docutils literal notranslate"><span class="pre">pvfactors.geometry.base.PVSegment</span></code>) – List of PV segments for side</td>
-</tr>
-</tbody>
-</table>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>list_segments</strong> (list of <code class="xref py py-class docutils literal notranslate"><span class="pre">pvfactors.geometry.base.PVSegment</span></code>, optional) – List of PV segments for side (Default = None)</p>
+</dd>
+</dl>
 </dd></dl>
 
 <p class="rubric">Methods</p>
-<table border="1" class="longtable docutils">
+<table class="longtable docutils align-default">
 <colgroup>
-<col width="10%" />
-<col width="90%" />
+<col style="width: 10%" />
+<col style="width: 90%" />
 </colgroup>
-<tbody valign="top">
-<tr class="row-odd"><td><a class="reference internal" href="#base.BaseSide.__init__" title="base.BaseSide.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>([list_segments])</td>
-<td>Create a side geometry.</td>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#base.BaseSide.__init__" title="base.BaseSide.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>([list_segments])</p></td>
+<td><p>Create a side geometry.</p></td>
 </tr>
-<tr class="row-even"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">cast_shadow</span></code>(linestring)</td>
-<td>Cast shadow on Side using linestring: will rearrange the PV surfaces between the shaded and illuminated collections of the segments.</td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">cast_shadow</span></code>(linestring)</p></td>
+<td><p>Cast shadow on Side using linestring: will rearrange the PV surfaces between the shaded and illuminated collections of the segments.</p></td>
 </tr>
-<tr class="row-odd"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">cut_at_point</span></code>(point)</td>
-<td>Cut Side at point if the side contains it.</td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">cut_at_point</span></code>(point)</p></td>
+<td><p>Cut Side at point if the side contains it.</p></td>
 </tr>
-<tr class="row-even"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">from_linestring_coords</span></code>(coords[,&nbsp;shaded,&nbsp;…])</td>
-<td>Create a Side with a single PV surface, or multiple discretized identical ones.</td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">from_linestring_coords</span></code>(coords[, shaded, …])</p></td>
+<td><p>Create a Side with a single PV surface, or multiple discretized identical ones.</p></td>
 </tr>
-<tr class="row-odd"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_param_weighted</span></code>(param)</td>
-<td>Get the parameter from the side’s surfaces, after weighting by surface length.</td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_param_weighted</span></code>(param)</p></td>
+<td><p>Get the parameter from the side’s surfaces, after weighting by surface length.</p></td>
 </tr>
-<tr class="row-even"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_param_ww</span></code>(param)</td>
-<td>Get the parameter from the side’s surfaces with weight, i.e.</td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_param_ww</span></code>(param)</p></td>
+<td><p>Get the parameter from the side’s surfaces with weight, i.e.</p></td>
 </tr>
-<tr class="row-odd"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">merge_shaded_areas</span></code>()</td>
-<td>Merge shaded areas of all PV segments</td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">merge_shaded_areas</span></code>()</p></td>
+<td><p>Merge shaded areas of all PV segments</p></td>
 </tr>
-<tr class="row-even"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot</span></code>(ax[,&nbsp;color_shaded,&nbsp;color_illum,&nbsp;with_index])</td>
-<td>Plot the surfaces in the Side object.</td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot</span></code>(ax[, color_shaded, color_illum, with_index])</p></td>
+<td><p>Plot the surfaces in the Side object.</p></td>
 </tr>
-<tr class="row-odd"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_params</span></code>(new_dict)</td>
-<td>Update surface parameters in the Side.</td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_params</span></code>(new_dict)</p></td>
+<td><p>Update surface parameters in the Side.</p></td>
 </tr>
 </tbody>
 </table>
 <p class="rubric">Attributes</p>
-<table border="1" class="longtable docutils">
+<table class="longtable docutils align-default">
 <colgroup>
-<col width="10%" />
-<col width="90%" />
+<col style="width: 10%" />
+<col style="width: 90%" />
 </colgroup>
-<tbody valign="top">
-<tr class="row-odd"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">all_surfaces</span></code></td>
-<td>List of all surfaces in the Side object.</td>
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">all_surfaces</span></code></p></td>
+<td><p>List of all surfaces in the Side object.</p></td>
 </tr>
-<tr class="row-even"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">n_surfaces</span></code></td>
-<td>Number of surfaces in the Side object.</td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">n_surfaces</span></code></p></td>
+<td><p>Number of surfaces in the Side object.</p></td>
 </tr>
-<tr class="row-odd"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">n_vector</span></code></td>
-<td>Normal vector of the Side.</td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">n_vector</span></code></p></td>
+<td><p>Normal vector of the Side.</p></td>
 </tr>
-<tr class="row-even"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">shaded_length</span></code></td>
-<td>Shaded length of the Side.</td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">shaded_length</span></code></p></td>
+<td><p>Shaded length of the Side.</p></td>
 </tr>
-<tr class="row-odd"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">surface_indices</span></code></td>
-<td>List of all surface indices in the Side object.</td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">surface_indices</span></code></p></td>
+<td><p>List of all surface indices in the Side object.</p></td>
 </tr>
 </tbody>
 </table>

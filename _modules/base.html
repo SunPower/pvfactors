@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>base &mdash; pvfactors 1.0.1+0.gb9e42db.dirty documentation</title>
+  <title>base &mdash; pvfactors 1.1.0 documentation</title>
   
 
   
@@ -28,6 +28,7 @@
         <script type="text/javascript" src="../_static/doctools.js"></script>
         <script type="text/javascript" src="../_static/language_data.js"></script>
         <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
     
     <script type="text/javascript" src="../_static/js/theme.js"></script>
 
@@ -65,7 +66,7 @@
             
             
               <div class="version">
-                1.0.1
+                1.1.0
               </div>
             
           
@@ -162,7 +163,6 @@
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
-<span class="kn">from</span> <span class="nn">collections</span> <span class="k">import</span> <span class="n">OrderedDict</span>
 <span class="kn">from</span> <span class="nn">pvfactors</span> <span class="k">import</span> <span class="n">PVFactorsError</span>
 <span class="kn">from</span> <span class="nn">pvfactors.config</span> <span class="k">import</span> <span class="p">(</span>
     <span class="n">DEFAULT_NORMAL_VEC</span><span class="p">,</span> <span class="n">COLOR_DIC</span><span class="p">,</span> <span class="n">DISTANCE_TOLERANCE</span><span class="p">,</span> <span class="n">PLOT_FONTSIZE</span><span class="p">,</span>
@@ -176,7 +176,7 @@
 <span class="kn">from</span> <span class="nn">pvlib.tools</span> <span class="k">import</span> <span class="n">cosd</span><span class="p">,</span> <span class="n">sind</span>
 
 
-<span class="k">def</span> <span class="nf">check_uniform_shading</span><span class="p">(</span><span class="n">list_elements</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">_check_uniform_shading</span><span class="p">(</span><span class="n">list_elements</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Check that all :py:class:`~pvfactors.geometry.base.PVSurface` objects in</span>
 <span class="sd">    list have uniform shading</span>
 
@@ -200,10 +200,10 @@
                 <span class="k">raise</span> <span class="n">PVFactorsError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
 
 
-<span class="k">def</span> <span class="nf">coords_from_center_tilt_length</span><span class="p">(</span><span class="n">xy_center</span><span class="p">,</span> <span class="n">tilt</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span>
-                                   <span class="n">surface_azimuth</span><span class="p">,</span> <span class="n">axis_azimuth</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Calculate ``shapely`` :py:class:`LineString` coordinate from</span>
-<span class="sd">    center coords, surface tilt angle and length of line.</span>
+<span class="k">def</span> <span class="nf">_coords_from_center_tilt_length</span><span class="p">(</span><span class="n">xy_center</span><span class="p">,</span> <span class="n">tilt</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span>
+                                    <span class="n">surface_azimuth</span><span class="p">,</span> <span class="n">axis_azimuth</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Calculate ``shapely`` :py:class:`LineString` coordinates from</span>
+<span class="sd">    center coords, surface angles and length of line.</span>
 <span class="sd">    The axis azimuth indicates the axis of rotation of the pvrows (if single-</span>
 <span class="sd">    axis trackers). In the 2D plane, the axis of rotation will be the vector</span>
 <span class="sd">    normal to that 2D plane and going into the 2D plane (when plotting it).</span>
@@ -214,22 +214,23 @@
 <span class="sd">    Tilt angles need to always be positive. Given the axis azimuth and surface</span>
 <span class="sd">    azimuth, a rotation angle will be derived. Positive rotation angles will</span>
 <span class="sd">    indicate pvrows pointing to the left, and negative rotation angles will</span>
-<span class="sd">    indicate pvrows pointing to the right.</span>
+<span class="sd">    indicate pvrows pointing to the right (no matter what the the axis azimuth</span>
+<span class="sd">    is).</span>
 <span class="sd">    All of these conventions are necessary to make sure that no matter what</span>
 <span class="sd">    the tilt and surface angles are, we can still identify correctly</span>
-<span class="sd">    the same pv rows: the leftmost PV row will have index 0, and rightmost</span>
+<span class="sd">    the same pv rows: the leftmost PV row will have index 0, and the rightmost</span>
 <span class="sd">    will have index -1.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    xy_center : tuple</span>
 <span class="sd">        x, y coordinates of center point of desired linestring</span>
-<span class="sd">    tilt : float</span>
-<span class="sd">        surface tilt angle desired [deg]</span>
+<span class="sd">    tilt : float or np.ndarray</span>
+<span class="sd">        Surface tilt angles desired [deg]. Values should all be positive.</span>
 <span class="sd">    length : float</span>
 <span class="sd">        desired length of linestring [m]</span>
-<span class="sd">    surface_azimuth : float</span>
-<span class="sd">        Surface azimuth of PV surface [deg]</span>
+<span class="sd">    surface_azimuth : float or np.ndarray</span>
+<span class="sd">        Surface azimuth angles of PV surface [deg]</span>
 <span class="sd">    axis_azimuth : float</span>
 <span class="sd">        Axis azimuth of the PV surface, i.e. direction of axis of rotation</span>
 <span class="sd">        [deg]</span>
@@ -237,39 +238,70 @@
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    list</span>
-<span class="sd">        List of linestring coordinates obtained from inputs</span>
+<span class="sd">        List of linestring coordinates obtained from inputs (could be vectors)</span>
+<span class="sd">        in the form of [[x1, y1], [x2, y2]], where xi and yi could be arrays</span>
+<span class="sd">        or scalar values.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">is_pointing_right</span> <span class="o">=</span> <span class="p">((</span><span class="n">surface_azimuth</span> <span class="o">-</span> <span class="n">axis_azimuth</span><span class="p">)</span> <span class="o">%</span> <span class="mf">360.</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mf">180.</span>
-    <span class="k">if</span> <span class="n">is_pointing_right</span><span class="p">:</span>
-        <span class="c1"># system should be rotated to the right: so negative rotation angle</span>
-        <span class="n">rotation</span> <span class="o">=</span> <span class="n">tilt</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="c1"># need positive rotation angle for system to point to the left</span>
-        <span class="n">rotation</span> <span class="o">=</span> <span class="o">-</span> <span class="n">tilt</span>
+    <span class="c1"># PV row params</span>
     <span class="n">x_center</span><span class="p">,</span> <span class="n">y_center</span> <span class="o">=</span> <span class="n">xy_center</span>
     <span class="n">radius</span> <span class="o">=</span> <span class="n">length</span> <span class="o">/</span> <span class="mf">2.</span>
+    <span class="c1"># Get rotation</span>
+    <span class="n">rotation</span> <span class="o">=</span> <span class="n">_get_rotation_from_tilt_azimuth</span><span class="p">(</span><span class="n">surface_azimuth</span><span class="p">,</span> <span class="n">axis_azimuth</span><span class="p">,</span>
+                                               <span class="n">tilt</span><span class="p">)</span>
+    <span class="c1"># Calculate coords</span>
     <span class="n">x1</span> <span class="o">=</span> <span class="n">radius</span> <span class="o">*</span> <span class="n">cosd</span><span class="p">(</span><span class="n">rotation</span> <span class="o">+</span> <span class="mf">180.</span><span class="p">)</span> <span class="o">+</span> <span class="n">x_center</span>
     <span class="n">y1</span> <span class="o">=</span> <span class="n">radius</span> <span class="o">*</span> <span class="n">sind</span><span class="p">(</span><span class="n">rotation</span> <span class="o">+</span> <span class="mf">180.</span><span class="p">)</span> <span class="o">+</span> <span class="n">y_center</span>
     <span class="n">x2</span> <span class="o">=</span> <span class="n">radius</span> <span class="o">*</span> <span class="n">cosd</span><span class="p">(</span><span class="n">rotation</span><span class="p">)</span> <span class="o">+</span> <span class="n">x_center</span>
     <span class="n">y2</span> <span class="o">=</span> <span class="n">radius</span> <span class="o">*</span> <span class="n">sind</span><span class="p">(</span><span class="n">rotation</span><span class="p">)</span> <span class="o">+</span> <span class="n">y_center</span>
 
-    <span class="k">return</span> <span class="p">[(</span><span class="n">x1</span><span class="p">,</span> <span class="n">y1</span><span class="p">),</span> <span class="p">(</span><span class="n">x2</span><span class="p">,</span> <span class="n">y2</span><span class="p">)]</span>
+    <span class="k">return</span> <span class="p">[[</span><span class="n">x1</span><span class="p">,</span> <span class="n">y1</span><span class="p">],</span> <span class="p">[</span><span class="n">x2</span><span class="p">,</span> <span class="n">y2</span><span class="p">]]</span>
 
 
-<span class="k">def</span> <span class="nf">get_solar_2d_vector</span><span class="p">(</span><span class="n">solar_zenith</span><span class="p">,</span> <span class="n">solar_azimuth</span><span class="p">,</span> <span class="n">axis_azimuth</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">_get_rotation_from_tilt_azimuth</span><span class="p">(</span><span class="n">surface_azimuth</span><span class="p">,</span> <span class="n">axis_azimuth</span><span class="p">,</span> <span class="n">tilt</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Calculate the rotation angle using surface azimuth, axis azimuth,</span>
+<span class="sd">    and surface tilt angles. While surface tilt angles need to always be</span>
+<span class="sd">    positive, rotation angles can be negative.</span>
+<span class="sd">    In pvfactors, positive rotation angles will indicate pvrows pointing to the</span>
+<span class="sd">    left, and negative rotation angles will indicate pvrows pointing to the</span>
+<span class="sd">    right (no matter what the the axis azimuth is).</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    tilt : float or np.ndarray</span>
+<span class="sd">        Surface tilt angles desired [deg]. Values should all be positive.</span>
+<span class="sd">    surface_azimuth : float or np.ndarray</span>
+<span class="sd">        Surface azimuth angles of PV surface [deg]</span>
+<span class="sd">    axis_azimuth : float</span>
+<span class="sd">        Axis azimuth of the PV surface, i.e. direction of axis of rotation</span>
+<span class="sd">        [deg]</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    float or np.ndarray</span>
+<span class="sd">        Calculated rotation angle(s) in [deg]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Calculate rotation of PV row (signed tilt angle)</span>
+    <span class="n">is_pointing_right</span> <span class="o">=</span> <span class="p">((</span><span class="n">surface_azimuth</span> <span class="o">-</span> <span class="n">axis_azimuth</span><span class="p">)</span> <span class="o">%</span> <span class="mf">360.</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mf">180.</span>
+    <span class="n">rotation</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">is_pointing_right</span><span class="p">,</span> <span class="n">tilt</span><span class="p">,</span> <span class="o">-</span><span class="n">tilt</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">rotation</span>
+
+
+<span class="k">def</span> <span class="nf">_get_solar_2d_vectors</span><span class="p">(</span><span class="n">solar_zenith</span><span class="p">,</span> <span class="n">solar_azimuth</span><span class="p">,</span> <span class="n">axis_azimuth</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Projection of 3d solar vector onto the cross section of the systems:</span>
 <span class="sd">    which is the 2D plane we are considering.</span>
 <span class="sd">    This is needed to calculate shadows.</span>
 <span class="sd">    Remember that the 2D plane is such that the direction of the torque</span>
 <span class="sd">    tube vector (or rotation axis) goes into (and normal to) the 2D plane,</span>
 <span class="sd">    such that positive rotation angles will have the PV surfaces tilted to the</span>
-<span class="sd">    LEFT and vice versa</span>
+<span class="sd">    LEFT and vice versa.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    solar_zenith : float</span>
+<span class="sd">    solar_zenith : float or numpy array</span>
 <span class="sd">        Solar zenith angle [deg]</span>
-<span class="sd">    solar_azimuth : float</span>
+<span class="sd">    solar_azimuth : float or numpy array</span>
 <span class="sd">        Solar azimuth angle [deg]</span>
 <span class="sd">    axis_azimuth : float</span>
 <span class="sd">        Axis azimuth of the PV surface, i.e. direction of axis of rotation</span>
@@ -277,8 +309,9 @@
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    solar_2d_vector : list</span>
-<span class="sd">        Two vector components of the solar vector in the 2D plane</span>
+<span class="sd">    solar_2d_vector : numpy array</span>
+<span class="sd">        Two vector components of the solar vector in the 2D plane, with the</span>
+<span class="sd">        form [x, y], where x and y can be arrays</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">solar_2d_vector</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span>
         <span class="c1"># a drawing really helps understand the following</span>
@@ -295,7 +328,7 @@
 <span class="sd">    orientations.&quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="BaseSurface.__init__"><a class="viewcode-back" href="../developer/generated/base.BaseSurface.html#base.BaseSurface.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coords</span><span class="p">,</span> <span class="n">normal_vector</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                 <span class="n">surface_params</span><span class="o">=</span><span class="p">[]):</span>
+                 <span class="n">surface_params</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Create a surface using linestring coordinates.</span>
 <span class="sd">        Normal vector can have two directions for a given LineString,</span>
 <span class="sd">        so the user can provide it in order to be specific,</span>
@@ -315,10 +348,11 @@
 <span class="sd">            Surface index (Default = None)</span>
 <span class="sd">        surface_params : list of str, optional</span>
 <span class="sd">            Names of the surface parameters, eg reflectivity, total incident</span>
-<span class="sd">            irradiance, temperature, etc. (Default = [])</span>
+<span class="sd">            irradiance, temperature, etc. (Default = None)</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
 
+        <span class="n">surface_params</span> <span class="o">=</span> <span class="p">[]</span> <span class="k">if</span> <span class="n">surface_params</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">surface_params</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">BaseSurface</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">coords</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">normal_vector</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">n_vector</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_calculate_n_vector</span><span class="p">()</span>
@@ -421,7 +455,7 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="PVSurface.__init__"><a class="viewcode-back" href="../developer/generated/base.PVSurface.html#base.PVSurface.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coords</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">normal_vector</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">shaded</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-                 <span class="n">index</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">surface_params</span><span class="o">=</span><span class="p">[]):</span>
+                 <span class="n">index</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">surface_params</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Initialize PV surface.</span>
 
 <span class="sd">        Parameters</span>
@@ -437,9 +471,10 @@
 <span class="sd">            Surface index (Default = None)</span>
 <span class="sd">        surface_params : list of str, optional</span>
 <span class="sd">            Names of the surface parameters, eg reflectivity, total incident</span>
-<span class="sd">            irradiance, temperature, etc. (Default = [])</span>
+<span class="sd">            irradiance, temperature, etc. (Default = None)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
+        <span class="n">surface_params</span> <span class="o">=</span> <span class="p">[]</span> <span class="k">if</span> <span class="n">surface_params</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">surface_params</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">PVSurface</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">coords</span><span class="p">,</span> <span class="n">normal_vector</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">index</span><span class="p">,</span>
                                         <span class="n">surface_params</span><span class="o">=</span><span class="n">surface_params</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">shaded</span> <span class="o">=</span> <span class="n">shaded</span></div></div>
@@ -450,23 +485,25 @@
 <span class="sd">    objects that all have the same shading status. The PV surfaces are not</span>
 <span class="sd">    necessarily contiguous or collinear.&quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="ShadeCollection.__init__"><a class="viewcode-back" href="../developer/generated/base.ShadeCollection.html#base.ShadeCollection.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">list_surfaces</span><span class="o">=</span><span class="p">[],</span> <span class="n">shaded</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">surface_params</span><span class="o">=</span><span class="p">[]):</span>
+<div class="viewcode-block" id="ShadeCollection.__init__"><a class="viewcode-back" href="../developer/generated/base.ShadeCollection.html#base.ShadeCollection.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">list_surfaces</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">shaded</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">surface_params</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Initialize shade collection.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        list_surfaces : list, optional</span>
 <span class="sd">            List of :py:class:`~pvfactors.geometry.base.PVSurface` object</span>
-<span class="sd">            (Default = [])</span>
+<span class="sd">            (Default = None)</span>
 <span class="sd">        shaded : bool, optional</span>
 <span class="sd">            Shading status of the collection. If not specified, will be derived</span>
 <span class="sd">            from list of surfaces (Default = None)</span>
 <span class="sd">        surface_params : list of str, optional</span>
 <span class="sd">            Names of the surface parameters, eg reflectivity, total incident</span>
-<span class="sd">            irradiance, temperature, etc. (Default = [])</span>
+<span class="sd">            irradiance, temperature, etc. (Default = None)</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">check_uniform_shading</span><span class="p">(</span><span class="n">list_surfaces</span><span class="p">)</span>
+        <span class="n">list_surfaces</span> <span class="o">=</span> <span class="p">[]</span> <span class="k">if</span> <span class="n">list_surfaces</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">list_surfaces</span>
+        <span class="n">surface_params</span> <span class="o">=</span> <span class="p">[]</span> <span class="k">if</span> <span class="n">surface_params</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">surface_params</span>
+        <span class="n">_check_uniform_shading</span><span class="p">(</span><span class="n">list_surfaces</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">list_surfaces</span> <span class="o">=</span> <span class="n">list_surfaces</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">shaded</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_shading</span><span class="p">(</span><span class="n">shaded</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">is_collinear</span> <span class="o">=</span> <span class="n">is_collinear</span><span class="p">(</span><span class="n">list_surfaces</span><span class="p">)</span>
@@ -703,7 +740,7 @@
 
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">from_linestring_coords</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">coords</span><span class="p">,</span> <span class="n">shaded</span><span class="p">,</span> <span class="n">normal_vector</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                               <span class="n">surface_params</span><span class="o">=</span><span class="p">[]):</span>
+                               <span class="n">surface_params</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Create a shade collection with a single PV surface.</span>
 
 <span class="sd">        Parameters</span>
@@ -716,7 +753,7 @@
 <span class="sd">            Normal vector for the surface (Default = None)</span>
 <span class="sd">        surface_params : list of str, optional</span>
 <span class="sd">            Names of the surface parameters, eg reflectivity, total incident</span>
-<span class="sd">            irradiance, temperature, etc. (Default = [])</span>
+<span class="sd">            irradiance, temperature, etc. (Default = None)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">surf</span> <span class="o">=</span> <span class="n">PVSurface</span><span class="p">(</span><span class="n">coords</span><span class="o">=</span><span class="n">coords</span><span class="p">,</span> <span class="n">normal_vector</span><span class="o">=</span><span class="n">normal_vector</span><span class="p">,</span>
                          <span class="n">shaded</span><span class="o">=</span><span class="n">shaded</span><span class="p">,</span> <span class="n">surface_params</span><span class="o">=</span><span class="n">surface_params</span><span class="p">)</span>
@@ -924,7 +961,7 @@
 
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">from_linestring_coords</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">coords</span><span class="p">,</span> <span class="n">shaded</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">normal_vector</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                               <span class="n">index</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">surface_params</span><span class="o">=</span><span class="p">[]):</span>
+                               <span class="n">index</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">surface_params</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Create a PV segment with a single PV surface.</span>
 
 <span class="sd">        Parameters</span>
@@ -940,7 +977,7 @@
 <span class="sd">            Index of the segment (Default = None)</span>
 <span class="sd">        surface_params : list of str, optional</span>
 <span class="sd">            Names of the surface parameters, eg reflectivity, total incident</span>
-<span class="sd">            irradiance, temperature, etc. (Default = [])</span>
+<span class="sd">            irradiance, temperature, etc. (Default = None)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">col</span> <span class="o">=</span> <span class="n">ShadeCollection</span><span class="o">.</span><span class="n">from_linestring_coords</span><span class="p">(</span>
             <span class="n">coords</span><span class="p">,</span> <span class="n">shaded</span><span class="o">=</span><span class="n">shaded</span><span class="p">,</span> <span class="n">normal_vector</span><span class="o">=</span><span class="n">normal_vector</span><span class="p">,</span>
@@ -1041,14 +1078,15 @@
     <span class="sd">&quot;&quot;&quot;A side represents a fixed collection of PV segments objects that should</span>
 <span class="sd">    all be collinear, with the same normal vector&quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="BaseSide.__init__"><a class="viewcode-back" href="../developer/generated/base.BaseSide.html#base.BaseSide.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">list_segments</span><span class="o">=</span><span class="p">[]):</span>
+<div class="viewcode-block" id="BaseSide.__init__"><a class="viewcode-back" href="../developer/generated/base.BaseSide.html#base.BaseSide.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">list_segments</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Create a side geometry.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        list_segments : list of :py:class:`pvfactors.geometry.base.PVSegment`</span>
-<span class="sd">            List of PV segments for side</span>
+<span class="sd">        list_segments : list of :py:class:`pvfactors.geometry.base.PVSegment`, optional</span>
+<span class="sd">            List of PV segments for side (Default = None)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">list_segments</span> <span class="o">=</span> <span class="p">[]</span> <span class="k">if</span> <span class="n">list_segments</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">list_segments</span>
         <span class="n">check_collinear</span><span class="p">(</span><span class="n">list_segments</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">list_segments</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">list_segments</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_all_surfaces</span> <span class="o">=</span> <span class="kc">None</span>
@@ -1056,7 +1094,7 @@
 
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">from_linestring_coords</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">coords</span><span class="p">,</span> <span class="n">shaded</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">normal_vector</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                               <span class="n">index</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">n_segments</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">surface_params</span><span class="o">=</span><span class="p">[]):</span>
+                               <span class="n">index</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">n_segments</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">surface_params</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Create a Side with a single PV surface, or multiple discretized</span>
 <span class="sd">        identical ones.</span>
 
@@ -1075,7 +1113,7 @@
 <span class="sd">            Number of same-length segments to use (Default = 1)</span>
 <span class="sd">        surface_params : list of str, optional</span>
 <span class="sd">            Names of the surface parameters, eg reflectivity, total incident</span>
-<span class="sd">            irradiance, temperature, etc. (Default = [])</span>
+<span class="sd">            irradiance, temperature, etc. (Default = None)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">n_segments</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
             <span class="n">list_pvsegments</span> <span class="o">=</span> <span class="p">[</span><span class="n">PVSegment</span><span class="o">.</span><span class="n">from_linestring_coords</span><span class="p">(</span>
@@ -1252,42 +1290,20 @@
     <span class="n">registry_cols</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;geom&#39;</span><span class="p">,</span> <span class="s1">&#39;line_type&#39;</span><span class="p">,</span> <span class="s1">&#39;pvrow_index&#39;</span><span class="p">,</span> <span class="s1">&#39;side&#39;</span><span class="p">,</span>
                      <span class="s1">&#39;pvsegment_index&#39;</span><span class="p">,</span> <span class="s1">&#39;shaded&#39;</span><span class="p">,</span> <span class="s1">&#39;surface_index&#39;</span><span class="p">]</span>
 
-<div class="viewcode-block" id="BasePVArray.__init__"><a class="viewcode-back" href="../developer/generated/base.BasePVArray.html#base.BasePVArray.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">list_pvrows</span><span class="o">=</span><span class="p">[],</span> <span class="n">ground</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">distance</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                 <span class="n">height</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Initialize PV array.</span>
+<div class="viewcode-block" id="BasePVArray.__init__"><a class="viewcode-back" href="../developer/generated/base.BasePVArray.html#base.BasePVArray.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axis_azimuth</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Initialize Base of PV array.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        list_pvrows : list of :py:class:`~pvfactors.geometry.pvrow.PVRow`, optional</span>
-<span class="sd">            List of PV rows in the PV array</span>
-<span class="sd">            (Default = [])</span>
-<span class="sd">        ground : :py:class:`~pvfactors.geometry.pvground.PVGround`, optional</span>
-<span class="sd">            Ground geometry for the PV array</span>
-<span class="sd">        distance : float, optional</span>
-<span class="sd">            Unique distance between PV rows, if exists (Default = None)</span>
-<span class="sd">        height : float, optional</span>
-<span class="sd">            Unique height of all PV rows, if exists (Default = None)</span>
+<span class="sd">        axis_azimuth : float, optional</span>
+<span class="sd">            Azimuth angle of rotation axis [deg] (Default = None)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">pvrows</span> <span class="o">=</span> <span class="n">list_pvrows</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">ground</span> <span class="o">=</span> <span class="n">ground</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">distance</span> <span class="o">=</span> <span class="n">distance</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">height</span> <span class="o">=</span> <span class="n">height</span>
+        <span class="c1"># All PV arrays should have a fixed axis azimuth in pvfactors</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">axis_azimuth</span> <span class="o">=</span> <span class="n">axis_azimuth</span>
 
-        <span class="c1"># Initialize shading attributes</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">illum_side</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="c1"># For view factors</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">edge_points</span> <span class="o">=</span> <span class="p">[]</span>
-
-        <span class="c1"># Property related attributes: will not be built unless called</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_all_surfaces</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_dict_surfaces</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_surface_registry</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_view_matrix</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_obstr_matrix</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_surfaces_indexed</span> <span class="o">=</span> <span class="kc">False</span>
-
-        <span class="c1"># Initialize view factor matrix</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">vf_matrix</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># needs to be calculated externally</span></div>
+        <span class="c1"># Initialize view factor matrix: will be calculated externally,</span>
+        <span class="c1"># i.e. not by the PV Array class itself</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vf_matrix</span> <span class="o">=</span> <span class="kc">None</span></div>
 
     <span class="k">def</span> <span class="nf">plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ax</span><span class="p">,</span> <span class="n">with_index</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Plot all the PV rows and the ground in the PV array.</span>
@@ -1322,13 +1338,11 @@
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">all_surfaces</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;List of all surfaces in the PV array.&quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_all_surfaces</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">list_surfaces</span> <span class="o">=</span> <span class="p">[]</span>
-            <span class="n">list_surfaces</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ground</span><span class="o">.</span><span class="n">all_surfaces</span>
-            <span class="k">for</span> <span class="n">pvrow</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">pvrows</span><span class="p">:</span>
-                <span class="n">list_surfaces</span> <span class="o">+=</span> <span class="n">pvrow</span><span class="o">.</span><span class="n">all_surfaces</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_all_surfaces</span> <span class="o">=</span> <span class="n">list_surfaces</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_all_surfaces</span>
+        <span class="n">list_surfaces</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">list_surfaces</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ground</span><span class="o">.</span><span class="n">all_surfaces</span>
+        <span class="k">for</span> <span class="n">pvrow</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">pvrows</span><span class="p">:</span>
+            <span class="n">list_surfaces</span> <span class="o">+=</span> <span class="n">pvrow</span><span class="o">.</span><span class="n">all_surfaces</span>
+        <span class="k">return</span> <span class="n">list_surfaces</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">n_surfaces</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -1345,9 +1359,17 @@
         <span class="sd">&quot;&quot;&quot;Surface registry of the PV array, build if does not exist yet.</span>
 <span class="sd">        The surface registry is a pandas DataFrame that contains all the</span>
 <span class="sd">        indexed surfaces of the PV array, with some of their properties.&quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_surface_registry</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_surface_registry</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_build_surface_registry</span><span class="p">()</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_surface_registry</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_build_surface_registry</span><span class="p">()</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">view_obstr_matrices</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;How to build the view matrix will be specific to the pv array</span>
+<span class="sd">        considered, so ``_build_view_matrix()`` needs to be implemented in</span>
+<span class="sd">        the child class.</span>
+<span class="sd">        The view matrix will represent the views between all the surfaces.</span>
+<span class="sd">        The obstruction matrix will represent the obstructions in views</span>
+<span class="sd">        between all the surfaces.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_build_view_matrix</span><span class="p">()</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">view_matrix</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -1355,9 +1377,8 @@
 <span class="sd">        considered, so ``_build_view_matrix()`` needs to be implemented in</span>
 <span class="sd">        the child class.</span>
 <span class="sd">        The view matrix will represent the views between all the surfaces.&quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_view_matrix</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_view_matrix</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obstr_matrix</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_build_view_matrix</span><span class="p">()</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_view_matrix</span>
+        <span class="n">view_matrix</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_build_view_matrix</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">view_matrix</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">obstr_matrix</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -1366,9 +1387,8 @@
 <span class="sd">        the child class.</span>
 <span class="sd">        The obstruction matrix will represent the obstructions in views</span>
 <span class="sd">        between all the surfaces.&quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obstr_matrix</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_view_matrix</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obstr_matrix</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_build_view_matrix</span><span class="p">()</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obstr_matrix</span>
+        <span class="n">_</span><span class="p">,</span> <span class="n">obstr_matrix</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_build_view_matrix</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">obstr_matrix</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">surface_indices</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -1383,13 +1403,8 @@
     <span class="k">def</span> <span class="nf">dict_surfaces</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Dictionay of surfaces in the PV array, where keys are the surface</span>
 <span class="sd">        indices.&quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dict_surfaces</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_surfaces_indexed</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">index_all_surfaces</span><span class="p">()</span>
-            <span class="n">all_surfaces</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">all_surfaces</span>
-            <span class="n">dict_surf</span> <span class="o">=</span> <span class="p">{</span><span class="n">surf</span><span class="o">.</span><span class="n">index</span><span class="p">:</span> <span class="n">surf</span> <span class="k">for</span> <span class="n">surf</span> <span class="ow">in</span> <span class="n">all_surfaces</span><span class="p">}</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_dict_surfaces</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">(</span><span class="n">dict_surf</span><span class="p">)</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dict_surfaces</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">index_all_surfaces</span><span class="p">()</span>
+        <span class="k">return</span> <span class="p">{</span><span class="n">surf</span><span class="o">.</span><span class="n">index</span><span class="p">:</span> <span class="n">surf</span> <span class="k">for</span> <span class="n">surf</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">all_surfaces</span><span class="p">}</span>
 
     <span class="k">def</span> <span class="nf">update_params</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_dict</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Update surface parameters in the collection.</span>
@@ -1407,14 +1422,15 @@
         <span class="sd">&quot;&quot;&quot;Add unique indices to all surfaces in the PV array.&quot;&quot;&quot;</span>
         <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">surface</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">all_surfaces</span><span class="p">):</span>
             <span class="n">surface</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="n">idx</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_surfaces_indexed</span> <span class="o">=</span> <span class="kc">True</span>
 
-    <span class="k">def</span> <span class="nf">_build_view_matrix</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_build_view_matrix</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Not implemented.&quot;&quot;&quot;</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span>
 
     <span class="k">def</span> <span class="nf">_build_surface_registry</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Build the surface registry of the PV array.&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;Build the surface registry of the PV array, which is a</span>
+<span class="sd">        pandas DataFrame with most of the geometry information contained</span>
+<span class="sd">        in the class object&quot;&quot;&quot;</span>
         <span class="n">dict_registry</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="p">[]</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">registry_cols</span><span class="p">}</span>
         <span class="c1"># Fill up registry with ground surfaces</span>
         <span class="n">surf_line_type</span> <span class="o">=</span> <span class="s1">&#39;ground&#39;</span>
@@ -1496,7 +1512,15 @@
 
         <span class="c1"># Make dataframe</span>
         <span class="n">surface_registry</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">dict_registry</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">surface_registry</span></div>
+        <span class="k">return</span> <span class="n">surface_registry</span>
+
+    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Not implemented.&quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+    <span class="k">def</span> <span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Not implemented.&quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
 </pre></div>
 
            </div>

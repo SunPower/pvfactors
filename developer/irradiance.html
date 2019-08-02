@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>irradiance &mdash; pvfactors 1.0.1+0.gb9e42db.dirty documentation</title>
+  <title>irradiance &mdash; pvfactors 1.1.0 documentation</title>
   
 
   
@@ -28,6 +28,7 @@
         <script type="text/javascript" src="../_static/doctools.js"></script>
         <script type="text/javascript" src="../_static/language_data.js"></script>
         <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
     
     <script type="text/javascript" src="../_static/js/theme.js"></script>
 
@@ -65,7 +66,7 @@
             
             
               <div class="version">
-                1.0.1
+                1.1.0
               </div>
             
           
@@ -179,23 +180,13 @@
     margin-top: -19px;
 }
 
-/* nice headers on first paragraph of info/warning boxes */
-.admonition .first {
-    margin: -12px;
-    padding: 6px 12px;
-    margin-bottom: 12px;
-    color: #fff;
-    line-height: 1;
-    display: block;
-}
-.admonition.warning .first {
-    background: #f0b37e;
-}
-.admonition.note .first {
-    background: #6ab0de;
-}
 .admonition > p:before {
     margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
 }
 </style>
 <div class="section" id="irradiance">
@@ -204,14 +195,14 @@
 <div class="section" id="module-irradiance.base">
 <span id="base"></span><h2>base<a class="headerlink" href="#module-irradiance.base" title="Permalink to this headline">¶</a></h2>
 <p>Module with Base classes for irradiance models</p>
-<table border="1" class="longtable docutils">
+<table class="longtable docutils align-default">
 <colgroup>
-<col width="10%" />
-<col width="90%" />
+<col style="width: 10%" />
+<col style="width: 90%" />
 </colgroup>
-<tbody valign="top">
-<tr class="row-odd"><td><a class="reference internal" href="generated/irradiance.base.BaseModel.html#irradiance.base.BaseModel" title="irradiance.base.BaseModel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">irradiance.base.BaseModel</span></code></a></td>
-<td>Base class for irradiance models</td>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/irradiance.base.BaseModel.html#irradiance.base.BaseModel" title="irradiance.base.BaseModel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">irradiance.base.BaseModel</span></code></a></p></td>
+<td><p>Base class for irradiance models</p></td>
 </tr>
 </tbody>
 </table>
@@ -219,17 +210,17 @@
 <div class="section" id="module-models">
 <span id="models"></span><h2>models<a class="headerlink" href="#module-models" title="Permalink to this headline">¶</a></h2>
 <p>Module containing irradiance models used with pv array geometries</p>
-<table border="1" class="longtable docutils">
+<table class="longtable docutils align-default">
 <colgroup>
-<col width="10%" />
-<col width="90%" />
+<col style="width: 10%" />
+<col style="width: 90%" />
 </colgroup>
-<tbody valign="top">
-<tr class="row-odd"><td><a class="reference internal" href="generated/models.IsotropicOrdered.html#models.IsotropicOrdered" title="models.IsotropicOrdered"><code class="xref py py-obj docutils literal notranslate"><span class="pre">models.IsotropicOrdered</span></code></a></td>
-<td>Diffuse isotropic sky model for <code class="xref py py-class docutils literal notranslate"><span class="pre">OrderedPVArray</span></code>.</td>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/models.IsotropicOrdered.html#models.IsotropicOrdered" title="models.IsotropicOrdered"><code class="xref py py-obj docutils literal notranslate"><span class="pre">models.IsotropicOrdered</span></code></a></p></td>
+<td><p>Diffuse isotropic sky model for <code class="xref py py-class docutils literal notranslate"><span class="pre">OrderedPVArray</span></code>.</p></td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="generated/models.HybridPerezOrdered.html#models.HybridPerezOrdered" title="models.HybridPerezOrdered"><code class="xref py py-obj docutils literal notranslate"><span class="pre">models.HybridPerezOrdered</span></code></a></td>
-<td>Model is based off Perez diffuse light model, and applied to pvfactors <code class="xref py py-class docutils literal notranslate"><span class="pre">OrderedPVArray</span></code> objects.</td>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/models.HybridPerezOrdered.html#models.HybridPerezOrdered" title="models.HybridPerezOrdered"><code class="xref py py-obj docutils literal notranslate"><span class="pre">models.HybridPerezOrdered</span></code></a></p></td>
+<td><p>Model is based off Perez diffuse light model, and applied to pvfactors <code class="xref py py-class docutils literal notranslate"><span class="pre">OrderedPVArray</span></code> objects.</p></td>
 </tr>
 </tbody>
 </table>

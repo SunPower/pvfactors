@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>engine &mdash; pvfactors 1.0.1+0.gb9e42db.dirty documentation</title>
+  <title>engine &mdash; pvfactors 1.1.0 documentation</title>
   
 
   
@@ -28,6 +28,7 @@
         <script type="text/javascript" src="../_static/doctools.js"></script>
         <script type="text/javascript" src="../_static/language_data.js"></script>
         <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
     
     <script type="text/javascript" src="../_static/js/theme.js"></script>
 
@@ -65,7 +66,7 @@
             
             
               <div class="version">
-                1.0.1
+                1.1.0
               </div>
             
           
@@ -162,7 +163,6 @@
 <span class="sd">timeseries simulations.&quot;&quot;&quot;</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">from</span> <span class="nn">pvfactors.geometry</span> <span class="k">import</span> <span class="n">OrderedPVArray</span>
 <span class="kn">from</span> <span class="nn">pvfactors.viewfactors</span> <span class="k">import</span> <span class="n">VFCalculator</span>
 <span class="kn">from</span> <span class="nn">pvfactors.irradiance</span> <span class="k">import</span> <span class="n">HybridPerezOrdered</span>
 <span class="kn">from</span> <span class="nn">scipy</span> <span class="k">import</span> <span class="n">linalg</span>
@@ -174,15 +174,15 @@
 <span class="sd">    as a timeseries when the pvarrays can be build from dictionary parameters</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="PVEngine.__init__"><a class="viewcode-back" href="../developer/generated/engine.PVEngine.html#engine.PVEngine.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">vf_calculator</span><span class="o">=</span><span class="n">VFCalculator</span><span class="p">(),</span>
+<div class="viewcode-block" id="PVEngine.__init__"><a class="viewcode-back" href="../developer/generated/engine.PVEngine.html#engine.PVEngine.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pvarray</span><span class="p">,</span> <span class="n">vf_calculator</span><span class="o">=</span><span class="n">VFCalculator</span><span class="p">(),</span>
                  <span class="n">irradiance_model</span><span class="o">=</span><span class="n">HybridPerezOrdered</span><span class="p">(),</span>
-                 <span class="n">cls_pvarray</span><span class="o">=</span><span class="n">OrderedPVArray</span><span class="p">):</span>
+                 <span class="n">fast_mode_pvrow_index</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Create pv engine class, and initialize timeseries parameters.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        params : dict</span>
-<span class="sd">            The parameters defining the PV array</span>
+<span class="sd">        pvarray : BasePVArray (or child) object</span>
+<span class="sd">            The initialized PV array object that will be used for calculations</span>
 <span class="sd">        vf_calculator : vf calculator object, optional</span>
 <span class="sd">            Calculator that will be used to calculate the view factor matrices</span>
 <span class="sd">            (Default =</span>
@@ -192,53 +192,53 @@
 <span class="sd">            (Default =</span>
 <span class="sd">            :py:class:`~pvfactors.irradiance.models.HybridPerezOrdered`</span>
 <span class="sd">            object)</span>
-<span class="sd">        cls_pvarray : class of PV array, optional</span>
-<span class="sd">            Class that will be used to build the PV array</span>
-<span class="sd">            (Default =</span>
-<span class="sd">            :py:class:`~pvfactors.geometry.pvarray.OrderedPVArray` class)</span>
+<span class="sd">        fast_mode_pvrow_index : int, optional</span>
+<span class="sd">            If a pvrow index is passed, then the PVEngine fast mode</span>
+<span class="sd">            will be activated and the engine calculation will be done only</span>
+<span class="sd">            for the back surface of the pvrow with the corresponding</span>
+<span class="sd">            index (Default = None)</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">params</span> <span class="o">=</span> <span class="n">params</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">vf_calculator</span> <span class="o">=</span> <span class="n">vf_calculator</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">irradiance</span> <span class="o">=</span> <span class="n">irradiance_model</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">cls_pvarray</span> <span class="o">=</span> <span class="n">cls_pvarray</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pvarray</span> <span class="o">=</span> <span class="n">pvarray</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">is_fast_mode</span> <span class="o">=</span> <span class="kc">False</span> <span class="k">if</span> <span class="n">fast_mode_pvrow_index</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fast_mode_pvrow_index</span> <span class="o">=</span> <span class="n">fast_mode_pvrow_index</span>
 
-        <span class="c1"># Required timeseries values</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">solar_zenith</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">solar_azimuth</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">surface_tilt</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">surface_azimuth</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">n_points</span> <span class="o">=</span> <span class="kc">None</span></div>
+        <span class="c1"># These values will be updated at fitting time</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_points</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">skip_step</span> <span class="o">=</span> <span class="kc">None</span></div>
 
     <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timestamps</span><span class="p">,</span> <span class="n">DNI</span><span class="p">,</span> <span class="n">DHI</span><span class="p">,</span> <span class="n">solar_zenith</span><span class="p">,</span> <span class="n">solar_azimuth</span><span class="p">,</span>
             <span class="n">surface_tilt</span><span class="p">,</span> <span class="n">surface_azimuth</span><span class="p">,</span> <span class="n">albedo</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Fit the timeseries data to the engine. More specifically,</span>
-<span class="sd">        save all the parameters that needs to be saved, and perform the</span>
-<span class="sd">        irradiance transformations required by the irradiance model.</span>
+<span class="sd">        save all the parameters that needs to be saved, and fit the PV array</span>
+<span class="sd">        and irradiance models to the data (i.e. perform all the intermediate</span>
+<span class="sd">        vector-based calculations).</span>
 <span class="sd">        Note that all angles follow the pvlib-python angle convention: North -</span>
 <span class="sd">        0 deg, East - 90 deg, etc.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        timestamps : array-like</span>
+<span class="sd">        timestamps : array-like or timestamp-like</span>
 <span class="sd">            List of timestamps of the simulation.</span>
-<span class="sd">        DNI : array-like</span>
+<span class="sd">        DNI : array-like or float</span>
 <span class="sd">            Direct normal irradiance values [W/m2]</span>
-<span class="sd">        DHI : array-like</span>
+<span class="sd">        DHI : array-like or float</span>
 <span class="sd">            Diffuse horizontal irradiance values [W/m2]</span>
-<span class="sd">        solar_zenith : array-like</span>
+<span class="sd">        solar_zenith : array-like or float</span>
 <span class="sd">            Solar zenith angles [deg]</span>
-<span class="sd">        solar_azimuth : array-like</span>
+<span class="sd">        solar_azimuth : array-like or float</span>
 <span class="sd">            Solar azimuth angles [deg]</span>
-<span class="sd">        surface_tilt : array-like</span>
+<span class="sd">        surface_tilt : array-like or float</span>
 <span class="sd">            Surface tilt angles, from 0 to 180 [deg]</span>
-<span class="sd">        surface_azimuth : array-like</span>
+<span class="sd">        surface_azimuth : array-like or float</span>
 <span class="sd">            Surface azimuth angles [deg]</span>
-<span class="sd">        albedo : array-like</span>
-<span class="sd">            Albedo values (or ground reflectivity)</span>
+<span class="sd">        albedo : array-like or float</span>
+<span class="sd">            Albedo values (ground reflectivity)</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="c1"># Save</span>
+        <span class="c1"># Format inputs to numpy arrays if it looks like floats where inputted</span>
         <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isscalar</span><span class="p">(</span><span class="n">DNI</span><span class="p">):</span>
             <span class="n">timestamps</span> <span class="o">=</span> <span class="p">[</span><span class="n">timestamps</span><span class="p">]</span>
             <span class="n">DNI</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">DNI</span><span class="p">])</span>
@@ -247,24 +247,34 @@
             <span class="n">solar_azimuth</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">solar_azimuth</span><span class="p">])</span>
             <span class="n">surface_tilt</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">surface_tilt</span><span class="p">])</span>
             <span class="n">surface_azimuth</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">surface_azimuth</span><span class="p">])</span>
+
+        <span class="c1"># Format albedo</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">n_points</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">DNI</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isscalar</span><span class="p">(</span><span class="n">albedo</span><span class="p">):</span>
             <span class="n">albedo</span> <span class="o">=</span> <span class="n">albedo</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_points</span><span class="p">)</span>
 
-        <span class="c1"># Save timeseries values</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">solar_zenith</span> <span class="o">=</span> <span class="n">solar_zenith</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">solar_azimuth</span> <span class="o">=</span> <span class="n">solar_azimuth</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">surface_tilt</span> <span class="o">=</span> <span class="n">surface_tilt</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">surface_azimuth</span> <span class="o">=</span> <span class="n">surface_azimuth</span>
-
         <span class="c1"># Fit irradiance model</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">irradiance</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">timestamps</span><span class="p">,</span> <span class="n">DNI</span><span class="p">,</span> <span class="n">DHI</span><span class="p">,</span> <span class="n">solar_zenith</span><span class="p">,</span> <span class="n">solar_azimuth</span><span class="p">,</span>
-                            <span class="n">surface_tilt</span><span class="p">,</span> <span class="n">surface_azimuth</span><span class="p">,</span>
-                            <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s1">&#39;rho_front_pvrow&#39;</span><span class="p">],</span>
-                            <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s1">&#39;rho_back_pvrow&#39;</span><span class="p">],</span> <span class="n">albedo</span><span class="p">)</span>
+                            <span class="n">surface_tilt</span><span class="p">,</span> <span class="n">surface_azimuth</span><span class="p">,</span> <span class="n">albedo</span><span class="p">)</span>
+
+        <span class="c1"># Fit PV array</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pvarray</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">solar_zenith</span><span class="p">,</span> <span class="n">solar_azimuth</span><span class="p">,</span> <span class="n">surface_tilt</span><span class="p">,</span>
+                         <span class="n">surface_azimuth</span><span class="p">)</span>
+
+        <span class="c1"># Skip timesteps when:</span>
+        <span class="c1">#    - solar zenith &gt; 90, ie the sun is down</span>
+        <span class="c1">#    - DNI or DHI is negative, which does not make sense</span>
+        <span class="c1">#    - DNI and DHI are both zero</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">skip_step</span> <span class="o">=</span> <span class="p">(</span><span class="n">solar_zenith</span> <span class="o">&gt;</span> <span class="mi">90</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">DNI</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">DHI</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span> \
+            <span class="o">|</span> <span class="p">((</span><span class="n">DNI</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">DHI</span> <span class="o">==</span> <span class="mi">0</span><span class="p">))</span>
 
     <span class="k">def</span> <span class="nf">run_timestep</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idx</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Run simulation for a single timestep index.</span>
+
+<span class="sd">        Timestep will be skipped when:</span>
+<span class="sd">            - solar zenith &gt; 90, ie the sun is down</span>
+<span class="sd">            - DNI or DHI is negative, which does not make sense</span>
+<span class="sd">            - DNI and DHI are both zero</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -273,58 +283,82 @@
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        pvarray : PV array object</span>
+<span class="sd">        pvarray : PV array object or None</span>
 <span class="sd">            PV array object after all the calculations are performed and</span>
-<span class="sd">            applied to it</span>
+<span class="sd">            applied to it, ``None`` if the timestep is skipped</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="c1"># Check that the sun is up, if not do not run calculations</span>
-        <span class="n">solar_zenith</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">solar_zenith</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
-        <span class="n">sun_is_up</span> <span class="o">=</span> <span class="n">solar_zenith</span> <span class="o">&lt;=</span> <span class="mi">90</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">skip_step</span><span class="p">[</span><span class="n">idx</span><span class="p">]:</span>
+            <span class="n">pvarray</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># To be returned at the end</span>
+            <span class="n">pvarray</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pvarray</span>
 
-        <span class="k">if</span> <span class="n">sun_is_up</span><span class="p">:</span>
-            <span class="c1"># Update parameters</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
-                <span class="p">{</span><span class="s1">&#39;solar_zenith&#39;</span><span class="p">:</span> <span class="n">solar_zenith</span><span class="p">,</span>
-                 <span class="s1">&#39;solar_azimuth&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">solar_azimuth</span><span class="p">[</span><span class="n">idx</span><span class="p">],</span>
-                 <span class="s1">&#39;surface_tilt&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">surface_tilt</span><span class="p">[</span><span class="n">idx</span><span class="p">],</span>
-                 <span class="s1">&#39;surface_azimuth&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">surface_azimuth</span><span class="p">[</span><span class="n">idx</span><span class="p">]})</span>
-
-            <span class="c1"># Create pv array</span>
-            <span class="n">pvarray</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cls_pvarray</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">,</span> <span class="n">surface_params</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">irradiance</span><span class="o">.</span><span class="n">params</span><span class="p">)</span>
-            <span class="n">pvarray</span><span class="o">.</span><span class="n">cast_shadows</span><span class="p">()</span>
-            <span class="n">pvarray</span><span class="o">.</span><span class="n">cuts_for_pvrow_view</span><span class="p">()</span>
-
-            <span class="c1"># Calculate view factors</span>
-            <span class="n">geom_dict</span> <span class="o">=</span> <span class="n">pvarray</span><span class="o">.</span><span class="n">dict_surfaces</span>
-            <span class="n">vf_matrix</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vf_calculator</span><span class="o">.</span><span class="n">get_vf_matrix</span><span class="p">(</span>
-                <span class="n">geom_dict</span><span class="p">,</span> <span class="n">pvarray</span><span class="o">.</span><span class="n">view_matrix</span><span class="p">,</span> <span class="n">pvarray</span><span class="o">.</span><span class="n">obstr_matrix</span><span class="p">,</span>
-                <span class="n">pvarray</span><span class="o">.</span><span class="n">pvrows</span><span class="p">)</span>
-            <span class="n">pvarray</span><span class="o">.</span><span class="n">vf_matrix</span> <span class="o">=</span> <span class="n">vf_matrix</span>
+            <span class="c1"># Transform pvarray to time step</span>
+            <span class="n">pvarray</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span>
 
             <span class="c1"># Apply irradiance terms to pvarray</span>
-            <span class="n">irradiance_vec</span><span class="p">,</span> <span class="n">invrho_vec</span> <span class="o">=</span> \
+            <span class="n">irradiance_vec</span><span class="p">,</span> <span class="n">rho_vec</span><span class="p">,</span> <span class="n">invrho_vec</span><span class="p">,</span> <span class="n">total_perez_vec</span> <span class="o">=</span> \
                 <span class="bp">self</span><span class="o">.</span><span class="n">irradiance</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">pvarray</span><span class="p">,</span> <span class="n">idx</span><span class="o">=</span><span class="n">idx</span><span class="p">)</span>
 
-            <span class="c1"># Calculate radiosities</span>
-            <span class="n">invrho_mat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">invrho_vec</span><span class="p">)</span>
-            <span class="n">a_mat</span> <span class="o">=</span> <span class="n">invrho_mat</span> <span class="o">-</span> <span class="n">vf_matrix</span>
-            <span class="n">q0</span> <span class="o">=</span> <span class="n">linalg</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">a_mat</span><span class="p">,</span> <span class="n">irradiance_vec</span><span class="p">)</span>
-            <span class="n">qinc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">invrho_mat</span><span class="p">,</span> <span class="n">q0</span><span class="p">)</span>
+            <span class="c1"># Prepare inputs to view factor calculator</span>
+            <span class="n">geom_dict</span> <span class="o">=</span> <span class="n">pvarray</span><span class="o">.</span><span class="n">dict_surfaces</span>
+            <span class="n">view_matrix</span><span class="p">,</span> <span class="n">obstr_matrix</span> <span class="o">=</span> <span class="n">pvarray</span><span class="o">.</span><span class="n">view_obstr_matrices</span>
 
-            <span class="c1"># Calculate other terms</span>
-            <span class="n">isotropic_vec</span> <span class="o">=</span> <span class="n">vf_matrix</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">irradiance_vec</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-            <span class="n">reflection_vec</span> <span class="o">=</span> <span class="n">qinc</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">irradiance_vec</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">isotropic_vec</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_fast_mode</span><span class="p">:</span>
+                <span class="c1"># Indices of the surfaces of the back of the selected pvrows</span>
+                <span class="n">list_surface_indices</span> <span class="o">=</span> <span class="n">pvarray</span><span class="o">.</span><span class="n">pvrows</span><span class="p">[</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">fast_mode_pvrow_index</span><span class="p">]</span><span class="o">.</span><span class="n">back</span><span class="o">.</span><span class="n">surface_indices</span>
 
-            <span class="c1"># Update surfaces with values</span>
-            <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">surface</span> <span class="ow">in</span> <span class="n">geom_dict</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-                <span class="n">surface</span><span class="o">.</span><span class="n">update_params</span><span class="p">({</span><span class="s1">&#39;q0&#39;</span><span class="p">:</span> <span class="n">q0</span><span class="p">[</span><span class="n">idx</span><span class="p">],</span> <span class="s1">&#39;qinc&#39;</span><span class="p">:</span> <span class="n">qinc</span><span class="p">[</span><span class="n">idx</span><span class="p">],</span>
-                                       <span class="s1">&#39;isotropic&#39;</span><span class="p">:</span> <span class="n">isotropic_vec</span><span class="p">[</span><span class="n">idx</span><span class="p">],</span>
-                                       <span class="s1">&#39;reflection&#39;</span><span class="p">:</span> <span class="n">reflection_vec</span><span class="p">[</span><span class="n">idx</span><span class="p">]})</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">pvarray</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="c1"># Calculate view factors using a subset of view_matrix to</span>
+                <span class="c1"># gain in calculation speed</span>
+                <span class="n">vf_matrix_subset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vf_calculator</span><span class="o">.</span><span class="n">get_vf_matrix_subset</span><span class="p">(</span>
+                    <span class="n">geom_dict</span><span class="p">,</span> <span class="n">view_matrix</span><span class="p">,</span> <span class="n">obstr_matrix</span><span class="p">,</span> <span class="n">pvarray</span><span class="o">.</span><span class="n">pvrows</span><span class="p">,</span>
+                    <span class="n">list_surface_indices</span><span class="p">)</span>
+                <span class="n">pvarray</span><span class="o">.</span><span class="n">vf_matrix</span> <span class="o">=</span> <span class="n">vf_matrix_subset</span>
+
+                <span class="n">irradiance_vec_subset</span> <span class="o">=</span> <span class="n">irradiance_vec</span><span class="p">[</span><span class="n">list_surface_indices</span><span class="p">]</span>
+                <span class="c1"># In fast mode, will not care to calculate q0</span>
+                <span class="n">qinc</span> <span class="o">=</span> <span class="n">vf_matrix_subset</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">rho_vec</span> <span class="o">*</span> <span class="n">total_perez_vec</span><span class="p">)</span> \
+                    <span class="o">+</span> <span class="n">irradiance_vec_subset</span>
+
+                <span class="c1"># Calculate other terms</span>
+                <span class="n">isotropic_vec</span> <span class="o">=</span> <span class="n">vf_matrix_subset</span><span class="p">[:,</span> <span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">total_perez_vec</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                <span class="n">reflection_vec</span> <span class="o">=</span> <span class="n">qinc</span> <span class="o">-</span> <span class="n">irradiance_vec_subset</span> \
+                    <span class="o">-</span> <span class="n">isotropic_vec</span>
+
+                <span class="c1"># Update selected surfaces with values</span>
+                <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">surf_idx</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">list_surface_indices</span><span class="p">):</span>
+                    <span class="n">surface</span> <span class="o">=</span> <span class="n">geom_dict</span><span class="p">[</span><span class="n">surf_idx</span><span class="p">]</span>
+                    <span class="n">surface</span><span class="o">.</span><span class="n">update_params</span><span class="p">({</span><span class="s1">&#39;qinc&#39;</span><span class="p">:</span> <span class="n">qinc</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+                                           <span class="s1">&#39;isotropic&#39;</span><span class="p">:</span> <span class="n">isotropic_vec</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+                                           <span class="s1">&#39;reflection&#39;</span><span class="p">:</span> <span class="n">reflection_vec</span><span class="p">[</span><span class="n">i</span><span class="p">]})</span>
+
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># Calculate view factors</span>
+                <span class="n">vf_matrix</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vf_calculator</span><span class="o">.</span><span class="n">get_vf_matrix</span><span class="p">(</span>
+                    <span class="n">geom_dict</span><span class="p">,</span> <span class="n">view_matrix</span><span class="p">,</span> <span class="n">obstr_matrix</span><span class="p">,</span> <span class="n">pvarray</span><span class="o">.</span><span class="n">pvrows</span><span class="p">)</span>
+                <span class="n">pvarray</span><span class="o">.</span><span class="n">vf_matrix</span> <span class="o">=</span> <span class="n">vf_matrix</span>
+
+                <span class="c1"># Calculate radiosities</span>
+                <span class="n">invrho_mat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">invrho_vec</span><span class="p">)</span>
+                <span class="n">a_mat</span> <span class="o">=</span> <span class="n">invrho_mat</span> <span class="o">-</span> <span class="n">vf_matrix</span>
+                <span class="n">q0</span> <span class="o">=</span> <span class="n">linalg</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">a_mat</span><span class="p">,</span> <span class="n">irradiance_vec</span><span class="p">)</span>
+                <span class="n">qinc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">invrho_mat</span><span class="p">,</span> <span class="n">q0</span><span class="p">)</span>
+
+                <span class="c1"># Calculate other terms</span>
+                <span class="n">isotropic_vec</span> <span class="o">=</span> <span class="n">vf_matrix</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">irradiance_vec</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                <span class="n">reflection_vec</span> <span class="o">=</span> <span class="n">qinc</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> \
+                    <span class="o">-</span> <span class="n">irradiance_vec</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">isotropic_vec</span>
+
+                <span class="c1"># Update surfaces with values</span>
+                <span class="k">for</span> <span class="n">idx_surf</span><span class="p">,</span> <span class="n">surface</span> <span class="ow">in</span> <span class="n">geom_dict</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                    <span class="n">surface</span><span class="o">.</span><span class="n">update_params</span><span class="p">(</span>
+                        <span class="p">{</span><span class="s1">&#39;q0&#39;</span><span class="p">:</span> <span class="n">q0</span><span class="p">[</span><span class="n">idx_surf</span><span class="p">],</span>
+                         <span class="s1">&#39;qinc&#39;</span><span class="p">:</span> <span class="n">qinc</span><span class="p">[</span><span class="n">idx_surf</span><span class="p">],</span>
+                         <span class="s1">&#39;isotropic&#39;</span><span class="p">:</span> <span class="n">isotropic_vec</span><span class="p">[</span><span class="n">idx_surf</span><span class="p">],</span>
+                         <span class="s1">&#39;reflection&#39;</span><span class="p">:</span> <span class="n">reflection_vec</span><span class="p">[</span><span class="n">idx_surf</span><span class="p">]})</span>
 
         <span class="k">return</span> <span class="n">pvarray</span>
 

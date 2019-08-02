@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Developer API &mdash; pvfactors 1.0.1+0.gb9e42db.dirty documentation</title>
+  <title>Developer API &mdash; pvfactors 1.1.0 documentation</title>
   
 
   
@@ -28,6 +28,7 @@
         <script type="text/javascript" src="../_static/doctools.js"></script>
         <script type="text/javascript" src="../_static/language_data.js"></script>
         <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
     
     <script type="text/javascript" src="../_static/js/theme.js"></script>
 
@@ -67,7 +68,7 @@
             
             
               <div class="version">
-                1.0.1
+                1.1.0
               </div>
             
           
@@ -245,23 +246,13 @@
     margin-top: -19px;
 }
 
-/* nice headers on first paragraph of info/warning boxes */
-.admonition .first {
-    margin: -12px;
-    padding: 6px 12px;
-    margin-bottom: 12px;
-    color: #fff;
-    line-height: 1;
-    display: block;
-}
-.admonition.warning .first {
-    background: #f0b37e;
-}
-.admonition.note .first {
-    background: #6ab0de;
-}
 .admonition > p:before {
     margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
 }
 </style>
 <div class="section" id="developer-api">
@@ -277,29 +268,29 @@ For clarity and simplicity, all inherited methods and attributes have been remov
 <div class="section" id="module-base">
 <span id="base"></span><h3>base<a class="headerlink" href="#module-base" title="Permalink to this headline">¶</a></h3>
 <p>Base classes for pvfactors geometry subpackage.</p>
-<table border="1" class="longtable docutils">
+<table class="longtable docutils align-default">
 <colgroup>
-<col width="10%" />
-<col width="90%" />
+<col style="width: 10%" />
+<col style="width: 90%" />
 </colgroup>
-<tbody valign="top">
-<tr class="row-odd"><td><a class="reference internal" href="generated/base.BaseSurface.html#base.BaseSurface" title="base.BaseSurface"><code class="xref py py-obj docutils literal notranslate"><span class="pre">base.BaseSurface</span></code></a></td>
-<td>Base surfaces will be extensions of <code class="xref py py-class docutils literal notranslate"><span class="pre">LineString</span></code> classes, but adding an orientation to it (normal vector).</td>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/base.BaseSurface.html#base.BaseSurface" title="base.BaseSurface"><code class="xref py py-obj docutils literal notranslate"><span class="pre">base.BaseSurface</span></code></a></p></td>
+<td><p>Base surfaces will be extensions of <code class="xref py py-class docutils literal notranslate"><span class="pre">LineString</span></code> classes, but adding an orientation to it (normal vector).</p></td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="generated/base.PVSurface.html#base.PVSurface" title="base.PVSurface"><code class="xref py py-obj docutils literal notranslate"><span class="pre">base.PVSurface</span></code></a></td>
-<td>PV surfaces inherit from <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseSurface</span></code>.</td>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/base.PVSurface.html#base.PVSurface" title="base.PVSurface"><code class="xref py py-obj docutils literal notranslate"><span class="pre">base.PVSurface</span></code></a></p></td>
+<td><p>PV surfaces inherit from <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseSurface</span></code>.</p></td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="generated/base.ShadeCollection.html#base.ShadeCollection" title="base.ShadeCollection"><code class="xref py py-obj docutils literal notranslate"><span class="pre">base.ShadeCollection</span></code></a></td>
-<td>A group of <code class="xref py py-class docutils literal notranslate"><span class="pre">PVSurface</span></code> objects that all have the same shading status.</td>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/base.ShadeCollection.html#base.ShadeCollection" title="base.ShadeCollection"><code class="xref py py-obj docutils literal notranslate"><span class="pre">base.ShadeCollection</span></code></a></p></td>
+<td><p>A group of <code class="xref py py-class docutils literal notranslate"><span class="pre">PVSurface</span></code> objects that all have the same shading status.</p></td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="generated/base.PVSegment.html#base.PVSegment" title="base.PVSegment"><code class="xref py py-obj docutils literal notranslate"><span class="pre">base.PVSegment</span></code></a></td>
-<td>A PV segment will be a collection of 2 collinear and contiguous shade collections, a shaded one and an illuminated one.</td>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/base.PVSegment.html#base.PVSegment" title="base.PVSegment"><code class="xref py py-obj docutils literal notranslate"><span class="pre">base.PVSegment</span></code></a></p></td>
+<td><p>A PV segment will be a collection of 2 collinear and contiguous shade collections, a shaded one and an illuminated one.</p></td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="generated/base.BaseSide.html#base.BaseSide" title="base.BaseSide"><code class="xref py py-obj docutils literal notranslate"><span class="pre">base.BaseSide</span></code></a></td>
-<td>A side represents a fixed collection of PV segments objects that should all be collinear, with the same normal vector</td>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/base.BaseSide.html#base.BaseSide" title="base.BaseSide"><code class="xref py py-obj docutils literal notranslate"><span class="pre">base.BaseSide</span></code></a></p></td>
+<td><p>A side represents a fixed collection of PV segments objects that should all be collinear, with the same normal vector</p></td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="generated/base.BasePVArray.html#base.BasePVArray" title="base.BasePVArray"><code class="xref py py-obj docutils literal notranslate"><span class="pre">base.BasePVArray</span></code></a></td>
-<td>Base class for PV arrays in pvfactors.</td>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/base.BasePVArray.html#base.BasePVArray" title="base.BasePVArray"><code class="xref py py-obj docutils literal notranslate"><span class="pre">base.BasePVArray</span></code></a></p></td>
+<td><p>Base class for PV arrays in pvfactors.</p></td>
 </tr>
 </tbody>
 </table>
@@ -307,17 +298,17 @@ For clarity and simplicity, all inherited methods and attributes have been remov
 <div class="section" id="module-pvrow">
 <span id="pvrow"></span><h3>pvrow<a class="headerlink" href="#module-pvrow" title="Permalink to this headline">¶</a></h3>
 <p>Module will classes related to PV row geometries</p>
-<table border="1" class="longtable docutils">
+<table class="longtable docutils align-default">
 <colgroup>
-<col width="10%" />
-<col width="90%" />
+<col style="width: 10%" />
+<col style="width: 90%" />
 </colgroup>
-<tbody valign="top">
-<tr class="row-odd"><td><a class="reference internal" href="generated/pvrow.PVRowSide.html#pvrow.PVRowSide" title="pvrow.PVRowSide"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pvrow.PVRowSide</span></code></a></td>
-<td>A PV row side represents the whole surface of one side of a PV row.</td>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/pvrow.PVRowSide.html#pvrow.PVRowSide" title="pvrow.PVRowSide"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pvrow.PVRowSide</span></code></a></p></td>
+<td><p>A PV row side represents the whole surface of one side of a PV row.</p></td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="generated/pvrow.PVRow.html#pvrow.PVRow" title="pvrow.PVRow"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pvrow.PVRow</span></code></a></td>
-<td>A PV row is made of two PV row sides, a front and a back one.</td>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/pvrow.PVRow.html#pvrow.PVRow" title="pvrow.PVRow"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pvrow.PVRow</span></code></a></p></td>
+<td><p>A PV row is made of two PV row sides, a front and a back one.</p></td>
 </tr>
 </tbody>
 </table>
@@ -325,14 +316,14 @@ For clarity and simplicity, all inherited methods and attributes have been remov
 <div class="section" id="module-pvground">
 <span id="pvground"></span><h3>pvground<a class="headerlink" href="#module-pvground" title="Permalink to this headline">¶</a></h3>
 <p>Classes for implementation of ground geometry</p>
-<table border="1" class="longtable docutils">
+<table class="longtable docutils align-default">
 <colgroup>
-<col width="10%" />
-<col width="90%" />
+<col style="width: 10%" />
+<col style="width: 90%" />
 </colgroup>
-<tbody valign="top">
-<tr class="row-odd"><td><a class="reference internal" href="generated/pvground.PVGround.html#pvground.PVGround" title="pvground.PVGround"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pvground.PVGround</span></code></a></td>
-<td>Class that defines the ground in PV arrays.</td>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/pvground.PVGround.html#pvground.PVGround" title="pvground.PVGround"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pvground.PVGround</span></code></a></p></td>
+<td><p>Class that defines the ground geometry in PV arrays.</p></td>
 </tr>
 </tbody>
 </table>
@@ -341,14 +332,14 @@ For clarity and simplicity, all inherited methods and attributes have been remov
 <span id="pvarray"></span><h3>pvarray<a class="headerlink" href="#module-pvarray" title="Permalink to this headline">¶</a></h3>
 <p>Module containing PV array classes, which will use PV rows and ground
 geometries.</p>
-<table border="1" class="longtable docutils">
+<table class="longtable docutils align-default">
 <colgroup>
-<col width="10%" />
-<col width="90%" />
+<col style="width: 10%" />
+<col style="width: 90%" />
 </colgroup>
-<tbody valign="top">
-<tr class="row-odd"><td><a class="reference internal" href="generated/pvarray.OrderedPVArray.html#pvarray.OrderedPVArray" title="pvarray.OrderedPVArray"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pvarray.OrderedPVArray</span></code></a></td>
-<td>An ordered PV array has a flat horizontal ground, and pv rows which are all at the same height, with the same surface tilt and azimuth angles, and also all equally spaced.</td>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/pvarray.OrderedPVArray.html#pvarray.OrderedPVArray" title="pvarray.OrderedPVArray"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pvarray.OrderedPVArray</span></code></a></p></td>
+<td><p>An ordered PV array has a flat horizontal ground, and pv rows which are all at the same height, with the same surface tilt and azimuth angles, and also all equally spaced.</p></td>
 </tr>
 </tbody>
 </table>
@@ -360,14 +351,14 @@ geometries.</p>
 <div class="section" id="module-calculator">
 <span id="calculator"></span><h3>calculator<a class="headerlink" href="#module-calculator" title="Permalink to this headline">¶</a></h3>
 <p>Module with classes and functions to calculate views and view factors</p>
-<table border="1" class="longtable docutils">
+<table class="longtable docutils align-default">
 <colgroup>
-<col width="10%" />
-<col width="90%" />
+<col style="width: 10%" />
+<col style="width: 90%" />
 </colgroup>
-<tbody valign="top">
-<tr class="row-odd"><td><a class="reference internal" href="generated/calculator.VFCalculator.html#calculator.VFCalculator" title="calculator.VFCalculator"><code class="xref py py-obj docutils literal notranslate"><span class="pre">calculator.VFCalculator</span></code></a></td>
-<td>This calculator class will be used for the calculation of view factors for PV arrays</td>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/calculator.VFCalculator.html#calculator.VFCalculator" title="calculator.VFCalculator"><code class="xref py py-obj docutils literal notranslate"><span class="pre">calculator.VFCalculator</span></code></a></p></td>
+<td><p>This calculator class will be used for the calculation of view factors for PV arrays</p></td>
 </tr>
 </tbody>
 </table>
@@ -375,14 +366,14 @@ geometries.</p>
 <div class="section" id="module-mapper">
 <span id="mapper"></span><h3>mapper<a class="headerlink" href="#module-mapper" title="Permalink to this headline">¶</a></h3>
 <p>Classes that map view types to vf calculation methods</p>
-<table border="1" class="longtable docutils">
+<table class="longtable docutils align-default">
 <colgroup>
-<col width="10%" />
-<col width="90%" />
+<col style="width: 10%" />
+<col style="width: 90%" />
 </colgroup>
-<tbody valign="top">
-<tr class="row-odd"><td><a class="reference internal" href="generated/mapper.VFMapperOrderedPVArray.html#mapper.VFMapperOrderedPVArray" title="mapper.VFMapperOrderedPVArray"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mapper.VFMapperOrderedPVArray</span></code></a></td>
-<td>This class maps the “view types” of the <code class="xref py py-class docutils literal notranslate"><span class="pre">OrderedPVArray</span></code> <code class="docutils literal notranslate"><span class="pre">view_matrix</span></code> property to some view factor calculation functions.</td>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/mapper.VFMapperOrderedPVArray.html#mapper.VFMapperOrderedPVArray" title="mapper.VFMapperOrderedPVArray"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mapper.VFMapperOrderedPVArray</span></code></a></p></td>
+<td><p>This class maps the “view types” of the <code class="xref py py-class docutils literal notranslate"><span class="pre">OrderedPVArray</span></code> <code class="docutils literal notranslate"><span class="pre">view_matrix</span></code> property to some view factor calculation functions.</p></td>
 </tr>
 </tbody>
 </table>
@@ -394,14 +385,14 @@ geometries.</p>
 <div class="section" id="id2">
 <h3>base<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h3>
 <span class="target" id="module-irradiance.base"></span><p>Module with Base classes for irradiance models</p>
-<table border="1" class="longtable docutils">
+<table class="longtable docutils align-default">
 <colgroup>
-<col width="10%" />
-<col width="90%" />
+<col style="width: 10%" />
+<col style="width: 90%" />
 </colgroup>
-<tbody valign="top">
-<tr class="row-odd"><td><a class="reference internal" href="generated/irradiance.base.BaseModel.html#irradiance.base.BaseModel" title="irradiance.base.BaseModel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">irradiance.base.BaseModel</span></code></a></td>
-<td>Base class for irradiance models</td>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/irradiance.base.BaseModel.html#irradiance.base.BaseModel" title="irradiance.base.BaseModel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">irradiance.base.BaseModel</span></code></a></p></td>
+<td><p>Base class for irradiance models</p></td>
 </tr>
 </tbody>
 </table>
@@ -409,17 +400,17 @@ geometries.</p>
 <div class="section" id="module-models">
 <span id="models"></span><h3>models<a class="headerlink" href="#module-models" title="Permalink to this headline">¶</a></h3>
 <p>Module containing irradiance models used with pv array geometries</p>
-<table border="1" class="longtable docutils">
+<table class="longtable docutils align-default">
 <colgroup>
-<col width="10%" />
-<col width="90%" />
+<col style="width: 10%" />
+<col style="width: 90%" />
 </colgroup>
-<tbody valign="top">
-<tr class="row-odd"><td><a class="reference internal" href="generated/models.IsotropicOrdered.html#models.IsotropicOrdered" title="models.IsotropicOrdered"><code class="xref py py-obj docutils literal notranslate"><span class="pre">models.IsotropicOrdered</span></code></a></td>
-<td>Diffuse isotropic sky model for <code class="xref py py-class docutils literal notranslate"><span class="pre">OrderedPVArray</span></code>.</td>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/models.IsotropicOrdered.html#models.IsotropicOrdered" title="models.IsotropicOrdered"><code class="xref py py-obj docutils literal notranslate"><span class="pre">models.IsotropicOrdered</span></code></a></p></td>
+<td><p>Diffuse isotropic sky model for <code class="xref py py-class docutils literal notranslate"><span class="pre">OrderedPVArray</span></code>.</p></td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="generated/models.HybridPerezOrdered.html#models.HybridPerezOrdered" title="models.HybridPerezOrdered"><code class="xref py py-obj docutils literal notranslate"><span class="pre">models.HybridPerezOrdered</span></code></a></td>
-<td>Model is based off Perez diffuse light model, and applied to pvfactors <code class="xref py py-class docutils literal notranslate"><span class="pre">OrderedPVArray</span></code> objects.</td>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/models.HybridPerezOrdered.html#models.HybridPerezOrdered" title="models.HybridPerezOrdered"><code class="xref py py-obj docutils literal notranslate"><span class="pre">models.HybridPerezOrdered</span></code></a></p></td>
+<td><p>Model is based off Perez diffuse light model, and applied to pvfactors <code class="xref py py-class docutils literal notranslate"><span class="pre">OrderedPVArray</span></code> objects.</p></td>
 </tr>
 </tbody>
 </table>
@@ -429,14 +420,14 @@ geometries.</p>
 <span id="engine"></span><h2>engine<a class="headerlink" href="#module-engine" title="Permalink to this headline">¶</a></h2>
 <p>This module contains the engine classes that will run the complete
 timeseries simulations.</p>
-<table border="1" class="longtable docutils">
+<table class="longtable docutils align-default">
 <colgroup>
-<col width="10%" />
-<col width="90%" />
+<col style="width: 10%" />
+<col style="width: 90%" />
 </colgroup>
-<tbody valign="top">
-<tr class="row-odd"><td><a class="reference internal" href="generated/engine.PVEngine.html#engine.PVEngine" title="engine.PVEngine"><code class="xref py py-obj docutils literal notranslate"><span class="pre">engine.PVEngine</span></code></a></td>
-<td>Class putting all of the calculations together, and able to run it as a timeseries when the pvarrays can be build from dictionary parameters</td>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/engine.PVEngine.html#engine.PVEngine" title="engine.PVEngine"><code class="xref py py-obj docutils literal notranslate"><span class="pre">engine.PVEngine</span></code></a></p></td>
+<td><p>Class putting all of the calculations together, and able to run it as a timeseries when the pvarrays can be build from dictionary parameters</p></td>
 </tr>
 </tbody>
 </table>
@@ -445,17 +436,17 @@ timeseries simulations.</p>
 <span id="run"></span><h2>run<a class="headerlink" href="#module-run" title="Permalink to this headline">¶</a></h2>
 <p>Module containing the functions to run engine calculations in normal or
 parallel mode.</p>
-<table border="1" class="longtable docutils">
+<table class="longtable docutils align-default">
 <colgroup>
-<col width="10%" />
-<col width="90%" />
+<col style="width: 10%" />
+<col style="width: 90%" />
 </colgroup>
-<tbody valign="top">
-<tr class="row-odd"><td><a class="reference internal" href="generated/run.run_timeseries_engine.html#run.run_timeseries_engine" title="run.run_timeseries_engine"><code class="xref py py-obj docutils literal notranslate"><span class="pre">run.run_timeseries_engine</span></code></a></td>
-<td>Run timeseries simulation in normal mode, and using the specified classes.</td>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/run.run_timeseries_engine.html#run.run_timeseries_engine" title="run.run_timeseries_engine"><code class="xref py py-obj docutils literal notranslate"><span class="pre">run.run_timeseries_engine</span></code></a></p></td>
+<td><p>Run timeseries simulation in normal mode, and using the specified classes.</p></td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="generated/run.run_parallel_engine.html#run.run_parallel_engine" title="run.run_parallel_engine"><code class="xref py py-obj docutils literal notranslate"><span class="pre">run.run_parallel_engine</span></code></a></td>
-<td>Run timeseries simulation using multiprocessing.</td>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/run.run_parallel_engine.html#run.run_parallel_engine" title="run.run_parallel_engine"><code class="xref py py-obj docutils literal notranslate"><span class="pre">run.run_parallel_engine</span></code></a></p></td>
+<td><p>Run timeseries simulation using multiprocessing.</p></td>
 </tr>
 </tbody>
 </table>
@@ -463,17 +454,17 @@ parallel mode.</p>
 <div class="section" id="module-report">
 <span id="report"></span><h2>report<a class="headerlink" href="#module-report" title="Permalink to this headline">¶</a></h2>
 <p>Module containing examples of report builder functions and classes.</p>
-<table border="1" class="longtable docutils">
+<table class="longtable docutils align-default">
 <colgroup>
-<col width="10%" />
-<col width="90%" />
+<col style="width: 10%" />
+<col style="width: 90%" />
 </colgroup>
-<tbody valign="top">
-<tr class="row-odd"><td><a class="reference internal" href="generated/report.example_fn_build_report.html#report.example_fn_build_report" title="report.example_fn_build_report"><code class="xref py py-obj docutils literal notranslate"><span class="pre">report.example_fn_build_report</span></code></a></td>
-<td>Example function that builds a report when used in the <code class="xref py py-class docutils literal notranslate"><span class="pre">PVEngine</span></code>.</td>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/report.example_fn_build_report.html#report.example_fn_build_report" title="report.example_fn_build_report"><code class="xref py py-obj docutils literal notranslate"><span class="pre">report.example_fn_build_report</span></code></a></p></td>
+<td><p>Example function that builds a report when used in the <code class="xref py py-class docutils literal notranslate"><span class="pre">PVEngine</span></code>.</p></td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="generated/report.ExampleReportBuilder.html#report.ExampleReportBuilder" title="report.ExampleReportBuilder"><code class="xref py py-obj docutils literal notranslate"><span class="pre">report.ExampleReportBuilder</span></code></a></td>
-<td>A class is required to build reports when running calculations with multiprocessing because of python constraints</td>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/report.ExampleReportBuilder.html#report.ExampleReportBuilder" title="report.ExampleReportBuilder"><code class="xref py py-obj docutils literal notranslate"><span class="pre">report.ExampleReportBuilder</span></code></a></p></td>
+<td><p>A class is required to build reports when running calculations with multiprocessing because of python constraints</p></td>
 </tr>
 </tbody>
 </table>

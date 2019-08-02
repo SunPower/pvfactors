@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>report.example_fn_build_report &mdash; pvfactors 1.0.1+0.gb9e42db.dirty documentation</title>
+  <title>report.example_fn_build_report &mdash; pvfactors 1.1.0 documentation</title>
   
 
   
@@ -28,6 +28,7 @@
         <script type="text/javascript" src="../../_static/doctools.js"></script>
         <script type="text/javascript" src="../../_static/language_data.js"></script>
         <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
     
     <script type="text/javascript" src="../../_static/js/theme.js"></script>
 
@@ -67,7 +68,7 @@
             
             
               <div class="version">
-                1.0.1
+                1.1.0
               </div>
             
           
@@ -183,51 +184,37 @@
     margin-top: -19px;
 }
 
-/* nice headers on first paragraph of info/warning boxes */
-.admonition .first {
-    margin: -12px;
-    padding: 6px 12px;
-    margin-bottom: 12px;
-    color: #fff;
-    line-height: 1;
-    display: block;
-}
-.admonition.warning .first {
-    background: #f0b37e;
-}
-.admonition.note .first {
-    background: #6ab0de;
-}
 .admonition > p:before {
     margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
 }
 </style>
 <div class="section" id="report-example-fn-build-report">
 <h1>report.example_fn_build_report<a class="headerlink" href="#report-example-fn-build-report" title="Permalink to this headline">¶</a></h1>
 <dl class="function">
 <dt id="report.example_fn_build_report">
-<code class="descclassname">report.</code><code class="descname">example_fn_build_report</code><span class="sig-paren">(</span><em>report</em>, <em>pvarray</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/report.html#example_fn_build_report"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#report.example_fn_build_report" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">report.</code><code class="sig-name descname">example_fn_build_report</code><span class="sig-paren">(</span><em class="sig-param">report</em>, <em class="sig-param">pvarray</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/report.html#example_fn_build_report"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#report.example_fn_build_report" title="Permalink to this definition">¶</a></dt>
 <dd><p>Example function that builds a report when used in the
 <code class="xref py py-class docutils literal notranslate"><span class="pre">PVEngine</span></code>. Here it will be a dictionary
 with lists of calculated values.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>report</strong> (<em>dict</em>) – Initially <code class="docutils literal notranslate"><span class="pre">None</span></code>, this will be passed and updated by the function</li>
-<li><strong>pvarray</strong> (<em>PV array object</em>) – PV array with updated calculation values</li>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>report</strong> (<em>dict</em>) – Initially <code class="docutils literal notranslate"><span class="pre">None</span></code>, this will be passed and updated by the function</p></li>
+<li><p><strong>pvarray</strong> (<em>PV array object</em>) – PV array with updated calculation values</p></li>
 </ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>report</strong> – Report updated with newly calculated values</p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">dict</p>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>report</strong> – Report updated with newly calculated values</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
 </dd></dl>
 
 </div>

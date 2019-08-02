@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>geometry &mdash; pvfactors 1.0.1+0.gb9e42db.dirty documentation</title>
+  <title>geometry &mdash; pvfactors 1.1.0 documentation</title>
   
 
   
@@ -28,6 +28,7 @@
         <script type="text/javascript" src="../_static/doctools.js"></script>
         <script type="text/javascript" src="../_static/language_data.js"></script>
         <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
     
     <script type="text/javascript" src="../_static/js/theme.js"></script>
 
@@ -65,7 +66,7 @@
             
             
               <div class="version">
-                1.0.1
+                1.1.0
               </div>
             
           
@@ -179,23 +180,13 @@
     margin-top: -19px;
 }
 
-/* nice headers on first paragraph of info/warning boxes */
-.admonition .first {
-    margin: -12px;
-    padding: 6px 12px;
-    margin-bottom: 12px;
-    color: #fff;
-    line-height: 1;
-    display: block;
-}
-.admonition.warning .first {
-    background: #f0b37e;
-}
-.admonition.note .first {
-    background: #6ab0de;
-}
 .admonition > p:before {
     margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
 }
 </style>
 <div class="section" id="geometry">
@@ -207,29 +198,29 @@
 <div class="section" id="module-base">
 <span id="base"></span><h2>base<a class="headerlink" href="#module-base" title="Permalink to this headline">¶</a></h2>
 <p>Base classes for pvfactors geometry subpackage.</p>
-<table border="1" class="longtable docutils">
+<table class="longtable docutils align-default">
 <colgroup>
-<col width="10%" />
-<col width="90%" />
+<col style="width: 10%" />
+<col style="width: 90%" />
 </colgroup>
-<tbody valign="top">
-<tr class="row-odd"><td><a class="reference internal" href="generated/base.BaseSurface.html#base.BaseSurface" title="base.BaseSurface"><code class="xref py py-obj docutils literal notranslate"><span class="pre">base.BaseSurface</span></code></a></td>
-<td>Base surfaces will be extensions of <code class="xref py py-class docutils literal notranslate"><span class="pre">LineString</span></code> classes, but adding an orientation to it (normal vector).</td>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/base.BaseSurface.html#base.BaseSurface" title="base.BaseSurface"><code class="xref py py-obj docutils literal notranslate"><span class="pre">base.BaseSurface</span></code></a></p></td>
+<td><p>Base surfaces will be extensions of <code class="xref py py-class docutils literal notranslate"><span class="pre">LineString</span></code> classes, but adding an orientation to it (normal vector).</p></td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="generated/base.PVSurface.html#base.PVSurface" title="base.PVSurface"><code class="xref py py-obj docutils literal notranslate"><span class="pre">base.PVSurface</span></code></a></td>
-<td>PV surfaces inherit from <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseSurface</span></code>.</td>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/base.PVSurface.html#base.PVSurface" title="base.PVSurface"><code class="xref py py-obj docutils literal notranslate"><span class="pre">base.PVSurface</span></code></a></p></td>
+<td><p>PV surfaces inherit from <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseSurface</span></code>.</p></td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="generated/base.ShadeCollection.html#base.ShadeCollection" title="base.ShadeCollection"><code class="xref py py-obj docutils literal notranslate"><span class="pre">base.ShadeCollection</span></code></a></td>
-<td>A group of <code class="xref py py-class docutils literal notranslate"><span class="pre">PVSurface</span></code> objects that all have the same shading status.</td>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/base.ShadeCollection.html#base.ShadeCollection" title="base.ShadeCollection"><code class="xref py py-obj docutils literal notranslate"><span class="pre">base.ShadeCollection</span></code></a></p></td>
+<td><p>A group of <code class="xref py py-class docutils literal notranslate"><span class="pre">PVSurface</span></code> objects that all have the same shading status.</p></td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="generated/base.PVSegment.html#base.PVSegment" title="base.PVSegment"><code class="xref py py-obj docutils literal notranslate"><span class="pre">base.PVSegment</span></code></a></td>
-<td>A PV segment will be a collection of 2 collinear and contiguous shade collections, a shaded one and an illuminated one.</td>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/base.PVSegment.html#base.PVSegment" title="base.PVSegment"><code class="xref py py-obj docutils literal notranslate"><span class="pre">base.PVSegment</span></code></a></p></td>
+<td><p>A PV segment will be a collection of 2 collinear and contiguous shade collections, a shaded one and an illuminated one.</p></td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="generated/base.BaseSide.html#base.BaseSide" title="base.BaseSide"><code class="xref py py-obj docutils literal notranslate"><span class="pre">base.BaseSide</span></code></a></td>
-<td>A side represents a fixed collection of PV segments objects that should all be collinear, with the same normal vector</td>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/base.BaseSide.html#base.BaseSide" title="base.BaseSide"><code class="xref py py-obj docutils literal notranslate"><span class="pre">base.BaseSide</span></code></a></p></td>
+<td><p>A side represents a fixed collection of PV segments objects that should all be collinear, with the same normal vector</p></td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="generated/base.BasePVArray.html#base.BasePVArray" title="base.BasePVArray"><code class="xref py py-obj docutils literal notranslate"><span class="pre">base.BasePVArray</span></code></a></td>
-<td>Base class for PV arrays in pvfactors.</td>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/base.BasePVArray.html#base.BasePVArray" title="base.BasePVArray"><code class="xref py py-obj docutils literal notranslate"><span class="pre">base.BasePVArray</span></code></a></p></td>
+<td><p>Base class for PV arrays in pvfactors.</p></td>
 </tr>
 </tbody>
 </table>
@@ -237,17 +228,17 @@
 <div class="section" id="module-pvrow">
 <span id="pvrow"></span><h2>pvrow<a class="headerlink" href="#module-pvrow" title="Permalink to this headline">¶</a></h2>
 <p>Module will classes related to PV row geometries</p>
-<table border="1" class="longtable docutils">
+<table class="longtable docutils align-default">
 <colgroup>
-<col width="10%" />
-<col width="90%" />
+<col style="width: 10%" />
+<col style="width: 90%" />
 </colgroup>
-<tbody valign="top">
-<tr class="row-odd"><td><a class="reference internal" href="generated/pvrow.PVRowSide.html#pvrow.PVRowSide" title="pvrow.PVRowSide"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pvrow.PVRowSide</span></code></a></td>
-<td>A PV row side represents the whole surface of one side of a PV row.</td>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/pvrow.PVRowSide.html#pvrow.PVRowSide" title="pvrow.PVRowSide"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pvrow.PVRowSide</span></code></a></p></td>
+<td><p>A PV row side represents the whole surface of one side of a PV row.</p></td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="generated/pvrow.PVRow.html#pvrow.PVRow" title="pvrow.PVRow"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pvrow.PVRow</span></code></a></td>
-<td>A PV row is made of two PV row sides, a front and a back one.</td>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/pvrow.PVRow.html#pvrow.PVRow" title="pvrow.PVRow"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pvrow.PVRow</span></code></a></p></td>
+<td><p>A PV row is made of two PV row sides, a front and a back one.</p></td>
 </tr>
 </tbody>
 </table>
@@ -255,14 +246,14 @@
 <div class="section" id="module-pvground">
 <span id="pvground"></span><h2>pvground<a class="headerlink" href="#module-pvground" title="Permalink to this headline">¶</a></h2>
 <p>Classes for implementation of ground geometry</p>
-<table border="1" class="longtable docutils">
+<table class="longtable docutils align-default">
 <colgroup>
-<col width="10%" />
-<col width="90%" />
+<col style="width: 10%" />
+<col style="width: 90%" />
 </colgroup>
-<tbody valign="top">
-<tr class="row-odd"><td><a class="reference internal" href="generated/pvground.PVGround.html#pvground.PVGround" title="pvground.PVGround"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pvground.PVGround</span></code></a></td>
-<td>Class that defines the ground in PV arrays.</td>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/pvground.PVGround.html#pvground.PVGround" title="pvground.PVGround"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pvground.PVGround</span></code></a></p></td>
+<td><p>Class that defines the ground geometry in PV arrays.</p></td>
 </tr>
 </tbody>
 </table>
@@ -271,14 +262,14 @@
 <span id="pvarray"></span><h2>pvarray<a class="headerlink" href="#module-pvarray" title="Permalink to this headline">¶</a></h2>
 <p>Module containing PV array classes, which will use PV rows and ground
 geometries.</p>
-<table border="1" class="longtable docutils">
+<table class="longtable docutils align-default">
 <colgroup>
-<col width="10%" />
-<col width="90%" />
+<col style="width: 10%" />
+<col style="width: 90%" />
 </colgroup>
-<tbody valign="top">
-<tr class="row-odd"><td><a class="reference internal" href="generated/pvarray.OrderedPVArray.html#pvarray.OrderedPVArray" title="pvarray.OrderedPVArray"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pvarray.OrderedPVArray</span></code></a></td>
-<td>An ordered PV array has a flat horizontal ground, and pv rows which are all at the same height, with the same surface tilt and azimuth angles, and also all equally spaced.</td>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/pvarray.OrderedPVArray.html#pvarray.OrderedPVArray" title="pvarray.OrderedPVArray"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pvarray.OrderedPVArray</span></code></a></p></td>
+<td><p>An ordered PV array has a flat horizontal ground, and pv rows which are all at the same height, with the same surface tilt and azimuth angles, and also all equally spaced.</p></td>
 </tr>
 </tbody>
 </table>

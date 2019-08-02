@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Tutorials &mdash; pvfactors 1.0.1+0.gb9e42db.dirty documentation</title>
+  <title>Tutorials &mdash; pvfactors 1.1.0 documentation</title>
   
 
   
@@ -28,6 +28,7 @@
         <script type="text/javascript" src="../_static/doctools.js"></script>
         <script type="text/javascript" src="../_static/language_data.js"></script>
         <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
     
     <script type="text/javascript" src="../_static/js/theme.js"></script>
 
@@ -67,7 +68,7 @@
             
             
               <div class="version">
-                1.0.1
+                1.1.0
               </div>
             
           
@@ -100,6 +101,7 @@
 <li class="toctree-l2"><a class="reference internal" href="Calculate_view_factors.html">Calculate view factors</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Run_timeseries_simulations.html">Run timeseries simulations</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Run_parallel_simulations.html">Run timeseries simulations in parallel</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Run_fast_simulations.html">Run “fast” simulations with 8760 annual inputs</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../theory/index.html">Theory</a></li>
@@ -189,23 +191,13 @@
     margin-top: -19px;
 }
 
-/* nice headers on first paragraph of info/warning boxes */
-.admonition .first {
-    margin: -12px;
-    padding: 6px 12px;
-    margin-bottom: 12px;
-    color: #fff;
-    line-height: 1;
-    display: block;
-}
-.admonition.warning .first {
-    background: #f0b37e;
-}
-.admonition.note .first {
-    background: #6ab0de;
-}
 .admonition > p:before {
     margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
 }
 </style>
 <div class="section" id="tutorials">
@@ -222,6 +214,7 @@
 <li class="toctree-l1"><a class="reference internal" href="Calculate_view_factors.html">Calculate view factors</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Run_timeseries_simulations.html">Run timeseries simulations</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Run_parallel_simulations.html">Run timeseries simulations in parallel</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Run_fast_simulations.html">Run “fast” simulations with 8760 annual inputs</a></li>
 </ul>
 </div>
 </div>

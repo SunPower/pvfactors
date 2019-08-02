@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>mapper.VFMapperOrderedPVArray &mdash; pvfactors 1.0.1+0.gb9e42db.dirty documentation</title>
+  <title>mapper.VFMapperOrderedPVArray &mdash; pvfactors 1.1.0 documentation</title>
   
 
   
@@ -28,6 +28,7 @@
         <script type="text/javascript" src="../../_static/doctools.js"></script>
         <script type="text/javascript" src="../../_static/language_data.js"></script>
         <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
     
     <script type="text/javascript" src="../../_static/js/theme.js"></script>
 
@@ -67,7 +68,7 @@
             
             
               <div class="version">
-                1.0.1
+                1.1.0
               </div>
             
           
@@ -183,30 +184,20 @@
     margin-top: -19px;
 }
 
-/* nice headers on first paragraph of info/warning boxes */
-.admonition .first {
-    margin: -12px;
-    padding: 6px 12px;
-    margin-bottom: 12px;
-    color: #fff;
-    line-height: 1;
-    display: block;
-}
-.admonition.warning .first {
-    background: #f0b37e;
-}
-.admonition.note .first {
-    background: #6ab0de;
-}
 .admonition > p:before {
     margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
 }
 </style>
 <div class="section" id="mapper-vfmapperorderedpvarray">
 <h1>mapper.VFMapperOrderedPVArray<a class="headerlink" href="#mapper-vfmapperorderedpvarray" title="Permalink to this headline">¶</a></h1>
 <dl class="class">
 <dt id="mapper.VFMapperOrderedPVArray">
-<em class="property">class </em><code class="descclassname">mapper.</code><code class="descname">VFMapperOrderedPVArray</code><a class="reference internal" href="../../_modules/mapper.html#VFMapperOrderedPVArray"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mapper.VFMapperOrderedPVArray" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">mapper.</code><code class="sig-name descname">VFMapperOrderedPVArray</code><a class="reference internal" href="../../_modules/mapper.html#VFMapperOrderedPVArray"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mapper.VFMapperOrderedPVArray" title="Permalink to this definition">¶</a></dt>
 <dd><p>This class maps the “view types” of the
 <code class="xref py py-class docutils literal notranslate"><span class="pre">OrderedPVArray</span></code> <code class="docutils literal notranslate"><span class="pre">view_matrix</span></code>
 property to some view factor calculation functions.
@@ -214,43 +205,43 @@ For instance, the method to calculate the view factor between 2 PV row
 surfaces will be different than between a PV row surface and a ground one.</p>
 <dl class="method">
 <dt id="mapper.VFMapperOrderedPVArray.__init__">
-<code class="descname">__init__</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/mapper.html#VFMapperOrderedPVArray.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mapper.VFMapperOrderedPVArray.__init__" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/mapper.html#VFMapperOrderedPVArray.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mapper.VFMapperOrderedPVArray.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><p>Initialize the mapping between “view types” and calculation methods.</p>
 </dd></dl>
 
 <p class="rubric">Methods</p>
-<table border="1" class="longtable docutils">
+<table class="longtable docutils align-default">
 <colgroup>
-<col width="10%" />
-<col width="90%" />
+<col style="width: 10%" />
+<col style="width: 90%" />
 </colgroup>
-<tbody valign="top">
-<tr class="row-odd"><td><a class="reference internal" href="#mapper.VFMapperOrderedPVArray.__init__" title="mapper.VFMapperOrderedPVArray.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>()</td>
-<td>Initialize the mapping between “view types” and calculation methods.</td>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#mapper.VFMapperOrderedPVArray.__init__" title="mapper.VFMapperOrderedPVArray.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>()</p></td>
+<td><p>Initialize the mapping between “view types” and calculation methods.</p></td>
 </tr>
-<tr class="row-even"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">length_string</span></code>(pt1,&nbsp;pt2,&nbsp;obstruction)</td>
-<td>Calculate the length of a string between two boundary points of two lines as defined in the Hottel method.</td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">length_string</span></code>(pt1, pt2, obstruction)</p></td>
+<td><p>Calculate the length of a string between two boundary points of two lines as defined in the Hottel method.</p></td>
 </tr>
-<tr class="row-odd"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">vf_hottel_pvrow_ground</span></code>(line_1,&nbsp;line_2,&nbsp;…)</td>
-<td>Use Hottel method to calculate view factor between PV row surface and the ground.</td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">vf_hottel_pvrow_ground</span></code>(line_1, line_2, …)</p></td>
+<td><p>Use Hottel method to calculate view factor between PV row surface and the ground.</p></td>
 </tr>
-<tr class="row-even"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">vf_parallel_planes</span></code>(length_1,&nbsp;length_2,&nbsp;…)</td>
-<td>See: <a class="reference external" href="http://www.thermalradiation.net/sectionc/C-2a.htm">http://www.thermalradiation.net/sectionc/C-2a.htm</a></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">vf_parallel_planes</span></code>(length_1, length_2, …)</p></td>
+<td><p>See: <a class="reference external" href="http://www.thermalradiation.net/sectionc/C-2a.htm">http://www.thermalradiation.net/sectionc/C-2a.htm</a></p></td>
 </tr>
-<tr class="row-odd"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">vf_trk_to_trk</span></code>(line_1,&nbsp;line_2,&nbsp;*args)</td>
-<td>Use parallel plane formula to calculate view factor between PV rows.</td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">vf_trk_to_trk</span></code>(line_1, line_2, *args)</p></td>
+<td><p>Use parallel plane formula to calculate view factor between PV rows.</p></td>
 </tr>
 </tbody>
 </table>
 <p class="rubric">Attributes</p>
-<table border="1" class="longtable docutils">
+<table class="longtable docutils align-default">
 <colgroup>
-<col width="10%" />
-<col width="90%" />
+<col style="width: 10%" />
+<col style="width: 90%" />
 </colgroup>
-<tbody valign="top">
-<tr class="row-odd"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">reverse_view</span></code></td>
-<td></td>
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">reverse_view</span></code></p></td>
+<td><p></p></td>
 </tr>
 </tbody>
 </table>

@@ -13,6 +13,7 @@ report.ExampleReportBuilder
 
    .. autosummary::
    
+      ~ExampleReportBuilder.__init__
       ~ExampleReportBuilder.build
       ~ExampleReportBuilder.merge
    

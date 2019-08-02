@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>calculator.VFCalculator &mdash; pvfactors 1.0.1+0.gb9e42db.dirty documentation</title>
+  <title>calculator.VFCalculator &mdash; pvfactors 1.1.0 documentation</title>
   
 
   
@@ -28,6 +28,7 @@
         <script type="text/javascript" src="../../_static/doctools.js"></script>
         <script type="text/javascript" src="../../_static/language_data.js"></script>
         <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
     
     <script type="text/javascript" src="../../_static/js/theme.js"></script>
 
@@ -67,7 +68,7 @@
             
             
               <div class="version">
-                1.0.1
+                1.1.0
               </div>
             
           
@@ -183,60 +184,47 @@
     margin-top: -19px;
 }
 
-/* nice headers on first paragraph of info/warning boxes */
-.admonition .first {
-    margin: -12px;
-    padding: 6px 12px;
-    margin-bottom: 12px;
-    color: #fff;
-    line-height: 1;
-    display: block;
-}
-.admonition.warning .first {
-    background: #f0b37e;
-}
-.admonition.note .first {
-    background: #6ab0de;
-}
 .admonition > p:before {
     margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
 }
 </style>
 <div class="section" id="calculator-vfcalculator">
 <h1>calculator.VFCalculator<a class="headerlink" href="#calculator-vfcalculator" title="Permalink to this headline">¶</a></h1>
 <dl class="class">
 <dt id="calculator.VFCalculator">
-<em class="property">class </em><code class="descclassname">calculator.</code><code class="descname">VFCalculator</code><span class="sig-paren">(</span><em>mapper=None</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/calculator.html#VFCalculator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#calculator.VFCalculator" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">calculator.</code><code class="sig-name descname">VFCalculator</code><span class="sig-paren">(</span><em class="sig-param">mapper=None</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/calculator.html#VFCalculator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#calculator.VFCalculator" title="Permalink to this definition">¶</a></dt>
 <dd><p>This calculator class will be used for the calculation of view factors
 for PV arrays</p>
 <dl class="method">
 <dt id="calculator.VFCalculator.__init__">
-<code class="descname">__init__</code><span class="sig-paren">(</span><em>mapper=None</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/calculator.html#VFCalculator.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#calculator.VFCalculator.__init__" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param">mapper=None</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/calculator.html#VFCalculator.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#calculator.VFCalculator.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><p>Initialize the view factor mapper that will be used.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>mapper</strong> (<em>VF mapper object</em><em>, </em><em>optional</em>) – View factor mapper, which will map elements of the PV array view
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>mapper</strong> (<em>VF mapper object</em><em>, </em><em>optional</em>) – View factor mapper, which will map elements of the PV array view
 matrix to methods calculating view factors (Default =
-<code class="xref py py-class docutils literal notranslate"><span class="pre">VFMapperOrderedPVArray</span></code>)</td>
-</tr>
-</tbody>
-</table>
+<code class="xref py py-class docutils literal notranslate"><span class="pre">VFMapperOrderedPVArray</span></code>)</p>
+</dd>
+</dl>
 </dd></dl>
 
 <p class="rubric">Methods</p>
-<table border="1" class="longtable docutils">
+<table class="longtable docutils align-default">
 <colgroup>
-<col width="10%" />
-<col width="90%" />
+<col style="width: 10%" />
+<col style="width: 90%" />
 </colgroup>
-<tbody valign="top">
-<tr class="row-odd"><td><a class="reference internal" href="#calculator.VFCalculator.__init__" title="calculator.VFCalculator.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>([mapper])</td>
-<td>Initialize the view factor mapper that will be used.</td>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#calculator.VFCalculator.__init__" title="calculator.VFCalculator.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>([mapper])</p></td>
+<td><p>Initialize the view factor mapper that will be used.</p></td>
 </tr>
-<tr class="row-even"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_vf_matrix</span></code>(geom_dict,&nbsp;view_matrix,&nbsp;…)</td>
-<td>Calculate the view factors based on the surfaces of the PV array object, and using a mapping of “view types” in the view matrix, to the view factor calculation methods.</td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_vf_matrix</span></code>(geom_dict, view_matrix, …)</p></td>
+<td><p>Calculate the view factors based on the surfaces of the PV array object, and using a mapping of “view types” in the view matrix, to the view factor calculation methods.</p></td>
 </tr>
 </tbody>
 </table>

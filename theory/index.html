@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Theory &mdash; pvfactors 1.0.1+0.gb9e42db.dirty documentation</title>
+  <title>Theory &mdash; pvfactors 1.1.0 documentation</title>
   
 
   
@@ -28,6 +28,7 @@
         <script type="text/javascript" src="../_static/doctools.js"></script>
         <script type="text/javascript" src="../_static/language_data.js"></script>
         <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
     
     <script type="text/javascript" src="../_static/js/theme.js"></script>
 
@@ -40,7 +41,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Introduction" href="intro.html" />
-    <link rel="prev" title="Run timeseries simulations in parallel" href="../tutorials/Run_parallel_simulations.html" /> 
+    <link rel="prev" title="Run “fast” simulations with 8760 annual inputs" href="../tutorials/Run_fast_simulations.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -67,7 +68,7 @@
             
             
               <div class="version">
-                1.0.1
+                1.1.0
               </div>
             
           
@@ -186,28 +187,18 @@
     margin-top: -19px;
 }
 
-/* nice headers on first paragraph of info/warning boxes */
-.admonition .first {
-    margin: -12px;
-    padding: 6px 12px;
-    margin-bottom: 12px;
-    color: #fff;
-    line-height: 1;
-    display: block;
-}
-.admonition.warning .first {
-    background: #f0b37e;
-}
-.admonition.note .first {
-    background: #6ab0de;
-}
 .admonition > p:before {
     margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
 }
 </style>
 <div class="section" id="theory">
 <h1>Theory<a class="headerlink" href="#theory" title="Permalink to this headline">¶</a></h1>
-<p>The theory of the model is explained here. For more details, please refer to <a class="footnote-reference" href="#vf-paper" id="id1">[1]</a> .</p>
+<p>The theory of the model is explained here. For more details, please refer to <a class="footnote-reference brackets" href="#vf-paper" id="id1">1</a> .</p>
 <p>Contents:</p>
 <div class="toctree-wrapper compound">
 <ul>
@@ -217,16 +208,19 @@
 <li class="toctree-l2"><a class="reference internal" href="view_factors.html#application">Application</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="problem_formulation.html">Mathematical Model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="problem_formulation.html">Mathematical Model</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="problem_formulation.html#full-simulations">Full simulations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="problem_formulation.html#fast-simulations">Fast simulations</a></li>
+</ul>
+</li>
 </ul>
 </div>
 <p class="rubric">Footnotes</p>
-<table class="docutils footnote" frame="void" id="vf-paper" rules="none">
-<colgroup><col class="label" /><col /></colgroup>
-<tbody valign="top">
-<tr><td class="label"><a class="fn-backref" href="#id1">[1]</a></td><td>Anoma, M., Jacob, D., Bourne, B.C., Scholl, J.A., Riley, D.M. and Hansen, C.W., 2017. View Factor Model and Validation for Bifacial PV and Diffuse Shade on Single-Axis Trackers. In 44th IEEE Photovoltaic Specialist Conference.</td></tr>
-</tbody>
-</table>
+<dl class="footnote brackets">
+<dt class="label" id="vf-paper"><span class="brackets"><a class="fn-backref" href="#id1">1</a></span></dt>
+<dd><p>Anoma, M., Jacob, D., Bourne, B.C., Scholl, J.A., Riley, D.M. and Hansen, C.W., 2017. View Factor Model and Validation for Bifacial PV and Diffuse Shade on Single-Axis Trackers. In 44th IEEE Photovoltaic Specialist Conference.</p>
+</dd>
+</dl>
 </div>
 
 
@@ -240,7 +234,7 @@
         <a href="intro.html" class="btn btn-neutral float-right" title="Introduction" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="../tutorials/Run_parallel_simulations.html" class="btn btn-neutral float-left" title="Run timeseries simulations in parallel" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="../tutorials/Run_fast_simulations.html" class="btn btn-neutral float-left" title="Run “fast” simulations with 8760 annual inputs" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
