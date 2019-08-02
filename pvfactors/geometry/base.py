@@ -167,7 +167,7 @@ class BaseSurface(LineString):
     orientations."""
 
     def __init__(self, coords, normal_vector=None, index=None,
-                 surface_params=[]):
+                 surface_params=None):
         """Create a surface using linestring coordinates.
         Normal vector can have two directions for a given LineString,
         so the user can provide it in order to be specific,
@@ -187,10 +187,11 @@ class BaseSurface(LineString):
             Surface index (Default = None)
         surface_params : list of str, optional
             Names of the surface parameters, eg reflectivity, total incident
-            irradiance, temperature, etc. (Default = [])
+            irradiance, temperature, etc. (Default = None)
 
         """
 
+        surface_params = [] if surface_params is None else surface_params
         super(BaseSurface, self).__init__(coords)
         if normal_vector is None:
             self.n_vector = self._calculate_n_vector()
@@ -293,7 +294,7 @@ class PVSurface(BaseSurface):
     """
 
     def __init__(self, coords=None, normal_vector=None, shaded=False,
-                 index=None, surface_params=[]):
+                 index=None, surface_params=None):
         """Initialize PV surface.
 
         Parameters
@@ -309,9 +310,10 @@ class PVSurface(BaseSurface):
             Surface index (Default = None)
         surface_params : list of str, optional
             Names of the surface parameters, eg reflectivity, total incident
-            irradiance, temperature, etc. (Default = [])
+            irradiance, temperature, etc. (Default = None)
         """
 
+        surface_params = [] if surface_params is None else surface_params
         super(PVSurface, self).__init__(coords, normal_vector, index=index,
                                         surface_params=surface_params)
         self.shaded = shaded
@@ -322,22 +324,24 @@ class ShadeCollection(GeometryCollection):
     objects that all have the same shading status. The PV surfaces are not
     necessarily contiguous or collinear."""
 
-    def __init__(self, list_surfaces=[], shaded=None, surface_params=[]):
+    def __init__(self, list_surfaces=None, shaded=None, surface_params=None):
         """Initialize shade collection.
 
         Parameters
         ----------
         list_surfaces : list, optional
             List of :py:class:`~pvfactors.geometry.base.PVSurface` object
-            (Default = [])
+            (Default = None)
         shaded : bool, optional
             Shading status of the collection. If not specified, will be derived
             from list of surfaces (Default = None)
         surface_params : list of str, optional
             Names of the surface parameters, eg reflectivity, total incident
-            irradiance, temperature, etc. (Default = [])
+            irradiance, temperature, etc. (Default = None)
 
         """
+        list_surfaces = [] if list_surfaces is None else list_surfaces
+        surface_params = [] if surface_params is None else surface_params
         _check_uniform_shading(list_surfaces)
         self.list_surfaces = list_surfaces
         self.shaded = self._get_shading(shaded)
@@ -575,7 +579,7 @@ class ShadeCollection(GeometryCollection):
 
     @classmethod
     def from_linestring_coords(cls, coords, shaded, normal_vector=None,
-                               surface_params=[]):
+                               surface_params=None):
         """Create a shade collection with a single PV surface.
 
         Parameters
@@ -588,7 +592,7 @@ class ShadeCollection(GeometryCollection):
             Normal vector for the surface (Default = None)
         surface_params : list of str, optional
             Names of the surface parameters, eg reflectivity, total incident
-            irradiance, temperature, etc. (Default = [])
+            irradiance, temperature, etc. (Default = None)
         """
         surf = PVSurface(coords=coords, normal_vector=normal_vector,
                          shaded=shaded, surface_params=surface_params)
@@ -796,7 +800,7 @@ class PVSegment(GeometryCollection):
 
     @classmethod
     def from_linestring_coords(cls, coords, shaded=False, normal_vector=None,
-                               index=None, surface_params=[]):
+                               index=None, surface_params=None):
         """Create a PV segment with a single PV surface.
 
         Parameters
@@ -812,7 +816,7 @@ class PVSegment(GeometryCollection):
             Index of the segment (Default = None)
         surface_params : list of str, optional
             Names of the surface parameters, eg reflectivity, total incident
-            irradiance, temperature, etc. (Default = [])
+            irradiance, temperature, etc. (Default = None)
         """
         col = ShadeCollection.from_linestring_coords(
             coords, shaded=shaded, normal_vector=normal_vector,
@@ -913,14 +917,15 @@ class BaseSide(GeometryCollection):
     """A side represents a fixed collection of PV segments objects that should
     all be collinear, with the same normal vector"""
 
-    def __init__(self, list_segments=[]):
+    def __init__(self, list_segments=None):
         """Create a side geometry.
 
         Parameters
         ----------
-        list_segments : list of :py:class:`pvfactors.geometry.base.PVSegment`
-            List of PV segments for side
+        list_segments : list of :py:class:`pvfactors.geometry.base.PVSegment`, optional
+            List of PV segments for side (Default = None)
         """
+        list_segments = [] if list_segments is None else list_segments
         check_collinear(list_segments)
         self.list_segments = tuple(list_segments)
         self._all_surfaces = None
@@ -928,7 +933,7 @@ class BaseSide(GeometryCollection):
 
     @classmethod
     def from_linestring_coords(cls, coords, shaded=False, normal_vector=None,
-                               index=None, n_segments=1, surface_params=[]):
+                               index=None, n_segments=1, surface_params=None):
         """Create a Side with a single PV surface, or multiple discretized
         identical ones.
 
@@ -947,7 +952,7 @@ class BaseSide(GeometryCollection):
             Number of same-length segments to use (Default = 1)
         surface_params : list of str, optional
             Names of the surface parameters, eg reflectivity, total incident
-            irradiance, temperature, etc. (Default = [])
+            irradiance, temperature, etc. (Default = None)
         """
         if n_segments == 1:
             list_pvsegments = [PVSegment.from_linestring_coords(

@@ -23,7 +23,8 @@ class OrderedPVArray(BasePVArray):
     y_ground = 0.  # ground will be at height = 0 by default
 
     def __init__(self, axis_azimuth=None, gcr=None, pvrow_height=None,
-                 n_pvrows=None, pvrow_width=None, surface_params=[], cut={}):
+                 n_pvrows=None, pvrow_width=None, surface_params=None,
+                 cut=None):
         """Initialize ordered PV array.
         List of PV rows will be ordered from left to right.
 
@@ -41,10 +42,10 @@ class OrderedPVArray(BasePVArray):
             Width of the PV rows in the 2D plane in [m] (Default = None)
         surface_params : list of str, optional
             List of surface parameter names for the PV surfaces
-            (Default = [])
+            (Default = None)
         cut : dict, optional
             Nested dictionary that tells if some PV row sides need to be
-            discretized, and how (Default = {}).
+            discretized, and how (Default = None).
             Example: {1: {'front': 5}}, will create 5 segments on the front
             side of the PV row with index 1
         """
@@ -59,8 +60,8 @@ class OrderedPVArray(BasePVArray):
                          else None)
         self.width = pvrow_width
         self.n_pvrows = n_pvrows
-        self.surface_params = surface_params
-        self.cut = cut
+        self.surface_params = [] if surface_params is None else surface_params
+        self.cut = {} if cut is None else cut
 
         # These attributes will be updated at fitting time
         self.solar_2d_vectors = None
@@ -80,7 +81,7 @@ class OrderedPVArray(BasePVArray):
         self.is_flat = None
 
     @classmethod
-    def init_from_dict(cls, pvarray_params, surface_params=[]):
+    def init_from_dict(cls, pvarray_params, surface_params=None):
         """Instantiate ordered PV array from dictionary of parameters
 
         Parameters
@@ -88,7 +89,7 @@ class OrderedPVArray(BasePVArray):
         pvarray_params : dict
             The parameters defining the PV array
         surface_params : list of str, optional
-            List of parameter names to pass to surfaces (Default = [])
+            List of parameter names to pass to surfaces (Default = None)
 
         Returns
         -------
@@ -104,7 +105,8 @@ class OrderedPVArray(BasePVArray):
                    surface_params=surface_params)
 
     @classmethod
-    def transform_from_dict_of_scalars(cls, pvarray_params, surface_params=[]):
+    def transform_from_dict_of_scalars(cls, pvarray_params,
+                                       surface_params=None):
         """Instantiate, fit and transform ordered PV array using dictionary
         of scalar inputs.
 
@@ -113,7 +115,7 @@ class OrderedPVArray(BasePVArray):
         pvarray_params : dict
             The parameters used for instantiation, fitting, and transformation
         surface_params : list of str, optional
-            List of parameter names to pass to surfaces (Default = [])
+            List of parameter names to pass to surfaces (Default = None)
 
         Returns
         -------
