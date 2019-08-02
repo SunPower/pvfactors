@@ -111,7 +111,7 @@ def params_direct_shading(params):
 
 @pytest.fixture(scope='function')
 def ordered_pvarray(params):
-    pvarray = OrderedPVArray.from_dict(params)
+    pvarray = OrderedPVArray.transform_from_dict_of_scalars(params)
     yield pvarray
 
 

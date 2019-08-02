@@ -30,10 +30,8 @@ def test_isotropic_model_front(params_irr):
     """Direct shading on front surface"""
 
     # pvarray
-    pvarray = OrderedPVArray.from_dict(params_irr,
-                                       surface_params=IsotropicOrdered.params)
-    pvarray.cast_shadows()
-    pvarray.cuts_for_pvrow_view()
+    pvarray = OrderedPVArray.transform_from_dict_of_scalars(
+        params_irr, surface_params=IsotropicOrdered.params)
     # there should be some direct shading
     assert pvarray.pvrows[0].front.shaded_length
 
@@ -46,8 +44,6 @@ def test_isotropic_model_front(params_irr):
                   params_irr['solar_azimuth'],
                   params_irr['surface_tilt'],
                   params_irr['surface_azimuth'],
-                  params_irr['rho_front_pvrow'],
-                  params_irr['rho_back_pvrow'],
                   params_irr['rho_ground'])
 
     # Expected values
@@ -124,10 +120,8 @@ def test_isotropic_model_back(params_irr):
                        'surface_tilt': 160})
 
     # pvarray
-    pvarray = OrderedPVArray.from_dict(params_irr,
-                                       surface_params=IsotropicOrdered.params)
-    pvarray.cast_shadows()
-    pvarray.cuts_for_pvrow_view()
+    pvarray = OrderedPVArray.transform_from_dict_of_scalars(
+        params_irr, surface_params=IsotropicOrdered.params)
     # there should be some direct shading
     assert pvarray.pvrows[0].back.shaded_length
 
@@ -140,8 +134,6 @@ def test_isotropic_model_back(params_irr):
                   params_irr['solar_azimuth'],
                   params_irr['surface_tilt'],
                   params_irr['surface_azimuth'],
-                  params_irr['rho_front_pvrow'],
-                  params_irr['rho_back_pvrow'],
                   params_irr['rho_ground'])
 
     # Expected values
@@ -212,10 +204,8 @@ def test_isotropic_model_back(params_irr):
 def test_hybridperez_ordered_front(params_irr):
 
     # pvarray
-    pvarray = OrderedPVArray.from_dict(
+    pvarray = OrderedPVArray.transform_from_dict_of_scalars(
         params_irr, surface_params=HybridPerezOrdered.params)
-    pvarray.cast_shadows()
-    pvarray.cuts_for_pvrow_view()
     # there should be some direct shading
     assert pvarray.pvrows[0].front.shaded_length
 
@@ -229,8 +219,6 @@ def test_hybridperez_ordered_front(params_irr):
                   params_irr['solar_azimuth'],
                   params_irr['surface_tilt'],
                   params_irr['surface_azimuth'],
-                  params_irr['rho_front_pvrow'],
-                  params_irr['rho_back_pvrow'],
                   params_irr['rho_ground'])
 
     # Expected values
@@ -355,10 +343,8 @@ def test_hybridperez_ordered_back(params_irr):
                        'surface_tilt': 160})
 
     # pvarray
-    pvarray = OrderedPVArray.from_dict(
+    pvarray = OrderedPVArray.transform_from_dict_of_scalars(
         params_irr, surface_params=HybridPerezOrdered.params)
-    pvarray.cast_shadows()
-    pvarray.cuts_for_pvrow_view()
     # there should be some direct shading
     assert pvarray.pvrows[0].back.shaded_length
 
@@ -372,8 +358,6 @@ def test_hybridperez_ordered_back(params_irr):
                   params_irr['solar_azimuth'],
                   params_irr['surface_tilt'],
                   params_irr['surface_azimuth'],
-                  params_irr['rho_front_pvrow'],
-                  params_irr['rho_back_pvrow'],
                   params_irr['rho_ground'])
 
     # Expected values

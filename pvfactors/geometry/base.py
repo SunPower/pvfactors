@@ -2,7 +2,6 @@
 
 import numpy as np
 import pandas as pd
-from collections import OrderedDict
 from pvfactors import PVFactorsError
 from pvfactors.config import (
     DEFAULT_NORMAL_VEC, COLOR_DIC, DISTANCE_TOLERANCE, PLOT_FONTSIZE,
@@ -16,7 +15,7 @@ from shapely.ops import linemerge
 from pvlib.tools import cosd, sind
 
 
-def check_uniform_shading(list_elements):
+def _check_uniform_shading(list_elements):
     """Check that all :py:class:`~pvfactors.geometry.base.PVSurface` objects in
     list have uniform shading
 
@@ -40,10 +39,10 @@ def check_uniform_shading(list_elements):
                 raise PVFactorsError(msg)
 
 
-def coords_from_center_tilt_length(xy_center, tilt, length,
-                                   surface_azimuth, axis_azimuth):
-    """Calculate ``shapely`` :py:class:`LineString` coordinate from
-    center coords, surface tilt angle and length of line.
+def _coords_from_center_tilt_length(xy_center, tilt, length,
+                                    surface_azimuth, axis_azimuth):
+    """Calculate ``shapely`` :py:class:`LineString` coordinates from
+    center coords, surface angles and length of line.
     The axis azimuth indicates the axis of rotation of the pvrows (if single-
     axis trackers). In the 2D plane, the axis of rotation will be the vector
     normal to that 2D plane and going into the 2D plane (when plotting it).
@@ -54,22 +53,23 @@ def coords_from_center_tilt_length(xy_center, tilt, length,
     Tilt angles need to always be positive. Given the axis azimuth and surface
     azimuth, a rotation angle will be derived. Positive rotation angles will
     indicate pvrows pointing to the left, and negative rotation angles will
-    indicate pvrows pointing to the right.
+    indicate pvrows pointing to the right (no matter what the the axis azimuth
+    is).
     All of these conventions are necessary to make sure that no matter what
     the tilt and surface angles are, we can still identify correctly
-    the same pv rows: the leftmost PV row will have index 0, and rightmost
+    the same pv rows: the leftmost PV row will have index 0, and the rightmost
     will have index -1.
 
     Parameters
     ----------
     xy_center : tuple
         x, y coordinates of center point of desired linestring
-    tilt : float
-        surface tilt angle desired [deg]
+    tilt : float or np.ndarray
+        Surface tilt angles desired [deg]. Values should all be positive.
     length : float
         desired length of linestring [m]
-    surface_azimuth : float
-        Surface azimuth of PV surface [deg]
+    surface_azimuth : float or np.ndarray
+        Surface azimuth angles of PV surface [deg]
     axis_azimuth : float
         Axis azimuth of the PV surface, i.e. direction of axis of rotation
         [deg]
@@ -77,39 +77,70 @@ def coords_from_center_tilt_length(xy_center, tilt, length,
     Returns
     -------
     list
-        List of linestring coordinates obtained from inputs
+        List of linestring coordinates obtained from inputs (could be vectors)
+        in the form of [[x1, y1], [x2, y2]], where xi and yi could be arrays
+        or scalar values.
     """
-    is_pointing_right = ((surface_azimuth - axis_azimuth) % 360.) > 180.
-    if is_pointing_right:
-        # system should be rotated to the right: so negative rotation angle
-        rotation = tilt
-    else:
-        # need positive rotation angle for system to point to the left
-        rotation = - tilt
+    # PV row params
     x_center, y_center = xy_center
     radius = length / 2.
+    # Get rotation
+    rotation = _get_rotation_from_tilt_azimuth(surface_azimuth, axis_azimuth,
+                                               tilt)
+    # Calculate coords
     x1 = radius * cosd(rotation + 180.) + x_center
     y1 = radius * sind(rotation + 180.) + y_center
     x2 = radius * cosd(rotation) + x_center
     y2 = radius * sind(rotation) + y_center
 
-    return [(x1, y1), (x2, y2)]
+    return [[x1, y1], [x2, y2]]
 
 
-def get_solar_2d_vector(solar_zenith, solar_azimuth, axis_azimuth):
+def _get_rotation_from_tilt_azimuth(surface_azimuth, axis_azimuth, tilt):
+    """Calculate the rotation angle using surface azimuth, axis azimuth,
+    and surface tilt angles. While surface tilt angles need to always be
+    positive, rotation angles can be negative.
+    In pvfactors, positive rotation angles will indicate pvrows pointing to the
+    left, and negative rotation angles will indicate pvrows pointing to the
+    right (no matter what the the axis azimuth is).
+
+    Parameters
+    ----------
+    tilt : float or np.ndarray
+        Surface tilt angles desired [deg]. Values should all be positive.
+    surface_azimuth : float or np.ndarray
+        Surface azimuth angles of PV surface [deg]
+    axis_azimuth : float
+        Axis azimuth of the PV surface, i.e. direction of axis of rotation
+        [deg]
+
+    Returns
+    -------
+    float or np.ndarray
+        Calculated rotation angle(s) in [deg]
+    """
+
+    # Calculate rotation of PV row (signed tilt angle)
+    is_pointing_right = ((surface_azimuth - axis_azimuth) % 360.) > 180.
+    rotation = np.where(is_pointing_right, tilt, -tilt)
+
+    return rotation
+
+
+def _get_solar_2d_vectors(solar_zenith, solar_azimuth, axis_azimuth):
     """Projection of 3d solar vector onto the cross section of the systems:
     which is the 2D plane we are considering.
     This is needed to calculate shadows.
     Remember that the 2D plane is such that the direction of the torque
     tube vector (or rotation axis) goes into (and normal to) the 2D plane,
     such that positive rotation angles will have the PV surfaces tilted to the
-    LEFT and vice versa
+    LEFT and vice versa.
 
     Parameters
     ----------
-    solar_zenith : float
+    solar_zenith : float or numpy array
         Solar zenith angle [deg]
-    solar_azimuth : float
+    solar_azimuth : float or numpy array
         Solar azimuth angle [deg]
     axis_azimuth : float
         Axis azimuth of the PV surface, i.e. direction of axis of rotation
@@ -117,8 +148,9 @@ def get_solar_2d_vector(solar_zenith, solar_azimuth, axis_azimuth):
 
     Returns
     -------
-    solar_2d_vector : list
-        Two vector components of the solar vector in the 2D plane
+    solar_2d_vector : numpy array
+        Two vector components of the solar vector in the 2D plane, with the
+        form [x, y], where x and y can be arrays
     """
     solar_2d_vector = np.array([
         # a drawing really helps understand the following
@@ -135,7 +167,7 @@ class BaseSurface(LineString):
     orientations."""
 
     def __init__(self, coords, normal_vector=None, index=None,
-                 surface_params=[]):
+                 surface_params=None):
         """Create a surface using linestring coordinates.
         Normal vector can have two directions for a given LineString,
         so the user can provide it in order to be specific,
@@ -155,10 +187,11 @@ class BaseSurface(LineString):
             Surface index (Default = None)
         surface_params : list of str, optional
             Names of the surface parameters, eg reflectivity, total incident
-            irradiance, temperature, etc. (Default = [])
+            irradiance, temperature, etc. (Default = None)
 
         """
 
+        surface_params = [] if surface_params is None else surface_params
         super(BaseSurface, self).__init__(coords)
         if normal_vector is None:
             self.n_vector = self._calculate_n_vector()
@@ -261,7 +294,7 @@ class PVSurface(BaseSurface):
     """
 
     def __init__(self, coords=None, normal_vector=None, shaded=False,
-                 index=None, surface_params=[]):
+                 index=None, surface_params=None):
         """Initialize PV surface.
 
         Parameters
@@ -277,9 +310,10 @@ class PVSurface(BaseSurface):
             Surface index (Default = None)
         surface_params : list of str, optional
             Names of the surface parameters, eg reflectivity, total incident
-            irradiance, temperature, etc. (Default = [])
+            irradiance, temperature, etc. (Default = None)
         """
 
+        surface_params = [] if surface_params is None else surface_params
         super(PVSurface, self).__init__(coords, normal_vector, index=index,
                                         surface_params=surface_params)
         self.shaded = shaded
@@ -290,23 +324,25 @@ class ShadeCollection(GeometryCollection):
     objects that all have the same shading status. The PV surfaces are not
     necessarily contiguous or collinear."""
 
-    def __init__(self, list_surfaces=[], shaded=None, surface_params=[]):
+    def __init__(self, list_surfaces=None, shaded=None, surface_params=None):
         """Initialize shade collection.
 
         Parameters
         ----------
         list_surfaces : list, optional
             List of :py:class:`~pvfactors.geometry.base.PVSurface` object
-            (Default = [])
+            (Default = None)
         shaded : bool, optional
             Shading status of the collection. If not specified, will be derived
             from list of surfaces (Default = None)
         surface_params : list of str, optional
             Names of the surface parameters, eg reflectivity, total incident
-            irradiance, temperature, etc. (Default = [])
+            irradiance, temperature, etc. (Default = None)
 
         """
-        check_uniform_shading(list_surfaces)
+        list_surfaces = [] if list_surfaces is None else list_surfaces
+        surface_params = [] if surface_params is None else surface_params
+        _check_uniform_shading(list_surfaces)
         self.list_surfaces = list_surfaces
         self.shaded = self._get_shading(shaded)
         self.is_collinear = is_collinear(list_surfaces)
@@ -543,7 +579,7 @@ class ShadeCollection(GeometryCollection):
 
     @classmethod
     def from_linestring_coords(cls, coords, shaded, normal_vector=None,
-                               surface_params=[]):
+                               surface_params=None):
         """Create a shade collection with a single PV surface.
 
         Parameters
@@ -556,7 +592,7 @@ class ShadeCollection(GeometryCollection):
             Normal vector for the surface (Default = None)
         surface_params : list of str, optional
             Names of the surface parameters, eg reflectivity, total incident
-            irradiance, temperature, etc. (Default = [])
+            irradiance, temperature, etc. (Default = None)
         """
         surf = PVSurface(coords=coords, normal_vector=normal_vector,
                          shaded=shaded, surface_params=surface_params)
@@ -764,7 +800,7 @@ class PVSegment(GeometryCollection):
 
     @classmethod
     def from_linestring_coords(cls, coords, shaded=False, normal_vector=None,
-                               index=None, surface_params=[]):
+                               index=None, surface_params=None):
         """Create a PV segment with a single PV surface.
 
         Parameters
@@ -780,7 +816,7 @@ class PVSegment(GeometryCollection):
             Index of the segment (Default = None)
         surface_params : list of str, optional
             Names of the surface parameters, eg reflectivity, total incident
-            irradiance, temperature, etc. (Default = [])
+            irradiance, temperature, etc. (Default = None)
         """
         col = ShadeCollection.from_linestring_coords(
             coords, shaded=shaded, normal_vector=normal_vector,
@@ -881,14 +917,15 @@ class BaseSide(GeometryCollection):
     """A side represents a fixed collection of PV segments objects that should
     all be collinear, with the same normal vector"""
 
-    def __init__(self, list_segments=[]):
+    def __init__(self, list_segments=None):
         """Create a side geometry.
 
         Parameters
         ----------
-        list_segments : list of :py:class:`pvfactors.geometry.base.PVSegment`
-            List of PV segments for side
+        list_segments : list of :py:class:`pvfactors.geometry.base.PVSegment`, optional
+            List of PV segments for side (Default = None)
         """
+        list_segments = [] if list_segments is None else list_segments
         check_collinear(list_segments)
         self.list_segments = tuple(list_segments)
         self._all_surfaces = None
@@ -896,7 +933,7 @@ class BaseSide(GeometryCollection):
 
     @classmethod
     def from_linestring_coords(cls, coords, shaded=False, normal_vector=None,
-                               index=None, n_segments=1, surface_params=[]):
+                               index=None, n_segments=1, surface_params=None):
         """Create a Side with a single PV surface, or multiple discretized
         identical ones.
 
@@ -915,7 +952,7 @@ class BaseSide(GeometryCollection):
             Number of same-length segments to use (Default = 1)
         surface_params : list of str, optional
             Names of the surface parameters, eg reflectivity, total incident
-            irradiance, temperature, etc. (Default = [])
+            irradiance, temperature, etc. (Default = None)
         """
         if n_segments == 1:
             list_pvsegments = [PVSegment.from_linestring_coords(
@@ -1092,42 +1129,20 @@ class BasePVArray(object):
     registry_cols = ['geom', 'line_type', 'pvrow_index', 'side',
                      'pvsegment_index', 'shaded', 'surface_index']
 
-    def __init__(self, list_pvrows=[], ground=None, distance=None,
-                 height=None):
-        """Initialize PV array.
+    def __init__(self, axis_azimuth=None):
+        """Initialize Base of PV array.
 
         Parameters
         ----------
-        list_pvrows : list of :py:class:`~pvfactors.geometry.pvrow.PVRow`, optional
-            List of PV rows in the PV array
-            (Default = [])
-        ground : :py:class:`~pvfactors.geometry.pvground.PVGround`, optional
-            Ground geometry for the PV array
-        distance : float, optional
-            Unique distance between PV rows, if exists (Default = None)
-        height : float, optional
-            Unique height of all PV rows, if exists (Default = None)
+        axis_azimuth : float, optional
+            Azimuth angle of rotation axis [deg] (Default = None)
         """
-        self.pvrows = list_pvrows
-        self.ground = ground
-        self.distance = distance
-        self.height = height
+        # All PV arrays should have a fixed axis azimuth in pvfactors
+        self.axis_azimuth = axis_azimuth
 
-        # Initialize shading attributes
-        self.illum_side = None
-        # For view factors
-        self.edge_points = []
-
-        # Property related attributes: will not be built unless called
-        self._all_surfaces = None
-        self._dict_surfaces = None
-        self._surface_registry = None
-        self._view_matrix = None
-        self._obstr_matrix = None
-        self._surfaces_indexed = False
-
-        # Initialize view factor matrix
-        self.vf_matrix = None  # needs to be calculated externally
+        # Initialize view factor matrix: will be calculated externally,
+        # i.e. not by the PV Array class itself
+        self.vf_matrix = None
 
     def plot(self, ax, with_index=False):
         """Plot all the PV rows and the ground in the PV array.
@@ -1162,13 +1177,11 @@ class BasePVArray(object):
     @property
     def all_surfaces(self):
         """List of all surfaces in the PV array."""
-        if self._all_surfaces is None:
-            list_surfaces = []
-            list_surfaces += self.ground.all_surfaces
-            for pvrow in self.pvrows:
-                list_surfaces += pvrow.all_surfaces
-            self._all_surfaces = list_surfaces
-        return self._all_surfaces
+        list_surfaces = []
+        list_surfaces += self.ground.all_surfaces
+        for pvrow in self.pvrows:
+            list_surfaces += pvrow.all_surfaces
+        return list_surfaces
 
     @property
     def n_surfaces(self):
@@ -1185,9 +1198,17 @@ class BasePVArray(object):
         """Surface registry of the PV array, build if does not exist yet.
         The surface registry is a pandas DataFrame that contains all the
         indexed surfaces of the PV array, with some of their properties."""
-        if self._surface_registry is None:
-            self._surface_registry = self._build_surface_registry()
-        return self._surface_registry
+        return self._build_surface_registry()
+
+    @property
+    def view_obstr_matrices(self):
+        """How to build the view matrix will be specific to the pv array
+        considered, so ``_build_view_matrix()`` needs to be implemented in
+        the child class.
+        The view matrix will represent the views between all the surfaces.
+        The obstruction matrix will represent the obstructions in views
+        between all the surfaces."""
+        return self._build_view_matrix()
 
     @property
     def view_matrix(self):
@@ -1195,9 +1216,8 @@ class BasePVArray(object):
         considered, so ``_build_view_matrix()`` needs to be implemented in
         the child class.
         The view matrix will represent the views between all the surfaces."""
-        if self._view_matrix is None:
-            self._view_matrix, self._obstr_matrix = self._build_view_matrix()
-        return self._view_matrix
+        view_matrix, _ = self._build_view_matrix()
+        return view_matrix
 
     @property
     def obstr_matrix(self):
@@ -1206,9 +1226,8 @@ class BasePVArray(object):
         the child class.
         The obstruction matrix will represent the obstructions in views
         between all the surfaces."""
-        if self._obstr_matrix is None:
-            self._view_matrix, self._obstr_matrix = self._build_view_matrix()
-        return self._obstr_matrix
+        _, obstr_matrix = self._build_view_matrix()
+        return obstr_matrix
 
     @property
     def surface_indices(self):
@@ -1223,13 +1242,8 @@ class BasePVArray(object):
     def dict_surfaces(self):
         """Dictionay of surfaces in the PV array, where keys are the surface
         indices."""
-        if self._dict_surfaces is None:
-            if not self._surfaces_indexed:
-                self.index_all_surfaces()
-            all_surfaces = self.all_surfaces
-            dict_surf = {surf.index: surf for surf in all_surfaces}
-            self._dict_surfaces = OrderedDict(dict_surf)
-        return self._dict_surfaces
+        self.index_all_surfaces()
+        return {surf.index: surf for surf in self.all_surfaces}
 
     def update_params(self, new_dict):
         """Update surface parameters in the collection.
@@ -1247,14 +1261,15 @@ class BasePVArray(object):
         """Add unique indices to all surfaces in the PV array."""
         for idx, surface in enumerate(self.all_surfaces):
             surface.index = idx
-        self._surfaces_indexed = True
 
-    def _build_view_matrix(self):
+    def _build_view_matrix(self, *args, **kwargs):
         """Not implemented."""
         raise NotImplementedError
 
     def _build_surface_registry(self):
-        """Build the surface registry of the PV array."""
+        """Build the surface registry of the PV array, which is a
+        pandas DataFrame with most of the geometry information contained
+        in the class object"""
         dict_registry = {k: [] for k in self.registry_cols}
         # Fill up registry with ground surfaces
         surf_line_type = 'ground'
@@ -1337,3 +1352,11 @@ class BasePVArray(object):
         # Make dataframe
         surface_registry = pd.DataFrame.from_dict(dict_registry)
         return surface_registry
+
+    def fit(self, *args, **kwargs):
+        """Not implemented."""
+        raise NotImplementedError
+
+    def transform(self, *args, **kwargs):
+        """Not implemented."""
+        raise NotImplementedError

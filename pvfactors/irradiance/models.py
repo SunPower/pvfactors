@@ -23,19 +23,27 @@ class IsotropicOrdered(BaseModel):
     cats = ['ground', 'front_pvrow', 'back_pvrow']
     irradiance_comp = ['direct']
 
-    def __init__(self):
-        """Initialize irradiance model values that will be saved later on."""
+    def __init__(self, rho_front=0.01, rho_back=0.03):
+        """Initialize irradiance model values that will be saved later on.
+
+        Parameters
+        ----------
+        rho_front : float, optional
+            Reflectivity of the front side of the PV rows (default = 0.01)
+        rho_back : float, optional
+            Reflectivity of the back side of the PV rows (default = 0.03)
+        """
         self.direct = dict.fromkeys(self.cats)
         self.total_perez = dict.fromkeys(self.cats)
         self.isotropic_luminance = None
-        self.rho_front = None
-        self.rho_back = None
+        self.rho_front = rho_front
+        self.rho_back = rho_back
         self.albedo = None
         self.GHI = None
         self.DHI = None
 
     def fit(self, timestamps, DNI, DHI, solar_zenith, solar_azimuth,
-            surface_tilt, surface_azimuth, rho_front, rho_back, albedo,
+            surface_tilt, surface_azimuth, albedo,
             GHI=None):
         """Use vectorization to calculate values used for the isotropic
         irradiance model.
@@ -56,10 +64,6 @@ class IsotropicOrdered(BaseModel):
             Surface tilt angles, from 0 to 180 [deg]
         surface_azimuth : array-like
             Surface azimuth angles [deg]
-        rho_front : float
-            Reflectivity of the front side of the PV rows
-        rho_back : float
-            Reflectivity of the back side of the PV rows
         albedo : array-like
             Albedo values (or ground reflectivity)
         GHI : array-like, optional
@@ -95,8 +99,6 @@ class IsotropicOrdered(BaseModel):
 
         # Save diffuse light
         self.isotropic_luminance = DHI
-        self.rho_front = rho_front
-        self.rho_back = rho_back
         self.albedo = albedo
 
         # DNI seen by ground illuminated surfaces
@@ -207,7 +209,8 @@ class HybridPerezOrdered(BaseModel):
 
     def __init__(self, horizon_band_angle=DEFAULT_HORIZON_BAND_ANGLE,
                  circumsolar_angle=DEFAULT_CIRCUMSOLAR_ANGLE,
-                 circumsolar_model='uniform_disk'):
+                 circumsolar_model='uniform_disk', rho_front=0.01,
+                 rho_back=0.03):
         """Initialize irradiance model values that will be saved later on.
 
         Parameters
@@ -220,6 +223,10 @@ class HybridPerezOrdered(BaseModel):
             DEFAULT_CIRCUMSOLAR_ANGLE)
         circumsolar_model : str
             Circumsolar shading model to use (Default = 'uniform_disk')
+        rho_front : float, optional
+            Reflectivity of the front side of the PV rows (default = 0.01)
+        rho_back : float, optional
+            Reflectivity of the back side of the PV rows (default = 0.03)
         """
         self.direct = dict.fromkeys(self.cats)
         self.circumsolar = dict.fromkeys(self.cats)
@@ -229,14 +236,14 @@ class HybridPerezOrdered(BaseModel):
         self.horizon_band_angle = horizon_band_angle
         self.circumsolar_angle = circumsolar_angle
         self.circumsolar_model = circumsolar_model
-        self.rho_front = None
-        self.rho_back = None
+        self.rho_front = rho_front
+        self.rho_back = rho_back
         self.albedo = None
         self.GHI = None
         self.DNI = None
 
     def fit(self, timestamps, DNI, DHI, solar_zenith, solar_azimuth,
-            surface_tilt, surface_azimuth, rho_front, rho_back, albedo,
+            surface_tilt, surface_azimuth, albedo,
             GHI=None):
         """Use vectorization to calculate values used for the hybrid Perez
         irradiance model.
@@ -257,10 +264,6 @@ class HybridPerezOrdered(BaseModel):
             Surface tilt angles, from 0 to 180 [deg]
         surface_azimuth : array-like
             Surface azimuth angles [deg]
-        rho_front : float
-            Reflectivity of the front side of the PV rows
-        rho_back : float
-            Reflectivity of the back side of the PV rows
         albedo : array-like
             Albedo values (or ground reflectivity)
         GHI : array-like, optional
@@ -305,8 +308,6 @@ class HybridPerezOrdered(BaseModel):
 
         # Save isotropic luminance
         self.isotropic_luminance = luminance_isotropic
-        self.rho_front = rho_front
-        self.rho_back = rho_back
         self.albedo = albedo
 
         # Ground surfaces

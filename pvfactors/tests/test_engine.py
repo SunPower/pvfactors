@@ -10,7 +10,8 @@ def test_pvengine_float_inputs_iso(params):
     """Test that PV engine works for float inputs"""
 
     irradiance_model = IsotropicOrdered()
-    eng = PVEngine(params, irradiance_model=irradiance_model)
+    pvarray = OrderedPVArray.init_from_dict(params)
+    eng = PVEngine(pvarray, irradiance_model=irradiance_model)
 
     # Irradiance inputs
     timestamps = dt.datetime(2019, 6, 11, 11)
@@ -43,7 +44,8 @@ def test_pvengine_float_inputs_perez(params):
     """Test that PV engine works for float inputs"""
 
     irradiance_model = HybridPerezOrdered()
-    eng = PVEngine(params, irradiance_model=irradiance_model)
+    pvarray = OrderedPVArray.init_from_dict(params)
+    eng = PVEngine(pvarray, irradiance_model=irradiance_model)
 
     # Irradiance inputs
     timestamps = dt.datetime(2019, 6, 11, 11)
@@ -87,8 +89,9 @@ def test_pvengine_ts_inputs_perez(params_serial,
 
     # Create engine
     irradiance_model = HybridPerezOrdered()
-    eng = PVEngine(params_serial,
-                   irradiance_model=irradiance_model)
+    pvarray = OrderedPVArray.init_from_dict(
+        params_serial, surface_params=irradiance_model.params)
+    eng = PVEngine(pvarray, irradiance_model=irradiance_model)
 
     # Fit engine
     eng.fit(timestamps, dni, dhi, solar_zenith, solar_azimuth, surface_tilt,
@@ -113,10 +116,12 @@ def test_fast_pvengine_float_inputs_perez(params):
 
     # Prepare some engine inputs
     irradiance_model = HybridPerezOrdered()
+    pvarray = OrderedPVArray.init_from_dict(
+        params, surface_params=irradiance_model.params)
     fast_mode_pvrow_index = 1
 
     # Create engine object
-    eng = PVEngine(params, irradiance_model=irradiance_model,
+    eng = PVEngine(pvarray, irradiance_model=irradiance_model,
                    fast_mode_pvrow_index=fast_mode_pvrow_index)
 
     # Irradiance inputs

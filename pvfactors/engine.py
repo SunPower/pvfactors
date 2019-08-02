@@ -2,7 +2,6 @@
 timeseries simulations."""
 
 import numpy as np
-from pvfactors.geometry import OrderedPVArray
 from pvfactors.viewfactors import VFCalculator
 from pvfactors.irradiance import HybridPerezOrdered
 from scipy import linalg
@@ -14,16 +13,15 @@ class PVEngine(object):
     as a timeseries when the pvarrays can be build from dictionary parameters
     """
 
-    def __init__(self, params, vf_calculator=VFCalculator(),
+    def __init__(self, pvarray, vf_calculator=VFCalculator(),
                  irradiance_model=HybridPerezOrdered(),
-                 cls_pvarray=OrderedPVArray,
                  fast_mode_pvrow_index=None):
         """Create pv engine class, and initialize timeseries parameters.
 
         Parameters
         ----------
-        params : dict
-            The parameters defining the PV array
+        pvarray : BasePVArray (or child) object
+            The initialized PV array object that will be used for calculations
         vf_calculator : vf calculator object, optional
             Calculator that will be used to calculate the view factor matrices
             (Default =
@@ -33,61 +31,53 @@ class PVEngine(object):
             (Default =
             :py:class:`~pvfactors.irradiance.models.HybridPerezOrdered`
             object)
-        cls_pvarray : class of PV array, optional
-            Class that will be used to build the PV array
-            (Default =
-            :py:class:`~pvfactors.geometry.pvarray.OrderedPVArray` class)
         fast_mode_pvrow_index : int, optional
-            If a valid pvrow index is passed, then the PVEngine fast mode
+            If a pvrow index is passed, then the PVEngine fast mode
             will be activated and the engine calculation will be done only
-            for the back surface of the selected pvrow (Default = None)
+            for the back surface of the pvrow with the corresponding
+            index (Default = None)
 
         """
-        self.params = params
         self.vf_calculator = vf_calculator
         self.irradiance = irradiance_model
-        self.cls_pvarray = cls_pvarray
-        self.is_fast_mode = isinstance(fast_mode_pvrow_index, int) \
-            and fast_mode_pvrow_index < params['n_pvrows']
+        self.pvarray = pvarray
+        self.is_fast_mode = False if fast_mode_pvrow_index is None else True
         self.fast_mode_pvrow_index = fast_mode_pvrow_index
 
-        # Required timeseries values
-        self.solar_zenith = None
-        self.solar_azimuth = None
-        self.surface_tilt = None
-        self.surface_azimuth = None
+        # These values will be updated at fitting time
         self.n_points = None
         self.skip_step = None
 
     def fit(self, timestamps, DNI, DHI, solar_zenith, solar_azimuth,
             surface_tilt, surface_azimuth, albedo):
         """Fit the timeseries data to the engine. More specifically,
-        save all the parameters that needs to be saved, and perform the
-        irradiance transformations required by the irradiance model.
+        save all the parameters that needs to be saved, and fit the PV array
+        and irradiance models to the data (i.e. perform all the intermediate
+        vector-based calculations).
         Note that all angles follow the pvlib-python angle convention: North -
         0 deg, East - 90 deg, etc.
 
         Parameters
         ----------
-        timestamps : array-like
+        timestamps : array-like or timestamp-like
             List of timestamps of the simulation.
-        DNI : array-like
+        DNI : array-like or float
             Direct normal irradiance values [W/m2]
-        DHI : array-like
+        DHI : array-like or float
             Diffuse horizontal irradiance values [W/m2]
-        solar_zenith : array-like
+        solar_zenith : array-like or float
             Solar zenith angles [deg]
-        solar_azimuth : array-like
+        solar_azimuth : array-like or float
             Solar azimuth angles [deg]
-        surface_tilt : array-like
+        surface_tilt : array-like or float
             Surface tilt angles, from 0 to 180 [deg]
-        surface_azimuth : array-like
+        surface_azimuth : array-like or float
             Surface azimuth angles [deg]
-        albedo : array-like
-            Albedo values (or ground reflectivity)
+        albedo : array-like or float
+            Albedo values (ground reflectivity)
 
         """
-        # Save
+        # Format inputs to numpy arrays if it looks like floats where inputted
         if np.isscalar(DNI):
             timestamps = [timestamps]
             DNI = np.array([DNI])
@@ -96,23 +86,21 @@ class PVEngine(object):
             solar_azimuth = np.array([solar_azimuth])
             surface_tilt = np.array([surface_tilt])
             surface_azimuth = np.array([surface_azimuth])
+
+        # Format albedo
         self.n_points = len(DNI)
         if np.isscalar(albedo):
             albedo = albedo * np.ones(self.n_points)
 
-        # Save timeseries values
-        self.solar_zenith = solar_zenith
-        self.solar_azimuth = solar_azimuth
-        self.surface_tilt = surface_tilt
-        self.surface_azimuth = surface_azimuth
-
         # Fit irradiance model
         self.irradiance.fit(timestamps, DNI, DHI, solar_zenith, solar_azimuth,
-                            surface_tilt, surface_azimuth,
-                            self.params['rho_front_pvrow'],
-                            self.params['rho_back_pvrow'], albedo)
+                            surface_tilt, surface_azimuth, albedo)
 
-        # Determine timesteps to skip when:
+        # Fit PV array
+        self.pvarray.fit(solar_zenith, solar_azimuth, surface_tilt,
+                         surface_azimuth)
+
+        # Skip timesteps when:
         #    - solar zenith > 90, ie the sun is down
         #    - DNI or DHI is negative, which does not make sense
         #    - DNI and DHI are both zero
@@ -122,6 +110,11 @@ class PVEngine(object):
     def run_timestep(self, idx):
         """Run simulation for a single timestep index.
 
+        Timestep will be skipped when:
+            - solar zenith > 90, ie the sun is down
+            - DNI or DHI is negative, which does not make sense
+            - DNI and DHI are both zero
+
         Parameters
         ----------
         idx : int
@@ -129,34 +122,28 @@ class PVEngine(object):
 
         Returns
         -------
-        pvarray : PV array object
+        pvarray : PV array object or None
             PV array object after all the calculations are performed and
-            applied to it
+            applied to it, ``None`` if the timestep is skipped
 
         """
 
         if self.skip_step[idx]:
             pvarray = None
         else:
-            # Update parameters
-            self.params.update(
-                {'solar_zenith': self.solar_zenith[idx],
-                 'solar_azimuth': self.solar_azimuth[idx],
-                 'surface_tilt': self.surface_tilt[idx],
-                 'surface_azimuth': self.surface_azimuth[idx]})
+            # To be returned at the end
+            pvarray = self.pvarray
 
-            # Create pv array
-            pvarray = self.cls_pvarray.from_dict(
-                self.params, surface_params=self.irradiance.params)
-            pvarray.cast_shadows()
-            pvarray.cuts_for_pvrow_view()
-
-            # Prepare inputs
-            geom_dict = pvarray.dict_surfaces
+            # Transform pvarray to time step
+            pvarray.transform(idx)
 
             # Apply irradiance terms to pvarray
             irradiance_vec, rho_vec, invrho_vec, total_perez_vec = \
                 self.irradiance.transform(pvarray, idx=idx)
+
+            # Prepare inputs to view factor calculator
+            geom_dict = pvarray.dict_surfaces
+            view_matrix, obstr_matrix = pvarray.view_obstr_matrices
 
             if self.is_fast_mode:
                 # Indices of the surfaces of the back of the selected pvrows
@@ -166,8 +153,8 @@ class PVEngine(object):
                 # Calculate view factors using a subset of view_matrix to
                 # gain in calculation speed
                 vf_matrix_subset = self.vf_calculator.get_vf_matrix_subset(
-                    geom_dict, pvarray.view_matrix, pvarray.obstr_matrix,
-                    pvarray.pvrows, list_surface_indices)
+                    geom_dict, view_matrix, obstr_matrix, pvarray.pvrows,
+                    list_surface_indices)
                 pvarray.vf_matrix = vf_matrix_subset
 
                 irradiance_vec_subset = irradiance_vec[list_surface_indices]
@@ -190,8 +177,7 @@ class PVEngine(object):
             else:
                 # Calculate view factors
                 vf_matrix = self.vf_calculator.get_vf_matrix(
-                    geom_dict, pvarray.view_matrix, pvarray.obstr_matrix,
-                    pvarray.pvrows)
+                    geom_dict, view_matrix, obstr_matrix, pvarray.pvrows)
                 pvarray.vf_matrix = vf_matrix
 
                 # Calculate radiosities
@@ -206,10 +192,12 @@ class PVEngine(object):
                     - irradiance_vec[:-1] - isotropic_vec
 
                 # Update surfaces with values
-                for idx, surface in geom_dict.items():
-                    surface.update_params({'q0': q0[idx], 'qinc': qinc[idx],
-                                           'isotropic': isotropic_vec[idx],
-                                           'reflection': reflection_vec[idx]})
+                for idx_surf, surface in geom_dict.items():
+                    surface.update_params(
+                        {'q0': q0[idx_surf],
+                         'qinc': qinc[idx_surf],
+                         'isotropic': isotropic_vec[idx_surf],
+                         'reflection': reflection_vec[idx_surf]})
 
         return pvarray
 

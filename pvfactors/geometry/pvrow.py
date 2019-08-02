@@ -3,7 +3,7 @@
 import numpy as np
 from pvfactors.config import COLOR_DIC
 from pvfactors.geometry.base import \
-    BaseSide, coords_from_center_tilt_length
+    BaseSide, _coords_from_center_tilt_length
 from shapely.geometry import GeometryCollection, LineString
 
 
@@ -135,8 +135,8 @@ class PVRow(GeometryCollection):
         -------
         :py:class:`~pvfactors.geometry.pvrow.PVRow` object
         """
-        coords = coords_from_center_tilt_length(xy_center, tilt, width,
-                                                surface_azimuth, axis_azimuth)
+        coords = _coords_from_center_tilt_length(xy_center, tilt, width,
+                                                 surface_azimuth, axis_azimuth)
         return cls.from_linestring_coords(coords, shaded=shaded,
                                           normal_vector=normal_vector,
                                           index=index, cut=cut,
