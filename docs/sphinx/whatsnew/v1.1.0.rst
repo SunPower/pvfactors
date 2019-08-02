@@ -1,0 +1,19 @@
+.. _whatsnew_1100:
+
+v1.1.0 (August 2, 2019)
+=======================
+
+Some clean ups and enhancements: the PV Array geometry class ``OrderedPVArray`` now
+uses vectorization to calculate the geometry coordinates, which makes the simulations
+around 30% faster.
+
+* Vectorize geometry calculations (#60)
+* Add common project folders to .gitignore (#61)
+* Tutorial for fast mode (#62)
+
+
+Contributors
+------------
+
+* Cedric Leroy (:ghuser:`cedricleroy`)
+* Marc Anoma (:ghuser:`anomam`)

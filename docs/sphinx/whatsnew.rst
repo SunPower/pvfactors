@@ -6,6 +6,7 @@ What's New
 
 These are new features and improvements of note in each release.
 
+.. include:: whatsnew/v1.1.0.rst
 .. include:: whatsnew/v1.0.3.rst
 .. include:: whatsnew/v1.0.2.rst
 .. include:: whatsnew/v1.0.1.rst
