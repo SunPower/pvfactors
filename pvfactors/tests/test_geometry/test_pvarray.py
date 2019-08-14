@@ -1,5 +1,6 @@
 import os
 import numpy as np
+import pandas as pd
 from pvfactors.geometry import OrderedPVArray, PVGround, PVSurface
 from pvfactors.geometry.utils import contains
 from pvfactors.config import MAX_X_GROUND, MIN_X_GROUND
@@ -611,3 +612,50 @@ def test_ordered_pvarray_from_dict_w_direct_shading():
     distance_between_pvrows = \
         pvarray.pvrows[1].centroid.x - pvarray.pvrows[0].centroid.x
     assert distance_between_pvrows == 2.5
+
+
+def test_ordered_pvarray_direct_shading():
+    """Test that direct shading is calculated correctly in the following
+    4 situations:
+    - PV rows tilted to the left and front side shading
+    - PV rows tilted to the right and front side shading
+    - PV rows tilted to the left and back side shading
+    - PV rows tilted to the right and back side shading
+    """
+    # Base params
+    params = {
+        'n_pvrows': 3,
+        'pvrow_height': 1,
+        'pvrow_width': 1,
+        'axis_azimuth': 0.,
+        'gcr': 0.5
+    }
+    # Timeseries inputs
+    df_inputs = pd.DataFrame({
+        'solar_zenith': [70., 80., 80., 70.],
+        'solar_azimuth': [270., 90., 270., 90.],
+        'surface_tilt': [45., 45., 45., 45.],
+        'surface_azimuth': [270., 270., 90., 90.]})
+
+    # Initialize and fit pv array
+    pvarray = OrderedPVArray.init_from_dict(params)
+    # Fit pv array to timeseries data
+    pvarray.fit(df_inputs.solar_zenith, df_inputs.solar_azimuth,
+                df_inputs.surface_tilt, df_inputs.surface_azimuth)
+
+    # Left tilt, sun front
+    pvarray.transform(0)
+    expected_shaded_length = 0.24524505202814076
+    np.testing.assert_allclose(
+        expected_shaded_length, pvarray.pvrows[1].front.shaded_length)
+
+    # Left tilt, sun back
+    pvarray.transform(1)
+    expected_shaded_length = 0.39450728216229386
+    np.testing.assert_allclose(
+        expected_shaded_length, pvarray.pvrows[1].back.shaded_length)
+
+    import matplotlib.pyplot as plt
+    f, ax = plt.subplots()
+    pvarray.plot(ax)
+    plt.show()
