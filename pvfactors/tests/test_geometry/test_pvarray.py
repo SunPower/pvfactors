@@ -616,11 +616,12 @@ def test_ordered_pvarray_from_dict_w_direct_shading():
 
 def test_ordered_pvarray_direct_shading():
     """Test that direct shading is calculated correctly in the following
-    4 situations:
+    5 situations:
     - PV rows tilted to the left and front side shading
     - PV rows tilted to the right and front side shading
     - PV rows tilted to the left and back side shading
     - PV rows tilted to the right and back side shading
+    - no shading
     """
     # Base params
     params = {
@@ -632,16 +633,25 @@ def test_ordered_pvarray_direct_shading():
     }
     # Timeseries inputs
     df_inputs = pd.DataFrame({
-        'solar_zenith': [70., 80., 80., 70.],
-        'solar_azimuth': [270., 90., 270., 90.],
-        'surface_tilt': [45., 45., 45., 45.],
-        'surface_azimuth': [270., 270., 90., 90.]})
+        'solar_zenith': [70., 80., 80., 70., 10.],
+        'solar_azimuth': [270., 90., 270., 90., 90.],
+        'surface_tilt': [45., 45., 45., 45., 45.],
+        'surface_azimuth': [270., 270., 90., 90., 90.]})
 
     # Initialize and fit pv array
     pvarray = OrderedPVArray.init_from_dict(params)
     # Fit pv array to timeseries data
     pvarray.fit(df_inputs.solar_zenith, df_inputs.solar_azimuth,
                 df_inputs.surface_tilt, df_inputs.surface_azimuth)
+
+    expected_ts_front_shading = [0.24524505, 0., 0., 0.24524505, 0.]
+    expected_ts_back_shading = [0., 0.39450728, 0.39450728, 0., 0.]
+
+    # Test that timeseries shading calculated correctly
+    np.testing.assert_allclose(expected_ts_front_shading,
+                               pvarray.shaded_length_front)
+    np.testing.assert_allclose(expected_ts_back_shading,
+                               pvarray.shaded_length_back)
 
     # Left tilt, sun front
     pvarray.transform(0)
