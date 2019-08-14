@@ -164,7 +164,11 @@ class OrderedPVArray(BasePVArray):
         """
 
         self.n_states = len(solar_zenith)
+        # Save surface tilt angles
         self.surface_tilt = surface_tilt
+        # Calculate rotation angles
+        rotation_vec = _get_rotation_from_tilt_azimuth(
+            surface_azimuth, self.axis_azimuth, surface_tilt)
 
         # Calculate the solar 2D vectors for all timestamps
         self.solar_2d_vectors = _get_solar_2d_vectors(
@@ -173,11 +177,20 @@ class OrderedPVArray(BasePVArray):
         alpha_vec = np.arctan2(self.solar_2d_vectors[1],
                                self.solar_2d_vectors[0])
 
-        # Calculate rotation angles
-        rotation_vec = _get_rotation_from_tilt_azimuth(
-            surface_azimuth, self.axis_azimuth, surface_tilt)
-
         # Calculate the coordinates of all PV rows for all timestamps
+        self._calculate_pvrow_elements_coords(surface_tilt, surface_azimuth,
+                                              alpha_vec, rotation_vec)
+
+        # Calculate ground elements coordinates for all timestamps
+        self._calculate_ground_elements_coords(alpha_vec, rotation_vec)
+
+    def _calculate_pvrow_elements_coords(self, surface_tilt, surface_azimuth,
+                                         alpha_vec, rotation_vec):
+
+        # Calculate interrow direct shading lengths
+        self._calculate_interrow_shading_vec(alpha_vec, rotation_vec)
+
+        # Calculate coordinates of segments of each pv row side
         xy_centers = [(X_ORIGIN_PVROWS + idx * self.distance,
                        self.height + self.y_ground)
                       for idx in range(self.n_pvrows)]
@@ -188,36 +201,37 @@ class OrderedPVArray(BasePVArray):
                     self.axis_azimuth))
         self.pvrow_coords = np.array(self.pvrow_coords)
 
-        # Calculate ground elements coordinates
-        self._calculate_ground_elements_coords(alpha_vec, rotation_vec)
-
-        # Calculate vectorized inter-row shading
-        if self.n_pvrows > 1:
-            self._calculate_interrow_shading_vec(alpha_vec, rotation_vec)
-
-        # Determine when there's direct shading
-        self.has_direct_shading = np.zeros(self.n_states, dtype=bool)
-        if self.n_pvrows > 1:
-            # If the shadows are crossing (or close), there's direct shading
-            self.has_direct_shading = (
-                self.ground_shadow_coords[1][0][0] + DISTANCE_TOLERANCE
-                < self.ground_shadow_coords[0][1][0])
-
     def _calculate_interrow_shading_vec(self, alpha_vec, rotation_vec):
 
-        alpha_vec_deg = np.rad2deg(alpha_vec)
-        theta_t = 90. - rotation_vec
-        theta_t_rad = np.deg2rad(theta_t)
-        beta = theta_t + alpha_vec_deg
-        beta_rad = np.deg2rad(beta)
-        delta = self.distance * (
-            np.sin(theta_t_rad) - np.cos(theta_t_rad) * np.tan(beta_rad))
-        tmp_shaded_length_front = np.maximum(0, self.width - delta)
-        self.shaded_length_front = np.where(
-            tmp_shaded_length_front > self.width, 0, tmp_shaded_length_front)
-        tmp_shaded_length_back = np.maximum(0, self.width + delta)
-        self.shaded_length_back = np.where(
-            tmp_shaded_length_back > self.width, 0, tmp_shaded_length_back)
+        if self.n_pvrows > 1:
+            # Calculate intermediate values for direct shading
+            alpha_vec_deg = np.rad2deg(alpha_vec)
+            theta_t = 90. - rotation_vec
+            theta_t_rad = np.deg2rad(theta_t)
+            beta = theta_t + alpha_vec_deg
+            beta_rad = np.deg2rad(beta)
+            delta = self.distance * (
+                np.sin(theta_t_rad) - np.cos(theta_t_rad) * np.tan(beta_rad))
+            # Calculate temporary shaded lengths
+            tmp_shaded_length_front = np.maximum(0, self.width - delta)
+            tmp_shaded_length_back = np.maximum(0, self.width + delta)
+            # The shaded length can't be longer than PV row (meaning sun can't
+            # be under the horizon or something...)
+            self.shaded_length_front = np.where(
+                tmp_shaded_length_front > self.width, 0,
+                tmp_shaded_length_front)
+            self.shaded_length_back = np.where(
+                tmp_shaded_length_back > self.width, 0,
+                tmp_shaded_length_back)
+        else:
+            # Since there's 1 row, there can't be any direct shading
+            self.shaded_length_front = np.zeros(self.n_states)
+            self.shaded_length_back = np.zeros(self.n_states)
+
+        # Flag times when there's direct shading
+        self.has_direct_shading = (
+            (self.shaded_length_front > DISTANCE_TOLERANCE)
+            | (self.shaded_length_back > DISTANCE_TOLERANCE))
 
     def transform(self, idx):
         """
