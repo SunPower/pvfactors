@@ -652,20 +652,3 @@ def test_ordered_pvarray_direct_shading():
                                pvarray.shaded_length_front)
     np.testing.assert_allclose(expected_ts_back_shading,
                                pvarray.shaded_length_back)
-
-    # Left tilt, sun front
-    pvarray.transform(0)
-    expected_shaded_length = 0.24524505202814076
-    np.testing.assert_allclose(
-        expected_shaded_length, pvarray.pvrows[1].front.shaded_length)
-
-    # Left tilt, sun back
-    pvarray.transform(1)
-    expected_shaded_length = 0.39450728216229386
-    np.testing.assert_allclose(
-        expected_shaded_length, pvarray.pvrows[1].back.shaded_length)
-
-    import matplotlib.pyplot as plt
-    f, ax = plt.subplots()
-    pvarray.plot(ax)
-    plt.show()
