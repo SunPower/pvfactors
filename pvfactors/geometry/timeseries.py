@@ -16,18 +16,15 @@ class TsPVRow(object):
 
     @classmethod
     def from_raw_inputs(cls, xy_center, width, rotation_vec,
-                        cut, shaded_length_front, shaded_length_back,
-                        is_left_edge, is_right_edge):
+                        cut, shaded_length_front, shaded_length_back):
         # Calculate front side coords
         ts_front = TsSide.from_raw_inputs(
             xy_center, width, rotation_vec, cut.get('front', 1),
-            shaded_length_front, is_left_edge,
-            is_right_edge)
+            shaded_length_front)
         # Calculate back side coords
         ts_back = TsSide.from_raw_inputs(
             xy_center, width, rotation_vec, cut.get('back', 1),
-            shaded_length_front, is_left_edge,
-            is_right_edge)
+            shaded_length_back)
 
         return cls(ts_front, ts_back, xy_center)
 
@@ -52,18 +49,32 @@ class TsSide(object):
 
     @classmethod
     def from_raw_inputs(cls, xy_center, width, rotation_vec, cut,
-                        shaded_length, is_left_edge, is_right_edge):
-        # Create surface coords
-        # Put surfaces in shaded collections
-        # Put collections into segment coords
-        # Put shaded collection in side coords
+                        shaded_length):
+
+        mask_tilted_to_left = rotation_vec >= 0
 
         # Create Ts segments
         x_center, y_center = xy_center
         radius = width / 2.
         segment_length = width / cut
+        is_flat = rotation_vec == 0.
+
+        # Calculate coords of shading point
+        r_shade = radius - shaded_length
+        x_sh = np.where(
+            mask_tilted_to_left,
+            r_shade * cosd(rotation_vec + 180.) + x_center,
+            r_shade * cosd(rotation_vec) + x_center)
+        y_sh = np.where(
+            mask_tilted_to_left,
+            r_shade * sind(rotation_vec + 180.) + y_center,
+            r_shade * sind(rotation_vec) + y_center)
+
+        # Flat case
+        # Calculate coords
         list_segments = []
         for i in range(cut):
+            # Calculate segment coords
             r1 = radius - i * segment_length
             r2 = radius - (i + 1) * segment_length
             x1 = r1 * cosd(rotation_vec + 180.) + x_center
@@ -72,9 +83,35 @@ class TsSide(object):
             y2 = r2 * sind(rotation_vec + 180) + y_center
             segment_coords = TsLineCoords.from_array(
                 np.array([[x1, y1], [x2, y2]]))
-            illum = TsSurface(segment_coords)
-            shaded = TsSurface(TsLineCoords.from_array(
-                np.array([[x1, y1], [x1, y1]])))
+            # Determine lowest and highest points of segment
+            x_highest = np.where(mask_tilted_to_left, x2, x1)
+            y_highest = np.where(mask_tilted_to_left, y2, y1)
+            x_lowest = np.where(mask_tilted_to_left, x1, x2)
+            y_lowest = np.where(mask_tilted_to_left, y1, y2)
+            # import pdb
+            # pdb.set_trace()
+            # Calculate illum and shaded coords
+            x2_illum, y2_illum = x_highest, y_highest
+            x1_shaded, y1_shaded, x2_shaded, y2_shaded = \
+                x_lowest, y_lowest, x_lowest, y_lowest
+            mask_all_shaded = y_sh > y_highest
+            mask_partial_shaded = (y_sh > y_lowest) & (~ mask_all_shaded)
+            # import pdb
+            # pdb.set_trace()
+            x2_shaded = np.where(mask_all_shaded, x_highest, x2_shaded)
+            x2_shaded = np.where(mask_partial_shaded, x_sh, x2_shaded)
+            y2_shaded = np.where(mask_all_shaded, y_highest, y2_shaded)
+            y2_shaded = np.where(mask_partial_shaded, y_sh, y2_shaded)
+            x1_illum = x2_shaded
+            y1_illum = y2_shaded
+            illum_coords = TsLineCoords.from_array(
+                np.array([[x1_illum, y1_illum], [x2_illum, y2_illum]]))
+            shaded_coords = TsLineCoords.from_array(
+                np.array([[x1_shaded, y1_shaded], [x2_shaded, y2_shaded]]))
+            # Create illuminated and shaded surfaces
+            illum = TsSurface(illum_coords)
+            shaded = TsSurface(shaded_coords)
+            # Create dual segment
             segment = TsDualSegment(segment_coords, illum, shaded)
             list_segments.append(segment)
 

@@ -1,5 +1,5 @@
 import os
-from pvfactors.geometry.coords import TsPVRow
+from pvfactors.geometry.timeseries import TsPVRow
 import pandas as pd
 import numpy as np
 
@@ -13,14 +13,11 @@ def test_ts_pvrow():
         'shaded_length_front': [0.3, 0],
         'shaded_length_back': [0, 0.3]})
     cut = {'front': 3, 'back': 4}
-    is_left_edge = False
-    is_right_edge = False
 
     ts_pvrow = TsPVRow.from_raw_inputs(
         xy_center, width, df_inputs.rotation_vec,
         cut, df_inputs.shaded_length_front,
-        df_inputs.shaded_length_back, is_left_edge,
-        is_right_edge)
+        df_inputs.shaded_length_back)
 
     # Check timeseries length of front and back segments
     for seg in ts_pvrow.front.list_segments:
@@ -29,8 +26,12 @@ def test_ts_pvrow():
         np.testing.assert_allclose(width / cut['back'], seg.length)
 
     # Check shaded length on either sides of pv rows
-    np.testing.assert_allclose(0, ts_pvrow.front.shaded_length)
-    np.testing.assert_allclose(0, ts_pvrow.back.shaded_length)
+    np.testing.assert_allclose(df_inputs.shaded_length_front,
+                               ts_pvrow.front.shaded_length)
+    np.testing.assert_allclose(df_inputs.shaded_length_back,
+                               ts_pvrow.back.shaded_length)
+
+    # ---- !!!!!! Need to test flat case as well
 
 
 def test_plot_ts_pvrow():
@@ -47,14 +48,11 @@ def test_plot_ts_pvrow():
             'shaded_length_front': [0.3, 0],
             'shaded_length_back': [0, 0.3]})
         cut = {'front': 3, 'back': 4}
-        is_left_edge = False
-        is_right_edge = False
 
         ts_pvrow = TsPVRow.from_raw_inputs(
             xy_center, width, df_inputs.rotation_vec,
             cut, df_inputs.shaded_length_front,
-            df_inputs.shaded_length_back, is_left_edge,
-            is_right_edge)
+            df_inputs.shaded_length_back)
 
         # Plot it at ts 0
         f, ax = plt.subplots()
