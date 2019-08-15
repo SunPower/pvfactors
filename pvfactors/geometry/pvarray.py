@@ -186,6 +186,20 @@ class OrderedPVArray(BasePVArray):
 
     def _calculate_pvrow_elements_coords(self, surface_tilt, surface_azimuth,
                                          alpha_vec, rotation_vec):
+        """Calculate PV row coordinate elements in a vectorized way, such as
+        PV row boundary coordinates and shaded lengths.
+
+        Parameters
+        ----------
+        surface_tilt : array-like or float
+            Surface tilt angles, from 0 to 180 [deg]
+        surface_azimuth : array-like or float
+            Surface azimuth angles [deg]
+        alpha_vec : array-like or float
+            Angle made by 2d solar vector and x-axis [rad]
+        rotation_vec : array-like or float
+            Rotation angle of the PV rows [deg]
+        """
 
         # Calculate interrow direct shading lengths
         self._calculate_interrow_shading_vec(alpha_vec, rotation_vec)
@@ -202,6 +216,16 @@ class OrderedPVArray(BasePVArray):
         self.pvrow_coords = np.array(self.pvrow_coords)
 
     def _calculate_interrow_shading_vec(self, alpha_vec, rotation_vec):
+        """Calculate the shaded length on front and back side of PV rows when
+        direct shading happens, and in a vectorized way.
+
+        Parameters
+        ----------
+        alpha_vec : array-like or float
+            Angle made by 2d solar vector and x-axis [rad]
+        rotation_vec : array-like or float
+            Rotation angle of the PV rows [deg]
+        """
 
         if self.n_pvrows > 1:
             # Calculate intermediate values for direct shading
@@ -280,7 +304,8 @@ class OrderedPVArray(BasePVArray):
                 self._calculate_interrow_shading(idx)
 
             # Build lists of pv row neighbors, used to calculate view matrix
-            self.front_neighbors, self.back_neighbors = self._get_neighbors(self.surface_tilt[idx])
+            self.front_neighbors, self.back_neighbors = \
+                self._get_neighbors(self.surface_tilt[idx])
 
         else:
             msg = "Step index {} is out of range: [0 to {}]".format(
