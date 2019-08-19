@@ -2,6 +2,9 @@ import os
 from pvfactors.geometry.timeseries import TsPVRow
 import pandas as pd
 import numpy as np
+from pvfactors.geometry.pvrow import PVRow
+from pvfactors.geometry.base import \
+    BaseSide, PVSegment, PVSurface, ShadeCollection
 
 
 def test_ts_pvrow():
@@ -72,3 +75,33 @@ def test_plot_ts_pvrow():
         f, ax = plt.subplots()
         ts_pvrow.plot_at_idx(2, ax)
         plt.show()
+
+
+def test_ts_pvrow_to_geometry():
+    """Check that the geometries are created correctly"""
+
+    xy_center = (0, 2)
+    width = 2.
+    df_inputs = pd.DataFrame({
+        'rotation_vec': [20., -30., 0.],
+        'shaded_length_front': [1.3, 0., 1.9],
+        'shaded_length_back': [0, 0.3, 0.6]})
+    cut = {'front': 3, 'back': 4}
+
+    ts_pvrow = TsPVRow.from_raw_inputs(
+        xy_center, width, df_inputs.rotation_vec,
+        cut, df_inputs.shaded_length_front,
+        df_inputs.shaded_length_back)
+
+    pvrow = ts_pvrow.at(0)
+    # Check classes of geometries
+    assert isinstance(pvrow, PVRow)
+    assert isinstance(pvrow.front, BaseSide)
+    assert isinstance(pvrow.back, BaseSide)
+    assert isinstance(pvrow.front.list_segments[0], PVSegment)
+    assert isinstance(pvrow.back.list_segments[0].illum_collection,
+                      ShadeCollection)
+    assert isinstance(pvrow.front.list_segments[1].illum_collection
+                      .list_surfaces[0], PVSurface)
+    # Check some values
+    np.testing.assert_allclose(pvrow.front.shaded_length, 1.3)

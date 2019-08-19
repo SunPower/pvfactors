@@ -3,31 +3,58 @@
 import numpy as np
 from pvlib.tools import cosd, sind
 from pvfactors.config import DISTANCE_TOLERANCE, COLOR_DIC
-from pvfactors.geometry.base import PVSurface
+from pvfactors.geometry.base import (
+    PVSurface, ShadeCollection, PVSegment, BaseSide,
+    _coords_from_center_tilt_length)
+from pvfactors.geometry.pvrow import PVRow
 from shapely.geometry import GeometryCollection
 
 
 class TsPVRow(object):
 
-    def __init__(self, ts_front_side, ts_back_side, xy_center):
+    def __init__(self, ts_front_side, ts_back_side, xy_center, index=None,
+                 full_pvrow_coords=None):
         self.front = ts_front_side
         self.back = ts_back_side
         self.xy_center = xy_center
+        self.index = index
+        self.full_pvrow_coords = full_pvrow_coords
 
     @classmethod
     def from_raw_inputs(cls, xy_center, width, rotation_vec,
-                        cut, shaded_length_front, shaded_length_back):
+                        cut, shaded_length_front, shaded_length_back,
+                        index=None):
         """Shading will always be zero when pv rows are flat"""
+        # Calculate full pvrow coords
+        pvrow_coords = TsPVRow._calculate_full_coords(
+            xy_center, width, rotation_vec)
+        # Calculate normal vectors
+        dx = pvrow_coords.b2.x - pvrow_coords.b1.x
+        dy = pvrow_coords.b2.y - pvrow_coords.b1.y
+        normal_vec_front = np.array([-dy, dx])
         # Calculate front side coords
         ts_front = TsSide.from_raw_inputs(
             xy_center, width, rotation_vec, cut.get('front', 1),
-            shaded_length_front)
+            shaded_length_front, n_vector=normal_vec_front)
         # Calculate back side coords
         ts_back = TsSide.from_raw_inputs(
             xy_center, width, rotation_vec, cut.get('back', 1),
-            shaded_length_back)
+            shaded_length_back, n_vector=-normal_vec_front)
 
-        return cls(ts_front, ts_back, xy_center)
+        return cls(ts_front, ts_back, xy_center, index=index,
+                   full_pvrow_coords=pvrow_coords)
+
+    @staticmethod
+    def _calculate_full_coords(xy_center, width, rotation):
+        x_center, y_center = xy_center
+        radius = width / 2.
+        # Calculate coords
+        x1 = radius * cosd(rotation + 180.) + x_center
+        y1 = radius * sind(rotation + 180.) + y_center
+        x2 = radius * cosd(rotation) + x_center
+        y2 = radius * sind(rotation) + y_center
+        coords = TsLineCoords.from_array(np.array([[x1, y1], [x2, y2]]))
+        return coords
 
     def surfaces_at_idx(self, idx):
         list_surfaces = []
@@ -42,15 +69,23 @@ class TsPVRow(object):
         self.back.plot_at_idx(idx, ax, color_shaded=color_shaded,
                               color_illum=color_illum)
 
+    def at(self, idx):
+        front_geom = self.front.at(idx)
+        back_geom = self.back.at(idx)
+        pvrow = PVRow(front_side=front_geom, back_side=back_geom,
+                      index=self.index, original_linestring=None)
+        return pvrow
+
 
 class TsSide(object):
 
-    def __init__(self, segments):
+    def __init__(self, segments, n_vector=None):
         self.list_segments = segments
+        self.n_vector = n_vector
 
     @classmethod
     def from_raw_inputs(cls, xy_center, width, rotation_vec, cut,
-                        shaded_length):
+                        shaded_length, n_vector=None):
         """
         Shading will always be zero when PV rows are flat
         """
@@ -74,7 +109,6 @@ class TsSide(object):
             r_shade * sind(rotation_vec + 180.) + y_center,
             r_shade * sind(rotation_vec) + y_center)
 
-        # Flat case
         # Calculate coords
         list_segments = []
         for i in range(cut):
@@ -111,19 +145,27 @@ class TsSide(object):
             shaded_coords = TsLineCoords.from_array(
                 np.array([[x1_shaded, y1_shaded], [x2_shaded, y2_shaded]]))
             # Create illuminated and shaded surfaces
-            illum = TsSurface(illum_coords)
-            shaded = TsSurface(shaded_coords)
+            illum = TsSurface(illum_coords, n_vector=n_vector)
+            shaded = TsSurface(shaded_coords, n_vector=n_vector)
             # Create dual segment
-            segment = TsDualSegment(segment_coords, illum, shaded)
+            segment = TsDualSegment(segment_coords, illum, shaded,
+                                    n_vector=n_vector)
             list_segments.append(segment)
 
-        return cls(list_segments)
+        return cls(list_segments, n_vector=n_vector)
 
     def surfaces_at_idx(self, idx):
         list_surfaces = []
         for segment in self.list_segments:
             list_surfaces.append(segment.surfaces_at_idx(idx))
         return list_surfaces
+
+    def at(self, idx):
+        list_geom_segments = []
+        for ts_seg in self.list_segments:
+            list_geom_segments.append(ts_seg.at(idx))
+        side = BaseSide(list_geom_segments)
+        return side
 
     def plot_at_idx(self, idx, ax, color_shaded=COLOR_DIC['pvrow_shaded'],
                     color_illum=COLOR_DIC['pvrow_illum']):
@@ -144,10 +186,13 @@ class TsDualSegment(object):
     1 shaded surface and 1 illuminated surface. This allows consistent
     indexing of the object."""
 
-    def __init__(self, coords, illum_ts_surface, shaded_ts_surface):
+    def __init__(self, coords, illum_ts_surface, shaded_ts_surface,
+                 index=None, n_vector=None):
         self.coords = coords
         self.illum = illum_ts_surface
         self.shaded = shaded_ts_surface
+        self.index = index
+        self.n_vector = n_vector
 
     def surfaces_at_idx(self, idx):
         list_surfaces = []
@@ -164,6 +209,27 @@ class TsDualSegment(object):
         self.illum.plot_at_idx(idx, ax, color_illum)
         self.shaded.plot_at_idx(idx, ax, color_shaded)
 
+    def at(self, idx):
+        # Create illum collection
+        illum_surface = self.illum.at(idx, shaded=False)
+        list_illum_surfaces = [] if illum_surface.is_empty \
+            else [illum_surface]
+        illum_collection = ShadeCollection(
+            list_surfaces=list_illum_surfaces, shaded=False,
+            surface_params=None)
+        # Create shaded collection
+        shaded_surface = self.shaded.at(idx, shaded=True)
+        list_shaded_surfaces = [] if shaded_surface.is_empty \
+            else [shaded_surface]
+        shaded_collection = ShadeCollection(
+            list_surfaces=list_shaded_surfaces, shaded=True,
+            surface_params=None)
+        # Create PV segment
+        segment = PVSegment(illum_collection=illum_collection,
+                            shaded_collection=shaded_collection,
+                            index=self.index)
+        return segment
+
     @property
     def length(self):
         return self.illum.length + self.shaded.length
@@ -175,16 +241,23 @@ class TsDualSegment(object):
 
 class TsSurface(object):
 
-    def __init__(self, coords):
+    def __init__(self, coords, n_vector=None):
         self.coords = coords
         self.length = np.sqrt((coords.b2.y - coords.b1.y)**2
                               + (coords.b2.x - coords.b1.x)**2)
+        self.n_vector = n_vector
 
-    def at(self, idx):
+    def at(self, idx, shaded=None):
         if self.length[idx] < DISTANCE_TOLERANCE:
+            # return an empty geometry
             return GeometryCollection()
         else:
-            return PVSurface(self.coords.at(idx))
+            # Get normal vector at that time
+            n_vector = (self.n_vector[:, idx] if self.n_vector is not None
+                        else None)
+            # Return a pv surface geometry
+            return PVSurface(self.coords.at(idx), shaded=shaded,
+                             normal_vector=n_vector)
 
     def plot_at_idx(self, idx, ax, color):
         if self.length[idx] > DISTANCE_TOLERANCE:
