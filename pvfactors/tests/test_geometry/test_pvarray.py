@@ -455,7 +455,6 @@ def test_orderedpvarray_almost_flat():
 
 def test_time_ordered_pvarray(params):
 
-    # params.update({'surface_tilt': 0})
     from pvfactors.viewfactors import VFCalculator
 
     import time

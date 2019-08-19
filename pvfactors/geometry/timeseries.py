@@ -6,7 +6,7 @@ from pvfactors.config import DISTANCE_TOLERANCE, COLOR_DIC
 from pvfactors.geometry.base import (
     PVSurface, ShadeCollection, PVSegment, BaseSide)
 from pvfactors.geometry.pvrow import PVRow
-from shapely.geometry import GeometryCollection
+from shapely.geometry import GeometryCollection, LineString
 
 
 class TsPVRow(object):
@@ -22,7 +22,7 @@ class TsPVRow(object):
     @classmethod
     def from_raw_inputs(cls, xy_center, width, rotation_vec,
                         cut, shaded_length_front, shaded_length_back,
-                        index=None):
+                        index=None, surface_params=None):
         """Shading will always be zero when pv rows are flat"""
         # Calculate full pvrow coords
         pvrow_coords = TsPVRow._calculate_full_coords(
@@ -34,11 +34,13 @@ class TsPVRow(object):
         # Calculate front side coords
         ts_front = TsSide.from_raw_inputs(
             xy_center, width, rotation_vec, cut.get('front', 1),
-            shaded_length_front, n_vector=normal_vec_front)
+            shaded_length_front, n_vector=normal_vec_front,
+            surface_params=surface_params)
         # Calculate back side coords
         ts_back = TsSide.from_raw_inputs(
             xy_center, width, rotation_vec, cut.get('back', 1),
-            shaded_length_back, n_vector=-normal_vec_front)
+            shaded_length_back, n_vector=-normal_vec_front,
+            surface_params=surface_params)
 
         return cls(ts_front, ts_back, xy_center, index=index,
                    full_pvrow_coords=pvrow_coords)
@@ -71,8 +73,10 @@ class TsPVRow(object):
     def at(self, idx):
         front_geom = self.front.at(idx)
         back_geom = self.back.at(idx)
+        original_line = LineString(
+            self.full_pvrow_coords.coords[:, :, idx])
         pvrow = PVRow(front_side=front_geom, back_side=back_geom,
-                      index=self.index, original_linestring=None)
+                      index=self.index, original_linestring=original_line)
         return pvrow
 
 
@@ -84,7 +88,7 @@ class TsSide(object):
 
     @classmethod
     def from_raw_inputs(cls, xy_center, width, rotation_vec, cut,
-                        shaded_length, n_vector=None):
+                        shaded_length, n_vector=None, surface_params=None):
         """
         Shading will always be zero when PV rows are flat
         """
@@ -144,8 +148,10 @@ class TsSide(object):
             shaded_coords = TsLineCoords.from_array(
                 np.array([[x1_shaded, y1_shaded], [x2_shaded, y2_shaded]]))
             # Create illuminated and shaded surfaces
-            illum = TsSurface(illum_coords, n_vector=n_vector)
-            shaded = TsSurface(shaded_coords, n_vector=n_vector)
+            illum = TsSurface(illum_coords, n_vector=n_vector,
+                              surface_params=surface_params)
+            shaded = TsSurface(shaded_coords, n_vector=n_vector,
+                               surface_params=surface_params)
             # Create dual segment
             segment = TsDualSegment(segment_coords, illum, shaded,
                                     n_vector=n_vector)
@@ -240,11 +246,12 @@ class TsDualSegment(object):
 
 class TsSurface(object):
 
-    def __init__(self, coords, n_vector=None):
+    def __init__(self, coords, n_vector=None, surface_params=None):
         self.coords = coords
         self.length = np.sqrt((coords.b2.y - coords.b1.y)**2
                               + (coords.b2.x - coords.b1.x)**2)
         self.n_vector = n_vector
+        self.surface_params = surface_params
 
     def at(self, idx, shaded=None):
         if self.length[idx] < DISTANCE_TOLERANCE:
@@ -256,7 +263,8 @@ class TsSurface(object):
                         else None)
             # Return a pv surface geometry
             return PVSurface(self.coords.at(idx), shaded=shaded,
-                             normal_vector=n_vector)
+                             normal_vector=n_vector,
+                             surface_params=self.surface_params)
 
     def plot_at_idx(self, idx, ax, color):
         if self.length[idx] > DISTANCE_TOLERANCE:
