@@ -4,8 +4,7 @@ import numpy as np
 from pvlib.tools import cosd, sind
 from pvfactors.config import DISTANCE_TOLERANCE, COLOR_DIC
 from pvfactors.geometry.base import (
-    PVSurface, ShadeCollection, PVSegment, BaseSide,
-    _coords_from_center_tilt_length)
+    PVSurface, ShadeCollection, PVSegment, BaseSide)
 from pvfactors.geometry.pvrow import PVRow
 from shapely.geometry import GeometryCollection
 

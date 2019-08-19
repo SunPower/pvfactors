@@ -105,3 +105,10 @@ def test_ts_pvrow_to_geometry():
                       .list_surfaces[0], PVSurface)
     # Check some values
     np.testing.assert_allclose(pvrow.front.shaded_length, 1.3)
+    n_vector_front = (pvrow.front.list_segments[1].illum_collection
+                      .list_surfaces[0].n_vector)
+    n_vector_back = (pvrow.back.list_segments[1].illum_collection
+                     .list_surfaces[0].n_vector)
+    expected_n_vec_front = np.array([-0.68404029, 1.87938524])
+    np.testing.assert_allclose(n_vector_front, expected_n_vec_front)
+    np.testing.assert_allclose(n_vector_back, - expected_n_vec_front)
