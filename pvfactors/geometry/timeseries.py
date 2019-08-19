@@ -17,6 +17,7 @@ class TsPVRow(object):
     @classmethod
     def from_raw_inputs(cls, xy_center, width, rotation_vec,
                         cut, shaded_length_front, shaded_length_back):
+        """Shading will always be zero when pv rows are flat"""
         # Calculate front side coords
         ts_front = TsSide.from_raw_inputs(
             xy_center, width, rotation_vec, cut.get('front', 1),
@@ -50,6 +51,9 @@ class TsSide(object):
     @classmethod
     def from_raw_inputs(cls, xy_center, width, rotation_vec, cut,
                         shaded_length):
+        """
+        Shading will always be zero when PV rows are flat
+        """
 
         mask_tilted_to_left = rotation_vec >= 0
 
@@ -57,7 +61,7 @@ class TsSide(object):
         x_center, y_center = xy_center
         radius = width / 2.
         segment_length = width / cut
-        is_flat = rotation_vec == 0.
+        is_not_flat = rotation_vec != 0.
 
         # Calculate coords of shading point
         r_shade = radius - shaded_length
@@ -88,16 +92,14 @@ class TsSide(object):
             y_highest = np.where(mask_tilted_to_left, y2, y1)
             x_lowest = np.where(mask_tilted_to_left, x1, x2)
             y_lowest = np.where(mask_tilted_to_left, y1, y2)
-            # import pdb
-            # pdb.set_trace()
             # Calculate illum and shaded coords
             x2_illum, y2_illum = x_highest, y_highest
             x1_shaded, y1_shaded, x2_shaded, y2_shaded = \
                 x_lowest, y_lowest, x_lowest, y_lowest
-            mask_all_shaded = y_sh > y_highest
-            mask_partial_shaded = (y_sh > y_lowest) & (~ mask_all_shaded)
-            # import pdb
-            # pdb.set_trace()
+            mask_all_shaded = (y_sh > y_highest) & (is_not_flat)
+            mask_partial_shaded = (y_sh > y_lowest) & (~ mask_all_shaded) \
+                & (is_not_flat)
+            # Calculate second boundary point of shade
             x2_shaded = np.where(mask_all_shaded, x_highest, x2_shaded)
             x2_shaded = np.where(mask_partial_shaded, x_sh, x2_shaded)
             y2_shaded = np.where(mask_all_shaded, y_highest, y2_shaded)
@@ -166,10 +168,14 @@ class TsDualSegment(object):
     def length(self):
         return self.illum.length + self.shaded.length
 
+    @property
+    def shaded_length(self):
+        return self.shaded.length
+
 
 class TsSurface(object):
 
-    def __init__(self, coords, shaded=None):
+    def __init__(self, coords):
         self.coords = coords
         self.length = np.sqrt((coords.b2.y - coords.b1.y)**2
                               + (coords.b2.x - coords.b1.x)**2)
