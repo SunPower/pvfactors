@@ -359,11 +359,27 @@ class TsSide(object):
 
 class TsDualSegment(object):
     """A TsDualSegment is a timeseries segment that can only have
-    1 shaded surface and 1 illuminated surface. This allows consistent
-    indexing of the object."""
+    1 shaded surface and 1 illuminated surface. This allows indexing of the
+    object."""
 
     def __init__(self, coords, illum_ts_surface, shaded_ts_surface,
                  index=None, n_vector=None):
+        """Initialize timeseries dual segment using segment coordinates and
+        timeseries illuminated and shaded surfaces.
+
+        Parameters
+        ----------
+        coords : :py:class:`~pvfactors.geometry.timeseries.TsLineCoords`
+            Timeseries coordinates of full segment
+        illum_ts_surface : :py:class:`~pvfactors.geometry.timeseries.TsSurface`
+            Timeseries surface for illuminated part of dual segment
+        shaded_ts_surface : :py:class:`~pvfactors.geometry.timeseries.TsSurface`
+            Timeseries surface for shaded part of dual segment
+        index : int, optional
+            Index of segment (Default = None)
+        n_vector : np.ndarray, optional
+            Timeseries normal vectors of the side (Default = None)
+        """
         self.coords = coords
         self.illum = illum_ts_surface
         self.shaded = shaded_ts_surface
@@ -371,21 +387,55 @@ class TsDualSegment(object):
         self.n_vector = n_vector
 
     def surfaces_at_idx(self, idx):
-        list_surfaces = []
-        illum_surface = self.illum.at(idx)
-        shaded_surface = self.shaded.at(idx)
-        if not illum_surface.is_empty:
-            list_surfaces.append(illum_surface)
-        if not shaded_surface.is_empty:
-            list_surfaces.append(shaded_surface)
-        return list_surfaces
+        """Get all PV surface geometries in timeseries segment for a certain
+        index.
+
+        Parameters
+        ----------
+        idx : int
+            Index to use to generate PV surface geometries
+
+        Returns
+        -------
+        list of :py:class:`~pvfactors.geometry.base.PVSurface` objects
+            List of PV surfaces
+        """
+        segment = self.at(idx)
+        return segment.all_surfaces
 
     def plot_at_idx(self, idx, ax, color_shaded=COLOR_DIC['pvrow_shaded'],
                     color_illum=COLOR_DIC['pvrow_illum']):
-        self.illum.plot_at_idx(idx, ax, color_illum)
-        self.shaded.plot_at_idx(idx, ax, color_shaded)
+        """Plot timeseries segment at a certain index.
+
+        Parameters
+        ----------
+        idx : int
+            Index to use to plot timeseries segment
+        ax : :py:class:`matplotlib.pyplot.axes` object
+            Axes for plotting
+        color_shaded : str, optional
+            Color to use for plotting the shaded surfaces (Default =
+            COLOR_DIC['pvrow_shaded'])
+        color_shaded : str, optional
+            Color to use for plotting the illuminated surfaces (Default =
+            COLOR_DIC['pvrow_illum'])
+        """
+        segment = self.at(idx)
+        segment.plot(ax, color_shaded=color_shaded, color_illum=color_illum,
+                     with_index=False)
 
     def at(self, idx):
+        """Generate a PV segment geometry for the desired index.
+
+        Parameters
+        ----------
+        idx : int
+            Index to use to generate PV segment geometry
+
+        Returns
+        -------
+        segment : :py:class:`~pvfactors.geometry.base.PVSegment`
+        """
         # Create illum collection
         illum_surface = self.illum.at(idx, shaded=False)
         list_illum_surfaces = [] if illum_surface.is_empty \
@@ -408,10 +458,12 @@ class TsDualSegment(object):
 
     @property
     def length(self):
+        """Timeseries length of segment."""
         return self.illum.length + self.shaded.length
 
     @property
     def shaded_length(self):
+        """Timeseries length of shaded part of segment."""
         return self.shaded.length
 
 
