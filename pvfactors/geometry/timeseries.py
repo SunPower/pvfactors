@@ -1,4 +1,5 @@
-"""Timeseries geometry classes"""
+"""Timeseries geometry classes. They allow the vectorization of geometry
+calculations."""
 
 import numpy as np
 from pvlib.tools import cosd, sind
