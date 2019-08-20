@@ -3,13 +3,11 @@ geometries."""
 
 import numpy as np
 from pvfactors.geometry.pvground import PVGround
-from pvfactors.geometry.pvrow import PVRow
 from pvfactors.config import X_ORIGIN_PVROWS, VIEW_DICT, DISTANCE_TOLERANCE
 from pvfactors.geometry.base import \
-    _get_solar_2d_vectors, BasePVArray, _coords_from_center_tilt_length, \
-    _get_rotation_from_tilt_azimuth
-from pvfactors.geometry.utils import projection
-from shapely.geometry import LineString, Point
+    _get_solar_2d_vectors, BasePVArray, _get_rotation_from_tilt_azimuth
+from pvfactors.geometry.timeseries import TsPVRow
+from shapely.geometry import Point
 from pvfactors import PVFactorsError
 
 
@@ -65,7 +63,7 @@ class OrderedPVArray(BasePVArray):
 
         # These attributes will be updated at fitting time
         self.solar_2d_vectors = None
-        self.pvrow_coords = []
+        self.ts_pvrows = []
         self.ground_shadow_coords = []
         self.cut_point_coords = []
         self.n_states = None
@@ -178,23 +176,63 @@ class OrderedPVArray(BasePVArray):
                                self.solar_2d_vectors[0])
 
         # Calculate the coordinates of all PV rows for all timestamps
-        self._calculate_pvrow_elements_coords(surface_tilt, surface_azimuth,
-                                              alpha_vec, rotation_vec)
+        self._calculate_pvrow_elements_coords(alpha_vec, rotation_vec)
 
         # Calculate ground elements coordinates for all timestamps
         self._calculate_ground_elements_coords(alpha_vec, rotation_vec)
 
-    def _calculate_pvrow_elements_coords(self, surface_tilt, surface_azimuth,
-                                         alpha_vec, rotation_vec):
+    def transform(self, idx):
+        """
+        Transform the ordered PV array for the given index.
+        This means actually building the PV Row and Ground geometries. Note
+        that the list of PV rows will be ordered from left to right in the
+        geometry (along the x-axis), and indexed from 0 to n_pvrows - 1.
+        This can only be run after the ``fit()`` method.
+
+        Object attributes like ``pvrows`` and ``ground`` will be updated each
+        time this method is run.
+
+        Parameters
+        ----------
+        idx : int
+            Index for which to build the simulation.
+        """
+
+        if idx < self.n_states:
+            has_direct_shading = self.has_direct_shading[idx]
+            self.is_flat = self.surface_tilt[idx] == 0
+
+            # Create PV row geometries
+            self.pvrows = [ts_pvrow.at(idx) for ts_pvrow in self.ts_pvrows]
+
+            # Create ground geometry with its shadows and cut points
+            shadow_coords = self.ground_shadow_coords[:, :, :, idx]
+            cut_pt_coords = self.cut_point_coords[:, :, idx]
+            if has_direct_shading:
+                # Shadows are overlaping, so merge them into 1 big shadow
+                shadow_coords = [[shadow_coords[0][0][:],
+                                  shadow_coords[-1][1][:]]]
+            self.ground = PVGround.from_ordered_shadow_and_cut_pt_coords(
+                y_ground=self.y_ground, surface_params=self.surface_params,
+                ordered_shadow_coords=shadow_coords,
+                cut_point_coords=cut_pt_coords)
+            self.edge_points = [Point(coord) for coord in cut_pt_coords]
+
+            # Build lists of pv row neighbors, used to calculate view matrix
+            self.front_neighbors, self.back_neighbors = \
+                self._get_neighbors(self.surface_tilt[idx])
+
+        else:
+            msg = "Step index {} is out of range: [0 to {}]".format(
+                idx, self.n_states - 1)
+            raise PVFactorsError(msg)
+
+    def _calculate_pvrow_elements_coords(self, alpha_vec, rotation_vec):
         """Calculate PV row coordinate elements in a vectorized way, such as
         PV row boundary coordinates and shaded lengths.
 
         Parameters
         ----------
-        surface_tilt : array-like or float
-            Surface tilt angles, from 0 to 180 [deg]
-        surface_azimuth : array-like or float
-            Surface azimuth angles [deg]
         alpha_vec : array-like or float
             Angle made by 2d solar vector and x-axis [rad]
         rotation_vec : array-like or float
@@ -202,20 +240,40 @@ class OrderedPVArray(BasePVArray):
         """
 
         # Calculate interrow direct shading lengths
-        self._calculate_interrow_shading_vec(alpha_vec, rotation_vec)
+        self._calculate_interrow_shading(alpha_vec, rotation_vec)
 
         # Calculate coordinates of segments of each pv row side
         xy_centers = [(X_ORIGIN_PVROWS + idx * self.distance,
                        self.height + self.y_ground)
                       for idx in range(self.n_pvrows)]
-        for xy_center in xy_centers:
-            self.pvrow_coords.append(
-                _coords_from_center_tilt_length(
-                    xy_center, surface_tilt, self.width, surface_azimuth,
-                    self.axis_azimuth))
-        self.pvrow_coords = np.array(self.pvrow_coords)
+        tilted_to_left = rotation_vec >= 0.
+        for idx_pvrow, xy_center in enumerate(xy_centers):
+            # A special treatment needs to be applied to shaded lengths for
+            # the PV rows at the edge of the PV array
+            if idx_pvrow == 0:
+                # the leftmost row doesn't have left neighbors
+                shaded_length_front = np.where(tilted_to_left, 0.,
+                                               self.shaded_length_front)
+                shaded_length_back = np.where(tilted_to_left,
+                                              self.shaded_length_back, 0.)
+            elif idx_pvrow == (self.n_pvrows - 1):
+                # the rightmost row does have right neighbors
+                shaded_length_front = np.where(tilted_to_left,
+                                               self.shaded_length_front, 0.)
+                shaded_length_back = np.where(tilted_to_left, 0.,
+                                              self.shaded_length_back)
+            else:
+                # use calculated shaded lengths
+                shaded_length_front = self.shaded_length_front
+                shaded_length_back = self.shaded_length_back
+            # Create timeseries PV rows and add it to the list
+            self.ts_pvrows.append(TsPVRow.from_raw_inputs(
+                xy_center, self.width, rotation_vec,
+                self.cut.get(idx_pvrow, {}), shaded_length_front,
+                shaded_length_back, index=idx_pvrow,
+                surface_params=self.surface_params))
 
-    def _calculate_interrow_shading_vec(self, alpha_vec, rotation_vec):
+    def _calculate_interrow_shading(self, alpha_vec, rotation_vec):
         """Calculate the shaded length on front and back side of PV rows when
         direct shading happens, and in a vectorized way.
 
@@ -257,61 +315,6 @@ class OrderedPVArray(BasePVArray):
             (self.shaded_length_front > DISTANCE_TOLERANCE)
             | (self.shaded_length_back > DISTANCE_TOLERANCE))
 
-    def transform(self, idx):
-        """
-        Transform the ordered PV array for the given index.
-        This means actually building the PV Row and Ground geometries. Note
-        that the list of PV rows will be ordered from left to right in the
-        geometry (along the x-axis), and indexed from 0 to n_pvrows - 1.
-        This can only be run after the ``fit()`` method.
-
-        Object attributes like ``pvrows`` and ``ground`` will be updated each
-        time this method is run.
-
-        Parameters
-        ----------
-        idx : int
-            Index for which to build the simulation.
-        """
-
-        if idx < self.n_states:
-            has_direct_shading = self.has_direct_shading[idx]
-            self.is_flat = self.surface_tilt[idx] == 0
-
-            # Create list of PV rows from calculated pvrow coordinates
-            self.pvrows = [
-                PVRow.from_linestring_coords(
-                    pvrow_coord[:, :, idx],
-                    index=pvrow_idx, cut=self.cut.get(pvrow_idx, {}),
-                    surface_params=self.surface_params)
-                for pvrow_idx, pvrow_coord in enumerate(self.pvrow_coords)]
-
-            # Create ground geometry with its shadows and cut points
-            shadow_coords = self.ground_shadow_coords[:, :, :, idx]
-            cut_pt_coords = self.cut_point_coords[:, :, idx]
-            if has_direct_shading:
-                # Shadows are overlaping, so merge them into 1 big shadow
-                shadow_coords = [[shadow_coords[0][0][:],
-                                  shadow_coords[-1][1][:]]]
-            self.ground = PVGround.from_ordered_shadow_and_cut_pt_coords(
-                y_ground=self.y_ground, surface_params=self.surface_params,
-                ordered_shadow_coords=shadow_coords,
-                cut_point_coords=cut_pt_coords)
-            self.edge_points = [Point(coord) for coord in cut_pt_coords]
-
-            # Calculate inter row shading if any
-            if has_direct_shading:
-                self._calculate_interrow_shading(idx)
-
-            # Build lists of pv row neighbors, used to calculate view matrix
-            self.front_neighbors, self.back_neighbors = \
-                self._get_neighbors(self.surface_tilt[idx])
-
-        else:
-            msg = "Step index {} is out of range: [0 to {}]".format(
-                idx, self.n_states - 1)
-            raise PVFactorsError(msg)
-
     def _calculate_ground_elements_coords(self, alpha_vec, rotation_vec):
         """This private method is run at fitting time to calculate the ground
         element coordinates: i.e. the coordinates of the ground shadows and
@@ -329,12 +332,12 @@ class OrderedPVArray(BasePVArray):
 
         rotation_vec = np.deg2rad(rotation_vec)
         # Calculate coords of ground shadows and cutting points
-        for pvrow_coord in self.pvrow_coords:
+        for ts_pvrow in self.ts_pvrows:
             # Get pvrow coords
-            x1s_pvrow = pvrow_coord[0][0]
-            y1s_pvrow = pvrow_coord[0][1]
-            x2s_pvrow = pvrow_coord[1][0]
-            y2s_pvrow = pvrow_coord[1][1]
+            x1s_pvrow = ts_pvrow.full_pvrow_coords.b1.x
+            y1s_pvrow = ts_pvrow.full_pvrow_coords.b1.y
+            x2s_pvrow = ts_pvrow.full_pvrow_coords.b2.x
+            y2s_pvrow = ts_pvrow.full_pvrow_coords.b2.y
             # --- Shadow coords calculation
             # Calculate x coords of shadow
             x1s_shadow = x1s_pvrow \
@@ -356,46 +359,6 @@ class OrderedPVArray(BasePVArray):
 
         self.ground_shadow_coords = np.array(self.ground_shadow_coords)
         self.cut_point_coords = np.array(self.cut_point_coords)
-
-    def _calculate_interrow_shading(self, idx):
-        """This private method is run at transform time to calculate
-        direct shading between the PV rows, if any.
-        It will update the ``pvrows`` side segments with shadows as needed.
-
-        Parameters
-        ----------
-        idx : int
-            Index for which to calculate inter-row shading
-        """
-
-        solar_2d_vector = self.solar_2d_vectors[:, idx]
-        illum_side = ('front' if self.pvrows[0].front.n_vector.dot(
-            solar_2d_vector) >= 0 else 'back')
-        sun_on_the_right = solar_2d_vector[0] >= 0
-        if sun_on_the_right:
-            # right pvrow shades left pvrow
-            shaded_pvrow = self.pvrows[0]
-            front_pvrow = self.pvrows[1]
-            proj_initial = projection(front_pvrow.highest_point,
-                                      solar_2d_vector,
-                                      shaded_pvrow.original_linestring)
-            list_pvrows_to_shade = self.pvrows[:-1]
-        else:
-            # left pvrow shades right pvrow
-            shaded_pvrow = self.pvrows[1]
-            front_pvrow = self.pvrows[0]
-            proj_initial = projection(front_pvrow.highest_point,
-                                      solar_2d_vector,
-                                      shaded_pvrow.original_linestring)
-            list_pvrows_to_shade = self.pvrows[1:]
-
-        # Use distance translation to cast shadows on pvrows
-        for idx, pvrow in enumerate(list_pvrows_to_shade):
-            proj = Point(proj_initial.x + idx * self.distance,
-                         proj_initial.y)
-            shaded_side = getattr(pvrow, illum_side)
-            shaded_side.cast_shadow(
-                LineString([pvrow.lowest_point, proj]))
 
     def _get_neighbors(self, surface_tilt):
         """Determine the pvrows indices of the neighboring pvrow for the front
@@ -526,7 +489,8 @@ class OrderedPVArray(BasePVArray):
                     gnd_that_front_sees = []
                     gnd_that_back_sees = []
                     for idx_gnd, gnd_surface in enumerate(ground_surfaces):
-                        gnd_surface_on_the_right = gnd_centroids[idx_gnd].x > edge_point.x
+                        gnd_surface_on_the_right = \
+                            gnd_centroids[idx_gnd].x > edge_point.x
                         if gnd_surface_on_the_right:
                             gnd_that_front_sees.append(gnd_surface.index)
                         else:
@@ -538,7 +502,8 @@ class OrderedPVArray(BasePVArray):
                 if len(gnd_that_back_sees):
                     # PVRow <---> Ground: update views
                     view_matrix[back_indices[:, np.newaxis],
-                                gnd_that_back_sees] = VIEW_DICT["back_gnd_obst"]
+                                gnd_that_back_sees] = \
+                        VIEW_DICT["back_gnd_obst"]
                     view_matrix[gnd_that_back_sees[:, np.newaxis],
                                 back_indices] = VIEW_DICT["gnd_back_obst"]
                     # PVRow <---> Ground: obstruction
@@ -549,7 +514,8 @@ class OrderedPVArray(BasePVArray):
                 if len(gnd_that_front_sees):
                     # PVRow <---> Ground: update views
                     view_matrix[front_indices[:, np.newaxis],
-                                gnd_that_front_sees] = VIEW_DICT["front_gnd_obst"]
+                                gnd_that_front_sees] = \
+                        VIEW_DICT["front_gnd_obst"]
                     view_matrix[gnd_that_front_sees[:, np.newaxis],
                                 front_indices] = VIEW_DICT["gnd_front_obst"]
                     # PVRow <---> Ground: obstruction
