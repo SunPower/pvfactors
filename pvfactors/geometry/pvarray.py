@@ -248,19 +248,25 @@ class OrderedPVArray(BasePVArray):
                       for idx in range(self.n_pvrows)]
         tilted_to_left = rotation_vec >= 0.
         for idx_pvrow, xy_center in enumerate(xy_centers):
+            # A special treatment needs to be applied to shaded lengths for
+            # the PV rows at the edge of the PV array
             if idx_pvrow == 0:
+                # the leftmost row doesn't have left neighbors
                 shaded_length_front = np.where(tilted_to_left, 0.,
                                                self.shaded_length_front)
                 shaded_length_back = np.where(tilted_to_left,
                                               self.shaded_length_back, 0.)
             elif idx_pvrow == (self.n_pvrows - 1):
+                # the rightmost row does have right neighbors
                 shaded_length_front = np.where(tilted_to_left,
                                                self.shaded_length_front, 0.)
                 shaded_length_back = np.where(tilted_to_left, 0.,
                                               self.shaded_length_back)
             else:
+                # use calculated shaded lengths
                 shaded_length_front = self.shaded_length_front
                 shaded_length_back = self.shaded_length_back
+            # Create timeseries PV rows and add it to the list
             self.ts_pvrows.append(TsPVRow.from_raw_inputs(
                 xy_center, self.width, rotation_vec,
                 self.cut.get(idx_pvrow, {}), shaded_length_front,
