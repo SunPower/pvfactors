@@ -1,5 +1,5 @@
 import os
-from pvfactors.geometry.timeseries import TsPVRow
+from pvfactors.geometry.timeseries import TsPVRow, TsGround
 import pandas as pd
 import numpy as np
 from pvfactors.geometry.pvrow import PVRow
@@ -117,3 +117,21 @@ def test_ts_pvrow_to_geometry():
     np.testing.assert_allclose(n_vector_back, - expected_n_vec_front)
     assert front_surface.surface_params == surface_params
     assert back_surface.surface_params == surface_params
+
+
+def test_ts_ground_overlap():
+
+    shadow_coords = np.array([
+        [[[0, 0], [0, 0]], [[2, 1], [0, 0]]],
+        [[[1, 2], [0, 0]], [[5, 5], [0, 0]]]
+    ])
+    overlap = [True, False]
+
+    # Test without overlap
+    ts_ground = TsGround.from_ordered_shadows_coords(shadow_coords)
+    np.testing.assert_allclose(ts_ground.shadows[0].b2.x, [2, 1])
+
+    # Test with overlap
+    ts_ground = TsGround.from_ordered_shadows_coords(shadow_coords,
+                                                     flag_overlap=overlap)
+    np.testing.assert_allclose(ts_ground.shadows[0].b2.x, [1, 1])

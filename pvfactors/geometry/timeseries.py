@@ -173,7 +173,7 @@ class TsPVRow(object):
         front_geom = self.front.at(idx)
         back_geom = self.back.at(idx)
         original_line = LineString(
-            self.full_pvrow_coords.coords[:, :, idx])
+            self.full_pvrow_coords.as_array[:, :, idx])
         pvrow = PVRow(front_side=front_geom, back_side=back_geom,
                       index=self.index, original_linestring=original_line)
         return pvrow
@@ -468,6 +468,31 @@ class TsDualSegment(object):
         return self.shaded.length
 
 
+class TsGround(object):
+
+    def __init__(self, shadow_surfaces):
+
+        self.shadows = shadow_surfaces
+
+    @classmethod
+    def from_ordered_shadows_coords(cls, shadow_coords,
+                                    flag_overlap=None):
+
+        # Create shadow surfaces
+        list_coords = [TsLineCoords.from_array(coords)
+                       for coords in shadow_coords]
+        # If the overlap flags were passed, make sure shadows don't overlap
+        if flag_overlap is not None:
+            if len(list_coords) > 1:
+                for idx, coords in enumerate(list_coords[:-1]):
+                    coords.b2.x = np.where(flag_overlap,
+                                           list_coords[idx + 1].b1.x,
+                                           coords.b2.x)
+        # Create shadow surfaces
+        ts_shadows = [TsSurface(coords) for coords in list_coords]
+        return cls(ts_shadows)
+
+
 class TsSurface(object):
     """Timeseries surface class: vectorized representation of PV surface
     geometries."""
@@ -532,6 +557,16 @@ class TsSurface(object):
         if self.length[idx] > DISTANCE_TOLERANCE:
             self.at(idx).plot(ax, color=color)
 
+    @property
+    def b1(self):
+        """Timeseries coordinates of first boundary point"""
+        return self.coords.b1
+
+    @property
+    def b2(self):
+        """Timeseries coordinates of second boundary point"""
+        return self.coords.b2
+
 
 class TsLineCoords(object):
     """Timeseries line coordinates class: will provide a helpful shapely-like
@@ -552,10 +587,6 @@ class TsLineCoords(object):
         """
         self.b1 = b1_ts_coords
         self.b2 = b2_ts_coords
-        if coords is None:
-            self.coords = np.array([b1_ts_coords.coords, b2_ts_coords.coords])
-        else:
-            self.coords = coords
 
     def at(self, idx):
         """Get coordinates at a given index
@@ -565,7 +596,7 @@ class TsLineCoords(object):
         idx : int
             Index to use to get coordinates
         """
-        return self.coords[:, :, idx]
+        return self.as_array[:, :, idx]
 
     @classmethod
     def from_array(cls, coords_array):
@@ -578,7 +609,11 @@ class TsLineCoords(object):
         """
         b1 = TsPointCoords(coords_array[0, :, :])
         b2 = TsPointCoords(coords_array[1, :, :])
-        return cls(b1, b2, coords=coords_array)
+        return cls(b1, b2)
+
+    @property
+    def as_array(self):
+        return np.array([[self.b1.x, self.b1.y], [self.b2.x, self.b2.y]])
 
 
 class TsPointCoords(object):
@@ -595,7 +630,6 @@ class TsPointCoords(object):
         """
         self.x = coords[0, :]
         self.y = coords[1, :]
-        self.coords = coords
 
     def at(self, idx):
         """Get coordinates at a given index
@@ -605,4 +639,8 @@ class TsPointCoords(object):
         idx : int
             Index to use to get coordinates
         """
-        return self.coords[:, idx]
+        return self.as_array[:, idx]
+
+    @property
+    def as_array(self):
+        return np.array([self.x, self.y])
