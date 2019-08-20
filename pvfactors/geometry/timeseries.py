@@ -179,16 +179,51 @@ class TsPVRow(object):
 
 
 class TsSide(object):
+    """Timeseries side class: this class is a vectorized version of the
+    BaseSide geometries. The coordinates and attributes (list of segments,
+    normal vector) are all vectorized."""
 
     def __init__(self, segments, n_vector=None):
+        """Initialize timeseries side using list of timeseries segments.
+
+        Parameters
+        ----------
+        segments : list of :py:class:`~pvfactors.geometry.timeseries.TsDualSegment`
+            List of timeseries segments of the side
+        n_vector : np.ndarray, optional
+            Timeseries normal vectors of the side (Default = None)
+        """
         self.list_segments = segments
         self.n_vector = n_vector
 
     @classmethod
     def from_raw_inputs(cls, xy_center, width, rotation_vec, cut,
                         shaded_length, n_vector=None, surface_params=None):
-        """
-        Shading will always be zero when PV rows are flat
+        """Create timeseries side using raw PV row inputs.
+        Note: shading will always be zero when PV rows are flat.
+
+        Parameters
+        ----------
+        xy_center : tuple of float
+            x and y coordinates of the PV row center point (invariant)
+        width : float
+            width of the PV rows [m]
+        rotation_vec : np.ndarray
+            Timeseries rotation values of the PV row [deg]
+        cut : int
+            Discretization scheme of the PV side.
+            Will create segments of equal length.
+        shaded_length : np.ndarray
+            Timeseries values of side shaded length from lowest point [m]
+        n_vector : np.ndarray, optional
+            Timeseries normal vectors of the side
+        surface_params : list of str, optional
+            List of names of surface parameters to use when creating geometries
+            (Default = None)
+
+        Returns
+        -------
+        New timeseries side object
         """
 
         mask_tilted_to_left = rotation_vec >= 0
@@ -258,12 +293,34 @@ class TsSide(object):
         return cls(list_segments, n_vector=n_vector)
 
     def surfaces_at_idx(self, idx):
-        list_surfaces = []
-        for segment in self.list_segments:
-            list_surfaces.append(segment.surfaces_at_idx(idx))
-        return list_surfaces
+        """Get all PV surface geometries in timeseries side for a certain
+        index.
+
+        Parameters
+        ----------
+        idx : int
+            Index to use to generate PV surface geometries
+
+        Returns
+        -------
+        list of :py:class:`~pvfactors.geometry.base.PVSurface` objects
+            List of PV surfaces
+        """
+        side_geom = self.at(idx)
+        return side_geom.all_surfaces
 
     def at(self, idx):
+        """Generate a side geoemtry for the desired index.
+
+        Parameters
+        ----------
+        idx : int
+            Index to use to generate side geometry
+
+        Returns
+        -------
+        side : :py:class:`~pvfactors.geometry.base.BaseSide`
+        """
         list_geom_segments = []
         for ts_seg in self.list_segments:
             list_geom_segments.append(ts_seg.at(idx))
@@ -272,12 +329,28 @@ class TsSide(object):
 
     def plot_at_idx(self, idx, ax, color_shaded=COLOR_DIC['pvrow_shaded'],
                     color_illum=COLOR_DIC['pvrow_illum']):
-        for segment in self.list_segments:
-            segment.plot_at_idx(idx, ax, color_shaded=color_shaded,
-                                color_illum=color_illum)
+        """Plot timeseries side at a certain index.
+
+        Parameters
+        ----------
+        idx : int
+            Index to use to plot timeseries side
+        ax : :py:class:`matplotlib.pyplot.axes` object
+            Axes for plotting
+        color_shaded : str, optional
+            Color to use for plotting the shaded surfaces (Default =
+            COLOR_DIC['pvrow_shaded'])
+        color_shaded : str, optional
+            Color to use for plotting the illuminated surfaces (Default =
+            COLOR_DIC['pvrow_illum'])
+        """
+        side_geom = self.at(idx)
+        side_geom.plot(ax, color_shaded=color_shaded, color_illum=color_illum,
+                       with_index=False)
 
     @property
     def shaded_length(self):
+        """Timeseries shaded length of the side."""
         length = 0.
         for seg in self.list_segments:
             length += seg.shaded.length
