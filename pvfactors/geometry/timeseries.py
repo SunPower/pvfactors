@@ -310,7 +310,7 @@ class TsSide(object):
         return side_geom.all_surfaces
 
     def at(self, idx):
-        """Generate a side geoemtry for the desired index.
+        """Generate a side geometry for the desired index.
 
         Parameters
         ----------
@@ -468,8 +468,21 @@ class TsDualSegment(object):
 
 
 class TsSurface(object):
+    """Timeseries surface class: vectorized representation of PV surface
+    geometries."""
 
     def __init__(self, coords, n_vector=None, surface_params=None):
+        """Initialize timeseries surface using timeseries coordinates.
+
+        Parameters
+        ----------
+        coords : :py:class:`~pvfactors.geometry.timeseries.TsLineCoords`
+            Timeseries coordinates of full segment
+        index : int, optional
+            Index of segment (Default = None)
+        n_vector : np.ndarray, optional
+            Timeseries normal vectors of the side (Default = None)
+        """
         self.coords = coords
         self.length = np.sqrt((coords.b2.y - coords.b1.y)**2
                               + (coords.b2.x - coords.b1.x)**2)
@@ -477,6 +490,19 @@ class TsSurface(object):
         self.surface_params = surface_params
 
     def at(self, idx, shaded=None):
+        """Generate a PV segment geometry for the desired index.
+
+        Parameters
+        ----------
+        idx : int
+            Index to use to generate PV segment geometry
+
+        Returns
+        -------
+        segment : :py:class:`~pvfactors.geometry.base.PVSurface` or :py:class:`~shapely.geometry.GeometryCollection`
+            The returned object will be an empty geometry if its length is
+            really small, otherwise it will be a PV surface geometry
+        """
         if self.length[idx] < DISTANCE_TOLERANCE:
             # return an empty geometry
             return GeometryCollection()
@@ -490,36 +516,92 @@ class TsSurface(object):
                              surface_params=self.surface_params)
 
     def plot_at_idx(self, idx, ax, color):
+        """Plot timeseries PV row at a certain index, only if it's not
+        too small.
+
+        Parameters
+        ----------
+        idx : int
+            Index to use to plot timeseries PV surface
+        ax : :py:class:`matplotlib.pyplot.axes` object
+            Axes for plotting
+        color_shaded : str, optional
+            Color to use for plotting the PV surface
+        """
         if self.length[idx] > DISTANCE_TOLERANCE:
             self.at(idx).plot(ax, color=color)
 
 
 class TsLineCoords(object):
+    """Timeseries line coordinates class: will provide a helpful shapely-like
+    API to invoke timeseries coordinates."""
 
     def __init__(self, b1_ts_coords, b2_ts_coords, coords=None):
+        """Initialize timeseries line coordinates using the timeseries
+        coordinates of its boundaries.
+
+        Parameters
+        ----------
+        b1_ts_coords : :py:class:`~pvfactors.geometry.timeseries.TsPointCoords`
+            Timeseries coordinates of first boundary point
+        b2_ts_coords : :py:class:`~pvfactors.geometry.timeseries.TsPointCoords`
+            Timeseries coordinates of second boundary point
+        coords : np.ndarray, optional
+            Timeseries coordinates as numpy array
+        """
         self.b1 = b1_ts_coords
         self.b2 = b2_ts_coords
         if coords is None:
-            self.coords = np.array([b1_ts_coords, b2_ts_coords])
+            self.coords = np.array([b1_ts_coords.coords, b2_ts_coords.coords])
         else:
             self.coords = coords
 
     def at(self, idx):
+        """Get coordinates at a given index
+
+        Parameters
+        ----------
+        idx : int
+            Index to use to get coordinates
+        """
         return self.coords[:, :, idx]
 
     @classmethod
     def from_array(cls, coords_array):
+        """Create timeseries line coordinates from numpy array of coordinates.
+
+        Parameters
+        ----------
+        coords_array : np.ndarray
+            Numpy array of coordinates.
+        """
         b1 = TsPointCoords(coords_array[0, :, :])
         b2 = TsPointCoords(coords_array[1, :, :])
         return cls(b1, b2, coords=coords_array)
 
 
 class TsPointCoords(object):
+    """Timeseries point coordinates: provides a shapely-like API for timeseries
+    point coordinates."""
 
     def __init__(self, coords):
+        """Initialize timeseries point coordinates using numpy array of coords.
+
+        Parameters
+        ----------
+        coords : np.ndarray
+            Numpy array of timeseries point coordinates
+        """
         self.x = coords[0, :]
         self.y = coords[1, :]
         self.coords = coords
 
     def at(self, idx):
+        """Get coordinates at a given index
+
+        Parameters
+        ----------
+        idx : int
+            Index to use to get coordinates
+        """
         return self.coords[:, idx]
