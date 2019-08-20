@@ -10,9 +10,28 @@ from shapely.geometry import GeometryCollection, LineString
 
 
 class TsPVRow(object):
+    """Timeseries PV row class: this class is a vectorized version of the
+    PV row geometries. The coordinates and attributes (front and back sides)
+    are all vectorized."""
 
     def __init__(self, ts_front_side, ts_back_side, xy_center, index=None,
                  full_pvrow_coords=None):
+        """Initialize timeseries PV row with its front and back sides.
+
+        Parameters
+        ----------
+        ts_front_side : :py:class:`~pvfactors.geometry.timeseries.TsSide`
+            Timeseries front side of the PV row
+        ts_back_side : :py:class:`~pvfactors.geometry.timeseries.TsSide`
+            Timeseries back side of the PV row
+        xy_center : tuple of float
+            x and y coordinates of the PV row center point (invariant)
+        index : int, optional
+            index of the PV row (Default = None)
+        full_pvrow_coords : :py:class:`~pvfactors.geometry.timeseries.TsLineCoords`, optional
+            Timeseries coordinates of the full PV row, end to end
+            (Default = None)
+        """
         self.front = ts_front_side
         self.back = ts_back_side
         self.xy_center = xy_center
@@ -23,7 +42,34 @@ class TsPVRow(object):
     def from_raw_inputs(cls, xy_center, width, rotation_vec,
                         cut, shaded_length_front, shaded_length_back,
                         index=None, surface_params=None):
-        """Shading will always be zero when pv rows are flat"""
+        """Create timeseries PV row using raw inputs.
+        Note: shading will always be zero when pv rows are flat.
+
+        Parameters
+        ----------
+        xy_center : tuple of float
+            x and y coordinates of the PV row center point (invariant)
+        width : float
+            width of the PV rows [m]
+        rotation_vec : np.ndarray
+            Timeseries rotation values of the PV row [deg]
+        cut : dict
+            Discretization scheme of the PV row. Eg {'front': 2, 'back': 4}.
+            Will create segments of equal length on the designated sides.
+        shaded_length_front : np.ndarray
+            Timeseries values of front side shaded length [m]
+        shaded_length_back : np.ndarray
+            Timeseries values of back side shaded length [m]
+        index : int, optional
+            Index of the pv row (default = None)
+        surface_params : list of str, optional
+            List of names of surface parameters to use when creating geometries
+            (Default = None)
+
+        Returns
+        -------
+        New timeseries PV row object
+        """
         # Calculate full pvrow coords
         pvrow_coords = TsPVRow._calculate_full_coords(
             xy_center, width, rotation_vec)
@@ -47,6 +93,22 @@ class TsPVRow(object):
 
     @staticmethod
     def _calculate_full_coords(xy_center, width, rotation):
+        """Method to calculate the full PV row coordinaltes.
+
+        Parameters
+        ----------
+        xy_center : tuple of float
+            x and y coordinates of the PV row center point (invariant)
+        width : float
+            width of the PV rows [m]
+        rotation : np.ndarray
+            Timeseries rotation values of the PV row [deg]
+
+        Returns
+        -------
+        coords: :py:class:`~pvfactors.geometry.timeseries.TsLineCoords`
+            Timeseries coordinates of full PV row
+        """
         x_center, y_center = xy_center
         radius = width / 2.
         # Calculate coords
@@ -58,19 +120,55 @@ class TsPVRow(object):
         return coords
 
     def surfaces_at_idx(self, idx):
-        list_surfaces = []
-        list_surfaces.append(self.front.surfaces_at_idx(idx))
-        list_surfaces.append(self.back.surfaces_at_idx(idx))
-        return list_surfaces
+        """Get all PV surface geometries in timeseries PV row for a certain
+        index.
+
+        Parameters
+        ----------
+        idx : int
+            Index to use to generate PV surface geometries
+
+        Returns
+        -------
+        list of :py:class:`~pvfactors.geometry.base.PVSurface` objects
+            List of PV surfaces
+        """
+        pvrow = self.at(idx)
+        return pvrow.all_surfaces
 
     def plot_at_idx(self, idx, ax, color_shaded=COLOR_DIC['pvrow_shaded'],
                     color_illum=COLOR_DIC['pvrow_illum']):
-        self.front.plot_at_idx(idx, ax, color_shaded=color_shaded,
-                               color_illum=color_illum)
-        self.back.plot_at_idx(idx, ax, color_shaded=color_shaded,
-                              color_illum=color_illum)
+        """Plot timeseries PV row at a certain index.
+
+        Parameters
+        ----------
+        idx : int
+            Index to use to plot timeseries PV rows
+        ax : :py:class:`matplotlib.pyplot.axes` object
+            Axes for plotting
+        color_shaded : str, optional
+            Color to use for plotting the shaded surfaces (Default =
+            COLOR_DIC['pvrow_shaded'])
+        color_shaded : str, optional
+            Color to use for plotting the illuminated surfaces (Default =
+            COLOR_DIC['pvrow_illum'])
+        """
+        pvrow = self.at(idx)
+        pvrow.plot(ax, color_shaded=color_shaded,
+                   color_illum=color_illum, with_index=False)
 
     def at(self, idx):
+        """Generate a PV row geometry for the desired index.
+
+        Parameters
+        ----------
+        idx : int
+            Index to use to generate PV row geometry
+
+        Returns
+        -------
+        pvrow : :py:class:`~pvfactors.geometry.pvrow.PVRow`
+        """
         front_geom = self.front.at(idx)
         back_geom = self.back.at(idx)
         original_line = LineString(
