@@ -6,7 +6,7 @@ from pvfactors.geometry.pvground import PVGround
 from pvfactors.config import X_ORIGIN_PVROWS, VIEW_DICT, DISTANCE_TOLERANCE
 from pvfactors.geometry.base import \
     _get_solar_2d_vectors, BasePVArray, _get_rotation_from_tilt_azimuth
-from pvfactors.geometry.timeseries import TsPVRow
+from pvfactors.geometry.timeseries import TsPVRow, TsGround
 from shapely.geometry import Point
 from pvfactors import PVFactorsError
 
@@ -64,8 +64,7 @@ class OrderedPVArray(BasePVArray):
         # These attributes will be updated at fitting time
         self.solar_2d_vectors = None
         self.ts_pvrows = []
-        self.ground_shadow_coords = []
-        self.cut_point_coords = []
+        self.ts_ground = None
         self.n_states = None
         self.has_direct_shading = None
         self.surface_tilt = None
@@ -179,7 +178,10 @@ class OrderedPVArray(BasePVArray):
         self._calculate_pvrow_elements_coords(alpha_vec, rotation_vec)
 
         # Calculate ground elements coordinates for all timestamps
-        self._calculate_ground_elements_coords(alpha_vec, rotation_vec)
+        self.ts_ground = TsGround.from_ts_pvrows_and_angles(
+            self.ts_pvrows, alpha_vec, rotation_vec, y_ground=self.y_ground,
+            flag_overlap=self.has_direct_shading,
+            surface_params=self.surface_params)
 
     def transform(self, idx):
         """
@@ -199,24 +201,15 @@ class OrderedPVArray(BasePVArray):
         """
 
         if idx < self.n_states:
-            has_direct_shading = self.has_direct_shading[idx]
             self.is_flat = self.surface_tilt[idx] == 0
 
             # Create PV row geometries
             self.pvrows = [ts_pvrow.at(idx) for ts_pvrow in self.ts_pvrows]
 
             # Create ground geometry with its shadows and cut points
-            shadow_coords = self.ground_shadow_coords[:, :, :, idx]
-            cut_pt_coords = self.cut_point_coords[:, :, idx]
-            if has_direct_shading:
-                # Shadows are overlaping, so merge them into 1 big shadow
-                shadow_coords = [[shadow_coords[0][0][:],
-                                  shadow_coords[-1][1][:]]]
-            self.ground = PVGround.from_ordered_shadow_and_cut_pt_coords(
-                y_ground=self.y_ground, surface_params=self.surface_params,
-                ordered_shadow_coords=shadow_coords,
-                cut_point_coords=cut_pt_coords)
-            self.edge_points = [Point(coord) for coord in cut_pt_coords]
+            self.ground = self.ts_ground.at(idx)
+            self.edge_points = [Point(coord.at(idx))
+                                for coord in self.ts_ground.cut_point_coords]
 
             # Build lists of pv row neighbors, used to calculate view matrix
             self.front_neighbors, self.back_neighbors = \
@@ -314,51 +307,6 @@ class OrderedPVArray(BasePVArray):
         self.has_direct_shading = (
             (self.shaded_length_front > DISTANCE_TOLERANCE)
             | (self.shaded_length_back > DISTANCE_TOLERANCE))
-
-    def _calculate_ground_elements_coords(self, alpha_vec, rotation_vec):
-        """This private method is run at fitting time to calculate the ground
-        element coordinates: i.e. the coordinates of the ground shadows and
-        cut points.
-        It will update the ``ground_shadow_coords`` and ``cut_point_coords``
-        attributes of the object.
-
-        Parameters
-        ----------
-        alpha_vec : array-like or float
-            Angle made by 2d solar vector and x-axis [rad]
-        rotation_vec : array-like or float
-            Rotation angle of the PV rows [deg]
-        """
-
-        rotation_vec = np.deg2rad(rotation_vec)
-        # Calculate coords of ground shadows and cutting points
-        for ts_pvrow in self.ts_pvrows:
-            # Get pvrow coords
-            x1s_pvrow = ts_pvrow.full_pvrow_coords.b1.x
-            y1s_pvrow = ts_pvrow.full_pvrow_coords.b1.y
-            x2s_pvrow = ts_pvrow.full_pvrow_coords.b2.x
-            y2s_pvrow = ts_pvrow.full_pvrow_coords.b2.y
-            # --- Shadow coords calculation
-            # Calculate x coords of shadow
-            x1s_shadow = x1s_pvrow \
-                - (y1s_pvrow - self.y_ground) / np.tan(alpha_vec)
-            x2s_shadow = x2s_pvrow \
-                - (y2s_pvrow - self.y_ground) / np.tan(alpha_vec)
-            # Order x coords from left to right
-            x1s_on_left = x1s_shadow <= x2s_shadow
-            xs_left_shadow = np.where(x1s_on_left, x1s_shadow, x2s_shadow)
-            xs_right_shadow = np.where(x1s_on_left, x2s_shadow, x1s_shadow)
-            # Append shadow coords to list
-            self.ground_shadow_coords.append(
-                [[xs_left_shadow, self.y_ground * np.ones(self.n_states)],
-                 [xs_right_shadow, self.y_ground * np.ones(self.n_states)]])
-            # --- Cutting points coords calculation
-            dx = (y1s_pvrow - self.y_ground) / np.tan(rotation_vec)
-            self.cut_point_coords.append(
-                [x1s_pvrow - dx, self.y_ground * np.ones(self.n_states)])
-
-        self.ground_shadow_coords = np.array(self.ground_shadow_coords)
-        self.cut_point_coords = np.array(self.cut_point_coords)
 
     def _get_neighbors(self, surface_tilt):
         """Determine the pvrows indices of the neighboring pvrow for the front

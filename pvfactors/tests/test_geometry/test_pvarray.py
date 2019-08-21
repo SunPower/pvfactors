@@ -533,9 +533,11 @@ def test_coords_ground_shadows():
         [([3.10075071, 5.19163641], [0., 0.]),
          ([5.18914857, 6.51846431], [0., 0.])]
     ]
+    gnd_shadow_coords = [shadow.coords.as_array
+                         for shadow in ordered_pvarray.ts_ground.shadows]
 
     np.testing.assert_almost_equal(
-        expected_gnd_shadow_coords, ordered_pvarray.ground_shadow_coords)
+        expected_gnd_shadow_coords, gnd_shadow_coords)
 
 
 def test_coords_cut_points():
@@ -565,8 +567,11 @@ def test_coords_cut_points():
         [[14.17820455, -0.90992559], [0., 0.]],
         [[19.17820455, 4.09007441], [0., 0.]]]
 
+    cut_pt_coords = [cut_point.as_array
+                     for cut_point in
+                     ordered_pvarray.ts_ground.cut_point_coords]
     np.testing.assert_almost_equal(
-        expected_cut_point_coords, ordered_pvarray.cut_point_coords)
+        expected_cut_point_coords, cut_pt_coords)
 
 
 def test_ordered_pvarray_from_dict_w_direct_shading():
