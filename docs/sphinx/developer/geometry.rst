@@ -90,6 +90,7 @@ timeseries
    :template: class_no_base.rst
 
    timeseries.TsPVRow
+   timeseries.TsGround
    timeseries.TsSide
    timeseries.TsDualSegment
    timeseries.TsSurface

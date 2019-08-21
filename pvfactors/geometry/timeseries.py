@@ -3,10 +3,11 @@ calculations."""
 
 import numpy as np
 from pvlib.tools import cosd, sind
-from pvfactors.config import DISTANCE_TOLERANCE, COLOR_DIC
+from pvfactors.config import DISTANCE_TOLERANCE, COLOR_DIC, Y_GROUND
 from pvfactors.geometry.base import (
     PVSurface, ShadeCollection, PVSegment, BaseSide)
 from pvfactors.geometry.pvrow import PVRow
+from pvfactors.geometry.pvground import PVGround
 from shapely.geometry import GeometryCollection, LineString
 
 
@@ -173,7 +174,7 @@ class TsPVRow(object):
         front_geom = self.front.at(idx)
         back_geom = self.back.at(idx)
         original_line = LineString(
-            self.full_pvrow_coords.coords[:, :, idx])
+            self.full_pvrow_coords.as_array[:, :, idx])
         pvrow = PVRow(front_side=front_geom, back_side=back_geom,
                       index=self.index, original_linestring=original_line)
         return pvrow
@@ -468,6 +469,209 @@ class TsDualSegment(object):
         return self.shaded.length
 
 
+class TsGround(object):
+    """Timeseries ground class: this class is a vectorized version of the
+    PV ground geometry class, and it will store timeseries coordinates
+    for ground shadows and pv row cut points."""
+
+    def __init__(self, shadow_surfaces, surface_params=None,
+                 flag_overlap=None, cut_point_coords=None):
+        """Initialize timeseries ground using list of timeseries surfaces
+        for the ground shadows
+
+        Parameters
+        ----------
+        shadow_surfaces : list of :py:class:`~pvfactors.geometry.timeseries.TsSurface`
+            Timeseries surfaces for ground shadows
+        surface_params : list of str, optional
+            List of names of surface parameters to use when creating geometries
+            (Default = None)
+        flag_overlap : list of bool, optional
+            Flags indicating if the ground shadows are overlapping, for all
+            time steps (Default=None). I.e. is there direct shading on pv rows?
+        cut_point_coords : list of :py:class:`~pvfactors.geometry.timeseries.TsPointCoords`, optional
+            List of cut point coordinates, as calculated for timeseries PV rows
+            (Default = None)
+        """
+        self.shadows = shadow_surfaces
+        self.surface_params = [] if surface_params is None else surface_params
+        self.flag_overlap = flag_overlap
+        self.cut_point_coords = [] if cut_point_coords is None \
+            else cut_point_coords
+
+    @classmethod
+    def from_ts_pvrows_and_angles(cls, list_ts_pvrows, alpha_vec, rotation_vec,
+                                  y_ground=Y_GROUND, flag_overlap=None,
+                                  surface_params=None):
+        """Create timeseries ground from list of timeseries PV rows, and
+        PV array and solar angles.
+
+        Parameters
+        ----------
+        list_ts_pvrows : list of :py:class:`~pvfactors.geometry.timeseries.TsPVRow`
+            Timeseries PV rows to use to calculate timeseries ground shadows
+        alpha_vec : np.ndarray
+            Angle made by 2d solar vector and PV array x-axis [rad]
+        rotation_vec : np.ndarray
+            Timeseries rotation values of the PV row [deg]
+        y_ground : float, optional
+            Fixed y coordinate of flat ground [m] (Default = Y_GROUND constant)
+        flag_overlap : list of bool, optional
+            Flags indicating if the ground shadows are overlapping, for all
+            time steps (Default=None). I.e. is there direct shading on pv rows?
+        surface_params : list of str, optional
+            List of names of surface parameters to use when creating geometries
+            (Default = None)
+        """
+        rotation_vec = np.deg2rad(rotation_vec)
+        n_steps = len(rotation_vec)
+        # Calculate coords of ground shadows and cutting points
+        ground_shadow_coords = []
+        cut_point_coords = []
+        for ts_pvrow in list_ts_pvrows:
+            # Get pvrow coords
+            x1s_pvrow = ts_pvrow.full_pvrow_coords.b1.x
+            y1s_pvrow = ts_pvrow.full_pvrow_coords.b1.y
+            x2s_pvrow = ts_pvrow.full_pvrow_coords.b2.x
+            y2s_pvrow = ts_pvrow.full_pvrow_coords.b2.y
+            # --- Shadow coords calculation
+            # Calculate x coords of shadow
+            x1s_shadow = x1s_pvrow - (y1s_pvrow - y_ground) / np.tan(alpha_vec)
+            x2s_shadow = x2s_pvrow - (y2s_pvrow - y_ground) / np.tan(alpha_vec)
+            # Order x coords from left to right
+            x1s_on_left = x1s_shadow <= x2s_shadow
+            xs_left_shadow = np.where(x1s_on_left, x1s_shadow, x2s_shadow)
+            xs_right_shadow = np.where(x1s_on_left, x2s_shadow, x1s_shadow)
+            # Append shadow coords to list
+            ground_shadow_coords.append(
+                [[xs_left_shadow, y_ground * np.ones(n_steps)],
+                 [xs_right_shadow, y_ground * np.ones(n_steps)]])
+            # --- Cutting points coords calculation
+            dx = (y1s_pvrow - y_ground) / np.tan(rotation_vec)
+            cut_point_coords.append(
+                TsPointCoords(x1s_pvrow - dx, y_ground * np.ones(n_steps)))
+
+        ground_shadow_coords = np.array(ground_shadow_coords)
+        return cls.from_ordered_shadows_coords(
+            ground_shadow_coords, flag_overlap=flag_overlap,
+            cut_point_coords=cut_point_coords, surface_params=surface_params)
+
+    @classmethod
+    def from_ordered_shadows_coords(cls, shadow_coords, flag_overlap=None,
+                                    surface_params=None,
+                                    cut_point_coords=None):
+        """Create timeseries ground from list of ground shadow coordinates.
+
+        Parameters
+        ----------
+        shadow_coords : np.ndarray
+            List of ground shadow coordinates
+        flag_overlap : list of bool, optional
+            Flags indicating if the ground shadows are overlapping, for all
+            time steps (Default=None). I.e. is there direct shading on pv rows?
+        surface_params : list of str, optional
+            List of names of surface parameters to use when creating geometries
+            (Default = None)
+        cut_point_coords : list of :py:class:`~pvfactors.geometry.timeseries.TsPointCoords`, optional
+            List of cut point coordinates, as calculated for timeseries PV rows
+            (Default = None)
+        """
+
+        # Get cut point coords if any
+        cut_point_coords = [] if cut_point_coords is None else cut_point_coords
+        # Create shadow surfaces
+        list_coords = [TsLineCoords.from_array(coords)
+                       for coords in shadow_coords]
+        # If the overlap flags were passed, make sure shadows don't overlap
+        if flag_overlap is not None:
+            if len(list_coords) > 1:
+                for idx, coords in enumerate(list_coords[:-1]):
+                    coords.b2.x = np.where(flag_overlap,
+                                           list_coords[idx + 1].b1.x,
+                                           coords.b2.x)
+        # Create shadow surfaces
+        ts_shadows = [TsSurface(coords) for coords in list_coords]
+        return cls(ts_shadows, surface_params=surface_params,
+                   flag_overlap=flag_overlap,
+                   cut_point_coords=cut_point_coords)
+
+    def at(self, idx, x_min_max=None, merge_if_flag_overlap=True,
+           with_cut_points=True):
+        """Generate a PV ground geometry for the desired index.
+
+        Parameters
+        ----------
+        idx : int
+            Index to use to generate PV ground geometry
+        x_min_max : tuple, optional
+            List of minimum and maximum x coordinates for the flat surface [m]
+            (Default = None)
+        merge_if_flag_overlap : bool, optional
+            Decide whether to merge all shadows if they overlap or not
+            (Default = True)
+        with_cut_points :  bool, optional
+            Decide whether to include the saved cut points in the created
+            PV ground geometry (Default = True)
+
+        Returns
+        -------
+        pvground : :py:class:`~pvfactors.geometry.pvground.PVGround`
+        """
+        # Get cut point coords
+        cut_point_coords = ([cut_point.at(idx)
+                             for cut_point in self.cut_point_coords]
+                            if with_cut_points else [])
+        if merge_if_flag_overlap and (self.flag_overlap is not None):
+            is_overlap = self.flag_overlap[idx]
+            if is_overlap and (len(self.shadows) > 1):
+                ordered_shadow_coords = [[self.shadows[0].coords.b1.at(idx),
+                                          self.shadows[-1].coords.b2.at(idx)]]
+            else:
+                ordered_shadow_coords = [shadow.coords.at(idx)
+                                         for shadow in self.shadows]
+        else:
+            ordered_shadow_coords = [shadow.coords.at(idx)
+                                     for shadow in self.shadows]
+        pvground = PVGround.from_ordered_shadow_and_cut_pt_coords(
+            x_min_max=x_min_max, ordered_shadow_coords=ordered_shadow_coords,
+            cut_point_coords=cut_point_coords,
+            surface_params=self.surface_params)
+        return pvground
+
+    def plot_at_idx(self, idx, ax, color_shaded=COLOR_DIC['pvrow_shaded'],
+                    color_illum=COLOR_DIC['pvrow_illum'], x_min_max=None,
+                    merge_if_flag_overlap=True, with_cut_points=True):
+        """Plot timeseries ground at a certain index.
+
+        Parameters
+        ----------
+        idx : int
+            Index to use to plot timeseries side
+        ax : :py:class:`matplotlib.pyplot.axes` object
+            Axes for plotting
+        color_shaded : str, optional
+            Color to use for plotting the shaded surfaces (Default =
+            COLOR_DIC['pvrow_shaded'])
+        color_shaded : str, optional
+            Color to use for plotting the illuminated surfaces (Default =
+            COLOR_DIC['pvrow_illum'])
+        x_min_max : tuple, optional
+            List of minimum and maximum x coordinates for the flat surface [m]
+            (Default = None)
+        merge_if_flag_overlap : bool, optional
+            Decide whether to merge all shadows if they overlap or not
+            (Default = True)
+        with_cut_points :  bool, optional
+            Decide whether to include the saved cut points in the created
+            PV ground geometry (Default = True)
+        """
+        pvground = self.at(idx, x_min_max=x_min_max,
+                           merge_if_flag_overlap=merge_if_flag_overlap,
+                           with_cut_points=with_cut_points)
+        pvground.plot(ax, color_shaded=color_shaded, color_illum=color_illum,
+                      with_index=False)
+
+
 class TsSurface(object):
     """Timeseries surface class: vectorized representation of PV surface
     geometries."""
@@ -485,10 +689,12 @@ class TsSurface(object):
             Timeseries normal vectors of the side (Default = None)
         """
         self.coords = coords
+        self.surface_params = surface_params
+        # TODO: the following should probably be turned into properties,
+        # because if the coords change, they won't be altered. But speed...
         self.length = np.sqrt((coords.b2.y - coords.b1.y)**2
                               + (coords.b2.x - coords.b1.x)**2)
         self.n_vector = n_vector
-        self.surface_params = surface_params
 
     def at(self, idx, shaded=None):
         """Generate a PV segment geometry for the desired index.
@@ -532,6 +738,16 @@ class TsSurface(object):
         if self.length[idx] > DISTANCE_TOLERANCE:
             self.at(idx).plot(ax, color=color)
 
+    @property
+    def b1(self):
+        """Timeseries coordinates of first boundary point"""
+        return self.coords.b1
+
+    @property
+    def b2(self):
+        """Timeseries coordinates of second boundary point"""
+        return self.coords.b2
+
 
 class TsLineCoords(object):
     """Timeseries line coordinates class: will provide a helpful shapely-like
@@ -552,10 +768,6 @@ class TsLineCoords(object):
         """
         self.b1 = b1_ts_coords
         self.b2 = b2_ts_coords
-        if coords is None:
-            self.coords = np.array([b1_ts_coords.coords, b2_ts_coords.coords])
-        else:
-            self.coords = coords
 
     def at(self, idx):
         """Get coordinates at a given index
@@ -565,7 +777,7 @@ class TsLineCoords(object):
         idx : int
             Index to use to get coordinates
         """
-        return self.coords[:, :, idx]
+        return self.as_array[:, :, idx]
 
     @classmethod
     def from_array(cls, coords_array):
@@ -576,16 +788,21 @@ class TsLineCoords(object):
         coords_array : np.ndarray
             Numpy array of coordinates.
         """
-        b1 = TsPointCoords(coords_array[0, :, :])
-        b2 = TsPointCoords(coords_array[1, :, :])
-        return cls(b1, b2, coords=coords_array)
+        b1 = TsPointCoords.from_array(coords_array[0, :, :])
+        b2 = TsPointCoords.from_array(coords_array[1, :, :])
+        return cls(b1, b2)
+
+    @property
+    def as_array(self):
+        """Timeseries line coordinates as numpy array"""
+        return np.array([[self.b1.x, self.b1.y], [self.b2.x, self.b2.y]])
 
 
 class TsPointCoords(object):
     """Timeseries point coordinates: provides a shapely-like API for timeseries
     point coordinates."""
 
-    def __init__(self, coords):
+    def __init__(self, x, y):
         """Initialize timeseries point coordinates using numpy array of coords.
 
         Parameters
@@ -593,9 +810,8 @@ class TsPointCoords(object):
         coords : np.ndarray
             Numpy array of timeseries point coordinates
         """
-        self.x = coords[0, :]
-        self.y = coords[1, :]
-        self.coords = coords
+        self.x = x
+        self.y = y
 
     def at(self, idx):
         """Get coordinates at a given index
@@ -605,4 +821,20 @@ class TsPointCoords(object):
         idx : int
             Index to use to get coordinates
         """
-        return self.coords[:, idx]
+        return self.as_array[:, idx]
+
+    @property
+    def as_array(self):
+        """Timeseries point coordinates as numpy array"""
+        return np.array([self.x, self.y])
+
+    @classmethod
+    def from_array(cls, coords_array):
+        """Create timeseries point coords from numpy array of coordinates.
+
+        Parameters
+        ----------
+        coords_array : np.ndarray
+            Numpy array of coordinates.
+        """
+        return cls(coords_array[0, :], coords_array[1, :])
