@@ -70,3 +70,41 @@ def test_vf_matrix_subset_calculation(params):
     index_of_back_side_surface = 13
     np.testing.assert_array_almost_equal(
         vf_mat_fast, vf_mat_full[[index_of_back_side_surface], :])
+
+
+def test_ts_view_factors():
+
+    # Create base params
+    params = {
+        'axis_azimuth': 0,
+        'n_pvrows': 3,
+        'pvrow_height': 2.5,
+        'pvrow_width': 2.,
+        'gcr': 0.4,
+        'cut': {0: {'front': 5}, 1: {'back': 3}}
+    }
+
+    # Timeseries parameters for testing
+    solar_zenith = np.array([20., 45.])
+    solar_azimuth = np.array([70., 200.])
+    surface_tilt = np.array([10., 70.])
+    surface_azimuth = np.array([90., 270.])
+
+    # Plot simple ordered pv array
+    pvarray = OrderedPVArray(**params)
+    pvarray.fit(solar_zenith, solar_azimuth, surface_tilt,
+                surface_azimuth)
+
+    # Calculate view factors
+    pvrow_idx = 1
+    side = 'back'
+    segment_idx = 1
+    ts_pvrows = pvarray.ts_pvrows
+    ts_ground = pvarray.ts_ground
+    rotation_vec = pvarray.rotation_vec
+    calculator = VFCalculator()
+    view_factors = calculator.get_ts_view_factors_pvrow(
+        pvrow_idx, side, segment_idx, ts_pvrows, ts_ground, rotation_vec
+    )
+
+    print(view_factors)

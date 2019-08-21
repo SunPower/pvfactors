@@ -8,7 +8,7 @@ class VFCalculator(object):
     """This calculator class will be used for the calculation of view factors
     for PV arrays"""
 
-    def __init__(self, mapper=None):
+    def __init__(self, mapper=None, vf_ts_methods=None):
         """Initialize the view factor mapper that will be used.
 
         Parameters
@@ -20,7 +20,10 @@ class VFCalculator(object):
         """
         if mapper is None:
             mapper = VFMapperOrderedPVArray()
+        if vf_ts_methods is None:
+            vf_ts_methods = VFTsMethods()
         self.mapper = mapper
+        self.vf_ts_methods = vf_ts_methods
 
     def get_vf_matrix_subset(
         self, geom_dict, view_matrix, obstr_matrix, list_pvrows,
@@ -55,12 +58,6 @@ class VFCalculator(object):
             vf_matrix_subset[i, -1] = 1. - sum_finite_vfs
 
         return vf_matrix_subset
-
-    def get_surface_vf_vector(self, geom_dict, view_vec, obstr_vec,
-                              list_pvrows, surface_index):
-
-        n_finite_surfaces = n_all_surfaces - 1  # no sky
-        indices_views_finite = np.where(view_vec)
 
     def get_vf_matrix(self, geom_dict, view_matrix, obstr_matrix, list_pvrow):
         """Calculate the view factors based on the surfaces of the PV array
@@ -139,3 +136,68 @@ class VFCalculator(object):
         # portion of the hemisphere
         view_factors[:-1, -1] = 1. - np.sum(view_factors[:-1, :-1], axis=1)
         return view_factors
+
+    def get_ts_view_factors_pvrow(
+            self, pvrow_idx, side, segment_idx, ts_pvrows, ts_ground,
+            rotation_vec):
+
+        # TODO: check flat case
+        tilted_to_left = rotation_vec >= 0
+        n_shadows = len(ts_pvrows)
+        n_steps = len(rotation_vec)
+        segment_coords = getattr(ts_pvrows[pvrow_idx], side
+                                 ).list_segments[segment_idx].coords
+        segment_length = segment_coords.length
+        strings_are_uncrossed = ts_ground.strings_are_uncrossed[pvrow_idx]
+
+        # Calculate view factors to ground shadows
+        shadows_coords_left = \
+            ts_ground.shadow_coords_left_of_cut_point(pvrow_idx)
+        shadows_coords_right = \
+            ts_ground.shadow_coords_right_of_cut_point(pvrow_idx)
+        vf_shadows_left = np.zeros(n_steps)
+        vf_shadows_right = np.zeros(n_steps)
+        for i in range(n_shadows):
+            vf_shadows_left += self.vf_ts_methods.vf_surface_to_surface(
+                segment_coords, shadows_coords_left[i], segment_length)
+            vf_shadows_right += self.vf_ts_methods.vf_surface_to_surface(
+                segment_coords, shadows_coords_right[i], segment_length)
+        if side == 'back':
+            vf_shadows = np.where(tilted_to_left, vf_shadows_right,
+                                  vf_shadows_left)
+        else:
+            vf_shadows = np.where(tilted_to_left, vf_shadows_left,
+                                  vf_shadows_right)
+
+        # return all timeseries view factors
+        view_factors = {
+            'to_gnd_shadows': vf_shadows,
+            'to_gnd_obstructions': 0.,
+            'to_gnd': 0.,
+            'to_gnd_illum': 0.,
+            'to_pvrow_shaded': 0.,
+            'to_pvrow_illum': 0.,
+            'to_sky': 0.
+        }
+
+        return view_factors
+
+
+class VFTsMethods(object):
+
+    def __init__(self):
+        pass
+
+    def vf_surface_to_surface(self, line_1, line_2, width_1):
+        length_1 = self.distance(line_1.b1, line_2.b1)
+        length_2 = self.distance(line_1.b2, line_2.b2)
+        length_3 = self.distance(line_1.b1, line_2.b2)
+        length_4 = self.distance(line_1.b2, line_2.b1)
+        sum_1 = length_1 + length_2
+        sum_2 = length_3 + length_4
+        vf_1_to_2 = np.abs(sum_2 - sum_1) / (2. * width_1)
+
+        return vf_1_to_2
+
+    def distance(self, b1, b2):
+        return np.sqrt((b2.y - b1.y)**2 + (b2.x - b1.x)**2)
