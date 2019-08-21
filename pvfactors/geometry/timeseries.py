@@ -471,10 +471,12 @@ class TsDualSegment(object):
 
 class TsGround(object):
 
-    def __init__(self, shadow_surfaces, surface_params=None):
+    def __init__(self, shadow_surfaces, surface_params=None,
+                 flag_overlap=None):
 
         self.shadows = shadow_surfaces
         self.surface_params = [] if surface_params is None else surface_params
+        self.flag_overlap = flag_overlap
 
     @classmethod
     def from_ordered_shadows_coords(cls, shadow_coords, flag_overlap=None,
@@ -492,13 +494,25 @@ class TsGround(object):
                                            coords.b2.x)
         # Create shadow surfaces
         ts_shadows = [TsSurface(coords) for coords in list_coords]
-        return cls(ts_shadows)
+        return cls(ts_shadows, surface_params=surface_params,
+                   flag_overlap=flag_overlap)
 
-    def at(self, idx, cut_point_coords=None, x_min_max=None):
+    def at(self, idx, cut_point_coords=None, x_min_max=None,
+           merge_if_flag_overlap=True):
         """ TO BE IMPLEMENTED """
+        # Get cut point coords
         cut_point_coords = [] if cut_point_coords is None else cut_point_coords
-        ordered_shadow_coords = [shadow.coords.at(idx)
-                                 for shadow in self.shadows]
+        if merge_if_flag_overlap and (self.flag_overlap is not None):
+            is_overlap = self.flag_overlap[idx]
+            if is_overlap and (len(self.shadows) > 1):
+                ordered_shadow_coords = [[self.shadows[0].coords.b1.at(idx),
+                                          self.shadows[-1].coords.b2.at(idx)]]
+            else:
+                ordered_shadow_coords = [shadow.coords.at(idx)
+                                         for shadow in self.shadows]
+        else:
+            ordered_shadow_coords = [shadow.coords.at(idx)
+                                     for shadow in self.shadows]
         pvground = PVGround.from_ordered_shadow_and_cut_pt_coords(
             x_min_max=x_min_max, ordered_shadow_coords=ordered_shadow_coords,
             cut_point_coords=cut_point_coords,
@@ -507,7 +521,8 @@ class TsGround(object):
 
     def plot_at_idx(self, idx, ax, color_shaded=COLOR_DIC['pvrow_shaded'],
                     color_illum=COLOR_DIC['pvrow_illum'],
-                    cut_point_coords=None, x_min_max=None):
+                    cut_point_coords=None, x_min_max=None,
+                    merge_if_flag_overlap=True):
         """Plot timeseries side at a certain index.
 
         Parameters
@@ -522,9 +537,11 @@ class TsGround(object):
         color_shaded : str, optional
             Color to use for plotting the illuminated surfaces (Default =
             COLOR_DIC['pvrow_illum'])
+        ### TO FINISH ###
         """
         pvground = self.at(idx, cut_point_coords=cut_point_coords,
-                           x_min_max=x_min_max)
+                           x_min_max=x_min_max,
+                           merge_if_flag_overlap=merge_if_flag_overlap)
         pvground.plot(ax, color_shaded=color_shaded, color_illum=color_illum,
                       with_index=False)
 

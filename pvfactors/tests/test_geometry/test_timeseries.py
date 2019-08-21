@@ -151,18 +151,34 @@ def test_ts_ground_to_geometry():
                                                      flag_overlap=overlap)
 
     # Run some checks for index 0
-    pvground = ts_ground.at(0)
+    pvground = ts_ground.at(0, merge_if_flag_overlap=False)
     assert pvground.n_surfaces == 4
     assert pvground.list_segments[0].illum_collection.n_surfaces == 2
     assert pvground.list_segments[0].shaded_collection.n_surfaces == 2
     assert pvground.list_segments[0].shaded_collection.length == 5
 
-    # Run some checks for index 0
+    # Run some checks for index 1
     pvground = ts_ground.at(1)
     assert pvground.n_surfaces == 5
     assert pvground.list_segments[0].illum_collection.n_surfaces == 3
     assert pvground.list_segments[0].shaded_collection.n_surfaces == 2
     assert pvground.list_segments[0].shaded_collection.length == 4
+
+    # Run some checks for index 0, when merging
+    pvground = ts_ground.at(0, merge_if_flag_overlap=True)
+    assert pvground.n_surfaces == 3
+    assert pvground.list_segments[0].illum_collection.n_surfaces == 2
+    assert pvground.list_segments[0].shaded_collection.n_surfaces == 1
+    assert pvground.list_segments[0].shaded_collection.length == 5
+
+    # Run some checks for index 0, when merging and with cut points
+    cut_point_coords = [[2, 0]]
+    pvground = ts_ground.at(0, merge_if_flag_overlap=True,
+                            cut_point_coords=cut_point_coords)
+    assert pvground.n_surfaces == 4
+    assert pvground.list_segments[0].illum_collection.n_surfaces == 2
+    assert pvground.list_segments[0].shaded_collection.n_surfaces == 2
+    assert pvground.list_segments[0].shaded_collection.length == 5
 
     is_ci = os.environ.get('CI', False)
 
@@ -171,5 +187,7 @@ def test_ts_ground_to_geometry():
 
         # Plot it at ts 0
         f, ax = plt.subplots()
-        ts_ground.plot_at_idx(1, ax)
+        ts_ground.plot_at_idx(0, ax, merge_if_flag_overlap=True,
+                              cut_point_coords=cut_point_coords)
+        ax.set_xlim(-1, 6)
         plt.show()
