@@ -9,6 +9,7 @@ from pvfactors.geometry.base import (
 from pvfactors.geometry.pvrow import PVRow
 from pvfactors.geometry.pvground import PVGround
 from shapely.geometry import GeometryCollection, LineString
+from copy import deepcopy
 
 
 class TsPVRow(object):
@@ -671,6 +672,26 @@ class TsGround(object):
         pvground.plot(ax, color_shaded=color_shaded, color_illum=color_illum,
                       with_index=False)
 
+    def shadow_coords_left_of_cut_point(self, idx_cut_pt):
+        shadow_coords = []
+        cut_pt_coords = self.cut_point_coords[idx_cut_pt]
+        for shadow in self.shadows:
+            coords = deepcopy(shadow.coords)
+            coords.b1.x = np.minimum(coords.b1.x, cut_pt_coords.x)
+            coords.b2.x = np.minimum(coords.b2.x, cut_pt_coords.x)
+            shadow_coords.append(coords)
+        return shadow_coords
+
+    def shadow_coords_right_of_cut_point(self, idx_cut_pt):
+        shadow_coords = []
+        cut_pt_coords = self.cut_point_coords[idx_cut_pt]
+        for shadow in self.shadows:
+            coords = deepcopy(shadow.coords)
+            coords.b1.x = np.maximum(coords.b1.x, cut_pt_coords.x)
+            coords.b2.x = np.maximum(coords.b2.x, cut_pt_coords.x)
+            shadow_coords.append(coords)
+        return shadow_coords
+
 
 class TsSurface(object):
     """Timeseries surface class: vectorized representation of PV surface
@@ -797,6 +818,9 @@ class TsLineCoords(object):
         """Timeseries line coordinates as numpy array"""
         return np.array([[self.b1.x, self.b1.y], [self.b2.x, self.b2.y]])
 
+    def __repr__(self):
+        return str(self.as_array)
+
 
 class TsPointCoords(object):
     """Timeseries point coordinates: provides a shapely-like API for timeseries
@@ -838,3 +862,6 @@ class TsPointCoords(object):
             Numpy array of coordinates.
         """
         return cls(coords_array[0, :], coords_array[1, :])
+
+    def __repr__(self):
+        return str(self.as_array)
