@@ -3,7 +3,7 @@ calculations."""
 
 import numpy as np
 from pvlib.tools import cosd, sind
-from pvfactors.config import DISTANCE_TOLERANCE, COLOR_DIC
+from pvfactors.config import DISTANCE_TOLERANCE, COLOR_DIC, Y_GROUND
 from pvfactors.geometry.base import (
     PVSurface, ShadeCollection, PVSegment, BaseSide)
 from pvfactors.geometry.pvrow import PVRow
@@ -472,16 +472,59 @@ class TsDualSegment(object):
 class TsGround(object):
 
     def __init__(self, shadow_surfaces, surface_params=None,
-                 flag_overlap=None):
+                 flag_overlap=None, cut_point_coords=None):
 
         self.shadows = shadow_surfaces
         self.surface_params = [] if surface_params is None else surface_params
         self.flag_overlap = flag_overlap
+        self.cut_point_coords = [] if cut_point_coords is None \
+            else cut_point_coords
+
+    @classmethod
+    def from_ts_pvrows_and_angles(cls, list_ts_pvrows, alpha_vec, rotation_vec,
+                                  y_ground=Y_GROUND, flag_overlap=None,
+                                  surface_params=None):
+
+        rotation_vec = np.deg2rad(rotation_vec)
+        n_steps = len(rotation_vec)
+        # Calculate coords of ground shadows and cutting points
+        ground_shadow_coords = []
+        cut_point_coords = []
+        for ts_pvrow in list_ts_pvrows:
+            # Get pvrow coords
+            x1s_pvrow = ts_pvrow.full_pvrow_coords.b1.x
+            y1s_pvrow = ts_pvrow.full_pvrow_coords.b1.y
+            x2s_pvrow = ts_pvrow.full_pvrow_coords.b2.x
+            y2s_pvrow = ts_pvrow.full_pvrow_coords.b2.y
+            # --- Shadow coords calculation
+            # Calculate x coords of shadow
+            x1s_shadow = x1s_pvrow - (y1s_pvrow - y_ground) / np.tan(alpha_vec)
+            x2s_shadow = x2s_pvrow - (y2s_pvrow - y_ground) / np.tan(alpha_vec)
+            # Order x coords from left to right
+            x1s_on_left = x1s_shadow <= x2s_shadow
+            xs_left_shadow = np.where(x1s_on_left, x1s_shadow, x2s_shadow)
+            xs_right_shadow = np.where(x1s_on_left, x2s_shadow, x1s_shadow)
+            # Append shadow coords to list
+            ground_shadow_coords.append(
+                [[xs_left_shadow, y_ground * np.ones(n_steps)],
+                 [xs_right_shadow, y_ground * np.ones(n_steps)]])
+            # --- Cutting points coords calculation
+            dx = (y1s_pvrow - y_ground) / np.tan(rotation_vec)
+            cut_point_coords.append(
+                TsPointCoords(x1s_pvrow - dx, y_ground * np.ones(n_steps)))
+
+        ground_shadow_coords = np.array(ground_shadow_coords)
+        return cls.from_ordered_shadows_coords(
+            ground_shadow_coords, flag_overlap=flag_overlap,
+            cut_point_coords=cut_point_coords)
 
     @classmethod
     def from_ordered_shadows_coords(cls, shadow_coords, flag_overlap=None,
-                                    surface_params=None):
+                                    surface_params=None,
+                                    cut_point_coords=None):
 
+        # Get cut point coords if any
+        cut_point_coords = [] if cut_point_coords is None else cut_point_coords
         # Create shadow surfaces
         list_coords = [TsLineCoords.from_array(coords)
                        for coords in shadow_coords]
@@ -495,13 +538,16 @@ class TsGround(object):
         # Create shadow surfaces
         ts_shadows = [TsSurface(coords) for coords in list_coords]
         return cls(ts_shadows, surface_params=surface_params,
-                   flag_overlap=flag_overlap)
+                   flag_overlap=flag_overlap,
+                   cut_point_coords=cut_point_coords)
 
-    def at(self, idx, cut_point_coords=None, x_min_max=None,
-           merge_if_flag_overlap=True):
+    def at(self, idx, x_min_max=None, merge_if_flag_overlap=True,
+           with_cut_points=True):
         """ TO BE IMPLEMENTED """
         # Get cut point coords
-        cut_point_coords = [] if cut_point_coords is None else cut_point_coords
+        cut_point_coords = ([cut_point.at(idx)
+                             for cut_point in self.cut_point_coords]
+                            if with_cut_points else [])
         if merge_if_flag_overlap and (self.flag_overlap is not None):
             is_overlap = self.flag_overlap[idx]
             if is_overlap and (len(self.shadows) > 1):
@@ -520,9 +566,8 @@ class TsGround(object):
         return pvground
 
     def plot_at_idx(self, idx, ax, color_shaded=COLOR_DIC['pvrow_shaded'],
-                    color_illum=COLOR_DIC['pvrow_illum'],
-                    cut_point_coords=None, x_min_max=None,
-                    merge_if_flag_overlap=True):
+                    color_illum=COLOR_DIC['pvrow_illum'], x_min_max=None,
+                    merge_if_flag_overlap=True, with_cut_points=True):
         """Plot timeseries side at a certain index.
 
         Parameters
@@ -539,9 +584,9 @@ class TsGround(object):
             COLOR_DIC['pvrow_illum'])
         ### TO FINISH ###
         """
-        pvground = self.at(idx, cut_point_coords=cut_point_coords,
-                           x_min_max=x_min_max,
-                           merge_if_flag_overlap=merge_if_flag_overlap)
+        pvground = self.at(idx, x_min_max=x_min_max,
+                           merge_if_flag_overlap=merge_if_flag_overlap,
+                           with_cut_points=with_cut_points)
         pvground.plot(ax, color_shaded=color_shaded, color_illum=color_illum,
                       with_index=False)
 
