@@ -597,7 +597,7 @@ class TsGround(object):
 
     def at(self, idx, x_min_max=None, merge_if_flag_overlap=True,
            with_cut_points=True):
-        """Generate a PV ground geomtry for the desired index.
+        """Generate a PV ground geometry for the desired index.
 
         Parameters
         ----------
