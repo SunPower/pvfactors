@@ -135,3 +135,41 @@ def test_ts_ground_overlap():
     ts_ground = TsGround.from_ordered_shadows_coords(shadow_coords,
                                                      flag_overlap=overlap)
     np.testing.assert_allclose(ts_ground.shadows[0].b2.x, [1, 1])
+
+
+def test_ts_ground_to_geometry():
+
+    # There should be an overlap
+    shadow_coords = np.array([
+        [[[0, 0], [0, 0]], [[2, 1], [0, 0]]],
+        [[[1, 2], [0, 0]], [[5, 5], [0, 0]]]
+    ])
+    overlap = [True, False]
+
+    # Test with overlap
+    ts_ground = TsGround.from_ordered_shadows_coords(shadow_coords,
+                                                     flag_overlap=overlap)
+
+    # Run some checks for index 0
+    pvground = ts_ground.at(0)
+    assert pvground.n_surfaces == 4
+    assert pvground.list_segments[0].illum_collection.n_surfaces == 2
+    assert pvground.list_segments[0].shaded_collection.n_surfaces == 2
+    assert pvground.list_segments[0].shaded_collection.length == 5
+
+    # Run some checks for index 0
+    pvground = ts_ground.at(1)
+    assert pvground.n_surfaces == 5
+    assert pvground.list_segments[0].illum_collection.n_surfaces == 3
+    assert pvground.list_segments[0].shaded_collection.n_surfaces == 2
+    assert pvground.list_segments[0].shaded_collection.length == 4
+
+    is_ci = os.environ.get('CI', False)
+
+    if not is_ci:
+        import matplotlib.pyplot as plt
+
+        # Plot it at ts 0
+        f, ax = plt.subplots()
+        ts_ground.plot_at_idx(1, ax)
+        plt.show()

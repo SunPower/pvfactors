@@ -7,6 +7,7 @@ from pvfactors.config import DISTANCE_TOLERANCE, COLOR_DIC
 from pvfactors.geometry.base import (
     PVSurface, ShadeCollection, PVSegment, BaseSide)
 from pvfactors.geometry.pvrow import PVRow
+from pvfactors.geometry.pvground import PVGround
 from shapely.geometry import GeometryCollection, LineString
 
 
@@ -470,13 +471,14 @@ class TsDualSegment(object):
 
 class TsGround(object):
 
-    def __init__(self, shadow_surfaces):
+    def __init__(self, shadow_surfaces, surface_params=None):
 
         self.shadows = shadow_surfaces
+        self.surface_params = [] if surface_params is None else surface_params
 
     @classmethod
-    def from_ordered_shadows_coords(cls, shadow_coords,
-                                    flag_overlap=None):
+    def from_ordered_shadows_coords(cls, shadow_coords, flag_overlap=None,
+                                    surface_params=None):
 
         # Create shadow surfaces
         list_coords = [TsLineCoords.from_array(coords)
@@ -491,6 +493,40 @@ class TsGround(object):
         # Create shadow surfaces
         ts_shadows = [TsSurface(coords) for coords in list_coords]
         return cls(ts_shadows)
+
+    def at(self, idx, cut_point_coords=None, x_min_max=None):
+        """ TO BE IMPLEMENTED """
+        cut_point_coords = [] if cut_point_coords is None else cut_point_coords
+        ordered_shadow_coords = [shadow.coords.at(idx)
+                                 for shadow in self.shadows]
+        pvground = PVGround.from_ordered_shadow_and_cut_pt_coords(
+            x_min_max=x_min_max, ordered_shadow_coords=ordered_shadow_coords,
+            cut_point_coords=cut_point_coords,
+            surface_params=self.surface_params)
+        return pvground
+
+    def plot_at_idx(self, idx, ax, color_shaded=COLOR_DIC['pvrow_shaded'],
+                    color_illum=COLOR_DIC['pvrow_illum'],
+                    cut_point_coords=None, x_min_max=None):
+        """Plot timeseries side at a certain index.
+
+        Parameters
+        ----------
+        idx : int
+            Index to use to plot timeseries side
+        ax : :py:class:`matplotlib.pyplot.axes` object
+            Axes for plotting
+        color_shaded : str, optional
+            Color to use for plotting the shaded surfaces (Default =
+            COLOR_DIC['pvrow_shaded'])
+        color_shaded : str, optional
+            Color to use for plotting the illuminated surfaces (Default =
+            COLOR_DIC['pvrow_illum'])
+        """
+        pvground = self.at(idx, cut_point_coords=cut_point_coords,
+                           x_min_max=x_min_max)
+        pvground.plot(ax, color_shaded=color_shaded, color_illum=color_illum,
+                      with_index=False)
 
 
 class TsSurface(object):
@@ -510,10 +546,12 @@ class TsSurface(object):
             Timeseries normal vectors of the side (Default = None)
         """
         self.coords = coords
+        self.surface_params = surface_params
+        # TODO: the following should probably be turned into properties,
+        # because if the coords change, they won't be altered. But speed...
         self.length = np.sqrt((coords.b2.y - coords.b1.y)**2
                               + (coords.b2.x - coords.b1.x)**2)
         self.n_vector = n_vector
-        self.surface_params = surface_params
 
     def at(self, idx, shaded=None):
         """Generate a PV segment geometry for the desired index.
