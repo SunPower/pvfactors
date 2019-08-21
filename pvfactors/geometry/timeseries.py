@@ -516,7 +516,7 @@ class TsGround(object):
         ground_shadow_coords = np.array(ground_shadow_coords)
         return cls.from_ordered_shadows_coords(
             ground_shadow_coords, flag_overlap=flag_overlap,
-            cut_point_coords=cut_point_coords)
+            cut_point_coords=cut_point_coords, surface_params=surface_params)
 
     @classmethod
     def from_ordered_shadows_coords(cls, shadow_coords, flag_overlap=None,
