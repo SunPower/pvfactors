@@ -27,7 +27,7 @@ def test_ordered_pvarray_from_dict(params):
         pvarray.pvrows[0].front.n_vector, -pvarray.pvrows[0].back.n_vector)
     assert pvarray.pvrows[0].front.shaded_length == 0
     assert pvarray.gcr == params['gcr']
-    assert pvarray.surface_tilt == params['surface_tilt']
+    assert np.abs(pvarray.rotation_vec) == params['surface_tilt']
     assert pvarray.pvrows[0].front.n_vector[0] > 0
     distance_between_pvrows = \
         pvarray.pvrows[1].centroid.x - pvarray.pvrows[0].centroid.x
@@ -611,7 +611,7 @@ def test_ordered_pvarray_from_dict_w_direct_shading():
     np.testing.assert_allclose(pvarray.pvrows[1].front.shaded_length,
                                0.05979874)
     assert pvarray.gcr == params['gcr']
-    assert pvarray.surface_tilt == params['surface_tilt']
+    assert np.abs(pvarray.rotation_vec) == params['surface_tilt']
     assert pvarray.pvrows[0].front.n_vector[0] < 0
     distance_between_pvrows = \
         pvarray.pvrows[1].centroid.x - pvarray.pvrows[0].centroid.x
