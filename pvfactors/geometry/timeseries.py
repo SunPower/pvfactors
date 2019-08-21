@@ -662,8 +662,8 @@ class TsLineCoords(object):
         coords_array : np.ndarray
             Numpy array of coordinates.
         """
-        b1 = TsPointCoords(coords_array[0, :, :])
-        b2 = TsPointCoords(coords_array[1, :, :])
+        b1 = TsPointCoords.from_array(coords_array[0, :, :])
+        b2 = TsPointCoords.from_array(coords_array[1, :, :])
         return cls(b1, b2)
 
     @property
@@ -675,7 +675,7 @@ class TsPointCoords(object):
     """Timeseries point coordinates: provides a shapely-like API for timeseries
     point coordinates."""
 
-    def __init__(self, coords):
+    def __init__(self, x, y):
         """Initialize timeseries point coordinates using numpy array of coords.
 
         Parameters
@@ -683,8 +683,8 @@ class TsPointCoords(object):
         coords : np.ndarray
             Numpy array of timeseries point coordinates
         """
-        self.x = coords[0, :]
-        self.y = coords[1, :]
+        self.x = x
+        self.y = y
 
     def at(self, idx):
         """Get coordinates at a given index
@@ -699,3 +699,7 @@ class TsPointCoords(object):
     @property
     def as_array(self):
         return np.array([self.x, self.y])
+
+    @classmethod
+    def from_array(cls, coords_array):
+        return cls(coords_array[0, :], coords_array[1, :])
