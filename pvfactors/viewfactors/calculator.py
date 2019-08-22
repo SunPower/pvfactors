@@ -1,8 +1,10 @@
 """Module with classes and functions to calculate views and view factors"""
 
 from pvfactors.config import DISTANCE_TOLERANCE
+from pvfactors.geometry.timeseries import TsLineCoords, TsPointCoords
 from pvfactors.viewfactors.mapper import VFMapperOrderedPVArray
 import numpy as np
+from pvlib.tools import cosd, sind
 
 
 class VFCalculator(object):
@@ -139,15 +141,14 @@ class VFCalculator(object):
         return view_factors
 
     def get_ts_view_factors_pvrow(
-            self, pvrow_idx, side, segment_idx, ts_pvrows, ts_ground,
-            rotation_vec, distance):
+            self, pvrow_idx, segment_idx, ts_pvrows, ts_ground,
+            rotation_vec, distance, width):
 
         # TODO: check flat case
         tilted_to_left = rotation_vec >= 0
         n_shadows = len(ts_pvrows)
         n_steps = len(rotation_vec)
-        segment = getattr(ts_pvrows[pvrow_idx], side
-                          ).list_segments[segment_idx]
+        segment = ts_pvrows[pvrow_idx].back.list_segments[segment_idx]
         segment_coords = segment.coords
         segment_length = segment_coords.length
         strings_are_uncrossed = ts_ground.strings_are_uncrossed[pvrow_idx]
@@ -165,42 +166,29 @@ class VFCalculator(object):
                 segment_coords, shadows_coords_left[i], segment_length)
             vf_shadows_right += self.vf_ts_methods.vf_surface_to_surface(
                 segment_coords, shadows_coords_right[i], segment_length)
-        if side == 'back':
-            vf_shadows = np.where(tilted_to_left, vf_shadows_right,
-                                  vf_shadows_left)
-        else:
-            vf_shadows = np.where(tilted_to_left, vf_shadows_left,
-                                  vf_shadows_right)
+        vf_full_shadows = np.where(tilted_to_left, vf_shadows_right,
+                                   vf_shadows_left)
 
         # Calculate length of obstructions
         highest_pt_seg = segment.highest_point
-        lowest_pt_seg = segment.lowest_point
-        # Calculate angles to normal
-        l_obstr_left = []
-        l_obstr_right = []
+        vf_to_gnd_shadow_obstrx = []
         for i in range(n_shadows):
             shadow_left = shadows_coords_left[i]
             shadow_right = shadows_coords_right[i]
-            alpha_left = np.arctan2(highest_pt_seg.y - shadow_left.b1.y,
-                                    highest_pt_seg.x - shadow_left.b1.x)
-            alpha_right = np.arctan2(shadow_right.b2.y - highest_pt_seg.y,
-                                     shadow_right.b2.x - highest_pt_seg.x)
-            l_left = self.vf_ts_methods.length_obstr_left(
-                alpha_left, rotation_vec, distance, segment_length,
-                tilted_to_left=tilted_to_left)
-            l_right = self.vf_ts_methods.length_obstr_right(
-                alpha_right, rotation_vec, distance, segment_length,
-                tilted_to_left=tilted_to_left)
-            l_obstr_left.append(l_left)
-            l_obstr_right.append(l_right)
-
-        print(l_obstr_left)
-        print(l_obstr_right)
+            vf_to_obstrx = (
+                self.vf_ts_methods.calculate_vf_to_shadow_obstruction(
+                    segment, pvrow_idx, n_shadows, n_steps, tilted_to_left,
+                    width, ts_pvrows,
+                    shadow_left, shadow_right, highest_pt_seg,
+                    rotation_vec, distance, segment_length
+                ))
+            vf_to_gnd_shadow_obstrx.append(vf_to_obstrx)
+        vf_obstructions = np.sum(vf_to_gnd_shadow_obstrx, axis=0)
 
         # return all timeseries view factors
         view_factors = {
-            'to_full_gnd_shadows': vf_shadows,
-            'to_gnd_shadow_obstrx': 0.,
+            'to_full_gnd_shadows': vf_full_shadows,
+            'to_gnd_shadow_obstrx': vf_obstructions,
             'to_obstructed_gnd_shadows': 0.,
             'to_gnd_seen': 0.,
             'to_gnd_illum': 0.,
@@ -219,6 +207,7 @@ class VFTsMethods(object):
         pass
 
     def vf_surface_to_surface(self, line_1, line_2, width_1):
+        """Calculate view factors between timeseries line coords"""
         length_1 = self.distance(line_1.b1, line_2.b1)
         length_2 = self.distance(line_1.b2, line_2.b2)
         length_3 = self.distance(line_1.b1, line_2.b2)
@@ -232,8 +221,111 @@ class VFTsMethods(object):
     def distance(self, b1, b2):
         return np.sqrt((b2.y - b1.y)**2 + (b2.x - b1.x)**2)
 
+    def calculate_vf_to_shadow_obstruction(
+            self, segment, pvrow_idx, n_shadows, n_steps,
+            tilted_to_left, width, ts_pvrows,
+            shadow_left, shadow_right, highest_pt_seg,
+            rotation_vec, distance, segment_length):
+
+        # Calculate view factors to left obstructions
+        if pvrow_idx == 0:
+            vf_to_left_obstr = np.zeros(n_steps)
+        else:
+            left_ts_pvrow = ts_pvrows[pvrow_idx - 1]
+            vf_to_left_obstr = self._vf_to_left_obstruction(
+                shadow_left, highest_pt_seg,
+                rotation_vec, distance, segment_length,
+                tilted_to_left, n_steps,
+                left_ts_pvrow.xy_center,
+                left_ts_pvrow.full_pvrow_coords.lowest_point, width,
+                segment.coords)
+
+        # Calculate view factors to right obstructions
+        if pvrow_idx == n_shadows - 1:
+            vf_to_right_obstr = np.zeros(n_steps)
+        else:
+            right_ts_pvrow = ts_pvrows[pvrow_idx + 1]
+            vf_to_right_obstr = self._vf_to_right_obstruction(
+                shadow_right, highest_pt_seg,
+                rotation_vec, distance, segment_length,
+                tilted_to_left, n_steps,
+                right_ts_pvrow.xy_center,
+                right_ts_pvrow.full_pvrow_coords.lowest_point, width,
+                segment.coords)
+
+        # Filter since we're considering the back surface only
+        vf_to_obstruction = np.where(tilted_to_left, vf_to_right_obstr,
+                                     vf_to_left_obstr)
+
+        return vf_to_obstruction
+
+    def _vf_to_left_obstruction(self, shadow_left, highest_pt_seg,
+                                rotation_vec, distance, segment_length,
+                                tilted_to_left, n_steps,
+                                xy_center_left, lowest_pt_left, width,
+                                segment_coords):
+        # Calculate angles of chord with x-axis
+        alpha_left = np.arctan2(highest_pt_seg.y - shadow_left.b1.y,
+                                highest_pt_seg.x - shadow_left.b1.x)
+        # Calculate length of left pv row which is obstructing
+        l_left = self._length_obstr_left(
+            alpha_left, rotation_vec, distance, segment_length,
+            tilted_to_left=tilted_to_left)
+        # Calculate obstruction coords
+        obstr_coords = self._create_obstruction_coords(
+            xy_center_left, lowest_pt_left, width, l_left,
+            tilted_to_left, rotation_vec)
+        # Calculate view factors to obstruction
+        vf_left = self.vf_surface_to_surface(segment_coords, obstr_coords,
+                                             width)
+        return vf_left
+
+    def _vf_to_right_obstruction(self, shadow_right, highest_pt_seg,
+                                 rotation_vec, distance, segment_length,
+                                 tilted_to_left, n_steps,
+                                 xy_center_right, lowest_pt_right, width,
+                                 segment_coords):
+        # Calculate angles of chord with x-axis
+        alpha_right = np.arctan2(shadow_right.b2.y - highest_pt_seg.y,
+                                 shadow_right.b2.x - highest_pt_seg.x)
+        # Calculate length of right pv row which is obstructing
+        l_right = self._length_obstr_right(
+            alpha_right, rotation_vec, distance, segment_length,
+            tilted_to_left=tilted_to_left)
+        # Calculate obstruction coords
+        obstr_coords = self._create_obstruction_coords(
+            xy_center_right, lowest_pt_right, width, l_right,
+            tilted_to_left, rotation_vec)
+        # Calculate view factors to obstruction
+        vf_right = self.vf_surface_to_surface(segment_coords, obstr_coords,
+                                              width)
+        return vf_right
+
     @staticmethod
-    def length_obstr_left(alpha, theta, d, w, tilted_to_left=None):
+    def _create_obstruction_coords(xy_center, lowest_pt, width,
+                                   length_obstr, mask_tilted_to_left,
+                                   rotation_vec):
+
+        # Prepare inputs
+        x_center, y_center = xy_center
+        radius = width / 2.
+
+        # Calculate coords of shading point
+        r_shade = radius - length_obstr
+        x_sh = np.where(
+            mask_tilted_to_left,
+            r_shade * cosd(rotation_vec + 180.) + x_center,
+            r_shade * cosd(rotation_vec) + x_center)
+        y_sh = np.where(
+            mask_tilted_to_left,
+            r_shade * sind(rotation_vec + 180.) + y_center,
+            r_shade * sind(rotation_vec) + y_center)
+
+        line_coords = TsLineCoords(TsPointCoords(x_sh, y_sh), lowest_pt)
+        return line_coords
+
+    @staticmethod
+    def _length_obstr_left(alpha, theta, d, w, tilted_to_left=None):
         if tilted_to_left is None:
             tilted_to_left = theta >= 0
         # TODO: speed boost, pass as argument
@@ -258,7 +350,7 @@ class VFTsMethods(object):
         return length_left
 
     @staticmethod
-    def length_obstr_right(alpha, theta, d, w, tilted_to_left=None):
+    def _length_obstr_right(alpha, theta, d, w, tilted_to_left=None):
         if tilted_to_left is None:
             tilted_to_left = theta >= 0
         # TODO: speed boost, pass as argument
@@ -281,3 +373,19 @@ class VFTsMethods(object):
         # Aggregate calculations
         length_right = np.where(tilted_to_left, l_plus, l_minus)
         return length_right
+
+    @staticmethod
+    def build_obstr_coords(ts_pvrows, l_left, l_right, pvrow_idx, n_pvrows,
+                           n_steps):
+
+        # Build obstruction coords left
+        if pvrow_idx == 0:
+            # There is nothing on the left so return just a point
+            pass
+        pass
+
+    def build_obstr_coords_left():
+        pass
+
+    def build_obstr_coords_right():
+        pass

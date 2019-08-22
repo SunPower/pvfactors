@@ -97,18 +97,17 @@ def test_ts_view_factors():
 
     # Calculate view factors
     pvrow_idx = 1
-    side = 'back'
     segment_idx = 0
     ts_pvrows = pvarray.ts_pvrows
     ts_ground = pvarray.ts_ground
     rotation_vec = pvarray.rotation_vec
     calculator = VFCalculator()
     view_factors = calculator.get_ts_view_factors_pvrow(
-        pvrow_idx, side, segment_idx, ts_pvrows, ts_ground, rotation_vec,
-        pvarray.distance
+        pvrow_idx, segment_idx, ts_pvrows, ts_ground, rotation_vec,
+        pvarray.distance, pvarray.width
     )
 
-    # print(view_factors)
+    print(view_factors)
 
     # import os
     # is_ci = os.environ.get('CI', False)
@@ -135,7 +134,7 @@ def test_length_obstr_left():
     theta = np.array([-40., 40., -40., 40.])
     d = 2.857142857142857
     w = 2.
-    length = VFTsMethods.length_obstr_left(alpha, theta, d, w)
+    length = VFTsMethods._length_obstr_left(alpha, theta, d, w)
 
     expected_length = np.array([0.7390748775279945, 0., 0., 0.])
     np.testing.assert_allclose(length, expected_length)
@@ -147,7 +146,7 @@ def test_length_obstr_right():
     theta = np.array([-40., 40., -40., 40.])
     d = 2.857142857142857
     w = 2.
-    length = VFTsMethods.length_obstr_right(alpha, theta, d, w)
+    length = VFTsMethods._length_obstr_right(alpha, theta, d, w)
 
     expected_length = np.array([0., 0., 0., 0.224183046])
     np.testing.assert_allclose(length, expected_length)
