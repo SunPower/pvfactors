@@ -469,6 +469,14 @@ class TsDualSegment(object):
         """Timeseries length of shaded part of segment."""
         return self.shaded.length
 
+    @property
+    def highest_point(self):
+        return self.coords.highest_point
+
+    @property
+    def lowest_point(self):
+        return self.coords.lowest_point
+
 
 class TsGround(object):
     """Timeseries ground class: this class is a vectorized version of the
@@ -839,6 +847,20 @@ class TsLineCoords(object):
     def as_array(self):
         """Timeseries line coordinates as numpy array"""
         return np.array([[self.b1.x, self.b1.y], [self.b2.x, self.b2.y]])
+
+    @property
+    def highest_point(self):
+        is_b1_highest = self.b1.y >= self.b2.y
+        x = np.where(is_b1_highest, self.b1.x, self.b2.x)
+        y = np.where(is_b1_highest, self.b1.y, self.b2.y)
+        return TsPointCoords(x, y)
+
+    @property
+    def lowest_point(self):
+        is_b1_highest = self.b1.y >= self.b2.y
+        x = np.where(is_b1_highest, self.b2.x, self.b1.x)
+        y = np.where(is_b1_highest, self.b2.y, self.b1.y)
+        return TsPointCoords(x, y)
 
     def __repr__(self):
         return str(self.as_array)
