@@ -1174,7 +1174,8 @@ class BasePVArray(object):
         ax.set_xlabel("x [m]", fontsize=PLOT_FONTSIZE)
         ax.set_ylabel("y [m]", fontsize=PLOT_FONTSIZE)
 
-    def plot_at_idx(self, idx, ax, with_index=False):
+    def plot_at_idx(self, idx, ax, with_index=False,
+                    merge_if_flag_overlap=True):
         """Plot all the PV rows and the ground in the PV array at a desired
         step index. This can be called before transforming the array, and
         after fitting it.
@@ -1187,14 +1188,15 @@ class BasePVArray(object):
             Flag to annotate surfaces with their indices (Default = False)
         """
         # Plot pv array structures
-        self.ts_ground.at(idx
-                          ).plot(ax, color_shaded=COLOR_DIC['ground_shaded'],
-                                 color_illum=COLOR_DIC['ground_illum'],
-                                 with_index=with_index)
+        self.ts_ground.plot_at_idx(
+            idx, ax, color_shaded=COLOR_DIC['ground_shaded'],
+            color_illum=COLOR_DIC['ground_illum'],
+            merge_if_flag_overlap=merge_if_flag_overlap)
+
         for ts_pvrow in self.ts_pvrows:
-            ts_pvrow.at(idx).plot(ax, color_shaded=COLOR_DIC['pvrow_shaded'],
-                                  color_illum=COLOR_DIC['pvrow_illum'],
-                                  with_index=with_index)
+            ts_pvrow.plot_at_idx(
+                idx, ax, color_shaded=COLOR_DIC['pvrow_shaded'],
+                color_illum=COLOR_DIC['pvrow_illum'])
 
         # Plot formatting
         ax.axis('equal')

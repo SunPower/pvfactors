@@ -1,5 +1,6 @@
 """Module with classes and functions to calculate views and view factors"""
 
+from pvfactors.config import DISTANCE_TOLERANCE
 from pvfactors.viewfactors.mapper import VFMapperOrderedPVArray
 import numpy as np
 
@@ -139,22 +140,24 @@ class VFCalculator(object):
 
     def get_ts_view_factors_pvrow(
             self, pvrow_idx, side, segment_idx, ts_pvrows, ts_ground,
-            rotation_vec):
+            rotation_vec, distance):
 
         # TODO: check flat case
         tilted_to_left = rotation_vec >= 0
         n_shadows = len(ts_pvrows)
         n_steps = len(rotation_vec)
-        segment_coords = getattr(ts_pvrows[pvrow_idx], side
-                                 ).list_segments[segment_idx].coords
+        segment = getattr(ts_pvrows[pvrow_idx], side
+                          ).list_segments[segment_idx]
+        segment_coords = segment.coords
         segment_length = segment_coords.length
         strings_are_uncrossed = ts_ground.strings_are_uncrossed[pvrow_idx]
 
-        # Calculate view factors to ground shadows
+        # Get shadows on left and right sides of PV row
         shadows_coords_left = \
             ts_ground.shadow_coords_left_of_cut_point(pvrow_idx)
         shadows_coords_right = \
             ts_ground.shadow_coords_right_of_cut_point(pvrow_idx)
+        # Calculate view factors to ground shadows
         vf_shadows_left = np.zeros(n_steps)
         vf_shadows_right = np.zeros(n_steps)
         for i in range(n_shadows):
@@ -169,12 +172,39 @@ class VFCalculator(object):
             vf_shadows = np.where(tilted_to_left, vf_shadows_left,
                                   vf_shadows_right)
 
+        # Calculate length of obstructions
+        highest_pt_seg = segment.highest_point
+        lowest_pt_seg = segment.lowest_point
+        # Calculate angles to normal
+        l_obstr_left = []
+        l_obstr_right = []
+        for i in range(n_shadows):
+            shadow_left = shadows_coords_left[i]
+            shadow_right = shadows_coords_right[i]
+            alpha_left = np.arctan2(highest_pt_seg.y - shadow_left.b1.y,
+                                    highest_pt_seg.x - shadow_left.b1.x)
+            alpha_right = np.arctan2(shadow_right.b2.y - highest_pt_seg.y,
+                                     shadow_right.b2.x - highest_pt_seg.x)
+            l_left = self.vf_ts_methods.length_obstr_left(
+                alpha_left, rotation_vec, distance, segment_length,
+                tilted_to_left=tilted_to_left)
+            l_right = self.vf_ts_methods.length_obstr_right(
+                alpha_right, rotation_vec, distance, segment_length,
+                tilted_to_left=tilted_to_left)
+            l_obstr_left.append(l_left)
+            l_obstr_right.append(l_right)
+
+        print(l_obstr_left)
+        print(l_obstr_right)
+
         # return all timeseries view factors
         view_factors = {
-            'to_gnd_shadows': vf_shadows,
-            'to_gnd_obstructions': 0.,
-            'to_gnd': 0.,
+            'to_full_gnd_shadows': vf_shadows,
+            'to_gnd_shadow_obstrx': 0.,
+            'to_obstructed_gnd_shadows': 0.,
+            'to_gnd_seen': 0.,
             'to_gnd_illum': 0.,
+            'to_gnd_total': 0.,
             'to_pvrow_shaded': 0.,
             'to_pvrow_illum': 0.,
             'to_sky': 0.
@@ -201,3 +231,53 @@ class VFTsMethods(object):
 
     def distance(self, b1, b2):
         return np.sqrt((b2.y - b1.y)**2 + (b2.x - b1.x)**2)
+
+    @staticmethod
+    def length_obstr_left(alpha, theta, d, w, tilted_to_left=None):
+        if tilted_to_left is None:
+            tilted_to_left = theta >= 0
+        # TODO: speed boost, pass as argument
+        theta_plus = np.deg2rad(90. + theta)
+        theta_minus = np.deg2rad(90. - theta)
+        # There can be numerical instabilities with the tan function
+        # so make sure the beta values don't go beyond thresholds
+        beta_plus = np.minimum(theta_minus + alpha,
+                               np.pi / 2. - DISTANCE_TOLERANCE)
+        beta_minus = np.maximum(theta_plus - alpha,
+                                -np.pi / 2. + DISTANCE_TOLERANCE)
+
+        # Calculate shaded length in cases where tilted left and right
+        l_plus = np.maximum(
+            0, w + d * (np.sin(theta_minus)
+                        - np.cos(theta_minus) * np.tan(beta_plus)))
+        l_minus = np.maximum(
+            0, w - d * (np.sin(theta_plus)
+                        - np.cos(theta_plus) * np.tan(beta_minus)))
+        # Aggregate calculations
+        length_left = np.where(tilted_to_left, l_plus, l_minus)
+        return length_left
+
+    @staticmethod
+    def length_obstr_right(alpha, theta, d, w, tilted_to_left=None):
+        if tilted_to_left is None:
+            tilted_to_left = theta >= 0
+        # TODO: speed boost, pass as argument
+        theta_plus = np.deg2rad(90. + theta)
+        theta_minus = np.deg2rad(90. - theta)
+        # There can be numerical instabilities with the tan function
+        # so make sure the beta values don't go beyond thresholds
+        beta_plus = np.maximum(theta_minus + alpha,
+                               -np.pi / 2. + DISTANCE_TOLERANCE)
+        beta_minus = np.minimum(theta_plus - alpha,
+                                np.pi / 2 - DISTANCE_TOLERANCE)
+
+        # Calculate shaded length in cases where tilted left and right
+        l_plus = np.maximum(
+            0, w - d * (np.sin(theta_minus)
+                        - np.cos(theta_minus) * np.tan(beta_plus)))
+        l_minus = np.maximum(
+            0, w + d * (np.sin(theta_plus)
+                        - np.cos(theta_plus) * np.tan(beta_minus)))
+        # Aggregate calculations
+        length_right = np.where(tilted_to_left, l_plus, l_minus)
+        return length_right

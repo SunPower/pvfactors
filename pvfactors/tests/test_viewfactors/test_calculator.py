@@ -1,4 +1,4 @@
-from pvfactors.viewfactors.calculator import VFCalculator
+from pvfactors.viewfactors.calculator import VFCalculator, VFTsMethods
 from pvfactors.geometry import OrderedPVArray
 from pvfactors.irradiance import HybridPerezOrdered
 from pvfactors.engine import PVEngine
@@ -74,21 +74,21 @@ def test_vf_matrix_subset_calculation(params):
 
 def test_ts_view_factors():
 
+    print('\n')
     # Create base params
     params = {
         'axis_azimuth': 0,
         'n_pvrows': 3,
-        'pvrow_height': 2.5,
+        'pvrow_height': 1.5,
         'pvrow_width': 2.,
-        'gcr': 0.4,
-        'cut': {0: {'front': 5}, 1: {'back': 3}}
+        'gcr': 0.7
     }
 
     # Timeseries parameters for testing
-    solar_zenith = np.array([20., 45.])
-    solar_azimuth = np.array([70., 200.])
-    surface_tilt = np.array([10., 70.])
-    surface_azimuth = np.array([90., 270.])
+    solar_zenith = np.array([45., 60., 45., 60.])
+    solar_azimuth = np.array([90., 90., 270., 270.])
+    surface_tilt = np.array([40., 40., 40., 40.])
+    surface_azimuth = np.array([90., 270., 90., 270.])
 
     # Plot simple ordered pv array
     pvarray = OrderedPVArray(**params)
@@ -98,13 +98,56 @@ def test_ts_view_factors():
     # Calculate view factors
     pvrow_idx = 1
     side = 'back'
-    segment_idx = 1
+    segment_idx = 0
     ts_pvrows = pvarray.ts_pvrows
     ts_ground = pvarray.ts_ground
     rotation_vec = pvarray.rotation_vec
     calculator = VFCalculator()
     view_factors = calculator.get_ts_view_factors_pvrow(
-        pvrow_idx, side, segment_idx, ts_pvrows, ts_ground, rotation_vec
+        pvrow_idx, side, segment_idx, ts_pvrows, ts_ground, rotation_vec,
+        pvarray.distance
     )
 
-    print(view_factors)
+    # print(view_factors)
+
+    # import os
+    # is_ci = os.environ.get('CI', False)
+
+    # if not is_ci:
+    #     import matplotlib.pyplot as plt
+
+    #     # Plot it at ts 0
+    #     f, ax = plt.subplots()
+    #     pvarray.plot_at_idx(2, ax)
+    #     # ax.set_xlim(-1, 6)
+    #     plt.show()
+
+    #     # Plot it at ts 0
+    #     f, ax = plt.subplots()
+    #     pvarray.plot_at_idx(3, ax, merge_if_flag_overlap=False)
+    #     # ax.set_xlim(-1, 6)
+    #     plt.show()
+
+
+def test_length_obstr_left():
+    alpha = np.array([0.40488507262489587, 0.31533385191713814,
+                      1.2490068330646151, 0.6356138841900152])
+    theta = np.array([-40., 40., -40., 40.])
+    d = 2.857142857142857
+    w = 2.
+    length = VFTsMethods.length_obstr_left(alpha, theta, d, w)
+
+    expected_length = np.array([0.7390748775279945, 0., 0., 0.])
+    np.testing.assert_allclose(length, expected_length)
+
+
+def test_length_obstr_right():
+    alpha = np.array([-0.698131701, -2.443460953,
+                      -0.698131701, -0.651525961])
+    theta = np.array([-40., 40., -40., 40.])
+    d = 2.857142857142857
+    w = 2.
+    length = VFTsMethods.length_obstr_right(alpha, theta, d, w)
+
+    expected_length = np.array([0., 0., 0., 0.224183046])
+    np.testing.assert_allclose(length, expected_length)
