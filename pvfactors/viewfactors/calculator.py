@@ -167,8 +167,7 @@ class VFCalculator(object):
             vf_obstructed_shadow = (
                 self.vf_ts_methods.calculate_vf_to_shadow_obstruction_hottel(
                     segment, pvrow_idx, n_shadows, n_steps, tilted_to_left,
-                    ts_pvrows, shadow_left, shadow_right, segment_length
-                ))
+                    ts_pvrows, shadow_left, shadow_right, segment_length))
             list_vf_to_obstructed_gnd_shadows.append(vf_obstructed_shadow)
         list_vf_to_obstructed_gnd_shadows = np.array(
             list_vf_to_obstructed_gnd_shadows)
@@ -178,12 +177,17 @@ class VFCalculator(object):
 
         # Calculate view factors to whole ground
         vf_gnd_total = self.vf_ts_methods.calculate_vf_to_gnd(
-            segment, pvrow_idx, n_shadows, n_steps, ts_ground.y_ground,
+            segment_coords, pvrow_idx, n_shadows, n_steps, ts_ground.y_ground,
             ts_ground.cut_point_coords[pvrow_idx], segment_length,
             tilted_to_left, ts_pvrows)
 
-        # Calcualte view factors to illuminated ground
+        # Calculate view factors to illuminated ground
         vf_illum_gnd = vf_gnd_total - vf_shaded_gnd
+
+        # Calculate view factors to complete pv rows
+        vf_pvrow_total = self.vf_ts_methods.calculate_vf_to_pvrow(
+            segment_coords, pvrow_idx, n_shadows, n_steps, ts_pvrows,
+            segment_length, tilted_to_left)
 
         # return all timeseries view factors
         view_factors = {
@@ -191,6 +195,7 @@ class VFCalculator(object):
             'to_gnd_shaded': vf_shaded_gnd,
             'to_gnd_illum': vf_illum_gnd,
             'to_gnd_total': vf_gnd_total,
+            'to_pvrow_total': vf_pvrow_total,
             'to_pvrow_shaded': 0.,
             'to_pvrow_illum': 0.,
             'to_sky': 0.
@@ -204,13 +209,31 @@ class VFTsMethods(object):
     def __init__(self):
         pass
 
-    def calculate_vf_to_gnd(self, segment, pvrow_idx, n_pvrows, n_steps,
+    def calculate_vf_to_pvrow(self, segment_coords, pvrow_idx, n_pvrows,
+                              n_steps, ts_pvrows, segment_width,
+                              tilted_to_left):
+        if pvrow_idx == 0:
+            vf_left_pvrow = np.zeros(n_steps)
+        else:
+            left_ts_pvrow_coords = ts_pvrows[pvrow_idx - 1].full_pvrow_coords
+            vf_left_pvrow = self.vf_surface_to_surface(
+                segment_coords, left_ts_pvrow_coords, segment_width)
+
+        if pvrow_idx == (n_pvrows - 1):
+            vf_right_pvrow = np.zeros(n_steps)
+        else:
+            right_ts_pvrow_coords = ts_pvrows[pvrow_idx + 1].full_pvrow_coords
+            vf_right_pvrow = self.vf_surface_to_surface(
+                segment_coords, right_ts_pvrow_coords, segment_width)
+
+        vf_to_pvrow = np.where(tilted_to_left, vf_right_pvrow, vf_left_pvrow)
+
+        return vf_to_pvrow
+
+    def calculate_vf_to_gnd(self, segment_coords, pvrow_idx, n_pvrows, n_steps,
                             y_ground, cut_point_coords, segment_width,
                             tilted_to_left, ts_pvrows):
 
-        # import pdb
-        # pdb.set_trace()
-        segment_coords = segment.coords
         pvrow_lowest_pt = ts_pvrows[pvrow_idx].full_pvrow_coords.lowest_point
         if pvrow_idx == 0:
             coords_left_gnd = TsLineCoords(
