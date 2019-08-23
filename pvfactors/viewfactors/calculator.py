@@ -173,12 +173,24 @@ class VFCalculator(object):
         list_vf_to_obstructed_gnd_shadows = np.array(
             list_vf_to_obstructed_gnd_shadows)
 
+        # Calculate view factors to shaded ground
+        vf_shaded_gnd = np.sum(list_vf_to_obstructed_gnd_shadows, axis=0)
+
+        # Calculate view factors to whole ground
+        vf_gnd_total = self.vf_ts_methods.calculate_vf_to_gnd(
+            segment, pvrow_idx, n_shadows, n_steps, ts_ground.y_ground,
+            ts_ground.cut_point_coords[pvrow_idx], segment_length,
+            tilted_to_left, ts_pvrows)
+
+        # Calcualte view factors to illuminated ground
+        vf_illum_gnd = vf_gnd_total - vf_shaded_gnd
+
         # return all timeseries view factors
         view_factors = {
-            'to_obstructed_gnd_shadows': list_vf_to_obstructed_gnd_shadows,
-            'to_gnd_seen': 0.,
-            'to_gnd_illum': 0.,
-            'to_gnd_total': 0.,
+            'to_each_gnd_shadow': list_vf_to_obstructed_gnd_shadows,
+            'to_gnd_shaded': vf_shaded_gnd,
+            'to_gnd_illum': vf_illum_gnd,
+            'to_gnd_total': vf_gnd_total,
             'to_pvrow_shaded': 0.,
             'to_pvrow_illum': 0.,
             'to_sky': 0.
@@ -191,6 +203,46 @@ class VFTsMethods(object):
 
     def __init__(self):
         pass
+
+    def calculate_vf_to_gnd(self, segment, pvrow_idx, n_pvrows, n_steps,
+                            y_ground, cut_point_coords, segment_width,
+                            tilted_to_left, ts_pvrows):
+
+        # import pdb
+        # pdb.set_trace()
+        segment_coords = segment.coords
+        pvrow_lowest_pt = ts_pvrows[pvrow_idx].full_pvrow_coords.lowest_point
+        if pvrow_idx == 0:
+            coords_left_gnd = TsLineCoords(
+                TsPointCoords(MIN_X_GROUND * np.ones(n_steps), y_ground),
+                TsPointCoords(np.minimum(MAX_X_GROUND, cut_point_coords.x),
+                              y_ground))
+            vf_left_ground = self.vf_surface_to_surface(
+                segment_coords, coords_left_gnd, segment_width)
+        else:
+            left_pt_neighbor = \
+                ts_pvrows[pvrow_idx - 1].full_pvrow_coords.lowest_point
+            coords_gnd_proxy = TsLineCoords(left_pt_neighbor, pvrow_lowest_pt)
+            vf_left_ground = self.vf_surface_to_surface(
+                segment_coords, coords_gnd_proxy, segment_width)
+
+        if pvrow_idx == (n_pvrows - 1):
+            coords_right_gnd = TsLineCoords(
+                TsPointCoords(np.maximum(MIN_X_GROUND, cut_point_coords.x),
+                              y_ground),
+                TsPointCoords(MAX_X_GROUND * np.ones(n_steps), y_ground))
+            vf_right_ground = self.vf_surface_to_surface(
+                segment_coords, coords_right_gnd, segment_width)
+        else:
+            right_pt_neighbor = \
+                ts_pvrows[pvrow_idx + 1].full_pvrow_coords.lowest_point
+            coords_gnd_proxy = TsLineCoords(pvrow_lowest_pt, right_pt_neighbor)
+            vf_right_ground = self.vf_surface_to_surface(
+                segment_coords, coords_gnd_proxy, segment_width)
+
+        vf_ground = np.where(tilted_to_left, vf_right_ground, vf_left_ground)
+
+        return vf_ground
 
     def calculate_vf_to_shadow_obstruction_hottel(
             self, segment, pvrow_idx, n_shadows, n_steps,

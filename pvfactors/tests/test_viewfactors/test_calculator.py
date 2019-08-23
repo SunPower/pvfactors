@@ -110,7 +110,16 @@ def test_ts_view_factors():
         [0.053677, -0., 0.04077, 0.392779, 0.089299],
         [0.44436, -0., 0.004818, 0.323486, 0.5],
         [0.231492, 0.170844, -0., 0.030375, 0.089299]])
-
+    expected_vf_to_gnd_total = np.array(
+        [0.752735, 0.752735, 0.752735, 0.752735, 1.])
+    expected_vf_to_gnd_illum = np.array(
+        [0.023205, 0.581891, 0.707147, 0.006094, 0.321402])
     np.testing.assert_almost_equal(expected_vf_to_obstructed_shadows,
-                                   view_factors['to_obstructed_gnd_shadows'],
+                                   view_factors['to_each_gnd_shadow'],
+                                   decimal=6)
+    np.testing.assert_almost_equal(expected_vf_to_gnd_total,
+                                   view_factors['to_gnd_total'],
+                                   decimal=6)
+    np.testing.assert_almost_equal(expected_vf_to_gnd_illum,
+                                   view_factors['to_gnd_illum'],
                                    decimal=6)
