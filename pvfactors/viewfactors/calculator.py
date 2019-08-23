@@ -140,11 +140,11 @@ class VFCalculator(object):
         view_factors[:-1, -1] = 1. - np.sum(view_factors[:-1, :-1], axis=1)
         return view_factors
 
-    def get_ts_view_factors_pvrow(
-            self, pvrow_idx, segment_idx, ts_pvrows, ts_ground,
-            rotation_vec, distance, pvrow_width):
+    def get_vf_ts_pvrow_segment(self, pvrow_idx, segment_idx, ts_pvrows,
+                                ts_ground, rotation_vec, pvrow_width):
+        """Calculate timeseries view factors of pvrow segment to all other
+        elements of the PV array."""
 
-        # TODO: check flat case
         tilted_to_left = rotation_vec > 0
         n_shadows = len(ts_pvrows)
         n_steps = len(rotation_vec)
@@ -210,9 +210,9 @@ class VFCalculator(object):
 
 
 class VFTsMethods(object):
-
-    def __init__(self):
-        pass
+    """This class contains all the methods used to calculate timeseries
+    view factors from PV row segments to all the other elements of a PV
+    array."""
 
     def calculate_vf_to_pvrow(self, segment_coords, pvrow_idx, n_pvrows,
                               n_steps, ts_pvrows, segment_width,
@@ -224,14 +224,14 @@ class VFTsMethods(object):
             # Get vf to full pvrow
             left_ts_pvrow = ts_pvrows[pvrow_idx - 1]
             left_ts_pvrow_coords = left_ts_pvrow.full_pvrow_coords
-            vf_left_pvrow = self.vf_surface_to_surface(
+            vf_left_pvrow = self._vf_surface_to_surface(
                 segment_coords, left_ts_pvrow_coords, segment_width)
             # Get vf to shaded pvrow
             shaded_coords = self._create_shaded_side_coords(
                 left_ts_pvrow.xy_center, pvrow_width,
                 left_ts_pvrow.front.shaded_length, tilted_to_left,
                 rotation_vec, left_ts_pvrow.full_pvrow_coords.lowest_point)
-            vf_left_shaded_pvrow = self.vf_surface_to_surface(
+            vf_left_shaded_pvrow = self._vf_surface_to_surface(
                 segment_coords, shaded_coords, segment_width)
 
         if pvrow_idx == (n_pvrows - 1):
@@ -241,14 +241,14 @@ class VFTsMethods(object):
             # Get vf to full pvrow
             right_ts_pvrow = ts_pvrows[pvrow_idx + 1]
             right_ts_pvrow_coords = right_ts_pvrow.full_pvrow_coords
-            vf_right_pvrow = self.vf_surface_to_surface(
+            vf_right_pvrow = self._vf_surface_to_surface(
                 segment_coords, right_ts_pvrow_coords, segment_width)
             # Get vf to shaded pvrow
             shaded_coords = self._create_shaded_side_coords(
                 right_ts_pvrow.xy_center, pvrow_width,
                 right_ts_pvrow.front.shaded_length, tilted_to_left,
                 rotation_vec, right_ts_pvrow.full_pvrow_coords.lowest_point)
-            vf_right_shaded_pvrow = self.vf_surface_to_surface(
+            vf_right_shaded_pvrow = self._vf_surface_to_surface(
                 segment_coords, shaded_coords, segment_width)
 
         vf_to_pvrow = np.where(tilted_to_left, vf_right_pvrow, vf_left_pvrow)
@@ -256,6 +256,141 @@ class VFTsMethods(object):
                                       vf_left_shaded_pvrow)
 
         return vf_to_pvrow, vf_to_shaded_pvrow
+
+    def calculate_vf_to_gnd(self, segment_coords, pvrow_idx, n_pvrows, n_steps,
+                            y_ground, cut_point_coords, segment_width,
+                            tilted_to_left, ts_pvrows):
+
+        pvrow_lowest_pt = ts_pvrows[pvrow_idx].full_pvrow_coords.lowest_point
+        if pvrow_idx == 0:
+            coords_left_gnd = TsLineCoords(
+                TsPointCoords(MIN_X_GROUND * np.ones(n_steps), y_ground),
+                TsPointCoords(np.minimum(MAX_X_GROUND, cut_point_coords.x),
+                              y_ground))
+            vf_left_ground = self._vf_surface_to_surface(
+                segment_coords, coords_left_gnd, segment_width)
+        else:
+            left_pt_neighbor = \
+                ts_pvrows[pvrow_idx - 1].full_pvrow_coords.lowest_point
+            coords_gnd_proxy = TsLineCoords(left_pt_neighbor, pvrow_lowest_pt)
+            vf_left_ground = self._vf_surface_to_surface(
+                segment_coords, coords_gnd_proxy, segment_width)
+
+        if pvrow_idx == (n_pvrows - 1):
+            coords_right_gnd = TsLineCoords(
+                TsPointCoords(np.maximum(MIN_X_GROUND, cut_point_coords.x),
+                              y_ground),
+                TsPointCoords(MAX_X_GROUND * np.ones(n_steps), y_ground))
+            vf_right_ground = self._vf_surface_to_surface(
+                segment_coords, coords_right_gnd, segment_width)
+        else:
+            right_pt_neighbor = \
+                ts_pvrows[pvrow_idx + 1].full_pvrow_coords.lowest_point
+            coords_gnd_proxy = TsLineCoords(pvrow_lowest_pt, right_pt_neighbor)
+            vf_right_ground = self._vf_surface_to_surface(
+                segment_coords, coords_gnd_proxy, segment_width)
+
+        vf_ground = np.where(tilted_to_left, vf_right_ground, vf_left_ground)
+
+        return vf_ground
+
+    def calculate_vf_to_shadow_obstruction_hottel(
+            self, segment, pvrow_idx, n_shadows, n_steps,
+            tilted_to_left, ts_pvrows,
+            shadow_left, shadow_right, segment_length):
+
+        segment_lowest_pt = segment.lowest_point
+        segment_highest_pt = segment.highest_point
+        # Calculate view factors to left shadows
+        if pvrow_idx == 0:
+            vf_to_left_shadow = np.zeros(n_steps)
+        else:
+            pt_obstr = ts_pvrows[pvrow_idx - 1].full_pvrow_coords.lowest_point
+            is_shadow_left = True
+            vf_to_left_shadow = self._vf_hottel_shadows(
+                segment_highest_pt, segment_lowest_pt,
+                shadow_left.b1, shadow_left.b2, pt_obstr, segment_length,
+                is_shadow_left)
+
+        # Calculate view factors to right shadows
+        if pvrow_idx == n_shadows - 1:
+            vf_to_right_shadow = np.zeros(n_steps)
+        else:
+            pt_obstr = ts_pvrows[pvrow_idx + 1].full_pvrow_coords.lowest_point
+            is_shadow_left = False
+            vf_to_right_shadow = self._vf_hottel_shadows(
+                segment_highest_pt, segment_lowest_pt,
+                shadow_right.b1, shadow_right.b2, pt_obstr, segment_length,
+                is_shadow_left)
+
+        # Filter since we're considering the back surface only
+        vf_to_shadow = np.where(tilted_to_left, vf_to_right_shadow,
+                                vf_to_left_shadow)
+
+        return vf_to_shadow
+
+    def _vf_hottel_shadows(self, high_pt_pv, low_pt_pv, left_pt_gnd,
+                           right_pt_gnd, obstr_pt, width, shadow_is_left):
+
+        if shadow_is_left:
+            l1 = self._hottel_string_length(high_pt_pv, left_pt_gnd, obstr_pt,
+                                            shadow_is_left)
+            l2 = self._hottel_string_length(low_pt_pv, right_pt_gnd, obstr_pt,
+                                            shadow_is_left)
+            d1 = self._hottel_string_length(high_pt_pv, right_pt_gnd, obstr_pt,
+                                            shadow_is_left)
+            d2 = self._hottel_string_length(low_pt_pv, left_pt_gnd, obstr_pt,
+                                            shadow_is_left)
+        else:
+            l1 = self._hottel_string_length(high_pt_pv, right_pt_gnd, obstr_pt,
+                                            shadow_is_left)
+            l2 = self._hottel_string_length(low_pt_pv, left_pt_gnd, obstr_pt,
+                                            shadow_is_left)
+            d1 = self._hottel_string_length(high_pt_pv, left_pt_gnd, obstr_pt,
+                                            shadow_is_left)
+            d2 = self._hottel_string_length(low_pt_pv, right_pt_gnd, obstr_pt,
+                                            shadow_is_left)
+        vf_1_to_2 = (d1 + d2 - l1 - l2) / (2. * width)
+
+        return vf_1_to_2
+
+    def _hottel_string_length(self, pt_pv, pt_gnd, pt_obstr, shadow_is_left):
+        l_pv = self._distance(pt_pv, pt_gnd)
+        if pt_obstr is None:
+            l = l_pv
+        else:
+            alpha_pv = self._angle_with_x_axis(pt_gnd, pt_pv)
+            alpha_ob = self._angle_with_x_axis(pt_gnd, pt_obstr)
+            if shadow_is_left:
+                is_obstructing = alpha_pv > alpha_ob
+            else:
+                is_obstructing = alpha_pv < alpha_ob
+            l_obstr = (self._distance(pt_gnd, pt_obstr)
+                       + self._distance(pt_obstr, pt_pv))
+            l = np.where(is_obstructing, l_obstr, l_pv)
+        return l
+
+    def _vf_surface_to_surface(self, line_1, line_2, width_1):
+        """Calculate view factors between timeseries line coords"""
+        length_1 = self._distance(line_1.b1, line_2.b1)
+        length_2 = self._distance(line_1.b2, line_2.b2)
+        length_3 = self._distance(line_1.b1, line_2.b2)
+        length_4 = self._distance(line_1.b2, line_2.b1)
+        sum_1 = length_1 + length_2
+        sum_2 = length_3 + length_4
+        vf_1_to_2 = np.abs(sum_2 - sum_1) / (2. * width_1)
+
+        return vf_1_to_2
+
+    @staticmethod
+    def _distance(b1, b2):
+        """Calculate distance between two timeseries points"""
+        return np.sqrt((b2.y - b1.y)**2 + (b2.x - b1.x)**2)
+
+    @staticmethod
+    def _angle_with_x_axis(pt_1, pt_2):
+        """Angle with x-axis of vector going from pt_1 to pt_2"""
+        return np.arctan2(pt_2.y - pt_1.y, pt_2.x - pt_1.x)
 
     @staticmethod
     def _create_shaded_side_coords(xy_center, width, shaded_length,
@@ -281,137 +416,3 @@ class VFTsMethods(object):
                                           side_lowest_pt)
 
         return side_shaded_coords
-
-    def calculate_vf_to_gnd(self, segment_coords, pvrow_idx, n_pvrows, n_steps,
-                            y_ground, cut_point_coords, segment_width,
-                            tilted_to_left, ts_pvrows):
-
-        pvrow_lowest_pt = ts_pvrows[pvrow_idx].full_pvrow_coords.lowest_point
-        if pvrow_idx == 0:
-            coords_left_gnd = TsLineCoords(
-                TsPointCoords(MIN_X_GROUND * np.ones(n_steps), y_ground),
-                TsPointCoords(np.minimum(MAX_X_GROUND, cut_point_coords.x),
-                              y_ground))
-            vf_left_ground = self.vf_surface_to_surface(
-                segment_coords, coords_left_gnd, segment_width)
-        else:
-            left_pt_neighbor = \
-                ts_pvrows[pvrow_idx - 1].full_pvrow_coords.lowest_point
-            coords_gnd_proxy = TsLineCoords(left_pt_neighbor, pvrow_lowest_pt)
-            vf_left_ground = self.vf_surface_to_surface(
-                segment_coords, coords_gnd_proxy, segment_width)
-
-        if pvrow_idx == (n_pvrows - 1):
-            coords_right_gnd = TsLineCoords(
-                TsPointCoords(np.maximum(MIN_X_GROUND, cut_point_coords.x),
-                              y_ground),
-                TsPointCoords(MAX_X_GROUND * np.ones(n_steps), y_ground))
-            vf_right_ground = self.vf_surface_to_surface(
-                segment_coords, coords_right_gnd, segment_width)
-        else:
-            right_pt_neighbor = \
-                ts_pvrows[pvrow_idx + 1].full_pvrow_coords.lowest_point
-            coords_gnd_proxy = TsLineCoords(pvrow_lowest_pt, right_pt_neighbor)
-            vf_right_ground = self.vf_surface_to_surface(
-                segment_coords, coords_gnd_proxy, segment_width)
-
-        vf_ground = np.where(tilted_to_left, vf_right_ground, vf_left_ground)
-
-        return vf_ground
-
-    def calculate_vf_to_shadow_obstruction_hottel(
-            self, segment, pvrow_idx, n_shadows, n_steps,
-            tilted_to_left, ts_pvrows,
-            shadow_left, shadow_right, segment_length):
-
-        segment_lowest_pt = segment.lowest_point
-        segment_highest_pt = segment.highest_point
-        # Calculate view factors to left shadows
-        if pvrow_idx == 0:
-            vf_to_left_shadow = np.zeros(n_steps)
-        else:
-            pt_obstr = ts_pvrows[pvrow_idx - 1].full_pvrow_coords.lowest_point
-            is_shadow_left = True
-            vf_to_left_shadow = self.vf_hottel_shadows(
-                segment_highest_pt, segment_lowest_pt,
-                shadow_left.b1, shadow_left.b2, pt_obstr, segment_length,
-                is_shadow_left)
-
-        # Calculate view factors to right shadows
-        if pvrow_idx == n_shadows - 1:
-            vf_to_right_shadow = np.zeros(n_steps)
-        else:
-            pt_obstr = ts_pvrows[pvrow_idx + 1].full_pvrow_coords.lowest_point
-            is_shadow_left = False
-            vf_to_right_shadow = self.vf_hottel_shadows(
-                segment_highest_pt, segment_lowest_pt,
-                shadow_right.b1, shadow_right.b2, pt_obstr, segment_length,
-                is_shadow_left)
-
-        # Filter since we're considering the back surface only
-        vf_to_shadow = np.where(tilted_to_left, vf_to_right_shadow,
-                                vf_to_left_shadow)
-
-        return vf_to_shadow
-
-    def vf_hottel_shadows(self, high_pt_pv, low_pt_pv, left_pt_gnd,
-                          right_pt_gnd, obstr_pt, width, shadow_is_left):
-
-        if shadow_is_left:
-            l1 = self.hottel_string_length(high_pt_pv, left_pt_gnd, obstr_pt,
-                                           shadow_is_left)
-            l2 = self.hottel_string_length(low_pt_pv, right_pt_gnd, obstr_pt,
-                                           shadow_is_left)
-            d1 = self.hottel_string_length(high_pt_pv, right_pt_gnd, obstr_pt,
-                                           shadow_is_left)
-            d2 = self.hottel_string_length(low_pt_pv, left_pt_gnd, obstr_pt,
-                                           shadow_is_left)
-        else:
-            l1 = self.hottel_string_length(high_pt_pv, right_pt_gnd, obstr_pt,
-                                           shadow_is_left)
-            l2 = self.hottel_string_length(low_pt_pv, left_pt_gnd, obstr_pt,
-                                           shadow_is_left)
-            d1 = self.hottel_string_length(high_pt_pv, left_pt_gnd, obstr_pt,
-                                           shadow_is_left)
-            d2 = self.hottel_string_length(low_pt_pv, right_pt_gnd, obstr_pt,
-                                           shadow_is_left)
-        vf_1_to_2 = (d1 + d2 - l1 - l2) / (2. * width)
-
-        return vf_1_to_2
-
-    def hottel_string_length(self, pt_pv, pt_gnd, pt_obstr, shadow_is_left):
-        l_pv = self.distance(pt_pv, pt_gnd)
-        if pt_obstr is None:
-            l = l_pv
-        else:
-            alpha_pv = self.angle_with_x_axis(pt_gnd, pt_pv)
-            alpha_ob = self.angle_with_x_axis(pt_gnd, pt_obstr)
-            if shadow_is_left:
-                is_obstructing = alpha_pv > alpha_ob
-            else:
-                is_obstructing = alpha_pv < alpha_ob
-            l_obstr = (self.distance(pt_gnd, pt_obstr)
-                       + self.distance(pt_obstr, pt_pv))
-            l = np.where(is_obstructing, l_obstr, l_pv)
-        return l
-
-    def vf_surface_to_surface(self, line_1, line_2, width_1):
-        """Calculate view factors between timeseries line coords"""
-        length_1 = self.distance(line_1.b1, line_2.b1)
-        length_2 = self.distance(line_1.b2, line_2.b2)
-        length_3 = self.distance(line_1.b1, line_2.b2)
-        length_4 = self.distance(line_1.b2, line_2.b1)
-        sum_1 = length_1 + length_2
-        sum_2 = length_3 + length_4
-        vf_1_to_2 = np.abs(sum_2 - sum_1) / (2. * width_1)
-
-        return vf_1_to_2
-
-    @staticmethod
-    def distance(b1, b2):
-        return np.sqrt((b2.y - b1.y)**2 + (b2.x - b1.x)**2)
-
-    @staticmethod
-    def angle_with_x_axis(pt_1, pt_2):
-        """Angle with x-axis of vector going from pt_1 to pt_2"""
-        return np.arctan2(pt_2.y - pt_1.y, pt_2.x - pt_1.x)

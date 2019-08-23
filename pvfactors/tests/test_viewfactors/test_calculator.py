@@ -101,10 +101,9 @@ def test_ts_view_factors():
     ts_ground = pvarray.ts_ground
     rotation_vec = pvarray.rotation_vec
     calculator = VFCalculator()
-    view_factors = calculator.get_ts_view_factors_pvrow(
+    view_factors = calculator.get_vf_ts_pvrow_segment(
         pvrow_idx, segment_idx, ts_pvrows, ts_ground, rotation_vec,
-        pvarray.distance, pvarray.width
-    )
+        pvarray.width)
 
     expected_vf_to_obstructed_shadows = np.array([
         [0.053677, -0., 0.04077, 0.392779, 0.089299],
