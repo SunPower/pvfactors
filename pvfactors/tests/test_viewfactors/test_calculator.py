@@ -1,4 +1,4 @@
-from pvfactors.viewfactors.calculator import VFCalculator, VFTsMethods
+from pvfactors.viewfactors.calculator import VFCalculator
 from pvfactors.geometry import OrderedPVArray
 from pvfactors.irradiance import HybridPerezOrdered
 from pvfactors.engine import PVEngine
@@ -74,7 +74,6 @@ def test_vf_matrix_subset_calculation(params):
 
 def test_ts_view_factors():
 
-    print('\n')
     # Create base params
     params = {
         'axis_azimuth': 0,
@@ -107,46 +106,11 @@ def test_ts_view_factors():
         pvarray.distance, pvarray.width
     )
 
-    print(view_factors)
+    expected_vf_to_obstructed_shadows = np.array([
+        [0.053677, -0., 0.04077, 0.392779],
+        [0.44436, -0., 0.004818, 0.323486],
+        [0.231492, 0.170844, -0., 0.030375]])
 
-    # import os
-    # is_ci = os.environ.get('CI', False)
-
-    # if not is_ci:
-    #     import matplotlib.pyplot as plt
-
-    #     # Plot it at ts 0
-    #     f, ax = plt.subplots()
-    #     pvarray.plot_at_idx(2, ax)
-    #     # ax.set_xlim(-1, 6)
-    #     plt.show()
-
-    #     # Plot it at ts 0
-    #     f, ax = plt.subplots()
-    #     pvarray.plot_at_idx(3, ax, merge_if_flag_overlap=False)
-    #     # ax.set_xlim(-1, 6)
-    #     plt.show()
-
-
-def test_length_obstr_left():
-    alpha = np.array([0.40488507262489587, 0.31533385191713814,
-                      1.2490068330646151, 0.6356138841900152])
-    theta = np.array([-40., 40., -40., 40.])
-    d = 2.857142857142857
-    w = 2.
-    length = VFTsMethods._length_obstr_left(alpha, theta, d, w)
-
-    expected_length = np.array([0.7390748775279945, 0., 0., 0.])
-    np.testing.assert_allclose(length, expected_length)
-
-
-def test_length_obstr_right():
-    alpha = np.array([-0.698131701, -2.443460953,
-                      -0.698131701, -0.651525961])
-    theta = np.array([-40., 40., -40., 40.])
-    d = 2.857142857142857
-    w = 2.
-    length = VFTsMethods._length_obstr_right(alpha, theta, d, w)
-
-    expected_length = np.array([0., 0., 0., 0.224183046])
-    np.testing.assert_allclose(length, expected_length)
+    np.testing.assert_almost_equal(expected_vf_to_obstructed_shadows,
+                                   view_factors['to_obstructed_gnd_shadows'],
+                                   decimal=6)
