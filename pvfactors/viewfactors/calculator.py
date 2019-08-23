@@ -159,21 +159,7 @@ class VFCalculator(object):
         shadows_coords_right = \
             ts_ground.shadow_coords_right_of_cut_point(pvrow_idx)
         # Calculate view factors to ground shadows
-        list_vf_to_full_gnd_shadows = []
         list_vf_to_obstructed_gnd_shadows = []
-        for i in range(n_shadows):
-            # full vfs to shadows
-            vf_full_shadow_left = self.vf_ts_methods.vf_surface_to_surface(
-                segment_coords, shadows_coords_left[i], segment_length)
-            vf_full_shadow_right = self.vf_ts_methods.vf_surface_to_surface(
-                segment_coords, shadows_coords_right[i], segment_length)
-            vf_full_shadow = np.where(tilted_to_left, vf_full_shadow_right,
-                                      vf_full_shadow_left)
-            list_vf_to_full_gnd_shadows.append(vf_full_shadow)
-        list_vf_to_full_gnd_shadows = np.array(list_vf_to_full_gnd_shadows)
-
-        # Calculate length of obstructions
-        list_vf_to_gnd_shadow_obstrx = []
         for i in range(n_shadows):
             shadow_left = shadows_coords_left[i]
             shadow_right = shadows_coords_right[i]
@@ -189,7 +175,6 @@ class VFCalculator(object):
 
         # return all timeseries view factors
         view_factors = {
-            'to_full_gnd_shadows': list_vf_to_full_gnd_shadows,
             'to_obstructed_gnd_shadows': list_vf_to_obstructed_gnd_shadows,
             'to_gnd_seen': 0.,
             'to_gnd_illum': 0.,
