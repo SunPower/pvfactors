@@ -142,7 +142,7 @@ class VFCalculator(object):
 
     def get_ts_view_factors_pvrow(
             self, pvrow_idx, segment_idx, ts_pvrows, ts_ground,
-            rotation_vec, distance, width):
+            rotation_vec, distance, pvrow_width):
 
         # TODO: check flat case
         tilted_to_left = rotation_vec > 0
@@ -184,10 +184,15 @@ class VFCalculator(object):
         # Calculate view factors to illuminated ground
         vf_illum_gnd = vf_gnd_total - vf_shaded_gnd
 
-        # Calculate view factors to complete pv rows
-        vf_pvrow_total = self.vf_ts_methods.calculate_vf_to_pvrow(
-            segment_coords, pvrow_idx, n_shadows, n_steps, ts_pvrows,
-            segment_length, tilted_to_left)
+        # Calculate view factors to pv rows
+        vf_pvrow_total, vf_pvrow_shaded = \
+            self.vf_ts_methods.calculate_vf_to_pvrow(
+                segment_coords, pvrow_idx, n_shadows, n_steps, ts_pvrows,
+                segment_length, tilted_to_left, pvrow_width, rotation_vec)
+        vf_pvrow_illum = vf_pvrow_total - vf_pvrow_shaded
+
+        # Calculate view factors to sky
+        vf_to_sky = 1. - vf_gnd_total - vf_pvrow_total
 
         # return all timeseries view factors
         view_factors = {
@@ -196,9 +201,9 @@ class VFCalculator(object):
             'to_gnd_illum': vf_illum_gnd,
             'to_gnd_total': vf_gnd_total,
             'to_pvrow_total': vf_pvrow_total,
-            'to_pvrow_shaded': 0.,
-            'to_pvrow_illum': 0.,
-            'to_sky': 0.
+            'to_pvrow_shaded': vf_pvrow_shaded,
+            'to_pvrow_illum': vf_pvrow_illum,
+            'to_sky': vf_to_sky
         }
 
         return view_factors
@@ -211,24 +216,71 @@ class VFTsMethods(object):
 
     def calculate_vf_to_pvrow(self, segment_coords, pvrow_idx, n_pvrows,
                               n_steps, ts_pvrows, segment_width,
-                              tilted_to_left):
+                              tilted_to_left, pvrow_width, rotation_vec):
         if pvrow_idx == 0:
             vf_left_pvrow = np.zeros(n_steps)
+            vf_left_shaded_pvrow = np.zeros(n_steps)
         else:
-            left_ts_pvrow_coords = ts_pvrows[pvrow_idx - 1].full_pvrow_coords
+            # Get vf to full pvrow
+            left_ts_pvrow = ts_pvrows[pvrow_idx - 1]
+            left_ts_pvrow_coords = left_ts_pvrow.full_pvrow_coords
             vf_left_pvrow = self.vf_surface_to_surface(
                 segment_coords, left_ts_pvrow_coords, segment_width)
+            # Get vf to shaded pvrow
+            shaded_coords = self._create_shaded_side_coords(
+                left_ts_pvrow.xy_center, pvrow_width,
+                left_ts_pvrow.front.shaded_length, tilted_to_left,
+                rotation_vec, left_ts_pvrow.full_pvrow_coords.lowest_point)
+            vf_left_shaded_pvrow = self.vf_surface_to_surface(
+                segment_coords, shaded_coords, segment_width)
 
         if pvrow_idx == (n_pvrows - 1):
             vf_right_pvrow = np.zeros(n_steps)
+            vf_right_shaded_pvrow = np.zeros(n_steps)
         else:
-            right_ts_pvrow_coords = ts_pvrows[pvrow_idx + 1].full_pvrow_coords
+            # Get vf to full pvrow
+            right_ts_pvrow = ts_pvrows[pvrow_idx + 1]
+            right_ts_pvrow_coords = right_ts_pvrow.full_pvrow_coords
             vf_right_pvrow = self.vf_surface_to_surface(
                 segment_coords, right_ts_pvrow_coords, segment_width)
+            # Get vf to shaded pvrow
+            shaded_coords = self._create_shaded_side_coords(
+                right_ts_pvrow.xy_center, pvrow_width,
+                right_ts_pvrow.front.shaded_length, tilted_to_left,
+                rotation_vec, right_ts_pvrow.full_pvrow_coords.lowest_point)
+            vf_right_shaded_pvrow = self.vf_surface_to_surface(
+                segment_coords, shaded_coords, segment_width)
 
         vf_to_pvrow = np.where(tilted_to_left, vf_right_pvrow, vf_left_pvrow)
+        vf_to_shaded_pvrow = np.where(tilted_to_left, vf_right_shaded_pvrow,
+                                      vf_left_shaded_pvrow)
 
-        return vf_to_pvrow
+        return vf_to_pvrow, vf_to_shaded_pvrow
+
+    @staticmethod
+    def _create_shaded_side_coords(xy_center, width, shaded_length,
+                                   mask_tilted_to_left, rotation_vec,
+                                   side_lowest_pt):
+
+        # Create Ts segments
+        x_center, y_center = xy_center
+        radius = width / 2.
+
+        # Calculate coords of shading point
+        r_shade = radius - shaded_length
+        x_sh = np.where(
+            mask_tilted_to_left,
+            r_shade * cosd(rotation_vec + 180.) + x_center,
+            r_shade * cosd(rotation_vec) + x_center)
+        y_sh = np.where(
+            mask_tilted_to_left,
+            r_shade * sind(rotation_vec + 180.) + y_center,
+            r_shade * sind(rotation_vec) + y_center)
+
+        side_shaded_coords = TsLineCoords(TsPointCoords(x_sh, y_sh),
+                                          side_lowest_pt)
+
+        return side_shaded_coords
 
     def calculate_vf_to_gnd(self, segment_coords, pvrow_idx, n_pvrows, n_steps,
                             y_ground, cut_point_coords, segment_width,
