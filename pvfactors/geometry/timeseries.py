@@ -486,7 +486,7 @@ class TsGround(object):
 
     def __init__(self, shadow_surfaces, surface_params=None,
                  flag_overlap=None, cut_point_coords=None,
-                 strings_are_uncrossed=None):
+                 strings_are_uncrossed=None, y_ground=None):
         """Initialize timeseries ground using list of timeseries surfaces
         for the ground shadows
 
@@ -508,6 +508,8 @@ class TsGround(object):
             b1 of shadows are uncrossed, for all shadows
             -- as in view factor calculation.
             (Default = None)
+        y_ground : float, optional
+            Y coordinate of flat ground [m] (Default=None)
         """
         self.shadows = shadow_surfaces
         self.surface_params = [] if surface_params is None else surface_params
@@ -515,6 +517,7 @@ class TsGround(object):
         self.cut_point_coords = [] if cut_point_coords is None \
             else cut_point_coords
         self.strings_are_uncrossed = strings_are_uncrossed
+        self.y_ground = y_ground
 
     @classmethod
     def from_ts_pvrows_and_angles(cls, list_ts_pvrows, alpha_vec, rotation_vec,
@@ -574,12 +577,13 @@ class TsGround(object):
         return cls.from_ordered_shadows_coords(
             ground_shadow_coords, flag_overlap=flag_overlap,
             cut_point_coords=cut_point_coords, surface_params=surface_params,
-            strings_are_uncrossed=strings_are_uncrossed)
+            strings_are_uncrossed=strings_are_uncrossed, y_ground=y_ground)
 
     @classmethod
     def from_ordered_shadows_coords(cls, shadow_coords, flag_overlap=None,
                                     surface_params=None, cut_point_coords=None,
-                                    strings_are_uncrossed=None):
+                                    strings_are_uncrossed=None,
+                                    y_ground=Y_GROUND):
         """Create timeseries ground from list of ground shadow coordinates.
 
         Parameters
@@ -600,6 +604,8 @@ class TsGround(object):
             b1 of shadows are uncrossed, for all shadows
             -- as in view factor calculation.
             (Default = None)
+        y_ground : float, optional
+            Fixed y coordinate of flat ground [m] (Default = Y_GROUND constant)
         """
 
         # Get cut point coords if any
@@ -619,7 +625,8 @@ class TsGround(object):
         return cls(ts_shadows, surface_params=surface_params,
                    flag_overlap=flag_overlap,
                    cut_point_coords=cut_point_coords,
-                   strings_are_uncrossed=strings_are_uncrossed)
+                   strings_are_uncrossed=strings_are_uncrossed,
+                   y_ground=y_ground)
 
     def at(self, idx, x_min_max=None, merge_if_flag_overlap=True,
            with_cut_points=True):
