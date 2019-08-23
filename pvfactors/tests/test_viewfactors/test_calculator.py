@@ -84,10 +84,10 @@ def test_ts_view_factors():
     }
 
     # Timeseries parameters for testing
-    solar_zenith = np.array([45., 60., 45., 60.])
-    solar_azimuth = np.array([90., 90., 270., 270.])
-    surface_tilt = np.array([40., 40., 40., 40.])
-    surface_azimuth = np.array([90., 270., 90., 270.])
+    solar_zenith = np.array([45., 60., 45., 60., 0.])
+    solar_azimuth = np.array([90., 90., 270., 270., 90.])
+    surface_tilt = np.array([40., 40., 40., 40., 0.])
+    surface_azimuth = np.array([90., 270., 90., 270., 90.])
 
     # Plot simple ordered pv array
     pvarray = OrderedPVArray(**params)
@@ -107,9 +107,9 @@ def test_ts_view_factors():
     )
 
     expected_vf_to_obstructed_shadows = np.array([
-        [0.053677, -0., 0.04077, 0.392779],
-        [0.44436, -0., 0.004818, 0.323486],
-        [0.231492, 0.170844, -0., 0.030375]])
+        [0.053677, -0., 0.04077, 0.392779, 0.089299],
+        [0.44436, -0., 0.004818, 0.323486, 0.5],
+        [0.231492, 0.170844, -0., 0.030375, 0.089299]])
 
     np.testing.assert_almost_equal(expected_vf_to_obstructed_shadows,
                                    view_factors['to_obstructed_gnd_shadows'],

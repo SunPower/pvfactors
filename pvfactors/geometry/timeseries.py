@@ -3,7 +3,8 @@ calculations."""
 
 import numpy as np
 from pvlib.tools import cosd, sind
-from pvfactors.config import DISTANCE_TOLERANCE, COLOR_DIC, Y_GROUND
+from pvfactors.config import \
+    DISTANCE_TOLERANCE, COLOR_DIC, Y_GROUND, MIN_X_GROUND, MAX_X_GROUND
 from pvfactors.geometry.base import (
     PVSurface, ShadeCollection, PVSegment, BaseSide)
 from pvfactors.geometry.pvrow import PVRow
@@ -702,7 +703,9 @@ class TsGround(object):
         for shadow in self.shadows:
             coords = deepcopy(shadow.coords)
             coords.b1.x = np.minimum(coords.b1.x, cut_pt_coords.x)
+            coords.b1.x = np.maximum(coords.b1.x, MIN_X_GROUND)
             coords.b2.x = np.minimum(coords.b2.x, cut_pt_coords.x)
+            coords.b2.x = np.maximum(coords.b2.x, MIN_X_GROUND)
             shadow_coords.append(coords)
         return shadow_coords
 
@@ -712,7 +715,9 @@ class TsGround(object):
         for shadow in self.shadows:
             coords = deepcopy(shadow.coords)
             coords.b1.x = np.maximum(coords.b1.x, cut_pt_coords.x)
+            coords.b1.x = np.minimum(coords.b1.x, MAX_X_GROUND)
             coords.b2.x = np.maximum(coords.b2.x, cut_pt_coords.x)
+            coords.b2.x = np.minimum(coords.b2.x, MAX_X_GROUND)
             shadow_coords.append(coords)
         return shadow_coords
 

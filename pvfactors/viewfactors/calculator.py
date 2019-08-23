@@ -145,7 +145,7 @@ class VFCalculator(object):
             rotation_vec, distance, width):
 
         # TODO: check flat case
-        tilted_to_left = rotation_vec >= 0
+        tilted_to_left = rotation_vec > 0
         n_shadows = len(ts_pvrows)
         n_steps = len(rotation_vec)
         segment = ts_pvrows[pvrow_idx].back.list_segments[segment_idx]
