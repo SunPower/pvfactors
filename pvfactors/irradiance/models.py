@@ -473,6 +473,41 @@ class HybridPerezOrdered(BaseModel):
 
         return horizon_shading_pct
 
+    def calculate_horizon_shading_pct_ts(self, ts_pvrows, ts_point_coords,
+                                         pvrow_idx, tilted_to_left,
+                                         is_back_side=True):
+        n_pvrows = len(ts_pvrows)
+        if pvrow_idx == 0:
+            shading_pct_left = np.zeros_like(tilted_to_left)
+        else:
+            high_pt_left = ts_pvrows[
+                pvrow_idx - 1].full_pvrow_coords.highest_point
+            shading_angle_left = np.rad2deg(np.abs(np.arctan(
+                high_pt_left.y - ts_point_coords.y,
+                high_pt_left.x - ts_point_coords.x)))
+            shading_pct_left = calculate_horizon_band_shading(
+                shading_angle_left, self.horizon_band_angle)
+
+        if pvrow_idx == (n_pvrows - 1):
+            shading_pct_right = np.zeros_like(tilted_to_left)
+        else:
+            high_pt_right = ts_pvrows[
+                pvrow_idx + 1].full_pvrow_coords.highest_point
+            shading_angle_right = np.rad2deg(np.abs(np.arctan(
+                high_pt_right.y - ts_point_coords.y,
+                high_pt_right.x - ts_point_coords.x)))
+            shading_pct_right = calculate_horizon_band_shading(
+                shading_angle_right, self.horizon_band_angle)
+
+        if is_back_side:
+            shading_pct = np.where(tilted_to_left, shading_pct_right,
+                                   shading_pct_left)
+        else:
+            shading_pct = np.where(tilted_to_left, shading_pct_left,
+                                   shading_pct_right)
+
+        return shading_pct
+
     def calculate_circumsolar_shading_pct(self, surface, idx_neighbor, pvrows,
                                           solar_2d_vector):
         """Model method to calculate circumsolar shading on surfaces of
@@ -510,8 +545,7 @@ class HybridPerezOrdered(BaseModel):
             shading_angle = np.abs(np.arctan(
                 (neighbor_point.y - centroid.y) /
                 (neighbor_point.x - centroid.x))) * 180. / np.pi
-            percentage_circ_angle_covered = \
-                (shading_angle - lower_angle_circumsolar) \
+            percentage_circ_angle_covered = (shading_angle - lower_angle_circumsolar) \
                 / self.circumsolar_angle * 100.
             circ_shading_pct = calculate_circumsolar_shading(
                 percentage_circ_angle_covered, model=self.circumsolar_model)
@@ -580,8 +614,7 @@ class HybridPerezOrdered(BaseModel):
         # Will be used for back surface adjustments: from Perez model
         # FIXME: pvlib clips the angle values to calculate vf -> adjust here
         vf_circumsolar_backsurface = cosd(aoi_back_pvrow) / cosd(solar_zenith)
-        poa_circumsolar_back = \
-            luminance_circumsolar * vf_circumsolar_backsurface
+        poa_circumsolar_back = luminance_circumsolar * vf_circumsolar_backsurface
 
         # Return only >0 values for poa_horizon
         poa_horizon = np.abs(poa_horizon)

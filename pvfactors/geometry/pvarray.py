@@ -68,6 +68,7 @@ class OrderedPVArray(BasePVArray):
         self.n_states = None
         self.has_direct_shading = None
         self.surface_tilt = None
+        self.rotation_vec = None
         self.shaded_length_front = None
         self.shaded_length_back = None
 
@@ -166,6 +167,8 @@ class OrderedPVArray(BasePVArray):
         # Calculate rotation angles
         rotation_vec = _get_rotation_from_tilt_azimuth(
             surface_azimuth, self.axis_azimuth, surface_tilt)
+        # Save rotation vector
+        self.rotation_vec = rotation_vec
 
         # Calculate the solar 2D vectors for all timestamps
         self.solar_2d_vectors = _get_solar_2d_vectors(

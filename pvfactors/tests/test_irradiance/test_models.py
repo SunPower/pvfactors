@@ -3,6 +3,7 @@ from pvfactors.irradiance import IsotropicOrdered, HybridPerezOrdered
 from pvfactors.geometry import OrderedPVArray, PVSurface, PVRow
 from pvlib.tools import cosd
 import numpy as np
+import pandas as pd
 import datetime as dt
 
 
@@ -500,3 +501,42 @@ def test_hybridperez_circ_shading():
         surf, idx_neighbor, pvrows, solar_2d_vector)
 
     np.testing.assert_almost_equal(circ_shading_pct, 71.5969299216)
+
+
+def test_hybridperez_transform_ts():
+
+    # Base params
+    params = {
+        'n_pvrows': 3,
+        'pvrow_height': 1,
+        'pvrow_width': 1,
+        'axis_azimuth': 0.,
+        'gcr': 0.3
+    }
+    # Timeseries inputs
+    df_inputs = pd.DataFrame({
+        'solar_zenith': [70., 80., 80., 70., 10.],
+        'solar_azimuth': [270., 90., 270., 90., 90.],
+        'surface_tilt': [20., 10., 20., 30., 0.],
+        'surface_azimuth': [270., 270., 90., 90., 90.]})
+
+    # Initialize and fit pv array
+    pvarray = OrderedPVArray.init_from_dict(params)
+    # Fit pv array to timeseries data
+    pvarray.fit(df_inputs.solar_zenith, df_inputs.solar_azimuth,
+                df_inputs.surface_tilt, df_inputs.surface_azimuth)
+
+    # irradiance model
+    model = HybridPerezOrdered(horizon_band_angle=15.)
+    pvrow_idx = 1
+    centroid_coords = (pvarray.ts_pvrows[pvrow_idx].back.list_segments[0]
+                       .coords.centroid)
+    tilted_to_left = pvarray.rotation_vec > 0
+    horizon_pct_shading = model.calculate_horizon_shading_pct_ts(
+        pvarray.ts_pvrows, centroid_coords, pvrow_idx, tilted_to_left,
+        is_back_side=True)
+
+    # Check that values stay consistent
+    expected_pct_shading = np.array(
+        [64.695221, 33.081398, 64.695221, 93.574956, 0.])
+    np.testing.assert_allclose(expected_pct_shading, horizon_pct_shading)

@@ -358,6 +358,27 @@ class TsSide(object):
             length += seg.shaded.length
         return length
 
+    @property
+    def length(self):
+        length = 0.
+        for seg in self.list_segments:
+            length += seg.length
+        return length
+
+    def get_param_weighted(self, param):
+        return self.get_param_ww(param) / self.length
+
+    def get_param_ww(self, param):
+        value = 0.
+        for seg in self.list_segments:
+            value += seg.get_param_ww(param)
+        return value
+
+    def update_params(self, new_dict):
+
+        for seg in self.list_segments:
+            seg.update_params(new_dict)
+
 
 class TsDualSegment(object):
     """A TsDualSegment is a timeseries segment that can only have
@@ -467,6 +488,22 @@ class TsDualSegment(object):
     def shaded_length(self):
         """Timeseries length of shaded part of segment."""
         return self.shaded.length
+
+    @property
+    def centroid(self):
+        return self.coords.centroid
+
+    def get_param_ww(self, param):
+
+        value = 0
+        value += self.illum.get_param(param) * self.illum.length
+        value += self.shaded.get_param(param) * self.shaded.length
+        return value
+
+    def update_params(self, new_dict):
+
+        self.illum.update_params(new_dict)
+        self.shaded.update_params(new_dict)
 
 
 class TsGround(object):
@@ -689,12 +726,13 @@ class TsSurface(object):
             Timeseries normal vectors of the side (Default = None)
         """
         self.coords = coords
-        self.surface_params = surface_params
+        self.surface_params = [] if surface_params is None else surface_params
         # TODO: the following should probably be turned into properties,
         # because if the coords change, they won't be altered. But speed...
         self.length = np.sqrt((coords.b2.y - coords.b1.y)**2
                               + (coords.b2.x - coords.b1.x)**2)
         self.n_vector = n_vector
+        self.params = dict.fromkeys(self.surface_params)
 
     def at(self, idx, shaded=None):
         """Generate a PV segment geometry for the desired index.
@@ -748,6 +786,18 @@ class TsSurface(object):
         """Timeseries coordinates of second boundary point"""
         return self.coords.b2
 
+    @property
+    def centroid(self):
+        return self.coords.centroid
+
+    def get_param(self, param):
+
+        return self.params[param]
+
+    def update_params(self, new_dict):
+
+        self.params.update(new_dict)
+
 
 class TsLineCoords(object):
     """Timeseries line coordinates class: will provide a helpful shapely-like
@@ -796,6 +846,19 @@ class TsLineCoords(object):
     def as_array(self):
         """Timeseries line coordinates as numpy array"""
         return np.array([[self.b1.x, self.b1.y], [self.b2.x, self.b2.y]])
+
+    @property
+    def centroid(self):
+        dy = self.b2.y - self.b1.y
+        dx = self.b2.x - self.b1.x
+        return TsPointCoords(self.b1.x + 0.5 * dx, self.b1.y + 0.5 * dy)
+
+    @property
+    def highest_point(self):
+        b1_is_higher = self.b1.y >= 0
+        x = np.where(b1_is_higher, self.b1.x, self.b2.x)
+        y = np.where(b1_is_higher, self.b1.y, self.b2.y)
+        return TsPointCoords(x, y)
 
 
 class TsPointCoords(object):
