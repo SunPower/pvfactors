@@ -327,7 +327,12 @@ class HybridPerezOrdered(BaseModel):
             ~front_is_illum, poa_circumsolar_back, 0.)
         self.horizon['front_pvrow'] = poa_horizon
         self.horizon['back_pvrow'] = poa_horizon
-        self.total_perez['front_pvrow'] = total_perez_front_pvrow
+        self.total_perez['front_illum_pvrow'] = total_perez_front_pvrow
+        self.total_perez['front_shaded_pvrow'] = (
+            total_perez_front_pvrow - self.direct['front_pvrow'])
+        self.total_perez['ground_shaded'] = DHI
+        self.total_perez['ground_illum'] = GHI
+        self.total_perez['sky'] = luminance_isotropic
 
     def transform(self, pvarray, idx=0):
         """Apply calculated irradiance values to PV array, as well as
@@ -362,14 +367,14 @@ class HybridPerezOrdered(BaseModel):
                  'horizon': 0.,
                  'rho': self.albedo[idx],
                  'inv_rho': 1. / self.albedo[idx],
-                 'total_perez': self.GHI[idx]})
+                 'total_perez': self.total_perez['ground_illum'][idx]})
             seg.shaded_collection.update_params(
                 {'direct': 0.,
                  'circumsolar': 0.,
                  'horizon': 0.,
                  'rho': self.albedo[idx],
                  'inv_rho': 1. / self.albedo[idx],
-                 'total_perez': self.DHI[idx]})
+                 'total_perez': self.total_perez['ground_shaded'][idx]})
 
         pvrows = pvarray.pvrows
         for idx_pvrow, pvrow in enumerate(pvarray.pvrows):
@@ -381,15 +386,16 @@ class HybridPerezOrdered(BaseModel):
                      'horizon': self.horizon['front_pvrow'][idx],
                      'rho': self.rho_front,
                      'inv_rho': 1. / self.rho_front,
-                     'total_perez': self.total_perez['front_pvrow'][idx]})
+                     'total_perez':
+                     self.total_perez['front_illum_pvrow'][idx]})
                 seg.shaded_collection.update_params(
                     {'direct': 0.,
                      'circumsolar': 0.,
                      'horizon': self.horizon['front_pvrow'][idx],
                      'rho': self.rho_front,
                      'inv_rho': 1. / self.rho_front,
-                     'total_perez': self.total_perez['front_pvrow'][idx] -
-                     self.direct['front_pvrow'][idx]})
+                     'total_perez':
+                     self.total_perez['front_shaded_pvrow'][idx]})
             # Back: apply back surface horizon shading
             for seg in pvrow.back.list_segments:
                 # Illum
