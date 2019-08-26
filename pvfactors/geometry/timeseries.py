@@ -472,10 +472,12 @@ class TsDualSegment(object):
 
     @property
     def highest_point(self):
+        """Timeseries point coordinates of highest point of segment"""
         return self.coords.highest_point
 
     @property
     def lowest_point(self):
+        """Timeseries point coordinates of lowest point of segment"""
         return self.coords.lowest_point
 
 
@@ -705,6 +707,21 @@ class TsGround(object):
                       with_index=False)
 
     def shadow_coords_left_of_cut_point(self, idx_cut_pt):
+        """Get coordinates of shadows located on the left side of the cut point
+        with given index. The coordinates of the shadows will be bounded
+        by the coordinates of the cut point and the default minimum
+        ground x values.
+
+        Parameters
+        ----------
+        idx_cut_pt : int
+            Index of the cut point of interest
+
+        Returns
+        -------
+        list of :py:class:`~pvfactors.geometry.timeseries.TsLineCoords`
+            Coordinates of the shadows on the left side of the cut point
+        """
         shadow_coords = []
         cut_pt_coords = self.cut_point_coords[idx_cut_pt]
         for shadow in self.shadows:
@@ -717,6 +734,21 @@ class TsGround(object):
         return shadow_coords
 
     def shadow_coords_right_of_cut_point(self, idx_cut_pt):
+        """Get coordinates of shadows located on the right side of the cut
+        point with given index. The coordinates of the shadows will be bounded
+        by the coordinates of the cut point and the default maximum
+        ground x values.
+
+        Parameters
+        ----------
+        idx_cut_pt : int
+            Index of the cut point of interest
+
+        Returns
+        -------
+        list of :py:class:`~pvfactors.geometry.timeseries.TsLineCoords`
+            Coordinates of the shadows on the right side of the cut point
+        """
         shadow_coords = []
         cut_pt_coords = self.cut_point_coords[idx_cut_pt]
         for shadow in self.shadows:
@@ -805,6 +837,7 @@ class TsSurface(object):
 
     @property
     def length(self):
+        """Timeseries length of the surface"""
         return self.coords.length
 
 
@@ -862,6 +895,8 @@ class TsLineCoords(object):
 
     @property
     def highest_point(self):
+        """Timeseries point coordinates of highest point of timeseries
+        line coords"""
         is_b1_highest = self.b1.y >= self.b2.y
         x = np.where(is_b1_highest, self.b1.x, self.b2.x)
         y = np.where(is_b1_highest, self.b1.y, self.b2.y)
@@ -869,12 +904,15 @@ class TsLineCoords(object):
 
     @property
     def lowest_point(self):
+        """Timeseries point coordinates of lowest point of timeseries
+        line coords"""
         is_b1_highest = self.b1.y >= self.b2.y
         x = np.where(is_b1_highest, self.b2.x, self.b1.x)
         y = np.where(is_b1_highest, self.b2.y, self.b1.y)
         return TsPointCoords(x, y)
 
     def __repr__(self):
+        """Use the numpy array representation of the coords"""
         return str(self.as_array)
 
 
@@ -920,4 +958,5 @@ class TsPointCoords(object):
         return cls(coords_array[0, :], coords_array[1, :])
 
     def __repr__(self):
+        """Use the numpy array representation of the point"""
         return str(self.as_array)
