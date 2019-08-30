@@ -487,8 +487,7 @@ class TsGround(object):
     for ground shadows and pv row cut points."""
 
     def __init__(self, shadow_surfaces, surface_params=None,
-                 flag_overlap=None, cut_point_coords=None,
-                 strings_are_uncrossed=None, y_ground=None):
+                 flag_overlap=None, cut_point_coords=None, y_ground=None):
         """Initialize timeseries ground using list of timeseries surfaces
         for the ground shadows
 
@@ -505,11 +504,6 @@ class TsGround(object):
         cut_point_coords : list of :py:class:`~pvfactors.geometry.timeseries.TsPointCoords`, optional
             List of cut point coordinates, as calculated for timeseries PV rows
             (Default = None)
-        strings_are_uncrossed : list of list of bool, optional
-            Timeseries flag indicating of strings between b1 of pv rows and
-            b1 of shadows are uncrossed, for all shadows
-            -- as in view factor calculation.
-            (Default = None)
         y_ground : float, optional
             Y coordinate of flat ground [m] (Default=None)
         """
@@ -518,7 +512,6 @@ class TsGround(object):
         self.flag_overlap = flag_overlap
         self.cut_point_coords = [] if cut_point_coords is None \
             else cut_point_coords
-        self.strings_are_uncrossed = strings_are_uncrossed
         self.y_ground = y_ground
 
     @classmethod
@@ -550,7 +543,6 @@ class TsGround(object):
         # Calculate coords of ground shadows and cutting points
         ground_shadow_coords = []
         cut_point_coords = []
-        strings_are_uncrossed = []
         for ts_pvrow in list_ts_pvrows:
             # Get pvrow coords
             x1s_pvrow = ts_pvrow.full_pvrow_coords.b1.x
@@ -563,7 +555,6 @@ class TsGround(object):
             x2s_shadow = x2s_pvrow - (y2s_pvrow - y_ground) / np.tan(alpha_vec)
             # Order x coords from left to right
             x1s_on_left = x1s_shadow <= x2s_shadow
-            strings_are_uncrossed.append(x1s_on_left)
             xs_left_shadow = np.where(x1s_on_left, x1s_shadow, x2s_shadow)
             xs_right_shadow = np.where(x1s_on_left, x2s_shadow, x1s_shadow)
             # Append shadow coords to list
@@ -579,12 +570,11 @@ class TsGround(object):
         return cls.from_ordered_shadows_coords(
             ground_shadow_coords, flag_overlap=flag_overlap,
             cut_point_coords=cut_point_coords, surface_params=surface_params,
-            strings_are_uncrossed=strings_are_uncrossed, y_ground=y_ground)
+            y_ground=y_ground)
 
     @classmethod
     def from_ordered_shadows_coords(cls, shadow_coords, flag_overlap=None,
                                     surface_params=None, cut_point_coords=None,
-                                    strings_are_uncrossed=None,
                                     y_ground=Y_GROUND):
         """Create timeseries ground from list of ground shadow coordinates.
 
@@ -600,11 +590,6 @@ class TsGround(object):
             (Default = None)
         cut_point_coords : list of :py:class:`~pvfactors.geometry.timeseries.TsPointCoords`, optional
             List of cut point coordinates, as calculated for timeseries PV rows
-            (Default = None)
-        strings_are_uncrossed : list of list of bool, optional
-            Timeseries flag indicating of strings between b1 of pv rows and
-            b1 of shadows are uncrossed, for all shadows
-            -- as in view factor calculation.
             (Default = None)
         y_ground : float, optional
             Fixed y coordinate of flat ground [m] (Default = Y_GROUND constant)
@@ -626,9 +611,7 @@ class TsGround(object):
         ts_shadows = [TsSurface(coords) for coords in list_coords]
         return cls(ts_shadows, surface_params=surface_params,
                    flag_overlap=flag_overlap,
-                   cut_point_coords=cut_point_coords,
-                   strings_are_uncrossed=strings_are_uncrossed,
-                   y_ground=y_ground)
+                   cut_point_coords=cut_point_coords, y_ground=y_ground)
 
     def at(self, idx, x_min_max=None, merge_if_flag_overlap=True,
            with_cut_points=True):

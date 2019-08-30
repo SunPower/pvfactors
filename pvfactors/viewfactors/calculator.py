@@ -1,6 +1,6 @@
 """Module with classes and functions to calculate views and view factors"""
 
-from pvfactors.config import DISTANCE_TOLERANCE
+from pvfactors.config import MIN_X_GROUND, MAX_X_GROUND
 from pvfactors.geometry.timeseries import TsLineCoords, TsPointCoords
 from pvfactors.viewfactors.mapper import VFMapperOrderedPVArray
 import numpy as np
@@ -16,21 +16,50 @@ class VFCalculator(object):
 
         Parameters
         ----------
-        mapper : VF mapper object, optional
+        mapper : :py:class:`~pvfactors.geometry.mapper.VFMapperOrderedPVArray`, optional
             View factor mapper, which will map elements of the PV array view
             matrix to methods calculating view factors (Default =
             :py:class:`~pvfactors.viewfactors.mapper.VFMapperOrderedPVArray`)
+        vf_ts_methods : :py:class:`~pvfactors.geometry.calculator.VFTsMethods` object
+            Object with methods to calculate timeseries view factors for the
+            fast mode (Default = None)
         """
-        if mapper is None:
-            mapper = VFMapperOrderedPVArray()
-        if vf_ts_methods is None:
-            vf_ts_methods = VFTsMethods()
+        mapper = VFMapperOrderedPVArray() if mapper is None else mapper
+        vf_ts_methods = VFTsMethods() if vf_ts_methods is None \
+            else vf_ts_methods
         self.mapper = mapper
         self.vf_ts_methods = vf_ts_methods
 
     def get_vf_matrix_subset(
         self, geom_dict, view_matrix, obstr_matrix, list_pvrows,
             list_surface_indices):
+        """Method to calculate a subset of the view factor matrix: this is
+        used for fast mode calculations.
+
+
+        Parameters
+        ----------
+        geom_dict : ``OrderedDictionary``
+            Ordered dictionary of all the indexed PV surfaces from the PV
+            array
+        view_matrix : ``numpy.ndarray`` of int
+            This matrix specifies which surfaces each surface views, and
+            also what type of view it is
+        obstr_matrix : ``numpy.ndarray`` of int and ``None``
+            Complementing ``view_matrix`` by providing
+            additional arguments for the calculations; i.e. what pvrows are
+            obstructing the view between surface i and surface j
+        list_pvrows : list of :py:class:`~pvfactors.geometry.pvrow.PVRow`s
+            List of pvrows that can obstruct views between surfaces
+        list_surface_indices : list of int
+            List of indices for which to calculate view factors
+
+        Returns
+        -------
+        ``numpy.ndarray`` of float
+            Subset of view factor matrix calculated for given surface indices
+            (values from 0 to 1 in theory)
+        """
 
         n_all_surfaces = view_matrix.shape[0]
         n_finite_surfaces = n_all_surfaces - 1
@@ -142,16 +171,40 @@ class VFCalculator(object):
 
     def get_vf_ts_pvrow_segment(self, pvrow_idx, segment_idx, ts_pvrows,
                                 ts_ground, rotation_vec, pvrow_width):
-        """Calculate timeseries view factors of pvrow segment to all other
-        elements of the PV array."""
+        """Calculate timeseries view factors of timeseries pvrow segment to
+        all other elements of the PV array.
 
+        Parameters
+        ----------
+        pvrow_idx : int
+            Index of the timeseries PV row for which we want to calculate the
+            back surface irradiance
+        segment_idx: int
+            Index of the timeseries segment on the back surface for which we
+            want to calculate back surface irradiance
+        ts_pvrows : list of :py:class:`~pvfactors.geometry.timeseries.TsPVRow`
+            List of timeseries PV rows in the PV array
+        ts_pvrows : :py:class:`~pvfactors.geometry.timeseries.TsGround`
+            Timeseries ground of the PV array
+        rotation_vec : np.ndarray
+            Timeseries rotation vector of the PV rows in [deg]
+        pvrow_width : float
+            Width of the timeseries PV rows in the array in [m]
+
+        Returns
+        -------
+        view_factors : dict
+            Dictionary of the timeseries view factors to all types of surfaces
+            in the PV array. List of keys include: 'to_each_gnd_shadow',
+            'to_gnd_shaded', 'to_gnd_illum', 'to_gnd_total', 'to_pvrow_total',
+            'to_pvrow_shaded', 'to_pvrow_illum', 'to_sky'
+        """
         tilted_to_left = rotation_vec > 0
         n_shadows = len(ts_pvrows)
         n_steps = len(rotation_vec)
         segment = ts_pvrows[pvrow_idx].back.list_segments[segment_idx]
         segment_coords = segment.coords
         segment_length = segment_coords.length
-        strings_are_uncrossed = ts_ground.strings_are_uncrossed[pvrow_idx]
 
         # Get shadows on left and right sides of PV row
         shadows_coords_left = \
@@ -217,6 +270,17 @@ class VFTsMethods(object):
     def calculate_vf_to_pvrow(self, segment_coords, pvrow_idx, n_pvrows,
                               n_steps, ts_pvrows, segment_width,
                               tilted_to_left, pvrow_width, rotation_vec):
+        """Calculate view factors from timeseries segment to timeseries PV
+        rows around it.
+
+        Parameters
+        ----------
+        segment_coords : :py:class:`~pvfactors.geometry.timeseries.TsLineCoords`
+            Timeseries line coordinates of segment
+        pvrow_idx : int
+            Index of the timeseries PV row on the which the segment is
+        n_pvrows :
+        """
         if pvrow_idx == 0:
             vf_left_pvrow = np.zeros(n_steps)
             vf_left_shaded_pvrow = np.zeros(n_steps)
@@ -357,7 +421,7 @@ class VFTsMethods(object):
     def _hottel_string_length(self, pt_pv, pt_gnd, pt_obstr, shadow_is_left):
         l_pv = self._distance(pt_pv, pt_gnd)
         if pt_obstr is None:
-            l = l_pv
+            hottel_length = l_pv
         else:
             alpha_pv = self._angle_with_x_axis(pt_gnd, pt_pv)
             alpha_ob = self._angle_with_x_axis(pt_gnd, pt_obstr)
@@ -367,8 +431,8 @@ class VFTsMethods(object):
                 is_obstructing = alpha_pv < alpha_ob
             l_obstr = (self._distance(pt_gnd, pt_obstr)
                        + self._distance(pt_obstr, pt_pv))
-            l = np.where(is_obstructing, l_obstr, l_pv)
-        return l
+            hottel_length = np.where(is_obstructing, l_obstr, l_pv)
+        return hottel_length
 
     def _vf_surface_to_surface(self, line_1, line_2, width_1):
         """Calculate view factors between timeseries line coords"""
