@@ -268,18 +268,41 @@ class VFTsMethods(object):
     array."""
 
     def calculate_vf_to_pvrow(self, segment_coords, pvrow_idx, n_pvrows,
-                              n_steps, ts_pvrows, segment_width,
+                              n_steps, ts_pvrows, segment_length,
                               tilted_to_left, pvrow_width, rotation_vec):
         """Calculate view factors from timeseries segment to timeseries PV
         rows around it.
 
         Parameters
         ----------
-        segment_coords : :py:class:`~pvfactors.geometry.timeseries.TsLineCoords`
+        segment_coords :
+        :py:class:`~pvfactors.geometry.timeseries.TsLineCoords`
             Timeseries line coordinates of segment
         pvrow_idx : int
             Index of the timeseries PV row on the which the segment is
-        n_pvrows :
+        n_pvrows : int
+            Number of timeseries PV rows in the PV array
+        n_steps : int
+            Number of timesteps for which to calculate the pvfactors
+        ts_pvrows : list of :py:class:`~pvfactors.geometry.timeseries.TsPVRow`
+            Timeseries PV row geometries that will be used in the calculation
+        segment_length : float or np.ndarray
+            Length (width) of the timeseries PV segment [m]
+        tilted_to_left : list of bool
+            Flags indicating when the PV rows are strictly tilted to the left
+        pvrow_width : float
+            Width of the timeseries PV rows in the PV array [m], which is
+            constant
+        rotation_vec : np.ndarray
+            Rotation angles of the PV rows [deg]
+
+        Returns
+        -------
+        vf_to_pvrow : np.ndarray
+            View factors from timeseries segment to neighboring PV rows
+        vf_to_shaded_pvrow : np.ndarray
+            View factors from timeseries segment to shaded areas of the
+            neighboring PV rows
         """
         if pvrow_idx == 0:
             vf_left_pvrow = np.zeros(n_steps)
@@ -289,14 +312,14 @@ class VFTsMethods(object):
             left_ts_pvrow = ts_pvrows[pvrow_idx - 1]
             left_ts_pvrow_coords = left_ts_pvrow.full_pvrow_coords
             vf_left_pvrow = self._vf_surface_to_surface(
-                segment_coords, left_ts_pvrow_coords, segment_width)
+                segment_coords, left_ts_pvrow_coords, segment_length)
             # Get vf to shaded pvrow
             shaded_coords = self._create_shaded_side_coords(
                 left_ts_pvrow.xy_center, pvrow_width,
                 left_ts_pvrow.front.shaded_length, tilted_to_left,
                 rotation_vec, left_ts_pvrow.full_pvrow_coords.lowest_point)
             vf_left_shaded_pvrow = self._vf_surface_to_surface(
-                segment_coords, shaded_coords, segment_width)
+                segment_coords, shaded_coords, segment_length)
 
         if pvrow_idx == (n_pvrows - 1):
             vf_right_pvrow = np.zeros(n_steps)
@@ -306,14 +329,14 @@ class VFTsMethods(object):
             right_ts_pvrow = ts_pvrows[pvrow_idx + 1]
             right_ts_pvrow_coords = right_ts_pvrow.full_pvrow_coords
             vf_right_pvrow = self._vf_surface_to_surface(
-                segment_coords, right_ts_pvrow_coords, segment_width)
+                segment_coords, right_ts_pvrow_coords, segment_length)
             # Get vf to shaded pvrow
             shaded_coords = self._create_shaded_side_coords(
                 right_ts_pvrow.xy_center, pvrow_width,
                 right_ts_pvrow.front.shaded_length, tilted_to_left,
                 rotation_vec, right_ts_pvrow.full_pvrow_coords.lowest_point)
             vf_right_shaded_pvrow = self._vf_surface_to_surface(
-                segment_coords, shaded_coords, segment_width)
+                segment_coords, shaded_coords, segment_length)
 
         vf_to_pvrow = np.where(tilted_to_left, vf_right_pvrow, vf_left_pvrow)
         vf_to_shaded_pvrow = np.where(tilted_to_left, vf_right_shaded_pvrow,
@@ -322,8 +345,38 @@ class VFTsMethods(object):
         return vf_to_pvrow, vf_to_shaded_pvrow
 
     def calculate_vf_to_gnd(self, segment_coords, pvrow_idx, n_pvrows, n_steps,
-                            y_ground, cut_point_coords, segment_width,
+                            y_ground, cut_point_coords, segment_length,
                             tilted_to_left, ts_pvrows):
+        """Calculate view factors from timeseries segment to the entire ground.
+
+        Parameters
+        ----------
+        segment_coords :
+        :py:class:`~pvfactors.geometry.timeseries.TsLineCoords`
+            Timeseries line coordinates of segment
+        pvrow_idx : int
+            Index of the timeseries PV row on the which the segment is
+        n_pvrows : int
+            Number of timeseries PV rows in the PV array
+        n_steps : int
+            Number of timesteps for which to calculate the pvfactors
+        y_ground : float
+            Y-coordinate of the flat ground [m]
+        cut_point_coords : list of
+        :py:class:`~pvfactors.geometry.timeseries.TsPointCoords`
+            List of cut point coordinates, as calculated for timeseries PV rows
+        segment_length : float or np.ndarray
+            Length (width) of the timeseries PV segment [m]
+        tilted_to_left : list of bool
+            Flags indicating when the PV rows are strictly tilted to the left
+        ts_pvrows : list of :py:class:`~pvfactors.geometry.timeseries.TsPVRow`
+            Timeseries PV row geometries that will be used in the calculation
+
+        Returns
+        -------
+        vf_to_gnd : np.ndarray
+            View factors from timeseries segment to the entire ground
+        """
 
         pvrow_lowest_pt = ts_pvrows[pvrow_idx].full_pvrow_coords.lowest_point
         if pvrow_idx == 0:
@@ -332,13 +385,13 @@ class VFTsMethods(object):
                 TsPointCoords(np.minimum(MAX_X_GROUND, cut_point_coords.x),
                               y_ground))
             vf_left_ground = self._vf_surface_to_surface(
-                segment_coords, coords_left_gnd, segment_width)
+                segment_coords, coords_left_gnd, segment_length)
         else:
             left_pt_neighbor = \
                 ts_pvrows[pvrow_idx - 1].full_pvrow_coords.lowest_point
             coords_gnd_proxy = TsLineCoords(left_pt_neighbor, pvrow_lowest_pt)
             vf_left_ground = self._vf_surface_to_surface(
-                segment_coords, coords_gnd_proxy, segment_width)
+                segment_coords, coords_gnd_proxy, segment_length)
 
         if pvrow_idx == (n_pvrows - 1):
             coords_right_gnd = TsLineCoords(
@@ -346,22 +399,55 @@ class VFTsMethods(object):
                               y_ground),
                 TsPointCoords(MAX_X_GROUND * np.ones(n_steps), y_ground))
             vf_right_ground = self._vf_surface_to_surface(
-                segment_coords, coords_right_gnd, segment_width)
+                segment_coords, coords_right_gnd, segment_length)
         else:
             right_pt_neighbor = \
                 ts_pvrows[pvrow_idx + 1].full_pvrow_coords.lowest_point
             coords_gnd_proxy = TsLineCoords(pvrow_lowest_pt, right_pt_neighbor)
             vf_right_ground = self._vf_surface_to_surface(
-                segment_coords, coords_gnd_proxy, segment_width)
+                segment_coords, coords_gnd_proxy, segment_length)
 
         vf_ground = np.where(tilted_to_left, vf_right_ground, vf_left_ground)
 
         return vf_ground
 
     def calculate_vf_to_shadow_obstruction_hottel(
-            self, segment, pvrow_idx, n_shadows, n_steps,
-            tilted_to_left, ts_pvrows,
-            shadow_left, shadow_right, segment_length):
+            self, segment, pvrow_idx, n_shadows, n_steps, tilted_to_left,
+            ts_pvrows, shadow_left, shadow_right, segment_length):
+        """Calculate view factors from timeseries segment to the shadow of
+        a specific timeseries PV row which is casted on the ground.
+
+        Parameters
+        ----------
+        segment :
+        :py:class:`~pvfactors.geometry.timeseries.TsDualSegment`
+            Timeseries segment to use for calculation
+        pvrow_idx : int
+            Index of the timeseries PV row on the which the segment is
+        n_shadows : int
+            Number of timeseries PV rows in the PV array, and therefore number\
+            of shadows they cast on the ground
+        n_steps : int
+            Number of timesteps for which to calculate the pvfactors
+        tilted_to_left : list of bool
+            Flags indicating when the PV rows are strictly tilted to the left
+        ts_pvrows : list of :py:class:`~pvfactors.geometry.timeseries.TsPVRow`
+            Timeseries PV row geometries that will be used in the calculation
+        shadow_left : :py:class:`~pvfactors.geometry.timeseries.TsLineCoords`
+            Coordinates of the shadow that are on the left side of the cut
+            point of the PV row on which the segment is
+        shadow_right : :py:class:`~pvfactors.geometry.timeseries.TsLineCoords`
+            Coordinates of the shadow that are on the right side of the cut
+            point of the PV row on which the segment is
+        segment_length : float or np.ndarray
+            Length (width) of the timeseries PV segment [m]
+
+        Returns
+        -------
+        vf_to_shadow : np.ndarray
+            View factors from timeseries segment to the ground shadow of a
+            specific timeseries PV row
+        """
 
         segment_lowest_pt = segment.lowest_point
         segment_highest_pt = segment.highest_point
@@ -395,8 +481,42 @@ class VFTsMethods(object):
 
     def _vf_hottel_shadows(self, high_pt_pv, low_pt_pv, left_pt_gnd,
                            right_pt_gnd, obstr_pt, width, shadow_is_left):
+        """
+        Calculate the timeseries view factors from a PV surface defined by low
+        and high points, to a ground surface defined by left and right points,
+        while accounting for potentially obstructing neighboring PV rows,
+        defined by an obstruction point, and all of this using the Hottel
+        String method.
+
+        Parameters
+        ----------
+        high_pt_pv : :py:class:`~pvfactors.geometry.timeseries.TsPointCoords`
+            Highest point of the PV surface, for each timestamp
+        low_pt_pv : :py:class:`~pvfactors.geometry.timeseries.TsPointCoords`
+            Lowest point of the PV surface, for each timestamp
+        left_pt_gnd : :py:class:`~pvfactors.geometry.timeseries.TsPointCoords`
+            Leftmost point  of the ground surface, for each timestamp
+        right_pt_gnd : :py:class:`~pvfactors.geometry.timeseries.TsPointCoords`
+            Rightmost point  of the ground surface, for each timestamp
+        obstr_pt : :py:class:`~pvfactors.geometry.timeseries.TsPointCoords`
+            Obstructing point of neighboring PV row, for each timestamp
+        width : float or np.ndarray
+            Width of the PV row surface considered, from low to high point [m]
+        shadow_is_left : bool
+            Side of the considered shadow (or ground) surface with respect to
+            the edge point of the PV row on which the considered PV surface is
+            located
+
+        Returns
+        -------
+        vf_1_to_2 : np.ndarray
+            View factors from PV surface to ground (shadow) surface
+        """
 
         if shadow_is_left:
+            # When the shadow is left
+            # - uncrossed strings are high_pv - left_gnd and low_pv - right_gnd
+            # - crossed strings are high_pv - right_gnd and low_pv - left_gnd
             l1 = self._hottel_string_length(high_pt_pv, left_pt_gnd, obstr_pt,
                                             shadow_is_left)
             l2 = self._hottel_string_length(low_pt_pv, right_pt_gnd, obstr_pt,
@@ -406,6 +526,9 @@ class VFTsMethods(object):
             d2 = self._hottel_string_length(low_pt_pv, left_pt_gnd, obstr_pt,
                                             shadow_is_left)
         else:
+            # When the shadow is right
+            # - uncrossed strings are high_pv - right_gnd and low_pv - left_gnd
+            # - crossed strings are high_pv - left_gnd and low_pv - right_gnd
             l1 = self._hottel_string_length(high_pt_pv, right_pt_gnd, obstr_pt,
                                             shadow_is_left)
             l2 = self._hottel_string_length(low_pt_pv, left_pt_gnd, obstr_pt,
@@ -419,23 +542,69 @@ class VFTsMethods(object):
         return vf_1_to_2
 
     def _hottel_string_length(self, pt_pv, pt_gnd, pt_obstr, shadow_is_left):
+        """
+        Calculate a string length as defined by the Hottel String method in the
+        calculation of view factors, which allows to account for obstructions.
+
+        Parameters
+        ----------
+        left_pt_gnd : :py:class:`~pvfactors.geometry.timeseries.TsPointCoords`
+            Leftmost point  of the ground surface, for each timestamp
+        right_pt_gnd : :py:class:`~pvfactors.geometry.timeseries.TsPointCoords`
+            Rightmost point  of the ground surface, for each timestamp
+        obstr_pt : :py:class:`~pvfactors.geometry.timeseries.TsPointCoords`
+            Obstructing point of neighboring PV row, for each timestamp
+        shadow_is_left : bool
+            Side of the considered shadow (or ground) surface with respect to
+            the edge point of the PV row on which the considered PV surface is
+            located
+
+        Returns
+        -------
+        hottel_length : np.ndarray
+            Return timeseries length of the string, while accounting for
+            obstructions, in [m]
+        """
+        # Calculate length of string without obstruction
         l_pv = self._distance(pt_pv, pt_gnd)
         if pt_obstr is None:
+            # There can't be any obstruction
             hottel_length = l_pv
         else:
+            # Determine if there is obstruction by using the angles made by
+            # specific strings with the x-axis
             alpha_pv = self._angle_with_x_axis(pt_gnd, pt_pv)
             alpha_ob = self._angle_with_x_axis(pt_gnd, pt_obstr)
             if shadow_is_left:
                 is_obstructing = alpha_pv > alpha_ob
             else:
                 is_obstructing = alpha_pv < alpha_ob
+            # Calculate length of string with obstruction
             l_obstr = (self._distance(pt_gnd, pt_obstr)
                        + self._distance(pt_obstr, pt_pv))
+            # Merge based on whether there is obstruction or not
             hottel_length = np.where(is_obstructing, l_obstr, l_pv)
         return hottel_length
 
     def _vf_surface_to_surface(self, line_1, line_2, width_1):
-        """Calculate view factors between timeseries line coords"""
+        """Calculate view factors between timeseries line coords, and using
+        the Hottel String method for calculating view factors (without
+        obstruction).
+
+        Parameters
+        ----------
+        line_1 : :py:class:`~pvfactors.geometry.timeseries.TsLineCoords`
+            Timeseries line coordinates of surface 1
+        line_2 : :py:class:`~pvfactors.geometry.timeseries.TsLineCoords`
+            Timeseries line coordinates of surface 2
+        width_1 : float or np.ndarray
+            Length of line_1 in [m]
+
+        Returns
+        -------
+        vf_1_to_2 : np.ndarray
+            View factors from line_1 to line_2, for each timestep
+        """
         length_1 = self._distance(line_1.b1, line_2.b1)
         length_2 = self._distance(line_1.b2, line_2.b2)
         length_3 = self._distance(line_1.b1, line_2.b2)
@@ -447,19 +616,69 @@ class VFTsMethods(object):
         return vf_1_to_2
 
     @staticmethod
-    def _distance(b1, b2):
-        """Calculate distance between two timeseries points"""
-        return np.sqrt((b2.y - b1.y)**2 + (b2.x - b1.x)**2)
+    def _distance(pt_1, pt_2):
+        """Calculate distance between two timeseries points
+
+        Parameters
+        ----------
+        pt_1 : :py:class:`~pvfactors.geometry.timeseries.TsPointCoords`
+            Timeseries point coordinates of point 1
+        pt_2 : :py:class:`~pvfactors.geometry.timeseries.TsPointCoords`
+            Timeseries point coordinates of point 2
+
+        Returns
+        -------
+        np.ndarray
+            Distance between the two points, for each timestep
+        """
+        return np.sqrt((pt_2.y - pt_1.y)**2 + (pt_2.x - pt_1.x)**2)
 
     @staticmethod
     def _angle_with_x_axis(pt_1, pt_2):
-        """Angle with x-axis of vector going from pt_1 to pt_2"""
+        """Angle with x-axis of vector going from pt_1 to pt_2
+
+        Parameters
+        ----------
+        pt_1 : :py:class:`~pvfactors.geometry.timeseries.TsPointCoords`
+            Timeseries point coordinates of point 1
+        pt_2 : :py:class:`~pvfactors.geometry.timeseries.TsPointCoords`
+            Timeseries point coordinates of point 2
+
+        Returns
+        -------
+        np.ndarray
+            Angle between vector pt_1->pt_2 and x-axis
+        """
         return np.arctan2(pt_2.y - pt_1.y, pt_2.x - pt_1.x)
 
     @staticmethod
     def _create_shaded_side_coords(xy_center, width, shaded_length,
                                    mask_tilted_to_left, rotation_vec,
                                    side_lowest_pt):
+        """
+        Create the timeseries line coordinates for the shaded portion of a
+        PV row side, based on inputted shaded length.
+
+        Parameters
+        ----------
+        xy_center : tuple of float
+            x and y coordinates of the PV row center point (invariant)
+        width : float
+            width of the PV rows [m]
+        shaded_length : np.ndarray
+            Timeseries values of side shaded length [m]
+        tilted_to_left : list of bool
+            Flags indicating when the PV rows are strictly tilted to the left
+        rotation_vec : np.ndarray
+            Timeseries rotation vector of the PV rows in [deg]
+        side_lowest_pt : :py:class:`~pvfactors.geometry.timeseries.TsPointCoords`
+            Timeseries coordinates of lowest point of considered PV row side
+
+        Returns
+        -------
+        side_shaded_coords : :py:class:`~pvfactors.geometry.timeseries.TsPointCoords`
+            Timeseries coordinates of the shaded portion of the PV row side
+        """
 
         # Create Ts segments
         x_center, y_center = xy_center
