@@ -3,12 +3,14 @@ calculations."""
 
 import numpy as np
 from pvlib.tools import cosd, sind
-from pvfactors.config import DISTANCE_TOLERANCE, COLOR_DIC, Y_GROUND
+from pvfactors.config import \
+    DISTANCE_TOLERANCE, COLOR_DIC, Y_GROUND, MIN_X_GROUND, MAX_X_GROUND
 from pvfactors.geometry.base import (
     PVSurface, ShadeCollection, PVSegment, BaseSide)
 from pvfactors.geometry.pvrow import PVRow
 from pvfactors.geometry.pvground import PVGround
 from shapely.geometry import GeometryCollection, LineString
+from copy import deepcopy
 
 
 class TsPVRow(object):
@@ -468,6 +470,16 @@ class TsDualSegment(object):
         """Timeseries length of shaded part of segment."""
         return self.shaded.length
 
+    @property
+    def highest_point(self):
+        """Timeseries point coordinates of highest point of segment"""
+        return self.coords.highest_point
+
+    @property
+    def lowest_point(self):
+        """Timeseries point coordinates of lowest point of segment"""
+        return self.coords.lowest_point
+
 
 class TsGround(object):
     """Timeseries ground class: this class is a vectorized version of the
@@ -475,7 +487,7 @@ class TsGround(object):
     for ground shadows and pv row cut points."""
 
     def __init__(self, shadow_surfaces, surface_params=None,
-                 flag_overlap=None, cut_point_coords=None):
+                 flag_overlap=None, cut_point_coords=None, y_ground=None):
         """Initialize timeseries ground using list of timeseries surfaces
         for the ground shadows
 
@@ -492,12 +504,15 @@ class TsGround(object):
         cut_point_coords : list of :py:class:`~pvfactors.geometry.timeseries.TsPointCoords`, optional
             List of cut point coordinates, as calculated for timeseries PV rows
             (Default = None)
+        y_ground : float, optional
+            Y coordinate of flat ground [m] (Default=None)
         """
         self.shadows = shadow_surfaces
         self.surface_params = [] if surface_params is None else surface_params
         self.flag_overlap = flag_overlap
         self.cut_point_coords = [] if cut_point_coords is None \
             else cut_point_coords
+        self.y_ground = y_ground
 
     @classmethod
     def from_ts_pvrows_and_angles(cls, list_ts_pvrows, alpha_vec, rotation_vec,
@@ -554,12 +569,13 @@ class TsGround(object):
         ground_shadow_coords = np.array(ground_shadow_coords)
         return cls.from_ordered_shadows_coords(
             ground_shadow_coords, flag_overlap=flag_overlap,
-            cut_point_coords=cut_point_coords, surface_params=surface_params)
+            cut_point_coords=cut_point_coords, surface_params=surface_params,
+            y_ground=y_ground)
 
     @classmethod
     def from_ordered_shadows_coords(cls, shadow_coords, flag_overlap=None,
-                                    surface_params=None,
-                                    cut_point_coords=None):
+                                    surface_params=None, cut_point_coords=None,
+                                    y_ground=Y_GROUND):
         """Create timeseries ground from list of ground shadow coordinates.
 
         Parameters
@@ -575,6 +591,8 @@ class TsGround(object):
         cut_point_coords : list of :py:class:`~pvfactors.geometry.timeseries.TsPointCoords`, optional
             List of cut point coordinates, as calculated for timeseries PV rows
             (Default = None)
+        y_ground : float, optional
+            Fixed y coordinate of flat ground [m] (Default = Y_GROUND constant)
         """
 
         # Get cut point coords if any
@@ -593,7 +611,7 @@ class TsGround(object):
         ts_shadows = [TsSurface(coords) for coords in list_coords]
         return cls(ts_shadows, surface_params=surface_params,
                    flag_overlap=flag_overlap,
-                   cut_point_coords=cut_point_coords)
+                   cut_point_coords=cut_point_coords, y_ground=y_ground)
 
     def at(self, idx, x_min_max=None, merge_if_flag_overlap=True,
            with_cut_points=True):
@@ -671,6 +689,60 @@ class TsGround(object):
         pvground.plot(ax, color_shaded=color_shaded, color_illum=color_illum,
                       with_index=False)
 
+    def shadow_coords_left_of_cut_point(self, idx_cut_pt):
+        """Get coordinates of shadows located on the left side of the cut point
+        with given index. The coordinates of the shadows will be bounded
+        by the coordinates of the cut point and the default minimum
+        ground x values.
+
+        Parameters
+        ----------
+        idx_cut_pt : int
+            Index of the cut point of interest
+
+        Returns
+        -------
+        list of :py:class:`~pvfactors.geometry.timeseries.TsLineCoords`
+            Coordinates of the shadows on the left side of the cut point
+        """
+        shadow_coords = []
+        cut_pt_coords = self.cut_point_coords[idx_cut_pt]
+        for shadow in self.shadows:
+            coords = deepcopy(shadow.coords)
+            coords.b1.x = np.minimum(coords.b1.x, cut_pt_coords.x)
+            coords.b1.x = np.maximum(coords.b1.x, MIN_X_GROUND)
+            coords.b2.x = np.minimum(coords.b2.x, cut_pt_coords.x)
+            coords.b2.x = np.maximum(coords.b2.x, MIN_X_GROUND)
+            shadow_coords.append(coords)
+        return shadow_coords
+
+    def shadow_coords_right_of_cut_point(self, idx_cut_pt):
+        """Get coordinates of shadows located on the right side of the cut
+        point with given index. The coordinates of the shadows will be bounded
+        by the coordinates of the cut point and the default maximum
+        ground x values.
+
+        Parameters
+        ----------
+        idx_cut_pt : int
+            Index of the cut point of interest
+
+        Returns
+        -------
+        list of :py:class:`~pvfactors.geometry.timeseries.TsLineCoords`
+            Coordinates of the shadows on the right side of the cut point
+        """
+        shadow_coords = []
+        cut_pt_coords = self.cut_point_coords[idx_cut_pt]
+        for shadow in self.shadows:
+            coords = deepcopy(shadow.coords)
+            coords.b1.x = np.maximum(coords.b1.x, cut_pt_coords.x)
+            coords.b1.x = np.minimum(coords.b1.x, MAX_X_GROUND)
+            coords.b2.x = np.maximum(coords.b2.x, cut_pt_coords.x)
+            coords.b2.x = np.minimum(coords.b2.x, MAX_X_GROUND)
+            shadow_coords.append(coords)
+        return shadow_coords
+
 
 class TsSurface(object):
     """Timeseries surface class: vectorized representation of PV surface
@@ -692,8 +764,6 @@ class TsSurface(object):
         self.surface_params = surface_params
         # TODO: the following should probably be turned into properties,
         # because if the coords change, they won't be altered. But speed...
-        self.length = np.sqrt((coords.b2.y - coords.b1.y)**2
-                              + (coords.b2.x - coords.b1.x)**2)
         self.n_vector = n_vector
 
     def at(self, idx, shaded=None):
@@ -748,6 +818,11 @@ class TsSurface(object):
         """Timeseries coordinates of second boundary point"""
         return self.coords.b2
 
+    @property
+    def length(self):
+        """Timeseries length of the surface"""
+        return self.coords.length
+
 
 class TsLineCoords(object):
     """Timeseries line coordinates class: will provide a helpful shapely-like
@@ -768,6 +843,10 @@ class TsLineCoords(object):
         """
         self.b1 = b1_ts_coords
         self.b2 = b2_ts_coords
+        # TODO: the following should probably be turned into properties,
+        # because if the coords change, they won't be altered. But speed...
+        self.length = np.sqrt((b2_ts_coords.y - b1_ts_coords.y)**2
+                              + (b2_ts_coords.x - b1_ts_coords.x)**2)
 
     def at(self, idx):
         """Get coordinates at a given index
@@ -796,6 +875,28 @@ class TsLineCoords(object):
     def as_array(self):
         """Timeseries line coordinates as numpy array"""
         return np.array([[self.b1.x, self.b1.y], [self.b2.x, self.b2.y]])
+
+    @property
+    def highest_point(self):
+        """Timeseries point coordinates of highest point of timeseries
+        line coords"""
+        is_b1_highest = self.b1.y >= self.b2.y
+        x = np.where(is_b1_highest, self.b1.x, self.b2.x)
+        y = np.where(is_b1_highest, self.b1.y, self.b2.y)
+        return TsPointCoords(x, y)
+
+    @property
+    def lowest_point(self):
+        """Timeseries point coordinates of lowest point of timeseries
+        line coords"""
+        is_b1_highest = self.b1.y >= self.b2.y
+        x = np.where(is_b1_highest, self.b2.x, self.b1.x)
+        y = np.where(is_b1_highest, self.b2.y, self.b1.y)
+        return TsPointCoords(x, y)
+
+    def __repr__(self):
+        """Use the numpy array representation of the coords"""
+        return str(self.as_array)
 
 
 class TsPointCoords(object):
@@ -838,3 +939,7 @@ class TsPointCoords(object):
             Numpy array of coordinates.
         """
         return cls(coords_array[0, :], coords_array[1, :])
+
+    def __repr__(self):
+        """Use the numpy array representation of the point"""
+        return str(self.as_array)
