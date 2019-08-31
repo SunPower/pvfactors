@@ -1166,7 +1166,44 @@ class BasePVArray(object):
         # Plot formatting
         ax.axis('equal')
         if self.distance is not None:
-            n_pvrows = len(self.pvrows)
+            n_pvrows = self.n_pvrows
+            ax.set_xlim(- 0.5 * self.distance,
+                        (n_pvrows - 0.5) * self.distance)
+        if self.height is not None:
+            ax.set_ylim(- self.height, 2 * self.height)
+        ax.set_xlabel("x [m]", fontsize=PLOT_FONTSIZE)
+        ax.set_ylabel("y [m]", fontsize=PLOT_FONTSIZE)
+
+    def plot_at_idx(self, idx, ax, merge_if_flag_overlap=True):
+        """Plot all the PV rows and the ground in the PV array at a desired
+        step index. This can be called before transforming the array, and
+        after fitting it.
+
+        Parameters
+        ----------
+        idx : int
+            Selected timestep index for plotting the PV array
+        ax : :py:class:`matplotlib.pyplot.axes` object
+            Axes for plotting the PV array geometries
+        merge_if_flag_overlap : bool, optional
+            Decide whether to merge all shadows if they overlap
+            (Default = True)
+        """
+        # Plot pv array structures
+        self.ts_ground.plot_at_idx(
+            idx, ax, color_shaded=COLOR_DIC['ground_shaded'],
+            color_illum=COLOR_DIC['ground_illum'],
+            merge_if_flag_overlap=merge_if_flag_overlap)
+
+        for ts_pvrow in self.ts_pvrows:
+            ts_pvrow.plot_at_idx(
+                idx, ax, color_shaded=COLOR_DIC['pvrow_shaded'],
+                color_illum=COLOR_DIC['pvrow_illum'])
+
+        # Plot formatting
+        ax.axis('equal')
+        if self.distance is not None:
+            n_pvrows = self.n_pvrows
             ax.set_xlim(- 0.5 * self.distance,
                         (n_pvrows - 0.5) * self.distance)
         if self.height is not None:

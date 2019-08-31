@@ -5,6 +5,7 @@ import numpy as np
 from pvfactors.geometry.pvrow import PVRow
 from pvfactors.geometry.base import \
     BaseSide, PVSegment, PVSurface, ShadeCollection
+from pvfactors.config import MIN_X_GROUND, MAX_X_GROUND
 
 
 def test_ts_pvrow():
@@ -247,3 +248,68 @@ def test_ts_ground_to_geometry():
                               with_cut_points=True)
         ax.set_xlim(-1, 6)
         plt.show()
+
+
+def test_shadows_coords_left_right_of_cut_point():
+    """Test that coords left and right of cut point are created correctly"""
+    # Ground inputs
+    shadow_coords = np.array([
+        [[[0], [0]], [[2], [0]]],
+        [[[3], [0]], [[5], [0]]]
+    ], dtype=float)
+    overlap = [False]
+
+    # --- Create timeseries ground
+    cut_point = TsPointCoords([2.5], [0])
+    ts_ground = TsGround.from_ordered_shadows_coords(
+        shadow_coords, flag_overlap=overlap,
+        cut_point_coords=[cut_point])
+
+    # Get left and right shadows
+    shadows_left = ts_ground.shadow_coords_left_of_cut_point(0)
+    shadows_right = ts_ground.shadow_coords_right_of_cut_point(0)
+
+    # Reformat for testing
+    shadows_left = [shadow.as_array for shadow in shadows_left]
+    shadows_right = [shadow.as_array for shadow in shadows_right]
+
+    expected_shadows_left = [shadow_coords[0],
+                             [cut_point.as_array, cut_point.as_array]]
+    expected_shadows_right = [[cut_point.as_array, cut_point.as_array],
+                              shadow_coords[1]]
+
+    # Test that correct
+    np.testing.assert_allclose(shadows_left, expected_shadows_left)
+    np.testing.assert_allclose(shadows_right, expected_shadows_right)
+
+    # --- Case where pv rows are flat, cut point are inf
+    cut_point = TsPointCoords([np.inf], [0])
+    ts_ground = TsGround.from_ordered_shadows_coords(
+        shadow_coords, flag_overlap=overlap,
+        cut_point_coords=[cut_point])
+
+    # Get right shadows
+    shadows_right = ts_ground.shadow_coords_right_of_cut_point(0)
+
+    # Test that correct
+    maxi = MAX_X_GROUND
+    expected_shadows_right = np.array([[[[maxi], [0.]], [[maxi], [0.]]],
+                                       [[[maxi], [0.]], [[maxi], [0.]]]])
+    shadows_right = [shadow.as_array for shadow in shadows_right]
+    np.testing.assert_allclose(shadows_right, expected_shadows_right)
+
+    # --- Case where pv rows are flat, cut point are - inf
+    cut_point = TsPointCoords([- np.inf], [0])
+    ts_ground = TsGround.from_ordered_shadows_coords(
+        shadow_coords, flag_overlap=overlap,
+        cut_point_coords=[cut_point])
+
+    # Get left shadows
+    shadows_left = ts_ground.shadow_coords_left_of_cut_point(0)
+
+    # Test that correct
+    mini = MIN_X_GROUND
+    expected_shadows_left = np.array([[[[mini], [0.]], [[mini], [0.]]],
+                                      [[[mini], [0.]], [[mini], [0.]]]])
+    shadows_left = [shadow.as_array for shadow in shadows_left]
+    np.testing.assert_allclose(shadows_left, expected_shadows_left)

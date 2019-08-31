@@ -67,7 +67,6 @@ class OrderedPVArray(BasePVArray):
         self.ts_ground = None
         self.n_states = None
         self.has_direct_shading = None
-        self.surface_tilt = None
         self.rotation_vec = None
         self.shaded_length_front = None
         self.shaded_length_back = None
@@ -162,8 +161,6 @@ class OrderedPVArray(BasePVArray):
         """
 
         self.n_states = len(solar_zenith)
-        # Save surface tilt angles
-        self.surface_tilt = surface_tilt
         # Calculate rotation angles
         rotation_vec = _get_rotation_from_tilt_azimuth(
             surface_azimuth, self.axis_azimuth, surface_tilt)
@@ -186,6 +183,9 @@ class OrderedPVArray(BasePVArray):
             flag_overlap=self.has_direct_shading,
             surface_params=self.surface_params)
 
+        # Save surface rotation angles
+        self.rotation_vec = rotation_vec
+
     def transform(self, idx):
         """
         Transform the ordered PV array for the given index.
@@ -204,7 +204,7 @@ class OrderedPVArray(BasePVArray):
         """
 
         if idx < self.n_states:
-            self.is_flat = self.surface_tilt[idx] == 0
+            self.is_flat = self.rotation_vec[idx] == 0
 
             # Create PV row geometries
             self.pvrows = [ts_pvrow.at(idx) for ts_pvrow in self.ts_pvrows]
@@ -216,7 +216,7 @@ class OrderedPVArray(BasePVArray):
 
             # Build lists of pv row neighbors, used to calculate view matrix
             self.front_neighbors, self.back_neighbors = \
-                self._get_neighbors(self.surface_tilt[idx])
+                self._get_neighbors(self.rotation_vec[idx])
 
         else:
             msg = "Step index {} is out of range: [0 to {}]".format(
@@ -311,19 +311,19 @@ class OrderedPVArray(BasePVArray):
             (self.shaded_length_front > DISTANCE_TOLERANCE)
             | (self.shaded_length_back > DISTANCE_TOLERANCE))
 
-    def _get_neighbors(self, surface_tilt):
+    def _get_neighbors(self, rotation_vec):
         """Determine the pvrows indices of the neighboring pvrow for the front
         and back surfaces of each pvrow.
 
         Parameters
         ----------
-        surface_tilt : array-like or float
-            Surface tilt angles, from 0 to 180 [deg]
+        rotation_vec : array-like or float
+            Rotation angle of pv rows, from -180 to 180 [deg]
         """
         n_pvrows = len(self.pvrows)
         if n_pvrows:
-            flat = surface_tilt == 0
-            rotated_to_left = self.pvrows[0].front.n_vector[0] < 0
+            flat = rotation_vec == 0
+            rotated_to_left = rotation_vec > 0
             if flat:
                 front_neighbors = [None] * n_pvrows
                 back_neighbors = [None] * n_pvrows
