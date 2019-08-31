@@ -380,6 +380,7 @@ class VFTsMethods(object):
 
         pvrow_lowest_pt = ts_pvrows[pvrow_idx].full_pvrow_coords.lowest_point
         if pvrow_idx == 0:
+            # There is no obstruction to view of the ground on the left
             coords_left_gnd = TsLineCoords(
                 TsPointCoords(MIN_X_GROUND * np.ones(n_steps), y_ground),
                 TsPointCoords(np.minimum(MAX_X_GROUND, cut_point_coords.x),
@@ -387,6 +388,7 @@ class VFTsMethods(object):
             vf_left_ground = self._vf_surface_to_surface(
                 segment_coords, coords_left_gnd, segment_length)
         else:
+            # The left PV row obstructs the view of the ground on the left
             left_pt_neighbor = \
                 ts_pvrows[pvrow_idx - 1].full_pvrow_coords.lowest_point
             coords_gnd_proxy = TsLineCoords(left_pt_neighbor, pvrow_lowest_pt)
@@ -394,6 +396,7 @@ class VFTsMethods(object):
                 segment_coords, coords_gnd_proxy, segment_length)
 
         if pvrow_idx == (n_pvrows - 1):
+            # There is no obstruction of the view of the ground on the right
             coords_right_gnd = TsLineCoords(
                 TsPointCoords(np.maximum(MIN_X_GROUND, cut_point_coords.x),
                               y_ground),
@@ -401,12 +404,14 @@ class VFTsMethods(object):
             vf_right_ground = self._vf_surface_to_surface(
                 segment_coords, coords_right_gnd, segment_length)
         else:
+            # The right PV row obstructs the view of the ground on the right
             right_pt_neighbor = \
                 ts_pvrows[pvrow_idx + 1].full_pvrow_coords.lowest_point
             coords_gnd_proxy = TsLineCoords(pvrow_lowest_pt, right_pt_neighbor)
             vf_right_ground = self._vf_surface_to_surface(
                 segment_coords, coords_gnd_proxy, segment_length)
 
+        # Merge the views of the ground for the back side
         vf_ground = np.where(tilted_to_left, vf_right_ground, vf_left_ground)
 
         return vf_ground

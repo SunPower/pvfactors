@@ -1174,18 +1174,20 @@ class BasePVArray(object):
         ax.set_xlabel("x [m]", fontsize=PLOT_FONTSIZE)
         ax.set_ylabel("y [m]", fontsize=PLOT_FONTSIZE)
 
-    def plot_at_idx(self, idx, ax, with_index=False,
-                    merge_if_flag_overlap=True):
+    def plot_at_idx(self, idx, ax, merge_if_flag_overlap=True):
         """Plot all the PV rows and the ground in the PV array at a desired
         step index. This can be called before transforming the array, and
         after fitting it.
 
         Parameters
         ----------
+        idx : int
+            Selected timestep index for plotting the PV array
         ax : :py:class:`matplotlib.pyplot.axes` object
-            Axes for plotting
-        with_index : bool
-            Flag to annotate surfaces with their indices (Default = False)
+            Axes for plotting the PV array geometries
+        merge_if_flag_overlap : bool, optional
+            Decide whether to merge all shadows if they overlap
+            (Default = True)
         """
         # Plot pv array structures
         self.ts_ground.plot_at_idx(
