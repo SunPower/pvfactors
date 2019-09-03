@@ -88,12 +88,12 @@ def test_ts_pvrow_to_geometry():
         'shaded_length_front': [1.3, 0., 1.9],
         'shaded_length_back': [0, 0.3, 0.6]})
     cut = {'front': 3, 'back': 4}
-    surface_params = ['test1', 'test2']
+    param_names = ['test1', 'test2']
 
     ts_pvrow = TsPVRow.from_raw_inputs(
         xy_center, width, df_inputs.rotation_vec,
         cut, df_inputs.shaded_length_front,
-        df_inputs.shaded_length_back, surface_params=surface_params)
+        df_inputs.shaded_length_back, param_names=param_names)
 
     pvrow = ts_pvrow.at(0)
     # Check classes of geometries
@@ -116,8 +116,8 @@ def test_ts_pvrow_to_geometry():
     expected_n_vec_front = np.array([-0.68404029, 1.87938524])
     np.testing.assert_allclose(n_vector_front, expected_n_vec_front)
     np.testing.assert_allclose(n_vector_back, - expected_n_vec_front)
-    assert front_surface.surface_params == surface_params
-    assert back_surface.surface_params == surface_params
+    assert front_surface.param_names == param_names
+    assert back_surface.param_names == param_names
 
 
 def test_ts_ground_from_ts_pvrow():
@@ -131,18 +131,18 @@ def test_ts_ground_from_ts_pvrow():
         'shaded_length_front': [1.3, 0., 1.9],
         'shaded_length_back': [0, 0.3, 0.6]})
     cut = {'front': 3, 'back': 4}
-    surface_params = ['test1', 'test2']
+    param_names = ['test1', 'test2']
 
     ts_pvrow = TsPVRow.from_raw_inputs(
         xy_center, width, df_inputs.rotation_vec,
         cut, df_inputs.shaded_length_front,
-        df_inputs.shaded_length_back, surface_params=surface_params)
+        df_inputs.shaded_length_back, param_names=param_names)
 
     # Create ground from it
     alpha_vec = np.deg2rad([80., 90., 70.])
     ts_ground = TsGround.from_ts_pvrows_and_angles(
         [ts_pvrow], alpha_vec, df_inputs.rotation_vec,
-        surface_params=surface_params)
+        param_names=param_names)
 
     assert len(ts_ground.shadows) == 1
     # Check at specific times
@@ -157,7 +157,7 @@ def test_ts_ground_from_ts_pvrow():
     np.testing.assert_allclose(ts_ground.at(2).shaded_length, width)  # flat
     # Check that all have surface params
     for surf in ground_0.all_surfaces:
-        assert surf.surface_params == surface_params
+        assert surf.param_names == param_names
 
     is_ci = os.environ.get('CI', False)
 

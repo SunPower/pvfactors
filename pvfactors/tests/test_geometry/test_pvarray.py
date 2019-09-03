@@ -361,11 +361,11 @@ def test_view_matrix(params):
     # TODO: test values against saved array
 
 
-def test_surface_params(params):
+def test_param_names(params):
 
-    surface_params = ['qinc']
+    param_names = ['qinc']
     pvarray = OrderedPVArray.transform_from_dict_of_scalars(
-        params, surface_params=surface_params)
+        params, param_names=param_names)
 
     # Set all surfaces parameters to 1
     pvarray.update_params({'qinc': 1})
@@ -373,7 +373,7 @@ def test_surface_params(params):
     # Check that all surfaces of the correct surface params
     all_surfaces = pvarray.all_surfaces
     for surf in all_surfaces:
-        assert surf.surface_params == surface_params
+        assert surf.param_names == param_names
         assert surf.get_param('qinc') == 1
 
     # Check weighted values
