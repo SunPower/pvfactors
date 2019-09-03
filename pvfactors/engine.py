@@ -92,13 +92,16 @@ class PVEngine(object):
         if np.isscalar(albedo):
             albedo = albedo * np.ones(self.n_points)
 
+        # Fit PV array
+        self.pvarray.fit(solar_zenith, solar_azimuth, surface_tilt,
+                         surface_azimuth)
+
         # Fit irradiance model
         self.irradiance.fit(timestamps, DNI, DHI, solar_zenith, solar_azimuth,
                             surface_tilt, surface_azimuth, albedo)
 
-        # Fit PV array
-        self.pvarray.fit(solar_zenith, solar_azimuth, surface_tilt,
-                         surface_azimuth)
+        # Add timeseries irradiance results to pvarray
+        self.irradiance.transform_ts(self.pvarray)
 
         # Skip timesteps when:
         #    - solar zenith > 90, ie the sun is down
@@ -139,7 +142,7 @@ class PVEngine(object):
 
             # Apply irradiance terms to pvarray
             irradiance_vec, rho_vec, invrho_vec, total_perez_vec = \
-                self.irradiance.transform(pvarray, idx=idx)
+                self.irradiance.get_full_modeling_vectors(pvarray, idx)
 
             # Prepare inputs to view factor calculator
             geom_dict = pvarray.dict_surfaces

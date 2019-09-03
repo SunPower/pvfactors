@@ -506,6 +506,8 @@ class HybridPerezOrdered(BaseModel):
                          'inv_rho': 1. / self.rho_back,
                          'total_perez': 0.})
 
+    def get_full_modeling_vectors(self, pvarray, idx):
+
         # Sum up the necessary parameters to form the irradiance vector
         irradiance_vec, rho_vec, inv_rho_vec, total_perez_vec = \
             self.get_modeling_vectors(pvarray)
@@ -563,8 +565,8 @@ class HybridPerezOrdered(BaseModel):
             high_pt_left = ts_pvrows[
                 pvrow_idx - 1].full_pvrow_coords.highest_point
             shading_angle_left = np.rad2deg(np.abs(np.arctan(
-                high_pt_left.y - ts_point_coords.y,
-                high_pt_left.x - ts_point_coords.x)))
+                (high_pt_left.y - ts_point_coords.y)
+                / (high_pt_left.x - ts_point_coords.x))))
             shading_pct_left = calculate_horizon_band_shading(
                 shading_angle_left, self.horizon_band_angle)
 
@@ -574,8 +576,8 @@ class HybridPerezOrdered(BaseModel):
             high_pt_right = ts_pvrows[
                 pvrow_idx + 1].full_pvrow_coords.highest_point
             shading_angle_right = np.rad2deg(np.abs(np.arctan(
-                high_pt_right.y - ts_point_coords.y,
-                high_pt_right.x - ts_point_coords.x)))
+                (high_pt_right.y - ts_point_coords.y)
+                / (high_pt_right.x - ts_point_coords.x))))
             shading_pct_right = calculate_horizon_band_shading(
                 shading_angle_right, self.horizon_band_angle)
 

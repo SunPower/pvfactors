@@ -538,7 +538,7 @@ def test_hybridperez_horizon_shading_ts():
 
     # Check that values stay consistent
     expected_pct_shading = np.array(
-        [64.695221, 33.081398, 64.695221, 93.574956, 0.])
+        [17.163813, 8.667262, 17.163813, 25.317135, 0.])
     np.testing.assert_allclose(expected_pct_shading, horizon_pct_shading)
 
 

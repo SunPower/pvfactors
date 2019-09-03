@@ -20,6 +20,14 @@ class BaseModel(object):
         """Not implemented"""
         raise NotImplementedError
 
+    def transform_ts(self):
+        """Not implemented"""
+        raise NotImplementedError
+
+    def get_full_modeling_vectors(self):
+        """Not implemented"""
+        raise NotImplementedError
+
     def get_modeling_vectors(self, pvarray):
         """Get vector of summed up irradiance values from a PV array, as well
         as the inverse reflectivity values (the latter need to be named
