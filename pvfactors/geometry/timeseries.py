@@ -495,6 +495,10 @@ class TsDualSegment(object):
     def centroid(self):
         return self.coords.centroid
 
+    def get_param_weighted(self, param):
+
+        return self.get_param_ww(param) / self.length
+
     def get_param_ww(self, param):
 
         value = 0
@@ -549,6 +553,8 @@ class TsGround(object):
         self.cut_point_coords = [] if cut_point_coords is None \
             else cut_point_coords
         self.y_ground = y_ground
+        self.shaded_params = dict.fromkeys(self.surface_params)
+        self.illum_params = dict.fromkeys(self.surface_params)
 
     @classmethod
     def from_ts_pvrows_and_angles(cls, list_ts_pvrows, alpha_vec, rotation_vec,

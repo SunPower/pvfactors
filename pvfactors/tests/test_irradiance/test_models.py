@@ -503,7 +503,7 @@ def test_hybridperez_circ_shading():
     np.testing.assert_almost_equal(circ_shading_pct, 71.5969299216)
 
 
-def test_hybridperez_transform_ts():
+def test_hybridperez_horizon_shading_ts():
 
     # Base params
     params = {
@@ -540,3 +540,41 @@ def test_hybridperez_transform_ts():
     expected_pct_shading = np.array(
         [64.695221, 33.081398, 64.695221, 93.574956, 0.])
     np.testing.assert_allclose(expected_pct_shading, horizon_pct_shading)
+
+
+def test_hybridperez_transform_ts(df_inputs_clearsky_8760):
+
+    df_inputs = df_inputs_clearsky_8760.iloc[:24, :]
+    # Base params
+    params = {
+        'n_pvrows': 3,
+        'pvrow_height': 1,
+        'pvrow_width': 1,
+        'axis_azimuth': 0.,
+        'gcr': 0.3
+    }
+    albedo = 0.2
+
+    # Initialize and fit pv array
+    pvarray = OrderedPVArray.init_from_dict(params)
+    # Fit pv array to timeseries data
+    pvarray.fit(df_inputs.solar_zenith, df_inputs.solar_azimuth,
+                df_inputs.surface_tilt, df_inputs.surface_azimuth)
+
+    # irradiance model
+    model = HybridPerezOrdered(horizon_band_angle=15.)
+    model.fit(df_inputs.index, df_inputs.dni.values, df_inputs.dhi.values,
+              df_inputs.solar_zenith.values, df_inputs.solar_azimuth.values,
+              df_inputs.surface_tilt.values, df_inputs.surface_azimuth.values,
+              albedo)
+    model.transform_ts(pvarray)
+
+    expected_middle_back_horizon = np.array(
+        [0., 0., 0., 0., 0.,
+         0., 0., 0.4472212, 0., 0.,
+         0., 1.93210955, 2.03821535, 0., 0.,
+         0., 0.36426177, 0., 0., 0.,
+         0., 0., 0., 0.])
+    np.testing.assert_allclose(
+        expected_middle_back_horizon,
+        pvarray.ts_pvrows[1].back.list_segments[0].illum.params['horizon'])
