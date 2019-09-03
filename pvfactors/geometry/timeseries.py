@@ -694,9 +694,11 @@ class TsGround(object):
             ordered_shadow_coords = [shadow.coords.at(idx)
                                      for shadow in self.shadows]
         # Create parameters at given idx
-        illum_params = {k: (None if val is None else val[idx])
+        illum_params = {k: (val if (val is None) or np.isscalar(val)
+                            else val[idx])
                         for k, val in self.illum_params.items()}
-        shaded_params = {k: (None if val is None else val[idx])
+        shaded_params = {k: (None if (val is None) or np.isscalar(val)
+                             else val[idx])
                          for k, val in self.shaded_params.items()}
         # Return ground geometry
         return PVGround.from_ordered_shadow_and_cut_pt_coords(
@@ -837,7 +839,8 @@ class TsSurface(object):
             n_vector = (self.n_vector[:, idx] if self.n_vector is not None
                         else None)
             # Get params at idx
-            params = {k: (None if val is None else val[idx])
+            params = {k: (None if (val is None) or np.isscalar(val)
+                          else val[idx])
                       for k, val in self.params.items()}
             # Return a pv surface geometry with given params
             return PVSurface(self.coords.at(idx), shaded=shaded,

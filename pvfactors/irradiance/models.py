@@ -212,7 +212,7 @@ class IsotropicOrdered(BaseModel):
                      'inv_rho': inv_rho_front,
                      'total_perez': self.total_perez['front_pvrow']})
                 ts_seg.shaded.update_params(
-                    {'direct': 0.,
+                    {'direct': np.zeros(n_steps),
                      'rho': rho_front,
                      'inv_rho': inv_rho_front,
                      'total_perez': self.total_perez['front_pvrow']

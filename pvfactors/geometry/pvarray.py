@@ -104,8 +104,39 @@ class OrderedPVArray(BasePVArray):
                    param_names=param_names)
 
     @classmethod
-    def transform_from_dict_of_scalars(cls, pvarray_params,
-                                       param_names=None):
+    def fit_from_dict_of_scalars(cls, pvarray_params, param_names=None):
+        """Instantiate, and fit ordered PV array using dictionary
+        of scalar inputs.
+
+        Parameters
+        ----------
+        pvarray_params : dict
+            The parameters used for instantiation, fitting, and transformation
+        param_names : list of str, optional
+            List of parameter names to pass to surfaces (Default = None)
+
+        Returns
+        -------
+        OrderedPVArray
+            Initialized, and fitted Ordered PV Array
+        """
+
+        # Create pv array
+        pvarray = cls.init_from_dict(pvarray_params,
+                                     param_names=param_names)
+
+        # Fit pv array to scalar values
+        solar_zenith = np.array([pvarray_params['solar_zenith']])
+        solar_azimuth = np.array([pvarray_params['solar_azimuth']])
+        surface_tilt = np.array([pvarray_params['surface_tilt']])
+        surface_azimuth = np.array([pvarray_params['surface_azimuth']])
+        pvarray.fit(solar_zenith, solar_azimuth,
+                    surface_tilt, surface_azimuth)
+
+        return pvarray
+
+    @classmethod
+    def transform_from_dict_of_scalars(cls, pvarray_params, param_names=None):
         """Instantiate, fit and transform ordered PV array using dictionary
         of scalar inputs.
 
@@ -123,16 +154,8 @@ class OrderedPVArray(BasePVArray):
         """
 
         # Create pv array
-        pvarray = cls.init_from_dict(pvarray_params,
-                                     param_names=param_names)
-
-        # Fit pv array to scalar values
-        solar_zenith = np.array([pvarray_params['solar_zenith']])
-        solar_azimuth = np.array([pvarray_params['solar_azimuth']])
-        surface_tilt = np.array([pvarray_params['surface_tilt']])
-        surface_azimuth = np.array([pvarray_params['surface_azimuth']])
-        pvarray.fit(solar_zenith, solar_azimuth,
-                    surface_tilt, surface_azimuth)
+        pvarray = cls.fit_from_dict_of_scalars(pvarray_params,
+                                               param_names=param_names)
 
         # Transform pv array to first index (since scalar values were passed)
         pvarray.transform(0)

@@ -30,13 +30,7 @@ def params_irr():
 def test_isotropic_model_front(params_irr):
     """Direct shading on front surface"""
 
-    # pvarray
-    pvarray = OrderedPVArray.transform_from_dict_of_scalars(
-        params_irr, param_names=IsotropicOrdered.params)
-    # there should be some direct shading
-    assert pvarray.pvrows[0].front.shaded_length
-
-    # Apply irradiance model
+    # Create and fit irradiance model
     DNI = 1000.
     DHI = 100.
     irr_model = IsotropicOrdered()
@@ -51,16 +45,25 @@ def test_isotropic_model_front(params_irr):
     expected_dni_pvrow = DNI * cosd(45)
     expected_dni_ground = DNI * cosd(65)
 
-    # Check fitting
+    # Check irradiance fitting
     np.testing.assert_almost_equal(irr_model.direct['ground'][0],
                                    expected_dni_ground)
     np.testing.assert_almost_equal(irr_model.direct['front_pvrow'][0],
                                    expected_dni_pvrow)
     assert irr_model.direct['back_pvrow'][0] == 0.
 
-    # Transform
+    # Create, fit, and transform pv array
+    pvarray = OrderedPVArray.fit_from_dict_of_scalars(
+        params_irr, param_names=IsotropicOrdered.params)
+    irr_model.transform_ts(pvarray)
+    pvarray.transform(idx=0)
+
+    # there should be some direct shading
+    assert pvarray.pvrows[0].front.shaded_length
+
+    # Get modeling vectors
     irradiance_vec, rho_vec, invrho_vec, total_perez_vec = \
-        irr_model.transform(pvarray)
+        irr_model.get_full_modeling_vectors(pvarray, 0)
 
     # Check transform
     expected_irradiance_vec = [
@@ -120,12 +123,6 @@ def test_isotropic_model_back(params_irr):
     params_irr.update({'surface_azimuth': 270,
                        'surface_tilt': 160})
 
-    # pvarray
-    pvarray = OrderedPVArray.transform_from_dict_of_scalars(
-        params_irr, param_names=IsotropicOrdered.params)
-    # there should be some direct shading
-    assert pvarray.pvrows[0].back.shaded_length
-
     # Apply irradiance model
     DNI = 1000.
     DHI = 100.
@@ -148,9 +145,18 @@ def test_isotropic_model_back(params_irr):
                                    expected_dni_pvrow)
     assert irr_model.direct['front_pvrow'][0] == 0.
 
-    # Transform
+    # Create, fit, and transform pv array
+    pvarray = OrderedPVArray.fit_from_dict_of_scalars(
+        params_irr, param_names=IsotropicOrdered.params)
+    irr_model.transform_ts(pvarray)
+    pvarray.transform(idx=0)
+
+    # there should be some direct shading
+    assert pvarray.pvrows[0].back.shaded_length
+
+    # Get modeling vectors
     irradiance_vec, rho_vec, invrho_vec, total_perez_vec = \
-        irr_model.transform(pvarray)
+        irr_model.get_full_modeling_vectors(pvarray, 0)
 
     # Check
     expected_irradiance_vec = [
@@ -204,12 +210,6 @@ def test_isotropic_model_back(params_irr):
 
 def test_hybridperez_ordered_front(params_irr):
 
-    # pvarray
-    pvarray = OrderedPVArray.transform_from_dict_of_scalars(
-        params_irr, param_names=HybridPerezOrdered.params)
-    # there should be some direct shading
-    assert pvarray.pvrows[0].front.shaded_length
-
     # Apply irradiance model
     DNI = 1000.
     DHI = 100.
@@ -239,9 +239,18 @@ def test_hybridperez_ordered_front(params_irr):
                                    expected_dni_pvrow)
     assert irr_model.direct['back_pvrow'][0] == 0.
 
-    # Transform
+    # Create, fit, and transform pv array
+    pvarray = OrderedPVArray.fit_from_dict_of_scalars(
+        params_irr, param_names=IsotropicOrdered.params)
+    irr_model.transform_ts(pvarray)
+    pvarray.transform(idx=0)
+
+    # there should be some direct shading
+    assert pvarray.pvrows[0].front.shaded_length
+
+    # Get modeling vectors
     irradiance_vec, rho_vec, invrho_vec, total_perez_vec = \
-        irr_model.transform(pvarray)
+        irr_model.get_full_modeling_vectors(pvarray, 0)
 
     # Test isotropic_luminance
     np.testing.assert_almost_equal(irr_model.isotropic_luminance,
@@ -343,12 +352,6 @@ def test_hybridperez_ordered_back(params_irr):
     params_irr.update({'surface_azimuth': 270,
                        'surface_tilt': 160})
 
-    # pvarray
-    pvarray = OrderedPVArray.transform_from_dict_of_scalars(
-        params_irr, param_names=HybridPerezOrdered.params)
-    # there should be some direct shading
-    assert pvarray.pvrows[0].back.shaded_length
-
     # Apply irradiance model
     DNI = 1000.
     DHI = 100.
@@ -380,9 +383,18 @@ def test_hybridperez_ordered_back(params_irr):
                                    expected_dni_pvrow)
     assert irr_model.direct['front_pvrow'][0] == 0.
 
-    # Transform
+    # Create, fit, and transform pv array
+    pvarray = OrderedPVArray.fit_from_dict_of_scalars(
+        params_irr, param_names=IsotropicOrdered.params)
+    irr_model.transform_ts(pvarray)
+    pvarray.transform(idx=0)
+
+    # there should be some direct shading
+    assert pvarray.pvrows[0].back.shaded_length
+
+    # Get modeling vectors
     irradiance_vec, rho_vec, invrho_vec, total_perez_vec = \
-        irr_model.transform(pvarray)
+        irr_model.get_full_modeling_vectors(pvarray, 0)
 
     # Test isotropic_luminance
     np.testing.assert_almost_equal(irr_model.isotropic_luminance,
@@ -572,11 +584,10 @@ def test_hybridperez_transform_ts(df_inputs_clearsky_8760):
 
     # Check timeseries parameters
     expected_middle_back_horizon = np.array(
-        [0., 0., 0., 0., 0.,
-         0., 0., 0.4472212, 0., 0.,
-         0., 1.93210955, 2.03821535, 0., 0.,
-         0., 0.36426177, 0., 0., 0.,
-         0., 0., 0., 0.])
+        [0., 0., 0., 0., 0., 0.,
+         0., 0.8244883, 4.43051118, 6.12136418, 6.03641816, 2.75109931,
+         3.15586037, 6.14709947, 6.02242241, 4.25283177, 0.58518296, 0.,
+         0., 0., 0., 0., 0., 0.])
     np.testing.assert_allclose(
         expected_middle_back_horizon,
         pvarray.ts_pvrows[1].back.list_segments[0].illum.params['horizon'])
