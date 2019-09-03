@@ -8,15 +8,23 @@ class BaseModel(object):
     cats = None
     irradiance_comp = None
 
-    def __init__(self):
+    def __init__(self, *args, **kwargs):
         """Not implemented"""
         raise NotImplementedError
 
-    def fit(self):
+    def fit(self, *args, **kwargs):
         """Not implemented"""
         raise NotImplementedError
 
-    def transform(self):
+    def transform(self, *args, **kwargs):
+        """Not implemented"""
+        raise NotImplementedError
+
+    def transform_ts(self, *args, **kwargs):
+        """Not implemented"""
+        raise NotImplementedError
+
+    def get_full_modeling_vectors(self, *args, **kwargs):
         """Not implemented"""
         raise NotImplementedError
 

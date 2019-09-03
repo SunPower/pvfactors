@@ -3,6 +3,7 @@ from pvfactors.irradiance import IsotropicOrdered, HybridPerezOrdered
 from pvfactors.geometry import OrderedPVArray, PVSurface, PVRow
 from pvlib.tools import cosd
 import numpy as np
+import pandas as pd
 import datetime as dt
 
 
@@ -29,13 +30,7 @@ def params_irr():
 def test_isotropic_model_front(params_irr):
     """Direct shading on front surface"""
 
-    # pvarray
-    pvarray = OrderedPVArray.transform_from_dict_of_scalars(
-        params_irr, surface_params=IsotropicOrdered.params)
-    # there should be some direct shading
-    assert pvarray.pvrows[0].front.shaded_length
-
-    # Apply irradiance model
+    # Create and fit irradiance model
     DNI = 1000.
     DHI = 100.
     irr_model = IsotropicOrdered()
@@ -50,16 +45,25 @@ def test_isotropic_model_front(params_irr):
     expected_dni_pvrow = DNI * cosd(45)
     expected_dni_ground = DNI * cosd(65)
 
-    # Check fitting
+    # Check irradiance fitting
     np.testing.assert_almost_equal(irr_model.direct['ground'][0],
                                    expected_dni_ground)
     np.testing.assert_almost_equal(irr_model.direct['front_pvrow'][0],
                                    expected_dni_pvrow)
     assert irr_model.direct['back_pvrow'][0] == 0.
 
-    # Transform
+    # Create, fit, and transform pv array
+    pvarray = OrderedPVArray.fit_from_dict_of_scalars(
+        params_irr, param_names=IsotropicOrdered.params)
+    irr_model.transform_ts(pvarray)
+    pvarray.transform(idx=0)
+
+    # there should be some direct shading
+    assert pvarray.pvrows[0].front.shaded_length
+
+    # Get modeling vectors
     irradiance_vec, rho_vec, invrho_vec, total_perez_vec = \
-        irr_model.transform(pvarray)
+        irr_model.get_full_modeling_vectors(pvarray, 0)
 
     # Check transform
     expected_irradiance_vec = [
@@ -119,12 +123,6 @@ def test_isotropic_model_back(params_irr):
     params_irr.update({'surface_azimuth': 270,
                        'surface_tilt': 160})
 
-    # pvarray
-    pvarray = OrderedPVArray.transform_from_dict_of_scalars(
-        params_irr, surface_params=IsotropicOrdered.params)
-    # there should be some direct shading
-    assert pvarray.pvrows[0].back.shaded_length
-
     # Apply irradiance model
     DNI = 1000.
     DHI = 100.
@@ -147,9 +145,18 @@ def test_isotropic_model_back(params_irr):
                                    expected_dni_pvrow)
     assert irr_model.direct['front_pvrow'][0] == 0.
 
-    # Transform
+    # Create, fit, and transform pv array
+    pvarray = OrderedPVArray.fit_from_dict_of_scalars(
+        params_irr, param_names=IsotropicOrdered.params)
+    irr_model.transform_ts(pvarray)
+    pvarray.transform(idx=0)
+
+    # there should be some direct shading
+    assert pvarray.pvrows[0].back.shaded_length
+
+    # Get modeling vectors
     irradiance_vec, rho_vec, invrho_vec, total_perez_vec = \
-        irr_model.transform(pvarray)
+        irr_model.get_full_modeling_vectors(pvarray, 0)
 
     # Check
     expected_irradiance_vec = [
@@ -203,12 +210,6 @@ def test_isotropic_model_back(params_irr):
 
 def test_hybridperez_ordered_front(params_irr):
 
-    # pvarray
-    pvarray = OrderedPVArray.transform_from_dict_of_scalars(
-        params_irr, surface_params=HybridPerezOrdered.params)
-    # there should be some direct shading
-    assert pvarray.pvrows[0].front.shaded_length
-
     # Apply irradiance model
     DNI = 1000.
     DHI = 100.
@@ -238,9 +239,18 @@ def test_hybridperez_ordered_front(params_irr):
                                    expected_dni_pvrow)
     assert irr_model.direct['back_pvrow'][0] == 0.
 
-    # Transform
+    # Create, fit, and transform pv array
+    pvarray = OrderedPVArray.fit_from_dict_of_scalars(
+        params_irr, param_names=IsotropicOrdered.params)
+    irr_model.transform_ts(pvarray)
+    pvarray.transform(idx=0)
+
+    # there should be some direct shading
+    assert pvarray.pvrows[0].front.shaded_length
+
+    # Get modeling vectors
     irradiance_vec, rho_vec, invrho_vec, total_perez_vec = \
-        irr_model.transform(pvarray)
+        irr_model.get_full_modeling_vectors(pvarray, 0)
 
     # Test isotropic_luminance
     np.testing.assert_almost_equal(irr_model.isotropic_luminance,
@@ -342,12 +352,6 @@ def test_hybridperez_ordered_back(params_irr):
     params_irr.update({'surface_azimuth': 270,
                        'surface_tilt': 160})
 
-    # pvarray
-    pvarray = OrderedPVArray.transform_from_dict_of_scalars(
-        params_irr, surface_params=HybridPerezOrdered.params)
-    # there should be some direct shading
-    assert pvarray.pvrows[0].back.shaded_length
-
     # Apply irradiance model
     DNI = 1000.
     DHI = 100.
@@ -379,9 +383,18 @@ def test_hybridperez_ordered_back(params_irr):
                                    expected_dni_pvrow)
     assert irr_model.direct['front_pvrow'][0] == 0.
 
-    # Transform
+    # Create, fit, and transform pv array
+    pvarray = OrderedPVArray.fit_from_dict_of_scalars(
+        params_irr, param_names=IsotropicOrdered.params)
+    irr_model.transform_ts(pvarray)
+    pvarray.transform(idx=0)
+
+    # there should be some direct shading
+    assert pvarray.pvrows[0].back.shaded_length
+
+    # Get modeling vectors
     irradiance_vec, rho_vec, invrho_vec, total_perez_vec = \
-        irr_model.transform(pvarray)
+        irr_model.get_full_modeling_vectors(pvarray, 0)
 
     # Test isotropic_luminance
     np.testing.assert_almost_equal(irr_model.isotropic_luminance,
@@ -500,3 +513,106 @@ def test_hybridperez_circ_shading():
         surf, idx_neighbor, pvrows, solar_2d_vector)
 
     np.testing.assert_almost_equal(circ_shading_pct, 71.5969299216)
+
+
+def test_hybridperez_horizon_shading_ts():
+
+    # Base params
+    params = {
+        'n_pvrows': 3,
+        'pvrow_height': 1,
+        'pvrow_width': 1,
+        'axis_azimuth': 0.,
+        'gcr': 0.3
+    }
+    # Timeseries inputs
+    df_inputs = pd.DataFrame({
+        'solar_zenith': [70., 80., 80., 70., 10.],
+        'solar_azimuth': [270., 90., 270., 90., 90.],
+        'surface_tilt': [20., 10., 20., 30., 0.],
+        'surface_azimuth': [270., 270., 90., 90., 90.]})
+
+    # Initialize and fit pv array
+    pvarray = OrderedPVArray.init_from_dict(params)
+    # Fit pv array to timeseries data
+    pvarray.fit(df_inputs.solar_zenith, df_inputs.solar_azimuth,
+                df_inputs.surface_tilt, df_inputs.surface_azimuth)
+
+    # irradiance model
+    model = HybridPerezOrdered(horizon_band_angle=15.)
+    pvrow_idx = 1
+    centroid_coords = (pvarray.ts_pvrows[pvrow_idx].back.list_segments[0]
+                       .coords.centroid)
+    tilted_to_left = pvarray.rotation_vec > 0
+    horizon_pct_shading = model.calculate_horizon_shading_pct_ts(
+        pvarray.ts_pvrows, centroid_coords, pvrow_idx, tilted_to_left,
+        is_back_side=True)
+
+    # Check that values stay consistent
+    expected_pct_shading = np.array(
+        [17.163813, 8.667262, 17.163813, 25.317135, 0.])
+    np.testing.assert_allclose(expected_pct_shading, horizon_pct_shading)
+
+
+def test_hybridperez_transform_ts(df_inputs_clearsky_8760):
+
+    n_points = 24
+    df_inputs = df_inputs_clearsky_8760.iloc[:n_points, :]
+    # Base params
+    params = {
+        'n_pvrows': 3,
+        'pvrow_height': 1,
+        'pvrow_width': 1,
+        'axis_azimuth': 0.,
+        'gcr': 0.3
+    }
+    albedo = 0.2
+
+    # Initialize and fit pv array
+    pvarray = OrderedPVArray.init_from_dict(params)
+    # Fit pv array to timeseries data
+    pvarray.fit(df_inputs.solar_zenith, df_inputs.solar_azimuth,
+                df_inputs.surface_tilt, df_inputs.surface_azimuth)
+
+    # irradiance model
+    model = HybridPerezOrdered(horizon_band_angle=15.)
+    model.fit(df_inputs.index, df_inputs.dni.values, df_inputs.dhi.values,
+              df_inputs.solar_zenith.values, df_inputs.solar_azimuth.values,
+              df_inputs.surface_tilt.values, df_inputs.surface_azimuth.values,
+              albedo)
+    model.transform_ts(pvarray)
+
+    # Check timeseries parameters
+    expected_middle_back_horizon = np.array(
+        [0., 0., 0., 0., 0., 0.,
+         0., 0.8244883, 4.43051118, 6.12136418, 6.03641816, 2.75109931,
+         3.15586037, 6.14709947, 6.02242241, 4.25283177, 0.58518296, 0.,
+         0., 0., 0., 0., 0., 0.])
+    np.testing.assert_allclose(
+        expected_middle_back_horizon,
+        pvarray.ts_pvrows[1].back.list_segments[0].illum.params['horizon'])
+
+    expected_ground_circ = np.array(
+        [0., 0., 0., 0., 0.,
+         0., 0., 2.19047189, 8.14152575, 13.9017384,
+         18.54394777, 21.11510529, 21.00554831, 18.24251837, 13.47583799,
+         7.66930532, 1.74693357, 0., 0., 0.,
+         0., 0., 0., 0.])
+    np.testing.assert_allclose(
+        expected_ground_circ,
+        pvarray.ts_ground.illum_params['circumsolar'])
+    np.testing.assert_allclose(
+        np.zeros(n_points),
+        pvarray.ts_ground.shaded_params['circumsolar'])
+
+    # Check at a given time idx
+    pvrow = pvarray.ts_pvrows[1].at(7)
+    np.testing.assert_allclose(
+        pvrow.back.list_segments[0].illum_collection
+        .get_param_weighted('horizon'),
+        expected_middle_back_horizon[7])
+    pvground = pvarray.ts_ground.at(7)
+    np.testing.assert_allclose(
+        pvground.list_segments[0].illum_collection
+        .get_param_weighted('circumsolar'),
+        expected_ground_circ[7])

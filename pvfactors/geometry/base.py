@@ -167,7 +167,7 @@ class BaseSurface(LineString):
     orientations."""
 
     def __init__(self, coords, normal_vector=None, index=None,
-                 surface_params=None):
+                 param_names=None, params=None):
         """Create a surface using linestring coordinates.
         Normal vector can have two directions for a given LineString,
         so the user can provide it in order to be specific,
@@ -185,21 +185,23 @@ class BaseSurface(LineString):
             calculated)
         index : int, optional
             Surface index (Default = None)
-        surface_params : list of str, optional
+        param_names : list of str, optional
             Names of the surface parameters, eg reflectivity, total incident
             irradiance, temperature, etc. (Default = None)
-
+        params : dict, optional
+            Surface float parameters (Default = None)
         """
 
-        surface_params = [] if surface_params is None else surface_params
+        param_names = [] if param_names is None else param_names
         super(BaseSurface, self).__init__(coords)
         if normal_vector is None:
             self.n_vector = self._calculate_n_vector()
         else:
             self.n_vector = np.array(normal_vector)
         self.index = index
-        self.surface_params = surface_params
-        self.params = dict.fromkeys(self.surface_params)
+        self.param_names = param_names
+        self.params = params if params is not None \
+            else dict.fromkeys(self.param_names)
 
     def _calculate_n_vector(self):
         """Calculate normal vector of the surface, if surface is not empty"""
@@ -294,7 +296,7 @@ class PVSurface(BaseSurface):
     """
 
     def __init__(self, coords=None, normal_vector=None, shaded=False,
-                 index=None, surface_params=None):
+                 index=None, param_names=None, params=None):
         """Initialize PV surface.
 
         Parameters
@@ -308,14 +310,16 @@ class PVSurface(BaseSurface):
             Flag telling if surface is shaded or not (Default = False)
         index : int, optional
             Surface index (Default = None)
-        surface_params : list of str, optional
+        param_names : list of str, optional
             Names of the surface parameters, eg reflectivity, total incident
             irradiance, temperature, etc. (Default = None)
+        params : dict, optional
+            Surface float parameters (Default = None)
         """
 
-        surface_params = [] if surface_params is None else surface_params
+        param_names = [] if param_names is None else param_names
         super(PVSurface, self).__init__(coords, normal_vector, index=index,
-                                        surface_params=surface_params)
+                                        param_names=param_names, params=params)
         self.shaded = shaded
 
 
@@ -324,7 +328,7 @@ class ShadeCollection(GeometryCollection):
     objects that all have the same shading status. The PV surfaces are not
     necessarily contiguous or collinear."""
 
-    def __init__(self, list_surfaces=None, shaded=None, surface_params=None):
+    def __init__(self, list_surfaces=None, shaded=None, param_names=None):
         """Initialize shade collection.
 
         Parameters
@@ -335,18 +339,18 @@ class ShadeCollection(GeometryCollection):
         shaded : bool, optional
             Shading status of the collection. If not specified, will be derived
             from list of surfaces (Default = None)
-        surface_params : list of str, optional
+        param_names : list of str, optional
             Names of the surface parameters, eg reflectivity, total incident
             irradiance, temperature, etc. (Default = None)
 
         """
         list_surfaces = [] if list_surfaces is None else list_surfaces
-        surface_params = [] if surface_params is None else surface_params
+        param_names = [] if param_names is None else param_names
         _check_uniform_shading(list_surfaces)
         self.list_surfaces = list_surfaces
         self.shaded = self._get_shading(shaded)
         self.is_collinear = is_collinear(list_surfaces)
-        self.surface_params = surface_params
+        self.param_names = param_names
         super(ShadeCollection, self).__init__(list_surfaces)
 
     def _get_shading(self, shaded):
@@ -397,7 +401,7 @@ class ShadeCollection(GeometryCollection):
             normal_vector = self.n_vector
         surf = PVSurface(coords=linestring.coords,
                          normal_vector=normal_vector, shaded=self.shaded,
-                         surface_params=self.surface_params)
+                         param_names=self.param_names)
         self.add_pvsurface(surf)
 
     def add_pvsurface(self, pvsurface):
@@ -436,7 +440,7 @@ class ShadeCollection(GeometryCollection):
                         new_surface = PVSurface(
                             new_geom.coords, normal_vector=surface.n_vector,
                             shaded=surface.shaded,
-                            surface_params=surface.surface_params)
+                            param_names=surface.param_names)
                         new_list_surfaces.append(new_surface)
             else:
                 new_list_surfaces.append(surface)
@@ -466,7 +470,7 @@ class ShadeCollection(GeometryCollection):
             new_pvsurf = PVSurface(
                 coords=[(minx, miny), (maxx, maxy)],
                 shaded=self.shaded, normal_vector=surf_1.n_vector,
-                surface_params=surf_1.surface_params)
+                param_names=surf_1.param_names)
             self.list_surfaces = [new_pvsurf]
             self.update_geom_collection(self.list_surfaces)
 
@@ -492,11 +496,11 @@ class ShadeCollection(GeometryCollection):
                     new_surf_1 = PVSurface(
                         coords_1, normal_vector=surface.n_vector,
                         shaded=surface.shaded,
-                        surface_params=surface.surface_params)
+                        param_names=surface.param_names)
                     new_surf_2 = PVSurface(
                         coords_2, normal_vector=surface.n_vector,
                         shaded=surface.shaded,
-                        surface_params=surface.surface_params)
+                        param_names=surface.param_names)
                     # Now update collection
                     self.list_surfaces[idx] = new_surf_1
                     self.list_surfaces.append(new_surf_2)
@@ -579,7 +583,7 @@ class ShadeCollection(GeometryCollection):
 
     @classmethod
     def from_linestring_coords(cls, coords, shaded, normal_vector=None,
-                               surface_params=None):
+                               param_names=None):
         """Create a shade collection with a single PV surface.
 
         Parameters
@@ -590,13 +594,13 @@ class ShadeCollection(GeometryCollection):
             Shading status desired for the collection
         normal_vector : list, optional
             Normal vector for the surface (Default = None)
-        surface_params : list of str, optional
+        param_names : list of str, optional
             Names of the surface parameters, eg reflectivity, total incident
             irradiance, temperature, etc. (Default = None)
         """
         surf = PVSurface(coords=coords, normal_vector=normal_vector,
-                         shaded=shaded, surface_params=surface_params)
-        return cls([surf], shaded=shaded, surface_params=surface_params)
+                         shaded=shaded, param_names=param_names)
+        return cls([surf], shaded=shaded, param_names=param_names)
 
 
 class PVSegment(GeometryCollection):
@@ -800,7 +804,7 @@ class PVSegment(GeometryCollection):
 
     @classmethod
     def from_linestring_coords(cls, coords, shaded=False, normal_vector=None,
-                               index=None, surface_params=None):
+                               index=None, param_names=None):
         """Create a PV segment with a single PV surface.
 
         Parameters
@@ -814,17 +818,17 @@ class PVSegment(GeometryCollection):
             Normal vector for the surface (Default = None)
         index : int, optional
             Index of the segment (Default = None)
-        surface_params : list of str, optional
+        param_names : list of str, optional
             Names of the surface parameters, eg reflectivity, total incident
             irradiance, temperature, etc. (Default = None)
         """
         col = ShadeCollection.from_linestring_coords(
             coords, shaded=shaded, normal_vector=normal_vector,
-            surface_params=surface_params)
+            param_names=param_names)
         # Realized that needed to instantiate other_col, otherwise could
         # end up with shared collection among different PV segments
         other_col = ShadeCollection(list_surfaces=[], shaded=not shaded,
-                                    surface_params=surface_params)
+                                    param_names=param_names)
         if shaded:
             return cls(illum_collection=other_col,
                        shaded_collection=col, index=index)
@@ -933,7 +937,7 @@ class BaseSide(GeometryCollection):
 
     @classmethod
     def from_linestring_coords(cls, coords, shaded=False, normal_vector=None,
-                               index=None, n_segments=1, surface_params=None):
+                               index=None, n_segments=1, param_names=None):
         """Create a Side with a single PV surface, or multiple discretized
         identical ones.
 
@@ -950,14 +954,14 @@ class BaseSide(GeometryCollection):
             Index of the segments (Default = None)
         n_segments : int, optional
             Number of same-length segments to use (Default = 1)
-        surface_params : list of str, optional
+        param_names : list of str, optional
             Names of the surface parameters, eg reflectivity, total incident
             irradiance, temperature, etc. (Default = None)
         """
         if n_segments == 1:
             list_pvsegments = [PVSegment.from_linestring_coords(
                 coords, shaded=shaded, normal_vector=normal_vector,
-                index=index, surface_params=surface_params)]
+                index=index, param_names=param_names)]
         else:
             # Discretize coords and create segments accordingly
             linestring = LineString(coords)
@@ -970,7 +974,7 @@ class BaseSide(GeometryCollection):
                 # TODO: not clear what to do with the index here
                 pvsegment = PVSegment.from_linestring_coords(
                     new_coords, shaded=shaded, normal_vector=normal_vector,
-                    index=index, surface_params=surface_params)
+                    index=index, param_names=param_names)
                 list_pvsegments.append(pvsegment)
         return cls(list_segments=list_pvsegments)
 

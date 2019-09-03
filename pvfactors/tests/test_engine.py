@@ -90,7 +90,7 @@ def test_pvengine_ts_inputs_perez(params_serial,
     # Create engine
     irradiance_model = HybridPerezOrdered()
     pvarray = OrderedPVArray.init_from_dict(
-        params_serial, surface_params=irradiance_model.params)
+        params_serial, param_names=irradiance_model.params)
     eng = PVEngine(pvarray, irradiance_model=irradiance_model)
 
     # Fit engine
@@ -117,7 +117,7 @@ def test_fast_pvengine_float_inputs_perez(params):
     # Prepare some engine inputs
     irradiance_model = HybridPerezOrdered()
     pvarray = OrderedPVArray.init_from_dict(
-        params, surface_params=irradiance_model.params)
+        params, param_names=irradiance_model.params)
     fast_mode_pvrow_index = 1
 
     # Create engine object

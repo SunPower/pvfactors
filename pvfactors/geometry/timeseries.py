@@ -45,7 +45,7 @@ class TsPVRow(object):
     @classmethod
     def from_raw_inputs(cls, xy_center, width, rotation_vec,
                         cut, shaded_length_front, shaded_length_back,
-                        index=None, surface_params=None):
+                        index=None, param_names=None):
         """Create timeseries PV row using raw inputs.
         Note: shading will always be zero when pv rows are flat.
 
@@ -66,7 +66,7 @@ class TsPVRow(object):
             Timeseries values of back side shaded length [m]
         index : int, optional
             Index of the pv row (default = None)
-        surface_params : list of str, optional
+        param_names : list of str, optional
             List of names of surface parameters to use when creating geometries
             (Default = None)
 
@@ -85,12 +85,12 @@ class TsPVRow(object):
         ts_front = TsSide.from_raw_inputs(
             xy_center, width, rotation_vec, cut.get('front', 1),
             shaded_length_front, n_vector=normal_vec_front,
-            surface_params=surface_params)
+            param_names=param_names)
         # Calculate back side coords
         ts_back = TsSide.from_raw_inputs(
             xy_center, width, rotation_vec, cut.get('back', 1),
             shaded_length_back, n_vector=-normal_vec_front,
-            surface_params=surface_params)
+            param_names=param_names)
 
         return cls(ts_front, ts_back, xy_center, index=index,
                    full_pvrow_coords=pvrow_coords)
@@ -202,7 +202,7 @@ class TsSide(object):
 
     @classmethod
     def from_raw_inputs(cls, xy_center, width, rotation_vec, cut,
-                        shaded_length, n_vector=None, surface_params=None):
+                        shaded_length, n_vector=None, param_names=None):
         """Create timeseries side using raw PV row inputs.
         Note: shading will always be zero when PV rows are flat.
 
@@ -221,7 +221,7 @@ class TsSide(object):
             Timeseries values of side shaded length from lowest point [m]
         n_vector : np.ndarray, optional
             Timeseries normal vectors of the side
-        surface_params : list of str, optional
+        param_names : list of str, optional
             List of names of surface parameters to use when creating geometries
             (Default = None)
 
@@ -286,9 +286,9 @@ class TsSide(object):
                 np.array([[x1_shaded, y1_shaded], [x2_shaded, y2_shaded]]))
             # Create illuminated and shaded surfaces
             illum = TsSurface(illum_coords, n_vector=n_vector,
-                              surface_params=surface_params)
+                              param_names=param_names)
             shaded = TsSurface(shaded_coords, n_vector=n_vector,
-                               surface_params=surface_params)
+                               param_names=param_names)
             # Create dual segment
             segment = TsDualSegment(segment_coords, illum, shaded,
                                     n_vector=n_vector)
@@ -359,6 +359,66 @@ class TsSide(object):
         for seg in self.list_segments:
             length += seg.shaded.length
         return length
+
+    @property
+    def length(self):
+        """Timeseries length of side."""
+        length = 0.
+        for seg in self.list_segments:
+            length += seg.length
+        return length
+
+    def get_param_weighted(self, param):
+        """Get timeseries parameter for the side, after weighting by
+        surface length.
+
+        Parameters
+        ----------
+        param : str
+            Name of parameter
+
+        Returns
+        -------
+        np.ndarray
+            Weighted parameter values
+        """
+        return self.get_param_ww(param) / self.length
+
+    def get_param_ww(self, param):
+        """Get timeseries parameter from the side's surfaces with weight, i.e.
+        after multiplying by the surface lengths.
+
+        Parameters
+        ----------
+        param: str
+            Surface parameter to return
+
+        Returns
+        -------
+        np.ndarray
+            Timeseries parameter values multiplied by weights
+
+        Raises
+        ------
+        KeyError
+            if parameter name not in a surface parameters
+        """
+        value = 0.
+        for seg in self.list_segments:
+            value += seg.get_param_ww(param)
+        return value
+
+    def update_params(self, new_dict):
+        """Update timeseries surface parameters of the side.
+
+        Parameters
+        ----------
+        new_dict : dict
+            Parameters to add or update for the surfaces
+        """
+
+        for seg in self.list_segments:
+            seg.update_params(new_dict)
 
 
 class TsDualSegment(object):
@@ -446,14 +506,14 @@ class TsDualSegment(object):
             else [illum_surface]
         illum_collection = ShadeCollection(
             list_surfaces=list_illum_surfaces, shaded=False,
-            surface_params=None)
+            param_names=None)
         # Create shaded collection
         shaded_surface = self.shaded.at(idx, shaded=True)
         list_shaded_surfaces = [] if shaded_surface.is_empty \
             else [shaded_surface]
         shaded_collection = ShadeCollection(
             list_surfaces=list_shaded_surfaces, shaded=True,
-            surface_params=None)
+            param_names=None)
         # Create PV segment
         segment = PVSegment(illum_collection=illum_collection,
                             shaded_collection=shaded_collection,
@@ -471,6 +531,58 @@ class TsDualSegment(object):
         return self.shaded.length
 
     @property
+    def centroid(self):
+        """Timeseries point coordinates of the segment's centroid"""
+        return self.coords.centroid
+
+    def get_param_weighted(self, param):
+        """Get timeseries parameter for the segment, after weighting by
+        surface length.
+
+        Parameters
+        ----------
+        param : str
+            Name of parameter
+
+        Returns
+        -------
+        np.ndarray
+            Weighted parameter values
+        """
+        return self.get_param_ww(param) / self.length
+
+    def get_param_ww(self, param):
+        """Get timeseries parameter from the segment's surfaces with weight,
+        i.e. after multiplying by the surface lengths.
+
+        Parameters
+        ----------
+        param: str
+            Surface parameter to return
+
+        Returns
+        -------
+        np.ndarray
+            Timeseries parameter values multiplied by weights
+        """
+
+        value = 0
+        value += self.illum.get_param(param) * self.illum.length
+        value += self.shaded.get_param(param) * self.shaded.length
+        return value
+
+    def update_params(self, new_dict):
+        """Update timeseries surface parameters of the segment.
+
+        Parameters
+        ----------
+        new_dict : dict
+            Parameters to add or update for the surfaces
+        """
+        self.illum.update_params(new_dict)
+        self.shaded.update_params(new_dict)
+
+    @property
     def highest_point(self):
         """Timeseries point coordinates of highest point of segment"""
         return self.coords.highest_point
@@ -486,7 +598,7 @@ class TsGround(object):
     PV ground geometry class, and it will store timeseries coordinates
     for ground shadows and pv row cut points."""
 
-    def __init__(self, shadow_surfaces, surface_params=None,
+    def __init__(self, shadow_surfaces, param_names=None,
                  flag_overlap=None, cut_point_coords=None, y_ground=None):
         """Initialize timeseries ground using list of timeseries surfaces
         for the ground shadows
@@ -495,7 +607,7 @@ class TsGround(object):
         ----------
         shadow_surfaces : list of :py:class:`~pvfactors.geometry.timeseries.TsSurface`
             Timeseries surfaces for ground shadows
-        surface_params : list of str, optional
+        param_names : list of str, optional
             List of names of surface parameters to use when creating geometries
             (Default = None)
         flag_overlap : list of bool, optional
@@ -508,16 +620,18 @@ class TsGround(object):
             Y coordinate of flat ground [m] (Default=None)
         """
         self.shadows = shadow_surfaces
-        self.surface_params = [] if surface_params is None else surface_params
+        self.param_names = [] if param_names is None else param_names
         self.flag_overlap = flag_overlap
         self.cut_point_coords = [] if cut_point_coords is None \
             else cut_point_coords
         self.y_ground = y_ground
+        self.shaded_params = dict.fromkeys(self.param_names)
+        self.illum_params = dict.fromkeys(self.param_names)
 
     @classmethod
     def from_ts_pvrows_and_angles(cls, list_ts_pvrows, alpha_vec, rotation_vec,
                                   y_ground=Y_GROUND, flag_overlap=None,
-                                  surface_params=None):
+                                  param_names=None):
         """Create timeseries ground from list of timeseries PV rows, and
         PV array and solar angles.
 
@@ -534,7 +648,7 @@ class TsGround(object):
         flag_overlap : list of bool, optional
             Flags indicating if the ground shadows are overlapping, for all
             time steps (Default=None). I.e. is there direct shading on pv rows?
-        surface_params : list of str, optional
+        param_names : list of str, optional
             List of names of surface parameters to use when creating geometries
             (Default = None)
         """
@@ -569,12 +683,12 @@ class TsGround(object):
         ground_shadow_coords = np.array(ground_shadow_coords)
         return cls.from_ordered_shadows_coords(
             ground_shadow_coords, flag_overlap=flag_overlap,
-            cut_point_coords=cut_point_coords, surface_params=surface_params,
+            cut_point_coords=cut_point_coords, param_names=param_names,
             y_ground=y_ground)
 
     @classmethod
     def from_ordered_shadows_coords(cls, shadow_coords, flag_overlap=None,
-                                    surface_params=None, cut_point_coords=None,
+                                    param_names=None, cut_point_coords=None,
                                     y_ground=Y_GROUND):
         """Create timeseries ground from list of ground shadow coordinates.
 
@@ -585,7 +699,7 @@ class TsGround(object):
         flag_overlap : list of bool, optional
             Flags indicating if the ground shadows are overlapping, for all
             time steps (Default=None). I.e. is there direct shading on pv rows?
-        surface_params : list of str, optional
+        param_names : list of str, optional
             List of names of surface parameters to use when creating geometries
             (Default = None)
         cut_point_coords : list of :py:class:`~pvfactors.geometry.timeseries.TsPointCoords`, optional
@@ -609,7 +723,7 @@ class TsGround(object):
                                            coords.b2.x)
         # Create shadow surfaces
         ts_shadows = [TsSurface(coords) for coords in list_coords]
-        return cls(ts_shadows, surface_params=surface_params,
+        return cls(ts_shadows, param_names=param_names,
                    flag_overlap=flag_overlap,
                    cut_point_coords=cut_point_coords, y_ground=y_ground)
 
@@ -639,6 +753,7 @@ class TsGround(object):
         cut_point_coords = ([cut_point.at(idx)
                              for cut_point in self.cut_point_coords]
                             if with_cut_points else [])
+        # Decide whether to merge all shadows or not
         if merge_if_flag_overlap and (self.flag_overlap is not None):
             is_overlap = self.flag_overlap[idx]
             if is_overlap and (len(self.shadows) > 1):
@@ -650,11 +765,18 @@ class TsGround(object):
         else:
             ordered_shadow_coords = [shadow.coords.at(idx)
                                      for shadow in self.shadows]
-        pvground = PVGround.from_ordered_shadow_and_cut_pt_coords(
+        # Create parameters at given idx
+        illum_params = {k: (val if (val is None) or np.isscalar(val)
+                            else val[idx])
+                        for k, val in self.illum_params.items()}
+        shaded_params = {k: (None if (val is None) or np.isscalar(val)
+                             else val[idx])
+                         for k, val in self.shaded_params.items()}
+        # Return ground geometry
+        return PVGround.from_ordered_shadow_and_cut_pt_coords(
             x_min_max=x_min_max, ordered_shadow_coords=ordered_shadow_coords,
-            cut_point_coords=cut_point_coords,
-            surface_params=self.surface_params)
-        return pvground
+            cut_point_coords=cut_point_coords, param_names=self.param_names,
+            illum_params=illum_params, shaded_params=shaded_params)
 
     def plot_at_idx(self, idx, ax, color_shaded=COLOR_DIC['pvrow_shaded'],
                     color_illum=COLOR_DIC['pvrow_illum'], x_min_max=None,
@@ -748,7 +870,7 @@ class TsSurface(object):
     """Timeseries surface class: vectorized representation of PV surface
     geometries."""
 
-    def __init__(self, coords, n_vector=None, surface_params=None):
+    def __init__(self, coords, n_vector=None, param_names=None):
         """Initialize timeseries surface using timeseries coordinates.
 
         Parameters
@@ -761,10 +883,11 @@ class TsSurface(object):
             Timeseries normal vectors of the side (Default = None)
         """
         self.coords = coords
-        self.surface_params = surface_params
+        self.param_names = [] if param_names is None else param_names
         # TODO: the following should probably be turned into properties,
         # because if the coords change, they won't be altered. But speed...
         self.n_vector = n_vector
+        self.params = dict.fromkeys(self.param_names)
 
     def at(self, idx, shaded=None):
         """Generate a PV segment geometry for the desired index.
@@ -784,13 +907,18 @@ class TsSurface(object):
             # return an empty geometry
             return GeometryCollection()
         else:
-            # Get normal vector at that time
+            # Get normal vector at idx
             n_vector = (self.n_vector[:, idx] if self.n_vector is not None
                         else None)
-            # Return a pv surface geometry
+            # Get params at idx
+            params = {k: (None if (val is None) or np.isscalar(val)
+                          else val[idx])
+                      for k, val in self.params.items()}
+            # Return a pv surface geometry with given params
             return PVSurface(self.coords.at(idx), shaded=shaded,
                              normal_vector=n_vector,
-                             surface_params=self.surface_params)
+                             param_names=self.param_names,
+                             params=params)
 
     def plot_at_idx(self, idx, ax, color):
         """Plot timeseries PV row at a certain index, only if it's not
@@ -817,6 +945,36 @@ class TsSurface(object):
     def b2(self):
         """Timeseries coordinates of second boundary point"""
         return self.coords.b2
+
+    @property
+    def centroid(self):
+        """Timeseries point coordinates of the surface's centroid"""
+        return self.coords.centroid
+
+    def get_param(self, param):
+        """Get timeseries parameter values of surface
+
+        Parameters
+        ----------
+        param: str
+            Surface parameter to return
+
+        Returns
+        -------
+        np.ndarray
+            Timeseries parameter values
+        """
+        return self.params[param]
+
+    def update_params(self, new_dict):
+        """Update timeseries surface parameters.
+
+        Parameters
+        ----------
+        new_dict : dict
+            Parameters to add or update for the surface
+        """
+        self.params.update(new_dict)
 
     @property
     def length(self):
@@ -875,6 +1033,13 @@ class TsLineCoords(object):
     def as_array(self):
         """Timeseries line coordinates as numpy array"""
         return np.array([[self.b1.x, self.b1.y], [self.b2.x, self.b2.y]])
+
+    @property
+    def centroid(self):
+        """Timeseries point coordinates of the line coordinates"""
+        dy = self.b2.y - self.b1.y
+        dx = self.b2.x - self.b1.x
+        return TsPointCoords(self.b1.x + 0.5 * dx, self.b1.y + 0.5 * dy)
 
     @property
     def highest_point(self):

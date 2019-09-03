@@ -1,6 +1,7 @@
 import numpy as np
 from pvfactors.irradiance.utils import \
-    perez_diffuse_luminance, breakup_df_inputs, calculate_circumsolar_shading
+    perez_diffuse_luminance, breakup_df_inputs, \
+    calculate_circumsolar_shading, calculate_horizon_band_shading
 
 
 def test_perez_diffuse_luminance(df_perez_luminance):
@@ -39,3 +40,14 @@ def test_calculate_circumsolar_shading():
     rtol = 1e-8
     np.testing.assert_allclose(expected_disk_shading_perc, percent_shading,
                                atol=atol, rtol=rtol)
+
+
+def test_calculate_horizon_band_shading():
+    """Test that calculation of horizon band shading percentage is correct """
+
+    shading_angle = np.array([-10., 0., 3., 9., 20.])
+    horizon_band_angle = 15.
+    percent_shading = calculate_horizon_band_shading(shading_angle,
+                                                     horizon_band_angle)
+    expected_percent_shading = [0., 0., 20., 60., 100.]
+    np.testing.assert_allclose(expected_percent_shading, percent_shading)

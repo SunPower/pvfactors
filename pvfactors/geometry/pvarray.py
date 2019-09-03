@@ -21,7 +21,7 @@ class OrderedPVArray(BasePVArray):
     y_ground = 0.  # ground will be at height = 0 by default
 
     def __init__(self, axis_azimuth=None, gcr=None, pvrow_height=None,
-                 n_pvrows=None, pvrow_width=None, surface_params=None,
+                 n_pvrows=None, pvrow_width=None, param_names=None,
                  cut=None):
         """Initialize ordered PV array.
         List of PV rows will be ordered from left to right.
@@ -38,7 +38,7 @@ class OrderedPVArray(BasePVArray):
             Number of PV rows in the PV array (Default = None)
         pvrow_width : float, optional
             Width of the PV rows in the 2D plane in [m] (Default = None)
-        surface_params : list of str, optional
+        param_names : list of str, optional
             List of surface parameter names for the PV surfaces
             (Default = None)
         cut : dict, optional
@@ -58,7 +58,7 @@ class OrderedPVArray(BasePVArray):
                          else None)
         self.width = pvrow_width
         self.n_pvrows = n_pvrows
-        self.surface_params = [] if surface_params is None else surface_params
+        self.param_names = [] if param_names is None else param_names
         self.cut = {} if cut is None else cut
 
         # These attributes will be updated at fitting time
@@ -80,14 +80,14 @@ class OrderedPVArray(BasePVArray):
         self.is_flat = None
 
     @classmethod
-    def init_from_dict(cls, pvarray_params, surface_params=None):
+    def init_from_dict(cls, pvarray_params, param_names=None):
         """Instantiate ordered PV array from dictionary of parameters
 
         Parameters
         ----------
         pvarray_params : dict
             The parameters defining the PV array
-        surface_params : list of str, optional
+        param_names : list of str, optional
             List of parameter names to pass to surfaces (Default = None)
 
         Returns
@@ -101,11 +101,42 @@ class OrderedPVArray(BasePVArray):
                    n_pvrows=pvarray_params['n_pvrows'],
                    pvrow_width=pvarray_params['pvrow_width'],
                    cut=pvarray_params.get('cut', {}),
-                   surface_params=surface_params)
+                   param_names=param_names)
 
     @classmethod
-    def transform_from_dict_of_scalars(cls, pvarray_params,
-                                       surface_params=None):
+    def fit_from_dict_of_scalars(cls, pvarray_params, param_names=None):
+        """Instantiate, and fit ordered PV array using dictionary
+        of scalar inputs.
+
+        Parameters
+        ----------
+        pvarray_params : dict
+            The parameters used for instantiation, fitting, and transformation
+        param_names : list of str, optional
+            List of parameter names to pass to surfaces (Default = None)
+
+        Returns
+        -------
+        OrderedPVArray
+            Initialized, and fitted Ordered PV Array
+        """
+
+        # Create pv array
+        pvarray = cls.init_from_dict(pvarray_params,
+                                     param_names=param_names)
+
+        # Fit pv array to scalar values
+        solar_zenith = np.array([pvarray_params['solar_zenith']])
+        solar_azimuth = np.array([pvarray_params['solar_azimuth']])
+        surface_tilt = np.array([pvarray_params['surface_tilt']])
+        surface_azimuth = np.array([pvarray_params['surface_azimuth']])
+        pvarray.fit(solar_zenith, solar_azimuth,
+                    surface_tilt, surface_azimuth)
+
+        return pvarray
+
+    @classmethod
+    def transform_from_dict_of_scalars(cls, pvarray_params, param_names=None):
         """Instantiate, fit and transform ordered PV array using dictionary
         of scalar inputs.
 
@@ -113,7 +144,7 @@ class OrderedPVArray(BasePVArray):
         ----------
         pvarray_params : dict
             The parameters used for instantiation, fitting, and transformation
-        surface_params : list of str, optional
+        param_names : list of str, optional
             List of parameter names to pass to surfaces (Default = None)
 
         Returns
@@ -123,16 +154,8 @@ class OrderedPVArray(BasePVArray):
         """
 
         # Create pv array
-        pvarray = cls.init_from_dict(pvarray_params,
-                                     surface_params=surface_params)
-
-        # Fit pv array to scalar values
-        solar_zenith = np.array([pvarray_params['solar_zenith']])
-        solar_azimuth = np.array([pvarray_params['solar_azimuth']])
-        surface_tilt = np.array([pvarray_params['surface_tilt']])
-        surface_azimuth = np.array([pvarray_params['surface_azimuth']])
-        pvarray.fit(solar_zenith, solar_azimuth,
-                    surface_tilt, surface_azimuth)
+        pvarray = cls.fit_from_dict_of_scalars(pvarray_params,
+                                               param_names=param_names)
 
         # Transform pv array to first index (since scalar values were passed)
         pvarray.transform(0)
@@ -164,6 +187,8 @@ class OrderedPVArray(BasePVArray):
         # Calculate rotation angles
         rotation_vec = _get_rotation_from_tilt_azimuth(
             surface_azimuth, self.axis_azimuth, surface_tilt)
+        # Save rotation vector
+        self.rotation_vec = rotation_vec
 
         # Calculate the solar 2D vectors for all timestamps
         self.solar_2d_vectors = _get_solar_2d_vectors(
@@ -179,7 +204,7 @@ class OrderedPVArray(BasePVArray):
         self.ts_ground = TsGround.from_ts_pvrows_and_angles(
             self.ts_pvrows, alpha_vec, rotation_vec, y_ground=self.y_ground,
             flag_overlap=self.has_direct_shading,
-            surface_params=self.surface_params)
+            param_names=self.param_names)
 
         # Save surface rotation angles
         self.rotation_vec = rotation_vec
@@ -240,7 +265,7 @@ class OrderedPVArray(BasePVArray):
         xy_centers = [(X_ORIGIN_PVROWS + idx * self.distance,
                        self.height + self.y_ground)
                       for idx in range(self.n_pvrows)]
-        tilted_to_left = rotation_vec >= 0.
+        tilted_to_left = rotation_vec > 0.
         for idx_pvrow, xy_center in enumerate(xy_centers):
             # A special treatment needs to be applied to shaded lengths for
             # the PV rows at the edge of the PV array
@@ -265,7 +290,7 @@ class OrderedPVArray(BasePVArray):
                 xy_center, self.width, rotation_vec,
                 self.cut.get(idx_pvrow, {}), shaded_length_front,
                 shaded_length_back, index=idx_pvrow,
-                surface_params=self.surface_params))
+                param_names=self.param_names))
 
     def _calculate_interrow_shading(self, alpha_vec, rotation_vec):
         """Calculate the shaded length on front and back side of PV rows when

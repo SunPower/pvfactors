@@ -25,7 +25,7 @@ class PVGround(BaseSide):
 
     @classmethod
     def as_flat(cls, x_min_max=None, shaded=False, y_ground=Y_GROUND,
-                surface_params=[]):
+                param_names=[]):
         """Build a horizontal flat ground surface, made of 1 PV segment.
 
         Parameters
@@ -37,7 +37,7 @@ class PVGround(BaseSide):
             Shaded status of the created PV surfaces (Default = False)
         y_ground : float, optional
             Location of flat ground on y axis in [m] (Default = Y_GROUND)
-        surface_params : list of str, optional
+        param_names : list of str, optional
             Names of the surface parameters, eg reflectivity, total incident
             irradiance, temperature, etc. (Default = [])
 
@@ -54,13 +54,14 @@ class PVGround(BaseSide):
         coords = [(x_min, y_ground), (x_max, y_ground)]
         seg = PVSegment.from_linestring_coords(coords, shaded=shaded,
                                                normal_vector=[0., 1.],
-                                               surface_params=surface_params)
+                                               param_names=param_names)
         return cls(list_segments=[seg], original_linestring=LineString(coords))
 
     @classmethod
     def from_ordered_shadow_and_cut_pt_coords(
         cls, x_min_max=None, y_ground=Y_GROUND, ordered_shadow_coords=[],
-            cut_point_coords=[], surface_params=[]):
+            cut_point_coords=[], param_names=[], shaded_params={},
+            illum_params={}):
         """Build a horizontal flat ground surface, made of 1 PVSegment with
         shaded areas and "cut points" (reference points used in view factor
         calculations)
@@ -80,9 +81,15 @@ class PVGround(BaseSide):
             List of cut point coordinates, ordered from left to right.
             Shape = (# of cut points, 2 {# of points}, 2 {for xy coords})
             (Default = [])
-        surface_params : list of str, optional
+        param_names : list of str, optional
             Names of the surface parameters, eg reflectivity, total incident
             irradiance, temperature, etc. (Default = [])
+        shaded_params : dict, optional
+            Dictionary of parameter values for shaded surfaces
+            (Default = {})
+        illum_params : dict, optional
+            Dictionary of parameter values for illuminated surfaces
+            (Default = {})
 
         Returns
         -------
@@ -101,15 +108,15 @@ class PVGround(BaseSide):
         list_illum_surfaces = []
         recurse_on_cut_points(list_shaded_surfaces, list_illum_surfaces,
                               ordered_shadow_coords, cut_point_coords,
-                              x_min, x_max, y_ground, surface_params)
-
+                              x_min, x_max, y_ground, param_names,
+                              shaded_params, illum_params)
         # Create the shade collections
         shaded_collection = ShadeCollection(
             list_surfaces=list_shaded_surfaces, shaded=True,
-            surface_params=surface_params)
+            param_names=param_names)
         illum_collection = ShadeCollection(
             list_surfaces=list_illum_surfaces, shaded=False,
-            surface_params=surface_params)
+            param_names=param_names)
 
         # Create the ground segment
         segment = PVSegment(illum_collection=illum_collection,
@@ -127,7 +134,8 @@ class PVGround(BaseSide):
 def recurse_on_cut_points(
         list_shaded_surfaces, list_illum_surfaces,
         ordered_shadow_coords, cut_point_coords,
-        x_min, x_max, y_ground, surface_params):
+        x_min, x_max, y_ground, param_names,
+        shaded_params, illum_params):
     """Solve recursively the problem of building the lists of shaded and
     illuminated PV surfaces when cut points and shadows might exist.
 
@@ -149,15 +157,19 @@ def recurse_on_cut_points(
         Rightmost x coordinate of the considered ground [m]
     y_ground : float
         Location of flat ground on y axis in [m]
-    surface_params : list of str, optional
+    param_names : list of str, optional
         Names of the surface parameters, eg reflectivity, total incident
         irradiance, temperature, etc.
+    shaded_params : dict
+        Dictionary of parameter values for shaded surfaces
+    illum_params : dict
+        Dictionary of parameter values for illuminated surfaces
     """
 
     if len(cut_point_coords) == 0:
         build_list_illum_shadow_surfaces(
             list_shaded_surfaces, list_illum_surfaces, ordered_shadow_coords,
-            x_min, x_max, y_ground, surface_params)
+            x_min, x_max, y_ground, param_names, shaded_params, illum_params)
     else:
         # Get leftmost cut point
         cut_point = cut_point_coords[0]
@@ -173,18 +185,19 @@ def recurse_on_cut_points(
             build_list_illum_shadow_surfaces(
                 list_shaded_surfaces, list_illum_surfaces,
                 ordered_shadow_coords, x_min, new_x_max, y_ground,
-                surface_params)
+                param_names, shaded_params, illum_params)
             # New x_min should be at the cut point
             x_min = new_x_max
         # Now move to the next [x_min, x_max] frame
         recurse_on_cut_points(list_shaded_surfaces, list_illum_surfaces,
                               ordered_shadow_coords, cut_point_coords,
-                              x_min, x_max, y_ground, surface_params)
+                              x_min, x_max, y_ground, param_names,
+                              shaded_params, illum_params)
 
 
 def build_list_illum_shadow_surfaces(
         list_shaded_surfaces, list_illum_surfaces, ordered_shadow_coords,
-        x_min, x_max, y_ground, surface_params):
+        x_min, x_max, y_ground, param_names, shaded_params, illum_params):
     """Build lists of shaded and illuminated surfaces in the case when
     there are no cut points.
 
@@ -203,16 +216,20 @@ def build_list_illum_shadow_surfaces(
         Rightmost x coordinate of the considered ground [m]
     y_ground : float
         Location of flat ground on y axis in [m]
-    surface_params : list of str, optional
+    param_names : list of str, optional
         Names of the surface parameters, eg reflectivity, total incident
         irradiance, temperature, etc.
+    shaded_params : dict
+        Dictionary of parameter values for shaded surfaces
+    illum_params : dict
+        Dictionary of parameter values for illuminated surfaces
     """
     if len(ordered_shadow_coords) == 0:
         if x_min + DISTANCE_TOLERANCE < x_max:
             # The whole ground is illuminated
             full_extent_coords = [(x_min, y_ground), (x_max, y_ground)]
             illum = PVSurface(coords=full_extent_coords, shaded=False,
-                              surface_params=surface_params)
+                              param_names=param_names, params=illum_params)
             list_illum_surfaces.append(illum)
     else:
         # There are shadows and illuminated areas
@@ -235,31 +252,36 @@ def build_list_illum_shadow_surfaces(
                         x_illum_left = x_max
                     # Create shadow and add it to list
                     shadow = PVSurface(coords=coord, shaded=True,
-                                       surface_params=surface_params)
+                                       param_names=param_names,
+                                       params=shaded_params)
                     list_shaded_surfaces.append(shadow)
             elif x2 > x_max:
                 if x1 + DISTANCE_TOLERANCE < x_max:
                     # Shadow is cropped in the picture
                     coord = [[x1, y1], [x_max, y2]]
                     shadow = PVSurface(coords=coord, shaded=True,
-                                       surface_params=surface_params)
+                                       param_names=param_names,
+                                       params=shaded_params)
                     list_shaded_surfaces.append(shadow)
                     if x_illum_left + DISTANCE_TOLERANCE < x1:
                         coord = [[x_illum_left, y1], [x1, y1]]
                         illum = PVSurface(coords=coord, shaded=False,
-                                          surface_params=surface_params)
+                                          param_names=param_names,
+                                          params=illum_params)
                         list_illum_surfaces.append(illum)
                     # Update x_illum_left to right x coord of shadow
                     x_illum_left = x_max
             else:
                 # Shadow is fully in the picture
                 shadow = PVSurface(coords=shadow_coord, shaded=True,
-                                   surface_params=surface_params)
+                                   param_names=param_names,
+                                   params=shaded_params)
                 list_shaded_surfaces.append(shadow)
                 if x_illum_left + DISTANCE_TOLERANCE < x1:
                     coord = [[x_illum_left, y1], [x1, y1]]
                     illum = PVSurface(coords=coord, shaded=False,
-                                      surface_params=surface_params)
+                                      param_names=param_names,
+                                      params=illum_params)
                     list_illum_surfaces.append(illum)
                 # Update x_illum_left to right x coord of shadow
                 x_illum_left = x2
@@ -267,5 +289,5 @@ def build_list_illum_shadow_surfaces(
         if x_illum_left + DISTANCE_TOLERANCE < x_max:
             coord = [[x_illum_left, y1], [x_max, y1]]
             illum = PVSurface(coords=coord, shaded=False,
-                              surface_params=surface_params)
+                              param_names=param_names, params=illum_params)
             list_illum_surfaces.append(illum)

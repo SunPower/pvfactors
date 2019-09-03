@@ -350,7 +350,7 @@ def calculate_horizon_band_shading(shading_angle, horizon_band_angle):
 
     Parameters
     ----------
-    shading_angle : float
+    shading_angle : np.ndarray
         the elevation angle to use for shading
     horizon_band_angle : float
         the total elevation angle of the horizon band
@@ -361,12 +361,8 @@ def calculate_horizon_band_shading(shading_angle, horizon_band_angle):
         shading percentage of horizon band
 
     """
-    percent_shading = 0.
-    if shading_angle >= horizon_band_angle:
-        percent_shading = 100.
-    elif (shading_angle >= 0) | (shading_angle < horizon_band_angle):
-        percent_shading = 100. * shading_angle / horizon_band_angle
-    else:
-        # No shading
-        pass
+    percent_shading = np.where(shading_angle >= horizon_band_angle, 100., 0.)
+    percent_shading = np.where(
+        (shading_angle >= 0) & (shading_angle < horizon_band_angle),
+        100. * shading_angle / horizon_band_angle, percent_shading)
     return percent_shading
