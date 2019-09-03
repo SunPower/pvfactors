@@ -128,19 +128,6 @@ class IsotropicOrdered(BaseModel):
         idx : int, optional
             Index of the irradiance values to apply to the PV array (in the
             whole timeseries values)
-
-        Returns
-        -------
-        irradiance_vec : numpy array
-            List of summed up non-reflective irradiance values for all surfaces
-            and sky
-        rho_vec : numpy array
-            List of reflectivity values for all surfaces and sky
-        invrho_vec : numpy array
-            List of inverse reflectivity for all surfaces and sky
-        total_perez_vec : numpy array
-            List of total perez transposed irradiance values for all surfaces
-            and sky
         """
 
         for seg in pvarray.ground.list_segments:
@@ -183,6 +170,14 @@ class IsotropicOrdered(BaseModel):
                      'total_perez': 0.})
 
     def transform_ts(self, pvarray):
+        """Apply calculated irradiance values to PV array timeseries
+        geometries: assign values as parameters to timeseries surfaces.
+
+        Parameters
+        ----------
+        pvarray : PV array object
+            PV array on which the calculated irradiance values will be applied
+        """
 
         # Prepare variables
         n_steps = self.n_steps
@@ -231,7 +226,30 @@ class IsotropicOrdered(BaseModel):
                      'total_perez': np.zeros(n_steps)})
 
     def get_full_modeling_vectors(self, pvarray, idx):
+        """Get the modeling vectors used in matrix calculations of mathematical
+        model.
 
+        Parameters
+        ----------
+        pvarray : PV array object
+            PV array on which the calculated irradiance values will be applied
+        idx : int, optional
+            Index of the irradiance values to apply to the PV array (in the
+            whole timeseries values)
+
+        Returns
+        -------
+        irradiance_vec : numpy array
+            List of summed up non-reflective irradiance values for all surfaces
+            and sky
+        rho_vec : numpy array
+            List of reflectivity values for all surfaces and sky
+        invrho_vec : numpy array
+            List of inverse reflectivity for all surfaces and sky
+        total_perez_vec : numpy array
+            List of total perez transposed irradiance values for all surfaces
+            and sky
+        """
         # Sum up the necessary parameters to form the irradiance vector
         irradiance_vec, rho_vec, inv_rho_vec, total_perez_vec = \
             self.get_modeling_vectors(pvarray)
@@ -388,6 +406,14 @@ class HybridPerezOrdered(BaseModel):
         self.total_perez['sky'] = luminance_isotropic
 
     def transform_ts(self, pvarray):
+        """Apply calculated irradiance values to PV array timeseries
+        geometries: assign values as parameters to timeseries surfaces.
+
+        Parameters
+        ----------
+        pvarray : PV array object
+            PV array on which the calculated irradiance values will be applied
+        """
 
         # Prepare variables
         n_steps = self.n_steps
@@ -476,19 +502,6 @@ class HybridPerezOrdered(BaseModel):
         idx : int, optional
             Index of the irradiance values to apply to the PV array (in the
             whole timeseries values)
-
-        Returns
-        -------
-        irradiance_vec : numpy array
-            List of summed up non-reflective irradiance values for all surfaces
-            and sky
-        rho_vec : numpy array
-            List of reflectivity values for all surfaces and sky
-        invrho_vec : numpy array
-            List of inverse reflectivity for all surfaces and sky
-        total_perez_vec : numpy array
-            List of total perez transposed irradiance values for all surfaces
-            and sky
         """
 
         for seg in pvarray.ground.list_segments:
@@ -558,6 +571,30 @@ class HybridPerezOrdered(BaseModel):
                          'total_perez': 0.})
 
     def get_full_modeling_vectors(self, pvarray, idx):
+        """Get the modeling vectors used in matrix calculations of mathematical
+        model.
+
+        Parameters
+        ----------
+        pvarray : PV array object
+            PV array on which the calculated irradiance values will be applied
+        idx : int, optional
+            Index of the irradiance values to apply to the PV array (in the
+            whole timeseries values)
+
+        Returns
+        -------
+        irradiance_vec : numpy array
+            List of summed up non-reflective irradiance values for all surfaces
+            and sky
+        rho_vec : numpy array
+            List of reflectivity values for all surfaces and sky
+        invrho_vec : numpy array
+            List of inverse reflectivity for all surfaces and sky
+        total_perez_vec : numpy array
+            List of total perez transposed irradiance values for all surfaces
+            and sky
+        """
 
         # Sum up the necessary parameters to form the irradiance vector
         irradiance_vec, rho_vec, inv_rho_vec, total_perez_vec = \
@@ -609,6 +646,28 @@ class HybridPerezOrdered(BaseModel):
     def calculate_horizon_shading_pct_ts(self, ts_pvrows, ts_point_coords,
                                          pvrow_idx, tilted_to_left,
                                          is_back_side=True):
+        """Calculate horizon band shading percentage on surfaces of the ordered
+        PV array, in a vectorized way.
+
+        Parameters
+        ----------
+        ts_pvrows : list of :py:class:`~pvfactors.geometry.timeseries.TsPVRow`
+            List of timeseries PV rows in the PV array
+        ts_point_coords : :py:class:`~pvfactors.geometry.timeseries.TsPointCoords`
+            Timeseries coordinates of point that suffers horizon band shading
+        pvrow_idx : int
+            Index of PV row on which the above point is located
+        tilted_to_left : list of bool
+            Flags indicating when the PV rows are strictly tilted to the left
+        is_back_side : bool
+            Flag indicating if point is located on back side of PV row
+
+        Returns
+        -------
+        horizon_shading_pct : np.ndarray
+            Percentage vector of horizon band irradiance shading
+            (from 0 to 100)
+        """
         n_pvrows = len(ts_pvrows)
         if pvrow_idx == 0:
             shading_pct_left = np.zeros_like(tilted_to_left)
