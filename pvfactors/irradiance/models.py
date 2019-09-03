@@ -93,6 +93,7 @@ class IsotropicOrdered(BaseModel):
             GHI = DNI * cosd(solar_zenith) + DHI
         self.GHI = GHI
         self.DHI = DHI
+        self.n_steps = n
         perez_front_pvrow = get_total_irradiance(
             surface_tilt, surface_azimuth, solar_zenith, solar_azimuth,
             DNI, GHI, DHI, albedo=albedo)
@@ -180,6 +181,56 @@ class IsotropicOrdered(BaseModel):
                      'rho': self.rho_back,
                      'inv_rho': 1. / self.rho_back,
                      'total_perez': 0.})
+
+    def transform_ts(self, pvarray):
+
+        # Prepare variables
+        n_steps = self.n_steps
+        rho_front = self.rho_front * np.ones(n_steps)
+        inv_rho_front = 1. / rho_front
+        rho_back = self.rho_back * np.ones(n_steps)
+        inv_rho_back = 1. / rho_back
+
+        # Transform timeseries ground
+        pvarray.ts_ground.illum_params.update(
+            {'direct': self.direct['ground'],
+             'rho': self.albedo,
+             'inv_rho': 1. / self.albedo,
+             'total_perez': self.GHI})
+        pvarray.ts_ground.shaded_params.update(
+            {'direct': np.zeros(n_steps),
+             'rho': self.albedo,
+             'inv_rho': 1. / self.albedo,
+             'total_perez': self.DHI})
+
+        for ts_pvrow in pvarray.ts_pvrows:
+            # Front
+            for ts_seg in ts_pvrow.front.list_segments:
+                ts_seg.illum.update_params(
+                    {'direct': self.direct['front_pvrow'],
+                     'rho': rho_front,
+                     'inv_rho': inv_rho_front,
+                     'total_perez': self.total_perez['front_pvrow']})
+                ts_seg.shaded.update_params(
+                    {'direct': 0.,
+                     'rho': rho_front,
+                     'inv_rho': inv_rho_front,
+                     'total_perez': self.total_perez['front_pvrow']
+                     - self.direct['front_pvrow']})
+            # Back
+            for ts_seg in ts_pvrow.back.list_segments:
+                ts_seg.illum.update_params(
+                    {'direct': self.direct['back_pvrow'],
+                     'rho': rho_back,
+                     'inv_rho': inv_rho_back,
+                     'total_perez': np.zeros(n_steps)})
+                ts_seg.shaded.update_params(
+                    {'direct': np.zeros(n_steps),
+                     'rho': rho_back,
+                     'inv_rho': inv_rho_back,
+                     'total_perez': np.zeros(n_steps)})
+
+    def get_full_modeling_vectors(self, pvarray, idx):
 
         # Sum up the necessary parameters to form the irradiance vector
         irradiance_vec, rho_vec, inv_rho_vec, total_perez_vec = \
