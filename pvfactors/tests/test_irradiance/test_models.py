@@ -32,7 +32,7 @@ def test_isotropic_model_front(params_irr):
 
     # pvarray
     pvarray = OrderedPVArray.transform_from_dict_of_scalars(
-        params_irr, surface_params=IsotropicOrdered.params)
+        params_irr, param_names=IsotropicOrdered.params)
     # there should be some direct shading
     assert pvarray.pvrows[0].front.shaded_length
 
@@ -122,7 +122,7 @@ def test_isotropic_model_back(params_irr):
 
     # pvarray
     pvarray = OrderedPVArray.transform_from_dict_of_scalars(
-        params_irr, surface_params=IsotropicOrdered.params)
+        params_irr, param_names=IsotropicOrdered.params)
     # there should be some direct shading
     assert pvarray.pvrows[0].back.shaded_length
 
@@ -206,7 +206,7 @@ def test_hybridperez_ordered_front(params_irr):
 
     # pvarray
     pvarray = OrderedPVArray.transform_from_dict_of_scalars(
-        params_irr, surface_params=HybridPerezOrdered.params)
+        params_irr, param_names=HybridPerezOrdered.params)
     # there should be some direct shading
     assert pvarray.pvrows[0].front.shaded_length
 
@@ -345,7 +345,7 @@ def test_hybridperez_ordered_back(params_irr):
 
     # pvarray
     pvarray = OrderedPVArray.transform_from_dict_of_scalars(
-        params_irr, surface_params=HybridPerezOrdered.params)
+        params_irr, param_names=HybridPerezOrdered.params)
     # there should be some direct shading
     assert pvarray.pvrows[0].back.shaded_length
 
@@ -544,7 +544,8 @@ def test_hybridperez_horizon_shading_ts():
 
 def test_hybridperez_transform_ts(df_inputs_clearsky_8760):
 
-    df_inputs = df_inputs_clearsky_8760.iloc[:24, :]
+    n_points = 24
+    df_inputs = df_inputs_clearsky_8760.iloc[:n_points, :]
     # Base params
     params = {
         'n_pvrows': 3,
@@ -569,6 +570,7 @@ def test_hybridperez_transform_ts(df_inputs_clearsky_8760):
               albedo)
     model.transform_ts(pvarray)
 
+    # Check timeseries parameters
     expected_middle_back_horizon = np.array(
         [0., 0., 0., 0., 0.,
          0., 0., 0.4472212, 0., 0.,
@@ -578,3 +580,28 @@ def test_hybridperez_transform_ts(df_inputs_clearsky_8760):
     np.testing.assert_allclose(
         expected_middle_back_horizon,
         pvarray.ts_pvrows[1].back.list_segments[0].illum.params['horizon'])
+
+    expected_ground_circ = np.array(
+        [0., 0., 0., 0., 0.,
+         0., 0., 2.19047189, 8.14152575, 13.9017384,
+         18.54394777, 21.11510529, 21.00554831, 18.24251837, 13.47583799,
+         7.66930532, 1.74693357, 0., 0., 0.,
+         0., 0., 0., 0.])
+    np.testing.assert_allclose(
+        expected_ground_circ,
+        pvarray.ts_ground.illum_params['circumsolar'])
+    np.testing.assert_allclose(
+        np.zeros(n_points),
+        pvarray.ts_ground.shaded_params['circumsolar'])
+
+    # Check at a given time idx
+    pvrow = pvarray.ts_pvrows[1].at(7)
+    np.testing.assert_allclose(
+        pvrow.back.list_segments[0].illum_collection
+        .get_param_weighted('horizon'),
+        expected_middle_back_horizon[7])
+    pvground = pvarray.ts_ground.at(7)
+    np.testing.assert_allclose(
+        pvground.list_segments[0].illum_collection
+        .get_param_weighted('circumsolar'),
+        expected_ground_circ[7])

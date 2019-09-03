@@ -55,7 +55,7 @@ class PVRow(GeometryCollection):
 
     @classmethod
     def from_linestring_coords(cls, coords, shaded=False, normal_vector=None,
-                               index=None, cut={}, surface_params=[]):
+                               index=None, cut={}, param_names=[]):
         """Create a PV row with a single PV surface and using linestring
         coordinates.
 
@@ -73,7 +73,7 @@ class PVRow(GeometryCollection):
             Scheme to decide how many segments to create on each side.
             Eg {'front': 3, 'back': 2} will lead to 3 segments on front side
             and 2 segments on back side. (Default = {})
-        surface_params : list of str, optional
+        param_names : list of str, optional
             Names of the surface parameters, eg reflectivity, total incident
             irradiance, temperature, etc. (Default = [])
 
@@ -85,7 +85,7 @@ class PVRow(GeometryCollection):
         front_side = PVRowSide.from_linestring_coords(
             coords, shaded=shaded, normal_vector=normal_vector,
             index=index_single_segment, n_segments=cut.get('front', 1),
-            surface_params=surface_params)
+            param_names=param_names)
         if normal_vector is not None:
             back_n_vec = - np.array(normal_vector)
         else:
@@ -93,14 +93,14 @@ class PVRow(GeometryCollection):
         back_side = PVRowSide.from_linestring_coords(
             coords, shaded=shaded, normal_vector=back_n_vec,
             index=index_single_segment, n_segments=cut.get('back', 1),
-            surface_params=surface_params)
+            param_names=param_names)
         return cls(front_side=front_side, back_side=back_side, index=index,
                    original_linestring=LineString(coords))
 
     @classmethod
     def from_center_tilt_width(cls, xy_center, tilt, width, surface_azimuth,
                                axis_azimuth, shaded=False, normal_vector=None,
-                               index=None, cut={}, surface_params=[]):
+                               index=None, cut={}, param_names=[]):
         """Create a PV row using mainly the coordinates of the line center,
         a tilt angle, and its length.
 
@@ -127,7 +127,7 @@ class PVRow(GeometryCollection):
             Scheme to decide how many segments to create on each side.
             Eg {'front': 3, 'back': 2} will lead to 3 segments on front side
             and 2 segments on back side. (Default = {})
-        surface_params : list of str, optional
+        param_names : list of str, optional
             Names of the surface parameters, eg reflectivity, total incident
             irradiance, temperature, etc. (Default = [])
 
@@ -140,7 +140,7 @@ class PVRow(GeometryCollection):
         return cls.from_linestring_coords(coords, shaded=shaded,
                                           normal_vector=normal_vector,
                                           index=index, cut=cut,
-                                          surface_params=surface_params)
+                                          param_names=param_names)
 
     def plot(self, ax, color_shaded=COLOR_DIC['pvrow_shaded'],
              color_illum=COLOR_DIC['pvrow_illum'], with_index=False):
