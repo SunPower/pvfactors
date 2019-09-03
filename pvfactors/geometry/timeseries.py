@@ -362,21 +362,60 @@ class TsSide(object):
 
     @property
     def length(self):
+        """Timeseries length of side."""
         length = 0.
         for seg in self.list_segments:
             length += seg.length
         return length
 
     def get_param_weighted(self, param):
+        """Get timeseries parameter for the side, after weighting by
+        surface length.
+
+        Parameters
+        ----------
+        param : str
+            Name of parameter
+
+        Returns
+        -------
+        np.ndarray
+            Weighted parameter values
+        """
         return self.get_param_ww(param) / self.length
 
     def get_param_ww(self, param):
+        """Get timeseries parameter from the side's surfaces with weight, i.e.
+        after multiplying by the surface lengths.
+
+        Parameters
+        ----------
+        param: str
+            Surface parameter to return
+
+        Returns
+        -------
+        np.ndarray
+            Timeseries parameter values multiplied by weights
+
+        Raises
+        ------
+        KeyError
+            if parameter name not in a surface parameters
+        """
         value = 0.
         for seg in self.list_segments:
             value += seg.get_param_ww(param)
         return value
 
     def update_params(self, new_dict):
+        """Update timeseries surface parameters of the side.
+
+        Parameters
+        ----------
+        new_dict : dict
+            Parameters to add or update for the surfaces
+        """
 
         for seg in self.list_segments:
             seg.update_params(new_dict)
@@ -493,13 +532,39 @@ class TsDualSegment(object):
 
     @property
     def centroid(self):
+        """Timeseries point coordinates of the segment's centroid"""
         return self.coords.centroid
 
     def get_param_weighted(self, param):
+        """Get timeseries parameter for the segment, after weighting by
+        surface length.
 
+        Parameters
+        ----------
+        param : str
+            Name of parameter
+
+        Returns
+        -------
+        np.ndarray
+            Weighted parameter values
+        """
         return self.get_param_ww(param) / self.length
 
     def get_param_ww(self, param):
+        """Get timeseries parameter from the segment's surfaces with weight,
+        i.e. after multiplying by the surface lengths.
+
+        Parameters
+        ----------
+        param: str
+            Surface parameter to return
+
+        Returns
+        -------
+        np.ndarray
+            Timeseries parameter values multiplied by weights
+        """
 
         value = 0
         value += self.illum.get_param(param) * self.illum.length
@@ -507,6 +572,13 @@ class TsDualSegment(object):
         return value
 
     def update_params(self, new_dict):
+        """Update timeseries surface parameters of the segment.
+
+        Parameters
+        ----------
+        new_dict : dict
+            Parameters to add or update for the surfaces
+        """
         self.illum.update_params(new_dict)
         self.shaded.update_params(new_dict)
 
@@ -876,12 +948,32 @@ class TsSurface(object):
 
     @property
     def centroid(self):
+        """Timeseries point coordinates of the surface's centroid"""
         return self.coords.centroid
 
     def get_param(self, param):
+        """Get timeseries parameter values of surface
+
+        Parameters
+        ----------
+        param: str
+            Surface parameter to return
+
+        Returns
+        -------
+        np.ndarray
+            Timeseries parameter values
+        """
         return self.params[param]
 
     def update_params(self, new_dict):
+        """Update timeseries surface parameters.
+
+        Parameters
+        ----------
+        new_dict : dict
+            Parameters to add or update for the surface
+        """
         self.params.update(new_dict)
 
     @property
@@ -944,6 +1036,7 @@ class TsLineCoords(object):
 
     @property
     def centroid(self):
+        """Timeseries point coordinates of the line coordinates"""
         dy = self.b2.y - self.b1.y
         dx = self.b2.x - self.b1.x
         return TsPointCoords(self.b1.x + 0.5 * dx, self.b1.y + 0.5 * dy)
