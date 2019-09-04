@@ -259,4 +259,6 @@ class PVEngine(object):
                 + vf['to_sky'] * irr_sky
                 + sky_term)
 
-        print(qinc)
+        qinc = np.where(self.skip_step, 0., qinc)
+
+        return qinc

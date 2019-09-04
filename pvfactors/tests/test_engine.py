@@ -176,8 +176,7 @@ def test_run_fast_mode(params):
     # Run fast mode
     pvrow_idx = 1
     segment_idx = 0
-    eng.run_fast_back_pvrow(pvrow_idx, segment_idx=segment_idx)
-    # # Checks
-    # assert isinstance(pvarray, OrderedPVArray)
-    # np.testing.assert_almost_equal(
-    #     pvarray.pvrows[1].back.get_param_weighted('qinc'), 123.7087347744459)
+    qinc = eng.run_fast_back_pvrow(pvrow_idx, segment_idx=segment_idx)
+
+    # Check results
+    np.testing.assert_allclose(qinc, 123.753462)
