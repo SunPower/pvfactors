@@ -145,3 +145,39 @@ def test_fast_pvengine_float_inputs_perez(params):
     assert isinstance(pvarray, OrderedPVArray)
     np.testing.assert_almost_equal(
         pvarray.pvrows[1].back.get_param_weighted('qinc'), 123.7087347744459)
+
+
+def test_run_fast_mode(params):
+    """Test that PV engine works for float inputs"""
+
+    # Prepare some engine inputs
+    irradiance_model = HybridPerezOrdered()
+    pvarray = OrderedPVArray.init_from_dict(
+        params, param_names=irradiance_model.params)
+    fast_mode_pvrow_index = 1
+
+    # Create engine object
+    eng = PVEngine(pvarray, irradiance_model=irradiance_model,
+                   fast_mode_pvrow_index=fast_mode_pvrow_index)
+
+    # Irradiance inputs
+    timestamps = dt.datetime(2019, 6, 11, 11)
+    DNI = 1000.
+    DHI = 100.
+
+    # Fit engine
+    eng.fit(timestamps, DNI, DHI,
+            params['solar_zenith'], params['solar_azimuth'],
+            params['surface_tilt'], params['surface_azimuth'],
+            params['rho_ground'])
+    # Checks
+    np.testing.assert_almost_equal(eng.irradiance.direct['front_pvrow'], DNI)
+
+    # Run fast mode
+    pvrow_idx = 1
+    segment_idx = 0
+    eng.run_fast_mode(pvrow_idx, segment_idx=segment_idx)
+    # # Checks
+    # assert isinstance(pvarray, OrderedPVArray)
+    # np.testing.assert_almost_equal(
+    #     pvarray.pvrows[1].back.get_param_weighted('qinc'), 123.7087347744459)

@@ -229,3 +229,29 @@ class PVEngine(object):
                 report = fn_build_report(report, pvarray)
 
         return report
+
+    def run_fast_mode(self, pvrow_idx, segment_idx=None):
+
+        # Calculate irradiance vector for segment
+        albedo = self.irradiance_model.albedo
+        rho_front = self.irradiance_model.rho_front
+        perez_gnd_shaded = None
+        perez_gnd_illum = None
+        perez_pvrow_shaded = None
+        perez_pvrow_illum = None
+        perez_sky = None
+        sky_term = None
+
+        # Calculate view factors for segment
+        vf = self.vf_calculator.get_vf_ts_pvrow_segment(
+            pvrow_idx, segment_idx, self.pvarray.ts_pvrows,
+            self.pvarray.ts_ground, self.pvarray.rotation_vec,
+            self.pvarray.width)
+
+        # Calculate incident irradiance
+        qinc = (vf['to_gnd_shaded'] * albedo * perez_gnd_shaded
+                + vf['to_gnd_illum'] * albedo * perez_gnd_illum
+                + vf['to_pvrow_shaded'] * rho_front * perez_pvrow_shaded
+                + vf['to_pvrow_illum'] * rho_front * perez_pvrow_illum
+                + vf['to_sky'] * perez_sky
+                + sky_term)
