@@ -28,6 +28,31 @@ class BaseModel(object):
         """Not implemented"""
         raise NotImplementedError
 
+    @property
+    def gnd_shaded(self):
+        """Not implemented"""
+        raise NotImplementedError
+
+    @property
+    def gnd_illum(self):
+        """Not implemented"""
+        raise NotImplementedError
+
+    @property
+    def pvrow_shaded(self):
+        """Not implemented"""
+        raise NotImplementedError
+
+    @property
+    def pvrow_illum(self):
+        """Not implemented"""
+        raise NotImplementedError
+
+    @property
+    def sky(self):
+        """Not implemented"""
+        raise NotImplementedError
+
     def get_modeling_vectors(self, pvarray):
         """Get vector of summed up irradiance values from a PV array, as well
         as the inverse reflectivity values (the latter need to be named

@@ -230,17 +230,17 @@ class PVEngine(object):
 
         return report
 
-    def run_fast_mode(self, pvrow_idx, segment_idx=None):
+    def run_fast_back_pvrow(self, pvrow_idx, segment_idx=None):
 
         # Calculate irradiance vector for segment
-        albedo = self.irradiance_model.albedo
-        rho_front = self.irradiance_model.rho_front
-        perez_gnd_shaded = None
-        perez_gnd_illum = None
-        perez_pvrow_shaded = None
-        perez_pvrow_illum = None
-        perez_sky = None
-        sky_term = None
+        albedo = self.irradiance.albedo
+        rho_front = self.irradiance.rho_front
+        irr_gnd_shaded = self.irradiance.gnd_shaded
+        irr_gnd_illum = self.irradiance.gnd_illum
+        irr_pvrow_shaded = self.irradiance.pvrow_shaded
+        irr_pvrow_illum = self.irradiance.pvrow_illum
+        irr_sky = self.irradiance.sky_luminance
+        sky_term = 0.
 
         # Calculate view factors for segment
         vf = self.vf_calculator.get_vf_ts_pvrow_segment(
@@ -249,9 +249,11 @@ class PVEngine(object):
             self.pvarray.width)
 
         # Calculate incident irradiance
-        qinc = (vf['to_gnd_shaded'] * albedo * perez_gnd_shaded
-                + vf['to_gnd_illum'] * albedo * perez_gnd_illum
-                + vf['to_pvrow_shaded'] * rho_front * perez_pvrow_shaded
-                + vf['to_pvrow_illum'] * rho_front * perez_pvrow_illum
-                + vf['to_sky'] * perez_sky
+        qinc = (vf['to_gnd_shaded'] * albedo * irr_gnd_shaded
+                + vf['to_gnd_illum'] * albedo * irr_gnd_illum
+                + vf['to_pvrow_shaded'] * rho_front * irr_pvrow_shaded
+                + vf['to_pvrow_illum'] * rho_front * irr_pvrow_illum
+                + vf['to_sky'] * irr_sky
                 + sky_term)
+
+        print(qinc)

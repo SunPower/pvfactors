@@ -814,3 +814,30 @@ class HybridPerezOrdered(BaseModel):
         return luminance_isotropic, luminance_circumsolar, poa_horizon, \
             poa_circumsolar_front, poa_circumsolar_back, \
             aoi_front_pvrow, aoi_back_pvrow
+
+    @property
+    def gnd_shaded(self):
+        """Total timeseries irradiance incident on ground shaded areas"""
+        return self.total_perez['ground_shaded']
+
+    @property
+    def gnd_illum(self):
+        """Total timeseries irradiance incident on ground illuminated areas"""
+        return self.total_perez['ground_illum']
+
+    @property
+    def pvrow_shaded(self):
+        """Total timeseries irradiance incident on PV row's front illuminated
+        areas and calculated by Perez transposition"""
+        return self.total_perez['front_shaded_pvrow']
+
+    @property
+    def pvrow_illum(self):
+        """Total timeseries irradiance incident on PV row's front shaded
+        areas and calculated by Perez transposition"""
+        return self.total_perez['front_illum_pvrow']
+
+    @property
+    def sky_luminance(self):
+        """Total timeseries isotropic luminance of sky"""
+        return self.isotropic_luminance

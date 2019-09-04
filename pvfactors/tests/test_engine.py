@@ -176,7 +176,7 @@ def test_run_fast_mode(params):
     # Run fast mode
     pvrow_idx = 1
     segment_idx = 0
-    eng.run_fast_mode(pvrow_idx, segment_idx=segment_idx)
+    eng.run_fast_back_pvrow(pvrow_idx, segment_idx=segment_idx)
     # # Checks
     # assert isinstance(pvarray, OrderedPVArray)
     # np.testing.assert_almost_equal(
