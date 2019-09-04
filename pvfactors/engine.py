@@ -232,7 +232,25 @@ class PVEngine(object):
 
     def run_fast_back_pvrow(self, pvrow_idx, segment_idx=None):
 
-        # Calculate irradiance vector for segment
+        ts_pvrow = self.pvarray.ts_pvrows[pvrow_idx]
+        if segment_idx is None:
+            # Run calculation for all segments of back surface
+            for ts_segment in ts_pvrow.back.list_segments:
+                self._update_back_ts_segment_qinc(ts_segment, pvrow_idx)
+        else:
+            # Run calculation for selected segment of back surface
+            ts_segment = ts_pvrow.back.list_segments[segment_idx]
+            self._update_back_ts_segment_qinc(ts_segment, pvrow_idx)
+
+        return self.pvarray
+
+    def _update_back_ts_segment_qinc(self, ts_segment, pvrow_idx):
+
+        # Prepare surfaces of segment
+        surface_illum = ts_segment.illum
+        surface_shaded = ts_segment.shaded
+
+        # Get irradiance vectors for calculation
         albedo = self.irradiance.albedo
         rho_front = self.irradiance.rho_front
         irr_gnd_shaded = self.irradiance.gnd_shaded
@@ -240,25 +258,37 @@ class PVEngine(object):
         irr_pvrow_shaded = self.irradiance.pvrow_shaded
         irr_pvrow_illum = self.irradiance.pvrow_illum
         irr_sky = self.irradiance.sky_luminance
-        # Get the sky term for the segment
-        ts_segment = self.pvarray.ts_pvrows[pvrow_idx] \
-                                 .back.list_segments[segment_idx]
-        sky_term = self.irradiance.get_ts_segment_sky_term_back(ts_segment)
 
         # Calculate view factors for segment
-        vf = self.vf_calculator.get_vf_ts_pvrow_segment(
-            pvrow_idx, segment_idx, self.pvarray.ts_pvrows,
+        vf_illum = self.vf_calculator.get_vf_ts_pvrow_element(
+            pvrow_idx, surface_illum, self.pvarray.ts_pvrows,
+            self.pvarray.ts_ground, self.pvarray.rotation_vec,
+            self.pvarray.width)
+        vf_shaded = self.vf_calculator.get_vf_ts_pvrow_element(
+            pvrow_idx, surface_shaded, self.pvarray.ts_pvrows,
             self.pvarray.ts_ground, self.pvarray.rotation_vec,
             self.pvarray.width)
 
-        # Calculate incident irradiance
-        qinc = (vf['to_gnd_shaded'] * albedo * irr_gnd_shaded
-                + vf['to_gnd_illum'] * albedo * irr_gnd_illum
-                + vf['to_pvrow_shaded'] * rho_front * irr_pvrow_shaded
-                + vf['to_pvrow_illum'] * rho_front * irr_pvrow_illum
-                + vf['to_sky'] * irr_sky
-                + sky_term)
+        # Update sky terms
+        self.irradiance.update_ts_surface_sky_term(surface_illum)
+        self.irradiance.update_ts_surface_sky_term(surface_shaded)
 
-        qinc = np.where(self.skip_step, 0., qinc)
+        # Calculate incident irradiance on illuminated surface
+        qinc_illum = (
+            vf_illum['to_gnd_shaded'] * albedo * irr_gnd_shaded
+            + vf_illum['to_gnd_illum'] * albedo * irr_gnd_illum
+            + vf_illum['to_pvrow_shaded'] * rho_front * irr_pvrow_shaded
+            + vf_illum['to_pvrow_illum'] * rho_front * irr_pvrow_illum
+            + vf_illum['to_sky'] * irr_sky
+            + surface_illum.get_param('sky_term'))
+        surface_illum.update_params({'qinc': qinc_illum})
 
-        return qinc
+        # Calculate incident irradiance on shaded surface
+        qinc_shaded = (
+            vf_shaded['to_gnd_shaded'] * albedo * irr_gnd_shaded
+            + vf_shaded['to_gnd_illum'] * albedo * irr_gnd_illum
+            + vf_shaded['to_pvrow_shaded'] * rho_front * irr_pvrow_shaded
+            + vf_shaded['to_pvrow_illum'] * rho_front * irr_pvrow_illum
+            + vf_shaded['to_sky'] * irr_sky
+            + surface_shaded.get_param('sky_term'))
+        surface_shaded.update_params({'qinc': qinc_shaded})

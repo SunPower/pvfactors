@@ -93,16 +93,9 @@ class BaseModel(object):
 
         return irradiance_vec, rho_vec, invrho_vec, total_perez_vec
 
-    def get_ts_segment_sky_term_back(self, ts_segment):
+    def update_ts_surface_sky_term(self, ts_surface, name_sky_term='sky_term'):
 
-        # Calculate sky term for each surface of the segment
-        value_illum = 0.
-        value_shaded = 0.
+        value = 0.
         for component in self.irradiance_comp:
-            value_illum += ts_segment.illum.get_param(component)
-            value_shaded += ts_segment.shaded.get_param(component)
-        ts_segment.illum.update_params({'sky_term': value_illum})
-        ts_segment.shaded.update_params({'sky_term': value_shaded})
-
-        # Return the weighted value of sky term
-        return ts_segment.get_param_weighted('sky_term')
+            value += ts_surface.get_param(component)
+        ts_surface.update_params({name_sky_term: value})

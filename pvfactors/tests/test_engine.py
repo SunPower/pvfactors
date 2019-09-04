@@ -175,8 +175,18 @@ def test_run_fast_mode(params):
 
     # Run fast mode
     pvrow_idx = 1
-    segment_idx = 0
-    qinc = eng.run_fast_back_pvrow(pvrow_idx, segment_idx=segment_idx)
 
+    # By providing segment index
+    segment_idx = 0
+    pvarray = eng.run_fast_back_pvrow(pvrow_idx, segment_idx=segment_idx)
+    ts_seg = pvarray.ts_pvrows[pvrow_idx].back.list_segments[segment_idx]
+    qinc = ts_seg.get_param_weighted('qinc')
+    # Check results
+    np.testing.assert_allclose(qinc, 123.753462)
+
+    # Without providing segment index
+    pvarray = eng.run_fast_back_pvrow(pvrow_idx)
+    ts_side = pvarray.ts_pvrows[pvrow_idx].back
+    qinc = ts_side.get_param_weighted('qinc')
     # Check results
     np.testing.assert_allclose(qinc, 123.753462)
