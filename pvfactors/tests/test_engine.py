@@ -2,6 +2,7 @@ from pvfactors.engine import PVEngine
 from pvfactors.geometry import OrderedPVArray
 from pvfactors.irradiance import IsotropicOrdered, HybridPerezOrdered
 from pvfactors.irradiance.utils import breakup_df_inputs
+from pvfactors.report import example_fn_build_report_fast_mode
 import numpy as np
 import datetime as dt
 
@@ -176,18 +177,15 @@ def test_run_fast_mode(params):
     np.testing.assert_almost_equal(eng.irradiance.direct['front_pvrow'], DNI)
 
     # Run fast mode
-    pvarray = eng.run_fast_back_pvrow()
-    ts_seg = (pvarray.ts_pvrows[fast_mode_pvrow_index]
-              .back.list_segments[fast_mode_segment_index])
-    qinc = ts_seg.get_param_weighted('qinc')
+    qinc = eng.run_fast_back_pvrow(
+        fn_build_report=example_fn_build_report_fast_mode)
     # Check results
     np.testing.assert_allclose(qinc, 123.753462)
 
     # Without providing segment index
     eng.fast_mode_segment_index = None
-    pvarray = eng.run_fast_back_pvrow()
-    ts_side = pvarray.ts_pvrows[fast_mode_pvrow_index].back
-    qinc = ts_side.get_param_weighted('qinc')
+    qinc = eng.run_fast_back_pvrow(
+        fn_build_report=example_fn_build_report_fast_mode)
     # Check results
     np.testing.assert_allclose(qinc, 123.753462)
 
@@ -226,17 +224,14 @@ def test_run_fast_mode_back_shading(params):
             params['rho_ground'])
 
     # By providing segment index
-    pvarray = eng.run_fast_back_pvrow()
-    ts_seg = (pvarray.ts_pvrows[fast_mode_pvrow_index]
-              .back.list_segments[fast_mode_segment_index])
-    qinc = ts_seg.get_param_weighted('qinc')
+    qinc = eng.run_fast_back_pvrow(
+        fn_build_report=example_fn_build_report_fast_mode)
     # Check results
     np.testing.assert_allclose(qinc, expected_qinc)
 
     # Without providing segment index
     eng.fast_mode_segment_index = None
-    pvarray = eng.run_fast_back_pvrow()
-    ts_side = pvarray.ts_pvrows[fast_mode_pvrow_index].back
-    qinc = ts_side.get_param_weighted('qinc')
+    qinc = eng.run_fast_back_pvrow(
+        fn_build_report=example_fn_build_report_fast_mode)
     # Check results
     np.testing.assert_allclose(qinc, expected_qinc)

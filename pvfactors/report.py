@@ -6,8 +6,8 @@ import numpy as np
 
 def example_fn_build_report(report, pvarray):
     """Example function that builds a report when used in the
-    :py:class:`~pvfactors.engine.PVEngine`. Here it will be a dictionary
-    with lists of calculated values.
+    :py:class:`~pvfactors.engine.PVEngine` with full mode simulations.
+    Here it will be a dictionary with lists of calculated values.
 
     Parameters
     ----------
@@ -44,6 +44,13 @@ def example_fn_build_report(report, pvarray):
         report['iso_back'].append(np.nan)
 
     return report
+
+
+def example_fn_build_report_fast_mode(pvarray):
+
+    ts_pvrow = pvarray.ts_pvrows[1]
+    qinc_back = ts_pvrow.back.get_param_weighted('qinc')
+    return qinc_back
 
 
 class ExampleReportBuilder(object):

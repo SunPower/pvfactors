@@ -235,23 +235,33 @@ class PVEngine(object):
 
         return report
 
-    def run_fast_back_pvrow(self):
+    def run_fast_back_pvrow(self, fn_build_report=None, pvrow_index=None,
+                            segment_index=None):
 
-        pvrow_idx = self.fast_mode_pvrow_index
+        # Prepare variables
+        pvrow_idx = self.fast_mode_pvrow_index if pvrow_index is None \
+            else pvrow_index
+        segment_idx = self.fast_mode_segment_index if segment_index is None \
+            else segment_index
         ts_pvrow = self.pvarray.ts_pvrows[pvrow_idx]
-        if self.fast_mode_segment_index is None:
+
+        # Run calculations
+        if segment_idx is None:
             # Run calculation for all segments of back surface
             for ts_segment in ts_pvrow.back.list_segments:
-                self._update_back_ts_segment_qinc(ts_segment, pvrow_idx)
+                self._calculate_back_ts_segment_qinc(ts_segment, pvrow_idx)
         else:
             # Run calculation for selected segment of back surface
-            ts_segment = ts_pvrow.back.list_segments[
-                self.fast_mode_segment_index]
-            self._update_back_ts_segment_qinc(ts_segment, pvrow_idx)
+            ts_segment = ts_pvrow.back.list_segments[segment_idx]
+            self._calculate_back_ts_segment_qinc(ts_segment, pvrow_idx)
 
-        return self.pvarray
+        # Create report
+        report = None if fn_build_report is None \
+            else fn_build_report(self.pvarray)
 
-    def _update_back_ts_segment_qinc(self, ts_segment, pvrow_idx):
+        return report
+
+    def _calculate_back_ts_segment_qinc(self, ts_segment, pvrow_idx):
 
         # Prepare surfaces of segment
         surface_illum = ts_segment.illum
