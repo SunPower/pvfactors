@@ -240,7 +240,10 @@ class PVEngine(object):
         irr_pvrow_shaded = self.irradiance.pvrow_shaded
         irr_pvrow_illum = self.irradiance.pvrow_illum
         irr_sky = self.irradiance.sky_luminance
-        sky_term = 0.
+        # Get the sky term for the segment
+        ts_segment = self.pvarray.ts_pvrows[pvrow_idx] \
+                                 .back.list_segments[segment_idx]
+        sky_term = self.irradiance.get_ts_segment_sky_term_back(ts_segment)
 
         # Calculate view factors for segment
         vf = self.vf_calculator.get_vf_ts_pvrow_segment(
