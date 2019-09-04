@@ -148,7 +148,8 @@ def test_fast_pvengine_float_inputs_perez(params):
 
 
 def test_run_fast_mode(params):
-    """Test that PV engine works for float inputs"""
+    """Test that PV engine works for timeseries fast mode and float inputs.
+    Value is very close to loop-like fast mode"""
 
     # Prepare some engine inputs
     irradiance_model = HybridPerezOrdered()
@@ -190,3 +191,53 @@ def test_run_fast_mode(params):
     qinc = ts_side.get_param_weighted('qinc')
     # Check results
     np.testing.assert_allclose(qinc, 123.753462)
+
+
+def test_run_fast_mode_back_shading(params):
+    """Test that PV engine works for timeseries fast mode and float inputs,
+    and when there's large direct shading on the back surface.
+    Value is very close to loop-style fast mode"""
+
+    params.update({'gcr': 0.6, 'surface_azimuth': 270, 'surface_tilt': 120,
+                   'solar_zenith': 70.})
+    # Prepare some engine inputs
+    irradiance_model = HybridPerezOrdered()
+    pvarray = OrderedPVArray.init_from_dict(
+        params, param_names=irradiance_model.params)
+    fast_mode_pvrow_index = None  # 1
+
+    # Create engine object
+    eng = PVEngine(pvarray, irradiance_model=irradiance_model,
+                   fast_mode_pvrow_index=fast_mode_pvrow_index)
+
+    # Irradiance inputs
+    timestamps = dt.datetime(2019, 6, 11, 11)
+    DNI = 1000.
+    DHI = 100.
+
+    # Expected values
+    expected_qinc = 683.537153
+
+    # Fit engine
+    eng.fit(timestamps, DNI, DHI,
+            params['solar_zenith'], params['solar_azimuth'],
+            params['surface_tilt'], params['surface_azimuth'],
+            params['rho_ground'])
+
+    # Run fast mode
+    pvrow_idx = 1
+
+    # By providing segment index
+    segment_idx = 0
+    pvarray = eng.run_fast_back_pvrow(pvrow_idx, segment_idx=segment_idx)
+    ts_seg = pvarray.ts_pvrows[pvrow_idx].back.list_segments[segment_idx]
+    qinc = ts_seg.get_param_weighted('qinc')
+    # Check results
+    np.testing.assert_allclose(qinc, expected_qinc)
+
+    # Without providing segment index
+    pvarray = eng.run_fast_back_pvrow(pvrow_idx)
+    ts_side = pvarray.ts_pvrows[pvrow_idx].back
+    qinc = ts_side.get_param_weighted('qinc')
+    # Check results
+    np.testing.assert_allclose(qinc, expected_qinc)
