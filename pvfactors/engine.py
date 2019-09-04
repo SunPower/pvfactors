@@ -15,7 +15,8 @@ class PVEngine(object):
 
     def __init__(self, pvarray, vf_calculator=VFCalculator(),
                  irradiance_model=HybridPerezOrdered(),
-                 fast_mode_pvrow_index=None):
+                 fast_mode_pvrow_index=None,
+                 fast_mode_segment_index=None):
         """Create pv engine class, and initialize timeseries parameters.
 
         Parameters
@@ -36,13 +37,17 @@ class PVEngine(object):
             will be activated and the engine calculation will be done only
             for the back surface of the pvrow with the corresponding
             index (Default = None)
-
+        fast_mode_segment_index : int, optional
+            If a segment index is passed, then the PVEngine fast mode
+            will calculate back surface irradiance only for the
+            selected segment of the selected back surface (Default = None)
         """
         self.vf_calculator = vf_calculator
         self.irradiance = irradiance_model
         self.pvarray = pvarray
         self.is_fast_mode = False if fast_mode_pvrow_index is None else True
         self.fast_mode_pvrow_index = fast_mode_pvrow_index
+        self.fast_mode_segment_index = fast_mode_segment_index
 
         # These values will be updated at fitting time
         self.n_points = None
@@ -230,16 +235,18 @@ class PVEngine(object):
 
         return report
 
-    def run_fast_back_pvrow(self, pvrow_idx, segment_idx=None):
+    def run_fast_back_pvrow(self):
 
+        pvrow_idx = self.fast_mode_pvrow_index
         ts_pvrow = self.pvarray.ts_pvrows[pvrow_idx]
-        if segment_idx is None:
+        if self.fast_mode_segment_index is None:
             # Run calculation for all segments of back surface
             for ts_segment in ts_pvrow.back.list_segments:
                 self._update_back_ts_segment_qinc(ts_segment, pvrow_idx)
         else:
             # Run calculation for selected segment of back surface
-            ts_segment = ts_pvrow.back.list_segments[segment_idx]
+            ts_segment = ts_pvrow.back.list_segments[
+                self.fast_mode_segment_index]
             self._update_back_ts_segment_qinc(ts_segment, pvrow_idx)
 
         return self.pvarray
@@ -274,21 +281,45 @@ class PVEngine(object):
         self.irradiance.update_ts_surface_sky_term(surface_shaded)
 
         # Calculate incident irradiance on illuminated surface
-        qinc_illum = (
-            vf_illum['to_gnd_shaded'] * albedo * irr_gnd_shaded
-            + vf_illum['to_gnd_illum'] * albedo * irr_gnd_illum
-            + vf_illum['to_pvrow_shaded'] * rho_front * irr_pvrow_shaded
-            + vf_illum['to_pvrow_illum'] * rho_front * irr_pvrow_illum
-            + vf_illum['to_sky'] * irr_sky
-            + surface_illum.get_param('sky_term'))
-        surface_illum.update_params({'qinc': qinc_illum})
+        gnd_shadow_refl = vf_illum['to_gnd_shaded'] * albedo * irr_gnd_shaded
+        gnd_illum_refl = vf_illum['to_gnd_illum'] * albedo * irr_gnd_illum
+        pvrow_shadow_refl = (vf_illum['to_pvrow_shaded'] * rho_front
+                             * irr_pvrow_shaded)
+        pvrow_illum_refl = (vf_illum['to_pvrow_illum'] * rho_front
+                            * irr_pvrow_illum)
+        reflections = (gnd_shadow_refl + gnd_illum_refl + pvrow_shadow_refl
+                       + pvrow_illum_refl)
+        isotropic = vf_illum['to_sky'] * irr_sky
+        qinc_illum = (gnd_shadow_refl + gnd_illum_refl + pvrow_shadow_refl
+                      + pvrow_illum_refl + isotropic
+                      + surface_illum.get_param('sky_term'))
+        surface_illum.update_params(
+            {'qinc': qinc_illum,
+             'reflection_gnd_shaded': gnd_shadow_refl,
+             'reflection_gnd_illum': gnd_illum_refl,
+             'reflection_pvrow_shaded': pvrow_shadow_refl,
+             'reflection_pvrow_illum': pvrow_illum_refl,
+             'isotropic': isotropic,
+             'reflection': reflections})
 
         # Calculate incident irradiance on shaded surface
-        qinc_shaded = (
-            vf_shaded['to_gnd_shaded'] * albedo * irr_gnd_shaded
-            + vf_shaded['to_gnd_illum'] * albedo * irr_gnd_illum
-            + vf_shaded['to_pvrow_shaded'] * rho_front * irr_pvrow_shaded
-            + vf_shaded['to_pvrow_illum'] * rho_front * irr_pvrow_illum
-            + vf_shaded['to_sky'] * irr_sky
-            + surface_shaded.get_param('sky_term'))
-        surface_shaded.update_params({'qinc': qinc_shaded})
+        gnd_shadow_refl = vf_shaded['to_gnd_shaded'] * albedo * irr_gnd_shaded
+        gnd_illum_refl = vf_shaded['to_gnd_illum'] * albedo * irr_gnd_illum
+        pvrow_shadow_refl = (vf_shaded['to_pvrow_shaded'] * rho_front
+                             * irr_pvrow_shaded)
+        pvrow_illum_refl = (vf_shaded['to_pvrow_illum'] * rho_front
+                            * irr_pvrow_illum)
+        reflections = (gnd_shadow_refl + gnd_illum_refl + pvrow_shadow_refl
+                       + pvrow_illum_refl)
+        isotropic = vf_shaded['to_sky'] * irr_sky
+        qinc_shaded = (gnd_shadow_refl + gnd_illum_refl + pvrow_shadow_refl
+                       + pvrow_illum_refl + isotropic
+                       + surface_shaded.get_param('sky_term'))
+        surface_shaded.update_params(
+            {'qinc': qinc_shaded,
+             'reflection_gnd_shaded': gnd_shadow_refl,
+             'reflection_gnd_illum': gnd_illum_refl,
+             'reflection_pvrow_shaded': pvrow_shadow_refl,
+             'reflection_pvrow_illum': pvrow_illum_refl,
+             'isotropic': isotropic,
+             'reflection': reflections})

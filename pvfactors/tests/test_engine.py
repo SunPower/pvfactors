@@ -156,6 +156,7 @@ def test_run_fast_mode(params):
     pvarray = OrderedPVArray.init_from_dict(
         params, param_names=irradiance_model.params)
     fast_mode_pvrow_index = 1
+    fast_mode_segment_index = 0
 
     # Create engine object
     eng = PVEngine(pvarray, irradiance_model=irradiance_model,
@@ -175,19 +176,17 @@ def test_run_fast_mode(params):
     np.testing.assert_almost_equal(eng.irradiance.direct['front_pvrow'], DNI)
 
     # Run fast mode
-    pvrow_idx = 1
-
-    # By providing segment index
-    segment_idx = 0
-    pvarray = eng.run_fast_back_pvrow(pvrow_idx, segment_idx=segment_idx)
-    ts_seg = pvarray.ts_pvrows[pvrow_idx].back.list_segments[segment_idx]
+    pvarray = eng.run_fast_back_pvrow()
+    ts_seg = (pvarray.ts_pvrows[fast_mode_pvrow_index]
+              .back.list_segments[fast_mode_segment_index])
     qinc = ts_seg.get_param_weighted('qinc')
     # Check results
     np.testing.assert_allclose(qinc, 123.753462)
 
     # Without providing segment index
-    pvarray = eng.run_fast_back_pvrow(pvrow_idx)
-    ts_side = pvarray.ts_pvrows[pvrow_idx].back
+    eng.fast_mode_segment_index = None
+    pvarray = eng.run_fast_back_pvrow()
+    ts_side = pvarray.ts_pvrows[fast_mode_pvrow_index].back
     qinc = ts_side.get_param_weighted('qinc')
     # Check results
     np.testing.assert_allclose(qinc, 123.753462)
@@ -204,11 +203,13 @@ def test_run_fast_mode_back_shading(params):
     irradiance_model = HybridPerezOrdered()
     pvarray = OrderedPVArray.init_from_dict(
         params, param_names=irradiance_model.params)
-    fast_mode_pvrow_index = None  # 1
+    fast_mode_pvrow_index = 1
+    fast_mode_segment_index = 0
 
     # Create engine object
     eng = PVEngine(pvarray, irradiance_model=irradiance_model,
-                   fast_mode_pvrow_index=fast_mode_pvrow_index)
+                   fast_mode_pvrow_index=fast_mode_pvrow_index,
+                   fast_mode_segment_index=fast_mode_segment_index)
 
     # Irradiance inputs
     timestamps = dt.datetime(2019, 6, 11, 11)
@@ -224,20 +225,18 @@ def test_run_fast_mode_back_shading(params):
             params['surface_tilt'], params['surface_azimuth'],
             params['rho_ground'])
 
-    # Run fast mode
-    pvrow_idx = 1
-
     # By providing segment index
-    segment_idx = 0
-    pvarray = eng.run_fast_back_pvrow(pvrow_idx, segment_idx=segment_idx)
-    ts_seg = pvarray.ts_pvrows[pvrow_idx].back.list_segments[segment_idx]
+    pvarray = eng.run_fast_back_pvrow()
+    ts_seg = (pvarray.ts_pvrows[fast_mode_pvrow_index]
+              .back.list_segments[fast_mode_segment_index])
     qinc = ts_seg.get_param_weighted('qinc')
     # Check results
     np.testing.assert_allclose(qinc, expected_qinc)
 
     # Without providing segment index
-    pvarray = eng.run_fast_back_pvrow(pvrow_idx)
-    ts_side = pvarray.ts_pvrows[pvrow_idx].back
+    eng.fast_mode_segment_index = None
+    pvarray = eng.run_fast_back_pvrow()
+    ts_side = pvarray.ts_pvrows[fast_mode_pvrow_index].back
     qinc = ts_side.get_param_weighted('qinc')
     # Check results
     np.testing.assert_allclose(qinc, expected_qinc)
