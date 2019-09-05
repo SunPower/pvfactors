@@ -2,7 +2,6 @@ from pvfactors.engine import PVEngine
 from pvfactors.geometry import OrderedPVArray
 from pvfactors.irradiance import IsotropicOrdered, HybridPerezOrdered
 from pvfactors.irradiance.utils import breakup_df_inputs
-from pvfactors.report import example_fn_build_report_fast_mode
 import numpy as np
 import datetime as dt
 
@@ -112,7 +111,7 @@ def test_pvengine_ts_inputs_perez(params_serial,
         report['iso_back'], [1.727308, 1.726535])
 
 
-def test_loop_like_fast_mode(params):
+def test_fast_mode_loop_like(params):
     """Test value of older and decomissioned loop like fast mode"""
 
     # Prepare some engine inputs
@@ -131,12 +130,9 @@ def test_loop_like_fast_mode(params):
     DHI = 100.
 
     # Fit engine
-    eng.fit(timestamps, DNI, DHI,
-            params['solar_zenith'],
-            params['solar_azimuth'],
-            params['surface_tilt'],
-            params['surface_azimuth'],
-            params['rho_ground'])
+    eng.fit(timestamps, DNI, DHI, params['solar_zenith'],
+            params['solar_azimuth'], params['surface_tilt'],
+            params['surface_azimuth'], params['rho_ground'])
     # Checks
     np.testing.assert_almost_equal(eng.irradiance.direct['front_pvrow'], DNI)
 
@@ -162,7 +158,8 @@ def test_run_fast_mode(params):
 
     # Create engine object
     eng = PVEngine(pvarray, irradiance_model=irradiance_model,
-                   fast_mode_pvrow_index=fast_mode_pvrow_index)
+                   fast_mode_pvrow_index=fast_mode_pvrow_index,
+                   fast_mode_segment_index=fast_mode_segment_index)
 
     # Irradiance inputs
     timestamps = dt.datetime(2019, 6, 11, 11)
@@ -191,6 +188,56 @@ def test_run_fast_mode(params):
                                          .back.get_param_weighted('qinc')))
     # Check results
     np.testing.assert_allclose(qinc, 123.753462)
+
+
+def test_run_fast_mode_segments(params):
+    """Test that PV engine works for timeseries fast mode and float inputs.
+    Value is very close to loop-like fast mode"""
+
+    # Discretize middle PV row's back side
+    params.update({'cut': {1: {'back': 5}}})
+
+    # Prepare some engine inputs
+    irradiance_model = HybridPerezOrdered()
+    pvarray = OrderedPVArray.init_from_dict(
+        params, param_names=irradiance_model.params)
+    fast_mode_pvrow_index = 1
+    fast_mode_segment_index = 2
+
+    # Create engine object
+    eng = PVEngine(pvarray, irradiance_model=irradiance_model,
+                   fast_mode_pvrow_index=fast_mode_pvrow_index,
+                   fast_mode_segment_index=fast_mode_segment_index)
+
+    # Irradiance inputs
+    timestamps = dt.datetime(2019, 6, 11, 11)
+    DNI = 1000.
+    DHI = 100.
+
+    # Fit engine
+    eng.fit(timestamps, DNI, DHI,
+            params['solar_zenith'], params['solar_azimuth'],
+            params['surface_tilt'], params['surface_azimuth'],
+            params['rho_ground'])
+    # Checks
+    np.testing.assert_almost_equal(eng.irradiance.direct['front_pvrow'], DNI)
+
+    # Define report function to grab irradiance from PV row segment
+    def fn_report(pvarray): return (pvarray.ts_pvrows[1].back.list_segments[2]
+                                    .get_param_weighted('qinc'))
+
+    # Expected value for middle segment
+    qinc_expected = 121.39964
+    # Run fast mode for specific segment
+    qinc_segment = eng.run_fast_mode(fn_build_report=fn_report)
+    # Check results
+    np.testing.assert_allclose(qinc_segment, qinc_expected)
+
+    # Without providing segment index: the value should be the same as above
+    eng.fast_mode_segment_index = None
+    qinc_segment = eng.run_fast_mode(fn_build_report=fn_report)
+    # Check results
+    np.testing.assert_allclose(qinc_segment, qinc_expected)
 
 
 def test_run_fast_mode_compare_to_loop_like(params):
@@ -270,16 +317,16 @@ def test_run_fast_mode_back_shading(params):
             params['surface_tilt'], params['surface_azimuth'],
             params['rho_ground'])
 
+    def fn_report(pvarray): return (pvarray.ts_pvrows[1]
+                                    .back.get_param_weighted('qinc'))
     # By providing segment index
-    qinc = eng.run_fast_mode(
-        fn_build_report=example_fn_build_report_fast_mode)
+    qinc = eng.run_fast_mode(fn_build_report=fn_report)
     # Check results
     np.testing.assert_allclose(qinc, expected_qinc)
 
     # Without providing segment index
     eng.fast_mode_segment_index = None
-    qinc = eng.run_fast_mode(
-        fn_build_report=example_fn_build_report_fast_mode)
+    qinc = eng.run_fast_mode(fn_build_report=fn_report)
     # Check results
     np.testing.assert_allclose(qinc, expected_qinc)
 

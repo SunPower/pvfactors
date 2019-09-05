@@ -46,13 +46,6 @@ def example_fn_build_report(report, pvarray):
     return report
 
 
-def example_fn_build_report_fast_mode(pvarray):
-
-    ts_pvrow = pvarray.ts_pvrows[1]
-    qinc_back = ts_pvrow.back.get_param_weighted('qinc')
-    return qinc_back
-
-
 class ExampleReportBuilder(object):
     """A class is required to build reports when running calculations with
     multiprocessing because of python constraints"""
