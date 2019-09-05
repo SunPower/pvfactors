@@ -30,7 +30,7 @@ def test_pvengine_float_inputs_iso(params):
     np.testing.assert_almost_equal(eng.irradiance.direct['front_pvrow'], DNI)
 
     # Run timestep
-    pvarray = eng.run_timestep(0)
+    pvarray = eng.run_full_mode_timestep(0)
     # Checks
     assert isinstance(pvarray, OrderedPVArray)
     np.testing.assert_almost_equal(
@@ -64,7 +64,7 @@ def test_pvengine_float_inputs_perez(params):
     np.testing.assert_almost_equal(eng.irradiance.direct['front_pvrow'], DNI)
 
     # Run timestep
-    pvarray = eng.run_timestep(0)
+    pvarray = eng.run_full_mode_timestep(0)
     # Checks
     assert isinstance(pvarray, OrderedPVArray)
     np.testing.assert_almost_equal(
@@ -99,7 +99,7 @@ def test_pvengine_ts_inputs_perez(params_serial,
             surface_azimuth, albedo)
 
     # Run all timesteps
-    report = eng.run_all_timesteps(fn_build_report=fn_report_example)
+    report = eng.run_full_mode(fn_build_report=fn_report_example)
 
     # Check values
     np.testing.assert_array_almost_equal(
@@ -112,8 +112,8 @@ def test_pvengine_ts_inputs_perez(params_serial,
         report['iso_back'], [1.727308, 1.726535])
 
 
-def test_fast_pvengine_float_inputs_perez(params):
-    """Test that PV engine works for float inputs"""
+def test_loop_like_fast_mode(params):
+    """Test value of older and decomissioned loop like fast mode"""
 
     # Prepare some engine inputs
     irradiance_model = HybridPerezOrdered()
@@ -141,7 +141,8 @@ def test_fast_pvengine_float_inputs_perez(params):
     np.testing.assert_almost_equal(eng.irradiance.direct['front_pvrow'], DNI)
 
     # Run timestep
-    pvarray = eng.run_timestep(0)
+    pvarray = _fast_mode_with_loop(eng.pvarray, eng.irradiance,
+                                   eng.vf_calculator, fast_mode_pvrow_index, 0)
     # Checks
     assert isinstance(pvarray, OrderedPVArray)
     np.testing.assert_almost_equal(
@@ -177,7 +178,7 @@ def test_run_fast_mode(params):
     np.testing.assert_almost_equal(eng.irradiance.direct['front_pvrow'], DNI)
 
     # Run fast mode
-    qinc = eng.run_fast_back_pvrow(
+    qinc = eng.run_fast_mode(
         fn_build_report=lambda pvarray: (pvarray.ts_pvrows[1]
                                          .back.get_param_weighted('qinc')))
     # Check results
@@ -185,7 +186,7 @@ def test_run_fast_mode(params):
 
     # Without providing segment index
     eng.fast_mode_segment_index = None
-    qinc = eng.run_fast_back_pvrow(
+    qinc = eng.run_fast_mode(
         fn_build_report=lambda pvarray: (pvarray.ts_pvrows[1]
                                          .back.get_param_weighted('qinc')))
     # Check results
@@ -228,7 +229,7 @@ def test_run_fast_mode_compare_to_loop_like(params):
     # Expected should be: 138.10421248631152
     qinc_expected = pvarray_loop.pvrows[0].back.get_param_weighted('qinc')
     # Run timeseries calculation
-    qinc = eng.run_fast_back_pvrow(
+    qinc = eng.run_fast_mode(
         fn_build_report=lambda pvarray: (pvarray.ts_pvrows[0]
                                          .back.get_param_weighted('qinc')),
         pvrow_index=0)
@@ -270,14 +271,14 @@ def test_run_fast_mode_back_shading(params):
             params['rho_ground'])
 
     # By providing segment index
-    qinc = eng.run_fast_back_pvrow(
+    qinc = eng.run_fast_mode(
         fn_build_report=example_fn_build_report_fast_mode)
     # Check results
     np.testing.assert_allclose(qinc, expected_qinc)
 
     # Without providing segment index
     eng.fast_mode_segment_index = None
-    qinc = eng.run_fast_back_pvrow(
+    qinc = eng.run_fast_mode(
         fn_build_report=example_fn_build_report_fast_mode)
     # Check results
     np.testing.assert_allclose(qinc, expected_qinc)
@@ -304,7 +305,7 @@ def test_fast_mode_8760(params, df_inputs_clearsky_8760):
     eng = PVEngine(pvarray)
     eng.fit(timestamps, dni, dhi, solar_zenith, solar_azimuth, surface_tilt,
             surface_azimuth, params['rho_ground'])
-    qinc = eng.run_fast_back_pvrow(
+    qinc = eng.run_fast_mode(
         fn_build_report=lambda pvarray: (pvarray.ts_pvrows[0]
                                          .back.get_param_weighted('qinc')),
         pvrow_index=0)

@@ -115,8 +115,9 @@ class PVEngine(object):
         self.skip_step = (solar_zenith > 90) | (DNI < 0) | (DHI < 0) \
             | ((DNI == 0) & (DHI == 0))
 
-    def run_timestep(self, idx):
-        """Run simulation for a single timestep index.
+    def run_full_mode_timestep(self, idx):
+        """Run simulation for a single timestep index and using the full mode,
+        which calculates the equilibrium of reflections in the system.
 
         Timestep will be skipped when:
             - solar zenith > 90, ie the sun is down
@@ -142,10 +143,10 @@ class PVEngine(object):
             # To be returned at the end
             pvarray = self.pvarray
 
-            # Transform pvarray to time step
+            # Transform pvarray to time step idx to create geometries
             pvarray.transform(idx)
 
-            # Apply irradiance terms to pvarray
+            # Get the irradiance modeling vectors used in final calculations
             irradiance_vec, rho_vec, invrho_vec, total_perez_vec = \
                 self.irradiance.get_full_modeling_vectors(pvarray, idx)
 
@@ -153,65 +154,36 @@ class PVEngine(object):
             geom_dict = pvarray.dict_surfaces
             view_matrix, obstr_matrix = pvarray.view_obstr_matrices
 
-            if self.is_fast_mode:
-                # Indices of the surfaces of the back of the selected pvrows
-                list_surface_indices = pvarray.pvrows[
-                    self.fast_mode_pvrow_index].back.surface_indices
+            # Calculate view factors
+            vf_matrix = self.vf_calculator.get_vf_matrix(
+                geom_dict, view_matrix, obstr_matrix, pvarray.pvrows)
+            pvarray.vf_matrix = vf_matrix
 
-                # Calculate view factors using a subset of view_matrix to
-                # gain in calculation speed
-                vf_matrix_subset = self.vf_calculator.get_vf_matrix_subset(
-                    geom_dict, view_matrix, obstr_matrix, pvarray.pvrows,
-                    list_surface_indices)
-                pvarray.vf_matrix = vf_matrix_subset
+            # Calculate radiosities by solving system of equations
+            invrho_mat = np.diag(invrho_vec)
+            a_mat = invrho_mat - vf_matrix
+            q0 = linalg.solve(a_mat, irradiance_vec)
+            qinc = np.dot(invrho_mat, q0)
 
-                irradiance_vec_subset = irradiance_vec[list_surface_indices]
-                # In fast mode, will not care to calculate q0
-                qinc = vf_matrix_subset.dot(rho_vec * total_perez_vec) \
-                    + irradiance_vec_subset
+            # Derive other irradiance terms
+            isotropic_vec = vf_matrix[:-1, -1] * irradiance_vec[-1]
+            reflection_vec = qinc[:-1] \
+                - irradiance_vec[:-1] - isotropic_vec
 
-                # Calculate other terms
-                isotropic_vec = vf_matrix_subset[:, -1] * total_perez_vec[-1]
-                reflection_vec = qinc - irradiance_vec_subset \
-                    - isotropic_vec
-
-                # Update selected surfaces with values
-                for i, surf_idx in enumerate(list_surface_indices):
-                    surface = geom_dict[surf_idx]
-                    surface.update_params({'qinc': qinc[i],
-                                           'isotropic': isotropic_vec[i],
-                                           'reflection': reflection_vec[i]})
-
-            else:
-                # Calculate view factors
-                vf_matrix = self.vf_calculator.get_vf_matrix(
-                    geom_dict, view_matrix, obstr_matrix, pvarray.pvrows)
-                pvarray.vf_matrix = vf_matrix
-
-                # Calculate radiosities
-                invrho_mat = np.diag(invrho_vec)
-                a_mat = invrho_mat - vf_matrix
-                q0 = linalg.solve(a_mat, irradiance_vec)
-                qinc = np.dot(invrho_mat, q0)
-
-                # Calculate other terms
-                isotropic_vec = vf_matrix[:-1, -1] * irradiance_vec[-1]
-                reflection_vec = qinc[:-1] \
-                    - irradiance_vec[:-1] - isotropic_vec
-
-                # Update surfaces with values
-                for idx_surf, surface in geom_dict.items():
-                    surface.update_params(
-                        {'q0': q0[idx_surf],
-                         'qinc': qinc[idx_surf],
-                         'isotropic': isotropic_vec[idx_surf],
-                         'reflection': reflection_vec[idx_surf]})
+            # Update surfaces with values
+            for idx_surf, surface in geom_dict.items():
+                surface.update_params(
+                    {'q0': q0[idx_surf],
+                     'qinc': qinc[idx_surf],
+                     'isotropic': isotropic_vec[idx_surf],
+                     'reflection': reflection_vec[idx_surf]})
 
         return pvarray
 
-    def run_all_timesteps(self, fn_build_report=None):
-        """Run all simulation timesteps and return a report that will be built
-        by the function passed by the user.
+    def run_full_mode(self, fn_build_report=None):
+        """Run all simulation timesteps using the full mode, which calculates
+        the equilibrium of reflections in the system, and return a report that
+        will be built by the function passed by the user.
 
         Parameters
         ----------
@@ -229,14 +201,14 @@ class PVEngine(object):
 
         report = None
         for idx in tqdm(range(self.n_points)):
-            pvarray = self.run_timestep(idx)
+            pvarray = self.run_full_mode_timestep(idx)
             if fn_build_report is not None:
                 report = fn_build_report(report, pvarray)
 
         return report
 
-    def run_fast_back_pvrow(self, fn_build_report=None, pvrow_index=None,
-                            segment_index=None):
+    def run_fast_mode(self, fn_build_report=None, pvrow_index=None,
+                      segment_index=None):
 
         # Prepare variables
         pvrow_idx = self.fast_mode_pvrow_index if pvrow_index is None \

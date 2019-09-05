@@ -2,6 +2,7 @@ from pvfactors.viewfactors.calculator import VFCalculator
 from pvfactors.geometry import OrderedPVArray
 from pvfactors.irradiance import HybridPerezOrdered
 from pvfactors.engine import PVEngine
+from pvfactors.tests.test_engine import _fast_mode_with_loop
 import datetime as dt
 from pvfactors.tests.test_viewfactors.test_data import \
     vf_matrix_left_cut, vf_left_cut_sum_axis_one_rounded
@@ -48,7 +49,9 @@ def test_vf_matrix_subset_calculation(params):
             params['surface_tilt'],
             params['surface_azimuth'],
             params['rho_ground'])
-    pvarray_fast = eng.run_timestep(0)
+    pvarray_fast = _fast_mode_with_loop(
+        eng.pvarray, eng.irradiance,
+        eng.vf_calculator, fast_mode_pvrow_index, 0)
     vf_mat_fast = pvarray_fast.vf_matrix
 
     # Run in full mode
@@ -64,7 +67,7 @@ def test_vf_matrix_subset_calculation(params):
             params['surface_tilt'],
             params['surface_azimuth'],
             params['rho_ground'])
-    pvarray_full = eng.run_timestep(0)
+    pvarray_full = eng.run_full_mode_timestep(0)
     vf_mat_full = pvarray_full.vf_matrix
 
     index_of_back_side_surface = 13
