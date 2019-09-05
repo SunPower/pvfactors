@@ -310,7 +310,8 @@ class PVEngine(object):
              'reflection_pvrow_shaded': pvrow_shadow_refl,
              'reflection_pvrow_illum': pvrow_illum_refl,
              'isotropic': isotropic,
-             'reflection': reflections})
+             'reflection': reflections,
+             'view_factors': vf_illum})
 
         # Calculate incident irradiance on shaded surface
         gnd_shadow_refl = vf_shaded['to_gnd_shaded'] * albedo * irr_gnd_shaded
@@ -332,4 +333,5 @@ class PVEngine(object):
              'reflection_pvrow_shaded': pvrow_shadow_refl,
              'reflection_pvrow_illum': pvrow_illum_refl,
              'isotropic': isotropic,
-             'reflection': reflections})
+             'reflection': reflections,
+             'view_factors': vf_shaded})
