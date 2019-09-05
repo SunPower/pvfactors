@@ -460,8 +460,11 @@ class VFTsMethods(object):
         pvrow_element_highest_pt = pvrow_element.highest_point
         # Calculate view factors to left shadows
         if pvrow_idx == 0:
-            vf_to_left_shadow = np.zeros(n_steps)
+            # There is no obstruction on the left
+            vf_to_left_shadow = self._vf_surface_to_surface(
+                pvrow_element.coords, shadow_left, pvrow_element_length)
         else:
+            # There is potential obstruction on the left
             pt_obstr = ts_pvrows[pvrow_idx - 1].full_pvrow_coords.lowest_point
             is_shadow_left = True
             vf_to_left_shadow = self._vf_hottel_shadows(
@@ -471,8 +474,11 @@ class VFTsMethods(object):
 
         # Calculate view factors to right shadows
         if pvrow_idx == n_shadows - 1:
-            vf_to_right_shadow = np.zeros(n_steps)
+            # There is no obstruction on the right
+            vf_to_right_shadow = self._vf_surface_to_surface(
+                pvrow_element.coords, shadow_right, pvrow_element_length)
         else:
+            # There is potential obstruction on the right
             pt_obstr = ts_pvrows[pvrow_idx + 1].full_pvrow_coords.lowest_point
             is_shadow_left = False
             vf_to_right_shadow = self._vf_hottel_shadows(

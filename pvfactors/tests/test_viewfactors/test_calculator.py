@@ -73,7 +73,7 @@ def test_vf_matrix_subset_calculation(params):
 
 
 def test_ts_view_factors():
-
+    """Test calculation of timeseries view factors for center PV row"""
     # Create base params
     params = {
         'axis_azimuth': 0,

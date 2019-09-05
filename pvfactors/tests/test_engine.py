@@ -178,16 +178,28 @@ def test_run_fast_mode(params):
 
     # Run fast mode
     qinc = eng.run_fast_back_pvrow(
-        fn_build_report=example_fn_build_report_fast_mode)
+        fn_build_report=lambda pvarray: (pvarray.ts_pvrows[1]
+                                         .back.get_param_weighted('qinc')))
     # Check results
     np.testing.assert_allclose(qinc, 123.753462)
 
     # Without providing segment index
     eng.fast_mode_segment_index = None
     qinc = eng.run_fast_back_pvrow(
-        fn_build_report=example_fn_build_report_fast_mode)
+        fn_build_report=lambda pvarray: (pvarray.ts_pvrows[1]
+                                         .back.get_param_weighted('qinc')))
     # Check results
     np.testing.assert_allclose(qinc, 123.753462)
+
+    # Check the left pv row back side (no obstruction)
+    # This is exactly the same calculated value as in loop-like fast mode
+    # because ground is not infinite for back of left pv row
+    qinc = eng.run_fast_back_pvrow(
+        fn_build_report=lambda pvarray: (pvarray.ts_pvrows[0]
+                                         .back.get_param_weighted('qinc')),
+        pvrow_index=0)
+    # Check results: value taken from loop-like fast mode
+    np.testing.assert_allclose(qinc, 138.10421248631152)
 
 
 def test_run_fast_mode_back_shading(params):
@@ -235,3 +247,33 @@ def test_run_fast_mode_back_shading(params):
         fn_build_report=example_fn_build_report_fast_mode)
     # Check results
     np.testing.assert_allclose(qinc, expected_qinc)
+
+
+def test_fast_mode_8760(params, df_inputs_clearsky_8760):
+    """Test fast mode with 1 PV row to make sure that is consistent
+    after the vectorization update: should get exact same values
+    """
+    # Get MET data
+    df_inputs = df_inputs_clearsky_8760
+    timestamps = df_inputs.index
+    dni = df_inputs.dni.values
+    dhi = df_inputs.dhi.values
+    solar_zenith = df_inputs.solar_zenith.values
+    solar_azimuth = df_inputs.solar_azimuth.values
+    surface_tilt = df_inputs.surface_tilt.values
+    surface_azimuth = df_inputs.surface_azimuth.values
+    # Run simulation for only 1 PV row
+    params.update({'n_pvrows': 1})
+
+    # Run engine
+    pvarray = OrderedPVArray.init_from_dict(params)
+    eng = PVEngine(pvarray)
+    eng.fit(timestamps, dni, dhi, solar_zenith, solar_azimuth, surface_tilt,
+            surface_azimuth, params['rho_ground'])
+    qinc = eng.run_fast_back_pvrow(
+        fn_build_report=lambda pvarray: (pvarray.ts_pvrows[0]
+                                         .back.get_param_weighted('qinc')),
+        pvrow_index=0)
+
+    # Check than annual energy on back is consistent
+    np.testing.assert_allclose(np.nansum(qinc) / 1e3, 349.9345317405013)
