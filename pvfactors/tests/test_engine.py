@@ -191,15 +191,49 @@ def test_run_fast_mode(params):
     # Check results
     np.testing.assert_allclose(qinc, 123.753462)
 
-    # Check the left pv row back side (no obstruction)
-    # This is exactly the same calculated value as in loop-like fast mode
-    # because ground is not infinite for back of left pv row
+
+def test_run_fast_mode_compare_to_loop_like(params):
+    """Test that PV engine works for timeseries fast mode and float inputs.
+
+    Check the left pv row back side (no obstruction, since rotation < 0)
+    This should be exactly the same calculated value as in loop-like fast mode
+    because ground is not infinite for back of left pv row"""
+
+    # Prepare some engine inputs
+    irradiance_model = HybridPerezOrdered()
+    pvarray = OrderedPVArray.init_from_dict(
+        params, param_names=irradiance_model.params)
+    fast_mode_pvrow_index = 1
+    fast_mode_segment_index = 0
+    # Irradiance inputs
+    timestamps = dt.datetime(2019, 6, 11, 11)
+    DNI = 1000.
+    DHI = 100.
+
+    # Create engine object
+    eng = PVEngine(pvarray, irradiance_model=irradiance_model,
+                   fast_mode_pvrow_index=fast_mode_pvrow_index)
+    # Fit engine
+    eng.fit(timestamps, DNI, DHI,
+            params['solar_zenith'], params['solar_azimuth'],
+            params['surface_tilt'], params['surface_azimuth'],
+            params['rho_ground'])
+
+    # Run baseline calculation
+    pvrow_idx = 0
+    time_idx = 0
+    pvarray_loop = _fast_mode_with_loop(eng.pvarray, eng.irradiance,
+                                        eng.vf_calculator, pvrow_idx,
+                                        time_idx)
+    # Expected should be: 138.10421248631152
+    qinc_expected = pvarray_loop.pvrows[0].back.get_param_weighted('qinc')
+    # Run timeseries calculation
     qinc = eng.run_fast_back_pvrow(
         fn_build_report=lambda pvarray: (pvarray.ts_pvrows[0]
                                          .back.get_param_weighted('qinc')),
         pvrow_index=0)
     # Check results: value taken from loop-like fast mode
-    np.testing.assert_allclose(qinc, 138.10421248631152)
+    np.testing.assert_allclose(qinc, qinc_expected)
 
 
 def test_run_fast_mode_back_shading(params):
@@ -277,3 +311,50 @@ def test_fast_mode_8760(params, df_inputs_clearsky_8760):
 
     # Check than annual energy on back is consistent
     np.testing.assert_allclose(np.nansum(qinc) / 1e3, 349.9345317405013)
+
+
+def _fast_mode_with_loop(pvarray, irradiance, vf_calculator, pvrow_idx, idx):
+    """Function for running fast mode using subset of view factor matrix
+    and with the shapely geometries.
+
+    Saving this for future debugging of new timeseries fast mode.
+    """
+    # Transform pvarray to time step
+    pvarray.transform(idx)
+
+    # Apply irradiance terms to pvarray
+    irradiance_vec, rho_vec, invrho_vec, total_perez_vec = \
+        irradiance.get_full_modeling_vectors(pvarray, idx)
+
+    # Prepare inputs to view factor calculator
+    geom_dict = pvarray.dict_surfaces
+    view_matrix, obstr_matrix = pvarray.view_obstr_matrices
+
+    # Indices of the surfaces of the back of the selected pvrows
+    list_surface_indices = pvarray.pvrows[pvrow_idx].back.surface_indices
+
+    # Calculate view factors using a subset of view_matrix to
+    # gain in calculation speed
+    vf_matrix_subset = vf_calculator.get_vf_matrix_subset(
+        geom_dict, view_matrix, obstr_matrix, pvarray.pvrows,
+        list_surface_indices)
+    pvarray.vf_matrix = vf_matrix_subset
+
+    irradiance_vec_subset = irradiance_vec[list_surface_indices]
+    # In fast mode, will not care to calculate q0
+    qinc = vf_matrix_subset.dot(rho_vec * total_perez_vec) \
+        + irradiance_vec_subset
+
+    # Calculate other terms
+    isotropic_vec = vf_matrix_subset[:, -1] * total_perez_vec[-1]
+    reflection_vec = qinc - irradiance_vec_subset \
+        - isotropic_vec
+
+    # Update selected surfaces with values
+    for i, surf_idx in enumerate(list_surface_indices):
+        surface = geom_dict[surf_idx]
+        surface.update_params({'qinc': qinc[i],
+                               'isotropic': isotropic_vec[i],
+                               'reflection': reflection_vec[i]})
+
+    return pvarray

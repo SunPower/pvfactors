@@ -2,7 +2,6 @@
 geometries."""
 
 import numpy as np
-from pvfactors.geometry.pvground import PVGround
 from pvfactors.config import X_ORIGIN_PVROWS, VIEW_DICT, DISTANCE_TOLERANCE
 from pvfactors.geometry.base import \
     _get_solar_2d_vectors, BasePVArray, _get_rotation_from_tilt_azimuth

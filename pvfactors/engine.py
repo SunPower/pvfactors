@@ -263,9 +263,8 @@ class PVEngine(object):
 
     def _calculate_back_ts_segment_qinc(self, ts_segment, pvrow_idx):
 
-        # Prepare surfaces of segment
-        surface_illum = ts_segment.illum
-        surface_shaded = ts_segment.shaded
+        # Get all timeseries surfaces in segment
+        list_ts_surfaces = [ts_segment.illum, ts_segment.shaded]
 
         # Get irradiance vectors for calculation
         albedo = self.irradiance.albedo
@@ -276,62 +275,37 @@ class PVEngine(object):
         irr_pvrow_illum = self.irradiance.pvrow_illum
         irr_sky = self.irradiance.sky_luminance
 
-        # Calculate view factors for segment
-        vf_illum = self.vf_calculator.get_vf_ts_pvrow_element(
-            pvrow_idx, surface_illum, self.pvarray.ts_pvrows,
-            self.pvarray.ts_ground, self.pvarray.rotation_vec,
-            self.pvarray.width)
-        vf_shaded = self.vf_calculator.get_vf_ts_pvrow_element(
-            pvrow_idx, surface_shaded, self.pvarray.ts_pvrows,
-            self.pvarray.ts_ground, self.pvarray.rotation_vec,
-            self.pvarray.width)
+        for ts_surface in list_ts_surfaces:
+            # Calculate view factors for timeseries surface
+            vf = self.vf_calculator.get_vf_ts_pvrow_element(
+                pvrow_idx, ts_surface, self.pvarray.ts_pvrows,
+                self.pvarray.ts_ground, self.pvarray.rotation_vec,
+                self.pvarray.width)
 
-        # Update sky terms
-        self.irradiance.update_ts_surface_sky_term(surface_illum)
-        self.irradiance.update_ts_surface_sky_term(surface_shaded)
+            # Update sky terms of timeseries surface
+            self.irradiance.update_ts_surface_sky_term(ts_surface)
 
-        # Calculate incident irradiance on illuminated surface
-        gnd_shadow_refl = vf_illum['to_gnd_shaded'] * albedo * irr_gnd_shaded
-        gnd_illum_refl = vf_illum['to_gnd_illum'] * albedo * irr_gnd_illum
-        pvrow_shadow_refl = (vf_illum['to_pvrow_shaded'] * rho_front
-                             * irr_pvrow_shaded)
-        pvrow_illum_refl = (vf_illum['to_pvrow_illum'] * rho_front
-                            * irr_pvrow_illum)
-        reflections = (gnd_shadow_refl + gnd_illum_refl + pvrow_shadow_refl
-                       + pvrow_illum_refl)
-        isotropic = vf_illum['to_sky'] * irr_sky
-        qinc_illum = (gnd_shadow_refl + gnd_illum_refl + pvrow_shadow_refl
-                      + pvrow_illum_refl + isotropic
-                      + surface_illum.get_param('sky_term'))
-        surface_illum.update_params(
-            {'qinc': qinc_illum,
-             'reflection_gnd_shaded': gnd_shadow_refl,
-             'reflection_gnd_illum': gnd_illum_refl,
-             'reflection_pvrow_shaded': pvrow_shadow_refl,
-             'reflection_pvrow_illum': pvrow_illum_refl,
-             'isotropic': isotropic,
-             'reflection': reflections,
-             'view_factors': vf_illum})
+            # Calculate incident irradiance on illuminated surface
+            gnd_shadow_refl = vf['to_gnd_shaded'] * albedo * irr_gnd_shaded
+            gnd_illum_refl = vf['to_gnd_illum'] * albedo * irr_gnd_illum
+            pvrow_shadow_refl = (vf['to_pvrow_shaded'] * rho_front
+                                 * irr_pvrow_shaded)
+            pvrow_illum_refl = (vf['to_pvrow_illum'] * rho_front
+                                * irr_pvrow_illum)
+            reflections = (gnd_shadow_refl + gnd_illum_refl + pvrow_shadow_refl
+                           + pvrow_illum_refl)
+            isotropic = vf['to_sky'] * irr_sky
+            qinc = (gnd_shadow_refl + gnd_illum_refl + pvrow_shadow_refl
+                    + pvrow_illum_refl + isotropic
+                    + ts_surface.get_param('sky_term'))
 
-        # Calculate incident irradiance on shaded surface
-        gnd_shadow_refl = vf_shaded['to_gnd_shaded'] * albedo * irr_gnd_shaded
-        gnd_illum_refl = vf_shaded['to_gnd_illum'] * albedo * irr_gnd_illum
-        pvrow_shadow_refl = (vf_shaded['to_pvrow_shaded'] * rho_front
-                             * irr_pvrow_shaded)
-        pvrow_illum_refl = (vf_shaded['to_pvrow_illum'] * rho_front
-                            * irr_pvrow_illum)
-        reflections = (gnd_shadow_refl + gnd_illum_refl + pvrow_shadow_refl
-                       + pvrow_illum_refl)
-        isotropic = vf_shaded['to_sky'] * irr_sky
-        qinc_shaded = (gnd_shadow_refl + gnd_illum_refl + pvrow_shadow_refl
-                       + pvrow_illum_refl + isotropic
-                       + surface_shaded.get_param('sky_term'))
-        surface_shaded.update_params(
-            {'qinc': qinc_shaded,
-             'reflection_gnd_shaded': gnd_shadow_refl,
-             'reflection_gnd_illum': gnd_illum_refl,
-             'reflection_pvrow_shaded': pvrow_shadow_refl,
-             'reflection_pvrow_illum': pvrow_illum_refl,
-             'isotropic': isotropic,
-             'reflection': reflections,
-             'view_factors': vf_shaded})
+            # Update parameters of timeseries surface object
+            ts_surface.update_params(
+                {'qinc': qinc,
+                 'reflection_gnd_shaded': gnd_shadow_refl,
+                 'reflection_gnd_illum': gnd_illum_refl,
+                 'reflection_pvrow_shaded': pvrow_shadow_refl,
+                 'reflection_pvrow_illum': pvrow_illum_refl,
+                 'isotropic': isotropic,
+                 'reflection': reflections,
+                 'view_factors': vf})
