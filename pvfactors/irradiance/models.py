@@ -114,7 +114,7 @@ class IsotropicOrdered(BaseModel):
             ~front_is_illum, DNI * cosd(aoi_back_pvrow), 0.)
         self.total_perez['front_pvrow'] = perez_front_pvrow['poa_global']
 
-    def transform_ts(self, pvarray):
+    def transform(self, pvarray):
         """Apply calculated irradiance values to PV array timeseries
         geometries: assign values as parameters to timeseries surfaces.
 
@@ -372,7 +372,7 @@ class HybridPerezOrdered(BaseModel):
         self.total_perez['ground_illum'] = GHI
         self.total_perez['sky'] = luminance_isotropic
 
-    def transform_ts(self, pvarray):
+    def transform(self, pvarray):
         """Apply calculated irradiance values to PV array timeseries
         geometries: assign values as parameters to timeseries surfaces.
 

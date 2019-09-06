@@ -110,7 +110,7 @@ class PVEngine(object):
                             surface_tilt, surface_azimuth, albedo, GHI=GHI)
 
         # Add timeseries irradiance results to pvarray
-        self.irradiance.transform_ts(self.pvarray)
+        self.irradiance.transform(self.pvarray)
 
         # Skip timesteps when:
         #    - solar zenith > 90, ie the sun is down
