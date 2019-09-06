@@ -454,3 +454,37 @@ def _fast_mode_with_loop(pvarray, irradiance, vf_calculator, pvrow_idx, idx):
                                'reflection': reflection_vec[i]})
 
     return pvarray
+
+
+def test_run_fast_and_full_modes_sequentially(params, fn_report_example):
+    """Make sure that can run fast and full modes one after the other
+    without making the engine crash"""
+
+    # Irradiance inputs
+    timestamps = dt.datetime(2019, 6, 11, 11)
+    DNI = 1000.
+    DHI = 100.
+
+    # Prepare some engine inputs
+    pvarray = OrderedPVArray.init_from_dict(params)
+    fast_mode_pvrow_index = 1
+    fast_mode_segment_index = 0
+
+    # Create engine object
+    eng = PVEngine(pvarray, fast_mode_pvrow_index=fast_mode_pvrow_index,
+                   fast_mode_segment_index=fast_mode_segment_index)
+    # Fit engine
+    eng.fit(timestamps, DNI, DHI,
+            params['solar_zenith'], params['solar_azimuth'],
+            params['surface_tilt'], params['surface_azimuth'],
+            params['rho_ground'])
+
+    # Run fast mode
+    def fn_report(pvarray): return (pvarray.ts_pvrows[1]
+                                    .back.get_param_weighted('qinc'))
+    qinc_fast = eng.run_fast_mode(fn_build_report=fn_report)
+    # Run full mode
+    report = eng.run_full_mode(fn_build_report=fn_report_example)
+
+    np.testing.assert_allclose(qinc_fast, 123.75346216)
+    np.testing.assert_allclose(report['qinc_back'], 116.49050349491)
