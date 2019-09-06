@@ -13,10 +13,8 @@ class PVEngine(object):
     as a timeseries when the pvarrays can be build from dictionary parameters
     """
 
-    def __init__(self, pvarray, vf_calculator=VFCalculator(),
-                 irradiance_model=HybridPerezOrdered(),
-                 fast_mode_pvrow_index=None,
-                 fast_mode_segment_index=None):
+    def __init__(self, pvarray, vf_calculator=None, irradiance_model=None,
+                 fast_mode_pvrow_index=None, fast_mode_segment_index=None):
         """Create pv engine class, and initialize timeseries parameters.
 
         Parameters
@@ -24,14 +22,14 @@ class PVEngine(object):
         pvarray : BasePVArray (or child) object
             The initialized PV array object that will be used for calculations
         vf_calculator : vf calculator object, optional
-            Calculator that will be used to calculate the view factor matrices
-            (Default =
-            :py:class:`~pvfactors.viewfactors.calculator.VFCalculator` object)
+            Calculator that will be used to calculate the view factor matrices,
+            will use :py:class:`~pvfactors.viewfactors.calculator.VFCalculator`
+            if None (Default = None)
         irradiance_model : irradiance model object, optional
-            The irradiance model that will be applied to the PV array
-            (Default =
+            The irradiance model that will be applied to the PV array,
+            will use
             :py:class:`~pvfactors.irradiance.models.HybridPerezOrdered`
-            object)
+            if None (Default = None)
         fast_mode_pvrow_index : int, optional
             If a pvrow index is passed, then the PVEngine fast mode
             will be activated and the engine calculation will be done only
@@ -42,10 +40,13 @@ class PVEngine(object):
             will calculate back surface irradiance only for the
             selected segment of the selected back surface (Default = None)
         """
-        self.vf_calculator = vf_calculator
-        self.irradiance = irradiance_model
+        # Initialize the attributes of the PV engine
+        self.vf_calculator = (VFCalculator() if vf_calculator is None
+                              else vf_calculator)
+        self.irradiance = (HybridPerezOrdered() if irradiance_model is None
+                           else irradiance_model)
         self.pvarray = pvarray
-        self.is_fast_mode = False if fast_mode_pvrow_index is None else True
+        # Save fast mode indices
         self.fast_mode_pvrow_index = fast_mode_pvrow_index
         self.fast_mode_segment_index = fast_mode_segment_index
 
@@ -54,7 +55,7 @@ class PVEngine(object):
         self.skip_step = None
 
     def fit(self, timestamps, DNI, DHI, solar_zenith, solar_azimuth,
-            surface_tilt, surface_azimuth, albedo):
+            surface_tilt, surface_azimuth, albedo, GHI=None):
         """Fit the timeseries data to the engine. More specifically,
         save all the parameters that needs to be saved, and fit the PV array
         and irradiance models to the data (i.e. perform all the intermediate
@@ -80,7 +81,9 @@ class PVEngine(object):
             Surface azimuth angles [deg]
         albedo : array-like or float
             Albedo values (ground reflectivity)
-
+        GHI : array-like, optional
+            Global horizontal irradiance [W/m2], if not provided, will be
+            calculated from DNI and DHI if needed (Default = None)
         """
         # Format inputs to numpy arrays if it looks like floats where inputted
         if np.isscalar(DNI):
@@ -91,11 +94,12 @@ class PVEngine(object):
             solar_azimuth = np.array([solar_azimuth])
             surface_tilt = np.array([surface_tilt])
             surface_azimuth = np.array([surface_azimuth])
+            GHI = None if GHI is None else np.array([GHI])
 
         # Format albedo
         self.n_points = len(DNI)
-        if np.isscalar(albedo):
-            albedo = albedo * np.ones(self.n_points)
+        albedo = (albedo * np.ones(self.n_points) if np.isscalar(albedo)
+                  else albedo)
 
         # Fit PV array
         self.pvarray.fit(solar_zenith, solar_azimuth, surface_tilt,
@@ -103,7 +107,7 @@ class PVEngine(object):
 
         # Fit irradiance model
         self.irradiance.fit(timestamps, DNI, DHI, solar_zenith, solar_azimuth,
-                            surface_tilt, surface_azimuth, albedo)
+                            surface_tilt, surface_azimuth, albedo, GHI=GHI)
 
         # Add timeseries irradiance results to pvarray
         self.irradiance.transform_ts(self.pvarray)
@@ -147,10 +151,10 @@ class PVEngine(object):
         """
 
         # Prepare variables
-        pvrow_idx = self.fast_mode_pvrow_index if pvrow_index is None \
-            else pvrow_index
-        segment_idx = self.fast_mode_segment_index if segment_index is None \
-            else segment_index
+        pvrow_idx = (self.fast_mode_pvrow_index if pvrow_index is None
+                     else pvrow_index)
+        segment_idx = (self.fast_mode_segment_index if segment_index is None
+                       else segment_index)
         ts_pvrow = self.pvarray.ts_pvrows[pvrow_idx]
 
         # Run calculations
@@ -164,8 +168,8 @@ class PVEngine(object):
             self._calculate_back_ts_segment_qinc(ts_segment, pvrow_idx)
 
         # Create report
-        report = None if fn_build_report is None \
-            else fn_build_report(self.pvarray)
+        report = (None if fn_build_report is None
+                  else fn_build_report(self.pvarray))
 
         return report
 
@@ -190,8 +194,8 @@ class PVEngine(object):
         report = None
         for idx in tqdm(range(self.n_points)):
             pvarray = self.run_full_mode_timestep(idx)
-            if fn_build_report is not None:
-                report = fn_build_report(report, pvarray)
+            report = (None if fn_build_report is None
+                      else fn_build_report(report, pvarray))
 
         return report
 

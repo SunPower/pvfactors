@@ -79,18 +79,14 @@ class IsotropicOrdered(BaseModel):
             solar_azimuth = np.array([solar_azimuth])
             surface_tilt = np.array([surface_tilt])
             surface_azimuth = np.array([surface_azimuth])
-            if GHI is not None:
-                GHI = np.array([GHI])
+            GHI = None if GHI is None else np.array([GHI])
         # Length of arrays
         n = len(DNI)
         # Make sure that albedo is a vector
-        if np.isscalar(albedo):
-            albedo = albedo * np.ones(n)
+        albedo = albedo * np.ones(n) if np.isscalar(albedo) else albedo
 
         # Save and calculate total POA values from Perez model
-        if GHI is None:
-            # Calculate GHI if not specified
-            GHI = DNI * cosd(solar_zenith) + DHI
+        GHI = DNI * cosd(solar_zenith) + DHI if GHI is None else GHI
         self.GHI = GHI
         self.DHI = DHI
         self.n_steps = n
@@ -349,13 +345,11 @@ class HybridPerezOrdered(BaseModel):
             solar_azimuth = np.array([solar_azimuth])
             surface_tilt = np.array([surface_tilt])
             surface_azimuth = np.array([surface_azimuth])
-            if GHI is not None:
-                GHI = np.array([GHI])
+            GHI = None if GHI is None else np.array([GHI])
         # Length of arrays
         n = len(DNI)
         # Make sure that albedo is a vector
-        if np.isscalar(albedo):
-            albedo = albedo * np.ones(n)
+        albedo = albedo * np.ones(n) if np.isscalar(albedo) else albedo
 
         # Calculate terms from Perez model
         luminance_isotropic, luminance_circumsolar, poa_horizon, \
@@ -366,9 +360,7 @@ class HybridPerezOrdered(BaseModel):
                 surface_tilt, surface_azimuth)
 
         # Save and calculate total POA values from Perez model
-        if GHI is None:
-            # Calculate GHI if not specified
-            GHI = DNI * cosd(solar_zenith) + DHI
+        GHI = DNI * cosd(solar_zenith) + DHI if GHI is None else GHI
         self.GHI = GHI
         self.DHI = DHI
         self.n_steps = n
