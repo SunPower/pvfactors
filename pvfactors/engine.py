@@ -227,7 +227,7 @@ class PVEngine(object):
             pvarray.transform(idx)
 
             # Get the irradiance modeling vectors used in final calculations
-            irradiance_vec, rho_vec, invrho_vec, total_perez_vec = \
+            irradiance_vec, _, invrho_vec, _ = \
                 self.irradiance.get_full_modeling_vectors(pvarray, idx)
 
             # Prepare inputs to view factor calculator
