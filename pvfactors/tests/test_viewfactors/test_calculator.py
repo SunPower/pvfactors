@@ -2,6 +2,7 @@ from pvfactors.viewfactors.calculator import VFCalculator
 from pvfactors.geometry import OrderedPVArray
 from pvfactors.irradiance import HybridPerezOrdered
 from pvfactors.engine import PVEngine
+from pvfactors.tests.test_engine import _fast_mode_with_loop
 import datetime as dt
 from pvfactors.tests.test_viewfactors.test_data import \
     vf_matrix_left_cut, vf_left_cut_sum_axis_one_rounded
@@ -48,7 +49,9 @@ def test_vf_matrix_subset_calculation(params):
             params['surface_tilt'],
             params['surface_azimuth'],
             params['rho_ground'])
-    pvarray_fast = eng.run_timestep(0)
+    pvarray_fast = _fast_mode_with_loop(
+        eng.pvarray, eng.irradiance,
+        eng.vf_calculator, fast_mode_pvrow_index, 0)
     vf_mat_fast = pvarray_fast.vf_matrix
 
     # Run in full mode
@@ -64,7 +67,7 @@ def test_vf_matrix_subset_calculation(params):
             params['surface_tilt'],
             params['surface_azimuth'],
             params['rho_ground'])
-    pvarray_full = eng.run_timestep(0)
+    pvarray_full = eng.run_full_mode_timestep(0)
     vf_mat_full = pvarray_full.vf_matrix
 
     index_of_back_side_surface = 13
@@ -73,7 +76,7 @@ def test_vf_matrix_subset_calculation(params):
 
 
 def test_ts_view_factors():
-
+    """Test calculation of timeseries view factors for center PV row"""
     # Create base params
     params = {
         'axis_azimuth': 0,
@@ -101,8 +104,14 @@ def test_ts_view_factors():
     ts_ground = pvarray.ts_ground
     rotation_vec = pvarray.rotation_vec
     calculator = VFCalculator()
-    view_factors = calculator.get_vf_ts_pvrow_segment(
-        pvrow_idx, segment_idx, ts_pvrows, ts_ground, rotation_vec,
+    ts_segment = ts_pvrows[pvrow_idx].back.list_segments[segment_idx]
+    # Calculate view factors for segment
+    view_factors_segment = calculator.get_vf_ts_pvrow_element(
+        pvrow_idx, ts_segment, ts_pvrows, ts_ground, rotation_vec,
+        pvarray.width)
+    # Calculate view factors for segment's illum surface (should be identical)
+    view_factors_illum = calculator.get_vf_ts_pvrow_element(
+        pvrow_idx, ts_segment.illum, ts_pvrows, ts_ground, rotation_vec,
         pvarray.width)
 
     expected_vf_to_obstructed_shadows = np.array([
@@ -118,6 +127,12 @@ def test_ts_view_factors():
     expected_vf_to_pvrow_shaded = np.array([0., 0., 0., 0.068506, 0.])
     expected_vf_to_sky = np.array(
         [0.070879, 0.070879, 0.070879, 0.070879, -0.])
+    # Test that segment and segment's illum surface values are identical
+    for k, _ in view_factors_segment.items():
+        np.testing.assert_almost_equal(
+            view_factors_illum[k], view_factors_segment[k], decimal=6)
+    # Now test that values are always consistent
+    view_factors = view_factors_segment
     np.testing.assert_almost_equal(expected_vf_to_obstructed_shadows,
                                    view_factors['to_each_gnd_shadow'],
                                    decimal=6)

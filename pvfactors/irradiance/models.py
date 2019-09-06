@@ -79,18 +79,14 @@ class IsotropicOrdered(BaseModel):
             solar_azimuth = np.array([solar_azimuth])
             surface_tilt = np.array([surface_tilt])
             surface_azimuth = np.array([surface_azimuth])
-            if GHI is not None:
-                GHI = np.array([GHI])
+            GHI = None if GHI is None else np.array([GHI])
         # Length of arrays
         n = len(DNI)
         # Make sure that albedo is a vector
-        if np.isscalar(albedo):
-            albedo = albedo * np.ones(n)
+        albedo = albedo * np.ones(n) if np.isscalar(albedo) else albedo
 
         # Save and calculate total POA values from Perez model
-        if GHI is None:
-            # Calculate GHI if not specified
-            GHI = DNI * cosd(solar_zenith) + DHI
+        GHI = DNI * cosd(solar_zenith) + DHI if GHI is None else GHI
         self.GHI = GHI
         self.DHI = DHI
         self.n_steps = n
@@ -118,58 +114,7 @@ class IsotropicOrdered(BaseModel):
             ~front_is_illum, DNI * cosd(aoi_back_pvrow), 0.)
         self.total_perez['front_pvrow'] = perez_front_pvrow['poa_global']
 
-    def transform(self, pvarray, idx=0):
-        """Apply calculated irradiance values to PV array.
-
-        Parameters
-        ----------
-        pvarray : PV array object
-            PV array on which the calculated irradiance values will be applied
-        idx : int, optional
-            Index of the irradiance values to apply to the PV array (in the
-            whole timeseries values)
-        """
-
-        for seg in pvarray.ground.list_segments:
-            seg.illum_collection.update_params(
-                {'direct': self.direct['ground'][idx],
-                 'rho': self.albedo[idx],
-                 'inv_rho': 1. / self.albedo[idx],
-                 'total_perez': self.GHI[idx]})
-            seg.shaded_collection.update_params(
-                {'direct': 0.,
-                 'rho': self.albedo[idx],
-                 'inv_rho': 1. / self.albedo[idx],
-                 'total_perez': self.DHI[idx]})
-
-        for pvrow in pvarray.pvrows:
-            # Front
-            for seg in pvrow.front.list_segments:
-                seg.illum_collection.update_params(
-                    {'direct': self.direct['front_pvrow'][idx],
-                     'rho': self.rho_front,
-                     'inv_rho': 1. / self.rho_front,
-                     'total_perez': self.total_perez['front_pvrow'][idx]})
-                seg.shaded_collection.update_params(
-                    {'direct': 0.,
-                     'rho': self.rho_front,
-                     'inv_rho': 1. / self.rho_front,
-                     'total_perez': self.total_perez['front_pvrow'][idx] -
-                     self.direct['front_pvrow'][idx]})
-            # Back
-            for seg in pvrow.back.list_segments:
-                seg.illum_collection.update_params(
-                    {'direct': self.direct['back_pvrow'][idx],
-                     'rho': self.rho_back,
-                     'inv_rho': 1. / self.rho_back,
-                     'total_perez': 0.})
-                seg.shaded_collection.update_params(
-                    {'direct': 0.,
-                     'rho': self.rho_back,
-                     'inv_rho': 1. / self.rho_back,
-                     'total_perez': 0.})
-
-    def transform_ts(self, pvarray):
+    def transform(self, pvarray):
         """Apply calculated irradiance values to PV array timeseries
         geometries: assign values as parameters to timeseries surfaces.
 
@@ -191,12 +136,12 @@ class IsotropicOrdered(BaseModel):
             {'direct': self.direct['ground'],
              'rho': self.albedo,
              'inv_rho': 1. / self.albedo,
-             'total_perez': self.GHI})
+             'total_perez': self.gnd_illum})
         pvarray.ts_ground.shaded_params.update(
             {'direct': np.zeros(n_steps),
              'rho': self.albedo,
              'inv_rho': 1. / self.albedo,
-             'total_perez': self.DHI})
+             'total_perez': self.gnd_shaded})
 
         for ts_pvrow in pvarray.ts_pvrows:
             # Front
@@ -205,13 +150,12 @@ class IsotropicOrdered(BaseModel):
                     {'direct': self.direct['front_pvrow'],
                      'rho': rho_front,
                      'inv_rho': inv_rho_front,
-                     'total_perez': self.total_perez['front_pvrow']})
+                     'total_perez': self.pvrow_illum})
                 ts_seg.shaded.update_params(
                     {'direct': np.zeros(n_steps),
                      'rho': rho_front,
                      'inv_rho': inv_rho_front,
-                     'total_perez': self.total_perez['front_pvrow']
-                     - self.direct['front_pvrow']})
+                     'total_perez': self.pvrow_shaded})
             # Back
             for ts_seg in ts_pvrow.back.list_segments:
                 ts_seg.illum.update_params(
@@ -261,6 +205,33 @@ class IsotropicOrdered(BaseModel):
 
         return np.array(irradiance_vec), np.array(rho_vec), \
             np.array(inv_rho_vec), np.array(total_perez_vec)
+
+    @property
+    def gnd_shaded(self):
+        """Total timeseries irradiance incident on ground shaded areas"""
+        return self.DHI
+
+    @property
+    def gnd_illum(self):
+        """Total timeseries irradiance incident on ground illuminated areas"""
+        return self.GHI
+
+    @property
+    def pvrow_shaded(self):
+        """Total timeseries irradiance incident on PV row's front illuminated
+        areas and calculated by Perez transposition"""
+        return self.pvrow_illum - self.direct['front_pvrow']
+
+    @property
+    def pvrow_illum(self):
+        """Total timeseries irradiance incident on PV row's front shaded
+        areas and calculated by Perez transposition"""
+        return self.total_perez['front_pvrow']
+
+    @property
+    def sky_luminance(self):
+        """Total timeseries isotropic luminance of sky"""
+        return self.isotropic_luminance
 
 
 class HybridPerezOrdered(BaseModel):
@@ -349,26 +320,22 @@ class HybridPerezOrdered(BaseModel):
             solar_azimuth = np.array([solar_azimuth])
             surface_tilt = np.array([surface_tilt])
             surface_azimuth = np.array([surface_azimuth])
-            if GHI is not None:
-                GHI = np.array([GHI])
+            GHI = None if GHI is None else np.array([GHI])
         # Length of arrays
         n = len(DNI)
         # Make sure that albedo is a vector
-        if np.isscalar(albedo):
-            albedo = albedo * np.ones(n)
+        albedo = albedo * np.ones(n) if np.isscalar(albedo) else albedo
 
         # Calculate terms from Perez model
         luminance_isotropic, luminance_circumsolar, poa_horizon, \
             poa_circumsolar_front, poa_circumsolar_back, \
             aoi_front_pvrow, aoi_back_pvrow = \
-            self.calculate_luminance_poa_components(
+            self._calculate_luminance_poa_components(
                 timestamps, DNI, DHI, solar_zenith, solar_azimuth,
                 surface_tilt, surface_azimuth)
 
         # Save and calculate total POA values from Perez model
-        if GHI is None:
-            # Calculate GHI if not specified
-            GHI = DNI * cosd(solar_zenith) + DHI
+        GHI = DNI * cosd(solar_zenith) + DHI if GHI is None else GHI
         self.GHI = GHI
         self.DHI = DHI
         self.n_steps = n
@@ -405,7 +372,7 @@ class HybridPerezOrdered(BaseModel):
         self.total_perez['ground_illum'] = GHI
         self.total_perez['sky'] = luminance_isotropic
 
-    def transform_ts(self, pvarray):
+    def transform(self, pvarray):
         """Apply calculated irradiance values to PV array timeseries
         geometries: assign values as parameters to timeseries surfaces.
 
@@ -431,14 +398,14 @@ class HybridPerezOrdered(BaseModel):
             'horizon': np.zeros(n_steps),
             'rho': self.albedo,
             'inv_rho': 1. / self.albedo,
-            'total_perez': self.total_perez['ground_illum']})
+            'total_perez': self.gnd_illum})
         pvarray.ts_ground.shaded_params.update({
             'direct': np.zeros(n_steps),
             'circumsolar': np.zeros(n_steps),
             'horizon': np.zeros(n_steps),
             'rho': self.albedo,
             'inv_rho': 1. / self.albedo,
-            'total_perez': self.total_perez['ground_shaded']})
+            'total_perez': self.gnd_shaded})
 
         # Transform timeseries PV rows
         for idx_pvrow, ts_pvrow in enumerate(ts_pvrows):
@@ -450,19 +417,19 @@ class HybridPerezOrdered(BaseModel):
                     'horizon': self.horizon['front_pvrow'],
                     'rho': rho_front,
                     'inv_rho': inv_rho_front,
-                    'total_perez': self.total_perez['front_illum_pvrow']})
+                    'total_perez': self.pvrow_illum})
                 ts_seg.shaded.update_params({
                     'direct': np.zeros(n_steps),
                     'circumsolar': np.zeros(n_steps),
                     'horizon': self.horizon['front_pvrow'],
                     'rho': rho_front,
                     'inv_rho': inv_rho_front,
-                    'total_perez': self.total_perez['front_shaded_pvrow']})
+                    'total_perez': self.pvrow_shaded})
             # Back: apply back surface horizon shading
             for ts_seg in ts_pvrow.back.list_segments:
                 # Illum
                 centroid_illum = ts_seg.illum.centroid
-                hor_shd_pct_illum = self.calculate_horizon_shading_pct_ts(
+                hor_shd_pct_illum = self._calculate_horizon_shading_pct_ts(
                     ts_pvrows, centroid_illum, idx_pvrow, tilted_to_left,
                     is_back_side=True)
                 ts_seg.illum.update_params({
@@ -477,7 +444,7 @@ class HybridPerezOrdered(BaseModel):
                     'total_perez': np.zeros(n_steps)})
                 # Back
                 centroid_shaded = ts_seg.shaded.centroid
-                hor_shd_pct_shaded = self.calculate_horizon_shading_pct_ts(
+                hor_shd_pct_shaded = self._calculate_horizon_shading_pct_ts(
                     ts_pvrows, centroid_shaded, idx_pvrow, tilted_to_left,
                     is_back_side=True)
                 ts_seg.shaded.update_params({
@@ -490,85 +457,6 @@ class HybridPerezOrdered(BaseModel):
                     'rho': rho_back,
                     'inv_rho': inv_rho_back,
                     'total_perez': np.zeros(n_steps)})
-
-    def transform(self, pvarray, idx=0):
-        """Apply calculated irradiance values to PV array, as well as
-        horizon band shading on pvrow back sides.
-
-        Parameters
-        ----------
-        pvarray : PV array object
-            PV array on which the calculated irradiance values will be applied
-        idx : int, optional
-            Index of the irradiance values to apply to the PV array (in the
-            whole timeseries values)
-        """
-
-        for seg in pvarray.ground.list_segments:
-            seg.illum_collection.update_params(
-                {'direct': self.direct['ground'][idx],
-                 'circumsolar': self.circumsolar['ground'][idx],
-                 'horizon': 0.,
-                 'rho': self.albedo[idx],
-                 'inv_rho': 1. / self.albedo[idx],
-                 'total_perez': self.total_perez['ground_illum'][idx]})
-            seg.shaded_collection.update_params(
-                {'direct': 0.,
-                 'circumsolar': 0.,
-                 'horizon': 0.,
-                 'rho': self.albedo[idx],
-                 'inv_rho': 1. / self.albedo[idx],
-                 'total_perez': self.total_perez['ground_shaded'][idx]})
-
-        pvrows = pvarray.pvrows
-        for idx_pvrow, pvrow in enumerate(pvrows):
-            # Front
-            for seg in pvrow.front.list_segments:
-                seg.illum_collection.update_params(
-                    {'direct': self.direct['front_pvrow'][idx],
-                     'circumsolar': self.circumsolar['front_pvrow'][idx],
-                     'horizon': self.horizon['front_pvrow'][idx],
-                     'rho': self.rho_front,
-                     'inv_rho': 1. / self.rho_front,
-                     'total_perez':
-                     self.total_perez['front_illum_pvrow'][idx]})
-                seg.shaded_collection.update_params(
-                    {'direct': 0.,
-                     'circumsolar': 0.,
-                     'horizon': self.horizon['front_pvrow'][idx],
-                     'rho': self.rho_front,
-                     'inv_rho': 1. / self.rho_front,
-                     'total_perez':
-                     self.total_perez['front_shaded_pvrow'][idx]})
-            # Back: apply back surface horizon shading
-            for seg in pvrow.back.list_segments:
-                # Illum
-                idx_neighbor = pvarray.back_neighbors[idx_pvrow]
-                for surf in seg.illum_collection.list_surfaces:
-                    hor_shd_pct = self.calculate_horizon_shading_pct(
-                        surf, idx_neighbor, pvrows)
-                    surf.update_params(
-                        {'direct': self.direct['back_pvrow'][idx],
-                         'circumsolar': self.circumsolar['back_pvrow'][idx],
-                         'horizon': self.horizon['back_pvrow'][idx] *
-                         (1. - hor_shd_pct / 100.),
-                         'horizon_shd_pct': hor_shd_pct,
-                         'rho': self.rho_back,
-                         'inv_rho': 1. / self.rho_back,
-                         'total_perez': 0.})
-                # Shaded
-                for surf in seg.shaded_collection.list_surfaces:
-                    hor_shd_pct = self.calculate_horizon_shading_pct(
-                        surf, idx_neighbor, pvrows)
-                    surf.update_params(
-                        {'direct': 0.,
-                         'circumsolar': 0.,
-                         'horizon': self.horizon['back_pvrow'][idx] *
-                         (1. - hor_shd_pct / 100.),
-                         'horizon_shd_pct': hor_shd_pct,
-                         'rho': self.rho_back,
-                         'inv_rho': 1. / self.rho_back,
-                         'total_perez': 0.})
 
     def get_full_modeling_vectors(self, pvarray, idx):
         """Get the modeling vectors used in matrix calculations of mathematical
@@ -608,44 +496,36 @@ class HybridPerezOrdered(BaseModel):
         return np.array(irradiance_vec), np.array(rho_vec), \
             np.array(inv_rho_vec), np.array(total_perez_vec)
 
-    def calculate_horizon_shading_pct(self, surface, idx_neighbor, pvrows):
-        """Calculate horizon band shading percentage on surfaces of the ordered
-        PV array.
-        TODO: This needs to be merged with circumsolar shading for performance
+    @property
+    def gnd_shaded(self):
+        """Total timeseries irradiance incident on ground shaded areas"""
+        return self.total_perez['ground_shaded']
 
-        Parameters
-        ----------
-        surface : :py:class:`~pvfactors.geometry.base.PVSurface` object
-            PV surface for which some horizon band shading will occur
-        idx_neighbor : int
-            Index of the neighboring PV row (can be ``None``)
-        pvrows : list of :py:class:`~pvfactors.geometry.pvrow.PVRow` objects
-            List of PV rows on which ``idx_neighbor`` will be used
+    @property
+    def gnd_illum(self):
+        """Total timeseries irradiance incident on ground illuminated areas"""
+        return self.total_perez['ground_illum']
 
-        Returns
-        -------
-        horizon_shading_pct : float
-            Percentage of horizon band irradiance shaded (from 0 to 100)
-        """
+    @property
+    def pvrow_shaded(self):
+        """Total timeseries irradiance incident on PV row's front illuminated
+        areas and calculated by Perez transposition"""
+        return self.total_perez['front_shaded_pvrow']
 
-        # TODO: should be applied to all pvrow surfaces
+    @property
+    def pvrow_illum(self):
+        """Total timeseries irradiance incident on PV row's front shaded
+        areas and calculated by Perez transposition"""
+        return self.total_perez['front_illum_pvrow']
 
-        horizon_shading_pct = 0.
-        if idx_neighbor is not None:
-            centroid = surface.centroid
-            neighbor_point = pvrows[idx_neighbor].highest_point
-            shading_angle = np.abs(np.arctan(
-                (neighbor_point.y - centroid.y) /
-                (neighbor_point.x - centroid.x))
-            ) * 180. / np.pi
-            horizon_shading_pct = calculate_horizon_band_shading(
-                shading_angle, self.horizon_band_angle)
+    @property
+    def sky_luminance(self):
+        """Total timeseries isotropic luminance of sky"""
+        return self.isotropic_luminance
 
-        return horizon_shading_pct
-
-    def calculate_horizon_shading_pct_ts(self, ts_pvrows, ts_point_coords,
-                                         pvrow_idx, tilted_to_left,
-                                         is_back_side=True):
+    def _calculate_horizon_shading_pct_ts(self, ts_pvrows, ts_point_coords,
+                                          pvrow_idx, tilted_to_left,
+                                          is_back_side=True):
         """Calculate horizon band shading percentage on surfaces of the ordered
         PV array, in a vectorized way.
 
@@ -700,8 +580,8 @@ class HybridPerezOrdered(BaseModel):
 
         return shading_pct
 
-    def calculate_circumsolar_shading_pct(self, surface, idx_neighbor, pvrows,
-                                          solar_2d_vector):
+    def _calculate_circumsolar_shading_pct(self, surface, idx_neighbor, pvrows,
+                                           solar_2d_vector):
         """Model method to calculate circumsolar shading on surfaces of
         the ordered PV array.
         TODO: This needs to be merged with horizon shading for performance
@@ -745,7 +625,7 @@ class HybridPerezOrdered(BaseModel):
         return circ_shading_pct
 
     @staticmethod
-    def calculate_luminance_poa_components(
+    def _calculate_luminance_poa_components(
             timestamps, DNI, DHI, solar_zenith, solar_azimuth, surface_tilt,
             surface_azimuth):
         """Calculate Perez-like luminance and plane-of-array irradiance values.

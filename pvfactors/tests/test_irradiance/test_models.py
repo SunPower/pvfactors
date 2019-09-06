@@ -55,7 +55,7 @@ def test_isotropic_model_front(params_irr):
     # Create, fit, and transform pv array
     pvarray = OrderedPVArray.fit_from_dict_of_scalars(
         params_irr, param_names=IsotropicOrdered.params)
-    irr_model.transform_ts(pvarray)
+    irr_model.transform(pvarray)
     pvarray.transform(idx=0)
 
     # there should be some direct shading
@@ -148,7 +148,7 @@ def test_isotropic_model_back(params_irr):
     # Create, fit, and transform pv array
     pvarray = OrderedPVArray.fit_from_dict_of_scalars(
         params_irr, param_names=IsotropicOrdered.params)
-    irr_model.transform_ts(pvarray)
+    irr_model.transform(pvarray)
     pvarray.transform(idx=0)
 
     # there should be some direct shading
@@ -242,7 +242,7 @@ def test_hybridperez_ordered_front(params_irr):
     # Create, fit, and transform pv array
     pvarray = OrderedPVArray.fit_from_dict_of_scalars(
         params_irr, param_names=IsotropicOrdered.params)
-    irr_model.transform_ts(pvarray)
+    irr_model.transform(pvarray)
     pvarray.transform(idx=0)
 
     # there should be some direct shading
@@ -386,7 +386,7 @@ def test_hybridperez_ordered_back(params_irr):
     # Create, fit, and transform pv array
     pvarray = OrderedPVArray.fit_from_dict_of_scalars(
         params_irr, param_names=IsotropicOrdered.params)
-    irr_model.transform_ts(pvarray)
+    irr_model.transform(pvarray)
     pvarray.transform(idx=0)
 
     # there should be some direct shading
@@ -509,7 +509,7 @@ def test_hybridperez_circ_shading():
     solar_2d_vector = [1.2, 1]  # <45 deg elevation so should have >50% shading
     idx_neighbor = 0
 
-    circ_shading_pct = irr_model.calculate_circumsolar_shading_pct(
+    circ_shading_pct = irr_model._calculate_circumsolar_shading_pct(
         surf, idx_neighbor, pvrows, solar_2d_vector)
 
     np.testing.assert_almost_equal(circ_shading_pct, 71.5969299216)
@@ -544,7 +544,7 @@ def test_hybridperez_horizon_shading_ts():
     centroid_coords = (pvarray.ts_pvrows[pvrow_idx].back.list_segments[0]
                        .coords.centroid)
     tilted_to_left = pvarray.rotation_vec > 0
-    horizon_pct_shading = model.calculate_horizon_shading_pct_ts(
+    horizon_pct_shading = model._calculate_horizon_shading_pct_ts(
         pvarray.ts_pvrows, centroid_coords, pvrow_idx, tilted_to_left,
         is_back_side=True)
 
@@ -554,7 +554,7 @@ def test_hybridperez_horizon_shading_ts():
     np.testing.assert_allclose(expected_pct_shading, horizon_pct_shading)
 
 
-def test_hybridperez_transform_ts(df_inputs_clearsky_8760):
+def test_hybridperez_transform(df_inputs_clearsky_8760):
 
     n_points = 24
     df_inputs = df_inputs_clearsky_8760.iloc[:n_points, :]
@@ -580,7 +580,7 @@ def test_hybridperez_transform_ts(df_inputs_clearsky_8760):
               df_inputs.solar_zenith.values, df_inputs.solar_azimuth.values,
               df_inputs.surface_tilt.values, df_inputs.surface_azimuth.values,
               albedo)
-    model.transform_ts(pvarray)
+    model.transform(pvarray)
 
     # Check timeseries parameters
     expected_middle_back_horizon = np.array(

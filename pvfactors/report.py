@@ -6,8 +6,8 @@ import numpy as np
 
 def example_fn_build_report(report, pvarray):
     """Example function that builds a report when used in the
-    :py:class:`~pvfactors.engine.PVEngine`. Here it will be a dictionary
-    with lists of calculated values.
+    :py:class:`~pvfactors.engine.PVEngine` with full mode simulations.
+    Here it will be a dictionary with lists of calculated values.
 
     Parameters
     ----------

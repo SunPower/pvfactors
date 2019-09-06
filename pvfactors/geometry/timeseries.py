@@ -981,6 +981,16 @@ class TsSurface(object):
         """Timeseries length of the surface"""
         return self.coords.length
 
+    @property
+    def highest_point(self):
+        """Timeseries point coordinates of highest point of surface"""
+        return self.coords.highest_point
+
+    @property
+    def lowest_point(self):
+        """Timeseries point coordinates of lowest point of surface"""
+        return self.coords.lowest_point
+
 
 class TsLineCoords(object):
     """Timeseries line coordinates class: will provide a helpful shapely-like

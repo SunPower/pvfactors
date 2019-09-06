@@ -29,7 +29,7 @@ def test_pvengine_float_inputs_iso(params):
     np.testing.assert_almost_equal(eng.irradiance.direct['front_pvrow'], DNI)
 
     # Run timestep
-    pvarray = eng.run_timestep(0)
+    pvarray = eng.run_full_mode_timestep(0)
     # Checks
     assert isinstance(pvarray, OrderedPVArray)
     np.testing.assert_almost_equal(
@@ -63,7 +63,7 @@ def test_pvengine_float_inputs_perez(params):
     np.testing.assert_almost_equal(eng.irradiance.direct['front_pvrow'], DNI)
 
     # Run timestep
-    pvarray = eng.run_timestep(0)
+    pvarray = eng.run_full_mode_timestep(0)
     # Checks
     assert isinstance(pvarray, OrderedPVArray)
     np.testing.assert_almost_equal(
@@ -98,7 +98,7 @@ def test_pvengine_ts_inputs_perez(params_serial,
             surface_azimuth, albedo)
 
     # Run all timesteps
-    report = eng.run_all_timesteps(fn_build_report=fn_report_example)
+    report = eng.run_full_mode(fn_build_report=fn_report_example)
 
     # Check values
     np.testing.assert_array_almost_equal(
@@ -111,8 +111,8 @@ def test_pvengine_ts_inputs_perez(params_serial,
         report['iso_back'], [1.727308, 1.726535])
 
 
-def test_fast_pvengine_float_inputs_perez(params):
-    """Test that PV engine works for float inputs"""
+def test_fast_mode_loop_like(params):
+    """Test value of older and decomissioned loop like fast mode"""
 
     # Prepare some engine inputs
     irradiance_model = HybridPerezOrdered()
@@ -130,18 +130,327 @@ def test_fast_pvengine_float_inputs_perez(params):
     DHI = 100.
 
     # Fit engine
-    eng.fit(timestamps, DNI, DHI,
-            params['solar_zenith'],
-            params['solar_azimuth'],
-            params['surface_tilt'],
-            params['surface_azimuth'],
-            params['rho_ground'])
+    eng.fit(timestamps, DNI, DHI, params['solar_zenith'],
+            params['solar_azimuth'], params['surface_tilt'],
+            params['surface_azimuth'], params['rho_ground'])
     # Checks
     np.testing.assert_almost_equal(eng.irradiance.direct['front_pvrow'], DNI)
 
     # Run timestep
-    pvarray = eng.run_timestep(0)
+    pvarray = _fast_mode_with_loop(eng.pvarray, eng.irradiance,
+                                   eng.vf_calculator, fast_mode_pvrow_index, 0)
     # Checks
     assert isinstance(pvarray, OrderedPVArray)
     np.testing.assert_almost_equal(
         pvarray.pvrows[1].back.get_param_weighted('qinc'), 123.7087347744459)
+
+
+def test_run_fast_mode_isotropic(params):
+    """Test that PV engine works for timeseries fast mode and float inputs,
+    and using the isotropic irradiance model"""
+
+    # Prepare some engine inputs
+    irradiance_model = IsotropicOrdered()
+    pvarray = OrderedPVArray.init_from_dict(
+        params, param_names=irradiance_model.params)
+    fast_mode_pvrow_index = 1
+    fast_mode_segment_index = 0
+
+    # Create engine object
+    eng = PVEngine(pvarray, irradiance_model=irradiance_model,
+                   fast_mode_pvrow_index=fast_mode_pvrow_index,
+                   fast_mode_segment_index=fast_mode_segment_index)
+
+    # Irradiance inputs
+    timestamps = dt.datetime(2019, 6, 11, 11)
+    DNI = 1000.
+    DHI = 100.
+
+    # Fit engine
+    eng.fit(timestamps, DNI, DHI,
+            params['solar_zenith'], params['solar_azimuth'],
+            params['surface_tilt'], params['surface_azimuth'],
+            params['rho_ground'])
+    # Checks
+    np.testing.assert_almost_equal(eng.irradiance.direct['front_pvrow'], DNI)
+
+    # Expected value
+    qinc_expected = 122.73453
+
+    # Run fast mode
+    qinc = eng.run_fast_mode(
+        fn_build_report=lambda pvarray: (pvarray.ts_pvrows[1]
+                                         .back.get_param_weighted('qinc')))
+    # Check results
+    np.testing.assert_allclose(qinc, qinc_expected)
+
+    # Without providing segment index
+    eng.fast_mode_segment_index = None
+    qinc = eng.run_fast_mode(
+        fn_build_report=lambda pvarray: (pvarray.ts_pvrows[1]
+                                         .back.get_param_weighted('qinc')))
+    # Check results
+    np.testing.assert_allclose(qinc, qinc_expected)
+
+
+def test_run_fast_mode_perez(params):
+    """Test that PV engine works for timeseries fast mode and float inputs.
+    Value is very close to loop-like fast mode"""
+
+    # Prepare some engine inputs
+    irradiance_model = HybridPerezOrdered()
+    pvarray = OrderedPVArray.init_from_dict(
+        params, param_names=irradiance_model.params)
+    fast_mode_pvrow_index = 1
+    fast_mode_segment_index = 0
+
+    # Create engine object
+    eng = PVEngine(pvarray, irradiance_model=irradiance_model,
+                   fast_mode_pvrow_index=fast_mode_pvrow_index,
+                   fast_mode_segment_index=fast_mode_segment_index)
+
+    # Irradiance inputs
+    timestamps = dt.datetime(2019, 6, 11, 11)
+    DNI = 1000.
+    DHI = 100.
+
+    # Fit engine
+    eng.fit(timestamps, DNI, DHI,
+            params['solar_zenith'], params['solar_azimuth'],
+            params['surface_tilt'], params['surface_azimuth'],
+            params['rho_ground'])
+    # Checks
+    np.testing.assert_almost_equal(eng.irradiance.direct['front_pvrow'], DNI)
+
+    # Run fast mode
+    qinc = eng.run_fast_mode(
+        fn_build_report=lambda pvarray: (pvarray.ts_pvrows[1]
+                                         .back.get_param_weighted('qinc')))
+    # Check results
+    np.testing.assert_allclose(qinc, 123.753462)
+
+    # Without providing segment index
+    eng.fast_mode_segment_index = None
+    qinc = eng.run_fast_mode(
+        fn_build_report=lambda pvarray: (pvarray.ts_pvrows[1]
+                                         .back.get_param_weighted('qinc')))
+    # Check results
+    np.testing.assert_allclose(qinc, 123.753462)
+
+
+def test_run_fast_mode_segments(params):
+    """Test that PV engine works for timeseries fast mode and float inputs.
+    Value is very close to loop-like fast mode"""
+
+    # Discretize middle PV row's back side
+    params.update({'cut': {1: {'back': 5}}})
+
+    # Prepare some engine inputs
+    irradiance_model = HybridPerezOrdered()
+    pvarray = OrderedPVArray.init_from_dict(
+        params, param_names=irradiance_model.params)
+    fast_mode_pvrow_index = 1
+    fast_mode_segment_index = 2
+
+    # Create engine object
+    eng = PVEngine(pvarray, irradiance_model=irradiance_model,
+                   fast_mode_pvrow_index=fast_mode_pvrow_index,
+                   fast_mode_segment_index=fast_mode_segment_index)
+
+    # Irradiance inputs
+    timestamps = dt.datetime(2019, 6, 11, 11)
+    DNI = 1000.
+    DHI = 100.
+
+    # Fit engine
+    eng.fit(timestamps, DNI, DHI,
+            params['solar_zenith'], params['solar_azimuth'],
+            params['surface_tilt'], params['surface_azimuth'],
+            params['rho_ground'])
+    # Checks
+    np.testing.assert_almost_equal(eng.irradiance.direct['front_pvrow'], DNI)
+
+    # Define report function to grab irradiance from PV row segment
+    def fn_report(pvarray): return (pvarray.ts_pvrows[1].back.list_segments[2]
+                                    .get_param_weighted('qinc'))
+
+    # Expected value for middle segment
+    qinc_expected = 121.39964
+    # Run fast mode for specific segment
+    qinc_segment = eng.run_fast_mode(fn_build_report=fn_report)
+    # Check results
+    np.testing.assert_allclose(qinc_segment, qinc_expected)
+
+    # Without providing segment index: the value should be the same as above
+    eng.fast_mode_segment_index = None
+    qinc_segment = eng.run_fast_mode(fn_build_report=fn_report)
+    # Check results
+    np.testing.assert_allclose(qinc_segment, qinc_expected)
+
+
+def test_run_fast_mode_compare_to_loop_like(params):
+    """Test that PV engine works for timeseries fast mode and float inputs.
+
+    Check the left pv row back side (no obstruction, since rotation < 0)
+    This should be exactly the same calculated value as in loop-like fast mode
+    because ground is not infinite for back of left pv row"""
+
+    # Prepare some engine inputs
+    irradiance_model = HybridPerezOrdered()
+    pvarray = OrderedPVArray.init_from_dict(
+        params, param_names=irradiance_model.params)
+    fast_mode_pvrow_index = 1
+    fast_mode_segment_index = 0
+    # Irradiance inputs
+    timestamps = dt.datetime(2019, 6, 11, 11)
+    DNI = 1000.
+    DHI = 100.
+
+    # Create engine object
+    eng = PVEngine(pvarray, irradiance_model=irradiance_model,
+                   fast_mode_pvrow_index=fast_mode_pvrow_index)
+    # Fit engine
+    eng.fit(timestamps, DNI, DHI,
+            params['solar_zenith'], params['solar_azimuth'],
+            params['surface_tilt'], params['surface_azimuth'],
+            params['rho_ground'])
+
+    # Run baseline calculation
+    pvrow_idx = 0
+    time_idx = 0
+    pvarray_loop = _fast_mode_with_loop(eng.pvarray, eng.irradiance,
+                                        eng.vf_calculator, pvrow_idx,
+                                        time_idx)
+    # Expected should be: 138.10421248631152
+    qinc_expected = pvarray_loop.pvrows[0].back.get_param_weighted('qinc')
+    # Run timeseries calculation
+    qinc = eng.run_fast_mode(
+        fn_build_report=lambda pvarray: (pvarray.ts_pvrows[0]
+                                         .back.get_param_weighted('qinc')),
+        pvrow_index=0)
+    # Check results: value taken from loop-like fast mode
+    np.testing.assert_allclose(qinc, qinc_expected)
+
+
+def test_run_fast_mode_back_shading(params):
+    """Test that PV engine works for timeseries fast mode and float inputs,
+    and when there's large direct shading on the back surface.
+    Value is very close to loop-style fast mode"""
+
+    params.update({'gcr': 0.6, 'surface_azimuth': 270, 'surface_tilt': 120,
+                   'solar_zenith': 70.})
+    # Prepare some engine inputs
+    irradiance_model = HybridPerezOrdered()
+    pvarray = OrderedPVArray.init_from_dict(
+        params, param_names=irradiance_model.params)
+    fast_mode_pvrow_index = 1
+    fast_mode_segment_index = 0
+
+    # Create engine object
+    eng = PVEngine(pvarray, irradiance_model=irradiance_model,
+                   fast_mode_pvrow_index=fast_mode_pvrow_index,
+                   fast_mode_segment_index=fast_mode_segment_index)
+
+    # Irradiance inputs
+    timestamps = dt.datetime(2019, 6, 11, 11)
+    DNI = 1000.
+    DHI = 100.
+
+    # Expected values
+    expected_qinc = 683.537153
+
+    # Fit engine
+    eng.fit(timestamps, DNI, DHI,
+            params['solar_zenith'], params['solar_azimuth'],
+            params['surface_tilt'], params['surface_azimuth'],
+            params['rho_ground'])
+
+    def fn_report(pvarray): return (pvarray.ts_pvrows[1]
+                                    .back.get_param_weighted('qinc'))
+    # By providing segment index
+    qinc = eng.run_fast_mode(fn_build_report=fn_report)
+    # Check results
+    np.testing.assert_allclose(qinc, expected_qinc)
+
+    # Without providing segment index
+    eng.fast_mode_segment_index = None
+    qinc = eng.run_fast_mode(fn_build_report=fn_report)
+    # Check results
+    np.testing.assert_allclose(qinc, expected_qinc)
+
+
+def test_fast_mode_8760(params, df_inputs_clearsky_8760):
+    """Test fast mode with 1 PV row to make sure that is consistent
+    after the vectorization update: should get exact same values
+    """
+    # Get MET data
+    df_inputs = df_inputs_clearsky_8760
+    timestamps = df_inputs.index
+    dni = df_inputs.dni.values
+    dhi = df_inputs.dhi.values
+    solar_zenith = df_inputs.solar_zenith.values
+    solar_azimuth = df_inputs.solar_azimuth.values
+    surface_tilt = df_inputs.surface_tilt.values
+    surface_azimuth = df_inputs.surface_azimuth.values
+    # Run simulation for only 1 PV row
+    params.update({'n_pvrows': 1})
+
+    # Run engine
+    pvarray = OrderedPVArray.init_from_dict(params)
+    eng = PVEngine(pvarray)
+    eng.fit(timestamps, dni, dhi, solar_zenith, solar_azimuth, surface_tilt,
+            surface_azimuth, params['rho_ground'])
+    qinc = eng.run_fast_mode(
+        fn_build_report=lambda pvarray: (pvarray.ts_pvrows[0]
+                                         .back.get_param_weighted('qinc')),
+        pvrow_index=0)
+
+    # Check than annual energy on back is consistent
+    np.testing.assert_allclose(np.nansum(qinc) / 1e3, 349.9345317405013)
+
+
+def _fast_mode_with_loop(pvarray, irradiance, vf_calculator, pvrow_idx, idx):
+    """Function for running fast mode using subset of view factor matrix
+    and with the shapely geometries.
+
+    Saving this for future debugging of new timeseries fast mode.
+    """
+    # Transform pvarray to time step
+    pvarray.transform(idx)
+
+    # Apply irradiance terms to pvarray
+    irradiance_vec, rho_vec, invrho_vec, total_perez_vec = \
+        irradiance.get_full_modeling_vectors(pvarray, idx)
+
+    # Prepare inputs to view factor calculator
+    geom_dict = pvarray.dict_surfaces
+    view_matrix, obstr_matrix = pvarray.view_obstr_matrices
+
+    # Indices of the surfaces of the back of the selected pvrows
+    list_surface_indices = pvarray.pvrows[pvrow_idx].back.surface_indices
+
+    # Calculate view factors using a subset of view_matrix to
+    # gain in calculation speed
+    vf_matrix_subset = vf_calculator.get_vf_matrix_subset(
+        geom_dict, view_matrix, obstr_matrix, pvarray.pvrows,
+        list_surface_indices)
+    pvarray.vf_matrix = vf_matrix_subset
+
+    irradiance_vec_subset = irradiance_vec[list_surface_indices]
+    # In fast mode, will not care to calculate q0
+    qinc = vf_matrix_subset.dot(rho_vec * total_perez_vec) \
+        + irradiance_vec_subset
+
+    # Calculate other terms
+    isotropic_vec = vf_matrix_subset[:, -1] * total_perez_vec[-1]
+    reflection_vec = qinc - irradiance_vec_subset \
+        - isotropic_vec
+
+    # Update selected surfaces with values
+    for i, surf_idx in enumerate(list_surface_indices):
+        surface = geom_dict[surf_idx]
+        surface.update_params({'qinc': qinc[i],
+                               'isotropic': isotropic_vec[i],
+                               'reflection': reflection_vec[i]})
+
+    return pvarray

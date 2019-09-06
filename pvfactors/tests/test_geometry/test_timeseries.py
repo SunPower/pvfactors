@@ -159,20 +159,6 @@ def test_ts_ground_from_ts_pvrow():
     for surf in ground_0.all_surfaces:
         assert surf.param_names == param_names
 
-    is_ci = os.environ.get('CI', False)
-
-    if not is_ci:
-        import matplotlib.pyplot as plt
-
-        # Plot it at ts 0
-        f, ax = plt.subplots()
-        ts_pvrow.plot_at_idx(0, ax)
-        ts_ground.plot_at_idx(0, ax, merge_if_flag_overlap=True,
-                              with_cut_points=True)
-        ax.axis('equal')
-        ax.set_xlim(-3, 6)
-        plt.show()
-
 
 def test_ts_ground_overlap():
 
@@ -236,18 +222,6 @@ def test_ts_ground_to_geometry():
     assert pvground.list_segments[0].illum_collection.n_surfaces == 2
     assert pvground.list_segments[0].shaded_collection.n_surfaces == 2
     assert pvground.list_segments[0].shaded_collection.length == 5
-
-    is_ci = os.environ.get('CI', False)
-
-    if not is_ci:
-        import matplotlib.pyplot as plt
-
-        # Plot it at ts 0
-        f, ax = plt.subplots()
-        ts_ground.plot_at_idx(0, ax, merge_if_flag_overlap=True,
-                              with_cut_points=True)
-        ax.set_xlim(-1, 6)
-        plt.show()
 
 
 def test_shadows_coords_left_right_of_cut_point():

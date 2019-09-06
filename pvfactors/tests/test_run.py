@@ -6,7 +6,7 @@ import mock
 
 def test_run_timeseries_engine(fn_report_example, params_serial,
                                df_inputs_clearsky_8760):
-
+    """Test that running timeseries engine with full mode works consistently"""
     df_inputs = df_inputs_clearsky_8760.iloc[:24, :]
     n = df_inputs.shape[0]
 
@@ -35,6 +35,46 @@ def test_run_timeseries_engine(fn_report_example, params_serial,
                                    11.160301350847325)
     np.testing.assert_almost_equal(report['qinc_back'][-8],
                                    8.642850754173368)
+
+
+def test_run_timeseries_engine_fast_mode(fn_report_example, params_serial,
+                                         df_inputs_clearsky_8760):
+    """Test that running timeseries engine with fast mode works consistently.
+    Values are supposed to be a little higher than with full mode"""
+    df_inputs = df_inputs_clearsky_8760.iloc[:24, :]
+    n = df_inputs.shape[0]
+
+    # Get MET data
+    timestamps = df_inputs.index
+    dni = df_inputs.dni.values
+    dhi = df_inputs.dhi.values
+    solar_zenith = df_inputs.solar_zenith.values
+    solar_azimuth = df_inputs.solar_azimuth.values
+    surface_tilt = df_inputs.surface_tilt.values
+    surface_azimuth = df_inputs.surface_azimuth.values
+    fast_mode_pvrow_index = 1
+
+    def fn_report(pvarray): return {
+        'qinc_back': pvarray.ts_pvrows[1].back.get_param_weighted('qinc'),
+        'iso_back': pvarray.ts_pvrows[1].back.get_param_weighted('isotropic')}
+
+    report = run_timeseries_engine(
+        fn_report, params_serial,
+        timestamps, dni, dhi, solar_zenith, solar_azimuth, surface_tilt,
+        surface_azimuth, params_serial['rho_ground'],
+        fast_mode_pvrow_index=fast_mode_pvrow_index)
+
+    assert len(report['qinc_back']) == n
+    # Test value consistency
+    np.testing.assert_almost_equal(np.nansum(report['qinc_back']),
+                                   556.1006350124344)
+    np.testing.assert_almost_equal(np.nansum(report['iso_back']),
+                                   18.03732189070727)
+    # Check a couple values
+    np.testing.assert_almost_equal(report['qinc_back'][7],
+                                   11.308686359671267)
+    np.testing.assert_almost_equal(report['qinc_back'][-8],
+                                   8.747277900741802)
 
 
 def test_params_irradiance_model():
