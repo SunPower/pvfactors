@@ -145,7 +145,55 @@ def test_fast_mode_loop_like(params):
         pvarray.pvrows[1].back.get_param_weighted('qinc'), 123.7087347744459)
 
 
-def test_run_fast_mode(params):
+def test_run_fast_mode_isotropic(params):
+    """Test that PV engine works for timeseries fast mode and float inputs,
+    and using the isotropic irradiance model"""
+
+    # Prepare some engine inputs
+    irradiance_model = IsotropicOrdered()
+    pvarray = OrderedPVArray.init_from_dict(
+        params, param_names=irradiance_model.params)
+    fast_mode_pvrow_index = 1
+    fast_mode_segment_index = 0
+
+    # Create engine object
+    eng = PVEngine(pvarray, irradiance_model=irradiance_model,
+                   fast_mode_pvrow_index=fast_mode_pvrow_index,
+                   fast_mode_segment_index=fast_mode_segment_index)
+
+    # Irradiance inputs
+    timestamps = dt.datetime(2019, 6, 11, 11)
+    DNI = 1000.
+    DHI = 100.
+
+    # Fit engine
+    eng.fit(timestamps, DNI, DHI,
+            params['solar_zenith'], params['solar_azimuth'],
+            params['surface_tilt'], params['surface_azimuth'],
+            params['rho_ground'])
+    # Checks
+    np.testing.assert_almost_equal(eng.irradiance.direct['front_pvrow'], DNI)
+
+    # Expected value
+    qinc_expected = 122.73453
+
+    # Run fast mode
+    qinc = eng.run_fast_mode(
+        fn_build_report=lambda pvarray: (pvarray.ts_pvrows[1]
+                                         .back.get_param_weighted('qinc')))
+    # Check results
+    np.testing.assert_allclose(qinc, qinc_expected)
+
+    # Without providing segment index
+    eng.fast_mode_segment_index = None
+    qinc = eng.run_fast_mode(
+        fn_build_report=lambda pvarray: (pvarray.ts_pvrows[1]
+                                         .back.get_param_weighted('qinc')))
+    # Check results
+    np.testing.assert_allclose(qinc, qinc_expected)
+
+
+def test_run_fast_mode_perez(params):
     """Test that PV engine works for timeseries fast mode and float inputs.
     Value is very close to loop-like fast mode"""
 
