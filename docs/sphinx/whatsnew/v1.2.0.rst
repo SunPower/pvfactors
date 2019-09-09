@@ -1,0 +1,20 @@
+.. _whatsnew_1200:
+
+v1.2.0 (September 9, 2019)
+==========================
+
+Huge speed improvements and enhancements: implementation of a fully vectorized fast mode which now runs 8760 simulations in less than 2 seconds (and calculates same or better results than previous version of fast mode). The improvements done for fast mode also benefit the full simulation mode as some speed improvements have been observed as well.
+
+* Vectorize shading (#64)
+* Create timeseries PV row geometries (#65)
+* Create timeseries ground (#66)
+* Timeseries view factors (#67)
+* Update irradiance models (#68)
+* Update engine and run functions for timeseries fast mode (#69)
+* Update docs for vectorized fast mode (#70)
+
+
+Contributors
+------------
+
+* Marc Anoma (:ghuser:`anomam`)
