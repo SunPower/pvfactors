@@ -161,7 +161,7 @@ print("Isotropic irradiance on back surface of right pv row: %.2f W/m2"
 The users can also run simulations for all provided timestamps, and obtain a "report" that will look like whatever the users want, and which can rely on the simple API shown above.
 The two options to run the simulations are:
 
-- fast mode: almost instantaneous results for back side irradiance calculations, but simple reflection assumptions
+- [fast mode](https://sunpower.github.io/pvfactors/theory/problem_formulation.html#fast-simulations): almost instantaneous results for back side irradiance calculations, but using simple reflection assumptions
 
 
 ```python
@@ -198,7 +198,7 @@ df_report
 </div>
 
 
-- full mode: which calculates the equilibrium of reflections for all timestamps and all surfaces
+- [full mode](https://sunpower.github.io/pvfactors/theory/problem_formulation.html#full-simulations): which calculates the equilibrium of reflections for all timestamps and all surfaces
 
 
 ```python
