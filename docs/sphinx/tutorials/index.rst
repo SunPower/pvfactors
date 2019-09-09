@@ -49,7 +49,7 @@ The :ref:`getting_started_ref` section below shows how such a dictionary can be 
 
 - ``n_pvrows``: is the number of PV rows that the PV array will contain. In Fig. 1, we have 3 PV rows.
 - ``pvrow_height``: the PV row height (in meters) is the height of the PV row measured from the ground to the PV row center. In Fig. 1, the height of the PV rows is 2.5 m.
-- ``pvrow_width``: the PV row width (in meters) is the cross-section width of the entire PV row. In Fig. 1, it's the entire length of the blue lines.
+- ``pvrow_width``: the PV row width (in meters) is the cross-section width of the entire PV row. In Fig. 1, it's the entire length of the blue lines, so 2 m in the example.
 - ``axis_azimuth``: the PV array axis azimuth (in degrees) is the direction of the rotation axis of the PV rows (physically, it could be seen as the torque tube direction for single-axis trackers). In the 2D plane of the PV array geometry (as shown in Fig. 1), it is always the vector normal to that 2D plane and with the direction going into the 2D plane. So positive rotation angles will lead to PV rows tilted to the left, and negative rotation angles will lead to PV rows tilted to the right. The azimuth convention used in ``pvfactors`` is that 0 deg is North, 90 deg is East, etc.
 - ``gcr``: it is the ground coverage ratio of the PV array. It is calculated as being equal to the ratio of the PV row width by the distance seperating the PV row centers.
 - ``cut``: this optional parameter is used to discretize the PV row sides into equal-length segments. For instance here, the front side of the leftmost PV row (always with index 0) will have 3 segments, and the back side of the center PV row (with index 1) will have 2 segments.
