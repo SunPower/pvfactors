@@ -163,6 +163,25 @@ For instance, if we are interested in back side surfaces with indices ``3`` and 
 	Sky_7\\
 	\end{pmatrix}
 
+
+Grouping terms
+^^^^^^^^^^^^^^
+
+For each back surface element, we can then group reflection terms that have identical reflected irradiance values into something more intuitive:
+
+.. math::
+
+   q_{inc-back}
+   &≈ F_{to\ shaded\ ground} . albedo . q_{perez\ shaded\ ground} \\
+   &+ F_{to\ illuminated\ ground} . albedo . q_{perez\ illuminated\ ground} \\
+   &+ F_{to\ shaded\ front\ pv\ row} . \rho_{front\ pv\ row} . q_{perez\ front\ shaded\ pv\ row} \\
+   &+ F_{to\ illuminated\ front\ pv\ row} . \rho_{front\ pv\ row} . q_{perez\ front\ shaded\ pv\ row} \\
+   &+ F_{to\ sky\ dome} . luminance_{sky\ dome} \\
+   &+ Sky_{inc-back}
+
+This form is quite useful because we can then rely on vectorization to calculate back surface incident irradiance quite rapidly.
+
+
 .. rubric:: Footnotes
 
 .. [#perez_paper] Perez, R., Seals, R., Ineichen, P., Stewart, R. and Menicucci, D., 1987. A new simplified version of the Perez diffuse irradiance model for tilted surfaces. Solar energy, 39(3), pp.221-231.

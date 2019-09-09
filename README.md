@@ -8,7 +8,7 @@ pvfactors: irradiance modeling made simple
 
 pvfactors is a tool used by PV professionals to calculate the
 irradiance incident on surfaces of a photovoltaic array. It relies on the use of
-2D geometries and view factors integrated mathematically into a linear system of
+2D geometries and view factors integrated mathematically into systems of
 equations to account for reflections between all of the surfaces.
 
 pvfactors was originally ported from the SunPower developed 'vf_model' package, which was introduced at the IEEE PV Specialist Conference 44 2017 (see [1] and [link](https://pdfs.semanticscholar.org/ebb2/35e3c3796b158e1a3c45b40954e60d876ea9.pdf) to paper).
@@ -18,7 +18,7 @@ Documentation
 -------------
 
 The documentation can be found [here](https://sunpower.github.io/pvfactors).
-It includes a lot of [tutorials](https://sunpower.github.io/pvfactors/tutorials/index.html) that describe many ways of using pvfactors.
+It includes a lot of [tutorials](https://sunpower.github.io/pvfactors/tutorials/index.html) that describe the different ways of using pvfactors.
 
 
 Quick Start
