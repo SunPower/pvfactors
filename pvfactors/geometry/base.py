@@ -1178,7 +1178,8 @@ class BasePVArray(object):
         ax.set_xlabel("x [m]", fontsize=PLOT_FONTSIZE)
         ax.set_ylabel("y [m]", fontsize=PLOT_FONTSIZE)
 
-    def plot_at_idx(self, idx, ax, merge_if_flag_overlap=True):
+    def plot_at_idx(self, idx, ax, merge_if_flag_overlap=True,
+                    with_cut_points=True, x_min_max=None):
         """Plot all the PV rows and the ground in the PV array at a desired
         step index. This can be called before transforming the array, and
         after fitting it.
@@ -1192,12 +1193,19 @@ class BasePVArray(object):
         merge_if_flag_overlap : bool, optional
             Decide whether to merge all shadows if they overlap
             (Default = True)
+        with_cut_points :  bool, optional
+            Decide whether to include the saved cut points in the created
+            PV ground geometry (Default = True)
+        x_min_max : tuple, optional
+            List of minimum and maximum x coordinates for the flat ground
+            surface [m] (Default = None)
         """
         # Plot pv array structures
         self.ts_ground.plot_at_idx(
             idx, ax, color_shaded=COLOR_DIC['ground_shaded'],
             color_illum=COLOR_DIC['ground_illum'],
-            merge_if_flag_overlap=merge_if_flag_overlap)
+            merge_if_flag_overlap=merge_if_flag_overlap,
+            with_cut_points=with_cut_points, x_min_max=x_min_max)
 
         for ts_pvrow in self.ts_pvrows:
             ts_pvrow.plot_at_idx(
