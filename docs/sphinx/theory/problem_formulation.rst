@@ -15,6 +15,7 @@ The current version of the view factor model only addresses PV rows that are mad
 
 The mathematical model used in pvfactors simulations is different depending on the simulation type that is run. In "full simulations", all of the reflections between the modeled surfaces are taken into account in the calculations. In "fast simulations", assumptions are made on the reflected irradiance from the environment surrounding the surfaces of interest.
 
+.. _full_mode_theory:
 
 Full simulations
 ----------------
@@ -94,6 +95,8 @@ Or, for a system of ``n`` surfaces:
 	\end{pmatrix}
 
 After solving this system and finding all of the radiosities, it is very easy to deduce values of interest like back side or front side incident irradiance.
+
+.. _fast_mode_theory:
 
 Fast simulations
 ----------------
