@@ -31,3 +31,4 @@ docs/sphinx/developer/generated/
 # virtual envs
 venv/
 venv3/
+*.DS_Store*

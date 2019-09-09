@@ -15,6 +15,7 @@ The current version of the view factor model only addresses PV rows that are mad
 
 The mathematical model used in pvfactors simulations is different depending on the simulation type that is run. In "full simulations", all of the reflections between the modeled surfaces are taken into account in the calculations. In "fast simulations", assumptions are made on the reflected irradiance from the environment surrounding the surfaces of interest.
 
+.. _full_mode_theory:
 
 Full simulations
 ----------------
@@ -95,6 +96,8 @@ Or, for a system of ``n`` surfaces:
 
 After solving this system and finding all of the radiosities, it is very easy to deduce values of interest like back side or front side incident irradiance.
 
+.. _fast_mode_theory:
+
 Fast simulations
 ----------------
 
@@ -159,6 +162,25 @@ For instance, if we are interested in back side surfaces with indices ``3`` and 
 	Sky_3\\
 	Sky_7\\
 	\end{pmatrix}
+
+
+Grouping terms
+^^^^^^^^^^^^^^
+
+For each back surface element, we can then group reflection terms that have identical reflected irradiance values into something more intuitive:
+
+.. math::
+
+   q_{inc-back}
+   &≈ F_{to\ shaded\ ground} . albedo . q_{perez\ shaded\ ground} \\
+   &+ F_{to\ illuminated\ ground} . albedo . q_{perez\ illuminated\ ground} \\
+   &+ F_{to\ shaded\ front\ pv\ row} . \rho_{front\ pv\ row} . q_{perez\ front\ shaded\ pv\ row} \\
+   &+ F_{to\ illuminated\ front\ pv\ row} . \rho_{front\ pv\ row} . q_{perez\ front\ shaded\ pv\ row} \\
+   &+ F_{to\ sky\ dome} . luminance_{sky\ dome} \\
+   &+ Sky_{inc-back}
+
+This form is quite useful because we can then rely on vectorization to calculate back surface incident irradiance quite rapidly.
+
 
 .. rubric:: Footnotes
 

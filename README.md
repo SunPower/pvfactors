@@ -8,7 +8,7 @@ pvfactors: irradiance modeling made simple
 
 pvfactors is a tool used by PV professionals to calculate the
 irradiance incident on surfaces of a photovoltaic array. It relies on the use of
-2D geometries and view factors integrated mathematically into a linear system of
+2D geometries and view factors integrated mathematically into systems of
 equations to account for reflections between all of the surfaces.
 
 pvfactors was originally ported from the SunPower developed 'vf_model' package, which was introduced at the IEEE PV Specialist Conference 44 2017 (see [1] and [link](https://pdfs.semanticscholar.org/ebb2/35e3c3796b158e1a3c45b40954e60d876ea9.pdf) to paper).
@@ -18,7 +18,7 @@ Documentation
 -------------
 
 The documentation can be found [here](https://sunpower.github.io/pvfactors).
-It includes a lot of [tutorials](https://sunpower.github.io/pvfactors/tutorials/index.html) that describe many ways of using pvfactors.
+It includes a lot of [tutorials](https://sunpower.github.io/pvfactors/tutorials/index.html) that describe the different ways of using pvfactors.
 
 
 Quick Start
@@ -38,11 +38,10 @@ df_inputs = pd.DataFrame(
      'solar_azimuth': [110., 250.],
      'surface_tilt': [10., 20.],
      'surface_azimuth': [90., 270.],
-     'dni': [1000., 300.],
-     'dhi': [50., 500.],
+     'dni': [1000., 900.],
+     'dhi': [50., 100.],
      'albedo': [0.2, 0.2]},
-    index=[datetime(2017, 8, 31, 11), datetime(2017, 8, 31, 15)]
-)
+    index=[datetime(2017, 8, 31, 11), datetime(2017, 8, 31, 15)])
 df_inputs
 ```
 
@@ -52,35 +51,35 @@ df_inputs
   <thead>
     <tr style="text-align: right;">
       <th></th>
-      <th>albedo</th>
-      <th>dhi</th>
-      <th>dni</th>
-      <th>solar_azimuth</th>
       <th>solar_zenith</th>
-      <th>surface_azimuth</th>
+      <th>solar_azimuth</th>
       <th>surface_tilt</th>
+      <th>surface_azimuth</th>
+      <th>dni</th>
+      <th>dhi</th>
+      <th>albedo</th>
     </tr>
   </thead>
   <tbody>
     <tr>
-      <th>2017-08-31 11:00:00</th>
-      <td>0.2</td>
-      <td>50.0</td>
-      <td>1000.0</td>
-      <td>110.0</td>
+      <td>2017-08-31 11:00:00</td>
       <td>20.0</td>
-      <td>90.0</td>
+      <td>110.0</td>
       <td>10.0</td>
+      <td>90.0</td>
+      <td>1000.0</td>
+      <td>50.0</td>
+      <td>0.2</td>
     </tr>
     <tr>
-      <th>2017-08-31 15:00:00</th>
-      <td>0.2</td>
-      <td>500.0</td>
-      <td>300.0</td>
-      <td>250.0</td>
+      <td>2017-08-31 15:00:00</td>
       <td>50.0</td>
-      <td>270.0</td>
+      <td>250.0</td>
       <td>20.0</td>
+      <td>270.0</td>
+      <td>900.0</td>
+      <td>100.0</td>
+      <td>0.2</td>
     </tr>
   </tbody>
 </table>
@@ -98,20 +97,21 @@ pvarray_parameters = {
     'pvrow_width': 1,         # width of pvrows
     'axis_azimuth': 0.,       # azimuth angle of rotation axis
     'gcr': 0.4,               # ground coverage ratio
-    'rho_front_pvrow': 0.01,  # pv row front surface reflectivity
-    'rho_back_pvrow': 0.03    # pv row back surface reflectivity
 }
 ```
 
-The users can run a timeseries simulation using the ``PVEngine``
+The user can quickly create a PV array with ``pvfactors``, and manipulate it with the engine
+
+
+```python
+from pvfactors.geometry import OrderedPVArray
+# Create PV array
+pvarray = OrderedPVArray.init_from_dict(pvarray_parameters)
+```
 
 
 ```python
 from pvfactors.engine import PVEngine
-from pvfactors.geometry import OrderedPVArray
-
-# Create an ordered PV array
-pvarray = OrderedPVArray.init_from_dict(pvarray_parameters)
 # Create engine
 engine = PVEngine(pvarray)
 # Fit engine to data
@@ -121,62 +121,60 @@ engine.fit(df_inputs.index, df_inputs.dni, df_inputs.dhi,
            df_inputs.albedo)
 ```
 
-For a single timestamp
+The user can then plot the PV array geometry at any given time of the simulation:
 
 
 ```python
-# Import external libraries
-import matplotlib.pyplot as plt
-
-# Get pvarray at given timestamp
-pvarray = engine.run_timestep(idx=1)
-
 # Plot pvarray shapely geometries
-f, ax = plt.subplots(figsize=(10, 3))
-pvarray.plot(ax)
+f, ax = plt.subplots(figsize=(10, 5))
+pvarray.plot_at_idx(1, ax)
 plt.show()
 ```
 
 <img src="https://raw.githubusercontent.com/SunPower/pvfactors/master/docs/sphinx/_static/pvarray.png">
 
 
-The user can inspect the results very easily thanks to the simple geometry API
+It is then very easy to run simulations using the defined engine:
 
 
 ```python
-print("Incident irradiance on front surface of middle pv row: {} W/m2"
-      .format(pvarray.pvrows[1].front.get_param_weighted('qinc')))
-print("Reflected irradiance on back surface of left pv row: {} W/m2"
-      .format(pvarray.pvrows[0].back.get_param_weighted('reflection')))
-print("Isotropic irradiance on back surface of right pv row: {} W/m2"
-      .format(pvarray.pvrows[2].back.get_param_weighted('isotropic')))
+pvarray = engine.run_full_mode_timestep(1)
 ```
 
-    Incident irradiance on front surface of middle pv row: 811.7 W/m2
-    Reflected irradiance on back surface of left pv row: 90.2 W/m2
-    Isotropic irradiance on back surface of right pv row: 9.3 W/m2
+And inspect the results thanks to the simple geometry API
 
 
-The users can also run simulations for all timestamps, and obtain a "report" that will look like whatever the users want, and which will rely on the simple geometry API shown above.
-Here is an example:
+```python
+print("Incident irradiance on front surface of middle pv row: %.2f W/m2"
+      % (pvarray.pvrows[1].front.get_param_weighted('qinc')))
+print("Reflected irradiance on back surface of left pv row: %.2f W/m2"
+      % (pvarray.pvrows[0].back.get_param_weighted('reflection')))
+print("Isotropic irradiance on back surface of right pv row: %.2f W/m2"
+      % (pvarray.pvrows[2].back.get_param_weighted('isotropic')))
+```
+
+    Incident irradiance on front surface of middle pv row: 886.38 W/m2
+    Reflected irradiance on back surface of left pv row: 86.40 W/m2
+    Isotropic irradiance on back surface of right pv row: 1.85 W/m2
+
+
+The users can also run simulations for all provided timestamps, and obtain a "report" that will look like whatever the users want, and which can rely on the simple API shown above.
+The two options to run the simulations are:
+
+- [fast mode](https://sunpower.github.io/pvfactors/theory/problem_formulation.html#fast-simulations): almost instantaneous results for back side irradiance calculations, but using simple reflection assumptions
 
 
 ```python
 # Create a function that will build a report
-from pvfactors.report import example_fn_build_report
+def fn_report(pvarray): return {'qinc_back': pvarray.ts_pvrows[1].back.get_param_weighted('qinc')}
 
-# Run full simulation
-report = engine.run_all_timesteps(fn_build_report=example_fn_build_report)
+# Run fast mode simulation
+report = engine.run_fast_mode(fn_build_report=fn_report, pvrow_index=1)
 
 # Print results (report is defined by report function passed by user)
 df_report = pd.DataFrame(report, index=df_inputs.index)
 df_report
 ```
-
-    100%|██████████| 2/2 [00:00<00:00, 26.58it/s]
-
-
-
 
 <div>
 <table border="1" class="dataframe">
@@ -184,25 +182,65 @@ df_report
     <tr style="text-align: right;">
       <th></th>
       <th>qinc_back</th>
-      <th>iso_back</th>
-      <th>qinc_front</th>
-      <th>iso_front</th>
     </tr>
   </thead>
   <tbody>
     <tr>
-      <th>2017-08-31 11:00:00</th>
-      <td>106.627832</td>
-      <td>0.115792</td>
-      <td>1034.967753</td>
-      <td>20.848345</td>
+      <td>2017-08-31 11:00:00</td>
+      <td>110.586509</td>
     </tr>
     <tr>
-      <th>2017-08-31 15:00:00</th>
-      <td>85.535537</td>
-      <td>6.304878</td>
-      <td>811.659036</td>
-      <td>276.181750</td>
+      <td>2017-08-31 15:00:00</td>
+      <td>86.943571</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+
+- [full mode](https://sunpower.github.io/pvfactors/theory/problem_formulation.html#full-simulations): which calculates the equilibrium of reflections for all timestamps and all surfaces
+
+
+```python
+# Create a function that will build a report
+from pvfactors.report import example_fn_build_report
+
+# Run full mode simulation
+report = engine.run_full_mode(fn_build_report=example_fn_build_report)
+
+# Print results (report is defined by report function passed by user)
+df_report = pd.DataFrame(report, index=df_inputs.index)
+df_report
+```
+
+    100%|██████████| 2/2 [00:00<00:00, 51.08it/s]
+
+
+<div>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>qinc_front</th>
+      <th>qinc_back</th>
+      <th>iso_front</th>
+      <th>iso_back</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>2017-08-31 11:00:00</td>
+      <td>1034.967753</td>
+      <td>106.627832</td>
+      <td>20.848345</td>
+      <td>0.115792</td>
+    </tr>
+    <tr>
+      <td>2017-08-31 15:00:00</td>
+      <td>886.376819</td>
+      <td>79.668878</td>
+      <td>54.995702</td>
+      <td>1.255482</td>
     </tr>
   </tbody>
 </table>
