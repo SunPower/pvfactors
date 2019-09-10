@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Run timeseries simulations &mdash; pvfactors 1.1.0 documentation</title>
+  <title>Run timeseries simulations &mdash; pvfactors 1.1.0+10.gf60c805.dirty documentation</title>
   
 
   
@@ -94,21 +94,27 @@
             
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../installation/index.html">Installation</a></li>
-<li class="toctree-l1 current"><a class="reference internal" href="index.html">Tutorials</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="Getting_started.html">Getting started</a></li>
-<li class="toctree-l2"><a class="reference internal" href="PVArray_introduction.html">PV Array geometry introduction</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Create_discretized_pvarray.html">Discretize PV row sides and indexing</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Calculate_view_factors.html">Calculate view factors</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Run timeseries simulations</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#Get-timeseries-inputs">Get timeseries inputs</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#Prepare-PV-array-parameters">Prepare PV array parameters</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#Run-single-timestep-with-PVEngine-and-inspect-results">Run single timestep with PVEngine and inspect results</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#Run-multiple-timesteps-with-PVEngine">Run multiple timesteps with PVEngine</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#Run-one-or-multiple-timesteps-with-the-run_timeseries_engine()-function">Run one or multiple timesteps with the <code class="docutils literal notranslate"><span class="pre">run_timeseries_engine()</span></code> function</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">User guide and tutorials</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="index.html#understanding-pv-array-2d-geometries">Understanding PV array 2D geometries</a></li>
+<li class="toctree-l2"><a class="reference internal" href="index.html#pv-array-parameters">PV array parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="index.html#getting-started-running-simulations">Getting started: running simulations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="index.html#understanding-the-fast-mode-simulations">Understanding the “fast mode” simulations</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="index.html#understanding-the-full-mode-simulations">Understanding the “full mode” simulations</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="PVArray_introduction.html">PV Array geometry introduction</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Create_discretized_pvarray.html">Discretize PV row sides and indexing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Calculate_view_factors.html">Calculate view factors</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Run timeseries simulations</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#Get-timeseries-inputs">Get timeseries inputs</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#Prepare-PV-array-parameters">Prepare PV array parameters</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#Run-single-timestep-with-PVEngine-and-inspect-results">Run single timestep with PVEngine and inspect results</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#Run-multiple-timesteps-with-PVEngine">Run multiple timesteps with PVEngine</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#Run-one-or-multiple-timesteps-with-the-run_timeseries_engine()-function">Run one or multiple timesteps with the <code class="docutils literal notranslate"><span class="pre">run_timeseries_engine()</span></code> function</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="Run_parallel_simulations.html">Run timeseries simulations in parallel</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Run_fast_simulations.html">Run “fast” simulations with 8760 annual inputs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Run_parallel_simulations.html">Run timeseries simulations in parallel</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Run_fast_simulations.html">Run “fast” simulations with 8760 annual inputs</a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../theory/index.html">Theory</a></li>
@@ -159,7 +165,7 @@
     
       <li><a href="../index.html">Docs</a> &raquo;</li>
         
-          <li><a href="index.html">Tutorials</a> &raquo;</li>
+          <li><a href="index.html">User guide and tutorials</a> &raquo;</li>
         
       <li>Run timeseries simulations</li>
     

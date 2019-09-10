@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>pvground &mdash; pvfactors 1.1.0 documentation</title>
+  <title>pvground &mdash; pvfactors 1.2.0 documentation</title>
   
 
   
@@ -66,7 +66,7 @@
             
             
               <div class="version">
-                1.1.0
+                1.2.0
               </div>
             
           
@@ -92,7 +92,7 @@
             
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="../installation/index.html">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../tutorials/index.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/index.html">User guide and tutorials</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../theory/index.html">Theory</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../developer/index.html">Developer API</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../whatsnew.html">What’s New</a></li>
@@ -186,7 +186,7 @@
 
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">as_flat</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">x_min_max</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">shaded</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">y_ground</span><span class="o">=</span><span class="n">Y_GROUND</span><span class="p">,</span>
-                <span class="n">surface_params</span><span class="o">=</span><span class="p">[]):</span>
+                <span class="n">param_names</span><span class="o">=</span><span class="p">[]):</span>
         <span class="sd">&quot;&quot;&quot;Build a horizontal flat ground surface, made of 1 PV segment.</span>
 
 <span class="sd">        Parameters</span>
@@ -198,7 +198,7 @@
 <span class="sd">            Shaded status of the created PV surfaces (Default = False)</span>
 <span class="sd">        y_ground : float, optional</span>
 <span class="sd">            Location of flat ground on y axis in [m] (Default = Y_GROUND)</span>
-<span class="sd">        surface_params : list of str, optional</span>
+<span class="sd">        param_names : list of str, optional</span>
 <span class="sd">            Names of the surface parameters, eg reflectivity, total incident</span>
 <span class="sd">            irradiance, temperature, etc. (Default = [])</span>
 
@@ -215,13 +215,14 @@
         <span class="n">coords</span> <span class="o">=</span> <span class="p">[(</span><span class="n">x_min</span><span class="p">,</span> <span class="n">y_ground</span><span class="p">),</span> <span class="p">(</span><span class="n">x_max</span><span class="p">,</span> <span class="n">y_ground</span><span class="p">)]</span>
         <span class="n">seg</span> <span class="o">=</span> <span class="n">PVSegment</span><span class="o">.</span><span class="n">from_linestring_coords</span><span class="p">(</span><span class="n">coords</span><span class="p">,</span> <span class="n">shaded</span><span class="o">=</span><span class="n">shaded</span><span class="p">,</span>
                                                <span class="n">normal_vector</span><span class="o">=</span><span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">],</span>
-                                               <span class="n">surface_params</span><span class="o">=</span><span class="n">surface_params</span><span class="p">)</span>
+                                               <span class="n">param_names</span><span class="o">=</span><span class="n">param_names</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">list_segments</span><span class="o">=</span><span class="p">[</span><span class="n">seg</span><span class="p">],</span> <span class="n">original_linestring</span><span class="o">=</span><span class="n">LineString</span><span class="p">(</span><span class="n">coords</span><span class="p">))</span>
 
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">from_ordered_shadow_and_cut_pt_coords</span><span class="p">(</span>
         <span class="bp">cls</span><span class="p">,</span> <span class="n">x_min_max</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">y_ground</span><span class="o">=</span><span class="n">Y_GROUND</span><span class="p">,</span> <span class="n">ordered_shadow_coords</span><span class="o">=</span><span class="p">[],</span>
-            <span class="n">cut_point_coords</span><span class="o">=</span><span class="p">[],</span> <span class="n">surface_params</span><span class="o">=</span><span class="p">[]):</span>
+            <span class="n">cut_point_coords</span><span class="o">=</span><span class="p">[],</span> <span class="n">param_names</span><span class="o">=</span><span class="p">[],</span> <span class="n">shaded_params</span><span class="o">=</span><span class="p">{},</span>
+            <span class="n">illum_params</span><span class="o">=</span><span class="p">{}):</span>
         <span class="sd">&quot;&quot;&quot;Build a horizontal flat ground surface, made of 1 PVSegment with</span>
 <span class="sd">        shaded areas and &quot;cut points&quot; (reference points used in view factor</span>
 <span class="sd">        calculations)</span>
@@ -241,9 +242,15 @@
 <span class="sd">            List of cut point coordinates, ordered from left to right.</span>
 <span class="sd">            Shape = (# of cut points, 2 {# of points}, 2 {for xy coords})</span>
 <span class="sd">            (Default = [])</span>
-<span class="sd">        surface_params : list of str, optional</span>
+<span class="sd">        param_names : list of str, optional</span>
 <span class="sd">            Names of the surface parameters, eg reflectivity, total incident</span>
 <span class="sd">            irradiance, temperature, etc. (Default = [])</span>
+<span class="sd">        shaded_params : dict, optional</span>
+<span class="sd">            Dictionary of parameter values for shaded surfaces</span>
+<span class="sd">            (Default = {})</span>
+<span class="sd">        illum_params : dict, optional</span>
+<span class="sd">            Dictionary of parameter values for illuminated surfaces</span>
+<span class="sd">            (Default = {})</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
@@ -262,15 +269,15 @@
         <span class="n">list_illum_surfaces</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">recurse_on_cut_points</span><span class="p">(</span><span class="n">list_shaded_surfaces</span><span class="p">,</span> <span class="n">list_illum_surfaces</span><span class="p">,</span>
                               <span class="n">ordered_shadow_coords</span><span class="p">,</span> <span class="n">cut_point_coords</span><span class="p">,</span>
-                              <span class="n">x_min</span><span class="p">,</span> <span class="n">x_max</span><span class="p">,</span> <span class="n">y_ground</span><span class="p">,</span> <span class="n">surface_params</span><span class="p">)</span>
-
+                              <span class="n">x_min</span><span class="p">,</span> <span class="n">x_max</span><span class="p">,</span> <span class="n">y_ground</span><span class="p">,</span> <span class="n">param_names</span><span class="p">,</span>
+                              <span class="n">shaded_params</span><span class="p">,</span> <span class="n">illum_params</span><span class="p">)</span>
         <span class="c1"># Create the shade collections</span>
         <span class="n">shaded_collection</span> <span class="o">=</span> <span class="n">ShadeCollection</span><span class="p">(</span>
             <span class="n">list_surfaces</span><span class="o">=</span><span class="n">list_shaded_surfaces</span><span class="p">,</span> <span class="n">shaded</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-            <span class="n">surface_params</span><span class="o">=</span><span class="n">surface_params</span><span class="p">)</span>
+            <span class="n">param_names</span><span class="o">=</span><span class="n">param_names</span><span class="p">)</span>
         <span class="n">illum_collection</span> <span class="o">=</span> <span class="n">ShadeCollection</span><span class="p">(</span>
             <span class="n">list_surfaces</span><span class="o">=</span><span class="n">list_illum_surfaces</span><span class="p">,</span> <span class="n">shaded</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-            <span class="n">surface_params</span><span class="o">=</span><span class="n">surface_params</span><span class="p">)</span>
+            <span class="n">param_names</span><span class="o">=</span><span class="n">param_names</span><span class="p">)</span>
 
         <span class="c1"># Create the ground segment</span>
         <span class="n">segment</span> <span class="o">=</span> <span class="n">PVSegment</span><span class="p">(</span><span class="n">illum_collection</span><span class="o">=</span><span class="n">illum_collection</span><span class="p">,</span>
@@ -288,7 +295,8 @@
 <span class="k">def</span> <span class="nf">recurse_on_cut_points</span><span class="p">(</span>
         <span class="n">list_shaded_surfaces</span><span class="p">,</span> <span class="n">list_illum_surfaces</span><span class="p">,</span>
         <span class="n">ordered_shadow_coords</span><span class="p">,</span> <span class="n">cut_point_coords</span><span class="p">,</span>
-        <span class="n">x_min</span><span class="p">,</span> <span class="n">x_max</span><span class="p">,</span> <span class="n">y_ground</span><span class="p">,</span> <span class="n">surface_params</span><span class="p">):</span>
+        <span class="n">x_min</span><span class="p">,</span> <span class="n">x_max</span><span class="p">,</span> <span class="n">y_ground</span><span class="p">,</span> <span class="n">param_names</span><span class="p">,</span>
+        <span class="n">shaded_params</span><span class="p">,</span> <span class="n">illum_params</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Solve recursively the problem of building the lists of shaded and</span>
 <span class="sd">    illuminated PV surfaces when cut points and shadows might exist.</span>
 
@@ -310,15 +318,19 @@
 <span class="sd">        Rightmost x coordinate of the considered ground [m]</span>
 <span class="sd">    y_ground : float</span>
 <span class="sd">        Location of flat ground on y axis in [m]</span>
-<span class="sd">    surface_params : list of str, optional</span>
+<span class="sd">    param_names : list of str, optional</span>
 <span class="sd">        Names of the surface parameters, eg reflectivity, total incident</span>
 <span class="sd">        irradiance, temperature, etc.</span>
+<span class="sd">    shaded_params : dict</span>
+<span class="sd">        Dictionary of parameter values for shaded surfaces</span>
+<span class="sd">    illum_params : dict</span>
+<span class="sd">        Dictionary of parameter values for illuminated surfaces</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">cut_point_coords</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
         <span class="n">build_list_illum_shadow_surfaces</span><span class="p">(</span>
             <span class="n">list_shaded_surfaces</span><span class="p">,</span> <span class="n">list_illum_surfaces</span><span class="p">,</span> <span class="n">ordered_shadow_coords</span><span class="p">,</span>
-            <span class="n">x_min</span><span class="p">,</span> <span class="n">x_max</span><span class="p">,</span> <span class="n">y_ground</span><span class="p">,</span> <span class="n">surface_params</span><span class="p">)</span>
+            <span class="n">x_min</span><span class="p">,</span> <span class="n">x_max</span><span class="p">,</span> <span class="n">y_ground</span><span class="p">,</span> <span class="n">param_names</span><span class="p">,</span> <span class="n">shaded_params</span><span class="p">,</span> <span class="n">illum_params</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="c1"># Get leftmost cut point</span>
         <span class="n">cut_point</span> <span class="o">=</span> <span class="n">cut_point_coords</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
@@ -334,18 +346,19 @@
             <span class="n">build_list_illum_shadow_surfaces</span><span class="p">(</span>
                 <span class="n">list_shaded_surfaces</span><span class="p">,</span> <span class="n">list_illum_surfaces</span><span class="p">,</span>
                 <span class="n">ordered_shadow_coords</span><span class="p">,</span> <span class="n">x_min</span><span class="p">,</span> <span class="n">new_x_max</span><span class="p">,</span> <span class="n">y_ground</span><span class="p">,</span>
-                <span class="n">surface_params</span><span class="p">)</span>
+                <span class="n">param_names</span><span class="p">,</span> <span class="n">shaded_params</span><span class="p">,</span> <span class="n">illum_params</span><span class="p">)</span>
             <span class="c1"># New x_min should be at the cut point</span>
             <span class="n">x_min</span> <span class="o">=</span> <span class="n">new_x_max</span>
         <span class="c1"># Now move to the next [x_min, x_max] frame</span>
         <span class="n">recurse_on_cut_points</span><span class="p">(</span><span class="n">list_shaded_surfaces</span><span class="p">,</span> <span class="n">list_illum_surfaces</span><span class="p">,</span>
                               <span class="n">ordered_shadow_coords</span><span class="p">,</span> <span class="n">cut_point_coords</span><span class="p">,</span>
-                              <span class="n">x_min</span><span class="p">,</span> <span class="n">x_max</span><span class="p">,</span> <span class="n">y_ground</span><span class="p">,</span> <span class="n">surface_params</span><span class="p">)</span>
+                              <span class="n">x_min</span><span class="p">,</span> <span class="n">x_max</span><span class="p">,</span> <span class="n">y_ground</span><span class="p">,</span> <span class="n">param_names</span><span class="p">,</span>
+                              <span class="n">shaded_params</span><span class="p">,</span> <span class="n">illum_params</span><span class="p">)</span>
 
 
 <span class="k">def</span> <span class="nf">build_list_illum_shadow_surfaces</span><span class="p">(</span>
         <span class="n">list_shaded_surfaces</span><span class="p">,</span> <span class="n">list_illum_surfaces</span><span class="p">,</span> <span class="n">ordered_shadow_coords</span><span class="p">,</span>
-        <span class="n">x_min</span><span class="p">,</span> <span class="n">x_max</span><span class="p">,</span> <span class="n">y_ground</span><span class="p">,</span> <span class="n">surface_params</span><span class="p">):</span>
+        <span class="n">x_min</span><span class="p">,</span> <span class="n">x_max</span><span class="p">,</span> <span class="n">y_ground</span><span class="p">,</span> <span class="n">param_names</span><span class="p">,</span> <span class="n">shaded_params</span><span class="p">,</span> <span class="n">illum_params</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Build lists of shaded and illuminated surfaces in the case when</span>
 <span class="sd">    there are no cut points.</span>
 
@@ -364,16 +377,20 @@
 <span class="sd">        Rightmost x coordinate of the considered ground [m]</span>
 <span class="sd">    y_ground : float</span>
 <span class="sd">        Location of flat ground on y axis in [m]</span>
-<span class="sd">    surface_params : list of str, optional</span>
+<span class="sd">    param_names : list of str, optional</span>
 <span class="sd">        Names of the surface parameters, eg reflectivity, total incident</span>
 <span class="sd">        irradiance, temperature, etc.</span>
+<span class="sd">    shaded_params : dict</span>
+<span class="sd">        Dictionary of parameter values for shaded surfaces</span>
+<span class="sd">    illum_params : dict</span>
+<span class="sd">        Dictionary of parameter values for illuminated surfaces</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">ordered_shadow_coords</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">x_min</span> <span class="o">+</span> <span class="n">DISTANCE_TOLERANCE</span> <span class="o">&lt;</span> <span class="n">x_max</span><span class="p">:</span>
             <span class="c1"># The whole ground is illuminated</span>
             <span class="n">full_extent_coords</span> <span class="o">=</span> <span class="p">[(</span><span class="n">x_min</span><span class="p">,</span> <span class="n">y_ground</span><span class="p">),</span> <span class="p">(</span><span class="n">x_max</span><span class="p">,</span> <span class="n">y_ground</span><span class="p">)]</span>
             <span class="n">illum</span> <span class="o">=</span> <span class="n">PVSurface</span><span class="p">(</span><span class="n">coords</span><span class="o">=</span><span class="n">full_extent_coords</span><span class="p">,</span> <span class="n">shaded</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-                              <span class="n">surface_params</span><span class="o">=</span><span class="n">surface_params</span><span class="p">)</span>
+                              <span class="n">param_names</span><span class="o">=</span><span class="n">param_names</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="n">illum_params</span><span class="p">)</span>
             <span class="n">list_illum_surfaces</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">illum</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="c1"># There are shadows and illuminated areas</span>
@@ -396,31 +413,36 @@
                         <span class="n">x_illum_left</span> <span class="o">=</span> <span class="n">x_max</span>
                     <span class="c1"># Create shadow and add it to list</span>
                     <span class="n">shadow</span> <span class="o">=</span> <span class="n">PVSurface</span><span class="p">(</span><span class="n">coords</span><span class="o">=</span><span class="n">coord</span><span class="p">,</span> <span class="n">shaded</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-                                       <span class="n">surface_params</span><span class="o">=</span><span class="n">surface_params</span><span class="p">)</span>
+                                       <span class="n">param_names</span><span class="o">=</span><span class="n">param_names</span><span class="p">,</span>
+                                       <span class="n">params</span><span class="o">=</span><span class="n">shaded_params</span><span class="p">)</span>
                     <span class="n">list_shaded_surfaces</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">shadow</span><span class="p">)</span>
             <span class="k">elif</span> <span class="n">x2</span> <span class="o">&gt;</span> <span class="n">x_max</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">x1</span> <span class="o">+</span> <span class="n">DISTANCE_TOLERANCE</span> <span class="o">&lt;</span> <span class="n">x_max</span><span class="p">:</span>
                     <span class="c1"># Shadow is cropped in the picture</span>
                     <span class="n">coord</span> <span class="o">=</span> <span class="p">[[</span><span class="n">x1</span><span class="p">,</span> <span class="n">y1</span><span class="p">],</span> <span class="p">[</span><span class="n">x_max</span><span class="p">,</span> <span class="n">y2</span><span class="p">]]</span>
                     <span class="n">shadow</span> <span class="o">=</span> <span class="n">PVSurface</span><span class="p">(</span><span class="n">coords</span><span class="o">=</span><span class="n">coord</span><span class="p">,</span> <span class="n">shaded</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-                                       <span class="n">surface_params</span><span class="o">=</span><span class="n">surface_params</span><span class="p">)</span>
+                                       <span class="n">param_names</span><span class="o">=</span><span class="n">param_names</span><span class="p">,</span>
+                                       <span class="n">params</span><span class="o">=</span><span class="n">shaded_params</span><span class="p">)</span>
                     <span class="n">list_shaded_surfaces</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">shadow</span><span class="p">)</span>
                     <span class="k">if</span> <span class="n">x_illum_left</span> <span class="o">+</span> <span class="n">DISTANCE_TOLERANCE</span> <span class="o">&lt;</span> <span class="n">x1</span><span class="p">:</span>
                         <span class="n">coord</span> <span class="o">=</span> <span class="p">[[</span><span class="n">x_illum_left</span><span class="p">,</span> <span class="n">y1</span><span class="p">],</span> <span class="p">[</span><span class="n">x1</span><span class="p">,</span> <span class="n">y1</span><span class="p">]]</span>
                         <span class="n">illum</span> <span class="o">=</span> <span class="n">PVSurface</span><span class="p">(</span><span class="n">coords</span><span class="o">=</span><span class="n">coord</span><span class="p">,</span> <span class="n">shaded</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-                                          <span class="n">surface_params</span><span class="o">=</span><span class="n">surface_params</span><span class="p">)</span>
+                                          <span class="n">param_names</span><span class="o">=</span><span class="n">param_names</span><span class="p">,</span>
+                                          <span class="n">params</span><span class="o">=</span><span class="n">illum_params</span><span class="p">)</span>
                         <span class="n">list_illum_surfaces</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">illum</span><span class="p">)</span>
                     <span class="c1"># Update x_illum_left to right x coord of shadow</span>
                     <span class="n">x_illum_left</span> <span class="o">=</span> <span class="n">x_max</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="c1"># Shadow is fully in the picture</span>
                 <span class="n">shadow</span> <span class="o">=</span> <span class="n">PVSurface</span><span class="p">(</span><span class="n">coords</span><span class="o">=</span><span class="n">shadow_coord</span><span class="p">,</span> <span class="n">shaded</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-                                   <span class="n">surface_params</span><span class="o">=</span><span class="n">surface_params</span><span class="p">)</span>
+                                   <span class="n">param_names</span><span class="o">=</span><span class="n">param_names</span><span class="p">,</span>
+                                   <span class="n">params</span><span class="o">=</span><span class="n">shaded_params</span><span class="p">)</span>
                 <span class="n">list_shaded_surfaces</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">shadow</span><span class="p">)</span>
                 <span class="k">if</span> <span class="n">x_illum_left</span> <span class="o">+</span> <span class="n">DISTANCE_TOLERANCE</span> <span class="o">&lt;</span> <span class="n">x1</span><span class="p">:</span>
                     <span class="n">coord</span> <span class="o">=</span> <span class="p">[[</span><span class="n">x_illum_left</span><span class="p">,</span> <span class="n">y1</span><span class="p">],</span> <span class="p">[</span><span class="n">x1</span><span class="p">,</span> <span class="n">y1</span><span class="p">]]</span>
                     <span class="n">illum</span> <span class="o">=</span> <span class="n">PVSurface</span><span class="p">(</span><span class="n">coords</span><span class="o">=</span><span class="n">coord</span><span class="p">,</span> <span class="n">shaded</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-                                      <span class="n">surface_params</span><span class="o">=</span><span class="n">surface_params</span><span class="p">)</span>
+                                      <span class="n">param_names</span><span class="o">=</span><span class="n">param_names</span><span class="p">,</span>
+                                      <span class="n">params</span><span class="o">=</span><span class="n">illum_params</span><span class="p">)</span>
                     <span class="n">list_illum_surfaces</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">illum</span><span class="p">)</span>
                 <span class="c1"># Update x_illum_left to right x coord of shadow</span>
                 <span class="n">x_illum_left</span> <span class="o">=</span> <span class="n">x2</span>
@@ -428,7 +450,7 @@
         <span class="k">if</span> <span class="n">x_illum_left</span> <span class="o">+</span> <span class="n">DISTANCE_TOLERANCE</span> <span class="o">&lt;</span> <span class="n">x_max</span><span class="p">:</span>
             <span class="n">coord</span> <span class="o">=</span> <span class="p">[[</span><span class="n">x_illum_left</span><span class="p">,</span> <span class="n">y1</span><span class="p">],</span> <span class="p">[</span><span class="n">x_max</span><span class="p">,</span> <span class="n">y1</span><span class="p">]]</span>
             <span class="n">illum</span> <span class="o">=</span> <span class="n">PVSurface</span><span class="p">(</span><span class="n">coords</span><span class="o">=</span><span class="n">coord</span><span class="p">,</span> <span class="n">shaded</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-                              <span class="n">surface_params</span><span class="o">=</span><span class="n">surface_params</span><span class="p">)</span>
+                              <span class="n">param_names</span><span class="o">=</span><span class="n">param_names</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="n">illum_params</span><span class="p">)</span>
             <span class="n">list_illum_surfaces</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">illum</span><span class="p">)</span>
 </pre></div>
 

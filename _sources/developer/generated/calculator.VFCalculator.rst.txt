@@ -15,6 +15,8 @@ calculator.VFCalculator
    
       ~VFCalculator.__init__
       ~VFCalculator.get_vf_matrix
+      ~VFCalculator.get_vf_matrix_subset
+      ~VFCalculator.get_vf_ts_pvrow_element
    
    
 

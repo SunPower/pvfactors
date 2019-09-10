@@ -1,0 +1,332 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>timeseries.TsGround &mdash; pvfactors 1.2.0 documentation</title>
+  
+
+  
+  
+    <link rel="shortcut icon" href="../../_static/favicon.ico"/>
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../_static/doctools.js"></script>
+        <script type="text/javascript" src="../../_static/language_data.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/css/custom.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="timeseries.TsSide" href="timeseries.TsSide.html" />
+    <link rel="prev" title="timeseries.TsPVRow" href="timeseries.TsPVRow.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> pvfactors
+          
+
+          
+            
+            <img src="../../_static/logo_small.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.2.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../installation/index.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorials/index.html">User guide and tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../theory/index.html">Theory</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">Developer API</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../index.html#geometry">geometry</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../index.html#module-base">base</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../index.html#module-pvrow">pvrow</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../index.html#module-pvground">pvground</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../index.html#module-pvarray">pvarray</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="../index.html#module-timeseries">timeseries</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="timeseries.TsPVRow.html">timeseries.TsPVRow</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">timeseries.TsGround</a></li>
+<li class="toctree-l4"><a class="reference internal" href="timeseries.TsSide.html">timeseries.TsSide</a></li>
+<li class="toctree-l4"><a class="reference internal" href="timeseries.TsDualSegment.html">timeseries.TsDualSegment</a></li>
+<li class="toctree-l4"><a class="reference internal" href="timeseries.TsSurface.html">timeseries.TsSurface</a></li>
+<li class="toctree-l4"><a class="reference internal" href="timeseries.TsLineCoords.html">timeseries.TsLineCoords</a></li>
+<li class="toctree-l4"><a class="reference internal" href="timeseries.TsPointCoords.html">timeseries.TsPointCoords</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#viewfactors">viewfactors</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#irradiance">irradiance</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#module-engine">engine</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#module-run">run</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#module-report">report</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../whatsnew.html">What’s New</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">pvfactors</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Developer API</a> &raquo;</li>
+        
+      <li>timeseries.TsGround</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            
+              <!-- User defined GitHub URL -->
+              <a href="https://github.com/SunPower/pvfactors/" class="fa fa-github"> Edit on GitHub</a>
+            
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast,
+.nboutput.nblast {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast + .nbinput {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<div class="section" id="timeseries-tsground">
+<h1>timeseries.TsGround<a class="headerlink" href="#timeseries-tsground" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="timeseries.TsGround">
+<em class="property">class </em><code class="sig-prename descclassname">timeseries.</code><code class="sig-name descname">TsGround</code><span class="sig-paren">(</span><em class="sig-param">shadow_surfaces</em>, <em class="sig-param">param_names=None</em>, <em class="sig-param">flag_overlap=None</em>, <em class="sig-param">cut_point_coords=None</em>, <em class="sig-param">y_ground=None</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/timeseries.html#TsGround"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#timeseries.TsGround" title="Permalink to this definition">¶</a></dt>
+<dd><p>Timeseries ground class: this class is a vectorized version of the
+PV ground geometry class, and it will store timeseries coordinates
+for ground shadows and pv row cut points.</p>
+<dl class="method">
+<dt id="timeseries.TsGround.__init__">
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param">shadow_surfaces</em>, <em class="sig-param">param_names=None</em>, <em class="sig-param">flag_overlap=None</em>, <em class="sig-param">cut_point_coords=None</em>, <em class="sig-param">y_ground=None</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/timeseries.html#TsGround.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#timeseries.TsGround.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize timeseries ground using list of timeseries surfaces
+for the ground shadows</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>shadow_surfaces</strong> (list of <code class="xref py py-class docutils literal notranslate"><span class="pre">TsSurface</span></code>) – Timeseries surfaces for ground shadows</p></li>
+<li><p><strong>param_names</strong> (<em>list of str</em><em>, </em><em>optional</em>) – List of names of surface parameters to use when creating geometries
+(Default = None)</p></li>
+<li><p><strong>flag_overlap</strong> (<em>list of bool</em><em>, </em><em>optional</em>) – Flags indicating if the ground shadows are overlapping, for all
+time steps (Default=None). I.e. is there direct shading on pv rows?</p></li>
+<li><p><strong>cut_point_coords</strong> (list of <code class="xref py py-class docutils literal notranslate"><span class="pre">TsPointCoords</span></code>, optional) – List of cut point coordinates, as calculated for timeseries PV rows
+(Default = None)</p></li>
+<li><p><strong>y_ground</strong> (<em>float</em><em>, </em><em>optional</em>) – Y coordinate of flat ground [m] (Default=None)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<p class="rubric">Methods</p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#timeseries.TsGround.__init__" title="timeseries.TsGround.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(shadow_surfaces[, param_names, …])</p></td>
+<td><p>Initialize timeseries ground using list of timeseries surfaces for the ground shadows</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">at</span></code>(idx[, x_min_max, merge_if_flag_overlap, …])</p></td>
+<td><p>Generate a PV ground geometry for the desired index.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">from_ordered_shadows_coords</span></code>(shadow_coords[, …])</p></td>
+<td><p>Create timeseries ground from list of ground shadow coordinates.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">from_ts_pvrows_and_angles</span></code>(list_ts_pvrows, …)</p></td>
+<td><p>Create timeseries ground from list of timeseries PV rows, and PV array and solar angles.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_at_idx</span></code>(idx, ax[, color_shaded, …])</p></td>
+<td><p>Plot timeseries ground at a certain index.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">shadow_coords_left_of_cut_point</span></code>(idx_cut_pt)</p></td>
+<td><p>Get coordinates of shadows located on the left side of the cut point with given index.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">shadow_coords_right_of_cut_point</span></code>(idx_cut_pt)</p></td>
+<td><p>Get coordinates of shadows located on the right side of the cut point with given index.</p></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="timeseries.TsSide.html" class="btn btn-neutral float-right" title="timeseries.TsSide" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="timeseries.TsPVRow.html" class="btn btn-neutral float-left" title="timeseries.TsPVRow" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2016, SunPower Corporation
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

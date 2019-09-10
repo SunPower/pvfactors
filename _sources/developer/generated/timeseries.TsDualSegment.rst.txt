@@ -1,0 +1,62 @@
+timeseries.TsDualSegment
+========================
+
+.. currentmodule:: timeseries
+
+.. autoclass:: TsDualSegment
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      
+         ~TsDualSegment.__init__
+      
+      
+         ~TsDualSegment.at
+      
+      
+         ~TsDualSegment.get_param_weighted
+      
+      
+         ~TsDualSegment.get_param_ww
+      
+      
+         ~TsDualSegment.plot_at_idx
+      
+      
+         ~TsDualSegment.surfaces_at_idx
+      
+      
+         ~TsDualSegment.update_params
+      
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      
+         ~TsDualSegment.centroid
+      
+      
+         ~TsDualSegment.highest_point
+      
+      
+         ~TsDualSegment.length
+      
+      
+         ~TsDualSegment.lowest_point
+      
+      
+         ~TsDualSegment.shaded_length
+      
+   
+   

@@ -15,8 +15,9 @@ engine.PVEngine
    
       ~PVEngine.__init__
       ~PVEngine.fit
-      ~PVEngine.run_all_timesteps
-      ~PVEngine.run_timestep
+      ~PVEngine.run_fast_mode
+      ~PVEngine.run_full_mode
+      ~PVEngine.run_full_mode_timestep
    
    
 

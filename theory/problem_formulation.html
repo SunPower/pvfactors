@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Mathematical Model &mdash; pvfactors 1.1.0 documentation</title>
+  <title>Mathematical Model &mdash; pvfactors 1.2.0 documentation</title>
   
 
   
@@ -68,7 +68,7 @@
             
             
               <div class="version">
-                1.1.0
+                1.2.0
               </div>
             
           
@@ -94,7 +94,7 @@
             
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../installation/index.html">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../tutorials/index.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/index.html">User guide and tutorials</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">Theory</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="intro.html">Introduction</a></li>
 <li class="toctree-l2"><a class="reference internal" href="view_factors.html">View Factors</a></li>
@@ -102,6 +102,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#full-simulations">Full simulations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#fast-simulations">Fast simulations</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#example">Example</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#grouping-terms">Grouping terms</a></li>
 </ul>
 </li>
 </ul>
@@ -214,7 +215,7 @@
 </div>
 <p>The mathematical model used in pvfactors simulations is different depending on the simulation type that is run. In “full simulations”, all of the reflections between the modeled surfaces are taken into account in the calculations. In “fast simulations”, assumptions are made on the reflected irradiance from the environment surrounding the surfaces of interest.</p>
 <div class="section" id="full-simulations">
-<h2>Full simulations<a class="headerlink" href="#full-simulations" title="Permalink to this headline">¶</a></h2>
+<span id="full-mode-theory"></span><h2>Full simulations<a class="headerlink" href="#full-simulations" title="Permalink to this headline">¶</a></h2>
 <p>When making some assumptions, it is possible to represent the calculation of irradiance terms on each surface with a linear system. The dimension of this system changes depending on the number of surfaces considered. But we can formulate it for the general case of <code class="docutils literal notranslate"><span class="pre">n</span></code> surfaces.</p>
 <p>For a surface <code class="docutils literal notranslate"><span class="pre">i</span></code> we can write that:</p>
 <div class="math notranslate nohighlight">
@@ -282,7 +283,7 @@ Sky_n\\
 <p>After solving this system and finding all of the radiosities, it is very easy to deduce values of interest like back side or front side incident irradiance.</p>
 </div>
 <div class="section" id="fast-simulations">
-<h2>Fast simulations<a class="headerlink" href="#fast-simulations" title="Permalink to this headline">¶</a></h2>
+<span id="fast-mode-theory"></span><h2>Fast simulations<a class="headerlink" href="#fast-simulations" title="Permalink to this headline">¶</a></h2>
 <p>In the case of fast simulations and when interested in back side surfaces only, we can make additional assumptions that allow us to calculate the incident irradiance on back side surfaces without solving a linear system of equations.</p>
 <p>In the full simulation case, we defined a vector of incident irradiance on all surfaces as follows:</p>
 <div class="math notranslate nohighlight">
@@ -329,6 +330,19 @@ q_{perez, n}\\
 Sky_3\\
 Sky_7\\
 \end{pmatrix}\end{split}\]</div>
+</div>
+<div class="section" id="grouping-terms">
+<h3>Grouping terms<a class="headerlink" href="#grouping-terms" title="Permalink to this headline">¶</a></h3>
+<p>For each back surface element, we can then group reflection terms that have identical reflected irradiance values into something more intuitive:</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}q_{inc-back}
+&amp;≈ F_{to\ shaded\ ground} . albedo . q_{perez\ shaded\ ground} \\
+&amp;+ F_{to\ illuminated\ ground} . albedo . q_{perez\ illuminated\ ground} \\
+&amp;+ F_{to\ shaded\ front\ pv\ row} . \rho_{front\ pv\ row} . q_{perez\ front\ shaded\ pv\ row} \\
+&amp;+ F_{to\ illuminated\ front\ pv\ row} . \rho_{front\ pv\ row} . q_{perez\ front\ shaded\ pv\ row} \\
+&amp;+ F_{to\ sky\ dome} . luminance_{sky\ dome} \\
+&amp;+ Sky_{inc-back}\end{split}\]</div>
+<p>This form is quite useful because we can then rely on vectorization to calculate back surface incident irradiance quite rapidly.</p>
 <p class="rubric">Footnotes</p>
 <dl class="footnote brackets">
 <dt class="label" id="perez-paper"><span class="brackets"><a class="fn-backref" href="#id1">1</a></span></dt>

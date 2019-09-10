@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Developer API &mdash; pvfactors 1.1.0 documentation</title>
+  <title>Developer API &mdash; pvfactors 1.2.0 documentation</title>
   
 
   
@@ -68,7 +68,7 @@
             
             
               <div class="version">
-                1.1.0
+                1.2.0
               </div>
             
           
@@ -94,7 +94,7 @@
             
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../installation/index.html">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../tutorials/index.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/index.html">User guide and tutorials</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../theory/index.html">Theory</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Developer API</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#geometry">geometry</a><ul>
@@ -120,11 +120,22 @@
 <li class="toctree-l4"><a class="reference internal" href="generated/pvarray.OrderedPVArray.html">pvarray.OrderedPVArray</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="#module-timeseries">timeseries</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="generated/timeseries.TsPVRow.html">timeseries.TsPVRow</a></li>
+<li class="toctree-l4"><a class="reference internal" href="generated/timeseries.TsGround.html">timeseries.TsGround</a></li>
+<li class="toctree-l4"><a class="reference internal" href="generated/timeseries.TsSide.html">timeseries.TsSide</a></li>
+<li class="toctree-l4"><a class="reference internal" href="generated/timeseries.TsDualSegment.html">timeseries.TsDualSegment</a></li>
+<li class="toctree-l4"><a class="reference internal" href="generated/timeseries.TsSurface.html">timeseries.TsSurface</a></li>
+<li class="toctree-l4"><a class="reference internal" href="generated/timeseries.TsLineCoords.html">timeseries.TsLineCoords</a></li>
+<li class="toctree-l4"><a class="reference internal" href="generated/timeseries.TsPointCoords.html">timeseries.TsPointCoords</a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#viewfactors">viewfactors</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#module-calculator">calculator</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="generated/calculator.VFCalculator.html">calculator.VFCalculator</a></li>
+<li class="toctree-l4"><a class="reference internal" href="generated/calculator.VFTsMethods.html">calculator.VFTsMethods</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#module-mapper">mapper</a><ul>
@@ -344,6 +355,40 @@ geometries.</p>
 </tbody>
 </table>
 </div>
+<div class="section" id="module-timeseries">
+<span id="timeseries"></span><h3>timeseries<a class="headerlink" href="#module-timeseries" title="Permalink to this headline">¶</a></h3>
+<p>Timeseries geometry classes. They allow the vectorization of geometry
+calculations.</p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/timeseries.TsPVRow.html#timeseries.TsPVRow" title="timeseries.TsPVRow"><code class="xref py py-obj docutils literal notranslate"><span class="pre">timeseries.TsPVRow</span></code></a></p></td>
+<td><p>Timeseries PV row class: this class is a vectorized version of the PV row geometries.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/timeseries.TsGround.html#timeseries.TsGround" title="timeseries.TsGround"><code class="xref py py-obj docutils literal notranslate"><span class="pre">timeseries.TsGround</span></code></a></p></td>
+<td><p>Timeseries ground class: this class is a vectorized version of the PV ground geometry class, and it will store timeseries coordinates for ground shadows and pv row cut points.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/timeseries.TsSide.html#timeseries.TsSide" title="timeseries.TsSide"><code class="xref py py-obj docutils literal notranslate"><span class="pre">timeseries.TsSide</span></code></a></p></td>
+<td><p>Timeseries side class: this class is a vectorized version of the BaseSide geometries.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/timeseries.TsDualSegment.html#timeseries.TsDualSegment" title="timeseries.TsDualSegment"><code class="xref py py-obj docutils literal notranslate"><span class="pre">timeseries.TsDualSegment</span></code></a></p></td>
+<td><p>A TsDualSegment is a timeseries segment that can only have 1 shaded surface and 1 illuminated surface.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/timeseries.TsSurface.html#timeseries.TsSurface" title="timeseries.TsSurface"><code class="xref py py-obj docutils literal notranslate"><span class="pre">timeseries.TsSurface</span></code></a></p></td>
+<td><p>Timeseries surface class: vectorized representation of PV surface geometries.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/timeseries.TsLineCoords.html#timeseries.TsLineCoords" title="timeseries.TsLineCoords"><code class="xref py py-obj docutils literal notranslate"><span class="pre">timeseries.TsLineCoords</span></code></a></p></td>
+<td><p>Timeseries line coordinates class: will provide a helpful shapely-like API to invoke timeseries coordinates.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/timeseries.TsPointCoords.html#timeseries.TsPointCoords" title="timeseries.TsPointCoords"><code class="xref py py-obj docutils literal notranslate"><span class="pre">timeseries.TsPointCoords</span></code></a></p></td>
+<td><p>Timeseries point coordinates: provides a shapely-like API for timeseries point coordinates.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
 </div>
 <div class="section" id="viewfactors">
 <h2>viewfactors<a class="headerlink" href="#viewfactors" title="Permalink to this headline">¶</a></h2>
@@ -359,6 +404,9 @@ geometries.</p>
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="generated/calculator.VFCalculator.html#calculator.VFCalculator" title="calculator.VFCalculator"><code class="xref py py-obj docutils literal notranslate"><span class="pre">calculator.VFCalculator</span></code></a></p></td>
 <td><p>This calculator class will be used for the calculation of view factors for PV arrays</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/calculator.VFTsMethods.html#calculator.VFTsMethods" title="calculator.VFTsMethods"><code class="xref py py-obj docutils literal notranslate"><span class="pre">calculator.VFTsMethods</span></code></a></p></td>
+<td><p>This class contains all the methods used to calculate timeseries view factors from PV row elements to all the other elements of a PV array.</p></td>
 </tr>
 </tbody>
 </table>
@@ -461,7 +509,7 @@ parallel mode.</p>
 </colgroup>
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="generated/report.example_fn_build_report.html#report.example_fn_build_report" title="report.example_fn_build_report"><code class="xref py py-obj docutils literal notranslate"><span class="pre">report.example_fn_build_report</span></code></a></p></td>
-<td><p>Example function that builds a report when used in the <code class="xref py py-class docutils literal notranslate"><span class="pre">PVEngine</span></code>.</p></td>
+<td><p>Example function that builds a report when used in the <code class="xref py py-class docutils literal notranslate"><span class="pre">PVEngine</span></code> with full mode simulations.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="generated/report.ExampleReportBuilder.html#report.ExampleReportBuilder" title="report.ExampleReportBuilder"><code class="xref py py-obj docutils literal notranslate"><span class="pre">report.ExampleReportBuilder</span></code></a></p></td>
 <td><p>A class is required to build reports when running calculations with multiprocessing because of python constraints</p></td>

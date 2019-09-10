@@ -15,8 +15,11 @@ models.IsotropicOrdered
    
       ~IsotropicOrdered.__init__
       ~IsotropicOrdered.fit
-      ~IsotropicOrdered.get_irradiance_invrho_vector
+      ~IsotropicOrdered.get_full_modeling_vectors
+      ~IsotropicOrdered.get_modeling_vectors
       ~IsotropicOrdered.transform
+      ~IsotropicOrdered.transform_ts
+      ~IsotropicOrdered.update_ts_surface_sky_term
    
    
 
@@ -27,7 +30,13 @@ models.IsotropicOrdered
    .. autosummary::
    
       ~IsotropicOrdered.cats
+      ~IsotropicOrdered.gnd_illum
+      ~IsotropicOrdered.gnd_shaded
       ~IsotropicOrdered.irradiance_comp
       ~IsotropicOrdered.params
+      ~IsotropicOrdered.pvrow_illum
+      ~IsotropicOrdered.pvrow_shaded
+      ~IsotropicOrdered.sky
+      ~IsotropicOrdered.sky_luminance
    
    

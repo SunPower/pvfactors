@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>pvarray.OrderedPVArray &mdash; pvfactors 1.1.0 documentation</title>
+  <title>pvarray.OrderedPVArray &mdash; pvfactors 1.2.0 documentation</title>
   
 
   
@@ -40,7 +40,7 @@
   <link rel="stylesheet" href="../../_static/css/custom.css" type="text/css" />
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="calculator.VFCalculator" href="calculator.VFCalculator.html" />
+    <link rel="next" title="timeseries.TsPVRow" href="timeseries.TsPVRow.html" />
     <link rel="prev" title="pvground.PVGround" href="pvground.PVGround.html" /> 
 </head>
 
@@ -68,7 +68,7 @@
             
             
               <div class="version">
-                1.1.0
+                1.2.0
               </div>
             
           
@@ -94,7 +94,7 @@
             
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../../installation/index.html">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../tutorials/index.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorials/index.html">User guide and tutorials</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../theory/index.html">Theory</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../index.html">Developer API</a><ul class="current">
 <li class="toctree-l2 current"><a class="reference internal" href="../index.html#geometry">geometry</a><ul class="current">
@@ -105,6 +105,7 @@
 <li class="toctree-l4 current"><a class="current reference internal" href="#">pvarray.OrderedPVArray</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="../index.html#module-timeseries">timeseries</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../index.html#viewfactors">viewfactors</a></li>
@@ -214,7 +215,7 @@
 <h1>pvarray.OrderedPVArray<a class="headerlink" href="#pvarray-orderedpvarray" title="Permalink to this headline">¶</a></h1>
 <dl class="class">
 <dt id="pvarray.OrderedPVArray">
-<em class="property">class </em><code class="sig-prename descclassname">pvarray.</code><code class="sig-name descname">OrderedPVArray</code><span class="sig-paren">(</span><em class="sig-param">axis_azimuth=None</em>, <em class="sig-param">gcr=None</em>, <em class="sig-param">pvrow_height=None</em>, <em class="sig-param">n_pvrows=None</em>, <em class="sig-param">pvrow_width=None</em>, <em class="sig-param">surface_params=None</em>, <em class="sig-param">cut=None</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pvarray.html#OrderedPVArray"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pvarray.OrderedPVArray" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">pvarray.</code><code class="sig-name descname">OrderedPVArray</code><span class="sig-paren">(</span><em class="sig-param">axis_azimuth=None</em>, <em class="sig-param">gcr=None</em>, <em class="sig-param">pvrow_height=None</em>, <em class="sig-param">n_pvrows=None</em>, <em class="sig-param">pvrow_width=None</em>, <em class="sig-param">param_names=None</em>, <em class="sig-param">cut=None</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pvarray.html#OrderedPVArray"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pvarray.OrderedPVArray" title="Permalink to this definition">¶</a></dt>
 <dd><p>An ordered PV array has a flat horizontal ground, and pv rows which
 are all at the same height, with the same surface tilt and azimuth angles,
 and also all equally spaced. These simplifications allow faster and easier
@@ -222,7 +223,7 @@ calculations. In the ordered PV array, the list of PV rows must be
 ordered from left to right (along the x-axis) in the 2D geometry.</p>
 <dl class="method">
 <dt id="pvarray.OrderedPVArray.__init__">
-<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param">axis_azimuth=None</em>, <em class="sig-param">gcr=None</em>, <em class="sig-param">pvrow_height=None</em>, <em class="sig-param">n_pvrows=None</em>, <em class="sig-param">pvrow_width=None</em>, <em class="sig-param">surface_params=None</em>, <em class="sig-param">cut=None</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pvarray.html#OrderedPVArray.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pvarray.OrderedPVArray.__init__" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param">axis_azimuth=None</em>, <em class="sig-param">gcr=None</em>, <em class="sig-param">pvrow_height=None</em>, <em class="sig-param">n_pvrows=None</em>, <em class="sig-param">pvrow_width=None</em>, <em class="sig-param">param_names=None</em>, <em class="sig-param">cut=None</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pvarray.html#OrderedPVArray.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pvarray.OrderedPVArray.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><p>Initialize ordered PV array.
 List of PV rows will be ordered from left to right.</p>
 <dl class="field-list simple">
@@ -233,7 +234,7 @@ List of PV rows will be ordered from left to right.</p>
 <li><p><strong>pvrow_height</strong> (<em>float</em><em>, </em><em>optional</em>) – Unique height of all PV rows in [m] (Default = None)</p></li>
 <li><p><strong>n_pvrows</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of PV rows in the PV array (Default = None)</p></li>
 <li><p><strong>pvrow_width</strong> (<em>float</em><em>, </em><em>optional</em>) – Width of the PV rows in the 2D plane in [m] (Default = None)</p></li>
-<li><p><strong>surface_params</strong> (<em>list of str</em><em>, </em><em>optional</em>) – List of surface parameter names for the PV surfaces
+<li><p><strong>param_names</strong> (<em>list of str</em><em>, </em><em>optional</em>) – List of surface parameter names for the PV surfaces
 (Default = None)</p></li>
 <li><p><strong>cut</strong> (<em>dict</em><em>, </em><em>optional</em>) – Nested dictionary that tells if some PV row sides need to be
 discretized, and how (Default = None).
@@ -254,17 +255,20 @@ side of the PV row with index 1</p></li>
 <tr class="row-odd"><td><p><a class="reference internal" href="#pvarray.OrderedPVArray.__init__" title="pvarray.OrderedPVArray.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>([axis_azimuth, gcr, pvrow_height, …])</p></td>
 <td><p>Initialize ordered PV array.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">OrderedPVArray.cast_shadows</span></code></p></td>
-<td><p></p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">fit</span></code>(solar_zenith, solar_azimuth, …)</p></td>
+<td><p>Fit the ordered PV array to the list of solar and surface angles.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">OrderedPVArray.cuts_for_pvrow_view</span></code></p></td>
-<td><p></p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">fit_from_dict_of_scalars</span></code>(pvarray_params[, …])</p></td>
+<td><p>Instantiate, and fit ordered PV array using dictionary of scalar inputs.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">OrderedPVArray.from_dict</span></code></p></td>
-<td><p></p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">init_from_dict</span></code>(pvarray_params[, param_names])</p></td>
+<td><p>Instantiate ordered PV array from dictionary of parameters</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">OrderedPVArray.get_neighbors</span></code></p></td>
-<td><p></p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">transform</span></code>(idx)</p></td>
+<td><p>Transform the ordered PV array for the given index.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">transform_from_dict_of_scalars</span></code>(pvarray_params)</p></td>
+<td><p>Instantiate, fit and transform ordered PV array using dictionary of scalar inputs.</p></td>
 </tr>
 </tbody>
 </table>
@@ -292,7 +296,7 @@ side of the PV row with index 1</p></li>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="calculator.VFCalculator.html" class="btn btn-neutral float-right" title="calculator.VFCalculator" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="timeseries.TsPVRow.html" class="btn btn-neutral float-right" title="timeseries.TsPVRow" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="pvground.PVGround.html" class="btn btn-neutral float-left" title="pvground.PVGround" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>

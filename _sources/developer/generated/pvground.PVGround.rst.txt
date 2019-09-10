@@ -34,6 +34,9 @@ pvground.PVGround
       
       
       
+         ~PVGround.from_ordered_shadow_and_cut_pt_coords
+      
+      
       
       
       

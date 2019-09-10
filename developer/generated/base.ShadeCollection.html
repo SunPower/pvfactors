@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>base.ShadeCollection &mdash; pvfactors 1.1.0 documentation</title>
+  <title>base.ShadeCollection &mdash; pvfactors 1.2.0 documentation</title>
   
 
   
@@ -68,7 +68,7 @@
             
             
               <div class="version">
-                1.1.0
+                1.2.0
               </div>
             
           
@@ -94,7 +94,7 @@
             
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../../installation/index.html">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../tutorials/index.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorials/index.html">User guide and tutorials</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../theory/index.html">Theory</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../index.html">Developer API</a><ul class="current">
 <li class="toctree-l2 current"><a class="reference internal" href="../index.html#geometry">geometry</a><ul class="current">
@@ -110,6 +110,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../index.html#module-pvrow">pvrow</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../index.html#module-pvground">pvground</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../index.html#module-pvarray">pvarray</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../index.html#module-timeseries">timeseries</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../index.html#viewfactors">viewfactors</a></li>
@@ -219,13 +220,13 @@
 <h1>base.ShadeCollection<a class="headerlink" href="#base-shadecollection" title="Permalink to this headline">¶</a></h1>
 <dl class="class">
 <dt id="base.ShadeCollection">
-<em class="property">class </em><code class="sig-prename descclassname">base.</code><code class="sig-name descname">ShadeCollection</code><span class="sig-paren">(</span><em class="sig-param">list_surfaces=None</em>, <em class="sig-param">shaded=None</em>, <em class="sig-param">surface_params=None</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/base.html#ShadeCollection"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#base.ShadeCollection" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">base.</code><code class="sig-name descname">ShadeCollection</code><span class="sig-paren">(</span><em class="sig-param">list_surfaces=None</em>, <em class="sig-param">shaded=None</em>, <em class="sig-param">param_names=None</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/base.html#ShadeCollection"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#base.ShadeCollection" title="Permalink to this definition">¶</a></dt>
 <dd><p>A group of <code class="xref py py-class docutils literal notranslate"><span class="pre">PVSurface</span></code>
 objects that all have the same shading status. The PV surfaces are not
 necessarily contiguous or collinear.</p>
 <dl class="method">
 <dt id="base.ShadeCollection.__init__">
-<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param">list_surfaces=None</em>, <em class="sig-param">shaded=None</em>, <em class="sig-param">surface_params=None</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/base.html#ShadeCollection.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#base.ShadeCollection.__init__" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param">list_surfaces=None</em>, <em class="sig-param">shaded=None</em>, <em class="sig-param">param_names=None</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/base.html#ShadeCollection.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#base.ShadeCollection.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><p>Initialize shade collection.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -234,7 +235,7 @@ necessarily contiguous or collinear.</p>
 (Default = None)</p></li>
 <li><p><strong>shaded</strong> (<em>bool</em><em>, </em><em>optional</em>) – Shading status of the collection. If not specified, will be derived
 from list of surfaces (Default = None)</p></li>
-<li><p><strong>surface_params</strong> (<em>list of str</em><em>, </em><em>optional</em>) – Names of the surface parameters, eg reflectivity, total incident
+<li><p><strong>param_names</strong> (<em>list of str</em><em>, </em><em>optional</em>) – Names of the surface parameters, eg reflectivity, total incident
 irradiance, temperature, etc. (Default = None)</p></li>
 </ul>
 </dd>
@@ -248,7 +249,7 @@ irradiance, temperature, etc. (Default = None)</p></li>
 <col style="width: 90%" />
 </colgroup>
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#base.ShadeCollection.__init__" title="base.ShadeCollection.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>([list_surfaces, shaded, surface_params])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#base.ShadeCollection.__init__" title="base.ShadeCollection.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>([list_surfaces, shaded, param_names])</p></td>
 <td><p>Initialize shade collection.</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_linestring</span></code>(linestring[, normal_vector])</p></td>

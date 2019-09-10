@@ -75,3 +75,24 @@ pvarray
    :template: class_no_base.rst
 
    pvarray.OrderedPVArray
+
+
+timeseries
+^^^^^^^^^^
+
+.. automodule:: timeseries
+   :no-members:
+   :no-inherited-members:
+
+.. autosummary::
+   :toctree: generated/
+   :nosignatures:
+   :template: class_no_base.rst
+
+   timeseries.TsPVRow
+   timeseries.TsGround
+   timeseries.TsSide
+   timeseries.TsDualSegment
+   timeseries.TsSurface
+   timeseries.TsLineCoords
+   timeseries.TsPointCoords

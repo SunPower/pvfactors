@@ -19,6 +19,7 @@ calculator
    :nosignatures:
 
    calculator.VFCalculator
+   calculator.VFTsMethods
 
 mapper
 ^^^^^^

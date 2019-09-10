@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>calculator.VFCalculator &mdash; pvfactors 1.1.0 documentation</title>
+  <title>calculator.VFCalculator &mdash; pvfactors 1.2.0 documentation</title>
   
 
   
@@ -40,8 +40,8 @@
   <link rel="stylesheet" href="../../_static/css/custom.css" type="text/css" />
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="mapper.VFMapperOrderedPVArray" href="mapper.VFMapperOrderedPVArray.html" />
-    <link rel="prev" title="pvarray.OrderedPVArray" href="pvarray.OrderedPVArray.html" /> 
+    <link rel="next" title="calculator.VFTsMethods" href="calculator.VFTsMethods.html" />
+    <link rel="prev" title="timeseries.TsPointCoords" href="timeseries.TsPointCoords.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -68,7 +68,7 @@
             
             
               <div class="version">
-                1.1.0
+                1.2.0
               </div>
             
           
@@ -94,7 +94,7 @@
             
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../installation/index.html">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../tutorials/index.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorials/index.html">User guide and tutorials</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../theory/index.html">Theory</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../index.html">Developer API</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../whatsnew.html">What’s New</a></li>
@@ -197,18 +197,22 @@
 <h1>calculator.VFCalculator<a class="headerlink" href="#calculator-vfcalculator" title="Permalink to this headline">¶</a></h1>
 <dl class="class">
 <dt id="calculator.VFCalculator">
-<em class="property">class </em><code class="sig-prename descclassname">calculator.</code><code class="sig-name descname">VFCalculator</code><span class="sig-paren">(</span><em class="sig-param">mapper=None</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/calculator.html#VFCalculator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#calculator.VFCalculator" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">calculator.</code><code class="sig-name descname">VFCalculator</code><span class="sig-paren">(</span><em class="sig-param">mapper=None</em>, <em class="sig-param">vf_ts_methods=None</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/calculator.html#VFCalculator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#calculator.VFCalculator" title="Permalink to this definition">¶</a></dt>
 <dd><p>This calculator class will be used for the calculation of view factors
 for PV arrays</p>
 <dl class="method">
 <dt id="calculator.VFCalculator.__init__">
-<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param">mapper=None</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/calculator.html#VFCalculator.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#calculator.VFCalculator.__init__" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param">mapper=None</em>, <em class="sig-param">vf_ts_methods=None</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/calculator.html#VFCalculator.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#calculator.VFCalculator.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><p>Initialize the view factor mapper that will be used.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>mapper</strong> (<em>VF mapper object</em><em>, </em><em>optional</em>) – View factor mapper, which will map elements of the PV array view
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>mapper</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">VFMapperOrderedPVArray</span></code>, optional) – View factor mapper, which will map elements of the PV array view
 matrix to methods calculating view factors (Default =
-<code class="xref py py-class docutils literal notranslate"><span class="pre">VFMapperOrderedPVArray</span></code>)</p>
+<code class="xref py py-class docutils literal notranslate"><span class="pre">VFMapperOrderedPVArray</span></code>)</p></li>
+<li><p><strong>vf_ts_methods</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">VFTsMethods</span></code> object) – Object with methods to calculate timeseries view factors for the
+fast mode (Default = None)</p></li>
+</ul>
 </dd>
 </dl>
 </dd></dl>
@@ -220,11 +224,17 @@ matrix to methods calculating view factors (Default =
 <col style="width: 90%" />
 </colgroup>
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#calculator.VFCalculator.__init__" title="calculator.VFCalculator.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>([mapper])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#calculator.VFCalculator.__init__" title="calculator.VFCalculator.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>([mapper, vf_ts_methods])</p></td>
 <td><p>Initialize the view factor mapper that will be used.</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_vf_matrix</span></code>(geom_dict, view_matrix, …)</p></td>
 <td><p>Calculate the view factors based on the surfaces of the PV array object, and using a mapping of “view types” in the view matrix, to the view factor calculation methods.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_vf_matrix_subset</span></code>(geom_dict, view_matrix, …)</p></td>
+<td><p>Method to calculate a subset of the view factor matrix: this is used for fast mode calculations.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_vf_ts_pvrow_element</span></code>(pvrow_idx, …)</p></td>
+<td><p>Calculate timeseries view factors of timeseries pvrow element (segment or surface) to all other elements of the PV array.</p></td>
 </tr>
 </tbody>
 </table>
@@ -240,10 +250,10 @@ matrix to methods calculating view factors (Default =
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="mapper.VFMapperOrderedPVArray.html" class="btn btn-neutral float-right" title="mapper.VFMapperOrderedPVArray" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="calculator.VFTsMethods.html" class="btn btn-neutral float-right" title="calculator.VFTsMethods" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="pvarray.OrderedPVArray.html" class="btn btn-neutral float-left" title="pvarray.OrderedPVArray" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="timeseries.TsPointCoords.html" class="btn btn-neutral float-left" title="timeseries.TsPointCoords" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

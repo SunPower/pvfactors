@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Tutorials &mdash; pvfactors 1.1.0 documentation</title>
+  <title>User guide and tutorials &mdash; pvfactors 1.2.0 documentation</title>
   
 
   
@@ -68,7 +68,7 @@
             
             
               <div class="version">
-                1.1.0
+                1.2.0
               </div>
             
           
@@ -94,14 +94,25 @@
             
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../installation/index.html">Installation</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Tutorials</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="Getting_started.html">Getting started</a></li>
-<li class="toctree-l2"><a class="reference internal" href="PVArray_introduction.html">PV Array geometry introduction</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Create_discretized_pvarray.html">Discretize PV row sides and indexing</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Calculate_view_factors.html">Calculate view factors</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Run_timeseries_simulations.html">Run timeseries simulations</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Run_parallel_simulations.html">Run timeseries simulations in parallel</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Run_fast_simulations.html">Run “fast” simulations with 8760 annual inputs</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">User guide and tutorials</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#understanding-pv-array-2d-geometries">Understanding PV array 2D geometries</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pv-array-parameters">PV array parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#getting-started-running-simulations">Getting started: running simulations</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="Getting_started.html">Getting started</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#details-on-the-fast-mode-simulations">Details on the “fast mode” simulations</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="Run_fast_simulations.html">Run fast simulations with 8760 annual inputs</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#details-on-the-full-mode-simulations">Details on the “full mode” simulations</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="PVArray_introduction.html">PV Array geometry introduction</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Create_discretized_pvarray.html">Discretize PV row sides and indexing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Calculate_view_factors.html">Calculate view factors</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Run_full_timeseries_simulations.html">Run full timeseries simulations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Run_full_parallel_simulations.html">Run full simulations in parallel</a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../theory/index.html">Theory</a></li>
@@ -154,7 +165,7 @@
     
       <li><a href="../index.html">Docs</a> &raquo;</li>
         
-      <li>Tutorials</li>
+      <li>User guide and tutorials</li>
     
     
       <li class="wy-breadcrumbs-aside">
@@ -200,22 +211,76 @@
     text-align: unset;
 }
 </style>
-<div class="section" id="tutorials">
-<span id="id1"></span><h1>Tutorials<a class="headerlink" href="#tutorials" title="Permalink to this headline">¶</a></h1>
-<div class="line-block">
-<div class="line">Here is a list of tutorials to help users get started using <code class="docutils literal notranslate"><span class="pre">pvfactors</span></code>.</div>
-<div class="line">The notebooks for these tutorials are located in the <a class="reference external" href="https://github.com/SunPower/pvfactors/tree/master/docs/tutorials">tutorials folder</a> of the Github repository.</div>
+<div class="section" id="user-guide-and-tutorials">
+<span id="tutorials"></span><h1>User guide and tutorials<a class="headerlink" href="#user-guide-and-tutorials" title="Permalink to this headline">¶</a></h1>
+<p>This section will cover some tutorials to help the users easily get started with <code class="docutils literal notranslate"><span class="pre">pvfactors</span></code>. The notebooks used for this section are all located in the <a class="reference external" href="https://github.com/SunPower/pvfactors/tree/master/docs/tutorials">tutorials folder</a> of the Github repository.</p>
+<div class="section" id="understanding-pv-array-2d-geometries">
+<h2>Understanding PV array 2D geometries<a class="headerlink" href="#understanding-pv-array-2d-geometries" title="Permalink to this headline">¶</a></h2>
+<p>Let’s start with an example of a PV array 2D geometry plotted with <code class="docutils literal notranslate"><span class="pre">pvfactors</span></code>.</p>
+<div class="figure align-center" id="id1">
+<a class="reference internal image-reference" href="../_images/Example_pvarray.png"><img alt="../_images/Example_pvarray.png" src="../_images/Example_pvarray.png" style="width: 50%;" /></a>
+<p class="caption"><span class="caption-text">Fig. 1: Example of PV array 2D geometry in <code class="docutils literal notranslate"><span class="pre">pvfactors</span></code></span><a class="headerlink" href="#id1" title="Permalink to this image">¶</a></p>
 </div>
+<p>As shown in the figure above, a <code class="docutils literal notranslate"><span class="pre">pvfactors</span></code> PV array is made out of a list of PV rows (the tilted blue lines), and a ground (the flat lines at y=0).</p>
+<ul class="simple">
+<li><p>Each PV row has 2 sides: a front and a back side, and each side of a PV row is made out of segments. The segments are fixed sections whose location on the PV row side is always constant throughout the simulations, which allows the users to consistently track and calculate irradiance for given sections of a PV row. But each segment of each side of the PV rows is made out of collections of surfaces that are either shaded or illuminated, and these surfaces cannot be tracked during the simulations because they change depending on the PV row rotation angles and the sun’s position. In Fig. 1, the leftmost PV row’s front side has 3 segments, while its back side has only 1, and the center PV row’s back side has 2 segments, while its front side has only 1, etc. For more details on <code class="docutils literal notranslate"><span class="pre">pvfactors</span></code> geometries, please refer to the tutorial sections below.</p></li>
+<li><p>The ground can be seen as the segment of a “side”, which will be made of collections of shaded surfaces (gray lines) and illuminated surfaces (yellow lines) that will change with the PV row rotation angles and the sun angles. Physically, these shaded surfaces represent the shadows of the PV rows that are cast on the ground. The ground will also keep track of “cut points”, which are also defined by the PV rows (1 per PV row), and which indicate the extent of the ground that a PV row front side and back side can see.</p></li>
+</ul>
+</div>
+<div class="section" id="pv-array-parameters">
+<h2>PV array parameters<a class="headerlink" href="#pv-array-parameters" title="Permalink to this headline">¶</a></h2>
+<p>In <code class="docutils literal notranslate"><span class="pre">pvfactors</span></code>, a PV array has a number of fixed parameters that do not change with rotation and solar angles, and which can be passed as a dictionary with specific fields. Below is a sample of a PV array parameters dictionary, which was used to create the 2D geometry shown in Fig. 1.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">pvarray_parameters</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;n_pvrows&#39;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>                            <span class="c1"># number of pv rows</span>
+    <span class="s1">&#39;pvrow_height&#39;</span><span class="p">:</span> <span class="mf">2.5</span><span class="p">,</span>                      <span class="c1"># height of pv rows (measured at center / torque tube)</span>
+    <span class="s1">&#39;pvrow_width&#39;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>                         <span class="c1"># width of pvrows</span>
+    <span class="s1">&#39;axis_azimuth&#39;</span><span class="p">:</span> <span class="mf">0.</span><span class="p">,</span>                       <span class="c1"># azimuth angle of rotation axis</span>
+    <span class="s1">&#39;gcr&#39;</span><span class="p">:</span> <span class="mf">0.4</span><span class="p">,</span>                               <span class="c1"># ground coverage ratio</span>
+    <span class="s1">&#39;cut&#39;</span><span class="p">:</span> <span class="p">{</span><span class="mi">0</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;front&#39;</span><span class="p">:</span> <span class="mi">3</span><span class="p">},</span> <span class="mi">1</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;back&#39;</span><span class="p">:</span> <span class="mi">2</span><span class="p">}}</span>  <span class="c1"># discretization scheme of the pv rows</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>The <a class="reference internal" href="#getting-started-ref"><span class="std std-ref">Getting started: running simulations</span></a> section below shows how such a dictionary can be used to create a PV array in <code class="docutils literal notranslate"><span class="pre">pvfactors</span></code>. Here is a description of what each parameter means:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">n_pvrows</span></code>: is the number of PV rows that the PV array will contain. In Fig. 1, we have 3 PV rows.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">pvrow_height</span></code>: the PV row height (in meters) is the height of the PV row measured from the ground to the PV row center. In Fig. 1, the height of the PV rows is 2.5 m.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">pvrow_width</span></code>: the PV row width (in meters) is the cross-section width of the entire PV row. In Fig. 1, it’s the entire length of the blue lines, so 2 m in the example.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">axis_azimuth</span></code>: the PV array axis azimuth (in degrees) is the direction of the rotation axis of the PV rows (physically, it could be seen as the torque tube direction for single-axis trackers). In the 2D plane of the PV array geometry (as shown in Fig. 1), it is always the vector normal to that 2D plane and with the direction going into the 2D plane. So positive rotation angles will lead to PV rows tilted to the left, and negative rotation angles will lead to PV rows tilted to the right. The azimuth convention used in <code class="docutils literal notranslate"><span class="pre">pvfactors</span></code> is that 0 deg is North, 90 deg is East, etc.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">gcr</span></code>: it is the ground coverage ratio of the PV array. It is calculated as being equal to the ratio of the PV row width by the distance seperating the PV row centers.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">cut</span></code>: this optional parameter is used to discretize the PV row sides into equal-length segments. For instance here, the front side of the leftmost PV row (always with index 0) will have 3 segments, and the back side of the center PV row (with index 1) will have 2 segments.</p></li>
+</ul>
+</div>
+<div class="section" id="getting-started-running-simulations">
+<span id="getting-started-ref"></span><h2>Getting started: running simulations<a class="headerlink" href="#getting-started-running-simulations" title="Permalink to this headline">¶</a></h2>
+<p>Here is a quick overview on how to get started and run irradiance simulations with <code class="docutils literal notranslate"><span class="pre">pvfactors</span></code>. The users may find it useful to first read the theory and mathematical formulation for <a class="reference internal" href="../theory/problem_formulation.html#full-mode-theory"><span class="std std-ref">Full simulations</span></a> and <a class="reference internal" href="../theory/problem_formulation.html#fast-mode-theory"><span class="std std-ref">Fast simulations</span></a> to understand the difference between the two approaches.</p>
 <div class="toctree-wrapper compound">
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="Getting_started.html">Getting started</a></li>
+</ul>
+</div>
+</div>
+<div class="section" id="details-on-the-fast-mode-simulations">
+<h2>Details on the “fast mode” simulations<a class="headerlink" href="#details-on-the-fast-mode-simulations" title="Permalink to this headline">¶</a></h2>
+<p>In “fast mode” (and as described in the <a class="reference internal" href="../theory/problem_formulation.html#fast-mode-theory"><span class="std std-ref">Fast simulations</span></a> theory section), <code class="docutils literal notranslate"><span class="pre">pvfactors</span></code> assumes that all incident irradiance values for the system are known except for the PV row back surfaces. So since the system to solve is now explicit (no matrix inversion needed), vectorization is used to speed up the calculations.</p>
+<p>This mode relies on “timeseries geometries” of the PV array, which are the attributes named <code class="docutils literal notranslate"><span class="pre">ts_pvrows</span></code> and <code class="docutils literal notranslate"><span class="pre">ts_ground</span></code>, and which contain vectors of coordinates for all timestamps and for all geometry elements. Please take a look at the tutorial sections below for more details on the fast mode.</p>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="Run_fast_simulations.html">Run fast simulations with 8760 annual inputs</a></li>
+</ul>
+</div>
+</div>
+<div class="section" id="details-on-the-full-mode-simulations">
+<h2>Details on the “full mode” simulations<a class="headerlink" href="#details-on-the-full-mode-simulations" title="Permalink to this headline">¶</a></h2>
+<p>In “full mode” (and as described in the <a class="reference internal" href="../theory/problem_formulation.html#full-mode-theory"><span class="std std-ref">Full simulations</span></a> theory section), <code class="docutils literal notranslate"><span class="pre">pvfactors</span></code> calculates the equilibrium of reflections between all surfaces of the PV array for each timestamp. So the system to solve is implicit (matrix inversion required). This mode relies on timestamp specfic geometries for the PV array using its attributes <code class="docutils literal notranslate"><span class="pre">pvrows</span></code> and <code class="docutils literal notranslate"><span class="pre">ground</span></code>.</p>
+<div class="toctree-wrapper compound">
+<ul>
 <li class="toctree-l1"><a class="reference internal" href="PVArray_introduction.html">PV Array geometry introduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Create_discretized_pvarray.html">Discretize PV row sides and indexing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Calculate_view_factors.html">Calculate view factors</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Run_timeseries_simulations.html">Run timeseries simulations</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Run_parallel_simulations.html">Run timeseries simulations in parallel</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Run_fast_simulations.html">Run “fast” simulations with 8760 annual inputs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Run_full_timeseries_simulations.html">Run full timeseries simulations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Run_full_parallel_simulations.html">Run full simulations in parallel</a></li>
 </ul>
+</div>
 </div>
 </div>
 

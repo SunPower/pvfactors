@@ -15,8 +15,11 @@ irradiance.base.BaseModel
    
       ~BaseModel.__init__
       ~BaseModel.fit
-      ~BaseModel.get_irradiance_invrho_vector
+      ~BaseModel.get_full_modeling_vectors
+      ~BaseModel.get_modeling_vectors
       ~BaseModel.transform
+      ~BaseModel.transform_ts
+      ~BaseModel.update_ts_surface_sky_term
    
    
 
@@ -27,7 +30,12 @@ irradiance.base.BaseModel
    .. autosummary::
    
       ~BaseModel.cats
+      ~BaseModel.gnd_illum
+      ~BaseModel.gnd_shaded
       ~BaseModel.irradiance_comp
       ~BaseModel.params
+      ~BaseModel.pvrow_illum
+      ~BaseModel.pvrow_shaded
+      ~BaseModel.sky
    
    

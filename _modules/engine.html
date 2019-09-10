@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>engine &mdash; pvfactors 1.1.0 documentation</title>
+  <title>engine &mdash; pvfactors 1.2.0 documentation</title>
   
 
   
@@ -66,7 +66,7 @@
             
             
               <div class="version">
-                1.1.0
+                1.2.0
               </div>
             
           
@@ -92,7 +92,7 @@
             
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="../installation/index.html">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../tutorials/index.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/index.html">User guide and tutorials</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../theory/index.html">Theory</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../developer/index.html">Developer API</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../whatsnew.html">What’s New</a></li>
@@ -174,9 +174,8 @@
 <span class="sd">    as a timeseries when the pvarrays can be build from dictionary parameters</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="PVEngine.__init__"><a class="viewcode-back" href="../developer/generated/engine.PVEngine.html#engine.PVEngine.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pvarray</span><span class="p">,</span> <span class="n">vf_calculator</span><span class="o">=</span><span class="n">VFCalculator</span><span class="p">(),</span>
-                 <span class="n">irradiance_model</span><span class="o">=</span><span class="n">HybridPerezOrdered</span><span class="p">(),</span>
-                 <span class="n">fast_mode_pvrow_index</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="PVEngine.__init__"><a class="viewcode-back" href="../developer/generated/engine.PVEngine.html#engine.PVEngine.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pvarray</span><span class="p">,</span> <span class="n">vf_calculator</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">irradiance_model</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">fast_mode_pvrow_index</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fast_mode_segment_index</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Create pv engine class, and initialize timeseries parameters.</span>
 
 <span class="sd">        Parameters</span>
@@ -184,33 +183,40 @@
 <span class="sd">        pvarray : BasePVArray (or child) object</span>
 <span class="sd">            The initialized PV array object that will be used for calculations</span>
 <span class="sd">        vf_calculator : vf calculator object, optional</span>
-<span class="sd">            Calculator that will be used to calculate the view factor matrices</span>
-<span class="sd">            (Default =</span>
-<span class="sd">            :py:class:`~pvfactors.viewfactors.calculator.VFCalculator` object)</span>
+<span class="sd">            Calculator that will be used to calculate the view factor matrices,</span>
+<span class="sd">            will use :py:class:`~pvfactors.viewfactors.calculator.VFCalculator`</span>
+<span class="sd">            if None (Default = None)</span>
 <span class="sd">        irradiance_model : irradiance model object, optional</span>
-<span class="sd">            The irradiance model that will be applied to the PV array</span>
-<span class="sd">            (Default =</span>
+<span class="sd">            The irradiance model that will be applied to the PV array,</span>
+<span class="sd">            will use</span>
 <span class="sd">            :py:class:`~pvfactors.irradiance.models.HybridPerezOrdered`</span>
-<span class="sd">            object)</span>
+<span class="sd">            if None (Default = None)</span>
 <span class="sd">        fast_mode_pvrow_index : int, optional</span>
 <span class="sd">            If a pvrow index is passed, then the PVEngine fast mode</span>
 <span class="sd">            will be activated and the engine calculation will be done only</span>
 <span class="sd">            for the back surface of the pvrow with the corresponding</span>
 <span class="sd">            index (Default = None)</span>
-
+<span class="sd">        fast_mode_segment_index : int, optional</span>
+<span class="sd">            If a segment index is passed, then the PVEngine fast mode</span>
+<span class="sd">            will calculate back surface irradiance only for the</span>
+<span class="sd">            selected segment of the selected back surface (Default = None)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">vf_calculator</span> <span class="o">=</span> <span class="n">vf_calculator</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">irradiance</span> <span class="o">=</span> <span class="n">irradiance_model</span>
+        <span class="c1"># Initialize the attributes of the PV engine</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vf_calculator</span> <span class="o">=</span> <span class="p">(</span><span class="n">VFCalculator</span><span class="p">()</span> <span class="k">if</span> <span class="n">vf_calculator</span> <span class="ow">is</span> <span class="kc">None</span>
+                              <span class="k">else</span> <span class="n">vf_calculator</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">irradiance</span> <span class="o">=</span> <span class="p">(</span><span class="n">HybridPerezOrdered</span><span class="p">()</span> <span class="k">if</span> <span class="n">irradiance_model</span> <span class="ow">is</span> <span class="kc">None</span>
+                           <span class="k">else</span> <span class="n">irradiance_model</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">pvarray</span> <span class="o">=</span> <span class="n">pvarray</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">is_fast_mode</span> <span class="o">=</span> <span class="kc">False</span> <span class="k">if</span> <span class="n">fast_mode_pvrow_index</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">True</span>
+        <span class="c1"># Save fast mode indices</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">fast_mode_pvrow_index</span> <span class="o">=</span> <span class="n">fast_mode_pvrow_index</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fast_mode_segment_index</span> <span class="o">=</span> <span class="n">fast_mode_segment_index</span>
 
         <span class="c1"># These values will be updated at fitting time</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">n_points</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">skip_step</span> <span class="o">=</span> <span class="kc">None</span></div>
 
     <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timestamps</span><span class="p">,</span> <span class="n">DNI</span><span class="p">,</span> <span class="n">DHI</span><span class="p">,</span> <span class="n">solar_zenith</span><span class="p">,</span> <span class="n">solar_azimuth</span><span class="p">,</span>
-            <span class="n">surface_tilt</span><span class="p">,</span> <span class="n">surface_azimuth</span><span class="p">,</span> <span class="n">albedo</span><span class="p">):</span>
+            <span class="n">surface_tilt</span><span class="p">,</span> <span class="n">surface_azimuth</span><span class="p">,</span> <span class="n">albedo</span><span class="p">,</span> <span class="n">GHI</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Fit the timeseries data to the engine. More specifically,</span>
 <span class="sd">        save all the parameters that needs to be saved, and fit the PV array</span>
 <span class="sd">        and irradiance models to the data (i.e. perform all the intermediate</span>
@@ -236,7 +242,9 @@
 <span class="sd">            Surface azimuth angles [deg]</span>
 <span class="sd">        albedo : array-like or float</span>
 <span class="sd">            Albedo values (ground reflectivity)</span>
-
+<span class="sd">        GHI : array-like, optional</span>
+<span class="sd">            Global horizontal irradiance [W/m2], if not provided, will be</span>
+<span class="sd">            calculated from DNI and DHI if needed (Default = None)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Format inputs to numpy arrays if it looks like floats where inputted</span>
         <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isscalar</span><span class="p">(</span><span class="n">DNI</span><span class="p">):</span>
@@ -247,19 +255,23 @@
             <span class="n">solar_azimuth</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">solar_azimuth</span><span class="p">])</span>
             <span class="n">surface_tilt</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">surface_tilt</span><span class="p">])</span>
             <span class="n">surface_azimuth</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">surface_azimuth</span><span class="p">])</span>
+            <span class="n">GHI</span> <span class="o">=</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">GHI</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">GHI</span><span class="p">])</span>
 
         <span class="c1"># Format albedo</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">n_points</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">DNI</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isscalar</span><span class="p">(</span><span class="n">albedo</span><span class="p">):</span>
-            <span class="n">albedo</span> <span class="o">=</span> <span class="n">albedo</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_points</span><span class="p">)</span>
-
-        <span class="c1"># Fit irradiance model</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">irradiance</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">timestamps</span><span class="p">,</span> <span class="n">DNI</span><span class="p">,</span> <span class="n">DHI</span><span class="p">,</span> <span class="n">solar_zenith</span><span class="p">,</span> <span class="n">solar_azimuth</span><span class="p">,</span>
-                            <span class="n">surface_tilt</span><span class="p">,</span> <span class="n">surface_azimuth</span><span class="p">,</span> <span class="n">albedo</span><span class="p">)</span>
+        <span class="n">albedo</span> <span class="o">=</span> <span class="p">(</span><span class="n">albedo</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_points</span><span class="p">)</span> <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isscalar</span><span class="p">(</span><span class="n">albedo</span><span class="p">)</span>
+                  <span class="k">else</span> <span class="n">albedo</span><span class="p">)</span>
 
         <span class="c1"># Fit PV array</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">pvarray</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">solar_zenith</span><span class="p">,</span> <span class="n">solar_azimuth</span><span class="p">,</span> <span class="n">surface_tilt</span><span class="p">,</span>
                          <span class="n">surface_azimuth</span><span class="p">)</span>
+
+        <span class="c1"># Fit irradiance model</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">irradiance</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">timestamps</span><span class="p">,</span> <span class="n">DNI</span><span class="p">,</span> <span class="n">DHI</span><span class="p">,</span> <span class="n">solar_zenith</span><span class="p">,</span> <span class="n">solar_azimuth</span><span class="p">,</span>
+                            <span class="n">surface_tilt</span><span class="p">,</span> <span class="n">surface_azimuth</span><span class="p">,</span> <span class="n">albedo</span><span class="p">,</span> <span class="n">GHI</span><span class="o">=</span><span class="n">GHI</span><span class="p">)</span>
+
+        <span class="c1"># Add timeseries irradiance results to pvarray</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">irradiance</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pvarray</span><span class="p">)</span>
 
         <span class="c1"># Skip timesteps when:</span>
         <span class="c1">#    - solar zenith &gt; 90, ie the sun is down</span>
@@ -268,8 +280,89 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">skip_step</span> <span class="o">=</span> <span class="p">(</span><span class="n">solar_zenith</span> <span class="o">&gt;</span> <span class="mi">90</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">DNI</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">DHI</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span> \
             <span class="o">|</span> <span class="p">((</span><span class="n">DNI</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">DHI</span> <span class="o">==</span> <span class="mi">0</span><span class="p">))</span>
 
-    <span class="k">def</span> <span class="nf">run_timestep</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idx</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Run simulation for a single timestep index.</span>
+    <span class="k">def</span> <span class="nf">run_fast_mode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fn_build_report</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">pvrow_index</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                      <span class="n">segment_index</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Run all simulation timesteps using the fast mode for the back</span>
+<span class="sd">        surface of a PV row, and assuming that the incident irradiance on all</span>
+<span class="sd">        other surfaces is known (all but back surfaces).</span>
+<span class="sd">        The function will return a report that will be built by the function</span>
+<span class="sd">        passed by the user.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        fn_build_report : function, optional</span>
+<span class="sd">            Function that will build the report of the simulation</span>
+<span class="sd">            (Default value = None)</span>
+<span class="sd">        pvrow_index : int, optional</span>
+<span class="sd">            Index of the PV row for which we want to calculate back surface</span>
+<span class="sd">            irradiance; if used, this will override the</span>
+<span class="sd">            ``fast_mode_pvrow_index`` passed at engine initialization</span>
+<span class="sd">            (Default = None)</span>
+<span class="sd">        segment_index : int, optional</span>
+<span class="sd">            Index of the segment on the PV row&#39;s back side for which we want</span>
+<span class="sd">            to calculate the incident irradiance; if used, this will override</span>
+<span class="sd">            the ``fast_mode_segment_index`` passed at engine initialization</span>
+<span class="sd">            (Default = None)</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        report</span>
+<span class="sd">            Results from the simulation, as specified by user&#39;s report</span>
+<span class="sd">            function. If no function is passed, nothing will be returned.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Prepare variables</span>
+        <span class="n">pvrow_idx</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fast_mode_pvrow_index</span> <span class="k">if</span> <span class="n">pvrow_index</span> <span class="ow">is</span> <span class="kc">None</span>
+                     <span class="k">else</span> <span class="n">pvrow_index</span><span class="p">)</span>
+        <span class="n">segment_idx</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fast_mode_segment_index</span> <span class="k">if</span> <span class="n">segment_index</span> <span class="ow">is</span> <span class="kc">None</span>
+                       <span class="k">else</span> <span class="n">segment_index</span><span class="p">)</span>
+        <span class="n">ts_pvrow</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pvarray</span><span class="o">.</span><span class="n">ts_pvrows</span><span class="p">[</span><span class="n">pvrow_idx</span><span class="p">]</span>
+
+        <span class="c1"># Run calculations</span>
+        <span class="k">if</span> <span class="n">segment_idx</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># Run calculation for all segments of back surface</span>
+            <span class="k">for</span> <span class="n">ts_segment</span> <span class="ow">in</span> <span class="n">ts_pvrow</span><span class="o">.</span><span class="n">back</span><span class="o">.</span><span class="n">list_segments</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_calculate_back_ts_segment_qinc</span><span class="p">(</span><span class="n">ts_segment</span><span class="p">,</span> <span class="n">pvrow_idx</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Run calculation for selected segment of back surface</span>
+            <span class="n">ts_segment</span> <span class="o">=</span> <span class="n">ts_pvrow</span><span class="o">.</span><span class="n">back</span><span class="o">.</span><span class="n">list_segments</span><span class="p">[</span><span class="n">segment_idx</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_calculate_back_ts_segment_qinc</span><span class="p">(</span><span class="n">ts_segment</span><span class="p">,</span> <span class="n">pvrow_idx</span><span class="p">)</span>
+
+        <span class="c1"># Create report</span>
+        <span class="n">report</span> <span class="o">=</span> <span class="p">(</span><span class="kc">None</span> <span class="k">if</span> <span class="n">fn_build_report</span> <span class="ow">is</span> <span class="kc">None</span>
+                  <span class="k">else</span> <span class="n">fn_build_report</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pvarray</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="n">report</span>
+
+    <span class="k">def</span> <span class="nf">run_full_mode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fn_build_report</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Run all simulation timesteps using the full mode, which calculates</span>
+<span class="sd">        the equilibrium of reflections in the system, and return a report that</span>
+<span class="sd">        will be built by the function passed by the user.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        fn_build_report : function, optional</span>
+<span class="sd">            Function that will build the report of the simulation</span>
+<span class="sd">            (Default value = None)</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        report</span>
+<span class="sd">            Saved results from the simulation, as specified by user&#39;s report</span>
+<span class="sd">            function. If no function is passed, nothing will be returned.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">report</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_points</span><span class="p">)):</span>
+            <span class="n">pvarray</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">run_full_mode_timestep</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span>
+            <span class="n">report</span> <span class="o">=</span> <span class="p">(</span><span class="kc">None</span> <span class="k">if</span> <span class="n">fn_build_report</span> <span class="ow">is</span> <span class="kc">None</span>
+                      <span class="k">else</span> <span class="n">fn_build_report</span><span class="p">(</span><span class="n">report</span><span class="p">,</span> <span class="n">pvarray</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="n">report</span>
+
+    <span class="k">def</span> <span class="nf">run_full_mode_timestep</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idx</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Run simulation for a single timestep index and using the full mode,</span>
+<span class="sd">        which calculates the equilibrium of reflections in the system.</span>
 
 <span class="sd">        Timestep will be skipped when:</span>
 <span class="sd">            - solar zenith &gt; 90, ie the sun is down</span>
@@ -295,98 +388,105 @@
             <span class="c1"># To be returned at the end</span>
             <span class="n">pvarray</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pvarray</span>
 
-            <span class="c1"># Transform pvarray to time step</span>
+            <span class="c1"># Transform pvarray to time step idx to create geometries</span>
             <span class="n">pvarray</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span>
 
-            <span class="c1"># Apply irradiance terms to pvarray</span>
-            <span class="n">irradiance_vec</span><span class="p">,</span> <span class="n">rho_vec</span><span class="p">,</span> <span class="n">invrho_vec</span><span class="p">,</span> <span class="n">total_perez_vec</span> <span class="o">=</span> \
-                <span class="bp">self</span><span class="o">.</span><span class="n">irradiance</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">pvarray</span><span class="p">,</span> <span class="n">idx</span><span class="o">=</span><span class="n">idx</span><span class="p">)</span>
+            <span class="c1"># Get the irradiance modeling vectors used in final calculations</span>
+            <span class="n">irradiance_vec</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">invrho_vec</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> \
+                <span class="bp">self</span><span class="o">.</span><span class="n">irradiance</span><span class="o">.</span><span class="n">get_full_modeling_vectors</span><span class="p">(</span><span class="n">pvarray</span><span class="p">,</span> <span class="n">idx</span><span class="p">)</span>
 
             <span class="c1"># Prepare inputs to view factor calculator</span>
             <span class="n">geom_dict</span> <span class="o">=</span> <span class="n">pvarray</span><span class="o">.</span><span class="n">dict_surfaces</span>
             <span class="n">view_matrix</span><span class="p">,</span> <span class="n">obstr_matrix</span> <span class="o">=</span> <span class="n">pvarray</span><span class="o">.</span><span class="n">view_obstr_matrices</span>
 
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_fast_mode</span><span class="p">:</span>
-                <span class="c1"># Indices of the surfaces of the back of the selected pvrows</span>
-                <span class="n">list_surface_indices</span> <span class="o">=</span> <span class="n">pvarray</span><span class="o">.</span><span class="n">pvrows</span><span class="p">[</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">fast_mode_pvrow_index</span><span class="p">]</span><span class="o">.</span><span class="n">back</span><span class="o">.</span><span class="n">surface_indices</span>
+            <span class="c1"># Calculate view factors</span>
+            <span class="n">vf_matrix</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vf_calculator</span><span class="o">.</span><span class="n">get_vf_matrix</span><span class="p">(</span>
+                <span class="n">geom_dict</span><span class="p">,</span> <span class="n">view_matrix</span><span class="p">,</span> <span class="n">obstr_matrix</span><span class="p">,</span> <span class="n">pvarray</span><span class="o">.</span><span class="n">pvrows</span><span class="p">)</span>
+            <span class="n">pvarray</span><span class="o">.</span><span class="n">vf_matrix</span> <span class="o">=</span> <span class="n">vf_matrix</span>
 
-                <span class="c1"># Calculate view factors using a subset of view_matrix to</span>
-                <span class="c1"># gain in calculation speed</span>
-                <span class="n">vf_matrix_subset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vf_calculator</span><span class="o">.</span><span class="n">get_vf_matrix_subset</span><span class="p">(</span>
-                    <span class="n">geom_dict</span><span class="p">,</span> <span class="n">view_matrix</span><span class="p">,</span> <span class="n">obstr_matrix</span><span class="p">,</span> <span class="n">pvarray</span><span class="o">.</span><span class="n">pvrows</span><span class="p">,</span>
-                    <span class="n">list_surface_indices</span><span class="p">)</span>
-                <span class="n">pvarray</span><span class="o">.</span><span class="n">vf_matrix</span> <span class="o">=</span> <span class="n">vf_matrix_subset</span>
+            <span class="c1"># Calculate radiosities by solving system of equations</span>
+            <span class="n">invrho_mat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">invrho_vec</span><span class="p">)</span>
+            <span class="n">a_mat</span> <span class="o">=</span> <span class="n">invrho_mat</span> <span class="o">-</span> <span class="n">vf_matrix</span>
+            <span class="n">q0</span> <span class="o">=</span> <span class="n">linalg</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">a_mat</span><span class="p">,</span> <span class="n">irradiance_vec</span><span class="p">)</span>
+            <span class="n">qinc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">invrho_mat</span><span class="p">,</span> <span class="n">q0</span><span class="p">)</span>
 
-                <span class="n">irradiance_vec_subset</span> <span class="o">=</span> <span class="n">irradiance_vec</span><span class="p">[</span><span class="n">list_surface_indices</span><span class="p">]</span>
-                <span class="c1"># In fast mode, will not care to calculate q0</span>
-                <span class="n">qinc</span> <span class="o">=</span> <span class="n">vf_matrix_subset</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">rho_vec</span> <span class="o">*</span> <span class="n">total_perez_vec</span><span class="p">)</span> \
-                    <span class="o">+</span> <span class="n">irradiance_vec_subset</span>
+            <span class="c1"># Derive other irradiance terms</span>
+            <span class="n">isotropic_vec</span> <span class="o">=</span> <span class="n">vf_matrix</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">irradiance_vec</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">reflection_vec</span> <span class="o">=</span> <span class="n">qinc</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> \
+                <span class="o">-</span> <span class="n">irradiance_vec</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">isotropic_vec</span>
 
-                <span class="c1"># Calculate other terms</span>
-                <span class="n">isotropic_vec</span> <span class="o">=</span> <span class="n">vf_matrix_subset</span><span class="p">[:,</span> <span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">total_perez_vec</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-                <span class="n">reflection_vec</span> <span class="o">=</span> <span class="n">qinc</span> <span class="o">-</span> <span class="n">irradiance_vec_subset</span> \
-                    <span class="o">-</span> <span class="n">isotropic_vec</span>
-
-                <span class="c1"># Update selected surfaces with values</span>
-                <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">surf_idx</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">list_surface_indices</span><span class="p">):</span>
-                    <span class="n">surface</span> <span class="o">=</span> <span class="n">geom_dict</span><span class="p">[</span><span class="n">surf_idx</span><span class="p">]</span>
-                    <span class="n">surface</span><span class="o">.</span><span class="n">update_params</span><span class="p">({</span><span class="s1">&#39;qinc&#39;</span><span class="p">:</span> <span class="n">qinc</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
-                                           <span class="s1">&#39;isotropic&#39;</span><span class="p">:</span> <span class="n">isotropic_vec</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
-                                           <span class="s1">&#39;reflection&#39;</span><span class="p">:</span> <span class="n">reflection_vec</span><span class="p">[</span><span class="n">i</span><span class="p">]})</span>
-
-            <span class="k">else</span><span class="p">:</span>
-                <span class="c1"># Calculate view factors</span>
-                <span class="n">vf_matrix</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vf_calculator</span><span class="o">.</span><span class="n">get_vf_matrix</span><span class="p">(</span>
-                    <span class="n">geom_dict</span><span class="p">,</span> <span class="n">view_matrix</span><span class="p">,</span> <span class="n">obstr_matrix</span><span class="p">,</span> <span class="n">pvarray</span><span class="o">.</span><span class="n">pvrows</span><span class="p">)</span>
-                <span class="n">pvarray</span><span class="o">.</span><span class="n">vf_matrix</span> <span class="o">=</span> <span class="n">vf_matrix</span>
-
-                <span class="c1"># Calculate radiosities</span>
-                <span class="n">invrho_mat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">invrho_vec</span><span class="p">)</span>
-                <span class="n">a_mat</span> <span class="o">=</span> <span class="n">invrho_mat</span> <span class="o">-</span> <span class="n">vf_matrix</span>
-                <span class="n">q0</span> <span class="o">=</span> <span class="n">linalg</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">a_mat</span><span class="p">,</span> <span class="n">irradiance_vec</span><span class="p">)</span>
-                <span class="n">qinc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">invrho_mat</span><span class="p">,</span> <span class="n">q0</span><span class="p">)</span>
-
-                <span class="c1"># Calculate other terms</span>
-                <span class="n">isotropic_vec</span> <span class="o">=</span> <span class="n">vf_matrix</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">irradiance_vec</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-                <span class="n">reflection_vec</span> <span class="o">=</span> <span class="n">qinc</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> \
-                    <span class="o">-</span> <span class="n">irradiance_vec</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">isotropic_vec</span>
-
-                <span class="c1"># Update surfaces with values</span>
-                <span class="k">for</span> <span class="n">idx_surf</span><span class="p">,</span> <span class="n">surface</span> <span class="ow">in</span> <span class="n">geom_dict</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-                    <span class="n">surface</span><span class="o">.</span><span class="n">update_params</span><span class="p">(</span>
-                        <span class="p">{</span><span class="s1">&#39;q0&#39;</span><span class="p">:</span> <span class="n">q0</span><span class="p">[</span><span class="n">idx_surf</span><span class="p">],</span>
-                         <span class="s1">&#39;qinc&#39;</span><span class="p">:</span> <span class="n">qinc</span><span class="p">[</span><span class="n">idx_surf</span><span class="p">],</span>
-                         <span class="s1">&#39;isotropic&#39;</span><span class="p">:</span> <span class="n">isotropic_vec</span><span class="p">[</span><span class="n">idx_surf</span><span class="p">],</span>
-                         <span class="s1">&#39;reflection&#39;</span><span class="p">:</span> <span class="n">reflection_vec</span><span class="p">[</span><span class="n">idx_surf</span><span class="p">]})</span>
+            <span class="c1"># Update surfaces with values</span>
+            <span class="k">for</span> <span class="n">idx_surf</span><span class="p">,</span> <span class="n">surface</span> <span class="ow">in</span> <span class="n">geom_dict</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="n">surface</span><span class="o">.</span><span class="n">update_params</span><span class="p">(</span>
+                    <span class="p">{</span><span class="s1">&#39;q0&#39;</span><span class="p">:</span> <span class="n">q0</span><span class="p">[</span><span class="n">idx_surf</span><span class="p">],</span>
+                     <span class="s1">&#39;qinc&#39;</span><span class="p">:</span> <span class="n">qinc</span><span class="p">[</span><span class="n">idx_surf</span><span class="p">],</span>
+                     <span class="s1">&#39;isotropic&#39;</span><span class="p">:</span> <span class="n">isotropic_vec</span><span class="p">[</span><span class="n">idx_surf</span><span class="p">],</span>
+                     <span class="s1">&#39;reflection&#39;</span><span class="p">:</span> <span class="n">reflection_vec</span><span class="p">[</span><span class="n">idx_surf</span><span class="p">]})</span>
 
         <span class="k">return</span> <span class="n">pvarray</span>
 
-    <span class="k">def</span> <span class="nf">run_all_timesteps</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fn_build_report</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Run all simulation timesteps and return a report that will be built</span>
-<span class="sd">        by the function passed by the user.</span>
+    <span class="k">def</span> <span class="nf">_calculate_back_ts_segment_qinc</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ts_segment</span><span class="p">,</span> <span class="n">pvrow_idx</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Calculate the incident irradiance on a timeseries segment&#39;s surfaces</span>
+<span class="sd">        for the back side of a PV row, using the fast mode, so assuming that</span>
+<span class="sd">        the incident irradiance on all other surfaces is known.</span>
+<span class="sd">        Nothing is returned by the function, but the segment&#39;s surfaces&#39;</span>
+<span class="sd">        parameter values are updated.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        fn_build_report : function, optional</span>
-<span class="sd">            Function that will build the report of the simulation</span>
-<span class="sd">            (Default value = None)</span>
-
-<span class="sd">        Returns</span>
-<span class="sd">        -------</span>
-<span class="sd">        report</span>
-<span class="sd">            Saved results from the simulation, as specified by user&#39;s report</span>
-<span class="sd">            function</span>
-
+<span class="sd">        ts_segment : :py:class:`~pvfactors.geometry.timeseries.TsDualSegment`</span>
+<span class="sd">            Timeseries segment for which we want to calculate the incident</span>
+<span class="sd">            irradiance</span>
+<span class="sd">        pvrow_idx : int</span>
+<span class="sd">            Index of the PV row on which the segment is located</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="n">report</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_points</span><span class="p">)):</span>
-            <span class="n">pvarray</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">run_timestep</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">fn_build_report</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">report</span> <span class="o">=</span> <span class="n">fn_build_report</span><span class="p">(</span><span class="n">report</span><span class="p">,</span> <span class="n">pvarray</span><span class="p">)</span>
+        <span class="c1"># Get all timeseries surfaces in segment</span>
+        <span class="n">list_ts_surfaces</span> <span class="o">=</span> <span class="p">[</span><span class="n">ts_segment</span><span class="o">.</span><span class="n">illum</span><span class="p">,</span> <span class="n">ts_segment</span><span class="o">.</span><span class="n">shaded</span><span class="p">]</span>
 
-        <span class="k">return</span> <span class="n">report</span></div>
+        <span class="c1"># Get irradiance vectors for calculation</span>
+        <span class="n">albedo</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">irradiance</span><span class="o">.</span><span class="n">albedo</span>
+        <span class="n">rho_front</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">irradiance</span><span class="o">.</span><span class="n">rho_front</span>
+        <span class="n">irr_gnd_shaded</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">irradiance</span><span class="o">.</span><span class="n">gnd_shaded</span>
+        <span class="n">irr_gnd_illum</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">irradiance</span><span class="o">.</span><span class="n">gnd_illum</span>
+        <span class="n">irr_pvrow_shaded</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">irradiance</span><span class="o">.</span><span class="n">pvrow_shaded</span>
+        <span class="n">irr_pvrow_illum</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">irradiance</span><span class="o">.</span><span class="n">pvrow_illum</span>
+        <span class="n">irr_sky</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">irradiance</span><span class="o">.</span><span class="n">sky_luminance</span>
+
+        <span class="k">for</span> <span class="n">ts_surface</span> <span class="ow">in</span> <span class="n">list_ts_surfaces</span><span class="p">:</span>
+            <span class="c1"># Calculate view factors for timeseries surface</span>
+            <span class="n">vf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vf_calculator</span><span class="o">.</span><span class="n">get_vf_ts_pvrow_element</span><span class="p">(</span>
+                <span class="n">pvrow_idx</span><span class="p">,</span> <span class="n">ts_surface</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pvarray</span><span class="o">.</span><span class="n">ts_pvrows</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">pvarray</span><span class="o">.</span><span class="n">ts_ground</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pvarray</span><span class="o">.</span><span class="n">rotation_vec</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">pvarray</span><span class="o">.</span><span class="n">width</span><span class="p">)</span>
+
+            <span class="c1"># Update sky terms of timeseries surface</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">irradiance</span><span class="o">.</span><span class="n">update_ts_surface_sky_term</span><span class="p">(</span><span class="n">ts_surface</span><span class="p">)</span>
+
+            <span class="c1"># Calculate incident irradiance on illuminated surface</span>
+            <span class="n">gnd_shadow_refl</span> <span class="o">=</span> <span class="n">vf</span><span class="p">[</span><span class="s1">&#39;to_gnd_shaded&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="n">albedo</span> <span class="o">*</span> <span class="n">irr_gnd_shaded</span>
+            <span class="n">gnd_illum_refl</span> <span class="o">=</span> <span class="n">vf</span><span class="p">[</span><span class="s1">&#39;to_gnd_illum&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="n">albedo</span> <span class="o">*</span> <span class="n">irr_gnd_illum</span>
+            <span class="n">pvrow_shadow_refl</span> <span class="o">=</span> <span class="p">(</span><span class="n">vf</span><span class="p">[</span><span class="s1">&#39;to_pvrow_shaded&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="n">rho_front</span>
+                                 <span class="o">*</span> <span class="n">irr_pvrow_shaded</span><span class="p">)</span>
+            <span class="n">pvrow_illum_refl</span> <span class="o">=</span> <span class="p">(</span><span class="n">vf</span><span class="p">[</span><span class="s1">&#39;to_pvrow_illum&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="n">rho_front</span>
+                                <span class="o">*</span> <span class="n">irr_pvrow_illum</span><span class="p">)</span>
+            <span class="n">reflections</span> <span class="o">=</span> <span class="p">(</span><span class="n">gnd_shadow_refl</span> <span class="o">+</span> <span class="n">gnd_illum_refl</span> <span class="o">+</span> <span class="n">pvrow_shadow_refl</span>
+                           <span class="o">+</span> <span class="n">pvrow_illum_refl</span><span class="p">)</span>
+            <span class="n">isotropic</span> <span class="o">=</span> <span class="n">vf</span><span class="p">[</span><span class="s1">&#39;to_sky&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="n">irr_sky</span>
+            <span class="n">qinc</span> <span class="o">=</span> <span class="p">(</span><span class="n">gnd_shadow_refl</span> <span class="o">+</span> <span class="n">gnd_illum_refl</span> <span class="o">+</span> <span class="n">pvrow_shadow_refl</span>
+                    <span class="o">+</span> <span class="n">pvrow_illum_refl</span> <span class="o">+</span> <span class="n">isotropic</span>
+                    <span class="o">+</span> <span class="n">ts_surface</span><span class="o">.</span><span class="n">get_param</span><span class="p">(</span><span class="s1">&#39;sky_term&#39;</span><span class="p">))</span>
+
+            <span class="c1"># Update parameters of timeseries surface object</span>
+            <span class="n">ts_surface</span><span class="o">.</span><span class="n">update_params</span><span class="p">(</span>
+                <span class="p">{</span><span class="s1">&#39;qinc&#39;</span><span class="p">:</span> <span class="n">qinc</span><span class="p">,</span>
+                 <span class="s1">&#39;reflection_gnd_shaded&#39;</span><span class="p">:</span> <span class="n">gnd_shadow_refl</span><span class="p">,</span>
+                 <span class="s1">&#39;reflection_gnd_illum&#39;</span><span class="p">:</span> <span class="n">gnd_illum_refl</span><span class="p">,</span>
+                 <span class="s1">&#39;reflection_pvrow_shaded&#39;</span><span class="p">:</span> <span class="n">pvrow_shadow_refl</span><span class="p">,</span>
+                 <span class="s1">&#39;reflection_pvrow_illum&#39;</span><span class="p">:</span> <span class="n">pvrow_illum_refl</span><span class="p">,</span>
+                 <span class="s1">&#39;isotropic&#39;</span><span class="p">:</span> <span class="n">isotropic</span><span class="p">,</span>
+                 <span class="s1">&#39;reflection&#39;</span><span class="p">:</span> <span class="n">reflections</span><span class="p">,</span>
+                 <span class="s1">&#39;view_factors&#39;</span><span class="p">:</span> <span class="n">vf</span><span class="p">})</span></div>
 </pre></div>
 
            </div>

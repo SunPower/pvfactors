@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>pvrow &mdash; pvfactors 1.1.0 documentation</title>
+  <title>pvrow &mdash; pvfactors 1.2.0 documentation</title>
   
 
   
@@ -66,7 +66,7 @@
             
             
               <div class="version">
-                1.1.0
+                1.2.0
               </div>
             
           
@@ -92,7 +92,7 @@
             
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="../installation/index.html">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../tutorials/index.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/index.html">User guide and tutorials</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../theory/index.html">Theory</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../developer/index.html">Developer API</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../whatsnew.html">What’s New</a></li>
@@ -216,7 +216,7 @@
 
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">from_linestring_coords</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">coords</span><span class="p">,</span> <span class="n">shaded</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">normal_vector</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                               <span class="n">index</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">cut</span><span class="o">=</span><span class="p">{},</span> <span class="n">surface_params</span><span class="o">=</span><span class="p">[]):</span>
+                               <span class="n">index</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">cut</span><span class="o">=</span><span class="p">{},</span> <span class="n">param_names</span><span class="o">=</span><span class="p">[]):</span>
         <span class="sd">&quot;&quot;&quot;Create a PV row with a single PV surface and using linestring</span>
 <span class="sd">        coordinates.</span>
 
@@ -234,7 +234,7 @@
 <span class="sd">            Scheme to decide how many segments to create on each side.</span>
 <span class="sd">            Eg {&#39;front&#39;: 3, &#39;back&#39;: 2} will lead to 3 segments on front side</span>
 <span class="sd">            and 2 segments on back side. (Default = {})</span>
-<span class="sd">        surface_params : list of str, optional</span>
+<span class="sd">        param_names : list of str, optional</span>
 <span class="sd">            Names of the surface parameters, eg reflectivity, total incident</span>
 <span class="sd">            irradiance, temperature, etc. (Default = [])</span>
 
@@ -246,7 +246,7 @@
         <span class="n">front_side</span> <span class="o">=</span> <span class="n">PVRowSide</span><span class="o">.</span><span class="n">from_linestring_coords</span><span class="p">(</span>
             <span class="n">coords</span><span class="p">,</span> <span class="n">shaded</span><span class="o">=</span><span class="n">shaded</span><span class="p">,</span> <span class="n">normal_vector</span><span class="o">=</span><span class="n">normal_vector</span><span class="p">,</span>
             <span class="n">index</span><span class="o">=</span><span class="n">index_single_segment</span><span class="p">,</span> <span class="n">n_segments</span><span class="o">=</span><span class="n">cut</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;front&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
-            <span class="n">surface_params</span><span class="o">=</span><span class="n">surface_params</span><span class="p">)</span>
+            <span class="n">param_names</span><span class="o">=</span><span class="n">param_names</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">normal_vector</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">back_n_vec</span> <span class="o">=</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">normal_vector</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
@@ -254,14 +254,14 @@
         <span class="n">back_side</span> <span class="o">=</span> <span class="n">PVRowSide</span><span class="o">.</span><span class="n">from_linestring_coords</span><span class="p">(</span>
             <span class="n">coords</span><span class="p">,</span> <span class="n">shaded</span><span class="o">=</span><span class="n">shaded</span><span class="p">,</span> <span class="n">normal_vector</span><span class="o">=</span><span class="n">back_n_vec</span><span class="p">,</span>
             <span class="n">index</span><span class="o">=</span><span class="n">index_single_segment</span><span class="p">,</span> <span class="n">n_segments</span><span class="o">=</span><span class="n">cut</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;back&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
-            <span class="n">surface_params</span><span class="o">=</span><span class="n">surface_params</span><span class="p">)</span>
+            <span class="n">param_names</span><span class="o">=</span><span class="n">param_names</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">front_side</span><span class="o">=</span><span class="n">front_side</span><span class="p">,</span> <span class="n">back_side</span><span class="o">=</span><span class="n">back_side</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">index</span><span class="p">,</span>
                    <span class="n">original_linestring</span><span class="o">=</span><span class="n">LineString</span><span class="p">(</span><span class="n">coords</span><span class="p">))</span>
 
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">from_center_tilt_width</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">xy_center</span><span class="p">,</span> <span class="n">tilt</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">surface_azimuth</span><span class="p">,</span>
                                <span class="n">axis_azimuth</span><span class="p">,</span> <span class="n">shaded</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">normal_vector</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                               <span class="n">index</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">cut</span><span class="o">=</span><span class="p">{},</span> <span class="n">surface_params</span><span class="o">=</span><span class="p">[]):</span>
+                               <span class="n">index</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">cut</span><span class="o">=</span><span class="p">{},</span> <span class="n">param_names</span><span class="o">=</span><span class="p">[]):</span>
         <span class="sd">&quot;&quot;&quot;Create a PV row using mainly the coordinates of the line center,</span>
 <span class="sd">        a tilt angle, and its length.</span>
 
@@ -288,7 +288,7 @@
 <span class="sd">            Scheme to decide how many segments to create on each side.</span>
 <span class="sd">            Eg {&#39;front&#39;: 3, &#39;back&#39;: 2} will lead to 3 segments on front side</span>
 <span class="sd">            and 2 segments on back side. (Default = {})</span>
-<span class="sd">        surface_params : list of str, optional</span>
+<span class="sd">        param_names : list of str, optional</span>
 <span class="sd">            Names of the surface parameters, eg reflectivity, total incident</span>
 <span class="sd">            irradiance, temperature, etc. (Default = [])</span>
 
@@ -301,7 +301,7 @@
         <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">from_linestring_coords</span><span class="p">(</span><span class="n">coords</span><span class="p">,</span> <span class="n">shaded</span><span class="o">=</span><span class="n">shaded</span><span class="p">,</span>
                                           <span class="n">normal_vector</span><span class="o">=</span><span class="n">normal_vector</span><span class="p">,</span>
                                           <span class="n">index</span><span class="o">=</span><span class="n">index</span><span class="p">,</span> <span class="n">cut</span><span class="o">=</span><span class="n">cut</span><span class="p">,</span>
-                                          <span class="n">surface_params</span><span class="o">=</span><span class="n">surface_params</span><span class="p">)</span>
+                                          <span class="n">param_names</span><span class="o">=</span><span class="n">param_names</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ax</span><span class="p">,</span> <span class="n">color_shaded</span><span class="o">=</span><span class="n">COLOR_DIC</span><span class="p">[</span><span class="s1">&#39;pvrow_shaded&#39;</span><span class="p">],</span>
              <span class="n">color_illum</span><span class="o">=</span><span class="n">COLOR_DIC</span><span class="p">[</span><span class="s1">&#39;pvrow_illum&#39;</span><span class="p">],</span> <span class="n">with_index</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>

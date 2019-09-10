@@ -17,18 +17,22 @@ pvarray.OrderedPVArray
          ~OrderedPVArray.__init__
       
       
-         ~OrderedPVArray.cast_shadows
+         ~OrderedPVArray.fit
       
       
-         ~OrderedPVArray.cuts_for_pvrow_view
+         ~OrderedPVArray.fit_from_dict_of_scalars
       
       
-         ~OrderedPVArray.from_dict
+      
+         ~OrderedPVArray.init_from_dict
       
       
-         ~OrderedPVArray.get_neighbors
       
       
+         ~OrderedPVArray.transform
+      
+      
+         ~OrderedPVArray.transform_from_dict_of_scalars
       
       
    
@@ -40,6 +44,7 @@ pvarray.OrderedPVArray
 
    .. autosummary::
    
+      
       
       
       

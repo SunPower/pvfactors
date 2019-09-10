@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>geometry &mdash; pvfactors 1.1.0 documentation</title>
+  <title>geometry &mdash; pvfactors 1.2.0 documentation</title>
   
 
   
@@ -66,7 +66,7 @@
             
             
               <div class="version">
-                1.1.0
+                1.2.0
               </div>
             
           
@@ -92,7 +92,7 @@
             
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="../installation/index.html">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../tutorials/index.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/index.html">User guide and tutorials</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../theory/index.html">Theory</a></li>
 <li class="toctree-l1"><a class="reference internal" href="index.html">Developer API</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../whatsnew.html">What’s New</a></li>
@@ -270,6 +270,40 @@ geometries.</p>
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="generated/pvarray.OrderedPVArray.html#pvarray.OrderedPVArray" title="pvarray.OrderedPVArray"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pvarray.OrderedPVArray</span></code></a></p></td>
 <td><p>An ordered PV array has a flat horizontal ground, and pv rows which are all at the same height, with the same surface tilt and azimuth angles, and also all equally spaced.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="module-timeseries">
+<span id="timeseries"></span><h2>timeseries<a class="headerlink" href="#module-timeseries" title="Permalink to this headline">¶</a></h2>
+<p>Timeseries geometry classes. They allow the vectorization of geometry
+calculations.</p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/timeseries.TsPVRow.html#timeseries.TsPVRow" title="timeseries.TsPVRow"><code class="xref py py-obj docutils literal notranslate"><span class="pre">timeseries.TsPVRow</span></code></a></p></td>
+<td><p>Timeseries PV row class: this class is a vectorized version of the PV row geometries.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/timeseries.TsGround.html#timeseries.TsGround" title="timeseries.TsGround"><code class="xref py py-obj docutils literal notranslate"><span class="pre">timeseries.TsGround</span></code></a></p></td>
+<td><p>Timeseries ground class: this class is a vectorized version of the PV ground geometry class, and it will store timeseries coordinates for ground shadows and pv row cut points.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/timeseries.TsSide.html#timeseries.TsSide" title="timeseries.TsSide"><code class="xref py py-obj docutils literal notranslate"><span class="pre">timeseries.TsSide</span></code></a></p></td>
+<td><p>Timeseries side class: this class is a vectorized version of the BaseSide geometries.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/timeseries.TsDualSegment.html#timeseries.TsDualSegment" title="timeseries.TsDualSegment"><code class="xref py py-obj docutils literal notranslate"><span class="pre">timeseries.TsDualSegment</span></code></a></p></td>
+<td><p>A TsDualSegment is a timeseries segment that can only have 1 shaded surface and 1 illuminated surface.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/timeseries.TsSurface.html#timeseries.TsSurface" title="timeseries.TsSurface"><code class="xref py py-obj docutils literal notranslate"><span class="pre">timeseries.TsSurface</span></code></a></p></td>
+<td><p>Timeseries surface class: vectorized representation of PV surface geometries.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/timeseries.TsLineCoords.html#timeseries.TsLineCoords" title="timeseries.TsLineCoords"><code class="xref py py-obj docutils literal notranslate"><span class="pre">timeseries.TsLineCoords</span></code></a></p></td>
+<td><p>Timeseries line coordinates class: will provide a helpful shapely-like API to invoke timeseries coordinates.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/timeseries.TsPointCoords.html#timeseries.TsPointCoords" title="timeseries.TsPointCoords"><code class="xref py py-obj docutils literal notranslate"><span class="pre">timeseries.TsPointCoords</span></code></a></p></td>
+<td><p>Timeseries point coordinates: provides a shapely-like API for timeseries point coordinates.</p></td>
 </tr>
 </tbody>
 </table>

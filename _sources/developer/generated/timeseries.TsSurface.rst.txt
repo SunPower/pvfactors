@@ -1,0 +1,59 @@
+timeseries.TsSurface
+====================
+
+.. currentmodule:: timeseries
+
+.. autoclass:: TsSurface
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      
+         ~TsSurface.__init__
+      
+      
+         ~TsSurface.at
+      
+      
+         ~TsSurface.get_param
+      
+      
+         ~TsSurface.plot_at_idx
+      
+      
+         ~TsSurface.update_params
+      
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      
+         ~TsSurface.b1
+      
+      
+         ~TsSurface.b2
+      
+      
+         ~TsSurface.centroid
+      
+      
+         ~TsSurface.highest_point
+      
+      
+         ~TsSurface.length
+      
+      
+         ~TsSurface.lowest_point
+      
+   
+   

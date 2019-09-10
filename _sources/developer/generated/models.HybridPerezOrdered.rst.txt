@@ -14,12 +14,12 @@ models.HybridPerezOrdered
    .. autosummary::
    
       ~HybridPerezOrdered.__init__
-      ~HybridPerezOrdered.calculate_circumsolar_shading_pct
-      ~HybridPerezOrdered.calculate_horizon_shading_pct
-      ~HybridPerezOrdered.calculate_luminance_poa_components
       ~HybridPerezOrdered.fit
-      ~HybridPerezOrdered.get_irradiance_invrho_vector
+      ~HybridPerezOrdered.get_full_modeling_vectors
+      ~HybridPerezOrdered.get_modeling_vectors
       ~HybridPerezOrdered.transform
+      ~HybridPerezOrdered.transform_ts
+      ~HybridPerezOrdered.update_ts_surface_sky_term
    
    
 
@@ -30,7 +30,13 @@ models.HybridPerezOrdered
    .. autosummary::
    
       ~HybridPerezOrdered.cats
+      ~HybridPerezOrdered.gnd_illum
+      ~HybridPerezOrdered.gnd_shaded
       ~HybridPerezOrdered.irradiance_comp
       ~HybridPerezOrdered.params
+      ~HybridPerezOrdered.pvrow_illum
+      ~HybridPerezOrdered.pvrow_shaded
+      ~HybridPerezOrdered.sky
+      ~HybridPerezOrdered.sky_luminance
    
    

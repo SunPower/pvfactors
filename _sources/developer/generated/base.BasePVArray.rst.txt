@@ -17,10 +17,19 @@ base.BasePVArray
          ~BasePVArray.__init__
       
       
+         ~BasePVArray.fit
+      
+      
          ~BasePVArray.index_all_surfaces
       
       
          ~BasePVArray.plot
+      
+      
+         ~BasePVArray.plot_at_idx
+      
+      
+         ~BasePVArray.transform
       
       
          ~BasePVArray.update_params
@@ -57,6 +66,9 @@ base.BasePVArray
       
       
          ~BasePVArray.view_matrix
+      
+      
+         ~BasePVArray.view_obstr_matrices
       
    
    

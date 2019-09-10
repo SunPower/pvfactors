@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>base &mdash; pvfactors 1.1.0 documentation</title>
+  <title>base &mdash; pvfactors 1.2.0 documentation</title>
   
 
   
@@ -66,7 +66,7 @@
             
             
               <div class="version">
-                1.1.0
+                1.2.0
               </div>
             
           
@@ -92,7 +92,7 @@
             
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="../installation/index.html">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../tutorials/index.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/index.html">User guide and tutorials</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../theory/index.html">Theory</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../developer/index.html">Developer API</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../whatsnew.html">What’s New</a></li>
@@ -328,7 +328,7 @@
 <span class="sd">    orientations.&quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="BaseSurface.__init__"><a class="viewcode-back" href="../developer/generated/base.BaseSurface.html#base.BaseSurface.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coords</span><span class="p">,</span> <span class="n">normal_vector</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                 <span class="n">surface_params</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+                 <span class="n">param_names</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Create a surface using linestring coordinates.</span>
 <span class="sd">        Normal vector can have two directions for a given LineString,</span>
 <span class="sd">        so the user can provide it in order to be specific,</span>
@@ -346,21 +346,23 @@
 <span class="sd">            calculated)</span>
 <span class="sd">        index : int, optional</span>
 <span class="sd">            Surface index (Default = None)</span>
-<span class="sd">        surface_params : list of str, optional</span>
+<span class="sd">        param_names : list of str, optional</span>
 <span class="sd">            Names of the surface parameters, eg reflectivity, total incident</span>
 <span class="sd">            irradiance, temperature, etc. (Default = None)</span>
-
+<span class="sd">        params : dict, optional</span>
+<span class="sd">            Surface float parameters (Default = None)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="n">surface_params</span> <span class="o">=</span> <span class="p">[]</span> <span class="k">if</span> <span class="n">surface_params</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">surface_params</span>
+        <span class="n">param_names</span> <span class="o">=</span> <span class="p">[]</span> <span class="k">if</span> <span class="n">param_names</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">param_names</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">BaseSurface</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">coords</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">normal_vector</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">n_vector</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_calculate_n_vector</span><span class="p">()</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">n_vector</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">normal_vector</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="n">index</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">surface_params</span> <span class="o">=</span> <span class="n">surface_params</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">params</span> <span class="o">=</span> <span class="nb">dict</span><span class="o">.</span><span class="n">fromkeys</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">surface_params</span><span class="p">)</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">param_names</span> <span class="o">=</span> <span class="n">param_names</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">params</span> <span class="o">=</span> <span class="n">params</span> <span class="k">if</span> <span class="n">params</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> \
+            <span class="k">else</span> <span class="nb">dict</span><span class="o">.</span><span class="n">fromkeys</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">param_names</span><span class="p">)</span></div>
 
     <span class="k">def</span> <span class="nf">_calculate_n_vector</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Calculate normal vector of the surface, if surface is not empty&quot;&quot;&quot;</span>
@@ -455,7 +457,7 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="PVSurface.__init__"><a class="viewcode-back" href="../developer/generated/base.PVSurface.html#base.PVSurface.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coords</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">normal_vector</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">shaded</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-                 <span class="n">index</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">surface_params</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+                 <span class="n">index</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">param_names</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Initialize PV surface.</span>
 
 <span class="sd">        Parameters</span>
@@ -469,14 +471,16 @@
 <span class="sd">            Flag telling if surface is shaded or not (Default = False)</span>
 <span class="sd">        index : int, optional</span>
 <span class="sd">            Surface index (Default = None)</span>
-<span class="sd">        surface_params : list of str, optional</span>
+<span class="sd">        param_names : list of str, optional</span>
 <span class="sd">            Names of the surface parameters, eg reflectivity, total incident</span>
 <span class="sd">            irradiance, temperature, etc. (Default = None)</span>
+<span class="sd">        params : dict, optional</span>
+<span class="sd">            Surface float parameters (Default = None)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="n">surface_params</span> <span class="o">=</span> <span class="p">[]</span> <span class="k">if</span> <span class="n">surface_params</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">surface_params</span>
+        <span class="n">param_names</span> <span class="o">=</span> <span class="p">[]</span> <span class="k">if</span> <span class="n">param_names</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">param_names</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">PVSurface</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">coords</span><span class="p">,</span> <span class="n">normal_vector</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">index</span><span class="p">,</span>
-                                        <span class="n">surface_params</span><span class="o">=</span><span class="n">surface_params</span><span class="p">)</span>
+                                        <span class="n">param_names</span><span class="o">=</span><span class="n">param_names</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="n">params</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">shaded</span> <span class="o">=</span> <span class="n">shaded</span></div></div>
 
 
@@ -485,7 +489,7 @@
 <span class="sd">    objects that all have the same shading status. The PV surfaces are not</span>
 <span class="sd">    necessarily contiguous or collinear.&quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="ShadeCollection.__init__"><a class="viewcode-back" href="../developer/generated/base.ShadeCollection.html#base.ShadeCollection.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">list_surfaces</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">shaded</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">surface_params</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="ShadeCollection.__init__"><a class="viewcode-back" href="../developer/generated/base.ShadeCollection.html#base.ShadeCollection.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">list_surfaces</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">shaded</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">param_names</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Initialize shade collection.</span>
 
 <span class="sd">        Parameters</span>
@@ -496,18 +500,18 @@
 <span class="sd">        shaded : bool, optional</span>
 <span class="sd">            Shading status of the collection. If not specified, will be derived</span>
 <span class="sd">            from list of surfaces (Default = None)</span>
-<span class="sd">        surface_params : list of str, optional</span>
+<span class="sd">        param_names : list of str, optional</span>
 <span class="sd">            Names of the surface parameters, eg reflectivity, total incident</span>
 <span class="sd">            irradiance, temperature, etc. (Default = None)</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">list_surfaces</span> <span class="o">=</span> <span class="p">[]</span> <span class="k">if</span> <span class="n">list_surfaces</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">list_surfaces</span>
-        <span class="n">surface_params</span> <span class="o">=</span> <span class="p">[]</span> <span class="k">if</span> <span class="n">surface_params</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">surface_params</span>
+        <span class="n">param_names</span> <span class="o">=</span> <span class="p">[]</span> <span class="k">if</span> <span class="n">param_names</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">param_names</span>
         <span class="n">_check_uniform_shading</span><span class="p">(</span><span class="n">list_surfaces</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">list_surfaces</span> <span class="o">=</span> <span class="n">list_surfaces</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">shaded</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_shading</span><span class="p">(</span><span class="n">shaded</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">is_collinear</span> <span class="o">=</span> <span class="n">is_collinear</span><span class="p">(</span><span class="n">list_surfaces</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">surface_params</span> <span class="o">=</span> <span class="n">surface_params</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">param_names</span> <span class="o">=</span> <span class="n">param_names</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">ShadeCollection</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">list_surfaces</span><span class="p">)</span></div>
 
     <span class="k">def</span> <span class="nf">_get_shading</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">shaded</span><span class="p">):</span>
@@ -558,7 +562,7 @@
             <span class="n">normal_vector</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_vector</span>
         <span class="n">surf</span> <span class="o">=</span> <span class="n">PVSurface</span><span class="p">(</span><span class="n">coords</span><span class="o">=</span><span class="n">linestring</span><span class="o">.</span><span class="n">coords</span><span class="p">,</span>
                          <span class="n">normal_vector</span><span class="o">=</span><span class="n">normal_vector</span><span class="p">,</span> <span class="n">shaded</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">shaded</span><span class="p">,</span>
-                         <span class="n">surface_params</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">surface_params</span><span class="p">)</span>
+                         <span class="n">param_names</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">param_names</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">add_pvsurface</span><span class="p">(</span><span class="n">surf</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">add_pvsurface</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pvsurface</span><span class="p">):</span>
@@ -597,7 +601,7 @@
                         <span class="n">new_surface</span> <span class="o">=</span> <span class="n">PVSurface</span><span class="p">(</span>
                             <span class="n">new_geom</span><span class="o">.</span><span class="n">coords</span><span class="p">,</span> <span class="n">normal_vector</span><span class="o">=</span><span class="n">surface</span><span class="o">.</span><span class="n">n_vector</span><span class="p">,</span>
                             <span class="n">shaded</span><span class="o">=</span><span class="n">surface</span><span class="o">.</span><span class="n">shaded</span><span class="p">,</span>
-                            <span class="n">surface_params</span><span class="o">=</span><span class="n">surface</span><span class="o">.</span><span class="n">surface_params</span><span class="p">)</span>
+                            <span class="n">param_names</span><span class="o">=</span><span class="n">surface</span><span class="o">.</span><span class="n">param_names</span><span class="p">)</span>
                         <span class="n">new_list_surfaces</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">new_surface</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">new_list_surfaces</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">surface</span><span class="p">)</span>
@@ -627,7 +631,7 @@
             <span class="n">new_pvsurf</span> <span class="o">=</span> <span class="n">PVSurface</span><span class="p">(</span>
                 <span class="n">coords</span><span class="o">=</span><span class="p">[(</span><span class="n">minx</span><span class="p">,</span> <span class="n">miny</span><span class="p">),</span> <span class="p">(</span><span class="n">maxx</span><span class="p">,</span> <span class="n">maxy</span><span class="p">)],</span>
                 <span class="n">shaded</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">shaded</span><span class="p">,</span> <span class="n">normal_vector</span><span class="o">=</span><span class="n">surf_1</span><span class="o">.</span><span class="n">n_vector</span><span class="p">,</span>
-                <span class="n">surface_params</span><span class="o">=</span><span class="n">surf_1</span><span class="o">.</span><span class="n">surface_params</span><span class="p">)</span>
+                <span class="n">param_names</span><span class="o">=</span><span class="n">surf_1</span><span class="o">.</span><span class="n">param_names</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">list_surfaces</span> <span class="o">=</span> <span class="p">[</span><span class="n">new_pvsurf</span><span class="p">]</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">update_geom_collection</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">list_surfaces</span><span class="p">)</span>
 
@@ -653,11 +657,11 @@
                     <span class="n">new_surf_1</span> <span class="o">=</span> <span class="n">PVSurface</span><span class="p">(</span>
                         <span class="n">coords_1</span><span class="p">,</span> <span class="n">normal_vector</span><span class="o">=</span><span class="n">surface</span><span class="o">.</span><span class="n">n_vector</span><span class="p">,</span>
                         <span class="n">shaded</span><span class="o">=</span><span class="n">surface</span><span class="o">.</span><span class="n">shaded</span><span class="p">,</span>
-                        <span class="n">surface_params</span><span class="o">=</span><span class="n">surface</span><span class="o">.</span><span class="n">surface_params</span><span class="p">)</span>
+                        <span class="n">param_names</span><span class="o">=</span><span class="n">surface</span><span class="o">.</span><span class="n">param_names</span><span class="p">)</span>
                     <span class="n">new_surf_2</span> <span class="o">=</span> <span class="n">PVSurface</span><span class="p">(</span>
                         <span class="n">coords_2</span><span class="p">,</span> <span class="n">normal_vector</span><span class="o">=</span><span class="n">surface</span><span class="o">.</span><span class="n">n_vector</span><span class="p">,</span>
                         <span class="n">shaded</span><span class="o">=</span><span class="n">surface</span><span class="o">.</span><span class="n">shaded</span><span class="p">,</span>
-                        <span class="n">surface_params</span><span class="o">=</span><span class="n">surface</span><span class="o">.</span><span class="n">surface_params</span><span class="p">)</span>
+                        <span class="n">param_names</span><span class="o">=</span><span class="n">surface</span><span class="o">.</span><span class="n">param_names</span><span class="p">)</span>
                     <span class="c1"># Now update collection</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">list_surfaces</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_surf_1</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">list_surfaces</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">new_surf_2</span><span class="p">)</span>
@@ -740,7 +744,7 @@
 
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">from_linestring_coords</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">coords</span><span class="p">,</span> <span class="n">shaded</span><span class="p">,</span> <span class="n">normal_vector</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                               <span class="n">surface_params</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+                               <span class="n">param_names</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Create a shade collection with a single PV surface.</span>
 
 <span class="sd">        Parameters</span>
@@ -751,13 +755,13 @@
 <span class="sd">            Shading status desired for the collection</span>
 <span class="sd">        normal_vector : list, optional</span>
 <span class="sd">            Normal vector for the surface (Default = None)</span>
-<span class="sd">        surface_params : list of str, optional</span>
+<span class="sd">        param_names : list of str, optional</span>
 <span class="sd">            Names of the surface parameters, eg reflectivity, total incident</span>
 <span class="sd">            irradiance, temperature, etc. (Default = None)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">surf</span> <span class="o">=</span> <span class="n">PVSurface</span><span class="p">(</span><span class="n">coords</span><span class="o">=</span><span class="n">coords</span><span class="p">,</span> <span class="n">normal_vector</span><span class="o">=</span><span class="n">normal_vector</span><span class="p">,</span>
-                         <span class="n">shaded</span><span class="o">=</span><span class="n">shaded</span><span class="p">,</span> <span class="n">surface_params</span><span class="o">=</span><span class="n">surface_params</span><span class="p">)</span>
-        <span class="k">return</span> <span class="bp">cls</span><span class="p">([</span><span class="n">surf</span><span class="p">],</span> <span class="n">shaded</span><span class="o">=</span><span class="n">shaded</span><span class="p">,</span> <span class="n">surface_params</span><span class="o">=</span><span class="n">surface_params</span><span class="p">)</span></div>
+                         <span class="n">shaded</span><span class="o">=</span><span class="n">shaded</span><span class="p">,</span> <span class="n">param_names</span><span class="o">=</span><span class="n">param_names</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">([</span><span class="n">surf</span><span class="p">],</span> <span class="n">shaded</span><span class="o">=</span><span class="n">shaded</span><span class="p">,</span> <span class="n">param_names</span><span class="o">=</span><span class="n">param_names</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="PVSegment"><a class="viewcode-back" href="../developer/generated/base.PVSegment.html#base.PVSegment">[docs]</a><span class="k">class</span> <span class="nc">PVSegment</span><span class="p">(</span><span class="n">GeometryCollection</span><span class="p">):</span>
@@ -961,7 +965,7 @@
 
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">from_linestring_coords</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">coords</span><span class="p">,</span> <span class="n">shaded</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">normal_vector</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                               <span class="n">index</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">surface_params</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+                               <span class="n">index</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">param_names</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Create a PV segment with a single PV surface.</span>
 
 <span class="sd">        Parameters</span>
@@ -975,17 +979,17 @@
 <span class="sd">            Normal vector for the surface (Default = None)</span>
 <span class="sd">        index : int, optional</span>
 <span class="sd">            Index of the segment (Default = None)</span>
-<span class="sd">        surface_params : list of str, optional</span>
+<span class="sd">        param_names : list of str, optional</span>
 <span class="sd">            Names of the surface parameters, eg reflectivity, total incident</span>
 <span class="sd">            irradiance, temperature, etc. (Default = None)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">col</span> <span class="o">=</span> <span class="n">ShadeCollection</span><span class="o">.</span><span class="n">from_linestring_coords</span><span class="p">(</span>
             <span class="n">coords</span><span class="p">,</span> <span class="n">shaded</span><span class="o">=</span><span class="n">shaded</span><span class="p">,</span> <span class="n">normal_vector</span><span class="o">=</span><span class="n">normal_vector</span><span class="p">,</span>
-            <span class="n">surface_params</span><span class="o">=</span><span class="n">surface_params</span><span class="p">)</span>
+            <span class="n">param_names</span><span class="o">=</span><span class="n">param_names</span><span class="p">)</span>
         <span class="c1"># Realized that needed to instantiate other_col, otherwise could</span>
         <span class="c1"># end up with shared collection among different PV segments</span>
         <span class="n">other_col</span> <span class="o">=</span> <span class="n">ShadeCollection</span><span class="p">(</span><span class="n">list_surfaces</span><span class="o">=</span><span class="p">[],</span> <span class="n">shaded</span><span class="o">=</span><span class="ow">not</span> <span class="n">shaded</span><span class="p">,</span>
-                                    <span class="n">surface_params</span><span class="o">=</span><span class="n">surface_params</span><span class="p">)</span>
+                                    <span class="n">param_names</span><span class="o">=</span><span class="n">param_names</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">shaded</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">illum_collection</span><span class="o">=</span><span class="n">other_col</span><span class="p">,</span>
                        <span class="n">shaded_collection</span><span class="o">=</span><span class="n">col</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">index</span><span class="p">)</span>
@@ -1094,7 +1098,7 @@
 
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">from_linestring_coords</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">coords</span><span class="p">,</span> <span class="n">shaded</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">normal_vector</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                               <span class="n">index</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">n_segments</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">surface_params</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+                               <span class="n">index</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">n_segments</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">param_names</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Create a Side with a single PV surface, or multiple discretized</span>
 <span class="sd">        identical ones.</span>
 
@@ -1111,14 +1115,14 @@
 <span class="sd">            Index of the segments (Default = None)</span>
 <span class="sd">        n_segments : int, optional</span>
 <span class="sd">            Number of same-length segments to use (Default = 1)</span>
-<span class="sd">        surface_params : list of str, optional</span>
+<span class="sd">        param_names : list of str, optional</span>
 <span class="sd">            Names of the surface parameters, eg reflectivity, total incident</span>
 <span class="sd">            irradiance, temperature, etc. (Default = None)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">n_segments</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
             <span class="n">list_pvsegments</span> <span class="o">=</span> <span class="p">[</span><span class="n">PVSegment</span><span class="o">.</span><span class="n">from_linestring_coords</span><span class="p">(</span>
                 <span class="n">coords</span><span class="p">,</span> <span class="n">shaded</span><span class="o">=</span><span class="n">shaded</span><span class="p">,</span> <span class="n">normal_vector</span><span class="o">=</span><span class="n">normal_vector</span><span class="p">,</span>
-                <span class="n">index</span><span class="o">=</span><span class="n">index</span><span class="p">,</span> <span class="n">surface_params</span><span class="o">=</span><span class="n">surface_params</span><span class="p">)]</span>
+                <span class="n">index</span><span class="o">=</span><span class="n">index</span><span class="p">,</span> <span class="n">param_names</span><span class="o">=</span><span class="n">param_names</span><span class="p">)]</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="c1"># Discretize coords and create segments accordingly</span>
             <span class="n">linestring</span> <span class="o">=</span> <span class="n">LineString</span><span class="p">(</span><span class="n">coords</span><span class="p">)</span>
@@ -1131,7 +1135,7 @@
                 <span class="c1"># TODO: not clear what to do with the index here</span>
                 <span class="n">pvsegment</span> <span class="o">=</span> <span class="n">PVSegment</span><span class="o">.</span><span class="n">from_linestring_coords</span><span class="p">(</span>
                     <span class="n">new_coords</span><span class="p">,</span> <span class="n">shaded</span><span class="o">=</span><span class="n">shaded</span><span class="p">,</span> <span class="n">normal_vector</span><span class="o">=</span><span class="n">normal_vector</span><span class="p">,</span>
-                    <span class="n">index</span><span class="o">=</span><span class="n">index</span><span class="p">,</span> <span class="n">surface_params</span><span class="o">=</span><span class="n">surface_params</span><span class="p">)</span>
+                    <span class="n">index</span><span class="o">=</span><span class="n">index</span><span class="p">,</span> <span class="n">param_names</span><span class="o">=</span><span class="n">param_names</span><span class="p">)</span>
                 <span class="n">list_pvsegments</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pvsegment</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">list_segments</span><span class="o">=</span><span class="n">list_pvsegments</span><span class="p">)</span>
 
@@ -1327,7 +1331,52 @@
         <span class="c1"># Plot formatting</span>
         <span class="n">ax</span><span class="o">.</span><span class="n">axis</span><span class="p">(</span><span class="s1">&#39;equal&#39;</span><span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">distance</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">n_pvrows</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pvrows</span><span class="p">)</span>
+            <span class="n">n_pvrows</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_pvrows</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="o">-</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">distance</span><span class="p">,</span>
+                        <span class="p">(</span><span class="n">n_pvrows</span> <span class="o">-</span> <span class="mf">0.5</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">distance</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">height</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">height</span><span class="p">,</span> <span class="mi">2</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">height</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;x [m]&quot;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="n">PLOT_FONTSIZE</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;y [m]&quot;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="n">PLOT_FONTSIZE</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">plot_at_idx</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idx</span><span class="p">,</span> <span class="n">ax</span><span class="p">,</span> <span class="n">merge_if_flag_overlap</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                    <span class="n">with_cut_points</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">x_min_max</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Plot all the PV rows and the ground in the PV array at a desired</span>
+<span class="sd">        step index. This can be called before transforming the array, and</span>
+<span class="sd">        after fitting it.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        idx : int</span>
+<span class="sd">            Selected timestep index for plotting the PV array</span>
+<span class="sd">        ax : :py:class:`matplotlib.pyplot.axes` object</span>
+<span class="sd">            Axes for plotting the PV array geometries</span>
+<span class="sd">        merge_if_flag_overlap : bool, optional</span>
+<span class="sd">            Decide whether to merge all shadows if they overlap</span>
+<span class="sd">            (Default = True)</span>
+<span class="sd">        with_cut_points :  bool, optional</span>
+<span class="sd">            Decide whether to include the saved cut points in the created</span>
+<span class="sd">            PV ground geometry (Default = True)</span>
+<span class="sd">        x_min_max : tuple, optional</span>
+<span class="sd">            List of minimum and maximum x coordinates for the flat ground</span>
+<span class="sd">            surface [m] (Default = None)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Plot pv array structures</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ts_ground</span><span class="o">.</span><span class="n">plot_at_idx</span><span class="p">(</span>
+            <span class="n">idx</span><span class="p">,</span> <span class="n">ax</span><span class="p">,</span> <span class="n">color_shaded</span><span class="o">=</span><span class="n">COLOR_DIC</span><span class="p">[</span><span class="s1">&#39;ground_shaded&#39;</span><span class="p">],</span>
+            <span class="n">color_illum</span><span class="o">=</span><span class="n">COLOR_DIC</span><span class="p">[</span><span class="s1">&#39;ground_illum&#39;</span><span class="p">],</span>
+            <span class="n">merge_if_flag_overlap</span><span class="o">=</span><span class="n">merge_if_flag_overlap</span><span class="p">,</span>
+            <span class="n">with_cut_points</span><span class="o">=</span><span class="n">with_cut_points</span><span class="p">,</span> <span class="n">x_min_max</span><span class="o">=</span><span class="n">x_min_max</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">ts_pvrow</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">ts_pvrows</span><span class="p">:</span>
+            <span class="n">ts_pvrow</span><span class="o">.</span><span class="n">plot_at_idx</span><span class="p">(</span>
+                <span class="n">idx</span><span class="p">,</span> <span class="n">ax</span><span class="p">,</span> <span class="n">color_shaded</span><span class="o">=</span><span class="n">COLOR_DIC</span><span class="p">[</span><span class="s1">&#39;pvrow_shaded&#39;</span><span class="p">],</span>
+                <span class="n">color_illum</span><span class="o">=</span><span class="n">COLOR_DIC</span><span class="p">[</span><span class="s1">&#39;pvrow_illum&#39;</span><span class="p">])</span>
+
+        <span class="c1"># Plot formatting</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">axis</span><span class="p">(</span><span class="s1">&#39;equal&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">distance</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">n_pvrows</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_pvrows</span>
             <span class="n">ax</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="o">-</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">distance</span><span class="p">,</span>
                         <span class="p">(</span><span class="n">n_pvrows</span> <span class="o">-</span> <span class="mf">0.5</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">distance</span><span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">height</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>

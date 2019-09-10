@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>base.PVSurface &mdash; pvfactors 1.1.0 documentation</title>
+  <title>base.PVSurface &mdash; pvfactors 1.2.0 documentation</title>
   
 
   
@@ -68,7 +68,7 @@
             
             
               <div class="version">
-                1.1.0
+                1.2.0
               </div>
             
           
@@ -94,7 +94,7 @@
             
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../../installation/index.html">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../tutorials/index.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorials/index.html">User guide and tutorials</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../theory/index.html">Theory</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../index.html">Developer API</a><ul class="current">
 <li class="toctree-l2 current"><a class="reference internal" href="../index.html#geometry">geometry</a><ul class="current">
@@ -110,6 +110,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../index.html#module-pvrow">pvrow</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../index.html#module-pvground">pvground</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../index.html#module-pvarray">pvarray</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../index.html#module-timeseries">timeseries</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../index.html#viewfactors">viewfactors</a></li>
@@ -219,13 +220,13 @@
 <h1>base.PVSurface<a class="headerlink" href="#base-pvsurface" title="Permalink to this headline">¶</a></h1>
 <dl class="class">
 <dt id="base.PVSurface">
-<em class="property">class </em><code class="sig-prename descclassname">base.</code><code class="sig-name descname">PVSurface</code><span class="sig-paren">(</span><em class="sig-param">coords=None</em>, <em class="sig-param">normal_vector=None</em>, <em class="sig-param">shaded=False</em>, <em class="sig-param">index=None</em>, <em class="sig-param">surface_params=None</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/base.html#PVSurface"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#base.PVSurface" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">base.</code><code class="sig-name descname">PVSurface</code><span class="sig-paren">(</span><em class="sig-param">coords=None</em>, <em class="sig-param">normal_vector=None</em>, <em class="sig-param">shaded=False</em>, <em class="sig-param">index=None</em>, <em class="sig-param">param_names=None</em>, <em class="sig-param">params=None</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/base.html#PVSurface"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#base.PVSurface" title="Permalink to this definition">¶</a></dt>
 <dd><p>PV surfaces inherit from
 <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseSurface</span></code>. The only difference is
 that PV surfaces have a <code class="docutils literal notranslate"><span class="pre">shaded</span></code> attribute.</p>
 <dl class="method">
 <dt id="base.PVSurface.__init__">
-<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param">coords=None</em>, <em class="sig-param">normal_vector=None</em>, <em class="sig-param">shaded=False</em>, <em class="sig-param">index=None</em>, <em class="sig-param">surface_params=None</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/base.html#PVSurface.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#base.PVSurface.__init__" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param">coords=None</em>, <em class="sig-param">normal_vector=None</em>, <em class="sig-param">shaded=False</em>, <em class="sig-param">index=None</em>, <em class="sig-param">param_names=None</em>, <em class="sig-param">params=None</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/base.html#PVSurface.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#base.PVSurface.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><p>Initialize PV surface.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -235,8 +236,9 @@ that PV surfaces have a <code class="docutils literal notranslate"><span class="
 calculated)</p></li>
 <li><p><strong>shaded</strong> (<em>bool</em><em>, </em><em>optional</em>) – Flag telling if surface is shaded or not (Default = False)</p></li>
 <li><p><strong>index</strong> (<em>int</em><em>, </em><em>optional</em>) – Surface index (Default = None)</p></li>
-<li><p><strong>surface_params</strong> (<em>list of str</em><em>, </em><em>optional</em>) – Names of the surface parameters, eg reflectivity, total incident
+<li><p><strong>param_names</strong> (<em>list of str</em><em>, </em><em>optional</em>) – Names of the surface parameters, eg reflectivity, total incident
 irradiance, temperature, etc. (Default = None)</p></li>
+<li><p><strong>params</strong> (<em>dict</em><em>, </em><em>optional</em>) – Surface float parameters (Default = None)</p></li>
 </ul>
 </dd>
 </dl>

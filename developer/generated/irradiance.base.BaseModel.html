@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>irradiance.base.BaseModel &mdash; pvfactors 1.1.0 documentation</title>
+  <title>irradiance.base.BaseModel &mdash; pvfactors 1.2.0 documentation</title>
   
 
   
@@ -68,7 +68,7 @@
             
             
               <div class="version">
-                1.1.0
+                1.2.0
               </div>
             
           
@@ -94,7 +94,7 @@
             
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../installation/index.html">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../tutorials/index.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorials/index.html">User guide and tutorials</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../theory/index.html">Theory</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../index.html">Developer API</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../whatsnew.html">What’s New</a></li>
@@ -197,11 +197,11 @@
 <h1>irradiance.base.BaseModel<a class="headerlink" href="#irradiance-base-basemodel" title="Permalink to this headline">¶</a></h1>
 <dl class="class">
 <dt id="irradiance.base.BaseModel">
-<em class="property">class </em><code class="sig-prename descclassname">irradiance.base.</code><code class="sig-name descname">BaseModel</code><a class="reference internal" href="../../_modules/irradiance/base.html#BaseModel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#irradiance.base.BaseModel" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">irradiance.base.</code><code class="sig-name descname">BaseModel</code><span class="sig-paren">(</span><em class="sig-param">*args</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/irradiance/base.html#BaseModel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#irradiance.base.BaseModel" title="Permalink to this definition">¶</a></dt>
 <dd><p>Base class for irradiance models</p>
 <dl class="method">
 <dt id="irradiance.base.BaseModel.__init__">
-<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/irradiance/base.html#BaseModel.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#irradiance.base.BaseModel.__init__" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param">*args</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/irradiance/base.html#BaseModel.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#irradiance.base.BaseModel.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><p>Not implemented</p>
 </dd></dl>
 
@@ -212,17 +212,26 @@
 <col style="width: 90%" />
 </colgroup>
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#irradiance.base.BaseModel.__init__" title="irradiance.base.BaseModel.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>()</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#irradiance.base.BaseModel.__init__" title="irradiance.base.BaseModel.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(*args, **kwargs)</p></td>
 <td><p>Not implemented</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">fit</span></code>()</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">fit</span></code>(*args, **kwargs)</p></td>
 <td><p>Not implemented</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">BaseModel.get_irradiance_invrho_vector</span></code></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">transform</span></code>()</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_full_modeling_vectors</span></code>(*args, **kwargs)</p></td>
 <td><p>Not implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_modeling_vectors</span></code>(pvarray)</p></td>
+<td><p>Get vector of summed up irradiance values from a PV array, as well as the inverse reflectivity values (the latter need to be named “inv_rho”), and the total perez irradiance values.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">transform</span></code>(*args, **kwargs)</p></td>
+<td><p>Not implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">transform_ts</span></code>(*args, **kwargs)</p></td>
+<td><p>Not implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_ts_surface_sky_term</span></code>(ts_surface[, …])</p></td>
+<td><p>Update the ‘sky_term’ parameter of a timeseries surface.</p></td>
 </tr>
 </tbody>
 </table>
@@ -236,11 +245,26 @@
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">cats</span></code></p></td>
 <td><p></p></td>
 </tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">gnd_illum</span></code></p></td>
+<td><p>Not implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">gnd_shaded</span></code></p></td>
+<td><p>Not implemented</p></td>
+</tr>
 <tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">irradiance_comp</span></code></p></td>
 <td><p></p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">params</span></code></p></td>
 <td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">pvrow_illum</span></code></p></td>
+<td><p>Not implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">pvrow_shaded</span></code></p></td>
+<td><p>Not implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">sky</span></code></p></td>
+<td><p>Not implemented</p></td>
 </tr>
 </tbody>
 </table>

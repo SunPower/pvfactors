@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>pvground.PVGround &mdash; pvfactors 1.1.0 documentation</title>
+  <title>pvground.PVGround &mdash; pvfactors 1.2.0 documentation</title>
   
 
   
@@ -68,7 +68,7 @@
             
             
               <div class="version">
-                1.1.0
+                1.2.0
               </div>
             
           
@@ -94,7 +94,7 @@
             
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../../installation/index.html">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../tutorials/index.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorials/index.html">User guide and tutorials</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../theory/index.html">Theory</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../index.html">Developer API</a><ul class="current">
 <li class="toctree-l2 current"><a class="reference internal" href="../index.html#geometry">geometry</a><ul class="current">
@@ -105,6 +105,7 @@
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="../index.html#module-pvarray">pvarray</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../index.html#module-timeseries">timeseries</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../index.html#viewfactors">viewfactors</a></li>
@@ -243,6 +244,9 @@
 </tr>
 <tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">as_flat</span></code>([x_min_max, shaded, y_ground, …])</p></td>
 <td><p>Build a horizontal flat ground surface, made of 1 PV segment.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">from_ordered_shadow_and_cut_pt_coords</span></code>([…])</p></td>
+<td><p>Build a horizontal flat ground surface, made of 1 PVSegment with shaded areas and “cut points” (reference points used in view factor calculations)</p></td>
 </tr>
 </tbody>
 </table>

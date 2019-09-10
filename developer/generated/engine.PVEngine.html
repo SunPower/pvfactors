@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>engine.PVEngine &mdash; pvfactors 1.1.0 documentation</title>
+  <title>engine.PVEngine &mdash; pvfactors 1.2.0 documentation</title>
   
 
   
@@ -68,7 +68,7 @@
             
             
               <div class="version">
-                1.1.0
+                1.2.0
               </div>
             
           
@@ -94,7 +94,7 @@
             
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../../installation/index.html">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../tutorials/index.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorials/index.html">User guide and tutorials</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../theory/index.html">Theory</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../index.html">Developer API</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="../index.html#geometry">geometry</a></li>
@@ -208,28 +208,31 @@
 <h1>engine.PVEngine<a class="headerlink" href="#engine-pvengine" title="Permalink to this headline">¶</a></h1>
 <dl class="class">
 <dt id="engine.PVEngine">
-<em class="property">class </em><code class="sig-prename descclassname">engine.</code><code class="sig-name descname">PVEngine</code><span class="sig-paren">(</span><em class="sig-param">pvarray</em>, <em class="sig-param">vf_calculator=&lt;pvfactors.viewfactors.calculator.VFCalculator object&gt;</em>, <em class="sig-param">irradiance_model=&lt;pvfactors.irradiance.models.HybridPerezOrdered object&gt;</em>, <em class="sig-param">fast_mode_pvrow_index=None</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/engine.html#PVEngine"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#engine.PVEngine" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">engine.</code><code class="sig-name descname">PVEngine</code><span class="sig-paren">(</span><em class="sig-param">pvarray</em>, <em class="sig-param">vf_calculator=None</em>, <em class="sig-param">irradiance_model=None</em>, <em class="sig-param">fast_mode_pvrow_index=None</em>, <em class="sig-param">fast_mode_segment_index=None</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/engine.html#PVEngine"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#engine.PVEngine" title="Permalink to this definition">¶</a></dt>
 <dd><p>Class putting all of the calculations together, and able to run it
 as a timeseries when the pvarrays can be build from dictionary parameters</p>
 <dl class="method">
 <dt id="engine.PVEngine.__init__">
-<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param">pvarray</em>, <em class="sig-param">vf_calculator=&lt;pvfactors.viewfactors.calculator.VFCalculator object&gt;</em>, <em class="sig-param">irradiance_model=&lt;pvfactors.irradiance.models.HybridPerezOrdered object&gt;</em>, <em class="sig-param">fast_mode_pvrow_index=None</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/engine.html#PVEngine.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#engine.PVEngine.__init__" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param">pvarray</em>, <em class="sig-param">vf_calculator=None</em>, <em class="sig-param">irradiance_model=None</em>, <em class="sig-param">fast_mode_pvrow_index=None</em>, <em class="sig-param">fast_mode_segment_index=None</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/engine.html#PVEngine.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#engine.PVEngine.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create pv engine class, and initialize timeseries parameters.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>pvarray</strong> (<a class="reference internal" href="base.BasePVArray.html#base.BasePVArray" title="base.BasePVArray"><em>BasePVArray</em></a><em> (or </em><em>child</em><em>) </em><em>object</em>) – The initialized PV array object that will be used for calculations</p></li>
-<li><p><strong>vf_calculator</strong> (<em>vf calculator object</em><em>, </em><em>optional</em>) – Calculator that will be used to calculate the view factor matrices
-(Default =
-<code class="xref py py-class docutils literal notranslate"><span class="pre">VFCalculator</span></code> object)</p></li>
-<li><p><strong>irradiance_model</strong> (<em>irradiance model object</em><em>, </em><em>optional</em>) – The irradiance model that will be applied to the PV array
-(Default =
+<li><p><strong>vf_calculator</strong> (<em>vf calculator object</em><em>, </em><em>optional</em>) – Calculator that will be used to calculate the view factor matrices,
+will use <code class="xref py py-class docutils literal notranslate"><span class="pre">VFCalculator</span></code>
+if None (Default = None)</p></li>
+<li><p><strong>irradiance_model</strong> (<em>irradiance model object</em><em>, </em><em>optional</em>) – The irradiance model that will be applied to the PV array,
+will use
 <code class="xref py py-class docutils literal notranslate"><span class="pre">HybridPerezOrdered</span></code>
-object)</p></li>
+if None (Default = None)</p></li>
 <li><p><strong>fast_mode_pvrow_index</strong> (<em>int</em><em>, </em><em>optional</em>) – If a pvrow index is passed, then the PVEngine fast mode
 will be activated and the engine calculation will be done only
 for the back surface of the pvrow with the corresponding
 index (Default = None)</p></li>
+<li><p><strong>fast_mode_segment_index</strong> (<em>int</em><em>, </em><em>optional</em>) – If a segment index is passed, then the PVEngine fast mode
+will calculate back surface irradiance only for the
+selected segment of the selected back surface (Default = None)</p></li>
 </ul>
 </dd>
 </dl>
@@ -248,11 +251,14 @@ index (Default = None)</p></li>
 <tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">fit</span></code>(timestamps, DNI, DHI, solar_zenith, …)</p></td>
 <td><p>Fit the timeseries data to the engine.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">run_all_timesteps</span></code>([fn_build_report])</p></td>
-<td><p>Run all simulation timesteps and return a report that will be built by the function passed by the user.</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">run_fast_mode</span></code>([fn_build_report, …])</p></td>
+<td><p>Run all simulation timesteps using the fast mode for the back surface of a PV row, and assuming that the incident irradiance on all other surfaces is known (all but back surfaces).</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">run_timestep</span></code>(idx)</p></td>
-<td><p>Run simulation for a single timestep index.</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">run_full_mode</span></code>([fn_build_report])</p></td>
+<td><p>Run all simulation timesteps using the full mode, which calculates the equilibrium of reflections in the system, and return a report that will be built by the function passed by the user.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">run_full_mode_timestep</span></code>(idx)</p></td>
+<td><p>Run simulation for a single timestep index and using the full mode, which calculates the equilibrium of reflections in the system.</p></td>
 </tr>
 </tbody>
 </table>

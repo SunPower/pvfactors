@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>models.HybridPerezOrdered &mdash; pvfactors 1.1.0 documentation</title>
+  <title>models.HybridPerezOrdered &mdash; pvfactors 1.2.0 documentation</title>
   
 
   
@@ -68,7 +68,7 @@
             
             
               <div class="version">
-                1.1.0
+                1.2.0
               </div>
             
           
@@ -94,7 +94,7 @@
             
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../installation/index.html">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../tutorials/index.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorials/index.html">User guide and tutorials</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../theory/index.html">Theory</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../index.html">Developer API</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../whatsnew.html">What’s New</a></li>
@@ -232,23 +232,23 @@ DEFAULT_CIRCUMSOLAR_ANGLE)</p></li>
 <tr class="row-odd"><td><p><a class="reference internal" href="#models.HybridPerezOrdered.__init__" title="models.HybridPerezOrdered.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>([horizon_band_angle, …])</p></td>
 <td><p>Initialize irradiance model values that will be saved later on.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">calculate_circumsolar_shading_pct</span></code>(surface, …)</p></td>
-<td><p>Model method to calculate circumsolar shading on surfaces of the ordered PV array.</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">calculate_horizon_shading_pct</span></code>(surface, …)</p></td>
-<td><p>Calculate horizon band shading percentage on surfaces of the ordered PV array.</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">calculate_luminance_poa_components</span></code>(…)</p></td>
-<td><p>Calculate Perez-like luminance and plane-of-array irradiance values.</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">fit</span></code>(timestamps, DNI, DHI, solar_zenith, …)</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">fit</span></code>(timestamps, DNI, DHI, solar_zenith, …)</p></td>
 <td><p>Use vectorization to calculate values used for the hybrid Perez irradiance model.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">HybridPerezOrdered.get_irradiance_invrho_vector</span></code></p></td>
-<td><p></p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_full_modeling_vectors</span></code>(pvarray, idx)</p></td>
+<td><p>Get the modeling vectors used in matrix calculations of mathematical model.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">transform</span></code>(pvarray[, idx])</p></td>
-<td><p>Apply calculated irradiance values to PV array, as well as horizon band shading on pvrow back sides.</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_modeling_vectors</span></code>(pvarray)</p></td>
+<td><p>Get vector of summed up irradiance values from a PV array, as well as the inverse reflectivity values (the latter need to be named “inv_rho”), and the total perez irradiance values.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">transform</span></code>(pvarray)</p></td>
+<td><p>Apply calculated irradiance values to PV array timeseries geometries: assign values as parameters to timeseries surfaces.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">transform_ts</span></code>(*args, **kwargs)</p></td>
+<td><p>Not implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_ts_surface_sky_term</span></code>(ts_surface[, …])</p></td>
+<td><p>Update the ‘sky_term’ parameter of a timeseries surface.</p></td>
 </tr>
 </tbody>
 </table>
@@ -262,11 +262,29 @@ DEFAULT_CIRCUMSOLAR_ANGLE)</p></li>
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">cats</span></code></p></td>
 <td><p></p></td>
 </tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">gnd_illum</span></code></p></td>
+<td><p>Total timeseries irradiance incident on ground illuminated areas</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">gnd_shaded</span></code></p></td>
+<td><p>Total timeseries irradiance incident on ground shaded areas</p></td>
+</tr>
 <tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">irradiance_comp</span></code></p></td>
 <td><p></p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">params</span></code></p></td>
 <td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">pvrow_illum</span></code></p></td>
+<td><p>Total timeseries irradiance incident on PV row’s front shaded areas and calculated by Perez transposition</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">pvrow_shaded</span></code></p></td>
+<td><p>Total timeseries irradiance incident on PV row’s front illuminated areas and calculated by Perez transposition</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">sky</span></code></p></td>
+<td><p>Not implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">sky_luminance</span></code></p></td>
+<td><p>Total timeseries isotropic luminance of sky</p></td>
 </tr>
 </tbody>
 </table>

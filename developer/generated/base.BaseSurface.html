@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>base.BaseSurface &mdash; pvfactors 1.1.0 documentation</title>
+  <title>base.BaseSurface &mdash; pvfactors 1.2.0 documentation</title>
   
 
   
@@ -68,7 +68,7 @@
             
             
               <div class="version">
-                1.1.0
+                1.2.0
               </div>
             
           
@@ -94,7 +94,7 @@
             
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../../installation/index.html">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../tutorials/index.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorials/index.html">User guide and tutorials</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../theory/index.html">Theory</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../index.html">Developer API</a><ul class="current">
 <li class="toctree-l2 current"><a class="reference internal" href="../index.html#geometry">geometry</a><ul class="current">
@@ -110,6 +110,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../index.html#module-pvrow">pvrow</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../index.html#module-pvground">pvground</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../index.html#module-pvarray">pvarray</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../index.html#module-timeseries">timeseries</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../index.html#viewfactors">viewfactors</a></li>
@@ -219,14 +220,14 @@
 <h1>base.BaseSurface<a class="headerlink" href="#base-basesurface" title="Permalink to this headline">¶</a></h1>
 <dl class="class">
 <dt id="base.BaseSurface">
-<em class="property">class </em><code class="sig-prename descclassname">base.</code><code class="sig-name descname">BaseSurface</code><span class="sig-paren">(</span><em class="sig-param">coords</em>, <em class="sig-param">normal_vector=None</em>, <em class="sig-param">index=None</em>, <em class="sig-param">surface_params=None</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/base.html#BaseSurface"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#base.BaseSurface" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">base.</code><code class="sig-name descname">BaseSurface</code><span class="sig-paren">(</span><em class="sig-param">coords</em>, <em class="sig-param">normal_vector=None</em>, <em class="sig-param">index=None</em>, <em class="sig-param">param_names=None</em>, <em class="sig-param">params=None</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/base.html#BaseSurface"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#base.BaseSurface" title="Permalink to this definition">¶</a></dt>
 <dd><p>Base surfaces will be extensions of <code class="xref py py-class docutils literal notranslate"><span class="pre">LineString</span></code> classes,
 but adding an orientation to it (normal vector).
 So two surfaces could use the same linestring, but have opposite
 orientations.</p>
 <dl class="method">
 <dt id="base.BaseSurface.__init__">
-<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param">coords</em>, <em class="sig-param">normal_vector=None</em>, <em class="sig-param">index=None</em>, <em class="sig-param">surface_params=None</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/base.html#BaseSurface.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#base.BaseSurface.__init__" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param">coords</em>, <em class="sig-param">normal_vector=None</em>, <em class="sig-param">index=None</em>, <em class="sig-param">param_names=None</em>, <em class="sig-param">params=None</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/base.html#BaseSurface.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#base.BaseSurface.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create a surface using linestring coordinates.
 Normal vector can have two directions for a given LineString,
 so the user can provide it in order to be specific,
@@ -241,8 +242,9 @@ will take the default value.</p>
 <li><p><strong>normal_vector</strong> (<em>list</em><em>, </em><em>optional</em>) – Normal vector for the surface (Default = None, so will be
 calculated)</p></li>
 <li><p><strong>index</strong> (<em>int</em><em>, </em><em>optional</em>) – Surface index (Default = None)</p></li>
-<li><p><strong>surface_params</strong> (<em>list of str</em><em>, </em><em>optional</em>) – Names of the surface parameters, eg reflectivity, total incident
+<li><p><strong>param_names</strong> (<em>list of str</em><em>, </em><em>optional</em>) – Names of the surface parameters, eg reflectivity, total incident
 irradiance, temperature, etc. (Default = None)</p></li>
+<li><p><strong>params</strong> (<em>dict</em><em>, </em><em>optional</em>) – Surface float parameters (Default = None)</p></li>
 </ul>
 </dd>
 </dl>
