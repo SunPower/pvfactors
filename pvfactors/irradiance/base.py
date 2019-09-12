@@ -45,7 +45,7 @@ class BaseModel(object):
         raise NotImplementedError
 
     @property
-    def sky(self):
+    def sky_luminance(self):
         """Not implemented"""
         raise NotImplementedError
 
