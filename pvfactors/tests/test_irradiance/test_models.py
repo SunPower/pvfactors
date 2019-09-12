@@ -46,7 +46,7 @@ def test_isotropic_model_front(params_irr):
     expected_dni_ground = DNI * cosd(65)
 
     # Check irradiance fitting
-    np.testing.assert_almost_equal(irr_model.direct['ground'][0],
+    np.testing.assert_almost_equal(irr_model.direct['ground_illum'][0],
                                    expected_dni_ground)
     np.testing.assert_almost_equal(irr_model.direct['front_pvrow'][0],
                                    expected_dni_pvrow)
@@ -139,7 +139,7 @@ def test_isotropic_model_back(params_irr):
     expected_dni_ground = DNI * cosd(65)
 
     # Check fitting
-    np.testing.assert_almost_equal(irr_model.direct['ground'][0],
+    np.testing.assert_almost_equal(irr_model.direct['ground_illum'][0],
                                    expected_dni_ground)
     np.testing.assert_almost_equal(irr_model.direct['back_pvrow'][0],
                                    expected_dni_pvrow)
@@ -233,7 +233,7 @@ def test_hybridperez_ordered_front(params_irr):
     horizon_shading_pct = 70.404518731426592
 
     # Check fitting
-    np.testing.assert_almost_equal(irr_model.direct['ground'][0],
+    np.testing.assert_almost_equal(irr_model.direct['ground_illum'][0],
                                    expected_dni_ground)
     np.testing.assert_almost_equal(irr_model.direct['front_pvrow'][0],
                                    expected_dni_pvrow)
@@ -377,7 +377,7 @@ def test_hybridperez_ordered_back(params_irr):
     horizon_shading_pct_2 = 50.195287265251757
 
     # Check fitting
-    np.testing.assert_almost_equal(irr_model.direct['ground'][0],
+    np.testing.assert_almost_equal(irr_model.direct['ground_illum'][0],
                                    expected_dni_ground)
     np.testing.assert_almost_equal(irr_model.direct['back_pvrow'][0],
                                    expected_dni_pvrow)
