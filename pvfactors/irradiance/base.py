@@ -20,10 +20,6 @@ class BaseModel(object):
         """Not implemented"""
         raise NotImplementedError
 
-    def transform_ts(self, *args, **kwargs):
-        """Not implemented"""
-        raise NotImplementedError
-
     def get_full_modeling_vectors(self, *args, **kwargs):
         """Not implemented"""
         raise NotImplementedError
@@ -49,7 +45,7 @@ class BaseModel(object):
         raise NotImplementedError
 
     @property
-    def sky(self):
+    def sky_luminance(self):
         """Not implemented"""
         raise NotImplementedError
 

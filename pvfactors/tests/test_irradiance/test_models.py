@@ -46,7 +46,7 @@ def test_isotropic_model_front(params_irr):
     expected_dni_ground = DNI * cosd(65)
 
     # Check irradiance fitting
-    np.testing.assert_almost_equal(irr_model.direct['ground'][0],
+    np.testing.assert_almost_equal(irr_model.direct['ground_illum'][0],
                                    expected_dni_ground)
     np.testing.assert_almost_equal(irr_model.direct['front_pvrow'][0],
                                    expected_dni_pvrow)
@@ -139,7 +139,7 @@ def test_isotropic_model_back(params_irr):
     expected_dni_ground = DNI * cosd(65)
 
     # Check fitting
-    np.testing.assert_almost_equal(irr_model.direct['ground'][0],
+    np.testing.assert_almost_equal(irr_model.direct['ground_illum'][0],
                                    expected_dni_ground)
     np.testing.assert_almost_equal(irr_model.direct['back_pvrow'][0],
                                    expected_dni_pvrow)
@@ -233,7 +233,7 @@ def test_hybridperez_ordered_front(params_irr):
     horizon_shading_pct = 70.404518731426592
 
     # Check fitting
-    np.testing.assert_almost_equal(irr_model.direct['ground'][0],
+    np.testing.assert_almost_equal(irr_model.direct['ground_illum'][0],
                                    expected_dni_ground)
     np.testing.assert_almost_equal(irr_model.direct['front_pvrow'][0],
                                    expected_dni_pvrow)
@@ -377,7 +377,7 @@ def test_hybridperez_ordered_back(params_irr):
     horizon_shading_pct_2 = 50.195287265251757
 
     # Check fitting
-    np.testing.assert_almost_equal(irr_model.direct['ground'][0],
+    np.testing.assert_almost_equal(irr_model.direct['ground_illum'][0],
                                    expected_dni_ground)
     np.testing.assert_almost_equal(irr_model.direct['back_pvrow'][0],
                                    expected_dni_pvrow)
@@ -616,3 +616,72 @@ def test_hybridperez_transform(df_inputs_clearsky_8760):
         pvground.list_segments[0].illum_collection
         .get_param_weighted('circumsolar'),
         expected_ground_circ[7])
+
+
+def test_hybridperez_ordered_transparency_spacing(params_irr):
+    """Check that module transparency and spacing params are applied
+    correctly in HybridPerezOrdered"""
+
+    # Apply irradiance model
+    DNI = 1000.
+    DHI = 100.
+    ts = dt.datetime(2019, 6, 14, 11)
+    irr_parameters = {'horizon_band_angle': 6.5,
+                      'module_transparency': 0.1,
+                      'module_spacing_ratio': 0.1}
+    irr_model = HybridPerezOrdered(**irr_parameters)
+    irr_model.fit(ts, DNI, DHI,
+                  params_irr['solar_zenith'],
+                  params_irr['solar_azimuth'],
+                  params_irr['surface_tilt'],
+                  params_irr['surface_azimuth'],
+                  params_irr['rho_ground'])
+
+    # Create, fit, and transform pv array
+    pvarray = OrderedPVArray.fit_from_dict_of_scalars(
+        params_irr, param_names=IsotropicOrdered.params)
+    irr_model.transform(pvarray)
+    pvarray.transform(idx=0)
+
+    gnd_seg = pvarray.ground.list_segments[0]
+    surf_gnd_shaded = gnd_seg.shaded_collection.list_surfaces[0]
+    surf_gnd_illum = gnd_seg.illum_collection.list_surfaces[0]
+
+    # Run some checks
+    np.testing.assert_allclose(surf_gnd_illum.get_param('circumsolar') * 0.19,
+                               surf_gnd_shaded.get_param('circumsolar'))
+    np.testing.assert_allclose(surf_gnd_illum.get_param('direct') * 0.19,
+                               surf_gnd_shaded.get_param('direct'))
+
+
+def test_isotropic_ordered_transparency_spacing(params_irr):
+    """Check that module transparency and spacing params are applied
+    correctly in IsotropicOrdered"""
+
+    # Apply irradiance model
+    DNI = 1000.
+    DHI = 100.
+    ts = dt.datetime(2019, 6, 14, 11)
+    irr_parameters = {'module_transparency': 0.1,
+                      'module_spacing_ratio': 0.1}
+    irr_model = IsotropicOrdered(**irr_parameters)
+    irr_model.fit(ts, DNI, DHI,
+                  params_irr['solar_zenith'],
+                  params_irr['solar_azimuth'],
+                  params_irr['surface_tilt'],
+                  params_irr['surface_azimuth'],
+                  params_irr['rho_ground'])
+
+    # Create, fit, and transform pv array
+    pvarray = OrderedPVArray.fit_from_dict_of_scalars(
+        params_irr, param_names=IsotropicOrdered.params)
+    irr_model.transform(pvarray)
+    pvarray.transform(idx=0)
+
+    gnd_seg = pvarray.ground.list_segments[0]
+    surf_gnd_shaded = gnd_seg.shaded_collection.list_surfaces[0]
+    surf_gnd_illum = gnd_seg.illum_collection.list_surfaces[0]
+
+    # Run some checks
+    np.testing.assert_allclose(surf_gnd_illum.get_param('direct') * 0.19,
+                               surf_gnd_shaded.get_param('direct'))

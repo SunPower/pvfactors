@@ -1,4 +1,4 @@
-.. irradiance
+.. _irradiance_classes:
 
 .. currentmodule:: pvfactors
 
