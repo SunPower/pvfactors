@@ -48,9 +48,9 @@ def test_isotropic_model_front(params_irr):
     # Check irradiance fitting
     np.testing.assert_almost_equal(irr_model.direct['ground_illum'][0],
                                    expected_dni_ground)
-    np.testing.assert_almost_equal(irr_model.direct['front_pvrow'][0],
+    np.testing.assert_almost_equal(irr_model.direct['front_illum_pvrow'][0],
                                    expected_dni_pvrow)
-    assert irr_model.direct['back_pvrow'][0] == 0.
+    assert irr_model.direct['back_illum_pvrow'][0] == 0.
 
     # Create, fit, and transform pv array
     pvarray = OrderedPVArray.fit_from_dict_of_scalars(
@@ -141,9 +141,9 @@ def test_isotropic_model_back(params_irr):
     # Check fitting
     np.testing.assert_almost_equal(irr_model.direct['ground_illum'][0],
                                    expected_dni_ground)
-    np.testing.assert_almost_equal(irr_model.direct['back_pvrow'][0],
+    np.testing.assert_almost_equal(irr_model.direct['back_illum_pvrow'][0],
                                    expected_dni_pvrow)
-    assert irr_model.direct['front_pvrow'][0] == 0.
+    assert irr_model.direct['front_illum_pvrow'][0] == 0.
 
     # Create, fit, and transform pv array
     pvarray = OrderedPVArray.fit_from_dict_of_scalars(
@@ -235,9 +235,9 @@ def test_hybridperez_ordered_front(params_irr):
     # Check fitting
     np.testing.assert_almost_equal(irr_model.direct['ground_illum'][0],
                                    expected_dni_ground)
-    np.testing.assert_almost_equal(irr_model.direct['front_pvrow'][0],
+    np.testing.assert_almost_equal(irr_model.direct['front_illum_pvrow'][0],
                                    expected_dni_pvrow)
-    assert irr_model.direct['back_pvrow'][0] == 0.
+    assert irr_model.direct['back_illum_pvrow'][0] == 0.
 
     # Create, fit, and transform pv array
     pvarray = OrderedPVArray.fit_from_dict_of_scalars(
@@ -379,9 +379,9 @@ def test_hybridperez_ordered_back(params_irr):
     # Check fitting
     np.testing.assert_almost_equal(irr_model.direct['ground_illum'][0],
                                    expected_dni_ground)
-    np.testing.assert_almost_equal(irr_model.direct['back_pvrow'][0],
+    np.testing.assert_almost_equal(irr_model.direct['back_illum_pvrow'][0],
                                    expected_dni_pvrow)
-    assert irr_model.direct['front_pvrow'][0] == 0.
+    assert irr_model.direct['front_illum_pvrow'][0] == 0.
 
     # Create, fit, and transform pv array
     pvarray = OrderedPVArray.fit_from_dict_of_scalars(

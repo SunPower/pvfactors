@@ -26,7 +26,8 @@ def test_pvengine_float_inputs_iso(params):
             params['surface_azimuth'],
             params['rho_ground'])
     # Checks
-    np.testing.assert_almost_equal(eng.irradiance.direct['front_pvrow'], DNI)
+    np.testing.assert_almost_equal(eng.irradiance.direct['front_illum_pvrow'],
+                                   DNI)
 
     # Run timestep
     pvarray = eng.run_full_mode_timestep(0)
@@ -60,7 +61,8 @@ def test_pvengine_float_inputs_perez(params):
             params['surface_azimuth'],
             params['rho_ground'])
     # Checks
-    np.testing.assert_almost_equal(eng.irradiance.direct['front_pvrow'], DNI)
+    np.testing.assert_almost_equal(eng.irradiance.direct['front_illum_pvrow'],
+                                   DNI)
 
     # Run timestep
     pvarray = eng.run_full_mode_timestep(0)
@@ -134,7 +136,8 @@ def test_fast_mode_loop_like(params):
             params['solar_azimuth'], params['surface_tilt'],
             params['surface_azimuth'], params['rho_ground'])
     # Checks
-    np.testing.assert_almost_equal(eng.irradiance.direct['front_pvrow'], DNI)
+    np.testing.assert_almost_equal(eng.irradiance.direct['front_illum_pvrow'],
+                                   DNI)
 
     # Run timestep
     pvarray = _fast_mode_with_loop(eng.pvarray, eng.irradiance,
@@ -172,7 +175,8 @@ def test_run_fast_mode_isotropic(params):
             params['surface_tilt'], params['surface_azimuth'],
             params['rho_ground'])
     # Checks
-    np.testing.assert_almost_equal(eng.irradiance.direct['front_pvrow'], DNI)
+    np.testing.assert_almost_equal(eng.irradiance.direct['front_illum_pvrow'],
+                                   DNI)
 
     # Expected value
     qinc_expected = 122.73453
@@ -220,7 +224,8 @@ def test_run_fast_mode_perez(params):
             params['surface_tilt'], params['surface_azimuth'],
             params['rho_ground'])
     # Checks
-    np.testing.assert_almost_equal(eng.irradiance.direct['front_pvrow'], DNI)
+    np.testing.assert_almost_equal(eng.irradiance.direct['front_illum_pvrow'],
+                                   DNI)
 
     # Run fast mode
     qinc = eng.run_fast_mode(
@@ -268,7 +273,8 @@ def test_run_fast_mode_segments(params):
             params['surface_tilt'], params['surface_azimuth'],
             params['rho_ground'])
     # Checks
-    np.testing.assert_almost_equal(eng.irradiance.direct['front_pvrow'], DNI)
+    np.testing.assert_almost_equal(eng.irradiance.direct['front_illum_pvrow'],
+                                   DNI)
 
     # Define report function to grab irradiance from PV row segment
     def fn_report(pvarray): return (pvarray.ts_pvrows[1].back.list_segments[2]
@@ -300,7 +306,6 @@ def test_run_fast_mode_compare_to_loop_like(params):
     pvarray = OrderedPVArray.init_from_dict(
         params, param_names=irradiance_model.params)
     fast_mode_pvrow_index = 1
-    fast_mode_segment_index = 0
     # Irradiance inputs
     timestamps = dt.datetime(2019, 6, 11, 11)
     DNI = 1000.
