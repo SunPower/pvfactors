@@ -10,7 +10,7 @@ irradiance incident on surfaces of a photovoltaic array. It relies on the use of
 2D geometries and view factors integrated mathematically into systems of
 equations to account for reflections between all of the surfaces.
 
-pvfactors was originally ported from the SunPower developed 'vf_model' package, which was introduced at the IEEE PV Specialist Conference 44 2017 (see [#pvfactors_paper]_ and [link](https://pdfs.semanticscholar.org/ebb2/35e3c3796b158e1a3c45b40954e60d876ea9.pdf) to paper).
+pvfactors was originally ported from the SunPower developed 'vf_model' package, which was introduced at the IEEE PV Specialist Conference 44 2017 (see [#pvfactors_paper]_ and link_ to paper).
 
 
 .. contents:: Table of contents
@@ -31,7 +31,7 @@ Quick Start
 Given some timeseries inputs:
 
 
-.. code:: python
+.. code:: ipython3
    # Import external libraries
    from datetime import datetime
    import pandas as pd
@@ -51,51 +51,66 @@ Given some timeseries inputs:
    df_inputs
 
 
-<div>
-<table border="1" class="dataframe">
-  <thead>
-    <tr style="text-align: right;">
-      <th></th>
-      <th>solar_zenith</th>
-      <th>solar_azimuth</th>
-      <th>surface_tilt</th>
-      <th>surface_azimuth</th>
-      <th>dni</th>
-      <th>dhi</th>
-      <th>albedo</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>2017-08-31 11:00:00</td>
-      <td>20.0</td>
-      <td>110.0</td>
-      <td>10.0</td>
-      <td>90.0</td>
-      <td>1000.0</td>
-      <td>50.0</td>
-      <td>0.2</td>
-    </tr>
-    <tr>
-      <td>2017-08-31 15:00:00</td>
-      <td>50.0</td>
-      <td>250.0</td>
-      <td>20.0</td>
-      <td>270.0</td>
-      <td>900.0</td>
-      <td>100.0</td>
-      <td>0.2</td>
-    </tr>
-  </tbody>
-</table>
-</div>
+.. raw:: html
+
+    <div>
+    <style scoped>
+        .dataframe tbody tr th:only-of-type {
+            vertical-align: middle;
+        }
+
+        .dataframe tbody tr th {
+            vertical-align: top;
+        }
+
+        .dataframe thead th {
+            text-align: right;
+        }
+    </style>
+    <table border="1" class="dataframe">
+      <thead>
+        <tr style="text-align: right;">
+          <th></th>
+          <th>solar_zenith</th>
+          <th>solar_azimuth</th>
+          <th>surface_tilt</th>
+          <th>surface_azimuth</th>
+          <th>dni</th>
+          <th>dhi</th>
+          <th>albedo</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>2017-08-31 11:00:00</td>
+          <td>20.0</td>
+          <td>110.0</td>
+          <td>10.0</td>
+          <td>90.0</td>
+          <td>1000.0</td>
+          <td>50.0</td>
+          <td>0.2</td>
+        </tr>
+        <tr>
+          <td>2017-08-31 15:00:00</td>
+          <td>50.0</td>
+          <td>250.0</td>
+          <td>20.0</td>
+          <td>270.0</td>
+          <td>900.0</td>
+          <td>100.0</td>
+          <td>0.2</td>
+        </tr>
+      </tbody>
+    </table>
+    </div>
 
 
 
 And some PV array parameters
 
 
-.. code:: python
+.. code:: ipython3
    pvarray_parameters = {
        'n_pvrows': 3,            # number of pv rows
        'pvrow_height': 1,        # height of pvrows (measured at center / torque tube)
@@ -107,7 +122,7 @@ And some PV array parameters
 The user can quickly create a PV array with ``pvfactors``, and manipulate it with the engine
 
 
-.. code:: python
+.. code:: ipython3
 
    from pvfactors.geometry import OrderedPVArray
    # Create PV array
@@ -115,7 +130,7 @@ The user can quickly create a PV array with ``pvfactors``, and manipulate it wit
 
 
 
-.. code:: python
+.. code:: ipython3
 
    from pvfactors.engine import PVEngine
    # Create engine
@@ -129,7 +144,7 @@ The user can quickly create a PV array with ``pvfactors``, and manipulate it wit
 The user can then plot the PV array geometry at any given time of the simulation:
 
 
-.. code:: python
+.. code:: ipython3
 
    # Plot pvarray shapely geometries
    f, ax = plt.subplots(figsize=(10, 5))
@@ -142,7 +157,7 @@ The user can then plot the PV array geometry at any given time of the simulation
 It is then very easy to run simulations using the defined engine:
 
 
-.. code:: python
+.. code:: ipython3
 
    pvarray = engine.run_full_mode_timestep(1)
 
@@ -150,7 +165,7 @@ It is then very easy to run simulations using the defined engine:
 And inspect the results thanks to the simple geometry API
 
 
-.. code:: python
+.. code:: ipython3
    print("Incident irradiance on front surface of middle pv row: %.2f W/m2"
        % (pvarray.pvrows[1].front.get_param_weighted('qinc')))
    print("Reflected irradiance on back surface of left pv row: %.2f W/m2"
@@ -158,7 +173,7 @@ And inspect the results thanks to the simple geometry API
    print("Isotropic irradiance on back surface of right pv row: %.2f W/m2"
        % (pvarray.pvrows[2].back.get_param_weighted('isotropic')))
 
-.. code:: python
+.. code:: ipython3
 
    Incident irradiance on front surface of middle pv row: 886.38 W/m2
    Reflected irradiance on back surface of left pv row: 86.40 W/m2
@@ -171,7 +186,7 @@ The two options to run the simulations are:
 - [fast mode](https://sunpower.github.io/pvfactors/theory/problem_formulation.html#fast-simulations): almost instantaneous results for back side irradiance calculations, but using simple reflection assumptions
 
 
-.. code:: python
+.. code:: ipython3
    # Create a function that will build a report
    def fn_report(pvarray): return {'qinc_back': pvarray.ts_pvrows[1].back.get_param_weighted('qinc')}
 
@@ -182,32 +197,48 @@ The two options to run the simulations are:
    df_report = pd.DataFrame(report, index=df_inputs.index)
    df_report
 
-<div>
-<table border="1" class="dataframe">
-  <thead>
-    <tr style="text-align: right;">
-      <th></th>
-      <th>qinc_back</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>2017-08-31 11:00:00</td>
-      <td>110.586509</td>
-    </tr>
-    <tr>
-      <td>2017-08-31 15:00:00</td>
-      <td>86.943571</td>
-    </tr>
-  </tbody>
-</table>
-</div>
+
+.. raw:: html
+
+    <div>
+    <style scoped>
+        .dataframe tbody tr th:only-of-type {
+            vertical-align: middle;
+        }
+
+        .dataframe tbody tr th {
+            vertical-align: top;
+        }
+
+        .dataframe thead th {
+            text-align: right;
+        }
+    </style>
+    <table border="1" class="dataframe">
+      <thead>
+        <tr style="text-align: right;">
+          <th></th>
+          <th>qinc_back</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>2017-08-31 11:00:00</td>
+          <td>110.586509</td>
+        </tr>
+        <tr>
+          <td>2017-08-31 15:00:00</td>
+          <td>86.943571</td>
+        </tr>
+      </tbody>
+    </table>
+    </div>
 
 
 - [full mode](https://sunpower.github.io/pvfactors/theory/problem_formulation.html#full-simulations): which calculates the equilibrium of reflections for all timestamps and all surfaces
 
 
-.. code:: python
+.. code:: ipython3
    # Create a function that will build a report
    from pvfactors.report import example_fn_build_report
 
@@ -219,40 +250,55 @@ The two options to run the simulations are:
    df_report
 
 
-.. code:: python
+.. parsed-literal::
 
-   100%|██████████| 2/2 [00:00<00:00, 51.08it/s]
+    100%|██████████| 2/2 [00:00<00:00, 51.08it/s]
 
 
-<div>
-<table border="1" class="dataframe">
-  <thead>
-    <tr style="text-align: right;">
-      <th></th>
-      <th>qinc_front</th>
-      <th>qinc_back</th>
-      <th>iso_front</th>
-      <th>iso_back</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>2017-08-31 11:00:00</td>
-      <td>1034.967753</td>
-      <td>106.627832</td>
-      <td>20.848345</td>
-      <td>0.115792</td>
-    </tr>
-    <tr>
-      <td>2017-08-31 15:00:00</td>
-      <td>886.376819</td>
-      <td>79.668878</td>
-      <td>54.995702</td>
-      <td>1.255482</td>
-    </tr>
-  </tbody>
-</table>
-</div>
+.. raw:: html
+
+    <div>
+    <style scoped>
+        .dataframe tbody tr th:only-of-type {
+            vertical-align: middle;
+        }
+
+        .dataframe tbody tr th {
+            vertical-align: top;
+        }
+
+        .dataframe thead th {
+            text-align: right;
+        }
+    </style>
+    <table border="1" class="dataframe">
+      <thead>
+        <tr style="text-align: right;">
+          <th></th>
+          <th>qinc_front</th>
+          <th>qinc_back</th>
+          <th>iso_front</th>
+          <th>iso_back</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>2017-08-31 11:00:00</td>
+          <td>1034.967753</td>
+          <td>106.627832</td>
+          <td>20.848345</td>
+          <td>0.115792</td>
+        </tr>
+        <tr>
+          <td>2017-08-31 15:00:00</td>
+          <td>886.376819</td>
+          <td>79.668878</td>
+          <td>54.995702</td>
+          <td>1.255482</td>
+        </tr>
+      </tbody>
+    </table>
+    </div>
 
 
 
@@ -308,6 +354,8 @@ To install the package in editable mode, you can use:
 
 
 .. rubric:: References
+
+.. _link: https://pdfs.semanticscholar.org/ebb2/35e3c3796b158e1a3c45b40954e60d876ea9.pdf
 
 .. [#pvfactors_paper] Anoma, M., Jacob, D., Bourne, B. C., Scholl, J. A., Riley, D. M., & Hansen, C. W. (2017). View Factor Model and Validation for Bifacial PV and Diffuse Shade on Single-Axis Trackers. In 44th IEEE Photovoltaic Specialist Conference.
 
