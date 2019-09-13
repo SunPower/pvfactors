@@ -26,7 +26,8 @@ def test_pvengine_float_inputs_iso(params):
             params['surface_azimuth'],
             params['rho_ground'])
     # Checks
-    np.testing.assert_almost_equal(eng.irradiance.direct['front_pvrow'], DNI)
+    np.testing.assert_almost_equal(eng.irradiance.direct['front_illum_pvrow'],
+                                   DNI)
 
     # Run timestep
     pvarray = eng.run_full_mode_timestep(0)
@@ -60,7 +61,8 @@ def test_pvengine_float_inputs_perez(params):
             params['surface_azimuth'],
             params['rho_ground'])
     # Checks
-    np.testing.assert_almost_equal(eng.irradiance.direct['front_pvrow'], DNI)
+    np.testing.assert_almost_equal(eng.irradiance.direct['front_illum_pvrow'],
+                                   DNI)
 
     # Run timestep
     pvarray = eng.run_full_mode_timestep(0)
@@ -134,7 +136,8 @@ def test_fast_mode_loop_like(params):
             params['solar_azimuth'], params['surface_tilt'],
             params['surface_azimuth'], params['rho_ground'])
     # Checks
-    np.testing.assert_almost_equal(eng.irradiance.direct['front_pvrow'], DNI)
+    np.testing.assert_almost_equal(eng.irradiance.direct['front_illum_pvrow'],
+                                   DNI)
 
     # Run timestep
     pvarray = _fast_mode_with_loop(eng.pvarray, eng.irradiance,
@@ -142,7 +145,7 @@ def test_fast_mode_loop_like(params):
     # Checks
     assert isinstance(pvarray, OrderedPVArray)
     np.testing.assert_almost_equal(
-        pvarray.pvrows[1].back.get_param_weighted('qinc'), 123.7087347744459)
+        pvarray.pvrows[1].back.get_param_weighted('qinc'), 119.0505580124769)
 
 
 def test_run_fast_mode_isotropic(params):
@@ -172,7 +175,8 @@ def test_run_fast_mode_isotropic(params):
             params['surface_tilt'], params['surface_azimuth'],
             params['rho_ground'])
     # Checks
-    np.testing.assert_almost_equal(eng.irradiance.direct['front_pvrow'], DNI)
+    np.testing.assert_almost_equal(eng.irradiance.direct['front_illum_pvrow'],
+                                   DNI)
 
     # Expected value
     qinc_expected = 122.73453
@@ -220,14 +224,16 @@ def test_run_fast_mode_perez(params):
             params['surface_tilt'], params['surface_azimuth'],
             params['rho_ground'])
     # Checks
-    np.testing.assert_almost_equal(eng.irradiance.direct['front_pvrow'], DNI)
+    np.testing.assert_almost_equal(eng.irradiance.direct['front_illum_pvrow'],
+                                   DNI)
 
+    expected_back_qinc = 119.095285
     # Run fast mode
     qinc = eng.run_fast_mode(
         fn_build_report=lambda pvarray: (pvarray.ts_pvrows[1]
                                          .back.get_param_weighted('qinc')))
     # Check results
-    np.testing.assert_allclose(qinc, 123.753462)
+    np.testing.assert_allclose(qinc, expected_back_qinc)
 
     # Without providing segment index
     eng.fast_mode_segment_index = None
@@ -235,7 +241,7 @@ def test_run_fast_mode_perez(params):
         fn_build_report=lambda pvarray: (pvarray.ts_pvrows[1]
                                          .back.get_param_weighted('qinc')))
     # Check results
-    np.testing.assert_allclose(qinc, 123.753462)
+    np.testing.assert_allclose(qinc, expected_back_qinc)
 
 
 def test_run_fast_mode_segments(params):
@@ -268,14 +274,15 @@ def test_run_fast_mode_segments(params):
             params['surface_tilt'], params['surface_azimuth'],
             params['rho_ground'])
     # Checks
-    np.testing.assert_almost_equal(eng.irradiance.direct['front_pvrow'], DNI)
+    np.testing.assert_almost_equal(eng.irradiance.direct['front_illum_pvrow'],
+                                   DNI)
 
     # Define report function to grab irradiance from PV row segment
     def fn_report(pvarray): return (pvarray.ts_pvrows[1].back.list_segments[2]
                                     .get_param_weighted('qinc'))
 
     # Expected value for middle segment
-    qinc_expected = 121.39964
+    qinc_expected = 116.572594
     # Run fast mode for specific segment
     qinc_segment = eng.run_fast_mode(fn_build_report=fn_report)
     # Check results
@@ -300,7 +307,6 @@ def test_run_fast_mode_compare_to_loop_like(params):
     pvarray = OrderedPVArray.init_from_dict(
         params, param_names=irradiance_model.params)
     fast_mode_pvrow_index = 1
-    fast_mode_segment_index = 0
     # Irradiance inputs
     timestamps = dt.datetime(2019, 6, 11, 11)
     DNI = 1000.
@@ -406,7 +412,7 @@ def test_fast_mode_8760(params, df_inputs_clearsky_8760):
         pvrow_index=0)
 
     # Check than annual energy on back is consistent
-    np.testing.assert_allclose(np.nansum(qinc) / 1e3, 349.9345317405013)
+    np.testing.assert_allclose(np.nansum(qinc) / 1e3, 342.848005)
 
 
 def _fast_mode_with_loop(pvarray, irradiance, vf_calculator, pvrow_idx, idx):
@@ -486,11 +492,11 @@ def test_run_fast_and_full_modes_sequentially(params, fn_report_example):
     # Run full mode
     report = eng.run_full_mode(fn_build_report=fn_report_example)
 
-    np.testing.assert_allclose(qinc_fast, 123.75346216)
+    np.testing.assert_allclose(qinc_fast, 119.095285)
     np.testing.assert_allclose(report['qinc_back'], 116.49050349491)
 
 
-def test_pvengine_float_inputs_perez_transparency_spacing(params):
+def test_pvengine_float_inputs_perez_transparency_spacing_full(params):
     """Test that module transparency and spacing are having the
     expected effect to calculated PV back side irradiance"""
 
@@ -540,6 +546,61 @@ def test_pvengine_float_inputs_perez_transparency_spacing(params):
     expected_back_qinc = 132.13881181118185  # higher than when params are 0
     w_spacing_transparency_back_qinc = (
         pvarray.pvrows[1].back.get_param_weighted('qinc'))
+    np.testing.assert_almost_equal(
+        w_spacing_transparency_back_qinc, expected_back_qinc)
+    assert no_spacing_transparency_back_qinc < w_spacing_transparency_back_qinc
+
+
+def test_pvengine_float_inputs_perez_transparency_spacing_fast(params):
+    """Test that module transparency and spacing are having the
+    expected effect to calculated PV back side irradiance"""
+
+    # Irradiance inputs
+    timestamps = dt.datetime(2019, 6, 11, 11)
+    DNI = 1000.
+    DHI = 100.
+
+    # --- with 0 transparency and spacing
+    # Create models
+    irr_params = {'module_transparency': 0.,
+                  'module_spacing_ratio': 0.}
+    irradiance_model = HybridPerezOrdered(**irr_params)
+    pvarray = OrderedPVArray.init_from_dict(params)
+    eng = PVEngine(pvarray, irradiance_model=irradiance_model)
+
+    # Fit engine
+    eng.fit(timestamps, DNI, DHI,
+            params['solar_zenith'],
+            params['solar_azimuth'],
+            params['surface_tilt'],
+            params['surface_azimuth'],
+            params['rho_ground'])
+    # Run timestep
+    def fn_report(pvarray): return (pvarray.ts_pvrows[1]
+                                    .back.get_param_weighted('qinc'))
+    no_spacing_transparency_back_qinc = \
+        eng.run_fast_mode(fn_build_report=fn_report, pvrow_index=1)
+
+    # --- with non-0 transparency and spacing
+    # Create models
+    irr_params = {'module_transparency': 0.1,
+                  'module_spacing_ratio': 0.1}
+    irradiance_model = HybridPerezOrdered(**irr_params)
+    pvarray = OrderedPVArray.init_from_dict(params)
+    eng = PVEngine(pvarray, irradiance_model=irradiance_model)
+
+    # Fit engine
+    eng.fit(timestamps, DNI, DHI,
+            params['solar_zenith'],
+            params['solar_azimuth'],
+            params['surface_tilt'],
+            params['surface_azimuth'],
+            params['rho_ground'])
+    # Run timestep
+    w_spacing_transparency_back_qinc = \
+        eng.run_fast_mode(fn_build_report=fn_report, pvrow_index=1)
+    # Checks
+    expected_back_qinc = 134.7143531  # higher than when params are 0
     np.testing.assert_almost_equal(
         w_spacing_transparency_back_qinc, expected_back_qinc)
     assert no_spacing_transparency_back_qinc < w_spacing_transparency_back_qinc

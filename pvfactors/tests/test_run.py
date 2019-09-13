@@ -67,14 +67,14 @@ def test_run_timeseries_engine_fast_mode(fn_report_example, params_serial,
     assert len(report['qinc_back']) == n
     # Test value consistency
     np.testing.assert_almost_equal(np.nansum(report['qinc_back']),
-                                   556.1006350124344)
+                                   548.0011865481954)
     np.testing.assert_almost_equal(np.nansum(report['iso_back']),
                                    18.03732189070727)
     # Check a couple values
     np.testing.assert_almost_equal(report['qinc_back'][7],
-                                   11.308686359671267)
+                                   11.304105184587364)
     np.testing.assert_almost_equal(report['qinc_back'][-8],
-                                   8.747277900741802)
+                                   8.743201975668212)
 
 
 def test_params_irradiance_model():
