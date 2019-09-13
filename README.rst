@@ -21,8 +21,8 @@ pvfactors was originally ported from the SunPower developed 'vf_model' package, 
 Documentation
 -------------
 
-The documentation can be found [here](https://sunpower.github.io/pvfactors).
-It includes a lot of [tutorials](https://sunpower.github.io/pvfactors/tutorials/index.html) that describe the different ways of using pvfactors.
+The documentation can be found `here <https://sunpower.github.io/pvfactors>`_.
+It includes a lot of tutorials_ that describe the different ways of using pvfactors.
 
 
 Quick Start
@@ -31,7 +31,8 @@ Quick Start
 Given some timeseries inputs:
 
 
-.. code:: ipython3
+.. code:: python
+
    # Import external libraries
    from datetime import datetime
    import pandas as pd
@@ -54,19 +55,6 @@ Given some timeseries inputs:
 .. raw:: html
 
     <div>
-    <style scoped>
-        .dataframe tbody tr th:only-of-type {
-            vertical-align: middle;
-        }
-
-        .dataframe tbody tr th {
-            vertical-align: top;
-        }
-
-        .dataframe thead th {
-            text-align: right;
-        }
-    </style>
     <table border="1" class="dataframe">
       <thead>
         <tr style="text-align: right;">
@@ -110,7 +98,8 @@ Given some timeseries inputs:
 And some PV array parameters
 
 
-.. code:: ipython3
+.. code:: python
+
    pvarray_parameters = {
        'n_pvrows': 3,            # number of pv rows
        'pvrow_height': 1,        # height of pvrows (measured at center / torque tube)
@@ -122,7 +111,7 @@ And some PV array parameters
 The user can quickly create a PV array with ``pvfactors``, and manipulate it with the engine
 
 
-.. code:: ipython3
+.. code:: python
 
    from pvfactors.geometry import OrderedPVArray
    # Create PV array
@@ -130,7 +119,7 @@ The user can quickly create a PV array with ``pvfactors``, and manipulate it wit
 
 
 
-.. code:: ipython3
+.. code:: python
 
    from pvfactors.engine import PVEngine
    # Create engine
@@ -144,7 +133,7 @@ The user can quickly create a PV array with ``pvfactors``, and manipulate it wit
 The user can then plot the PV array geometry at any given time of the simulation:
 
 
-.. code:: ipython3
+.. code:: python
 
    # Plot pvarray shapely geometries
    f, ax = plt.subplots(figsize=(10, 5))
@@ -157,7 +146,7 @@ The user can then plot the PV array geometry at any given time of the simulation
 It is then very easy to run simulations using the defined engine:
 
 
-.. code:: ipython3
+.. code:: python
 
    pvarray = engine.run_full_mode_timestep(1)
 
@@ -165,7 +154,7 @@ It is then very easy to run simulations using the defined engine:
 And inspect the results thanks to the simple geometry API
 
 
-.. code:: ipython3
+.. code:: python
    print("Incident irradiance on front surface of middle pv row: %.2f W/m2"
        % (pvarray.pvrows[1].front.get_param_weighted('qinc')))
    print("Reflected irradiance on back surface of left pv row: %.2f W/m2"
@@ -173,7 +162,7 @@ And inspect the results thanks to the simple geometry API
    print("Isotropic irradiance on back surface of right pv row: %.2f W/m2"
        % (pvarray.pvrows[2].back.get_param_weighted('isotropic')))
 
-.. code:: ipython3
+.. code:: python
 
    Incident irradiance on front surface of middle pv row: 886.38 W/m2
    Reflected irradiance on back surface of left pv row: 86.40 W/m2
@@ -183,10 +172,10 @@ And inspect the results thanks to the simple geometry API
 The users can also run simulations for all provided timestamps, and obtain a "report" that will look like whatever the users want, and which can rely on the simple API shown above.
 The two options to run the simulations are:
 
-- [fast mode](https://sunpower.github.io/pvfactors/theory/problem_formulation.html#fast-simulations): almost instantaneous results for back side irradiance calculations, but using simple reflection assumptions
+- `fast mode`_: almost instantaneous results for back side irradiance calculations, but using simple reflection assumptions
 
 
-.. code:: ipython3
+.. code:: python
    # Create a function that will build a report
    def fn_report(pvarray): return {'qinc_back': pvarray.ts_pvrows[1].back.get_param_weighted('qinc')}
 
@@ -201,19 +190,6 @@ The two options to run the simulations are:
 .. raw:: html
 
     <div>
-    <style scoped>
-        .dataframe tbody tr th:only-of-type {
-            vertical-align: middle;
-        }
-
-        .dataframe tbody tr th {
-            vertical-align: top;
-        }
-
-        .dataframe thead th {
-            text-align: right;
-        }
-    </style>
     <table border="1" class="dataframe">
       <thead>
         <tr style="text-align: right;">
@@ -235,10 +211,10 @@ The two options to run the simulations are:
     </div>
 
 
-- [full mode](https://sunpower.github.io/pvfactors/theory/problem_formulation.html#full-simulations): which calculates the equilibrium of reflections for all timestamps and all surfaces
+- `full mode`_: which calculates the equilibrium of reflections for all timestamps and all surfaces
 
 
-.. code:: ipython3
+.. code:: python
    # Create a function that will build a report
    from pvfactors.report import example_fn_build_report
 
@@ -258,19 +234,6 @@ The two options to run the simulations are:
 .. raw:: html
 
     <div>
-    <style scoped>
-        .dataframe tbody tr th:only-of-type {
-            vertical-align: middle;
-        }
-
-        .dataframe tbody tr th {
-            vertical-align: top;
-        }
-
-        .dataframe thead th {
-            text-align: right;
-        }
-    </style>
     <table border="1" class="dataframe">
       <thead>
         <tr style="text-align: right;">
@@ -305,13 +268,13 @@ The two options to run the simulations are:
 Installation
 ------------
 
-pvfactors is currently compatible and tested with Python versions 2.7 and 3.6, and is available in [PyPI](https://pypi.org/project/pvfactors/).
+pvfactors is currently compatible and tested with Python versions 2.7 and 3.6, and is available in `PyPI <https://pypi.org/project/pvfactors/>`_.
 
-The easiest way to install pvfactors is to use [pip](https://pip.pypa.io/en/stable/) as follows:
+The easiest way to install pvfactors is to use pip_ as follows:
 
     $ pip install pvfactors
 
-The package wheel files are also available in the [release section](https://github.com/SunPower/pvfactors/releases) of the Github repository.
+The package wheel files are also available in the `release section`_ of the Github repository.
 
 
 Requirements
@@ -319,11 +282,11 @@ Requirements
 
 Requirements are included in the ``requirements.txt`` file of the package. Here is
 a list of important dependencies:
-* [shapely](https://pypi.python.org/pypi/Shapely)
-* [numpy](https://pypi.python.org/pypi/numpy)
-* [scipy](https://pypi.python.org/pypi/scipy)
-* [pandas](https://pypi.python.org/pypi/pandas)
-* [pvlib-python](https://pypi.python.org/pypi/pvlib)
+* `shapely <https://pypi.python.org/pypi/Shapely>`_
+* `numpy <https://pypi.python.org/pypi/numpy>`_
+* `scipy <https://pypi.python.org/pypi/scipy>`_
+* `pandas <https://pypi.python.org/pypi/pandas>`_
+* `pvlib-python <https://pypi.python.org/pypi/pvlib>`_
 
 
 Citing pvfactors
@@ -339,7 +302,7 @@ Contributing
 ------------
 
 Contributions are needed in order to improve pvfactors.
-If you wish to contribute, you can start by forking and cloning the repository, and then installing pvfactors using [pip](https://pip.pypa.io/en/stable/) in the root folder of the package:
+If you wish to contribute, you can start by forking and cloning the repository, and then installing pvfactors using pip_ in the root folder of the package:
 
 .. code:: sh
 
@@ -353,11 +316,23 @@ To install the package in editable mode, you can use:
     $ pip install -e .
 
 
-.. rubric:: References
+References
+----------
+
+.. [#pvfactors_paper] Anoma, M., Jacob, D., Bourne, B. C., Scholl, J. A., Riley, D. M., & Hansen, C. W. (2017). View Factor Model and Validation for Bifacial PV and Diffuse Shade on Single-Axis Trackers. In 44th IEEE Photovoltaic Specialist Conference.
+
 
 .. _link: https://pdfs.semanticscholar.org/ebb2/35e3c3796b158e1a3c45b40954e60d876ea9.pdf
 
-.. [#pvfactors_paper] Anoma, M., Jacob, D., Bourne, B. C., Scholl, J. A., Riley, D. M., & Hansen, C. W. (2017). View Factor Model and Validation for Bifacial PV and Diffuse Shade on Single-Axis Trackers. In 44th IEEE Photovoltaic Specialist Conference.
+.. _tutorials: https://sunpower.github.io/pvfactors/tutorials/index.html
+
+.. _`full mode`: https://sunpower.github.io/pvfactors/theory/problem_formulation.html#full-simulations
+
+.. _`fast mode`: https://sunpower.github.io/pvfactors/theory/problem_formulation.html#fast-simulations
+
+.. _pip: https://pip.pypa.io/en/stable/
+
+.. _`release section`: https://github.com/SunPower/pvfactors/releases
 
 .. |Logo| image:: https://raw.githubusercontent.com/SunPower/pvfactors/master/docs/sphinx/_static/logo.png
           :target: http://sunpower.github.io/pvfactors/
