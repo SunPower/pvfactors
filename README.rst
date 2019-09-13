@@ -125,9 +125,9 @@ The user can quickly create a PV array with ``pvfactors``, and manipulate it wit
    engine = PVEngine(pvarray)
    # Fit engine to data
    engine.fit(df_inputs.index, df_inputs.dni, df_inputs.dhi,
-       df_inputs.solar_zenith, df_inputs.solar_azimuth,
-       df_inputs.surface_tilt, df_inputs.surface_azimuth,
-       df_inputs.albedo)
+              df_inputs.solar_zenith, df_inputs.solar_azimuth,
+              df_inputs.surface_tilt, df_inputs.surface_azimuth,
+              df_inputs.albedo)
 
 The user can then plot the PV array geometry at any given time of the simulation:
 
