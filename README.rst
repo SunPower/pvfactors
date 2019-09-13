@@ -156,11 +156,11 @@ And inspect the results thanks to the simple geometry API
 .. code:: python
 
    print("Incident irradiance on front surface of middle pv row: %.2f W/m2"
-       % (pvarray.pvrows[1].front.get_param_weighted('qinc')))
+         % (pvarray.pvrows[1].front.get_param_weighted('qinc')))
    print("Reflected irradiance on back surface of left pv row: %.2f W/m2"
-       % (pvarray.pvrows[0].back.get_param_weighted('reflection')))
+         % (pvarray.pvrows[0].back.get_param_weighted('reflection')))
    print("Isotropic irradiance on back surface of right pv row: %.2f W/m2"
-       % (pvarray.pvrows[2].back.get_param_weighted('isotropic')))
+         % (pvarray.pvrows[2].back.get_param_weighted('isotropic')))
 
 .. parsed-literal::
 
