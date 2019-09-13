@@ -1,0 +1,25 @@
+.. _whatsnew_1210:
+
+v1.2.1 (September 13, 2019)
+===========================
+
+Enhancements
+------------
+
+Added module spacing and transparency inputs to irradiance models, and updated README file to make it clearer.
+
+* Add module transparency and spacing to irradiance models (#72)
+* Use reStructuredText for README and add TOC (#74)
+
+Fixes
+-----
+
+Fix small issue in irradiance models for fast mode: made sure that shaded surfaces are not getting any Perez circumsolar irradiance, except via module spacing and transparency.
+
+* Fix irradiance models for fast mode shaded surfaces (#73)
+
+
+Contributors
+------------
+
+* Marc Anoma (:ghuser:`anomam`)
