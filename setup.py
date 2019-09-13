@@ -6,7 +6,7 @@ import versioneer
 DESCRIPTION = (
     '2D View Factor Model to calculate the irradiance incident on ' +
     'various surfaces of PV arrays')
-with open('README.md', 'r') as f:
+with open('README.rst', 'r') as f:
     LONG_DESCRIPTION = f.read()
 with open('requirements.txt', 'r') as f:
     INSTALL_REQUIRES = list(f)
@@ -36,7 +36,6 @@ TESTS_REQUIRES = ['pytest>=3.2.1', 'pytest-mock>=1.10.0', 'mock']
 setup(name=DISTNAME,
       description=DESCRIPTION,
       long_description=LONG_DESCRIPTION,
-      long_description_content_type='text/markdown',
       version=versioneer.get_version(),
       cmdclass=versioneer.get_cmdclass(),
       author=AUTHOR,
