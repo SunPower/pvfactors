@@ -360,8 +360,6 @@ To install the package in editable mode, you can use:
 .. [#pvfactors_paper] Anoma, M., Jacob, D., Bourne, B. C., Scholl, J. A., Riley, D. M., & Hansen, C. W. (2017). View Factor Model and Validation for Bifacial PV and Diffuse Shade on Single-Axis Trackers. In 44th IEEE Photovoltaic Specialist Conference.
 
 .. |Logo| image:: https://raw.githubusercontent.com/SunPower/pvfactors/master/docs/sphinx/_static/logo.png
-          :align: center
-          :width: 60%
           :target: http://sunpower.github.io/pvfactors/
 
 .. |CircleCI| image:: https://circleci.com/gh/SunPower/pvfactors.svg?style=shield
