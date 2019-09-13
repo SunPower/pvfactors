@@ -273,6 +273,8 @@ pvfactors is currently compatible and tested with Python versions 2.7 and 3.6, a
 
 The easiest way to install pvfactors is to use pip_ as follows:
 
+.. code:: sh
+
     $ pip install pvfactors
 
 The package wheel files are also available in the `release section`_ of the Github repository.
@@ -295,6 +297,9 @@ Citing pvfactors
 
 We appreciate your use of pvfactors.
 If you use pvfactors in a published work, we kindly ask that you cite:
+
+
+.. parsed-literal::
 
    Anoma, M., Jacob, D., Bourne, B.C., Scholl, J.A., Riley, D.M. and Hansen, C.W., 2017. View Factor Model and Validation for Bifacial PV and Diffuse Shade on Single-Axis Trackers. In 44th IEEE Photovoltaic Specialist Conference.
 
