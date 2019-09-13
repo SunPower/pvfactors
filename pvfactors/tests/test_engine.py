@@ -496,7 +496,7 @@ def test_run_fast_and_full_modes_sequentially(params, fn_report_example):
     np.testing.assert_allclose(report['qinc_back'], 116.49050349491)
 
 
-def test_pvengine_float_inputs_perez_transparency_spacing(params):
+def test_pvengine_float_inputs_perez_transparency_spacing_full(params):
     """Test that module transparency and spacing are having the
     expected effect to calculated PV back side irradiance"""
 
@@ -546,6 +546,61 @@ def test_pvengine_float_inputs_perez_transparency_spacing(params):
     expected_back_qinc = 132.13881181118185  # higher than when params are 0
     w_spacing_transparency_back_qinc = (
         pvarray.pvrows[1].back.get_param_weighted('qinc'))
+    np.testing.assert_almost_equal(
+        w_spacing_transparency_back_qinc, expected_back_qinc)
+    assert no_spacing_transparency_back_qinc < w_spacing_transparency_back_qinc
+
+
+def test_pvengine_float_inputs_perez_transparency_spacing_fast(params):
+    """Test that module transparency and spacing are having the
+    expected effect to calculated PV back side irradiance"""
+
+    # Irradiance inputs
+    timestamps = dt.datetime(2019, 6, 11, 11)
+    DNI = 1000.
+    DHI = 100.
+
+    # --- with 0 transparency and spacing
+    # Create models
+    irr_params = {'module_transparency': 0.,
+                  'module_spacing_ratio': 0.}
+    irradiance_model = HybridPerezOrdered(**irr_params)
+    pvarray = OrderedPVArray.init_from_dict(params)
+    eng = PVEngine(pvarray, irradiance_model=irradiance_model)
+
+    # Fit engine
+    eng.fit(timestamps, DNI, DHI,
+            params['solar_zenith'],
+            params['solar_azimuth'],
+            params['surface_tilt'],
+            params['surface_azimuth'],
+            params['rho_ground'])
+    # Run timestep
+    def fn_report(pvarray): return (pvarray.ts_pvrows[1]
+                                    .back.get_param_weighted('qinc'))
+    no_spacing_transparency_back_qinc = \
+        eng.run_fast_mode(fn_build_report=fn_report, pvrow_index=1)
+
+    # --- with non-0 transparency and spacing
+    # Create models
+    irr_params = {'module_transparency': 0.1,
+                  'module_spacing_ratio': 0.1}
+    irradiance_model = HybridPerezOrdered(**irr_params)
+    pvarray = OrderedPVArray.init_from_dict(params)
+    eng = PVEngine(pvarray, irradiance_model=irradiance_model)
+
+    # Fit engine
+    eng.fit(timestamps, DNI, DHI,
+            params['solar_zenith'],
+            params['solar_azimuth'],
+            params['surface_tilt'],
+            params['surface_azimuth'],
+            params['rho_ground'])
+    # Run timestep
+    w_spacing_transparency_back_qinc = \
+        eng.run_fast_mode(fn_build_report=fn_report, pvrow_index=1)
+    # Checks
+    expected_back_qinc = 134.7143531  # higher than when params are 0
     np.testing.assert_almost_equal(
         w_spacing_transparency_back_qinc, expected_back_qinc)
     assert no_spacing_transparency_back_qinc < w_spacing_transparency_back_qinc
