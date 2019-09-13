@@ -269,9 +269,7 @@ The two options to run the simulations are:
 Installation
 ------------
 
-pvfactors is currently compatible and tested with Python versions 2.7 and 3.6, and is available in `PyPI <https://pypi.org/project/pvfactors/>`_.
-
-The easiest way to install pvfactors is to use pip_ as follows:
+pvfactors is currently compatible and tested with Python 2 and 3, and is available in `PyPI <https://pypi.org/project/pvfactors/>`_. The easiest way to install pvfactors is to use pip_ as follows:
 
 .. code:: sh
 
@@ -295,8 +293,7 @@ Requirements are included in the ``requirements.txt`` file of the package. Here 
 Citing pvfactors
 ----------------
 
-We appreciate your use of pvfactors.
-If you use pvfactors in a published work, we kindly ask that you cite:
+We appreciate your use of pvfactors. If you use pvfactors in a published work, we kindly ask that you cite:
 
 
 .. parsed-literal::
