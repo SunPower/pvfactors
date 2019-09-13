@@ -341,8 +341,8 @@ def test_hybridperez_ordered_front(params_irr):
     # Check total perez vec
     expected_total_perez_vec = [
         522.618262, 522.618262, 522.618262, 522.618262, 522.618262,
-        100., 807.243186, 100.136405, 0., 807.243186,
-        100.136405, 0., 807.243186, 0., 63.217593]
+        63.217593, 807.243186, 38.593656, 0., 807.243186,
+        38.593656, 0., 807.243186, 0., 63.217593]
     np.testing.assert_array_almost_equal(total_perez_vec,
                                          expected_total_perez_vec)
 
@@ -491,7 +491,7 @@ def test_hybridperez_ordered_back(params_irr):
     # Check total perez vec
     expected_total_perez_vec = [
         522.618262, 522.618262, 522.618262, 522.618262, 522.618262,
-        100., 104.387248, 0., 0., 104.387248,
+        63.217593, 104.387248, 0., 0., 104.387248,
         0., 0., 104.387248, 0., 63.217593]
     np.testing.assert_array_almost_equal(total_perez_vec,
                                          expected_total_perez_vec)

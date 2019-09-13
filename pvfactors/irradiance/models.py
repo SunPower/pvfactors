@@ -468,13 +468,13 @@ class HybridPerezOrdered(BaseModel):
         self.total_perez['front_shaded_pvrow'] = (
             total_perez_front_pvrow
             - self.direct['front_illum_pvrow']
-            # - self.circumsolar['front_illum_pvrow']
+            - self.circumsolar['front_illum_pvrow']
             + self.direct['front_shaded_pvrow']
             + self.circumsolar['front_shaded_pvrow']
         )
         self.total_perez['ground_shaded'] = (
             DHI
-            # - self.circumsolar['ground_illum']
+            - self.circumsolar['ground_illum']
             + self.circumsolar['ground_shaded']
             + self.direct['ground_shaded'])
         self.total_perez['ground_illum'] = GHI

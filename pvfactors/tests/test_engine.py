@@ -145,7 +145,7 @@ def test_fast_mode_loop_like(params):
     # Checks
     assert isinstance(pvarray, OrderedPVArray)
     np.testing.assert_almost_equal(
-        pvarray.pvrows[1].back.get_param_weighted('qinc'), 123.7087347744459)
+        pvarray.pvrows[1].back.get_param_weighted('qinc'), 119.0505580124769)
 
 
 def test_run_fast_mode_isotropic(params):
@@ -227,12 +227,13 @@ def test_run_fast_mode_perez(params):
     np.testing.assert_almost_equal(eng.irradiance.direct['front_illum_pvrow'],
                                    DNI)
 
+    expected_back_qinc = 119.095285
     # Run fast mode
     qinc = eng.run_fast_mode(
         fn_build_report=lambda pvarray: (pvarray.ts_pvrows[1]
                                          .back.get_param_weighted('qinc')))
     # Check results
-    np.testing.assert_allclose(qinc, 123.753462)
+    np.testing.assert_allclose(qinc, expected_back_qinc)
 
     # Without providing segment index
     eng.fast_mode_segment_index = None
@@ -240,7 +241,7 @@ def test_run_fast_mode_perez(params):
         fn_build_report=lambda pvarray: (pvarray.ts_pvrows[1]
                                          .back.get_param_weighted('qinc')))
     # Check results
-    np.testing.assert_allclose(qinc, 123.753462)
+    np.testing.assert_allclose(qinc, expected_back_qinc)
 
 
 def test_run_fast_mode_segments(params):
@@ -281,7 +282,7 @@ def test_run_fast_mode_segments(params):
                                     .get_param_weighted('qinc'))
 
     # Expected value for middle segment
-    qinc_expected = 121.39964
+    qinc_expected = 116.572594
     # Run fast mode for specific segment
     qinc_segment = eng.run_fast_mode(fn_build_report=fn_report)
     # Check results
@@ -411,7 +412,7 @@ def test_fast_mode_8760(params, df_inputs_clearsky_8760):
         pvrow_index=0)
 
     # Check than annual energy on back is consistent
-    np.testing.assert_allclose(np.nansum(qinc) / 1e3, 349.9345317405013)
+    np.testing.assert_allclose(np.nansum(qinc) / 1e3, 342.848005)
 
 
 def _fast_mode_with_loop(pvarray, irradiance, vf_calculator, pvrow_idx, idx):
@@ -491,7 +492,7 @@ def test_run_fast_and_full_modes_sequentially(params, fn_report_example):
     # Run full mode
     report = eng.run_full_mode(fn_build_report=fn_report_example)
 
-    np.testing.assert_allclose(qinc_fast, 123.75346216)
+    np.testing.assert_allclose(qinc_fast, 119.095285)
     np.testing.assert_allclose(report['qinc_back'], 116.49050349491)
 
 
