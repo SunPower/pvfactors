@@ -153,6 +153,7 @@ And inspect the results thanks to the simple geometry API
 
 
 .. code:: python
+
    print("Incident irradiance on front surface of middle pv row: %.2f W/m2"
        % (pvarray.pvrows[1].front.get_param_weighted('qinc')))
    print("Reflected irradiance on back surface of left pv row: %.2f W/m2"
@@ -160,7 +161,7 @@ And inspect the results thanks to the simple geometry API
    print("Isotropic irradiance on back surface of right pv row: %.2f W/m2"
        % (pvarray.pvrows[2].back.get_param_weighted('isotropic')))
 
-.. code:: python
+.. parsed-literal::
 
    Incident irradiance on front surface of middle pv row: 886.38 W/m2
    Reflected irradiance on back surface of left pv row: 86.40 W/m2
@@ -174,6 +175,7 @@ The two options to run the simulations are:
 
 
 .. code:: python
+
    # Create a function that will build a report
    def fn_report(pvarray): return {'qinc_back': pvarray.ts_pvrows[1].back.get_param_weighted('qinc')}
 
@@ -213,6 +215,7 @@ The two options to run the simulations are:
 
 
 .. code:: python
+
    # Create a function that will build a report
    from pvfactors.report import example_fn_build_report
 
