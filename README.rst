@@ -39,15 +39,13 @@ Given some timeseries inputs:
 
    # Create input data
    df_inputs = pd.DataFrame(
-       {
-           'solar_zenith': [20., 50.],
-           'solar_azimuth': [110., 250.],
-           'surface_tilt': [10., 20.],
-           'surface_azimuth': [90., 270.],
-           'dni': [1000., 900.],
-           'dhi': [50., 100.],
-           'albedo': [0.2, 0.2]
-       },
+       {'solar_zenith': [20., 50.],
+        'solar_azimuth': [110., 250.],
+        'surface_tilt': [10., 20.],
+        'surface_azimuth': [90., 270.],
+        'dni': [1000., 900.],
+        'dhi': [50., 100.],
+        'albedo': [0.2, 0.2]},
        index=[datetime(2017, 8, 31, 11), datetime(2017, 8, 31, 15)])
    df_inputs
 
