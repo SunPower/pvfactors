@@ -13,6 +13,7 @@ Contents:
    intro
    view_factors
    problem_formulation
+   irradiance_models
 
 
 .. rubric:: Footnotes

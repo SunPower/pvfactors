@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>models &mdash; pvfactors 1.2.0 documentation</title>
+  <title>models &mdash; pvfactors 1.2.1 documentation</title>
   
 
   
@@ -66,7 +66,7 @@
             
             
               <div class="version">
-                1.2.0
+                1.2.1
               </div>
             
           
@@ -181,10 +181,12 @@
 <span class="sd">    it to the PV array.&quot;&quot;&quot;</span>
 
     <span class="n">params</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;rho&#39;</span><span class="p">,</span> <span class="s1">&#39;inv_rho&#39;</span><span class="p">,</span> <span class="s1">&#39;direct&#39;</span><span class="p">,</span> <span class="s1">&#39;isotropic&#39;</span><span class="p">,</span> <span class="s1">&#39;reflection&#39;</span><span class="p">]</span>
-    <span class="n">cats</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;ground&#39;</span><span class="p">,</span> <span class="s1">&#39;front_pvrow&#39;</span><span class="p">,</span> <span class="s1">&#39;back_pvrow&#39;</span><span class="p">]</span>
+    <span class="n">cats</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;ground_illum&#39;</span><span class="p">,</span> <span class="s1">&#39;ground_shaded&#39;</span><span class="p">,</span> <span class="s1">&#39;front_illum_pvrow&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;back_illum_pvrow&#39;</span><span class="p">,</span> <span class="s1">&#39;front_shaded_pvrow&#39;</span><span class="p">,</span> <span class="s1">&#39;back_shaded_pvrow&#39;</span><span class="p">]</span>
     <span class="n">irradiance_comp</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;direct&#39;</span><span class="p">]</span>
 
-<div class="viewcode-block" id="IsotropicOrdered.__init__"><a class="viewcode-back" href="../developer/generated/models.IsotropicOrdered.html#models.IsotropicOrdered.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rho_front</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span> <span class="n">rho_back</span><span class="o">=</span><span class="mf">0.03</span><span class="p">):</span>
+<div class="viewcode-block" id="IsotropicOrdered.__init__"><a class="viewcode-back" href="../developer/generated/models.IsotropicOrdered.html#models.IsotropicOrdered.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rho_front</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span> <span class="n">rho_back</span><span class="o">=</span><span class="mf">0.03</span><span class="p">,</span> <span class="n">module_transparency</span><span class="o">=</span><span class="mf">0.</span><span class="p">,</span>
+                 <span class="n">module_spacing_ratio</span><span class="o">=</span><span class="mf">0.</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Initialize irradiance model values that will be saved later on.</span>
 
 <span class="sd">        Parameters</span>
@@ -193,12 +195,24 @@
 <span class="sd">            Reflectivity of the front side of the PV rows (default = 0.01)</span>
 <span class="sd">        rho_back : float, optional</span>
 <span class="sd">            Reflectivity of the back side of the PV rows (default = 0.03)</span>
+<span class="sd">        module_transparency : float, optional</span>
+<span class="sd">            Module transparency (from 0 to 1), which will let some direct light</span>
+<span class="sd">            pass through the PV modules in the PV rows and reach the shaded</span>
+<span class="sd">            ground (Default = 0., fully opaque)</span>
+<span class="sd">        module_spacing_ratio : float, optional</span>
+<span class="sd">            Module spacing ratio (from 0 to 1), which is the ratio of the area</span>
+<span class="sd">            covered by the space between PV modules over the total area of the</span>
+<span class="sd">            PV rows, and which determines how much direct light will reach the</span>
+<span class="sd">            shaded ground through the PV rows</span>
+<span class="sd">            (Default = 0., no spacing at all)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">direct</span> <span class="o">=</span> <span class="nb">dict</span><span class="o">.</span><span class="n">fromkeys</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cats</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">total_perez</span> <span class="o">=</span> <span class="nb">dict</span><span class="o">.</span><span class="n">fromkeys</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cats</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">isotropic_luminance</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">rho_front</span> <span class="o">=</span> <span class="n">rho_front</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">rho_back</span> <span class="o">=</span> <span class="n">rho_back</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">module_transparency</span> <span class="o">=</span> <span class="n">module_transparency</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">module_spacing_ratio</span> <span class="o">=</span> <span class="n">module_spacing_ratio</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">albedo</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">GHI</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">DHI</span> <span class="o">=</span> <span class="kc">None</span></div>
@@ -260,7 +274,13 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">albedo</span> <span class="o">=</span> <span class="n">albedo</span>
 
         <span class="c1"># DNI seen by ground illuminated surfaces</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">direct</span><span class="p">[</span><span class="s1">&#39;ground&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">DNI</span> <span class="o">*</span> <span class="n">cosd</span><span class="p">(</span><span class="n">solar_zenith</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">direct</span><span class="p">[</span><span class="s1">&#39;ground_illum&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">DNI</span> <span class="o">*</span> <span class="n">cosd</span><span class="p">(</span><span class="n">solar_zenith</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">direct</span><span class="p">[</span><span class="s1">&#39;ground_shaded&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="c1"># Direct light through PV modules spacing</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">direct</span><span class="p">[</span><span class="s1">&#39;ground_illum&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">module_spacing_ratio</span>
+            <span class="c1"># Direct light through PV modules, by transparency</span>
+            <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">direct</span><span class="p">[</span><span class="s1">&#39;ground_illum&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="mf">1.</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">module_spacing_ratio</span><span class="p">)</span>
+            <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">module_transparency</span><span class="p">)</span>
 
         <span class="c1"># Calculate AOI on front pvrow using pvlib implementation</span>
         <span class="n">aoi_front_pvrow</span> <span class="o">=</span> <span class="n">aoi_function</span><span class="p">(</span>
@@ -269,11 +289,32 @@
 
         <span class="c1"># DNI seen by pvrow illuminated surfaces</span>
         <span class="n">front_is_illum</span> <span class="o">=</span> <span class="n">aoi_front_pvrow</span> <span class="o">&lt;=</span> <span class="mi">90</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">direct</span><span class="p">[</span><span class="s1">&#39;front_pvrow&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span>
+        <span class="c1"># direct</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">direct</span><span class="p">[</span><span class="s1">&#39;front_illum_pvrow&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span>
             <span class="n">front_is_illum</span><span class="p">,</span> <span class="n">DNI</span> <span class="o">*</span> <span class="n">cosd</span><span class="p">(</span><span class="n">aoi_front_pvrow</span><span class="p">),</span> <span class="mf">0.</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">direct</span><span class="p">[</span><span class="s1">&#39;back_pvrow&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">direct</span><span class="p">[</span><span class="s1">&#39;front_shaded_pvrow&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="c1"># Direct light through PV modules spacing</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">direct</span><span class="p">[</span><span class="s1">&#39;front_illum_pvrow&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">module_spacing_ratio</span>
+            <span class="c1"># Direct light through PV modules, by transparency</span>
+            <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">direct</span><span class="p">[</span><span class="s1">&#39;front_illum_pvrow&#39;</span><span class="p">]</span>
+            <span class="o">*</span> <span class="p">(</span><span class="mf">1.</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">module_spacing_ratio</span><span class="p">)</span>
+            <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">module_transparency</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">direct</span><span class="p">[</span><span class="s1">&#39;back_illum_pvrow&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span>
             <span class="o">~</span><span class="n">front_is_illum</span><span class="p">,</span> <span class="n">DNI</span> <span class="o">*</span> <span class="n">cosd</span><span class="p">(</span><span class="n">aoi_back_pvrow</span><span class="p">),</span> <span class="mf">0.</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">total_perez</span><span class="p">[</span><span class="s1">&#39;front_pvrow&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">perez_front_pvrow</span><span class="p">[</span><span class="s1">&#39;poa_global&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">direct</span><span class="p">[</span><span class="s1">&#39;back_shaded_pvrow&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="c1"># Direct light through PV modules spacing</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">direct</span><span class="p">[</span><span class="s1">&#39;back_illum_pvrow&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">module_spacing_ratio</span>
+            <span class="c1"># Direct light through PV modules, by transparency</span>
+            <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">direct</span><span class="p">[</span><span class="s1">&#39;back_illum_pvrow&#39;</span><span class="p">]</span>
+            <span class="o">*</span> <span class="p">(</span><span class="mf">1.</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">module_spacing_ratio</span><span class="p">)</span>
+            <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">module_transparency</span><span class="p">)</span>
+        <span class="c1"># perez</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">total_perez</span><span class="p">[</span><span class="s1">&#39;front_illum_pvrow&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">perez_front_pvrow</span><span class="p">[</span><span class="s1">&#39;poa_global&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">total_perez</span><span class="p">[</span><span class="s1">&#39;front_shaded_pvrow&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">total_perez</span><span class="p">[</span><span class="s1">&#39;front_illum_pvrow&#39;</span><span class="p">]</span>
+            <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">direct</span><span class="p">[</span><span class="s1">&#39;front_illum_pvrow&#39;</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">total_perez</span><span class="p">[</span><span class="s1">&#39;ground_shaded&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">DHI</span>
+                                             <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">direct</span><span class="p">[</span><span class="s1">&#39;ground_shaded&#39;</span><span class="p">])</span>
 
     <span class="k">def</span> <span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pvarray</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Apply calculated irradiance values to PV array timeseries</span>
@@ -294,12 +335,12 @@
 
         <span class="c1"># Transform timeseries ground</span>
         <span class="n">pvarray</span><span class="o">.</span><span class="n">ts_ground</span><span class="o">.</span><span class="n">illum_params</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
-            <span class="p">{</span><span class="s1">&#39;direct&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">direct</span><span class="p">[</span><span class="s1">&#39;ground&#39;</span><span class="p">],</span>
+            <span class="p">{</span><span class="s1">&#39;direct&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">direct</span><span class="p">[</span><span class="s1">&#39;ground_illum&#39;</span><span class="p">],</span>
              <span class="s1">&#39;rho&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">albedo</span><span class="p">,</span>
              <span class="s1">&#39;inv_rho&#39;</span><span class="p">:</span> <span class="mf">1.</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">albedo</span><span class="p">,</span>
              <span class="s1">&#39;total_perez&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">gnd_illum</span><span class="p">})</span>
         <span class="n">pvarray</span><span class="o">.</span><span class="n">ts_ground</span><span class="o">.</span><span class="n">shaded_params</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
-            <span class="p">{</span><span class="s1">&#39;direct&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">n_steps</span><span class="p">),</span>
+            <span class="p">{</span><span class="s1">&#39;direct&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">direct</span><span class="p">[</span><span class="s1">&#39;ground_shaded&#39;</span><span class="p">],</span>
              <span class="s1">&#39;rho&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">albedo</span><span class="p">,</span>
              <span class="s1">&#39;inv_rho&#39;</span><span class="p">:</span> <span class="mf">1.</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">albedo</span><span class="p">,</span>
              <span class="s1">&#39;total_perez&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">gnd_shaded</span><span class="p">})</span>
@@ -308,24 +349,24 @@
             <span class="c1"># Front</span>
             <span class="k">for</span> <span class="n">ts_seg</span> <span class="ow">in</span> <span class="n">ts_pvrow</span><span class="o">.</span><span class="n">front</span><span class="o">.</span><span class="n">list_segments</span><span class="p">:</span>
                 <span class="n">ts_seg</span><span class="o">.</span><span class="n">illum</span><span class="o">.</span><span class="n">update_params</span><span class="p">(</span>
-                    <span class="p">{</span><span class="s1">&#39;direct&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">direct</span><span class="p">[</span><span class="s1">&#39;front_pvrow&#39;</span><span class="p">],</span>
+                    <span class="p">{</span><span class="s1">&#39;direct&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">direct</span><span class="p">[</span><span class="s1">&#39;front_illum_pvrow&#39;</span><span class="p">],</span>
                      <span class="s1">&#39;rho&#39;</span><span class="p">:</span> <span class="n">rho_front</span><span class="p">,</span>
                      <span class="s1">&#39;inv_rho&#39;</span><span class="p">:</span> <span class="n">inv_rho_front</span><span class="p">,</span>
                      <span class="s1">&#39;total_perez&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">pvrow_illum</span><span class="p">})</span>
                 <span class="n">ts_seg</span><span class="o">.</span><span class="n">shaded</span><span class="o">.</span><span class="n">update_params</span><span class="p">(</span>
-                    <span class="p">{</span><span class="s1">&#39;direct&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">n_steps</span><span class="p">),</span>
+                    <span class="p">{</span><span class="s1">&#39;direct&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">direct</span><span class="p">[</span><span class="s1">&#39;front_shaded_pvrow&#39;</span><span class="p">],</span>
                      <span class="s1">&#39;rho&#39;</span><span class="p">:</span> <span class="n">rho_front</span><span class="p">,</span>
                      <span class="s1">&#39;inv_rho&#39;</span><span class="p">:</span> <span class="n">inv_rho_front</span><span class="p">,</span>
                      <span class="s1">&#39;total_perez&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">pvrow_shaded</span><span class="p">})</span>
             <span class="c1"># Back</span>
             <span class="k">for</span> <span class="n">ts_seg</span> <span class="ow">in</span> <span class="n">ts_pvrow</span><span class="o">.</span><span class="n">back</span><span class="o">.</span><span class="n">list_segments</span><span class="p">:</span>
                 <span class="n">ts_seg</span><span class="o">.</span><span class="n">illum</span><span class="o">.</span><span class="n">update_params</span><span class="p">(</span>
-                    <span class="p">{</span><span class="s1">&#39;direct&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">direct</span><span class="p">[</span><span class="s1">&#39;back_pvrow&#39;</span><span class="p">],</span>
+                    <span class="p">{</span><span class="s1">&#39;direct&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">direct</span><span class="p">[</span><span class="s1">&#39;back_illum_pvrow&#39;</span><span class="p">],</span>
                      <span class="s1">&#39;rho&#39;</span><span class="p">:</span> <span class="n">rho_back</span><span class="p">,</span>
                      <span class="s1">&#39;inv_rho&#39;</span><span class="p">:</span> <span class="n">inv_rho_back</span><span class="p">,</span>
                      <span class="s1">&#39;total_perez&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">n_steps</span><span class="p">)})</span>
                 <span class="n">ts_seg</span><span class="o">.</span><span class="n">shaded</span><span class="o">.</span><span class="n">update_params</span><span class="p">(</span>
-                    <span class="p">{</span><span class="s1">&#39;direct&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">n_steps</span><span class="p">),</span>
+                    <span class="p">{</span><span class="s1">&#39;direct&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">direct</span><span class="p">[</span><span class="s1">&#39;back_shaded_pvrow&#39;</span><span class="p">],</span>
                      <span class="s1">&#39;rho&#39;</span><span class="p">:</span> <span class="n">rho_back</span><span class="p">,</span>
                      <span class="s1">&#39;inv_rho&#39;</span><span class="p">:</span> <span class="n">inv_rho_back</span><span class="p">,</span>
                      <span class="s1">&#39;total_perez&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">n_steps</span><span class="p">)})</span>
@@ -370,7 +411,7 @@
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">gnd_shaded</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Total timeseries irradiance incident on ground shaded areas&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">DHI</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">total_perez</span><span class="p">[</span><span class="s1">&#39;ground_shaded&#39;</span><span class="p">]</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">gnd_illum</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -381,13 +422,13 @@
     <span class="k">def</span> <span class="nf">pvrow_shaded</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Total timeseries irradiance incident on PV row&#39;s front illuminated</span>
 <span class="sd">        areas and calculated by Perez transposition&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">pvrow_illum</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">direct</span><span class="p">[</span><span class="s1">&#39;front_pvrow&#39;</span><span class="p">]</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">total_perez</span><span class="p">[</span><span class="s1">&#39;front_shaded_pvrow&#39;</span><span class="p">]</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">pvrow_illum</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Total timeseries irradiance incident on PV row&#39;s front shaded</span>
 <span class="sd">        areas and calculated by Perez transposition&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">total_perez</span><span class="p">[</span><span class="s1">&#39;front_pvrow&#39;</span><span class="p">]</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">total_perez</span><span class="p">[</span><span class="s1">&#39;front_illum_pvrow&#39;</span><span class="p">]</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">sky_luminance</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -405,13 +446,15 @@
 
     <span class="n">params</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;rho&#39;</span><span class="p">,</span> <span class="s1">&#39;inv_rho&#39;</span><span class="p">,</span> <span class="s1">&#39;direct&#39;</span><span class="p">,</span> <span class="s1">&#39;isotropic&#39;</span><span class="p">,</span> <span class="s1">&#39;circumsolar&#39;</span><span class="p">,</span>
               <span class="s1">&#39;horizon&#39;</span><span class="p">,</span> <span class="s1">&#39;reflection&#39;</span><span class="p">]</span>
-    <span class="n">cats</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;ground&#39;</span><span class="p">,</span> <span class="s1">&#39;front_pvrow&#39;</span><span class="p">,</span> <span class="s1">&#39;back_pvrow&#39;</span><span class="p">]</span>
+    <span class="n">cats</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;ground_illum&#39;</span><span class="p">,</span> <span class="s1">&#39;ground_shaded&#39;</span><span class="p">,</span> <span class="s1">&#39;front_illum_pvrow&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;back_illum_pvrow&#39;</span><span class="p">,</span> <span class="s1">&#39;front_shaded_pvrow&#39;</span><span class="p">,</span> <span class="s1">&#39;back_shaded_pvrow&#39;</span><span class="p">]</span>
     <span class="n">irradiance_comp</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;direct&#39;</span><span class="p">,</span> <span class="s1">&#39;circumsolar&#39;</span><span class="p">,</span> <span class="s1">&#39;horizon&#39;</span><span class="p">]</span>
 
 <div class="viewcode-block" id="HybridPerezOrdered.__init__"><a class="viewcode-back" href="../developer/generated/models.HybridPerezOrdered.html#models.HybridPerezOrdered.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">horizon_band_angle</span><span class="o">=</span><span class="n">DEFAULT_HORIZON_BAND_ANGLE</span><span class="p">,</span>
                  <span class="n">circumsolar_angle</span><span class="o">=</span><span class="n">DEFAULT_CIRCUMSOLAR_ANGLE</span><span class="p">,</span>
                  <span class="n">circumsolar_model</span><span class="o">=</span><span class="s1">&#39;uniform_disk&#39;</span><span class="p">,</span> <span class="n">rho_front</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span>
-                 <span class="n">rho_back</span><span class="o">=</span><span class="mf">0.03</span><span class="p">):</span>
+                 <span class="n">rho_back</span><span class="o">=</span><span class="mf">0.03</span><span class="p">,</span> <span class="n">module_transparency</span><span class="o">=</span><span class="mf">0.</span><span class="p">,</span>
+                 <span class="n">module_spacing_ratio</span><span class="o">=</span><span class="mf">0.</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Initialize irradiance model values that will be saved later on.</span>
 
 <span class="sd">        Parameters</span>
@@ -428,6 +471,16 @@
 <span class="sd">            Reflectivity of the front side of the PV rows (default = 0.01)</span>
 <span class="sd">        rho_back : float, optional</span>
 <span class="sd">            Reflectivity of the back side of the PV rows (default = 0.03)</span>
+<span class="sd">        module_transparency : float, optional</span>
+<span class="sd">            Module transparency (from 0 to 1), which will let some direct light</span>
+<span class="sd">            pass through the PV modules in the PV rows and reach the shaded</span>
+<span class="sd">            ground (Default = 0., fully opaque)</span>
+<span class="sd">        module_spacing_ratio : float, optional</span>
+<span class="sd">            Module spacing ratio (from 0 to 1), which is the ratio of the area</span>
+<span class="sd">            covered by the space between PV modules over the total area of the</span>
+<span class="sd">            PV rows, and which determines how much direct light will reach the</span>
+<span class="sd">            shaded ground through the PV rows</span>
+<span class="sd">            (Default = 0., no spacing at all)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">direct</span> <span class="o">=</span> <span class="nb">dict</span><span class="o">.</span><span class="n">fromkeys</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cats</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">circumsolar</span> <span class="o">=</span> <span class="nb">dict</span><span class="o">.</span><span class="n">fromkeys</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cats</span><span class="p">)</span>
@@ -439,6 +492,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">circumsolar_model</span> <span class="o">=</span> <span class="n">circumsolar_model</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">rho_front</span> <span class="o">=</span> <span class="n">rho_front</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">rho_back</span> <span class="o">=</span> <span class="n">rho_back</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">module_transparency</span> <span class="o">=</span> <span class="n">module_transparency</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">module_spacing_ratio</span> <span class="o">=</span> <span class="n">module_spacing_ratio</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">albedo</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">GHI</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">DNI</span> <span class="o">=</span> <span class="kc">None</span>
@@ -510,26 +565,79 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">albedo</span> <span class="o">=</span> <span class="n">albedo</span>
 
         <span class="c1"># Ground surfaces</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">direct</span><span class="p">[</span><span class="s1">&#39;ground&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">DNI</span> <span class="o">*</span> <span class="n">cosd</span><span class="p">(</span><span class="n">solar_zenith</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">circumsolar</span><span class="p">[</span><span class="s1">&#39;ground&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">luminance_circumsolar</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">direct</span><span class="p">[</span><span class="s1">&#39;ground_illum&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">DNI</span> <span class="o">*</span> <span class="n">cosd</span><span class="p">(</span><span class="n">solar_zenith</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">direct</span><span class="p">[</span><span class="s1">&#39;ground_shaded&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="c1"># Direct light through PV modules spacing</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">direct</span><span class="p">[</span><span class="s1">&#39;ground_illum&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">module_spacing_ratio</span>
+            <span class="c1"># Direct light through PV modules, by transparency</span>
+            <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">direct</span><span class="p">[</span><span class="s1">&#39;ground_illum&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="mf">1.</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">module_spacing_ratio</span><span class="p">)</span>
+            <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">module_transparency</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">circumsolar</span><span class="p">[</span><span class="s1">&#39;ground_illum&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">luminance_circumsolar</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">circumsolar</span><span class="p">[</span><span class="s1">&#39;ground_shaded&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="c1"># Circumsolar light through PV modules spacing</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">circumsolar</span><span class="p">[</span><span class="s1">&#39;ground_illum&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">module_spacing_ratio</span>
+            <span class="c1"># Circumsolar light through PV modules, by transparency</span>
+            <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">circumsolar</span><span class="p">[</span><span class="s1">&#39;ground_illum&#39;</span><span class="p">]</span>
+            <span class="o">*</span> <span class="p">(</span><span class="mf">1.</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">module_spacing_ratio</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">module_transparency</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">horizon</span><span class="p">[</span><span class="s1">&#39;ground&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
 
         <span class="c1"># PV row surfaces</span>
         <span class="n">front_is_illum</span> <span class="o">=</span> <span class="n">aoi_front_pvrow</span> <span class="o">&lt;=</span> <span class="mi">90</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">direct</span><span class="p">[</span><span class="s1">&#39;front_pvrow&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span>
+        <span class="c1"># direct</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">direct</span><span class="p">[</span><span class="s1">&#39;front_illum_pvrow&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span>
             <span class="n">front_is_illum</span><span class="p">,</span> <span class="n">DNI</span> <span class="o">*</span> <span class="n">cosd</span><span class="p">(</span><span class="n">aoi_front_pvrow</span><span class="p">),</span> <span class="mf">0.</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">direct</span><span class="p">[</span><span class="s1">&#39;back_pvrow&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">direct</span><span class="p">[</span><span class="s1">&#39;front_shaded_pvrow&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="c1"># Direct light through PV modules spacing</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">direct</span><span class="p">[</span><span class="s1">&#39;front_illum_pvrow&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">module_spacing_ratio</span>
+            <span class="c1"># Direct light through PV modules, by transparency</span>
+            <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">direct</span><span class="p">[</span><span class="s1">&#39;front_illum_pvrow&#39;</span><span class="p">]</span>
+            <span class="o">*</span> <span class="p">(</span><span class="mf">1.</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">module_spacing_ratio</span><span class="p">)</span>
+            <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">module_transparency</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">direct</span><span class="p">[</span><span class="s1">&#39;back_illum_pvrow&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span>
             <span class="o">~</span><span class="n">front_is_illum</span><span class="p">,</span> <span class="n">DNI</span> <span class="o">*</span> <span class="n">cosd</span><span class="p">(</span><span class="n">aoi_back_pvrow</span><span class="p">),</span> <span class="mf">0.</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">circumsolar</span><span class="p">[</span><span class="s1">&#39;front_pvrow&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">direct</span><span class="p">[</span><span class="s1">&#39;back_shaded_pvrow&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="c1"># Direct light through PV modules spacing</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">direct</span><span class="p">[</span><span class="s1">&#39;back_illum_pvrow&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">module_spacing_ratio</span>
+            <span class="c1"># Direct light through PV modules, by transparency</span>
+            <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">direct</span><span class="p">[</span><span class="s1">&#39;back_illum_pvrow&#39;</span><span class="p">]</span>
+            <span class="o">*</span> <span class="p">(</span><span class="mf">1.</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">module_spacing_ratio</span><span class="p">)</span>
+            <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">module_transparency</span><span class="p">)</span>
+        <span class="c1"># circumsolar</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">circumsolar</span><span class="p">[</span><span class="s1">&#39;front_illum_pvrow&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span>
             <span class="n">front_is_illum</span><span class="p">,</span> <span class="n">poa_circumsolar_front</span><span class="p">,</span> <span class="mf">0.</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">circumsolar</span><span class="p">[</span><span class="s1">&#39;back_pvrow&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">circumsolar</span><span class="p">[</span><span class="s1">&#39;front_shaded_pvrow&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="c1"># Direct light through PV modules spacing</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">circumsolar</span><span class="p">[</span><span class="s1">&#39;front_illum_pvrow&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">module_spacing_ratio</span>
+            <span class="c1"># Direct light through PV modules, by transparency</span>
+            <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">circumsolar</span><span class="p">[</span><span class="s1">&#39;front_illum_pvrow&#39;</span><span class="p">]</span>
+            <span class="o">*</span> <span class="p">(</span><span class="mf">1.</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">module_spacing_ratio</span><span class="p">)</span>
+            <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">module_transparency</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">circumsolar</span><span class="p">[</span><span class="s1">&#39;back_illum_pvrow&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span>
             <span class="o">~</span><span class="n">front_is_illum</span><span class="p">,</span> <span class="n">poa_circumsolar_back</span><span class="p">,</span> <span class="mf">0.</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">circumsolar</span><span class="p">[</span><span class="s1">&#39;back_shaded_pvrow&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="c1"># Direct light through PV modules spacing</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">circumsolar</span><span class="p">[</span><span class="s1">&#39;back_illum_pvrow&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">module_spacing_ratio</span>
+            <span class="c1"># Direct light through PV modules, by transparency</span>
+            <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">circumsolar</span><span class="p">[</span><span class="s1">&#39;back_illum_pvrow&#39;</span><span class="p">]</span>
+            <span class="o">*</span> <span class="p">(</span><span class="mf">1.</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">module_spacing_ratio</span><span class="p">)</span>
+            <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">module_transparency</span><span class="p">)</span>
+        <span class="c1"># horizon</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">horizon</span><span class="p">[</span><span class="s1">&#39;front_pvrow&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">poa_horizon</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">horizon</span><span class="p">[</span><span class="s1">&#39;back_pvrow&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">poa_horizon</span>
+        <span class="c1"># perez</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">total_perez</span><span class="p">[</span><span class="s1">&#39;front_illum_pvrow&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">total_perez_front_pvrow</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">total_perez</span><span class="p">[</span><span class="s1">&#39;front_shaded_pvrow&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="n">total_perez_front_pvrow</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">direct</span><span class="p">[</span><span class="s1">&#39;front_pvrow&#39;</span><span class="p">])</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">total_perez</span><span class="p">[</span><span class="s1">&#39;ground_shaded&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">DHI</span>
+            <span class="n">total_perez_front_pvrow</span>
+            <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">direct</span><span class="p">[</span><span class="s1">&#39;front_illum_pvrow&#39;</span><span class="p">]</span>
+            <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">circumsolar</span><span class="p">[</span><span class="s1">&#39;front_illum_pvrow&#39;</span><span class="p">]</span>
+            <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">direct</span><span class="p">[</span><span class="s1">&#39;front_shaded_pvrow&#39;</span><span class="p">]</span>
+            <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">circumsolar</span><span class="p">[</span><span class="s1">&#39;front_shaded_pvrow&#39;</span><span class="p">]</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">total_perez</span><span class="p">[</span><span class="s1">&#39;ground_shaded&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">DHI</span>
+            <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">circumsolar</span><span class="p">[</span><span class="s1">&#39;ground_illum&#39;</span><span class="p">]</span>
+            <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">circumsolar</span><span class="p">[</span><span class="s1">&#39;ground_shaded&#39;</span><span class="p">]</span>
+            <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">direct</span><span class="p">[</span><span class="s1">&#39;ground_shaded&#39;</span><span class="p">])</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">total_perez</span><span class="p">[</span><span class="s1">&#39;ground_illum&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">GHI</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">total_perez</span><span class="p">[</span><span class="s1">&#39;sky&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">luminance_isotropic</span>
 
@@ -554,15 +662,15 @@
 
         <span class="c1"># Transform timeseries ground</span>
         <span class="n">pvarray</span><span class="o">.</span><span class="n">ts_ground</span><span class="o">.</span><span class="n">illum_params</span><span class="o">.</span><span class="n">update</span><span class="p">({</span>
-            <span class="s1">&#39;direct&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">direct</span><span class="p">[</span><span class="s1">&#39;ground&#39;</span><span class="p">],</span>
-            <span class="s1">&#39;circumsolar&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">circumsolar</span><span class="p">[</span><span class="s1">&#39;ground&#39;</span><span class="p">],</span>
+            <span class="s1">&#39;direct&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">direct</span><span class="p">[</span><span class="s1">&#39;ground_illum&#39;</span><span class="p">],</span>
+            <span class="s1">&#39;circumsolar&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">circumsolar</span><span class="p">[</span><span class="s1">&#39;ground_illum&#39;</span><span class="p">],</span>
             <span class="s1">&#39;horizon&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">n_steps</span><span class="p">),</span>
             <span class="s1">&#39;rho&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">albedo</span><span class="p">,</span>
             <span class="s1">&#39;inv_rho&#39;</span><span class="p">:</span> <span class="mf">1.</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">albedo</span><span class="p">,</span>
             <span class="s1">&#39;total_perez&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">gnd_illum</span><span class="p">})</span>
         <span class="n">pvarray</span><span class="o">.</span><span class="n">ts_ground</span><span class="o">.</span><span class="n">shaded_params</span><span class="o">.</span><span class="n">update</span><span class="p">({</span>
-            <span class="s1">&#39;direct&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">n_steps</span><span class="p">),</span>
-            <span class="s1">&#39;circumsolar&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">n_steps</span><span class="p">),</span>
+            <span class="s1">&#39;direct&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">direct</span><span class="p">[</span><span class="s1">&#39;ground_shaded&#39;</span><span class="p">],</span>
+            <span class="s1">&#39;circumsolar&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">circumsolar</span><span class="p">[</span><span class="s1">&#39;ground_shaded&#39;</span><span class="p">],</span>
             <span class="s1">&#39;horizon&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">n_steps</span><span class="p">),</span>
             <span class="s1">&#39;rho&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">albedo</span><span class="p">,</span>
             <span class="s1">&#39;inv_rho&#39;</span><span class="p">:</span> <span class="mf">1.</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">albedo</span><span class="p">,</span>
@@ -573,15 +681,15 @@
             <span class="c1"># Front</span>
             <span class="k">for</span> <span class="n">ts_seg</span> <span class="ow">in</span> <span class="n">ts_pvrow</span><span class="o">.</span><span class="n">front</span><span class="o">.</span><span class="n">list_segments</span><span class="p">:</span>
                 <span class="n">ts_seg</span><span class="o">.</span><span class="n">illum</span><span class="o">.</span><span class="n">update_params</span><span class="p">({</span>
-                    <span class="s1">&#39;direct&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">direct</span><span class="p">[</span><span class="s1">&#39;front_pvrow&#39;</span><span class="p">],</span>
-                    <span class="s1">&#39;circumsolar&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">circumsolar</span><span class="p">[</span><span class="s1">&#39;front_pvrow&#39;</span><span class="p">],</span>
+                    <span class="s1">&#39;direct&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">direct</span><span class="p">[</span><span class="s1">&#39;front_illum_pvrow&#39;</span><span class="p">],</span>
+                    <span class="s1">&#39;circumsolar&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">circumsolar</span><span class="p">[</span><span class="s1">&#39;front_illum_pvrow&#39;</span><span class="p">],</span>
                     <span class="s1">&#39;horizon&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">horizon</span><span class="p">[</span><span class="s1">&#39;front_pvrow&#39;</span><span class="p">],</span>
                     <span class="s1">&#39;rho&#39;</span><span class="p">:</span> <span class="n">rho_front</span><span class="p">,</span>
                     <span class="s1">&#39;inv_rho&#39;</span><span class="p">:</span> <span class="n">inv_rho_front</span><span class="p">,</span>
                     <span class="s1">&#39;total_perez&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">pvrow_illum</span><span class="p">})</span>
                 <span class="n">ts_seg</span><span class="o">.</span><span class="n">shaded</span><span class="o">.</span><span class="n">update_params</span><span class="p">({</span>
-                    <span class="s1">&#39;direct&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">n_steps</span><span class="p">),</span>
-                    <span class="s1">&#39;circumsolar&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">n_steps</span><span class="p">),</span>
+                    <span class="s1">&#39;direct&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">direct</span><span class="p">[</span><span class="s1">&#39;front_shaded_pvrow&#39;</span><span class="p">],</span>
+                    <span class="s1">&#39;circumsolar&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">circumsolar</span><span class="p">[</span><span class="s1">&#39;front_shaded_pvrow&#39;</span><span class="p">],</span>
                     <span class="s1">&#39;horizon&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">horizon</span><span class="p">[</span><span class="s1">&#39;front_pvrow&#39;</span><span class="p">],</span>
                     <span class="s1">&#39;rho&#39;</span><span class="p">:</span> <span class="n">rho_front</span><span class="p">,</span>
                     <span class="s1">&#39;inv_rho&#39;</span><span class="p">:</span> <span class="n">inv_rho_front</span><span class="p">,</span>
@@ -594,8 +702,8 @@
                     <span class="n">ts_pvrows</span><span class="p">,</span> <span class="n">centroid_illum</span><span class="p">,</span> <span class="n">idx_pvrow</span><span class="p">,</span> <span class="n">tilted_to_left</span><span class="p">,</span>
                     <span class="n">is_back_side</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
                 <span class="n">ts_seg</span><span class="o">.</span><span class="n">illum</span><span class="o">.</span><span class="n">update_params</span><span class="p">({</span>
-                    <span class="s1">&#39;direct&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">direct</span><span class="p">[</span><span class="s1">&#39;back_pvrow&#39;</span><span class="p">],</span>
-                    <span class="s1">&#39;circumsolar&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">circumsolar</span><span class="p">[</span><span class="s1">&#39;back_pvrow&#39;</span><span class="p">],</span>
+                    <span class="s1">&#39;direct&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">direct</span><span class="p">[</span><span class="s1">&#39;back_illum_pvrow&#39;</span><span class="p">],</span>
+                    <span class="s1">&#39;circumsolar&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">circumsolar</span><span class="p">[</span><span class="s1">&#39;back_illum_pvrow&#39;</span><span class="p">],</span>
                     <span class="s1">&#39;horizon&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">horizon</span><span class="p">[</span><span class="s1">&#39;back_pvrow&#39;</span><span class="p">]</span> <span class="o">*</span>
                     <span class="p">(</span><span class="mf">1.</span> <span class="o">-</span> <span class="n">hor_shd_pct_illum</span> <span class="o">/</span> <span class="mf">100.</span><span class="p">),</span>
                     <span class="s1">&#39;horizon_unshaded&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">horizon</span><span class="p">[</span><span class="s1">&#39;back_pvrow&#39;</span><span class="p">],</span>
@@ -609,8 +717,8 @@
                     <span class="n">ts_pvrows</span><span class="p">,</span> <span class="n">centroid_shaded</span><span class="p">,</span> <span class="n">idx_pvrow</span><span class="p">,</span> <span class="n">tilted_to_left</span><span class="p">,</span>
                     <span class="n">is_back_side</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
                 <span class="n">ts_seg</span><span class="o">.</span><span class="n">shaded</span><span class="o">.</span><span class="n">update_params</span><span class="p">({</span>
-                    <span class="s1">&#39;direct&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">n_steps</span><span class="p">),</span>
-                    <span class="s1">&#39;circumsolar&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">n_steps</span><span class="p">),</span>
+                    <span class="s1">&#39;direct&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">direct</span><span class="p">[</span><span class="s1">&#39;back_shaded_pvrow&#39;</span><span class="p">],</span>
+                    <span class="s1">&#39;circumsolar&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">circumsolar</span><span class="p">[</span><span class="s1">&#39;back_shaded_pvrow&#39;</span><span class="p">],</span>
                     <span class="s1">&#39;horizon&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">horizon</span><span class="p">[</span><span class="s1">&#39;back_pvrow&#39;</span><span class="p">]</span> <span class="o">*</span>
                     <span class="p">(</span><span class="mf">1.</span> <span class="o">-</span> <span class="n">hor_shd_pct_shaded</span> <span class="o">/</span> <span class="mf">100.</span><span class="p">),</span>
                     <span class="s1">&#39;horizon_unshaded&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">horizon</span><span class="p">[</span><span class="s1">&#39;back_pvrow&#39;</span><span class="p">],</span>

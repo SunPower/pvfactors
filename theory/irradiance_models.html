@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Installation &mdash; pvfactors 1.2.1 documentation</title>
+  <title>Irradiance models &mdash; pvfactors 1.2.1 documentation</title>
   
 
   
@@ -40,8 +40,8 @@
   <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="User guide and tutorials" href="../tutorials/index.html" />
-    <link rel="prev" title="Welcome to the pvfactors documentation!" href="../index.html" /> 
+    <link rel="next" title="Developer API" href="../developer/index.html" />
+    <link rel="prev" title="Mathematical Model" href="problem_formulation.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -93,14 +93,15 @@
             
             
               <ul class="current">
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Installation</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#install-with-pip">Install with pip</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#pvlib-implementation">pvlib implementation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#contributing">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation/index.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/index.html">User guide and tutorials</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Theory</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="intro.html">Introduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="view_factors.html">View Factors</a></li>
+<li class="toctree-l2"><a class="reference internal" href="problem_formulation.html">Mathematical Model</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Irradiance models</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="../tutorials/index.html">User guide and tutorials</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../theory/index.html">Theory</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../developer/index.html">Developer API</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../whatsnew.html">What’s New</a></li>
 </ul>
@@ -150,7 +151,9 @@
     
       <li><a href="../index.html">Docs</a> &raquo;</li>
         
-      <li>Installation</li>
+          <li><a href="index.html">Theory</a> &raquo;</li>
+        
+      <li>Irradiance models</li>
     
     
       <li class="wy-breadcrumbs-aside">
@@ -196,32 +199,26 @@
     text-align: unset;
 }
 </style>
-<div class="section" id="installation">
-<span id="id1"></span><h1>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="install-with-pip">
-<h2>Install with pip<a class="headerlink" href="#install-with-pip" title="Permalink to this headline">¶</a></h2>
-<p><code class="docutils literal notranslate"><span class="pre">pvfactors</span></code> works with both python 2 and 3.</p>
-<p>The easiest way to install <code class="docutils literal notranslate"><span class="pre">pvfactors</span></code> is using <a class="reference external" href="https://pypi.org/project/pip/">pip</a>:</p>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>$ pip install pvfactors
-</pre></div>
+<div class="section" id="irradiance-models">
+<span id="irradiance-models-theory"></span><h1>Irradiance models<a class="headerlink" href="#irradiance-models" title="Permalink to this headline">¶</a></h1>
+<p>As shown in the <a class="reference internal" href="problem_formulation.html#full-mode-theory"><span class="std std-ref">Full mode theory</span></a> and <a class="reference internal" href="problem_formulation.html#fast-mode-theory"><span class="std std-ref">Fast mode theory</span></a> sections, we always need to calculate a sky term for the different surfaces of the PV array.</p>
+<p>The sky term is the sum of all the irradiance components (for each surface) that are not directly related to the view factors or to the reflection process, but which still contribute to the incident irradiance on the surfaces. For instance, the direct component of the light incident on the front surface of a PV row is not directly dependent on the view factors, but we still need to account for it in the mathematical model, so this component will go into the sky term.</p>
+<p>A lot of different assumptions can be made, which will lead to more or less accurate results. But <code class="docutils literal notranslate"><span class="pre">pvfactors</span></code> was designed to make the implementation of these assumptions modular: all of these assumptions can be implemented inside a single Python class which can be used by the other parts of the model. This was done to make it easy for users to create their own irradiance modeling assumptions (inside a new class), and to then plug it into the <code class="docutils literal notranslate"><span class="pre">pvfactors</span></code> view-factor mathematical and geometry models.</p>
+<p><code class="docutils literal notranslate"><span class="pre">pvfactors</span></code> currently provides two irradiance models that can be used interchangeably in the calculations, and which are described in more details in the <a class="reference internal" href="../developer/irradiance.html#irradiance-classes"><span class="std std-ref">irradiance developer API</span></a>.</p>
+<ul class="simple">
+<li><p>the isotropic model assumes that all of the diffuse light from the sky dome is isotropic.</p></li>
+<li><p>the (hybrid) perez model follows <a class="footnote-reference brackets" href="#perez-paper" id="id1">1</a> and assumes that the diffuse light can be broken down into circumsolar, isotropic, and horizon components (see Fig. 1 below). Validation work shows that this model is more accurate for calculating back-side irradiance with <code class="docutils literal notranslate"><span class="pre">pvfactors</span></code>.</p></li>
+</ul>
+<div class="figure align-center" id="id3">
+<a class="reference internal image-reference" href="../_images/Irradiance_components.PNG"><img alt="../_images/Irradiance_components.PNG" src="../_images/Irradiance_components.PNG" style="width: 40%;" /></a>
+<p class="caption"><span class="caption-text">Fig. 1: Schematic showing direct and diffuse irradiance components on a PV system and according to the Perez diffuse light model <a class="footnote-reference brackets" href="#perez-paper" id="id2">1</a></span><a class="headerlink" href="#id3" title="Permalink to this image">¶</a></p>
 </div>
-</div>
-<div class="section" id="pvlib-implementation">
-<h2>pvlib implementation<a class="headerlink" href="#pvlib-implementation" title="Permalink to this headline">¶</a></h2>
-<p>A limited implementation of <code class="docutils literal notranslate"><span class="pre">pvfactors</span></code> is available in the bifacial module of <a class="reference external" href="https://pvlib-python.readthedocs.io">pvlib-python</a>: see <a class="reference external" href="https://pvlib-python.readthedocs.io/en/latest/generated/pvlib.bifacial.pvfactors_timeseries.html#pvlib.bifacial.pvfactors_timeseries">here</a>.</p>
-</div>
-<div class="section" id="contributing">
-<h2>Contributing<a class="headerlink" href="#contributing" title="Permalink to this headline">¶</a></h2>
-<p>Contributions are needed in order to improve this package.
-If you wish to contribute, you can start by forking and cloning the repository, and then installing <code class="docutils literal notranslate"><span class="pre">pvfactors</span></code> using <a class="reference external" href="https://pypi.org/project/pip/">pip</a> in the root folder of the package:</p>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>$ pip install .
-</pre></div>
-</div>
-<p>To install the package in editable mode, you can use:</p>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>$ pip install -e .
-</pre></div>
-</div>
-</div>
+<p class="rubric">Footnotes</p>
+<dl class="footnote brackets">
+<dt class="label" id="perez-paper"><span class="brackets">1</span><span class="fn-backref">(<a href="#id1">1</a>,<a href="#id2">2</a>)</span></dt>
+<dd><p>Perez, R., Seals, R., Ineichen, P., Stewart, R. and Menicucci, D., 1987. A new simplified version of the Perez diffuse irradiance model for tilted surfaces. Solar energy, 39(3), pp.221-231.</p>
+</dd>
+</dl>
 </div>
 
 
@@ -232,10 +229,10 @@ If you wish to contribute, you can start by forking and cloning the repository, 
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="../tutorials/index.html" class="btn btn-neutral float-right" title="User guide and tutorials" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="../developer/index.html" class="btn btn-neutral float-right" title="Developer API" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="../index.html" class="btn btn-neutral float-left" title="Welcome to the pvfactors documentation!" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="problem_formulation.html" class="btn btn-neutral float-left" title="Mathematical Model" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>models.IsotropicOrdered &mdash; pvfactors 1.2.0 documentation</title>
+  <title>models.IsotropicOrdered &mdash; pvfactors 1.2.1 documentation</title>
   
 
   
@@ -68,7 +68,7 @@
             
             
               <div class="version">
-                1.2.0
+                1.2.1
               </div>
             
           
@@ -197,20 +197,28 @@
 <h1>models.IsotropicOrdered<a class="headerlink" href="#models-isotropicordered" title="Permalink to this headline">¶</a></h1>
 <dl class="class">
 <dt id="models.IsotropicOrdered">
-<em class="property">class </em><code class="sig-prename descclassname">models.</code><code class="sig-name descname">IsotropicOrdered</code><span class="sig-paren">(</span><em class="sig-param">rho_front=0.01</em>, <em class="sig-param">rho_back=0.03</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/models.html#IsotropicOrdered"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#models.IsotropicOrdered" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">models.</code><code class="sig-name descname">IsotropicOrdered</code><span class="sig-paren">(</span><em class="sig-param">rho_front=0.01</em>, <em class="sig-param">rho_back=0.03</em>, <em class="sig-param">module_transparency=0.0</em>, <em class="sig-param">module_spacing_ratio=0.0</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/models.html#IsotropicOrdered"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#models.IsotropicOrdered" title="Permalink to this definition">¶</a></dt>
 <dd><p>Diffuse isotropic sky model for
 <code class="xref py py-class docutils literal notranslate"><span class="pre">OrderedPVArray</span></code>. It will
 calculate the appropriate values for an isotropic sky dome and apply
 it to the PV array.</p>
 <dl class="method">
 <dt id="models.IsotropicOrdered.__init__">
-<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param">rho_front=0.01</em>, <em class="sig-param">rho_back=0.03</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/models.html#IsotropicOrdered.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#models.IsotropicOrdered.__init__" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param">rho_front=0.01</em>, <em class="sig-param">rho_back=0.03</em>, <em class="sig-param">module_transparency=0.0</em>, <em class="sig-param">module_spacing_ratio=0.0</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/models.html#IsotropicOrdered.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#models.IsotropicOrdered.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><p>Initialize irradiance model values that will be saved later on.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>rho_front</strong> (<em>float</em><em>, </em><em>optional</em>) – Reflectivity of the front side of the PV rows (default = 0.01)</p></li>
 <li><p><strong>rho_back</strong> (<em>float</em><em>, </em><em>optional</em>) – Reflectivity of the back side of the PV rows (default = 0.03)</p></li>
+<li><p><strong>module_transparency</strong> (<em>float</em><em>, </em><em>optional</em>) – Module transparency (from 0 to 1), which will let some direct light
+pass through the PV modules in the PV rows and reach the shaded
+ground (Default = 0., fully opaque)</p></li>
+<li><p><strong>module_spacing_ratio</strong> (<em>float</em><em>, </em><em>optional</em>) – Module spacing ratio (from 0 to 1), which is the ratio of the area
+covered by the space between PV modules over the total area of the
+PV rows, and which determines how much direct light will reach the
+shaded ground through the PV rows
+(Default = 0., no spacing at all)</p></li>
 </ul>
 </dd>
 </dl>
@@ -223,7 +231,7 @@ it to the PV array.</p>
 <col style="width: 90%" />
 </colgroup>
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#models.IsotropicOrdered.__init__" title="models.IsotropicOrdered.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>([rho_front, rho_back])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#models.IsotropicOrdered.__init__" title="models.IsotropicOrdered.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>([rho_front, rho_back, …])</p></td>
 <td><p>Initialize irradiance model values that will be saved later on.</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">fit</span></code>(timestamps, DNI, DHI, solar_zenith, …)</p></td>
@@ -238,8 +246,8 @@ it to the PV array.</p>
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">transform</span></code>(pvarray)</p></td>
 <td><p>Apply calculated irradiance values to PV array timeseries geometries: assign values as parameters to timeseries surfaces.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">transform_ts</span></code>(*args, **kwargs)</p></td>
-<td><p>Not implemented</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">IsotropicOrdered.transform_ts</span></code></p></td>
+<td><p></p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_ts_surface_sky_term</span></code>(ts_surface[, …])</p></td>
 <td><p>Update the ‘sky_term’ parameter of a timeseries surface.</p></td>
@@ -274,8 +282,8 @@ it to the PV array.</p>
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">pvrow_shaded</span></code></p></td>
 <td><p>Total timeseries irradiance incident on PV row’s front illuminated areas and calculated by Perez transposition</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">sky</span></code></p></td>
-<td><p>Not implemented</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">IsotropicOrdered.sky</span></code></p></td>
+<td><p></p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">sky_luminance</span></code></p></td>
 <td><p>Total timeseries isotropic luminance of sky</p></td>
