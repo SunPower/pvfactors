@@ -62,7 +62,7 @@ class OrderedPVArray(BasePVArray):
 
         # These attributes will be updated at fitting time
         self.solar_2d_vectors = None
-        self.ts_pvrows = []
+        self.ts_pvrows = None
         self.ts_ground = None
         self.n_states = None
         self.has_direct_shading = None
@@ -256,6 +256,8 @@ class OrderedPVArray(BasePVArray):
         rotation_vec : array-like or float
             Rotation angle of the PV rows [deg]
         """
+        # Initialize timeseries pv rows
+        self.ts_pvrows = []
 
         # Calculate interrow direct shading lengths
         self._calculate_interrow_shading(alpha_vec, rotation_vec)
