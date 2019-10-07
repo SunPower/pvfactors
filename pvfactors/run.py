@@ -24,7 +24,8 @@ def run_timeseries_engine(fn_build_report, pvarray_parameters,
                           cls_vf=VFCalculator,
                           fast_mode_pvrow_index=None,
                           fast_mode_segment_index=None,
-                          irradiance_model_params=None):
+                          irradiance_model_params=None,
+                          ghi=None):
     """Run timeseries simulation in normal mode, and using the specified
     classes.
 
@@ -76,6 +77,8 @@ def run_timeseries_engine(fn_build_report, pvarray_parameters,
     irradiance_model_params : dict, optional
         Dictionary of parameters that will be passed to the irradiance model
         class as kwargs at instantiation (Default = None)
+    ghi : array-like
+        Global horizontal irradiance values [W/m2]
 
     Returns
     -------
@@ -98,7 +101,7 @@ def run_timeseries_engine(fn_build_report, pvarray_parameters,
 
     # Fit engine
     eng.fit(timestamps, dni, dhi, solar_zenith, solar_azimuth, surface_tilt,
-            surface_azimuth, albedo)
+            surface_azimuth, albedo, ghi=ghi)
 
     # Run all timesteps
     report = (eng.run_full_mode(fn_build_report=fn_build_report)
