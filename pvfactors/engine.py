@@ -55,7 +55,7 @@ class PVEngine(object):
         self.skip_step = None
 
     def fit(self, timestamps, DNI, DHI, solar_zenith, solar_azimuth,
-            surface_tilt, surface_azimuth, albedo, GHI=None):
+            surface_tilt, surface_azimuth, albedo, ghi=None):
         """Fit the timeseries data to the engine. More specifically,
         save all the parameters that needs to be saved, and fit the PV array
         and irradiance models to the data (i.e. perform all the intermediate
@@ -81,7 +81,7 @@ class PVEngine(object):
             Surface azimuth angles [deg]
         albedo : array-like or float
             Albedo values (ground reflectivity)
-        GHI : array-like, optional
+        ghi : array-like, optional
             Global horizontal irradiance [W/m2], if not provided, will be
             calculated from DNI and DHI if needed (Default = None)
         """
@@ -94,7 +94,7 @@ class PVEngine(object):
             solar_azimuth = np.array([solar_azimuth])
             surface_tilt = np.array([surface_tilt])
             surface_azimuth = np.array([surface_azimuth])
-            GHI = None if GHI is None else np.array([GHI])
+            ghi = None if ghi is None else np.array([ghi])
 
         # Format albedo
         self.n_points = len(DNI)
@@ -107,7 +107,7 @@ class PVEngine(object):
 
         # Fit irradiance model
         self.irradiance.fit(timestamps, DNI, DHI, solar_zenith, solar_azimuth,
-                            surface_tilt, surface_azimuth, albedo, GHI=GHI)
+                            surface_tilt, surface_azimuth, albedo, ghi=ghi)
 
         # Add timeseries irradiance results to pvarray
         self.irradiance.transform(self.pvarray)

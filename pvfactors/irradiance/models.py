@@ -58,7 +58,7 @@ class IsotropicOrdered(BaseModel):
 
     def fit(self, timestamps, DNI, DHI, solar_zenith, solar_azimuth,
             surface_tilt, surface_azimuth, albedo,
-            GHI=None):
+            ghi=None):
         """Use vectorization to calculate values used for the isotropic
         irradiance model.
 
@@ -80,7 +80,7 @@ class IsotropicOrdered(BaseModel):
             Surface azimuth angles [deg]
         albedo : array-like
             Albedo values (or ground reflectivity)
-        GHI : array-like, optional
+        ghi : array-like, optional
             Global horizontal irradiance [W/m2], if not provided, will be
             calculated from DNI and DHI (Default = None)
         """
@@ -93,20 +93,20 @@ class IsotropicOrdered(BaseModel):
             solar_azimuth = np.array([solar_azimuth])
             surface_tilt = np.array([surface_tilt])
             surface_azimuth = np.array([surface_azimuth])
-            GHI = None if GHI is None else np.array([GHI])
+            ghi = None if ghi is None else np.array([ghi])
         # Length of arrays
         n = len(DNI)
         # Make sure that albedo is a vector
         albedo = albedo * np.ones(n) if np.isscalar(albedo) else albedo
 
         # Save and calculate total POA values from Perez model
-        GHI = DNI * cosd(solar_zenith) + DHI if GHI is None else GHI
-        self.GHI = GHI
+        ghi = DNI * cosd(solar_zenith) + DHI if ghi is None else ghi
+        self.GHI = ghi
         self.DHI = DHI
         self.n_steps = n
         perez_front_pvrow = get_total_irradiance(
             surface_tilt, surface_azimuth, solar_zenith, solar_azimuth,
-            DNI, GHI, DHI, albedo=albedo)
+            DNI, ghi, DHI, albedo=albedo)
 
         # Save diffuse light
         self.isotropic_luminance = DHI
@@ -340,7 +340,7 @@ class HybridPerezOrdered(BaseModel):
 
     def fit(self, timestamps, DNI, DHI, solar_zenith, solar_azimuth,
             surface_tilt, surface_azimuth, albedo,
-            GHI=None):
+            ghi=None):
         """Use vectorization to calculate values used for the hybrid Perez
         irradiance model.
 
@@ -362,7 +362,7 @@ class HybridPerezOrdered(BaseModel):
             Surface azimuth angles [deg]
         albedo : array-like
             Albedo values (or ground reflectivity)
-        GHI : array-like, optional
+        ghi : array-like, optional
             Global horizontal irradiance [W/m2], if not provided, will be
             calculated from DNI and DHI (Default = None)
         """
@@ -375,7 +375,7 @@ class HybridPerezOrdered(BaseModel):
             solar_azimuth = np.array([solar_azimuth])
             surface_tilt = np.array([surface_tilt])
             surface_azimuth = np.array([surface_azimuth])
-            GHI = None if GHI is None else np.array([GHI])
+            ghi = None if ghi is None else np.array([ghi])
         # Length of arrays
         n = len(DNI)
         # Make sure that albedo is a vector
@@ -390,13 +390,13 @@ class HybridPerezOrdered(BaseModel):
                 surface_tilt, surface_azimuth)
 
         # Save and calculate total POA values from Perez model
-        GHI = DNI * cosd(solar_zenith) + DHI if GHI is None else GHI
-        self.GHI = GHI
+        ghi = DNI * cosd(solar_zenith) + DHI if ghi is None else ghi
+        self.GHI = ghi
         self.DHI = DHI
         self.n_steps = n
         perez_front_pvrow = get_total_irradiance(
             surface_tilt, surface_azimuth, solar_zenith, solar_azimuth,
-            DNI, GHI, DHI, albedo=albedo)
+            DNI, ghi, DHI, albedo=albedo)
         total_perez_front_pvrow = perez_front_pvrow['poa_global']
 
         # Save isotropic luminance
@@ -477,7 +477,7 @@ class HybridPerezOrdered(BaseModel):
             - self.circumsolar['ground_illum']
             + self.circumsolar['ground_shaded']
             + self.direct['ground_shaded'])
-        self.total_perez['ground_illum'] = GHI
+        self.total_perez['ground_illum'] = ghi
         self.total_perez['sky'] = luminance_isotropic
 
     def transform(self, pvarray):
