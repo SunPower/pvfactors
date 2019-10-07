@@ -77,8 +77,8 @@ def run_timeseries_engine(fn_build_report, pvarray_parameters,
     irradiance_model_params : dict, optional
         Dictionary of parameters that will be passed to the irradiance model
         class as kwargs at instantiation (Default = None)
-    ghi : array-like
-        Global horizontal irradiance values [W/m2]
+    ghi : array-like, optional
+        Global horizontal irradiance values [W/m2] (Default = None)
 
     Returns
     -------
@@ -118,7 +118,8 @@ def run_parallel_engine(report_builder, pvarray_parameters,
                         cls_irradiance=HybridPerezOrdered,
                         cls_vf=VFCalculator, fast_mode_pvrow_index=None,
                         fast_mode_segment_index=None,
-                        irradiance_model_params=None, n_processes=2):
+                        irradiance_model_params=None, n_processes=2,
+                        ghi=None):
     """Run timeseries simulation using multiprocessing. Here, instead of a
     function that will build the report, the users will need to pass a class
     (or an object).
@@ -174,6 +175,8 @@ def run_parallel_engine(report_builder, pvarray_parameters,
         class as kwargs at instantiation (Default = None)
     n_processes : int, optional
         Number of parallel processes to run for the calculation (Default = 2)
+    ghi : array-like, optional
+        Global horizontal irradiance values [W/m2] (Default = None)
 
     Returns
     -------
@@ -213,6 +216,8 @@ def run_parallel_engine(report_builder, pvarray_parameters,
     folds_fast_mode_pvrow_index = [fast_mode_pvrow_index] * n_processes
     folds_fast_mode_segment_index = [fast_mode_segment_index] * n_processes
     folds_irradiance_model_params = [irradiance_model_params] * n_processes
+    folds_ghi = ([ghi] * n_processes if ghi is None else
+                 np.array_split(ghi, n_processes))
     report_indices = list(range(n_processes))
 
     # Zip all the folds together
@@ -223,7 +228,8 @@ def run_parallel_engine(report_builder, pvarray_parameters,
                        folds_cls_engine, folds_cls_irradiance, folds_cls_vf,
                        folds_fast_mode_pvrow_index,
                        folds_fast_mode_segment_index,
-                       folds_irradiance_model_params, report_indices))
+                       folds_irradiance_model_params, folds_ghi,
+                       report_indices))
 
     # Start multiprocessing
     pool = Pool(n_processes)
@@ -266,7 +272,7 @@ def _run_serially(args):
         solar_zenith, solar_azimuth, surface_tilt, surface_azimuth,\
         albedo, cls_pvarray, cls_engine, cls_irradiance, cls_vf, \
         fast_mode_pvrow_index, fast_mode_segment_index, \
-        irradiance_model_params, idx = args
+        irradiance_model_params, ghi, idx = args
 
     report = run_timeseries_engine(
         report_builder.build, pvarray_parameters,
@@ -276,6 +282,7 @@ def _run_serially(args):
         cls_irradiance=cls_irradiance, cls_vf=cls_vf,
         fast_mode_pvrow_index=fast_mode_pvrow_index,
         fast_mode_segment_index=fast_mode_segment_index,
-        irradiance_model_params=irradiance_model_params)
+        irradiance_model_params=irradiance_model_params,
+        ghi=ghi)
 
     return report, idx
