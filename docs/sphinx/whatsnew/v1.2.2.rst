@@ -1,0 +1,24 @@
+.. _whatsnew_1220:
+
+v1.2.2 (October 8, 2019)
+========================
+
+Enhancements
+------------
+
+Passing GHI to the irradiance models when using the fast mode should provide more accuracy.
+
+* Add GHI to run functions inputs (#78)
+
+Fixes
+-----
+
+The OrderedPVArray didn't handle it well when the fit function was called multiple times. A fix was implemented for this.
+
+* Fix accumulation of pvrows when fitting multiple times (#77)
+
+
+Contributors
+------------
+
+* Marc Anoma (:ghuser:`anomam`)
