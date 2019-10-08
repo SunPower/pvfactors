@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>models &mdash; pvfactors 1.2.1 documentation</title>
+  <title>models &mdash; pvfactors 1.2.2 documentation</title>
   
 
   
@@ -66,7 +66,7 @@
             
             
               <div class="version">
-                1.2.1
+                1.2.2
               </div>
             
           
@@ -219,7 +219,7 @@
 
     <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timestamps</span><span class="p">,</span> <span class="n">DNI</span><span class="p">,</span> <span class="n">DHI</span><span class="p">,</span> <span class="n">solar_zenith</span><span class="p">,</span> <span class="n">solar_azimuth</span><span class="p">,</span>
             <span class="n">surface_tilt</span><span class="p">,</span> <span class="n">surface_azimuth</span><span class="p">,</span> <span class="n">albedo</span><span class="p">,</span>
-            <span class="n">GHI</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+            <span class="n">ghi</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Use vectorization to calculate values used for the isotropic</span>
 <span class="sd">        irradiance model.</span>
 
@@ -241,7 +241,7 @@
 <span class="sd">            Surface azimuth angles [deg]</span>
 <span class="sd">        albedo : array-like</span>
 <span class="sd">            Albedo values (or ground reflectivity)</span>
-<span class="sd">        GHI : array-like, optional</span>
+<span class="sd">        ghi : array-like, optional</span>
 <span class="sd">            Global horizontal irradiance [W/m2], if not provided, will be</span>
 <span class="sd">            calculated from DNI and DHI (Default = None)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -254,20 +254,20 @@
             <span class="n">solar_azimuth</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">solar_azimuth</span><span class="p">])</span>
             <span class="n">surface_tilt</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">surface_tilt</span><span class="p">])</span>
             <span class="n">surface_azimuth</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">surface_azimuth</span><span class="p">])</span>
-            <span class="n">GHI</span> <span class="o">=</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">GHI</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">GHI</span><span class="p">])</span>
+            <span class="n">ghi</span> <span class="o">=</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">ghi</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">ghi</span><span class="p">])</span>
         <span class="c1"># Length of arrays</span>
         <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">DNI</span><span class="p">)</span>
         <span class="c1"># Make sure that albedo is a vector</span>
         <span class="n">albedo</span> <span class="o">=</span> <span class="n">albedo</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">n</span><span class="p">)</span> <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isscalar</span><span class="p">(</span><span class="n">albedo</span><span class="p">)</span> <span class="k">else</span> <span class="n">albedo</span>
 
         <span class="c1"># Save and calculate total POA values from Perez model</span>
-        <span class="n">GHI</span> <span class="o">=</span> <span class="n">DNI</span> <span class="o">*</span> <span class="n">cosd</span><span class="p">(</span><span class="n">solar_zenith</span><span class="p">)</span> <span class="o">+</span> <span class="n">DHI</span> <span class="k">if</span> <span class="n">GHI</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">GHI</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">GHI</span> <span class="o">=</span> <span class="n">GHI</span>
+        <span class="n">ghi</span> <span class="o">=</span> <span class="n">DNI</span> <span class="o">*</span> <span class="n">cosd</span><span class="p">(</span><span class="n">solar_zenith</span><span class="p">)</span> <span class="o">+</span> <span class="n">DHI</span> <span class="k">if</span> <span class="n">ghi</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">ghi</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">GHI</span> <span class="o">=</span> <span class="n">ghi</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">DHI</span> <span class="o">=</span> <span class="n">DHI</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">n_steps</span> <span class="o">=</span> <span class="n">n</span>
         <span class="n">perez_front_pvrow</span> <span class="o">=</span> <span class="n">get_total_irradiance</span><span class="p">(</span>
             <span class="n">surface_tilt</span><span class="p">,</span> <span class="n">surface_azimuth</span><span class="p">,</span> <span class="n">solar_zenith</span><span class="p">,</span> <span class="n">solar_azimuth</span><span class="p">,</span>
-            <span class="n">DNI</span><span class="p">,</span> <span class="n">GHI</span><span class="p">,</span> <span class="n">DHI</span><span class="p">,</span> <span class="n">albedo</span><span class="o">=</span><span class="n">albedo</span><span class="p">)</span>
+            <span class="n">DNI</span><span class="p">,</span> <span class="n">ghi</span><span class="p">,</span> <span class="n">DHI</span><span class="p">,</span> <span class="n">albedo</span><span class="o">=</span><span class="n">albedo</span><span class="p">)</span>
 
         <span class="c1"># Save diffuse light</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">isotropic_luminance</span> <span class="o">=</span> <span class="n">DHI</span>
@@ -501,7 +501,7 @@
 
     <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timestamps</span><span class="p">,</span> <span class="n">DNI</span><span class="p">,</span> <span class="n">DHI</span><span class="p">,</span> <span class="n">solar_zenith</span><span class="p">,</span> <span class="n">solar_azimuth</span><span class="p">,</span>
             <span class="n">surface_tilt</span><span class="p">,</span> <span class="n">surface_azimuth</span><span class="p">,</span> <span class="n">albedo</span><span class="p">,</span>
-            <span class="n">GHI</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+            <span class="n">ghi</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Use vectorization to calculate values used for the hybrid Perez</span>
 <span class="sd">        irradiance model.</span>
 
@@ -523,7 +523,7 @@
 <span class="sd">            Surface azimuth angles [deg]</span>
 <span class="sd">        albedo : array-like</span>
 <span class="sd">            Albedo values (or ground reflectivity)</span>
-<span class="sd">        GHI : array-like, optional</span>
+<span class="sd">        ghi : array-like, optional</span>
 <span class="sd">            Global horizontal irradiance [W/m2], if not provided, will be</span>
 <span class="sd">            calculated from DNI and DHI (Default = None)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -536,7 +536,7 @@
             <span class="n">solar_azimuth</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">solar_azimuth</span><span class="p">])</span>
             <span class="n">surface_tilt</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">surface_tilt</span><span class="p">])</span>
             <span class="n">surface_azimuth</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">surface_azimuth</span><span class="p">])</span>
-            <span class="n">GHI</span> <span class="o">=</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">GHI</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">GHI</span><span class="p">])</span>
+            <span class="n">ghi</span> <span class="o">=</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">ghi</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">ghi</span><span class="p">])</span>
         <span class="c1"># Length of arrays</span>
         <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">DNI</span><span class="p">)</span>
         <span class="c1"># Make sure that albedo is a vector</span>
@@ -551,13 +551,13 @@
                 <span class="n">surface_tilt</span><span class="p">,</span> <span class="n">surface_azimuth</span><span class="p">)</span>
 
         <span class="c1"># Save and calculate total POA values from Perez model</span>
-        <span class="n">GHI</span> <span class="o">=</span> <span class="n">DNI</span> <span class="o">*</span> <span class="n">cosd</span><span class="p">(</span><span class="n">solar_zenith</span><span class="p">)</span> <span class="o">+</span> <span class="n">DHI</span> <span class="k">if</span> <span class="n">GHI</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">GHI</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">GHI</span> <span class="o">=</span> <span class="n">GHI</span>
+        <span class="n">ghi</span> <span class="o">=</span> <span class="n">DNI</span> <span class="o">*</span> <span class="n">cosd</span><span class="p">(</span><span class="n">solar_zenith</span><span class="p">)</span> <span class="o">+</span> <span class="n">DHI</span> <span class="k">if</span> <span class="n">ghi</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">ghi</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">GHI</span> <span class="o">=</span> <span class="n">ghi</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">DHI</span> <span class="o">=</span> <span class="n">DHI</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">n_steps</span> <span class="o">=</span> <span class="n">n</span>
         <span class="n">perez_front_pvrow</span> <span class="o">=</span> <span class="n">get_total_irradiance</span><span class="p">(</span>
             <span class="n">surface_tilt</span><span class="p">,</span> <span class="n">surface_azimuth</span><span class="p">,</span> <span class="n">solar_zenith</span><span class="p">,</span> <span class="n">solar_azimuth</span><span class="p">,</span>
-            <span class="n">DNI</span><span class="p">,</span> <span class="n">GHI</span><span class="p">,</span> <span class="n">DHI</span><span class="p">,</span> <span class="n">albedo</span><span class="o">=</span><span class="n">albedo</span><span class="p">)</span>
+            <span class="n">DNI</span><span class="p">,</span> <span class="n">ghi</span><span class="p">,</span> <span class="n">DHI</span><span class="p">,</span> <span class="n">albedo</span><span class="o">=</span><span class="n">albedo</span><span class="p">)</span>
         <span class="n">total_perez_front_pvrow</span> <span class="o">=</span> <span class="n">perez_front_pvrow</span><span class="p">[</span><span class="s1">&#39;poa_global&#39;</span><span class="p">]</span>
 
         <span class="c1"># Save isotropic luminance</span>
@@ -638,7 +638,7 @@
             <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">circumsolar</span><span class="p">[</span><span class="s1">&#39;ground_illum&#39;</span><span class="p">]</span>
             <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">circumsolar</span><span class="p">[</span><span class="s1">&#39;ground_shaded&#39;</span><span class="p">]</span>
             <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">direct</span><span class="p">[</span><span class="s1">&#39;ground_shaded&#39;</span><span class="p">])</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">total_perez</span><span class="p">[</span><span class="s1">&#39;ground_illum&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">GHI</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">total_perez</span><span class="p">[</span><span class="s1">&#39;ground_illum&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ghi</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">total_perez</span><span class="p">[</span><span class="s1">&#39;sky&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">luminance_isotropic</span>
 
     <span class="k">def</span> <span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pvarray</span><span class="p">):</span>

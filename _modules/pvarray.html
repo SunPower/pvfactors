@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>pvarray &mdash; pvfactors 1.2.1 documentation</title>
+  <title>pvarray &mdash; pvfactors 1.2.2 documentation</title>
   
 
   
@@ -66,7 +66,7 @@
             
             
               <div class="version">
-                1.2.1
+                1.2.2
               </div>
             
           
@@ -223,7 +223,7 @@
 
         <span class="c1"># These attributes will be updated at fitting time</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">solar_2d_vectors</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">ts_pvrows</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ts_pvrows</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ts_ground</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">n_states</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">has_direct_shading</span> <span class="o">=</span> <span class="kc">None</span>
@@ -417,6 +417,8 @@
 <span class="sd">        rotation_vec : array-like or float</span>
 <span class="sd">            Rotation angle of the PV rows [deg]</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Initialize timeseries pv rows</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ts_pvrows</span> <span class="o">=</span> <span class="p">[]</span>
 
         <span class="c1"># Calculate interrow direct shading lengths</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_calculate_interrow_shading</span><span class="p">(</span><span class="n">alpha_vec</span><span class="p">,</span> <span class="n">rotation_vec</span><span class="p">)</span>

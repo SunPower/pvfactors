@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>run.run_parallel_engine &mdash; pvfactors 1.2.1 documentation</title>
+  <title>run.run_parallel_engine &mdash; pvfactors 1.2.2 documentation</title>
   
 
   
@@ -68,7 +68,7 @@
             
             
               <div class="version">
-                1.2.1
+                1.2.2
               </div>
             
           
@@ -197,7 +197,7 @@
 <h1>run.run_parallel_engine<a class="headerlink" href="#run-run-parallel-engine" title="Permalink to this headline">¶</a></h1>
 <dl class="function">
 <dt id="run.run_parallel_engine">
-<code class="sig-prename descclassname">run.</code><code class="sig-name descname">run_parallel_engine</code><span class="sig-paren">(</span><em class="sig-param">report_builder</em>, <em class="sig-param">pvarray_parameters</em>, <em class="sig-param">timestamps</em>, <em class="sig-param">dni</em>, <em class="sig-param">dhi</em>, <em class="sig-param">solar_zenith</em>, <em class="sig-param">solar_azimuth</em>, <em class="sig-param">surface_tilt</em>, <em class="sig-param">surface_azimuth</em>, <em class="sig-param">albedo</em>, <em class="sig-param">cls_pvarray=&lt;class 'pvfactors.geometry.pvarray.OrderedPVArray'&gt;</em>, <em class="sig-param">cls_engine=&lt;class 'pvfactors.engine.PVEngine'&gt;</em>, <em class="sig-param">cls_irradiance=&lt;class 'pvfactors.irradiance.models.HybridPerezOrdered'&gt;</em>, <em class="sig-param">cls_vf=&lt;class 'pvfactors.viewfactors.calculator.VFCalculator'&gt;</em>, <em class="sig-param">fast_mode_pvrow_index=None</em>, <em class="sig-param">fast_mode_segment_index=None</em>, <em class="sig-param">irradiance_model_params=None</em>, <em class="sig-param">n_processes=2</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/run.html#run_parallel_engine"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#run.run_parallel_engine" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">run.</code><code class="sig-name descname">run_parallel_engine</code><span class="sig-paren">(</span><em class="sig-param">report_builder</em>, <em class="sig-param">pvarray_parameters</em>, <em class="sig-param">timestamps</em>, <em class="sig-param">dni</em>, <em class="sig-param">dhi</em>, <em class="sig-param">solar_zenith</em>, <em class="sig-param">solar_azimuth</em>, <em class="sig-param">surface_tilt</em>, <em class="sig-param">surface_azimuth</em>, <em class="sig-param">albedo</em>, <em class="sig-param">cls_pvarray=&lt;class 'pvfactors.geometry.pvarray.OrderedPVArray'&gt;</em>, <em class="sig-param">cls_engine=&lt;class 'pvfactors.engine.PVEngine'&gt;</em>, <em class="sig-param">cls_irradiance=&lt;class 'pvfactors.irradiance.models.HybridPerezOrdered'&gt;</em>, <em class="sig-param">cls_vf=&lt;class 'pvfactors.viewfactors.calculator.VFCalculator'&gt;</em>, <em class="sig-param">fast_mode_pvrow_index=None</em>, <em class="sig-param">fast_mode_segment_index=None</em>, <em class="sig-param">irradiance_model_params=None</em>, <em class="sig-param">n_processes=2</em>, <em class="sig-param">ghi=None</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/run.html#run_parallel_engine"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#run.run_parallel_engine" title="Permalink to this definition">¶</a></dt>
 <dd><p>Run timeseries simulation using multiprocessing. Here, instead of a
 function that will build the report, the users will need to pass a class
 (or an object).</p>
@@ -235,6 +235,7 @@ selected segment of the selected back surface (Default = None)</p></li>
 <li><p><strong>irradiance_model_params</strong> (<em>dict</em><em>, </em><em>optional</em>) – Dictionary of parameters that will be passed to the irradiance model
 class as kwargs at instantiation (Default = None)</p></li>
 <li><p><strong>n_processes</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of parallel processes to run for the calculation (Default = 2)</p></li>
+<li><p><strong>ghi</strong> (<em>array-like</em><em>, </em><em>optional</em>) – Global horizontal irradiance values [W/m2] (Default = None)</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
