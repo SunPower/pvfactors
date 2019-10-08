@@ -437,7 +437,8 @@ class TsDualSegment(object):
             Timeseries coordinates of full segment
         illum_ts_surface : :py:class:`~pvfactors.geometry.timeseries.TsSurface`
             Timeseries surface for illuminated part of dual segment
-        shaded_ts_surface : :py:class:`~pvfactors.geometry.timeseries.TsSurface`
+        shaded_ts_surface :
+        :py:class:`~pvfactors.geometry.timeseries.TsSurface`
             Timeseries surface for shaded part of dual segment
         index : int, optional
             Index of segment (Default = None)
@@ -865,6 +866,52 @@ class TsGround(object):
             coords.b2.x = np.minimum(coords.b2.x, MAX_X_GROUND)
             shadow_coords.append(coords)
         return shadow_coords
+
+
+class TsGroundElement(object):
+    """Special class for ground elements: a ground element has known
+    timeseries coordinate boundaries, but in order to vectorize the view
+    factor calculation, we need to define the portions of the element that
+    are in all the zones defined by the PV row cut points."""
+
+    def __init__(self, coords):
+        self.coords = coords
+        self.surface_dict = None  # will be necessary for view factor calcs
+        self.surface_list = []  # will be necessary for vf matrix formation
+
+    def create_all_surfaces(self, list_ordered_cut_pts):
+
+        self.surface_dict = dict.fromkeys(range(len(list_ordered_cut_pts)))
+        n_cut_pts = len(list_ordered_cut_pts)
+
+        next_surface = TsSurface(self.coords)
+        for idx_pt, cut_pt_coords in enumerate(list_ordered_cut_pts):
+            # Initialize dict
+            self.surface_dict[idx_pt]['left'] = []
+            self.surface_dict[idx_pt]['right'] = []
+            # Get surface on left of cut pt
+            surface_left = self._surface_left_of_cut_point(
+                next_surface, cut_pt_coords)
+            # Save that surface in the required structures
+            self.surface_list.append(surface_left)
+            for i in range(idx_pt, n_cut_pts):
+                self.surface_dict[i]['left'].append(surface_left)
+            for j in range(0, idx_pt - 1):
+                self.surface_dict[j]['right'].append(surface_left)
+            next_surface = self._surface_right_of_cut_point(
+                next_surface, cut_pt_coords)
+        # Save the right most portion
+        self.surface_list.append(next_surface)
+        for j in range(0, n_cut_pts):
+            self.surface_dict[j]['right'].append(next_surface)
+
+    @staticmethod
+    def _surface_right_of_cut_point(surface, cut_pt):
+        pass
+
+    @staticmethod
+    def _surface_left_of_cut_point(surface, cut_pt):
+        pass
 
 
 class TsSurface(object):
