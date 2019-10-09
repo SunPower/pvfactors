@@ -599,15 +599,17 @@ class TsGround(object):
     PV ground geometry class, and it will store timeseries coordinates
     for ground shadows and pv row cut points."""
 
-    def __init__(self, shadow_surfaces, param_names=None,
+    def __init__(self, shadow_elements, illum_elements, param_names=None,
                  flag_overlap=None, cut_point_coords=None, y_ground=None):
         """Initialize timeseries ground using list of timeseries surfaces
         for the ground shadows
 
         Parameters
         ----------
-        shadow_surfaces : list of :py:class:`~pvfactors.geometry.timeseries.TsSurface`
-            Timeseries surfaces for ground shadows
+        shadow_elements : list of :py:class:`~pvfactors.geometry.timeseries.TsGroundElement`
+            Timeseries shaded ground elements
+        illum_elements : list of :py:class:`~pvfactors.geometry.timeseries.TsGroundElement`
+            Timeseries illuminated ground elements
         param_names : list of str, optional
             List of names of surface parameters to use when creating geometries
             (Default = None)
@@ -620,7 +622,8 @@ class TsGround(object):
         y_ground : float, optional
             Y coordinate of flat ground [m] (Default=None)
         """
-        self.shadows = shadow_surfaces
+        self.shadow_elements = shadow_elements
+        self.illum_elements = illum_elements
         self.param_names = [] if param_names is None else param_names
         self.flag_overlap = flag_overlap
         self.cut_point_coords = [] if cut_point_coords is None \
@@ -713,20 +716,63 @@ class TsGround(object):
         # Get cut point coords if any
         cut_point_coords = [] if cut_point_coords is None else cut_point_coords
         # Create shadow surfaces
-        list_coords = [TsLineCoords.from_array(coords)
-                       for coords in shadow_coords]
+        list_shadow_coords = [TsLineCoords.from_array(coords)
+                              for coords in shadow_coords]
         # If the overlap flags were passed, make sure shadows don't overlap
         if flag_overlap is not None:
-            if len(list_coords) > 1:
-                for idx, coords in enumerate(list_coords[:-1]):
+            if len(list_shadow_coords) > 1:
+                for idx, coords in enumerate(list_shadow_coords[:-1]):
                     coords.b2.x = np.where(flag_overlap,
-                                           list_coords[idx + 1].b1.x,
+                                           list_shadow_coords[idx + 1].b1.x,
                                            coords.b2.x)
-        # Create shadow surfaces
-        ts_shadows = [TsSurface(coords) for coords in list_coords]
-        return cls(ts_shadows, param_names=param_names,
-                   flag_overlap=flag_overlap,
+        # Create shaded ground elements
+        ts_shadows_elements = cls._create_shadow_elements(list_shadow_coords)
+        # Create illuminated ground elements
+        ts_illum_elements = cls._create_illum_elements(ts_shadows_elements,
+                                                       y_ground)
+        return cls(ts_shadows_elements, ts_illum_elements,
+                   param_names=param_names, flag_overlap=flag_overlap,
                    cut_point_coords=cut_point_coords, y_ground=y_ground)
+
+    @staticmethod
+    def _create_shadow_elements(list_shadow_coords):
+        """This method will clip the shadow coords to the limit of ground,
+        i.e. the shadow coordinates shouldn't be outside of the range
+        [MIN_X_GROUND, MAX_X_GROUND]."""
+
+        list_shadow_elements = []
+        for shadow_coords in list_shadow_coords:
+            shadow_coords.b1.x = np.clip(shadow_coords.b1.x, MIN_X_GROUND,
+                                         MAX_X_GROUND)
+            shadow_coords.b2.x = np.clip(shadow_coords.b2.x, MIN_X_GROUND,
+                                         MAX_X_GROUND)
+            list_shadow_elements.append(TsGroundElement(shadow_coords))
+
+        return list_shadow_elements
+
+    @staticmethod
+    def _create_illum_elements(list_shadow_elements, y_ground):
+        """Create illuminated ground elements"""
+
+        list_illum_elements = []
+        # There must be at least 1 shadow element, otherwise what's the point
+        n_steps = len(list_shadow_elements[0].coords.b1.x)
+        y_ground_vec = y_ground * np.ones(n_steps)
+        next_x = MIN_X_GROUND * np.ones(n_steps)
+        for shadow_element in list_shadow_elements:
+            x1 = next_x
+            x2 = shadow_element.coords.b1.x
+            coords = TsLineCoords.from_array(
+                np.array([[x1, y_ground_vec], [x2, y_ground_vec]]))
+            list_illum_elements.append(TsGroundElement(coords))
+            next_x = shadow_element.coords.b2.x
+        # Add last illum element
+        coords = TsLineCoords.from_array(
+            np.array([[next_x, y_ground_vec],
+                      [MAX_X_GROUND * np.ones(n_steps), y_ground_vec]]))
+        list_illum_elements.append(TsGroundElement(coords))
+
+        return list_illum_elements
 
     def at(self, idx, x_min_max=None, merge_if_flag_overlap=True,
            with_cut_points=True):
@@ -754,18 +800,25 @@ class TsGround(object):
         cut_point_coords = ([cut_point.at(idx)
                              for cut_point in self.cut_point_coords]
                             if with_cut_points else [])
+        # Filter out shadow coords that have zero length
+        filtered_shadow_coords = [shadow_element.coords
+                                  for i, shadow_element
+                                  in enumerate(self.shadow_elements)
+                                  if shadow_element.coords.length[idx]
+                                  > DISTANCE_TOLERANCE]
         # Decide whether to merge all shadows or not
         if merge_if_flag_overlap and (self.flag_overlap is not None):
             is_overlap = self.flag_overlap[idx]
-            if is_overlap and (len(self.shadows) > 1):
-                ordered_shadow_coords = [[self.shadows[0].coords.b1.at(idx),
-                                          self.shadows[-1].coords.b2.at(idx)]]
+            if is_overlap and (len(filtered_shadow_coords) > 1):
+                ordered_shadow_coords = [
+                    [filtered_shadow_coords[0].b1.at(idx),
+                     filtered_shadow_coords[-1].b2.at(idx)]]
             else:
-                ordered_shadow_coords = [shadow.coords.at(idx)
-                                         for shadow in self.shadows]
+                ordered_shadow_coords = [coords.at(idx)
+                                         for coords in filtered_shadow_coords]
         else:
-            ordered_shadow_coords = [shadow.coords.at(idx)
-                                     for shadow in self.shadows]
+            ordered_shadow_coords = [coords.at(idx)
+                                     for coords in filtered_shadow_coords]
         # Create parameters at given idx
         # TODO: should find faster solution
         illum_params = {k: (val if (val is None) or np.isscalar(val)
@@ -831,7 +884,7 @@ class TsGround(object):
         """
         shadow_coords = []
         cut_pt_coords = self.cut_point_coords[idx_cut_pt]
-        for shadow in self.shadows:
+        for shadow in self.shadow_elements:
             coords = deepcopy(shadow.coords)
             coords.b1.x = np.minimum(coords.b1.x, cut_pt_coords.x)
             coords.b1.x = np.maximum(coords.b1.x, MIN_X_GROUND)
@@ -858,7 +911,7 @@ class TsGround(object):
         """
         shadow_coords = []
         cut_pt_coords = self.cut_point_coords[idx_cut_pt]
-        for shadow in self.shadows:
+        for shadow in self.shadow_elements:
             coords = deepcopy(shadow.coords)
             coords.b1.x = np.maximum(coords.b1.x, cut_pt_coords.x)
             coords.b1.x = np.minimum(coords.b1.x, MAX_X_GROUND)
@@ -912,6 +965,21 @@ class TsGroundElement(object):
     @staticmethod
     def _surface_left_of_cut_point(surface, cut_pt):
         pass
+
+    @property
+    def b1(self):
+        """Timeseries coordinates of first boundary point"""
+        return self.coords.b1
+
+    @property
+    def b2(self):
+        """Timeseries coordinates of second boundary point"""
+        return self.coords.b2
+
+    @property
+    def centroid(self):
+        """Timeseries point coordinates of the element's centroid"""
+        return self.coords.centroid
 
 
 class TsSurface(object):

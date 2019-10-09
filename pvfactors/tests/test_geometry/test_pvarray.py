@@ -533,8 +533,8 @@ def test_coords_ground_shadows():
         [([3.10075071, 5.19163641], [0., 0.]),
          ([5.18914857, 6.51846431], [0., 0.])]
     ]
-    gnd_shadow_coords = [shadow.coords.as_array
-                         for shadow in ordered_pvarray.ts_ground.shadows]
+    gnd_shadow_coords = [shadow.coords.as_array for shadow
+                         in ordered_pvarray.ts_ground.shadow_elements]
 
     np.testing.assert_almost_equal(
         expected_gnd_shadow_coords, gnd_shadow_coords)

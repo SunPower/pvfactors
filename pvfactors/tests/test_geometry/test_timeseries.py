@@ -144,7 +144,7 @@ def test_ts_ground_from_ts_pvrow():
         [ts_pvrow], alpha_vec, df_inputs.rotation_vec,
         param_names=param_names)
 
-    assert len(ts_ground.shadows) == 1
+    assert len(ts_ground.shadow_elements) == 1
     # Check at specific times
     ground_0 = ts_ground.at(0)
     assert ground_0.n_surfaces == 4
@@ -170,12 +170,12 @@ def test_ts_ground_overlap():
 
     # Test without overlap
     ts_ground = TsGround.from_ordered_shadows_coords(shadow_coords)
-    np.testing.assert_allclose(ts_ground.shadows[0].b2.x, [2, 1])
+    np.testing.assert_allclose(ts_ground.shadow_elements[0].b2.x, [2, 1])
 
     # Test with overlap
     ts_ground = TsGround.from_ordered_shadows_coords(shadow_coords,
                                                      flag_overlap=overlap)
-    np.testing.assert_allclose(ts_ground.shadows[0].b2.x, [1, 1])
+    np.testing.assert_allclose(ts_ground.shadow_elements[0].b2.x, [1, 1])
 
 
 def test_ts_ground_to_geometry():
