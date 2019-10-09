@@ -1060,10 +1060,6 @@ class TsLineCoords(object):
         """
         self.b1 = b1_ts_coords
         self.b2 = b2_ts_coords
-        # TODO: the following should probably be turned into properties,
-        # because if the coords change, they won't be altered. But speed...
-        self.length = np.sqrt((b2_ts_coords.y - b1_ts_coords.y)**2
-                              + (b2_ts_coords.x - b1_ts_coords.x)**2)
 
     def at(self, idx):
         """Get coordinates at a given index
@@ -1087,6 +1083,12 @@ class TsLineCoords(object):
         b1 = TsPointCoords.from_array(coords_array[0, :, :])
         b2 = TsPointCoords.from_array(coords_array[1, :, :])
         return cls(b1, b2)
+
+    @property
+    def length(self):
+        """Timeseries length of the line."""
+        return np.sqrt((self.b2.y - self.b1.y)**2
+                       + (self.b2.x - self.b1.x)**2)
 
     @property
     def as_array(self):
