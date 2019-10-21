@@ -141,8 +141,7 @@ def test_ts_ground_from_ts_pvrow():
     # Create ground from it
     alpha_vec = np.deg2rad([80., 90., 70.])
     ts_ground = TsGround.from_ts_pvrows_and_angles(
-        [ts_pvrow], alpha_vec, df_inputs.rotation_vec,
-        param_names=param_names)
+        [ts_pvrow], alpha_vec, df_inputs.rotation_vec, param_names=param_names)
 
     assert len(ts_ground.shadow_elements) == 1
     # Check at specific times
@@ -150,9 +149,9 @@ def test_ts_ground_from_ts_pvrow():
     assert ground_0.n_surfaces == 4
     assert ground_0.list_segments[0].shaded_collection.n_surfaces == 1
     ground_1 = ts_ground.at(1)  # vertical, sun above
-    assert ground_1.n_surfaces == 3
-    assert ground_1.list_segments[0].shaded_collection.n_surfaces == 1
-    assert ground_1.shaded_length < 1e-7
+    assert ground_1.n_surfaces == 2  # only 2 illuminated surfaces
+    assert ground_1.list_segments[0].shaded_collection.n_surfaces == 0
+    assert ground_1.shaded_length == 0  # no shadow (since shadow length 0ish)
     np.testing.assert_allclose(ground_0.shaded_length, 1.7587704831436)
     np.testing.assert_allclose(ts_ground.at(2).shaded_length, width)  # flat
     # Check that all have surface params
