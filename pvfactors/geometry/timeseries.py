@@ -726,17 +726,18 @@ class TsGround(object):
                                            list_shadow_coords[idx + 1].b1.x,
                                            coords.b2.x)
         # Create shaded ground elements
-        ts_shadows_elements = cls._create_shadow_elements(list_shadow_coords,
-                                                          cut_point_coords)
+        ts_shadows_elements = cls._create_shadow_elements(
+            list_shadow_coords, cut_point_coords, param_names)
         # Create illuminated ground elements
         ts_illum_elements = cls._create_illum_elements(
-            ts_shadows_elements, y_ground, cut_point_coords)
+            ts_shadows_elements, y_ground, cut_point_coords, param_names)
         return cls(ts_shadows_elements, ts_illum_elements,
                    param_names=param_names, flag_overlap=flag_overlap,
                    cut_point_coords=cut_point_coords, y_ground=y_ground)
 
     @staticmethod
-    def _create_shadow_elements(list_shadow_coords, cut_point_coords):
+    def _create_shadow_elements(list_shadow_coords, cut_point_coords,
+                                param_names):
         """This method will clip the shadow coords to the limit of ground,
         i.e. the shadow coordinates shouldn't be outside of the range
         [MIN_X_GROUND, MAX_X_GROUND]."""
@@ -749,12 +750,14 @@ class TsGround(object):
                                          MAX_X_GROUND)
             list_shadow_elements.append(
                 TsGroundElement(shadow_coords,
-                                list_ordered_cut_pts_coords=cut_point_coords))
+                                list_ordered_cut_pts_coords=cut_point_coords,
+                                param_names=param_names, shaded=True))
 
         return list_shadow_elements
 
     @staticmethod
-    def _create_illum_elements(list_shadow_elements, y_ground, cut_pt_coords):
+    def _create_illum_elements(list_shadow_elements, y_ground, cut_pt_coords,
+                               param_names):
         """Create illuminated ground elements"""
 
         list_illum_elements = []
@@ -768,19 +771,57 @@ class TsGround(object):
             coords = TsLineCoords.from_array(
                 np.array([[x1, y_ground_vec], [x2, y_ground_vec]]))
             list_illum_elements.append(TsGroundElement(
-                coords, list_ordered_cut_pts_coords=cut_pt_coords))
+                coords, list_ordered_cut_pts_coords=cut_pt_coords,
+                param_names=param_names, shaded=False))
             next_x = shadow_element.coords.b2.x
         # Add last illum element
         coords = TsLineCoords.from_array(
             np.array([[next_x, y_ground_vec],
                       [MAX_X_GROUND * np.ones(n_steps), y_ground_vec]]))
         list_illum_elements.append(TsGroundElement(
-            coords, list_ordered_cut_pts_coords=cut_pt_coords))
+            coords, list_ordered_cut_pts_coords=cut_pt_coords,
+            param_names=param_names, shaded=False))
 
         return list_illum_elements
 
-    def at(self, idx, x_min_max=None, merge_if_flag_overlap=True,
-           with_cut_points=True):
+    def at(self, idx, x_min_max=None, with_cut_points=True,
+           merge_if_flag_overlap=True):
+
+        # Get list shadow and illum surfaces
+        if with_cut_points:
+            list_shadow_surfaces = []
+            for shadow_el in self.shadow_elements:
+                for shadow_ts_surf in shadow_el.surface_list:
+                    surface = shadow_ts_surf.at(idx, shaded=True)
+                    if surface.length > DISTANCE_TOLERANCE:
+                        list_shadow_surfaces.append(surface)
+            list_illum_surfaces = []
+            for illum_el in self.illum_elements:
+                for illum_ts_surf in illum_el.surface_list:
+                    surface = illum_ts_surf.at(idx, shaded=False)
+                    if surface.length > DISTANCE_TOLERANCE:
+                        list_illum_surfaces.append(surface)
+        else:
+            list_shadow_surfaces = [PVSurface(shadow_el.coords.at(idx),
+                                              shaded=True,
+                                              param_names=self.param_names)
+                                    for shadow_el in self.shadow_elements
+                                    if shadow_el.coords.length[idx]
+                                    > DISTANCE_TOLERANCE]
+            list_illum_surfaces = [PVSurface(illum_el.coords.at(idx),
+                                             shaded=False,
+                                             param_names=self.param_names)
+                                   for illum_el in self.illum_elements
+                                   if illum_el.coords.length[idx]
+                                   > DISTANCE_TOLERANCE]
+
+        return PVGround.from_lists_surfaces(
+            list_shadow_surfaces, list_illum_surfaces,
+            param_names=self.param_names, y_ground=self.y_ground,
+            x_min_max=x_min_max)
+
+    def at_(self, idx, x_min_max=None, merge_if_flag_overlap=True,
+            with_cut_points=True):
         """Generate a PV ground geometry for the desired index.
 
         Parameters
@@ -932,8 +973,11 @@ class TsGroundElement(object):
     factor calculation, we need to define the portions of the element that
     are in all the zones defined by the PV row cut points."""
 
-    def __init__(self, coords, list_ordered_cut_pts_coords=None):
+    def __init__(self, coords, list_ordered_cut_pts_coords=None,
+                 param_names=None, shaded=False):
         self.coords = coords
+        self.param_names = param_names or []
+        self.shaded = shaded
         self.surface_dict = None  # will be necessary for view factor calcs
         self.surface_list = []  # will be necessary for vf matrix formation
         list_ordered_cut_pts_coords = list_ordered_cut_pts_coords or []
@@ -953,7 +997,7 @@ class TsGroundElement(object):
             coords_left = self._coords_left_of_cut_point(next_coords,
                                                          cut_pt_coords)
             # Save that surface in the required structures
-            surface_left = TsSurface(coords_left)
+            surface_left = TsSurface(coords_left, param_names=self.param_names)
             self.surface_list.append(surface_left)
             for i in range(idx_pt, n_cut_pts):
                 self.surface_dict[i]['left'].append(surface_left)
@@ -962,7 +1006,7 @@ class TsGroundElement(object):
             next_coords = self._coords_right_of_cut_point(next_coords,
                                                           cut_pt_coords)
         # Save the right most portion
-        next_surface = TsSurface(next_coords)
+        next_surface = TsSurface(next_coords, param_names=self.param_names)
         self.surface_list.append(next_surface)
         for j in range(0, n_cut_pts):
             self.surface_dict[j]['right'].append(next_surface)
@@ -1001,6 +1045,10 @@ class TsGroundElement(object):
     def centroid(self):
         """Timeseries point coordinates of the element's centroid"""
         return self.coords.centroid
+
+    def surfaces_at(self, idx):
+        return [surface.at(idx, shaded=self.shaded)
+                for surface in self.surface_list]
 
 
 class TsSurface(object):
