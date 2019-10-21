@@ -942,14 +942,13 @@ class TsGroundElement(object):
 
     def _create_all_ts_surfaces(self, list_ordered_cut_pts):
 
-        self.surface_dict = {i: {} for i in range(len(list_ordered_cut_pts))}
+        # Initialize dict
+        self.surface_dict = {i: {'right': [], 'left': []}
+                             for i in range(len(list_ordered_cut_pts))}
         n_cut_pts = len(list_ordered_cut_pts)
 
         next_coords = self.coords
         for idx_pt, cut_pt_coords in enumerate(list_ordered_cut_pts):
-            # Initialize dict
-            self.surface_dict[idx_pt]['left'] = []
-            self.surface_dict[idx_pt]['right'] = []
             # Get coords on left of cut pt
             coords_left = self._coords_left_of_cut_point(next_coords,
                                                          cut_pt_coords)
@@ -958,7 +957,7 @@ class TsGroundElement(object):
             self.surface_list.append(surface_left)
             for i in range(idx_pt, n_cut_pts):
                 self.surface_dict[i]['left'].append(surface_left)
-            for j in range(0, idx_pt - 1):
+            for j in range(0, idx_pt):
                 self.surface_dict[j]['right'].append(surface_left)
             next_coords = self._coords_right_of_cut_point(next_coords,
                                                           cut_pt_coords)

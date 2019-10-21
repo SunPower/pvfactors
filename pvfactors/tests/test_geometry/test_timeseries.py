@@ -1,5 +1,6 @@
 import os
-from pvfactors.geometry.timeseries import TsPVRow, TsGround, TsPointCoords
+from pvfactors.geometry.timeseries import \
+    TsPVRow, TsGround, TsPointCoords, TsLineCoords, TsGroundElement
 import pandas as pd
 import numpy as np
 from pvfactors.geometry.pvrow import PVRow
@@ -286,3 +287,45 @@ def test_shadows_coords_left_right_of_cut_point():
                                       [[[mini], [0.]], [[mini], [0.]]]])
     shadows_left = [shadow.as_array for shadow in shadows_left]
     np.testing.assert_allclose(shadows_left, expected_shadows_left)
+
+
+def test_ts_ground_ground_elements():
+    """Check timeseries ground elements are created correctly"""
+
+    # Create timeseries coords
+    gnd_element_coords = TsLineCoords.from_array(
+        np.array([[[-1, -1], [0, 0]], [[1, 1], [0, 0]]]))
+    pt_coords_1 = TsPointCoords.from_array(np.array([[-0.5, -1], [0, 0]]))
+    pt_coords_2 = TsPointCoords.from_array(np.array([[0.5, 0], [0, 0]]))
+
+    # Create gnd element
+    gnd_element = TsGroundElement(
+        gnd_element_coords,
+        list_ordered_cut_pts_coords=[pt_coords_1, pt_coords_2])
+
+    # Check that structures contain the correct number of ts surfaces
+    assert len(gnd_element.surface_list) == 3
+    assert len(gnd_element.surface_dict[0]['left']) == 1
+    assert len(gnd_element.surface_dict[1]['left']) == 2
+    assert len(gnd_element.surface_dict[0]['right']) == 2
+    assert len(gnd_element.surface_dict[1]['right']) == 1
+    # Check that the objects are the same
+    assert (gnd_element.surface_list[0]
+            == gnd_element.surface_dict[0]['left'][0])
+    assert (gnd_element.surface_list[0]
+            == gnd_element.surface_dict[1]['left'][0])
+    assert (gnd_element.surface_list[1]
+            == gnd_element.surface_dict[0]['right'][0])
+    assert (gnd_element.surface_list[1]
+            == gnd_element.surface_dict[1]['left'][1])
+    assert (gnd_element.surface_list[2]
+            == gnd_element.surface_dict[0]['right'][1])
+    assert (gnd_element.surface_list[2]
+            == gnd_element.surface_dict[1]['right'][0])
+    # Now check surfaces lengths
+    np.testing.assert_allclose(gnd_element.surface_list[0].length, [0.5, 0])
+    np.testing.assert_allclose(gnd_element.surface_list[1].length, [1, 1])
+    np.testing.assert_allclose(gnd_element.surface_list[2].length, [0.5, 1])
+    # Check coords of surfaces
+    np.testing.assert_allclose(gnd_element.surface_list[0].b1.x, [-1, -1])
+    np.testing.assert_allclose(gnd_element.surface_list[0].b2.x, [-0.5, -1])
