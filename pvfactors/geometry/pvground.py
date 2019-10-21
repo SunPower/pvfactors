@@ -59,9 +59,9 @@ class PVGround(BaseSide):
 
     @classmethod
     def from_ordered_shadow_and_cut_pt_coords(
-        cls, x_min_max=None, y_ground=Y_GROUND, ordered_shadow_coords=[],
-            cut_point_coords=[], param_names=[], shaded_params={},
-            illum_params={}):
+        cls, x_min_max=None, y_ground=Y_GROUND, ordered_shadow_coords=None,
+            cut_point_coords=None, param_names=None, shaded_params=None,
+            illum_params=None):
         """Build a horizontal flat ground surface, made of 1 PVSegment with
         shaded areas and "cut points" (reference points used in view factor
         calculations)
@@ -96,13 +96,17 @@ class PVGround(BaseSide):
         PVGround object
             PV ground with shadows, illuminated ground, and cut points
         """
+
+        param_names = param_names or []
+        shaded_params = shaded_params or {}
+        illum_params = illum_params or {}
+        cut_point_coords = cut_point_coords or []
+        ordered_shadow_coords = ordered_shadow_coords or []
         # Get ground boundaries
         if x_min_max is None:
             x_min, x_max = MIN_X_GROUND, MAX_X_GROUND
         else:
             x_min, x_max = x_min_max
-        full_extent_coords = [(x_min, y_ground), (x_max, y_ground)]
-
         # Create the list of illuminated and shaded PV surfaces
         list_shaded_surfaces = []
         list_illum_surfaces = []
@@ -110,6 +114,24 @@ class PVGround(BaseSide):
                               ordered_shadow_coords, cut_point_coords,
                               x_min, x_max, y_ground, param_names,
                               shaded_params, illum_params)
+
+        return cls.from_lists_surfaces(
+            list_shaded_surfaces, list_illum_surfaces, param_names=param_names,
+            x_min_max=x_min_max, y_ground=y_ground)
+
+    @classmethod
+    def from_lists_surfaces(
+        cls, list_shaded_surfaces, list_illum_surfaces,
+            param_names=None, x_min_max=None, y_ground=Y_GROUND):
+        """Create ground from lists of surfaces"""
+        param_names = param_names or []
+        # Get ground boundaries
+        if x_min_max is None:
+            x_min, x_max = MIN_X_GROUND, MAX_X_GROUND
+        else:
+            x_min, x_max = x_min_max
+        full_extent_coords = [(x_min, y_ground), (x_max, y_ground)]
+
         # Create the shade collections
         shaded_collection = ShadeCollection(
             list_surfaces=list_shaded_surfaces, shaded=True,
