@@ -714,7 +714,7 @@ class TsGround(object):
         """
 
         # Get cut point coords if any
-        cut_point_coords = [] if cut_point_coords is None else cut_point_coords
+        cut_point_coords = cut_point_coords or []
         # Create shadow surfaces
         list_shadow_coords = [TsLineCoords.from_array(coords)
                               for coords in shadow_coords]
@@ -726,16 +726,17 @@ class TsGround(object):
                                            list_shadow_coords[idx + 1].b1.x,
                                            coords.b2.x)
         # Create shaded ground elements
-        ts_shadows_elements = cls._create_shadow_elements(list_shadow_coords)
+        ts_shadows_elements = cls._create_shadow_elements(list_shadow_coords,
+                                                          cut_point_coords)
         # Create illuminated ground elements
-        ts_illum_elements = cls._create_illum_elements(ts_shadows_elements,
-                                                       y_ground)
+        ts_illum_elements = cls._create_illum_elements(
+            ts_shadows_elements, y_ground, cut_point_coords)
         return cls(ts_shadows_elements, ts_illum_elements,
                    param_names=param_names, flag_overlap=flag_overlap,
                    cut_point_coords=cut_point_coords, y_ground=y_ground)
 
     @staticmethod
-    def _create_shadow_elements(list_shadow_coords):
+    def _create_shadow_elements(list_shadow_coords, cut_point_coords):
         """This method will clip the shadow coords to the limit of ground,
         i.e. the shadow coordinates shouldn't be outside of the range
         [MIN_X_GROUND, MAX_X_GROUND]."""
@@ -746,12 +747,14 @@ class TsGround(object):
                                          MAX_X_GROUND)
             shadow_coords.b2.x = np.clip(shadow_coords.b2.x, MIN_X_GROUND,
                                          MAX_X_GROUND)
-            list_shadow_elements.append(TsGroundElement(shadow_coords))
+            list_shadow_elements.append(
+                TsGroundElement(shadow_coords,
+                                list_ordered_cut_pts_coords=cut_point_coords))
 
         return list_shadow_elements
 
     @staticmethod
-    def _create_illum_elements(list_shadow_elements, y_ground):
+    def _create_illum_elements(list_shadow_elements, y_ground, cut_pt_coords):
         """Create illuminated ground elements"""
 
         list_illum_elements = []
@@ -764,13 +767,15 @@ class TsGround(object):
             x2 = shadow_element.coords.b1.x
             coords = TsLineCoords.from_array(
                 np.array([[x1, y_ground_vec], [x2, y_ground_vec]]))
-            list_illum_elements.append(TsGroundElement(coords))
+            list_illum_elements.append(TsGroundElement(
+                coords, list_ordered_cut_pts_coords=cut_pt_coords))
             next_x = shadow_element.coords.b2.x
         # Add last illum element
         coords = TsLineCoords.from_array(
             np.array([[next_x, y_ground_vec],
                       [MAX_X_GROUND * np.ones(n_steps), y_ground_vec]]))
-        list_illum_elements.append(TsGroundElement(coords))
+        list_illum_elements.append(TsGroundElement(
+            coords, list_ordered_cut_pts_coords=cut_pt_coords))
 
         return list_illum_elements
 
@@ -927,44 +932,61 @@ class TsGroundElement(object):
     factor calculation, we need to define the portions of the element that
     are in all the zones defined by the PV row cut points."""
 
-    def __init__(self, coords):
+    def __init__(self, coords, list_ordered_cut_pts_coords=None):
         self.coords = coords
         self.surface_dict = None  # will be necessary for view factor calcs
         self.surface_list = []  # will be necessary for vf matrix formation
+        list_ordered_cut_pts_coords = list_ordered_cut_pts_coords or []
+        if len(list_ordered_cut_pts_coords) > 0:
+            self._create_all_ts_surfaces(list_ordered_cut_pts_coords)
 
-    def create_all_surfaces(self, list_ordered_cut_pts):
+    def _create_all_ts_surfaces(self, list_ordered_cut_pts):
 
-        self.surface_dict = dict.fromkeys(range(len(list_ordered_cut_pts)))
+        self.surface_dict = {i: {} for i in range(len(list_ordered_cut_pts))}
         n_cut_pts = len(list_ordered_cut_pts)
 
-        next_surface = TsSurface(self.coords)
+        next_coords = self.coords
         for idx_pt, cut_pt_coords in enumerate(list_ordered_cut_pts):
             # Initialize dict
             self.surface_dict[idx_pt]['left'] = []
             self.surface_dict[idx_pt]['right'] = []
-            # Get surface on left of cut pt
-            surface_left = self._surface_left_of_cut_point(
-                next_surface, cut_pt_coords)
+            # Get coords on left of cut pt
+            coords_left = self._coords_left_of_cut_point(next_coords,
+                                                         cut_pt_coords)
             # Save that surface in the required structures
+            surface_left = TsSurface(coords_left)
             self.surface_list.append(surface_left)
             for i in range(idx_pt, n_cut_pts):
                 self.surface_dict[i]['left'].append(surface_left)
             for j in range(0, idx_pt - 1):
                 self.surface_dict[j]['right'].append(surface_left)
-            next_surface = self._surface_right_of_cut_point(
-                next_surface, cut_pt_coords)
+            next_coords = self._coords_right_of_cut_point(next_coords,
+                                                          cut_pt_coords)
         # Save the right most portion
+        next_surface = TsSurface(next_coords)
         self.surface_list.append(next_surface)
         for j in range(0, n_cut_pts):
             self.surface_dict[j]['right'].append(next_surface)
 
     @staticmethod
-    def _surface_right_of_cut_point(surface, cut_pt):
-        pass
+    def _coords_right_of_cut_point(coords, cut_pt_coords):
+        coords = deepcopy(coords)
+        # FIXME: using global constants instaead of inputs
+        coords.b1.x = np.maximum(coords.b1.x, cut_pt_coords.x)
+        coords.b1.x = np.minimum(coords.b1.x, MAX_X_GROUND)
+        coords.b2.x = np.maximum(coords.b2.x, cut_pt_coords.x)
+        coords.b2.x = np.minimum(coords.b2.x, MAX_X_GROUND)
+        return coords
 
     @staticmethod
-    def _surface_left_of_cut_point(surface, cut_pt):
-        pass
+    def _coords_left_of_cut_point(coords, cut_pt_coords):
+        coords = deepcopy(coords)
+        # FIXME: using global constants instaead of inputs
+        coords.b1.x = np.minimum(coords.b1.x, cut_pt_coords.x)
+        coords.b1.x = np.maximum(coords.b1.x, MIN_X_GROUND)
+        coords.b2.x = np.minimum(coords.b2.x, cut_pt_coords.x)
+        coords.b2.x = np.maximum(coords.b2.x, MIN_X_GROUND)
+        return coords
 
     @property
     def b1(self):
