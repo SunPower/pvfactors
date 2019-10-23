@@ -879,6 +879,15 @@ class TsGround(object):
                     n_surf = len(surfaces)
                     for i_surf, surface in enumerate(surfaces):
                         if i_surf == n_surf - 1:
+                            # last surface, could also be first
+                            if i_surf == 0:
+                                # Need to merge with preceding if exists
+                                if surface_to_merge is not None:
+                                    coords = [surface_to_merge.boundary[0],
+                                              surface.boundary[1]]
+                                    surface = PVSurface(
+                                        coords, shaded=True,
+                                        param_names=self.param_names)
                             if i_el == n_shadow_elements - 1:
                                 # last surface of last shadow element
                                 list_shadow_surfaces.append(surface)
@@ -886,6 +895,7 @@ class TsGround(object):
                                 # keep for merging with next surface
                                 surface_to_merge = surface
                         elif i_surf == 0:
+                            # first surface but definitely not last either
                             if surface_to_merge is not None:
                                 coords = [surface_to_merge.boundary[0],
                                           surface.boundary[1]]
@@ -895,6 +905,7 @@ class TsGround(object):
                             else:
                                 list_shadow_surfaces.append(surface)
                         else:
+                            # not first nor last surface
                             list_shadow_surfaces.append(surface)
             else:
                 for shadow_el in non_pt_shadow_elements:
