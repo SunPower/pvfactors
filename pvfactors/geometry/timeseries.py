@@ -632,6 +632,20 @@ class TsGround(object):
         self.shaded_params = dict.fromkeys(self.param_names)
         self.illum_params = dict.fromkeys(self.param_names)
 
+    def update_illum_params(self, new_dict):
+        self.illum_params.update(new_dict)
+        for illum_el in self.illum_elements:
+            illum_el.params.update(new_dict)
+            for surf in illum_el.surface_list:
+                surf.params.update(new_dict)
+
+    def update_shaded_params(self, new_dict):
+        self.shaded_params.update(new_dict)
+        for shaded_el in self.shadow_elements:
+            shaded_el.params.update(new_dict)
+            for surf in shaded_el.surface_list:
+                surf.params.update(new_dict)
+
     @classmethod
     def from_ts_pvrows_and_angles(cls, list_ts_pvrows, alpha_vec, rotation_vec,
                                   y_ground=Y_GROUND, flag_overlap=None,
@@ -804,17 +818,22 @@ class TsGround(object):
             for illum_el in self.illum_elements:
                 list_illum_surfaces += illum_el.non_point_surfaces_at(idx)
         else:
+            # Create parameters at given idx
+            # TODO: should find faster solution
+            illum_params = self._get_params_at_idx(idx, self.illum_params)
+            shaded_params = self._get_params_at_idx(idx, self.shaded_params)
             if merge_if_flag_overlap and (self.flag_overlap is not None):
                 is_overlap = self.flag_overlap[idx]
                 if is_overlap and (len(non_pt_shadow_elements) > 1):
                     coords = [non_pt_shadow_elements[0].b1.at(idx),
                               non_pt_shadow_elements[-1].b2.at(idx)]
                     list_shadow_surfaces = [PVSurface(
-                        coords, shaded=True, param_names=self.param_names)]
+                        coords, shaded=True, param_names=self.param_names,
+                        params=shaded_params)]
                 else:
                     list_shadow_surfaces = [
                         PVSurface(shadow_el.coords.at(idx),
-                                  shaded=True,
+                                  shaded=True, params=shaded_params,
                                   param_names=self.param_names)
                         for shadow_el in non_pt_shadow_elements
                         if shadow_el.coords.length[idx]
@@ -822,13 +841,13 @@ class TsGround(object):
             else:
                 list_shadow_surfaces = [
                     PVSurface(shadow_el.coords.at(idx),
-                              shaded=True,
+                              shaded=True, params=shaded_params,
                               param_names=self.param_names)
                     for shadow_el in non_pt_shadow_elements
                     if shadow_el.coords.length[idx]
                     > DISTANCE_TOLERANCE]
             list_illum_surfaces = [PVSurface(illum_el.coords.at(idx),
-                                             shaded=False,
+                                             shaded=False, params=illum_params,
                                              param_names=self.param_names)
                                    for illum_el in self.illum_elements
                                    if illum_el.coords.length[idx]
@@ -838,6 +857,14 @@ class TsGround(object):
             list_shadow_surfaces, list_illum_surfaces,
             param_names=self.param_names, y_ground=self.y_ground,
             x_min_max=x_min_max)
+
+    def _get_params_at_idx(self, idx, params_dict):
+        if params_dict is None:
+            return None
+        else:
+            return {k: (val if (val is None) or np.isscalar(val)
+                        or isinstance(val, dict) else val[idx])
+                    for k, val in params_dict.items()}
 
     def _merge_shadow_surfaces(self, idx, non_pt_shadow_elements):
         # Decide whether to merge all shadows or not
@@ -1032,9 +1059,10 @@ class TsGroundElement(object):
     are in all the zones defined by the PV row cut points."""
 
     def __init__(self, coords, list_ordered_cut_pts_coords=None,
-                 param_names=None, shaded=False):
+                 param_names=None, shaded=False, params=None):
         self.coords = coords
         self.param_names = param_names or []
+        self.params = dict.fromkeys(self.param_names)
         self.shaded = shaded
         self.surface_dict = None  # will be necessary for view factor calcs
         self.surface_list = []  # will be necessary for vf matrix formation
@@ -1137,6 +1165,14 @@ class TsSurface(object):
         self.n_vector = n_vector
         self.params = dict.fromkeys(self.param_names)
 
+    def _get_params_at_idx(self, idx, params_dict):
+        if params_dict is None:
+            return None
+        else:
+            return {k: (val if (val is None) or np.isscalar(val)
+                        or isinstance(val, dict) else val[idx])
+                    for k, val in params_dict.items()}
+
     def at(self, idx, shaded=None):
         """Generate a PV segment geometry for the desired index.
 
@@ -1160,9 +1196,7 @@ class TsSurface(object):
                         else None)
             # Get params at idx
             # TODO: should find faster solution
-            params = {k: (val if (val is None) or np.isscalar(val)
-                          or isinstance(val, dict) else val[idx])
-                      for k, val in self.params.items()}
+            params = self._get_params_at_idx(idx, self.params)
             # Return a pv surface geometry with given params
             return PVSurface(self.coords.at(idx), shaded=shaded,
                              normal_vector=n_vector,
