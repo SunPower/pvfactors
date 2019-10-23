@@ -785,29 +785,48 @@ class TsGround(object):
         return list_illum_elements
 
     def at(self, idx, x_min_max=None, with_cut_points=True,
-           merge_if_flag_overlap=True):
+            merge_if_flag_overlap=True):
 
         # Get list shadow and illum surfaces
+        non_pt_shadow_elements = [
+            shadow_el for shadow_el in self.shadow_elements
+            if shadow_el.coords.length[idx] > DISTANCE_TOLERANCE]
         if with_cut_points:
-            list_shadow_surfaces = []
-            for shadow_el in self.shadow_elements:
-                for shadow_ts_surf in shadow_el.surface_list:
-                    surface = shadow_ts_surf.at(idx, shaded=True)
-                    if surface.length > DISTANCE_TOLERANCE:
-                        list_shadow_surfaces.append(surface)
+            if merge_if_flag_overlap:
+                list_shadow_surfaces = self._merge_shadow_surfaces(
+                    idx, non_pt_shadow_elements)
+            else:
+                list_shadow_surfaces = []
+                for shadow_el in non_pt_shadow_elements:
+                    list_shadow_surfaces += \
+                        shadow_el.non_point_surfaces_at(idx)
             list_illum_surfaces = []
             for illum_el in self.illum_elements:
-                for illum_ts_surf in illum_el.surface_list:
-                    surface = illum_ts_surf.at(idx, shaded=False)
-                    if surface.length > DISTANCE_TOLERANCE:
-                        list_illum_surfaces.append(surface)
+                list_illum_surfaces += illum_el.non_point_surfaces_at(idx)
         else:
-            list_shadow_surfaces = [PVSurface(shadow_el.coords.at(idx),
-                                              shaded=True,
-                                              param_names=self.param_names)
-                                    for shadow_el in self.shadow_elements
-                                    if shadow_el.coords.length[idx]
-                                    > DISTANCE_TOLERANCE]
+            if merge_if_flag_overlap and (self.flag_overlap is not None):
+                is_overlap = self.flag_overlap[idx]
+                if is_overlap and (len(non_pt_shadow_elements) > 1):
+                    coords = [non_pt_shadow_elements[0].b1.at(idx),
+                              non_pt_shadow_elements[-1].b2.at(idx)]
+                    list_shadow_surfaces = [PVSurface(
+                        coords, shaded=True, param_names=self.param_names)]
+                else:
+                    list_shadow_surfaces = [
+                        PVSurface(shadow_el.coords.at(idx),
+                                  shaded=True,
+                                  param_names=self.param_names)
+                        for shadow_el in non_pt_shadow_elements
+                        if shadow_el.coords.length[idx]
+                        > DISTANCE_TOLERANCE]
+            else:
+                list_shadow_surfaces = [
+                    PVSurface(shadow_el.coords.at(idx),
+                              shaded=True,
+                              param_names=self.param_names)
+                    for shadow_el in non_pt_shadow_elements
+                    if shadow_el.coords.length[idx]
+                    > DISTANCE_TOLERANCE]
             list_illum_surfaces = [PVSurface(illum_el.coords.at(idx),
                                              shaded=False,
                                              param_names=self.param_names)
@@ -819,6 +838,45 @@ class TsGround(object):
             list_shadow_surfaces, list_illum_surfaces,
             param_names=self.param_names, y_ground=self.y_ground,
             x_min_max=x_min_max)
+
+    def _merge_shadow_surfaces(self, idx, non_pt_shadow_elements):
+        # Decide whether to merge all shadows or not
+        list_shadow_surfaces = []
+        if self.flag_overlap is not None:
+            is_overlap = self.flag_overlap[idx]
+            n_shadow_elements = len(non_pt_shadow_elements)
+            if is_overlap and (n_shadow_elements > 1):
+                surface_to_merge = None
+                for i_el, shadow_el in enumerate(non_pt_shadow_elements):
+                    surfaces = shadow_el.non_point_surfaces_at(idx)
+                    n_surf = len(surfaces)
+                    for i_surf, surface in enumerate(surfaces):
+                        if i_surf == n_surf - 1:
+                            if i_el == n_shadow_elements - 1:
+                                # last surface of last shadow element
+                                list_shadow_surfaces.append(surface)
+                            else:
+                                # keep for merging with next surface
+                                surface_to_merge = surface
+                        elif i_surf == 0:
+                            if surface_to_merge is not None:
+                                coords = [surface_to_merge.boundary[0],
+                                          surface.boundary[1]]
+                                list_shadow_surfaces.append(
+                                    PVSurface(coords, shaded=True,
+                                              param_names=self.param_names))
+                            else:
+                                list_shadow_surfaces.append(surface)
+                        else:
+                            list_shadow_surfaces.append(surface)
+            else:
+                for shadow_el in non_pt_shadow_elements:
+                    list_shadow_surfaces += \
+                        shadow_el.non_point_surfaces_at(idx)
+        else:
+            for shadow_el in non_pt_shadow_elements:
+                list_shadow_surfaces += shadow_el.non_point_surfaces_at(idx)
+        return list_shadow_surfaces
 
     def at_(self, idx, x_min_max=None, merge_if_flag_overlap=True,
             with_cut_points=True):
@@ -1049,6 +1107,11 @@ class TsGroundElement(object):
     def surfaces_at(self, idx):
         return [surface.at(idx, shaded=self.shaded)
                 for surface in self.surface_list]
+
+    def non_point_surfaces_at(self, idx):
+        return [surface.at(idx, shaded=self.shaded)
+                for surface in self.surface_list
+                if surface.length[idx] > DISTANCE_TOLERANCE]
 
 
 class TsSurface(object):
