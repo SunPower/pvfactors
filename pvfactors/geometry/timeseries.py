@@ -632,20 +632,6 @@ class TsGround(object):
         self.shaded_params = dict.fromkeys(self.param_names)
         self.illum_params = dict.fromkeys(self.param_names)
 
-    def update_illum_params(self, new_dict):
-        self.illum_params.update(new_dict)
-        for illum_el in self.illum_elements:
-            illum_el.params.update(new_dict)
-            for surf in illum_el.surface_list:
-                surf.params.update(new_dict)
-
-    def update_shaded_params(self, new_dict):
-        self.shaded_params.update(new_dict)
-        for shaded_el in self.shadow_elements:
-            shaded_el.params.update(new_dict)
-            for surf in shaded_el.surface_list:
-                surf.params.update(new_dict)
-
     @classmethod
     def from_ts_pvrows_and_angles(cls, list_ts_pvrows, alpha_vec, rotation_vec,
                                   y_ground=Y_GROUND, flag_overlap=None,
@@ -749,55 +735,6 @@ class TsGround(object):
                    param_names=param_names, flag_overlap=flag_overlap,
                    cut_point_coords=cut_point_coords, y_ground=y_ground)
 
-    @staticmethod
-    def _create_shadow_elements(list_shadow_coords, cut_point_coords,
-                                param_names):
-        """This method will clip the shadow coords to the limit of ground,
-        i.e. the shadow coordinates shouldn't be outside of the range
-        [MIN_X_GROUND, MAX_X_GROUND]."""
-
-        list_shadow_elements = []
-        for shadow_coords in list_shadow_coords:
-            shadow_coords.b1.x = np.clip(shadow_coords.b1.x, MIN_X_GROUND,
-                                         MAX_X_GROUND)
-            shadow_coords.b2.x = np.clip(shadow_coords.b2.x, MIN_X_GROUND,
-                                         MAX_X_GROUND)
-            list_shadow_elements.append(
-                TsGroundElement(shadow_coords,
-                                list_ordered_cut_pts_coords=cut_point_coords,
-                                param_names=param_names, shaded=True))
-
-        return list_shadow_elements
-
-    @staticmethod
-    def _create_illum_elements(list_shadow_elements, y_ground, cut_pt_coords,
-                               param_names):
-        """Create illuminated ground elements"""
-
-        list_illum_elements = []
-        # There must be at least 1 shadow element, otherwise what's the point
-        n_steps = len(list_shadow_elements[0].coords.b1.x)
-        y_ground_vec = y_ground * np.ones(n_steps)
-        next_x = MIN_X_GROUND * np.ones(n_steps)
-        for shadow_element in list_shadow_elements:
-            x1 = next_x
-            x2 = shadow_element.coords.b1.x
-            coords = TsLineCoords.from_array(
-                np.array([[x1, y_ground_vec], [x2, y_ground_vec]]))
-            list_illum_elements.append(TsGroundElement(
-                coords, list_ordered_cut_pts_coords=cut_pt_coords,
-                param_names=param_names, shaded=False))
-            next_x = shadow_element.coords.b2.x
-        # Add last illum element
-        coords = TsLineCoords.from_array(
-            np.array([[next_x, y_ground_vec],
-                      [MAX_X_GROUND * np.ones(n_steps), y_ground_vec]]))
-        list_illum_elements.append(TsGroundElement(
-            coords, list_ordered_cut_pts_coords=cut_pt_coords,
-            param_names=param_names, shaded=False))
-
-        return list_illum_elements
-
     def at(self, idx, x_min_max=None, with_cut_points=True,
             merge_if_flag_overlap=True):
 
@@ -857,6 +794,156 @@ class TsGround(object):
             list_shadow_surfaces, list_illum_surfaces,
             param_names=self.param_names, y_ground=self.y_ground,
             x_min_max=x_min_max)
+
+    def plot_at_idx(self, idx, ax, color_shaded=COLOR_DIC['pvrow_shaded'],
+                    color_illum=COLOR_DIC['pvrow_illum'], x_min_max=None,
+                    merge_if_flag_overlap=True, with_cut_points=True):
+        """Plot timeseries ground at a certain index.
+
+        Parameters
+        ----------
+        idx : int
+            Index to use to plot timeseries side
+        ax : :py:class:`matplotlib.pyplot.axes` object
+            Axes for plotting
+        color_shaded : str, optional
+            Color to use for plotting the shaded surfaces (Default =
+            COLOR_DIC['pvrow_shaded'])
+        color_shaded : str, optional
+            Color to use for plotting the illuminated surfaces (Default =
+            COLOR_DIC['pvrow_illum'])
+        x_min_max : tuple, optional
+            List of minimum and maximum x coordinates for the flat surface [m]
+            (Default = None)
+        merge_if_flag_overlap : bool, optional
+            Decide whether to merge all shadows if they overlap or not
+            (Default = True)
+        with_cut_points :  bool, optional
+            Decide whether to include the saved cut points in the created
+            PV ground geometry (Default = True)
+        """
+        pvground = self.at(idx, x_min_max=x_min_max,
+                           merge_if_flag_overlap=merge_if_flag_overlap,
+                           with_cut_points=with_cut_points)
+        pvground.plot(ax, color_shaded=color_shaded, color_illum=color_illum,
+                      with_index=False)
+
+    def update_illum_params(self, new_dict):
+        self.illum_params.update(new_dict)
+        for illum_el in self.illum_elements:
+            illum_el.params.update(new_dict)
+            for surf in illum_el.surface_list:
+                surf.params.update(new_dict)
+
+    def update_shaded_params(self, new_dict):
+        self.shaded_params.update(new_dict)
+        for shaded_el in self.shadow_elements:
+            shaded_el.params.update(new_dict)
+            for surf in shaded_el.surface_list:
+                surf.params.update(new_dict)
+
+    def shadow_coords_left_of_cut_point(self, idx_cut_pt):
+        """Get coordinates of shadows located on the left side of the cut point
+        with given index. The coordinates of the shadows will be bounded
+        by the coordinates of the cut point and the default minimum
+        ground x values.
+
+        Parameters
+        ----------
+        idx_cut_pt : int
+            Index of the cut point of interest
+
+        Returns
+        -------
+        list of :py:class:`~pvfactors.geometry.timeseries.TsLineCoords`
+            Coordinates of the shadows on the left side of the cut point
+        """
+        shadow_coords = []
+        cut_pt_coords = self.cut_point_coords[idx_cut_pt]
+        for shadow in self.shadow_elements:
+            coords = deepcopy(shadow.coords)
+            coords.b1.x = np.minimum(coords.b1.x, cut_pt_coords.x)
+            coords.b1.x = np.maximum(coords.b1.x, MIN_X_GROUND)
+            coords.b2.x = np.minimum(coords.b2.x, cut_pt_coords.x)
+            coords.b2.x = np.maximum(coords.b2.x, MIN_X_GROUND)
+            shadow_coords.append(coords)
+        return shadow_coords
+
+    def shadow_coords_right_of_cut_point(self, idx_cut_pt):
+        """Get coordinates of shadows located on the right side of the cut
+        point with given index. The coordinates of the shadows will be bounded
+        by the coordinates of the cut point and the default maximum
+        ground x values.
+
+        Parameters
+        ----------
+        idx_cut_pt : int
+            Index of the cut point of interest
+
+        Returns
+        -------
+        list of :py:class:`~pvfactors.geometry.timeseries.TsLineCoords`
+            Coordinates of the shadows on the right side of the cut point
+        """
+        shadow_coords = []
+        cut_pt_coords = self.cut_point_coords[idx_cut_pt]
+        for shadow in self.shadow_elements:
+            coords = deepcopy(shadow.coords)
+            coords.b1.x = np.maximum(coords.b1.x, cut_pt_coords.x)
+            coords.b1.x = np.minimum(coords.b1.x, MAX_X_GROUND)
+            coords.b2.x = np.maximum(coords.b2.x, cut_pt_coords.x)
+            coords.b2.x = np.minimum(coords.b2.x, MAX_X_GROUND)
+            shadow_coords.append(coords)
+        return shadow_coords
+
+    @staticmethod
+    def _create_shadow_elements(list_shadow_coords, cut_point_coords,
+                                param_names):
+        """This method will clip the shadow coords to the limit of ground,
+        i.e. the shadow coordinates shouldn't be outside of the range
+        [MIN_X_GROUND, MAX_X_GROUND]."""
+
+        list_shadow_elements = []
+        for shadow_coords in list_shadow_coords:
+            shadow_coords.b1.x = np.clip(shadow_coords.b1.x, MIN_X_GROUND,
+                                         MAX_X_GROUND)
+            shadow_coords.b2.x = np.clip(shadow_coords.b2.x, MIN_X_GROUND,
+                                         MAX_X_GROUND)
+            list_shadow_elements.append(
+                TsGroundElement(shadow_coords,
+                                list_ordered_cut_pts_coords=cut_point_coords,
+                                param_names=param_names, shaded=True))
+
+        return list_shadow_elements
+
+    @staticmethod
+    def _create_illum_elements(list_shadow_elements, y_ground, cut_pt_coords,
+                               param_names):
+        """Create illuminated ground elements"""
+
+        list_illum_elements = []
+        # There must be at least 1 shadow element, otherwise what's the point
+        n_steps = len(list_shadow_elements[0].coords.b1.x)
+        y_ground_vec = y_ground * np.ones(n_steps)
+        next_x = MIN_X_GROUND * np.ones(n_steps)
+        for shadow_element in list_shadow_elements:
+            x1 = next_x
+            x2 = shadow_element.coords.b1.x
+            coords = TsLineCoords.from_array(
+                np.array([[x1, y_ground_vec], [x2, y_ground_vec]]))
+            list_illum_elements.append(TsGroundElement(
+                coords, list_ordered_cut_pts_coords=cut_pt_coords,
+                param_names=param_names, shaded=False))
+            next_x = shadow_element.coords.b2.x
+        # Add last illum element
+        coords = TsLineCoords.from_array(
+            np.array([[next_x, y_ground_vec],
+                      [MAX_X_GROUND * np.ones(n_steps), y_ground_vec]]))
+        list_illum_elements.append(TsGroundElement(
+            coords, list_ordered_cut_pts_coords=cut_pt_coords,
+            param_names=param_names, shaded=False))
+
+        return list_illum_elements
 
     def _get_params_at_idx(self, idx, params_dict):
         if params_dict is None:
@@ -918,152 +1005,6 @@ class TsGround(object):
                 list_shadow_surfaces += shadow_el.non_point_surfaces_at(idx)
         return list_shadow_surfaces
 
-    def at_(self, idx, x_min_max=None, merge_if_flag_overlap=True,
-            with_cut_points=True):
-        """Generate a PV ground geometry for the desired index.
-
-        Parameters
-        ----------
-        idx : int
-            Index to use to generate PV ground geometry
-        x_min_max : tuple, optional
-            List of minimum and maximum x coordinates for the flat surface [m]
-            (Default = None)
-        merge_if_flag_overlap : bool, optional
-            Decide whether to merge all shadows if they overlap or not
-            (Default = True)
-        with_cut_points :  bool, optional
-            Decide whether to include the saved cut points in the created
-            PV ground geometry (Default = True)
-
-        Returns
-        -------
-        pvground : :py:class:`~pvfactors.geometry.pvground.PVGround`
-        """
-        # Get cut point coords
-        cut_point_coords = ([cut_point.at(idx)
-                             for cut_point in self.cut_point_coords]
-                            if with_cut_points else [])
-        # Filter out shadow coords that have zero length
-        filtered_shadow_coords = [shadow_element.coords
-                                  for i, shadow_element
-                                  in enumerate(self.shadow_elements)
-                                  if shadow_element.coords.length[idx]
-                                  > DISTANCE_TOLERANCE]
-        # Decide whether to merge all shadows or not
-        if merge_if_flag_overlap and (self.flag_overlap is not None):
-            is_overlap = self.flag_overlap[idx]
-            if is_overlap and (len(filtered_shadow_coords) > 1):
-                ordered_shadow_coords = [
-                    [filtered_shadow_coords[0].b1.at(idx),
-                     filtered_shadow_coords[-1].b2.at(idx)]]
-            else:
-                ordered_shadow_coords = [coords.at(idx)
-                                         for coords in filtered_shadow_coords]
-        else:
-            ordered_shadow_coords = [coords.at(idx)
-                                     for coords in filtered_shadow_coords]
-        # Create parameters at given idx
-        # TODO: should find faster solution
-        illum_params = {k: (val if (val is None) or np.isscalar(val)
-                            or isinstance(val, dict) else val[idx])
-                        for k, val in self.illum_params.items()}
-        shaded_params = {k: (val if (val is None) or np.isscalar(val)
-                             or isinstance(val, dict) else val[idx])
-                         for k, val in self.shaded_params.items()}
-        # Return ground geometry
-        return PVGround.from_ordered_shadow_and_cut_pt_coords(
-            x_min_max=x_min_max, ordered_shadow_coords=ordered_shadow_coords,
-            cut_point_coords=cut_point_coords, param_names=self.param_names,
-            illum_params=illum_params, shaded_params=shaded_params)
-
-    def plot_at_idx(self, idx, ax, color_shaded=COLOR_DIC['pvrow_shaded'],
-                    color_illum=COLOR_DIC['pvrow_illum'], x_min_max=None,
-                    merge_if_flag_overlap=True, with_cut_points=True):
-        """Plot timeseries ground at a certain index.
-
-        Parameters
-        ----------
-        idx : int
-            Index to use to plot timeseries side
-        ax : :py:class:`matplotlib.pyplot.axes` object
-            Axes for plotting
-        color_shaded : str, optional
-            Color to use for plotting the shaded surfaces (Default =
-            COLOR_DIC['pvrow_shaded'])
-        color_shaded : str, optional
-            Color to use for plotting the illuminated surfaces (Default =
-            COLOR_DIC['pvrow_illum'])
-        x_min_max : tuple, optional
-            List of minimum and maximum x coordinates for the flat surface [m]
-            (Default = None)
-        merge_if_flag_overlap : bool, optional
-            Decide whether to merge all shadows if they overlap or not
-            (Default = True)
-        with_cut_points :  bool, optional
-            Decide whether to include the saved cut points in the created
-            PV ground geometry (Default = True)
-        """
-        pvground = self.at(idx, x_min_max=x_min_max,
-                           merge_if_flag_overlap=merge_if_flag_overlap,
-                           with_cut_points=with_cut_points)
-        pvground.plot(ax, color_shaded=color_shaded, color_illum=color_illum,
-                      with_index=False)
-
-    def shadow_coords_left_of_cut_point(self, idx_cut_pt):
-        """Get coordinates of shadows located on the left side of the cut point
-        with given index. The coordinates of the shadows will be bounded
-        by the coordinates of the cut point and the default minimum
-        ground x values.
-
-        Parameters
-        ----------
-        idx_cut_pt : int
-            Index of the cut point of interest
-
-        Returns
-        -------
-        list of :py:class:`~pvfactors.geometry.timeseries.TsLineCoords`
-            Coordinates of the shadows on the left side of the cut point
-        """
-        shadow_coords = []
-        cut_pt_coords = self.cut_point_coords[idx_cut_pt]
-        for shadow in self.shadow_elements:
-            coords = deepcopy(shadow.coords)
-            coords.b1.x = np.minimum(coords.b1.x, cut_pt_coords.x)
-            coords.b1.x = np.maximum(coords.b1.x, MIN_X_GROUND)
-            coords.b2.x = np.minimum(coords.b2.x, cut_pt_coords.x)
-            coords.b2.x = np.maximum(coords.b2.x, MIN_X_GROUND)
-            shadow_coords.append(coords)
-        return shadow_coords
-
-    def shadow_coords_right_of_cut_point(self, idx_cut_pt):
-        """Get coordinates of shadows located on the right side of the cut
-        point with given index. The coordinates of the shadows will be bounded
-        by the coordinates of the cut point and the default maximum
-        ground x values.
-
-        Parameters
-        ----------
-        idx_cut_pt : int
-            Index of the cut point of interest
-
-        Returns
-        -------
-        list of :py:class:`~pvfactors.geometry.timeseries.TsLineCoords`
-            Coordinates of the shadows on the right side of the cut point
-        """
-        shadow_coords = []
-        cut_pt_coords = self.cut_point_coords[idx_cut_pt]
-        for shadow in self.shadow_elements:
-            coords = deepcopy(shadow.coords)
-            coords.b1.x = np.maximum(coords.b1.x, cut_pt_coords.x)
-            coords.b1.x = np.minimum(coords.b1.x, MAX_X_GROUND)
-            coords.b2.x = np.maximum(coords.b2.x, cut_pt_coords.x)
-            coords.b2.x = np.minimum(coords.b2.x, MAX_X_GROUND)
-            shadow_coords.append(coords)
-        return shadow_coords
-
 
 class TsGroundElement(object):
     """Special class for ground elements: a ground element has known
@@ -1082,6 +1023,30 @@ class TsGroundElement(object):
         list_ordered_cut_pts_coords = list_ordered_cut_pts_coords or []
         if len(list_ordered_cut_pts_coords) > 0:
             self._create_all_ts_surfaces(list_ordered_cut_pts_coords)
+
+    @property
+    def b1(self):
+        """Timeseries coordinates of first boundary point"""
+        return self.coords.b1
+
+    @property
+    def b2(self):
+        """Timeseries coordinates of second boundary point"""
+        return self.coords.b2
+
+    @property
+    def centroid(self):
+        """Timeseries point coordinates of the element's centroid"""
+        return self.coords.centroid
+
+    def surfaces_at(self, idx):
+        return [surface.at(idx, shaded=self.shaded)
+                for surface in self.surface_list]
+
+    def non_point_surfaces_at(self, idx):
+        return [surface.at(idx, shaded=self.shaded)
+                for surface in self.surface_list
+                if surface.length[idx] > DISTANCE_TOLERANCE]
 
     def _create_all_ts_surfaces(self, list_ordered_cut_pts):
 
@@ -1129,30 +1094,6 @@ class TsGroundElement(object):
         coords.b2.x = np.minimum(coords.b2.x, cut_pt_coords.x)
         coords.b2.x = np.maximum(coords.b2.x, MIN_X_GROUND)
         return coords
-
-    @property
-    def b1(self):
-        """Timeseries coordinates of first boundary point"""
-        return self.coords.b1
-
-    @property
-    def b2(self):
-        """Timeseries coordinates of second boundary point"""
-        return self.coords.b2
-
-    @property
-    def centroid(self):
-        """Timeseries point coordinates of the element's centroid"""
-        return self.coords.centroid
-
-    def surfaces_at(self, idx):
-        return [surface.at(idx, shaded=self.shaded)
-                for surface in self.surface_list]
-
-    def non_point_surfaces_at(self, idx):
-        return [surface.at(idx, shaded=self.shaded)
-                for surface in self.surface_list
-                if surface.length[idx] > DISTANCE_TOLERANCE]
 
 
 class TsSurface(object):

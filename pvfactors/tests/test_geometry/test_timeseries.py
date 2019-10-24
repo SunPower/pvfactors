@@ -293,7 +293,7 @@ def test_shadows_coords_left_right_of_cut_point():
     np.testing.assert_allclose(shadows_left, expected_shadows_left)
 
 
-def test_ts_ground_ground_elements():
+def test_ts_ground_elements_surfaces():
     """Check timeseries ground elements are created correctly"""
 
     # Create timeseries coords
