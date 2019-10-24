@@ -597,8 +597,8 @@ class TsDualSegment(object):
 
 class TsGround(object):
     """Timeseries ground class: this class is a vectorized version of the
-    PV ground geometry class, and it will store timeseries coordinates
-    for ground shadows and pv row cut points."""
+    PV ground geometry class, and it will store timeseries shaded ground
+    and illuminated ground elements, as well as pv row cut points."""
 
     def __init__(self, shadow_elements, illum_elements, param_names=None,
                  flag_overlap=None, cut_point_coords=None, y_ground=None):
@@ -737,7 +737,7 @@ class TsGround(object):
                    cut_point_coords=cut_point_coords, y_ground=y_ground)
 
     def at(self, idx, x_min_max=None, merge_if_flag_overlap=True,
-           with_cut_points=True,):
+           with_cut_points=True):
         """Generate a PV ground geometry for the desired index. This will
         only return non-point surfaces within the ground bounds, i.e.
         surfaces that are not points, and which are within x_min and x_max.
@@ -911,16 +911,10 @@ class TsGround(object):
         list of :py:class:`~pvfactors.geometry.timeseries.TsLineCoords`
             Coordinates of the shadows on the left side of the cut point
         """
-        shadow_coords = []
         cut_pt_coords = self.cut_point_coords[idx_cut_pt]
-        for shadow in self.shadow_elements:
-            coords = deepcopy(shadow.coords)
-            coords.b1.x = np.minimum(coords.b1.x, cut_pt_coords.x)
-            coords.b1.x = np.maximum(coords.b1.x, MIN_X_GROUND)
-            coords.b2.x = np.minimum(coords.b2.x, cut_pt_coords.x)
-            coords.b2.x = np.maximum(coords.b2.x, MIN_X_GROUND)
-            shadow_coords.append(coords)
-        return shadow_coords
+        return [shadow_el._coords_left_of_cut_point(shadow_el.coords,
+                                                    cut_pt_coords)
+                for shadow_el in self.shadow_elements]
 
     def shadow_coords_right_of_cut_point(self, idx_cut_pt):
         """Get coordinates of shadows located on the right side of the cut
@@ -938,16 +932,10 @@ class TsGround(object):
         list of :py:class:`~pvfactors.geometry.timeseries.TsLineCoords`
             Coordinates of the shadows on the right side of the cut point
         """
-        shadow_coords = []
         cut_pt_coords = self.cut_point_coords[idx_cut_pt]
-        for shadow in self.shadow_elements:
-            coords = deepcopy(shadow.coords)
-            coords.b1.x = np.maximum(coords.b1.x, cut_pt_coords.x)
-            coords.b1.x = np.minimum(coords.b1.x, MAX_X_GROUND)
-            coords.b2.x = np.maximum(coords.b2.x, cut_pt_coords.x)
-            coords.b2.x = np.minimum(coords.b2.x, MAX_X_GROUND)
-            shadow_coords.append(coords)
-        return shadow_coords
+        return [shadow_el._coords_right_of_cut_point(shadow_el.coords,
+                                                     cut_pt_coords)
+                for shadow_el in self.shadow_elements]
 
     @staticmethod
     def _shadow_elements_from_coords_and_cut_pts(
@@ -1126,13 +1114,31 @@ class TsGround(object):
 
 
 class TsGroundElement(object):
-    """Special class for ground elements: a ground element has known
-    timeseries coordinate boundaries, but in order to vectorize the view
-    factor calculation, we need to define the portions of the element that
-    are in all the ground zones defined by the PV row cut points."""
+    """Special class for timeseries ground elements: a ground element has known
+    timeseries coordinate boundaries, but it will also have a break down of
+    its area into n+1 timeseries surfaces located in the n+1 ground zones
+    defined by the n ground cutting points.
+    This is crucial to calculate view factors in a vectorized way."""
 
     def __init__(self, coords, list_ordered_cut_pts_coords=None,
-                 param_names=None, shaded=False, params=None):
+                 param_names=None, shaded=False):
+        """Initialize the timeseries ground element using its timeseries
+        line coordinates, and build the timeseries surfaces for all the
+        cut point zones.
+
+        Parameters
+        ----------
+        coords : :py:class:`~pvfactors.geometry.timeseries.TsLineCoords`
+            Timeseries line coordinates of the ground element
+        list_ordered_cut_pts_coords : list, optional
+            List of all the cut point timeseries coordinates
+            (Default = [])
+        param_names : list of str, optional
+            List of names of surface parameters to use when creating geometries
+            (Default = None)
+        shaded : bool, optional
+            Flag specifying is element is a shadow or not (Default = False)
+        """
         self.coords = coords
         self.param_names = param_names or []
         self.params = dict.fromkeys(self.param_names)
@@ -1159,16 +1165,49 @@ class TsGroundElement(object):
         return self.coords.centroid
 
     def surfaces_at(self, idx):
+        """Return list of surfaces (from left to right) at given index that
+        make up the ground element.
+
+        Parameters
+        ----------
+        idx : int
+            Index of interest
+
+        Returns
+        -------
+        list of :py:class:`~pvfactors.geometry.base.PVSurface`
+        """
         return [surface.at(idx, shaded=self.shaded)
                 for surface in self.surface_list]
 
     def non_point_surfaces_at(self, idx):
+        """Return list of non-point surfaces (from left to right) at given
+        index that make up the ground element.
+
+        Parameters
+        ----------
+        idx : int
+            Index of interest
+
+        Returns
+        -------
+        list of :py:class:`~pvfactors.geometry.base.PVSurface`
+        """
         return [surface.at(idx, shaded=self.shaded)
                 for surface in self.surface_list
                 if surface.length[idx] > DISTANCE_TOLERANCE]
 
     def _create_all_ts_surfaces(self, list_ordered_cut_pts):
+        """Create all the n+1 timeseries surfaces that make up the timeseries
+        ground element, and which are located in the n+1 zones defined by
+        the n cut points.
 
+        Parameters
+        ----------
+        list_ordered_cut_pts : list of :py:class:`~pvfactors.geometry.timeseries.TsPointCoords`
+            List of timeseries coordinates of all cut points, ordered from
+            left to right
+        """
         # Initialize dict
         self.surface_dict = {i: {'right': [], 'left': []}
                              for i in range(len(list_ordered_cut_pts))}
@@ -1196,8 +1235,24 @@ class TsGroundElement(object):
 
     @staticmethod
     def _coords_right_of_cut_point(coords, cut_pt_coords):
+        """Calculate timeseries line coordinates that are right of the given
+        cut point coordinates, but still within the ground area
+
+        Parameters
+        ----------
+        coords : :py:class:`~pvfactors.geometry.timeseries.TsLineCoords`
+            Original timeseries coordinates
+        cut_pt_coords :
+        :py:class:`~pvfactors.geometry.timeseries.TsPointCoords`
+            Timeseries coordinates of cut point
+        Returns
+        -------
+        :py:class:`~pvfactors.geometry.timeseries.TsLineCoords`
+            Timeseries line coordinates that are located right of the cut
+            point
+        """
         coords = deepcopy(coords)
-        # FIXME: using global constants instaead of inputs
+        # FIXME: should be using x_min x_max inputs instead of global constant
         coords.b1.x = np.maximum(coords.b1.x, cut_pt_coords.x)
         coords.b1.x = np.minimum(coords.b1.x, MAX_X_GROUND)
         coords.b2.x = np.maximum(coords.b2.x, cut_pt_coords.x)
@@ -1206,8 +1261,24 @@ class TsGroundElement(object):
 
     @staticmethod
     def _coords_left_of_cut_point(coords, cut_pt_coords):
+        """Calculate timeseries line coordinates that are left of the given
+        cut point coordinates, but still within the ground area
+
+        Parameters
+        ----------
+        coords : :py:class:`~pvfactors.geometry.timeseries.TsLineCoords`
+            Original timeseries coordinates
+        cut_pt_coords :
+        :py:class:`~pvfactors.geometry.timeseries.TsPointCoords`
+            Timeseries coordinates of cut point
+        Returns
+        -------
+        :py:class:`~pvfactors.geometry.timeseries.TsLineCoords`
+            Timeseries line coordinates that are located left of the cut
+            point
+        """
         coords = deepcopy(coords)
-        # FIXME: using global constants instaead of inputs
+        # FIXME: should be using x_min x_max inputs instead of global constant
         coords.b1.x = np.minimum(coords.b1.x, cut_pt_coords.x)
         coords.b1.x = np.maximum(coords.b1.x, MIN_X_GROUND)
         coords.b2.x = np.minimum(coords.b2.x, cut_pt_coords.x)
