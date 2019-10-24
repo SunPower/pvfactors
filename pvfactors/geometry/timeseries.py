@@ -3,6 +3,7 @@ calculations."""
 
 import numpy as np
 from pvlib.tools import cosd, sind
+from pvfactors import PVFactorsError
 from pvfactors.config import \
     DISTANCE_TOLERANCE, COLOR_DIC, Y_GROUND, MIN_X_GROUND, MAX_X_GROUND
 from pvfactors.geometry.base import (
@@ -699,7 +700,7 @@ class TsGround(object):
         Parameters
         ----------
         shadow_coords : np.ndarray
-            List of ground shadow coordinates
+            List of ordered ground shadow coordinates (from left to right)
         flag_overlap : list of bool, optional
             Flags indicating if the ground shadows are overlapping, for all
             time steps (Default=None). I.e. is there direct shading on pv rows?
@@ -715,7 +716,7 @@ class TsGround(object):
 
         # Get cut point coords if any
         cut_point_coords = cut_point_coords or []
-        # Create shadow surfaces
+        # Create shadow coordinate objects
         list_shadow_coords = [TsLineCoords.from_array(coords)
                               for coords in shadow_coords]
         # If the overlap flags were passed, make sure shadows don't overlap
@@ -726,40 +727,70 @@ class TsGround(object):
                                            list_shadow_coords[idx + 1].b1.x,
                                            coords.b2.x)
         # Create shaded ground elements
-        ts_shadows_elements = cls._create_shadow_elements(
+        ts_shadows_elements = cls._shadow_elements_from_coords_and_cut_pts(
             list_shadow_coords, cut_point_coords, param_names)
         # Create illuminated ground elements
-        ts_illum_elements = cls._create_illum_elements(
-            ts_shadows_elements, y_ground, cut_point_coords, param_names)
+        ts_illum_elements = cls._illum_elements_from_coords_and_cut_pts(
+            ts_shadows_elements, cut_point_coords, param_names, y_ground)
         return cls(ts_shadows_elements, ts_illum_elements,
                    param_names=param_names, flag_overlap=flag_overlap,
                    cut_point_coords=cut_point_coords, y_ground=y_ground)
 
-    def at(self, idx, x_min_max=None, with_cut_points=True,
-            merge_if_flag_overlap=True):
+    def at(self, idx, x_min_max=None, merge_if_flag_overlap=True,
+           with_cut_points=True,):
+        """Generate a PV ground geometry for the desired index. This will
+        only return non-point surfaces within the ground bounds, i.e.
+        surfaces that are not points, and which are within x_min and x_max.
 
-        # Get list shadow and illum surfaces
+        Parameters
+        ----------
+        idx : int
+            Index to use to generate PV ground geometry
+        x_min_max : tuple, optional
+            List of minimum and maximum x coordinates for the flat surface [m]
+            (Default = None)
+        merge_if_flag_overlap : bool, optional
+            Decide whether to merge all shadows if they overlap or not
+            (Default = True)
+        with_cut_points :  bool, optional
+            Decide whether to include the saved cut points in the created
+            PV ground geometry (Default = True)
+
+        Returns
+        -------
+        pvground : :py:class:`~pvfactors.geometry.pvground.PVGround`
+        """
+        # Get shadow elements that are not points at the given index
         non_pt_shadow_elements = [
             shadow_el for shadow_el in self.shadow_elements
             if shadow_el.coords.length[idx] > DISTANCE_TOLERANCE]
+
         if with_cut_points:
+            # We want the ground surfaces broken up at the cut points
             if merge_if_flag_overlap:
+                # We want to merge the shadow surfaces when they overlap
                 list_shadow_surfaces = self._merge_shadow_surfaces(
                     idx, non_pt_shadow_elements)
             else:
+                # No need to merge the shadow surfaces
                 list_shadow_surfaces = []
                 for shadow_el in non_pt_shadow_elements:
                     list_shadow_surfaces += \
                         shadow_el.non_point_surfaces_at(idx)
+            # Get the illuminated surfaces
             list_illum_surfaces = []
             for illum_el in self.illum_elements:
                 list_illum_surfaces += illum_el.non_point_surfaces_at(idx)
         else:
-            # Create parameters at given idx
-            # TODO: should find faster solution
-            illum_params = self._get_params_at_idx(idx, self.illum_params)
-            shaded_params = self._get_params_at_idx(idx, self.shaded_params)
+            # No need to break up the surfaces at the cut points
+            # We will need to build up new surfaces (since not done by classes)
+
+            # Get the parameters at the given index
+            illum_params = _get_params_at_idx(idx, self.illum_params)
+            shaded_params = _get_params_at_idx(idx, self.shaded_params)
+
             if merge_if_flag_overlap and (self.flag_overlap is not None):
+                # We want to merge the shadow surfaces when they overlap
                 is_overlap = self.flag_overlap[idx]
                 if is_overlap and (len(non_pt_shadow_elements) > 1):
                     coords = [non_pt_shadow_elements[0].b1.at(idx),
@@ -768,6 +799,7 @@ class TsGround(object):
                         coords, shaded=True, param_names=self.param_names,
                         params=shaded_params)]
                 else:
+                    # No overlap for the given index or config
                     list_shadow_surfaces = [
                         PVSurface(shadow_el.coords.at(idx),
                                   shaded=True, params=shaded_params,
@@ -776,6 +808,7 @@ class TsGround(object):
                         if shadow_el.coords.length[idx]
                         > DISTANCE_TOLERANCE]
             else:
+                # No need to merge the shadow surfaces
                 list_shadow_surfaces = [
                     PVSurface(shadow_el.coords.at(idx),
                               shaded=True, params=shaded_params,
@@ -783,6 +816,7 @@ class TsGround(object):
                     for shadow_el in non_pt_shadow_elements
                     if shadow_el.coords.length[idx]
                     > DISTANCE_TOLERANCE]
+            # Get the illuminated surfaces
             list_illum_surfaces = [PVSurface(illum_el.coords.at(idx),
                                              shaded=False, params=illum_params,
                                              param_names=self.param_names)
@@ -790,6 +824,7 @@ class TsGround(object):
                                    if illum_el.coords.length[idx]
                                    > DISTANCE_TOLERANCE]
 
+        # Pass the created lists to the PVGround builder
         return PVGround.from_lists_surfaces(
             list_shadow_surfaces, list_illum_surfaces,
             param_names=self.param_names, y_ground=self.y_ground,
@@ -829,6 +864,15 @@ class TsGround(object):
                       with_index=False)
 
     def update_illum_params(self, new_dict):
+        """Update the illuminated parameters with new ones, not only for the
+        timeseries ground, but also for its ground elements and the timeseries
+        surfaces of the ground elements, so that they are all synced.
+
+        Parameters
+        ----------
+        new_dict : dict
+            New parameters
+        """
         self.illum_params.update(new_dict)
         for illum_el in self.illum_elements:
             illum_el.params.update(new_dict)
@@ -836,6 +880,15 @@ class TsGround(object):
                 surf.params.update(new_dict)
 
     def update_shaded_params(self, new_dict):
+        """Update the shaded parameters with new ones, not only for the
+        timeseries ground, but also for its ground elements and the timeseries
+        surfaces of the ground elements, so that they are all synced.
+
+        Parameters
+        ----------
+        new_dict : dict
+            New parameters
+        """
         self.shaded_params.update(new_dict)
         for shaded_el in self.shadow_elements:
             shaded_el.params.update(new_dict)
@@ -897,13 +950,34 @@ class TsGround(object):
         return shadow_coords
 
     @staticmethod
-    def _create_shadow_elements(list_shadow_coords, cut_point_coords,
-                                param_names):
-        """This method will clip the shadow coords to the limit of ground,
+    def _shadow_elements_from_coords_and_cut_pts(
+            list_shadow_coords, cut_point_coords, param_names):
+        """Create ground shadow elements from a list of ordered shadow
+        coordinates (from left to right), and the ground cut point coordinates.
+
+        Notes
+        -----
+        This method will clip the shadow coords to the limit of ground,
         i.e. the shadow coordinates shouldn't be outside of the range
-        [MIN_X_GROUND, MAX_X_GROUND]."""
+        [MIN_X_GROUND, MAX_X_GROUND].
+
+        Parameters
+        ----------
+        list_shadow_coords : list of :py:class:`~pvfactors.geometry.timeseries.TsLineCoords`
+            List of ordered ground shadow coordinates (from left to right)
+        cut_point_coords : list of :py:class:`~pvfactors.geometry.timeseries.TsLineCoords`
+            List of cut point coordinates (from left to right)
+        param_names : list
+            List of parameter names for the ground elements
+
+        Returns
+        -------
+        list_shadow_elements : list of :py:class:`~pvfactors.geometry.timeseries.TsGroundElement`
+            Ordered list of shadow elements (from left to right)
+        """
 
         list_shadow_elements = []
+        # FIXME: x_min and x_max should be passed as inputs
         for shadow_coords in list_shadow_coords:
             shadow_coords.b1.x = np.clip(shadow_coords.b1.x, MIN_X_GROUND,
                                          MAX_X_GROUND)
@@ -917,15 +991,41 @@ class TsGround(object):
         return list_shadow_elements
 
     @staticmethod
-    def _create_illum_elements(list_shadow_elements, y_ground, cut_pt_coords,
-                               param_names):
-        """Create illuminated ground elements"""
+    def _illum_elements_from_coords_and_cut_pts(
+            list_shadow_elements, cut_pt_coords, param_names, y_ground):
+        """Create ground illuminated elements from a list of ordered shadow
+        elements (from left to right), and the ground cut point coordinates.
+        This method will make sure that the illuminated ground elements are
+        all within the ground limits [MIN_X_GROUND, MAX_X_GROUND].
+
+        Parameters
+        ----------
+        list_shadow_coords : list of :py:class:`~pvfactors.geometry.timeseries.TsLineCoords`
+            List of ordered ground shadow coordinates (from left to right)
+        cut_point_coords : list of :py:class:`~pvfactors.geometry.timeseries.TsLineCoords`
+            List of cut point coordinates (from left to right)
+        param_names : list
+            List of parameter names for the ground elements
+
+        Returns
+        -------
+        list_shadow_elements : list of :py:class:`~pvfactors.geometry.timeseries.TsGroundElement`
+            Ordered list of shadow elements (from left to right)
+        """
 
         list_illum_elements = []
-        # There must be at least 1 shadow element, otherwise what's the point
+        if len(list_shadow_elements) == 0:
+            msg = """There must be at least one shadow element on the ground,
+            otherwise it probably means that no PV rows were created, so
+            there's no point in running a simulation..."""
+            raise PVFactorsError(msg)
         n_steps = len(list_shadow_elements[0].coords.b1.x)
         y_ground_vec = y_ground * np.ones(n_steps)
+        # FIXME: x_min and x_max should be passed as inputs
         next_x = MIN_X_GROUND * np.ones(n_steps)
+        # Build the groud elements from left to right, starting at x_min
+        # and covering the ground with illuminated elements where there's no
+        # shadow
         for shadow_element in list_shadow_elements:
             x1 = next_x
             x2 = shadow_element.coords.b1.x
@@ -935,7 +1035,7 @@ class TsGround(object):
                 coords, list_ordered_cut_pts_coords=cut_pt_coords,
                 param_names=param_names, shaded=False))
             next_x = shadow_element.coords.b2.x
-        # Add last illum element
+        # Add the last illuminated element to the list
         coords = TsLineCoords.from_array(
             np.array([[next_x, y_ground_vec],
                       [MAX_X_GROUND * np.ones(n_steps), y_ground_vec]]))
@@ -945,21 +1045,37 @@ class TsGround(object):
 
         return list_illum_elements
 
-    def _get_params_at_idx(self, idx, params_dict):
-        if params_dict is None:
-            return None
-        else:
-            return {k: (val if (val is None) or np.isscalar(val)
-                        or isinstance(val, dict) else val[idx])
-                    for k, val in params_dict.items()}
-
     def _merge_shadow_surfaces(self, idx, non_pt_shadow_elements):
+        """Merge the shadow surfaces in a list of shadow elements
+        at the shadow boundaries only, at a given index, but keep the shadow
+        surfaces broken up at the cut points.
+
+        Parameters
+        ----------
+        idx : int
+            Index at which we want to merge the surfaces
+        non_pt_shadow_elements : list of :py:class:`~pvfactors.geometry.timeseries.TsGroundElement`
+            List of non point shadow elements
+
+        Returns
+        -------
+        list_shadow_surfaces : list of :py:class:`~pvfactors.geometry.base.PVSurface`
+            List of shadow surfaces at a given index
+            (ordered from left to right)
+        """
+        # TODO: check if it would be faster to merge the ground elements first,
+        # and then break it down with the cut points
+
         # Decide whether to merge all shadows or not
         list_shadow_surfaces = []
         if self.flag_overlap is not None:
+            # Get the overlap flags
             is_overlap = self.flag_overlap[idx]
             n_shadow_elements = len(non_pt_shadow_elements)
             if is_overlap and (n_shadow_elements > 1):
+                # If there's only one shadow, not point in going through this
+
+                # Now go from left to right and merge shadow surfaces
                 surface_to_merge = None
                 for i_el, shadow_el in enumerate(non_pt_shadow_elements):
                     surfaces = shadow_el.non_point_surfaces_at(idx)
@@ -980,7 +1096,7 @@ class TsGround(object):
                                 # last surface of last shadow element
                                 list_shadow_surfaces.append(surface)
                             else:
-                                # keep for merging with next surface
+                                # keep for merging with next element
                                 surface_to_merge = surface
                         elif i_surf == 0:
                             # first surface but definitely not last either
@@ -997,12 +1113,15 @@ class TsGround(object):
                             # not first nor last surface
                             list_shadow_surfaces.append(surface)
             else:
+                # There's no need to merge anything
                 for shadow_el in non_pt_shadow_elements:
                     list_shadow_surfaces += \
                         shadow_el.non_point_surfaces_at(idx)
         else:
+            # There's no need to merge anything
             for shadow_el in non_pt_shadow_elements:
                 list_shadow_surfaces += shadow_el.non_point_surfaces_at(idx)
+
         return list_shadow_surfaces
 
 
@@ -1010,7 +1129,7 @@ class TsGroundElement(object):
     """Special class for ground elements: a ground element has known
     timeseries coordinate boundaries, but in order to vectorize the view
     factor calculation, we need to define the portions of the element that
-    are in all the zones defined by the PV row cut points."""
+    are in all the ground zones defined by the PV row cut points."""
 
     def __init__(self, coords, list_ordered_cut_pts_coords=None,
                  param_names=None, shaded=False, params=None):
@@ -1119,14 +1238,6 @@ class TsSurface(object):
         self.n_vector = n_vector
         self.params = dict.fromkeys(self.param_names)
 
-    def _get_params_at_idx(self, idx, params_dict):
-        if params_dict is None:
-            return None
-        else:
-            return {k: (val if (val is None) or np.isscalar(val)
-                        or isinstance(val, dict) else val[idx])
-                    for k, val in params_dict.items()}
-
     def at(self, idx, shaded=None):
         """Generate a PV segment geometry for the desired index.
 
@@ -1150,7 +1261,7 @@ class TsSurface(object):
                         else None)
             # Get params at idx
             # TODO: should find faster solution
-            params = self._get_params_at_idx(idx, self.params)
+            params = _get_params_at_idx(idx, self.params)
             # Return a pv surface geometry with given params
             return PVSurface(self.coords.at(idx), shaded=shaded,
                              normal_vector=n_vector,
@@ -1357,3 +1468,26 @@ class TsPointCoords(object):
     def __repr__(self):
         """Use the numpy array representation of the point"""
         return str(self.as_array)
+
+
+def _get_params_at_idx(idx, params_dict):
+    """Get the parameter values at given index. Return the whole parameter
+    when it's None, a scalar, or a dictionary
+
+    Parameters
+    ----------
+    idx : int
+        Index at which we want the parameter values
+    params_dict : dict
+        Dictionary of parameters
+
+    Returns
+    -------
+    Parameter value at index
+    """
+    if params_dict is None:
+        return None
+    else:
+        return {k: (val if (val is None) or np.isscalar(val)
+                    or isinstance(val, dict) else val[idx])
+                for k, val in params_dict.items()}
