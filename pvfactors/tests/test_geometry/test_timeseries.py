@@ -1,5 +1,6 @@
 import os
-from pvfactors.geometry.timeseries import TsPVRow, TsGround, TsPointCoords
+from pvfactors.geometry.timeseries import \
+    TsPVRow, TsGround, TsPointCoords, TsLineCoords, TsGroundElement
 import pandas as pd
 import numpy as np
 from pvfactors.geometry.pvrow import PVRow
@@ -141,18 +142,17 @@ def test_ts_ground_from_ts_pvrow():
     # Create ground from it
     alpha_vec = np.deg2rad([80., 90., 70.])
     ts_ground = TsGround.from_ts_pvrows_and_angles(
-        [ts_pvrow], alpha_vec, df_inputs.rotation_vec,
-        param_names=param_names)
+        [ts_pvrow], alpha_vec, df_inputs.rotation_vec, param_names=param_names)
 
-    assert len(ts_ground.shadows) == 1
+    assert len(ts_ground.shadow_elements) == 1
     # Check at specific times
     ground_0 = ts_ground.at(0)
     assert ground_0.n_surfaces == 4
     assert ground_0.list_segments[0].shaded_collection.n_surfaces == 1
     ground_1 = ts_ground.at(1)  # vertical, sun above
-    assert ground_1.n_surfaces == 3
-    assert ground_1.list_segments[0].shaded_collection.n_surfaces == 1
-    assert ground_1.shaded_length < 1e-7
+    assert ground_1.n_surfaces == 2  # only 2 illuminated surfaces
+    assert ground_1.list_segments[0].shaded_collection.n_surfaces == 0
+    assert ground_1.shaded_length == 0  # no shadow (since shadow length 0ish)
     np.testing.assert_allclose(ground_0.shaded_length, 1.7587704831436)
     np.testing.assert_allclose(ts_ground.at(2).shaded_length, width)  # flat
     # Check that all have surface params
@@ -170,12 +170,12 @@ def test_ts_ground_overlap():
 
     # Test without overlap
     ts_ground = TsGround.from_ordered_shadows_coords(shadow_coords)
-    np.testing.assert_allclose(ts_ground.shadows[0].b2.x, [2, 1])
+    np.testing.assert_allclose(ts_ground.shadow_elements[0].b2.x, [2, 1])
 
     # Test with overlap
     ts_ground = TsGround.from_ordered_shadows_coords(shadow_coords,
                                                      flag_overlap=overlap)
-    np.testing.assert_allclose(ts_ground.shadows[0].b2.x, [1, 1])
+    np.testing.assert_allclose(ts_ground.shadow_elements[0].b2.x, [1, 1])
 
 
 def test_ts_ground_to_geometry():
@@ -199,6 +199,7 @@ def test_ts_ground_to_geometry():
     assert pvground.list_segments[0].illum_collection.n_surfaces == 2
     assert pvground.list_segments[0].shaded_collection.n_surfaces == 2
     assert pvground.list_segments[0].shaded_collection.length == 5
+    np.testing.assert_allclose(pvground.shaded_length, 5)
 
     # Run some checks for index 1
     pvground = ts_ground.at(1, with_cut_points=False)
@@ -206,6 +207,7 @@ def test_ts_ground_to_geometry():
     assert pvground.list_segments[0].illum_collection.n_surfaces == 3
     assert pvground.list_segments[0].shaded_collection.n_surfaces == 2
     assert pvground.list_segments[0].shaded_collection.length == 4
+    np.testing.assert_allclose(pvground.shaded_length, 4)
 
     # Run some checks for index 0, when merging
     pvground = ts_ground.at(0, merge_if_flag_overlap=True,
@@ -214,6 +216,7 @@ def test_ts_ground_to_geometry():
     assert pvground.list_segments[0].illum_collection.n_surfaces == 2
     assert pvground.list_segments[0].shaded_collection.n_surfaces == 1
     assert pvground.list_segments[0].shaded_collection.length == 5
+    np.testing.assert_allclose(pvground.shaded_length, 5)
 
     # Run some checks for index 0, when merging and with cut points
     pvground = ts_ground.at(0, merge_if_flag_overlap=True,
@@ -222,6 +225,7 @@ def test_ts_ground_to_geometry():
     assert pvground.list_segments[0].illum_collection.n_surfaces == 2
     assert pvground.list_segments[0].shaded_collection.n_surfaces == 2
     assert pvground.list_segments[0].shaded_collection.length == 5
+    np.testing.assert_allclose(pvground.shaded_length, 5)
 
 
 def test_shadows_coords_left_right_of_cut_point():
@@ -287,3 +291,45 @@ def test_shadows_coords_left_right_of_cut_point():
                                       [[[mini], [0.]], [[mini], [0.]]]])
     shadows_left = [shadow.as_array for shadow in shadows_left]
     np.testing.assert_allclose(shadows_left, expected_shadows_left)
+
+
+def test_ts_ground_elements_surfaces():
+    """Check timeseries ground elements are created correctly"""
+
+    # Create timeseries coords
+    gnd_element_coords = TsLineCoords.from_array(
+        np.array([[[-1, -1], [0, 0]], [[1, 1], [0, 0]]]))
+    pt_coords_1 = TsPointCoords.from_array(np.array([[-0.5, -1], [0, 0]]))
+    pt_coords_2 = TsPointCoords.from_array(np.array([[0.5, 0], [0, 0]]))
+
+    # Create gnd element
+    gnd_element = TsGroundElement(
+        gnd_element_coords,
+        list_ordered_cut_pts_coords=[pt_coords_1, pt_coords_2])
+
+    # Check that structures contain the correct number of ts surfaces
+    assert len(gnd_element.surface_list) == 3
+    assert len(gnd_element.surface_dict[0]['left']) == 1
+    assert len(gnd_element.surface_dict[1]['left']) == 2
+    assert len(gnd_element.surface_dict[0]['right']) == 2
+    assert len(gnd_element.surface_dict[1]['right']) == 1
+    # Check that the objects are the same
+    assert (gnd_element.surface_list[0]
+            == gnd_element.surface_dict[0]['left'][0])
+    assert (gnd_element.surface_list[0]
+            == gnd_element.surface_dict[1]['left'][0])
+    assert (gnd_element.surface_list[1]
+            == gnd_element.surface_dict[0]['right'][0])
+    assert (gnd_element.surface_list[1]
+            == gnd_element.surface_dict[1]['left'][1])
+    assert (gnd_element.surface_list[2]
+            == gnd_element.surface_dict[0]['right'][1])
+    assert (gnd_element.surface_list[2]
+            == gnd_element.surface_dict[1]['right'][0])
+    # Now check surfaces lengths
+    np.testing.assert_allclose(gnd_element.surface_list[0].length, [0.5, 0])
+    np.testing.assert_allclose(gnd_element.surface_list[1].length, [1, 1])
+    np.testing.assert_allclose(gnd_element.surface_list[2].length, [0.5, 1])
+    # Check coords of surfaces
+    np.testing.assert_allclose(gnd_element.surface_list[0].b1.x, [-1, -1])
+    np.testing.assert_allclose(gnd_element.surface_list[0].b2.x, [-0.5, -1])

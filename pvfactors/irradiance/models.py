@@ -173,12 +173,12 @@ class IsotropicOrdered(BaseModel):
         inv_rho_back = 1. / rho_back
 
         # Transform timeseries ground
-        pvarray.ts_ground.illum_params.update(
+        pvarray.ts_ground.update_illum_params(
             {'direct': self.direct['ground_illum'],
              'rho': self.albedo,
              'inv_rho': 1. / self.albedo,
              'total_perez': self.gnd_illum})
-        pvarray.ts_ground.shaded_params.update(
+        pvarray.ts_ground.update_shaded_params(
             {'direct': self.direct['ground_shaded'],
              'rho': self.albedo,
              'inv_rho': 1. / self.albedo,
@@ -500,14 +500,14 @@ class HybridPerezOrdered(BaseModel):
         inv_rho_back = 1. / rho_back
 
         # Transform timeseries ground
-        pvarray.ts_ground.illum_params.update({
+        pvarray.ts_ground.update_illum_params({
             'direct': self.direct['ground_illum'],
             'circumsolar': self.circumsolar['ground_illum'],
             'horizon': np.zeros(n_steps),
             'rho': self.albedo,
             'inv_rho': 1. / self.albedo,
             'total_perez': self.gnd_illum})
-        pvarray.ts_ground.shaded_params.update({
+        pvarray.ts_ground.update_shaded_params({
             'direct': self.direct['ground_shaded'],
             'circumsolar': self.circumsolar['ground_shaded'],
             'horizon': np.zeros(n_steps),
