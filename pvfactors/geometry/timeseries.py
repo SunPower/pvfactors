@@ -182,6 +182,16 @@ class TsPVRow(object):
                       index=self.index, original_linestring=original_line)
         return pvrow
 
+    @property
+    def n_ts_surfaces(self):
+        """Number of timeseries surfaces in the ts PV row"""
+        return self.front.n_ts_surfaces + self.back.n_ts_surfaces
+
+    @property
+    def all_ts_surfaces(self):
+        """List of all timeseries surfaces"""
+        return self.front.all_ts_surfaces + self.back.all_ts_surfaces
+
 
 class TsSide(object):
     """Timeseries side class: this class is a vectorized version of the
@@ -421,11 +431,29 @@ class TsSide(object):
         for seg in self.list_segments:
             seg.update_params(new_dict)
 
+    @property
+    def n_ts_surfaces(self):
+        """Number of timeseries surfaces in the ts side"""
+        n_ts_surfaces = 0
+        for ts_segment in self.list_segments:
+            n_ts_surfaces += ts_segment.n_ts_surfaces
+        return n_ts_surfaces
+
+    @property
+    def all_ts_surfaces(self):
+        """List of all timeseries surfaces"""
+        all_ts_surfaces = []
+        for ts_segment in self.list_segments:
+            all_ts_surfaces += ts_segment.all_ts_surfaces
+        return all_ts_surfaces
+
 
 class TsDualSegment(object):
     """A TsDualSegment is a timeseries segment that can only have
     1 shaded surface and 1 illuminated surface. This allows indexing of the
     object."""
+
+    n_ts_surfaces = 2  # an illuminated and a shaded ts surface
 
     def __init__(self, coords, illum_ts_surface, shaded_ts_surface,
                  index=None, n_vector=None):
@@ -593,6 +621,11 @@ class TsDualSegment(object):
     def lowest_point(self):
         """Timeseries point coordinates of lowest point of segment"""
         return self.coords.lowest_point
+
+    @property
+    def all_ts_surfaces(self):
+        """List of all timeseries surfaces in dual segment"""
+        return [self.illum, self.shaded]
 
 
 class TsGround(object):
@@ -937,6 +970,26 @@ class TsGround(object):
                                                      cut_pt_coords)
                 for shadow_el in self.shadow_elements]
 
+    @property
+    def n_ts_surfaces(self):
+        """Number of timeseries surfaces in the ts ground"""
+        n_ts_surfaces = 0
+        for shadow_el in self.shadow_elements:
+            n_ts_surfaces += shadow_el.n_ts_surfaces
+        for illum_el in self.illum_elements:
+            n_ts_surfaces += illum_el.n_ts_surfaces
+        return n_ts_surfaces
+
+    @property
+    def all_ts_surfaces(self):
+        """Number of timeseries surfaces in the ts ground"""
+        all_ts_surfaces = []
+        for shadow_el in self.shadow_elements:
+            all_ts_surfaces += shadow_el.all_ts_surfaces
+        for illum_el in self.illum_elements:
+            all_ts_surfaces += illum_el.all_ts_surfaces
+        return all_ts_surfaces
+
     @staticmethod
     def _shadow_elements_from_coords_and_cut_pts(
             list_shadow_coords, cut_point_coords, param_names):
@@ -1148,6 +1201,7 @@ class TsGroundElement(object):
         list_ordered_cut_pts_coords = list_ordered_cut_pts_coords or []
         if len(list_ordered_cut_pts_coords) > 0:
             self._create_all_ts_surfaces(list_ordered_cut_pts_coords)
+        self.n_ts_surfaces = len(self.surface_list)
 
     @property
     def b1(self):
@@ -1163,6 +1217,11 @@ class TsGroundElement(object):
     def centroid(self):
         """Timeseries point coordinates of the element's centroid"""
         return self.coords.centroid
+
+    @property
+    def all_ts_surfaces(self):
+        """List of all ts surfaces making up the ts ground element"""
+        return self.surface_list
 
     def surfaces_at(self, idx):
         """Return list of surfaces (from left to right) at given index that
@@ -1290,7 +1349,7 @@ class TsSurface(object):
     """Timeseries surface class: vectorized representation of PV surface
     geometries."""
 
-    def __init__(self, coords, n_vector=None, param_names=None):
+    def __init__(self, coords, n_vector=None, param_names=None, index=None):
         """Initialize timeseries surface using timeseries coordinates.
 
         Parameters
@@ -1301,6 +1360,8 @@ class TsSurface(object):
             Index of segment (Default = None)
         n_vector : np.ndarray, optional
             Timeseries normal vectors of the side (Default = None)
+        index : int, optional
+            Index of the timeseries surfaces (Default = None)
         """
         self.coords = coords
         self.param_names = [] if param_names is None else param_names
@@ -1308,6 +1369,7 @@ class TsSurface(object):
         # because if the coords change, they won't be altered. But speed...
         self.n_vector = n_vector
         self.params = dict.fromkeys(self.param_names)
+        self.index = index
 
     def at(self, idx, shaded=None):
         """Generate a PV segment geometry for the desired index.
