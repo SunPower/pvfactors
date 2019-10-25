@@ -258,3 +258,14 @@ class VFCalculator(object):
         }
 
         return view_factors
+
+    def build_ts_vf_matrix(self, pvarray):
+
+        # Initialize matrix
+        rotation_vec = pvarray.rotation_vec
+        n_steps = len(rotation_vec)
+        n_ts_surfaces = pvarray.n_ts_surfaces
+        vf_matrix = np.zeros((n_ts_surfaces, n_ts_surfaces, n_steps),
+                             dtype=float)
+
+        return vf_matrix
