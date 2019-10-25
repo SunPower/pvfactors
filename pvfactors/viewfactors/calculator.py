@@ -268,4 +268,9 @@ class VFCalculator(object):
         vf_matrix = np.zeros((n_ts_surfaces, n_ts_surfaces, n_steps),
                              dtype=float)
 
+        ts_ground = pvarray.ts_ground
+        ts_pvrows = pvarray.ts_pvrows
+        for idx_pvrow, ts_pvrow in enumerate(ts_pvrows):
+            self.vf_ts_methods(ts_pvrow, ts_ground, vf_matrix)
+
         return vf_matrix

@@ -211,7 +211,7 @@ class VFTsMethods(object):
             # There is potential obstruction on the left
             pt_obstr = ts_pvrows[pvrow_idx - 1].full_pvrow_coords.lowest_point
             is_shadow_left = True
-            vf_to_left_shadow = self._vf_hottel_shadows(
+            vf_to_left_shadow = self._vf_hottel_gnd_surf(
                 pvrow_element_highest_pt, pvrow_element_lowest_pt,
                 shadow_left.b1, shadow_left.b2, pt_obstr, pvrow_element_length,
                 is_shadow_left)
@@ -225,7 +225,7 @@ class VFTsMethods(object):
             # There is potential obstruction on the right
             pt_obstr = ts_pvrows[pvrow_idx + 1].full_pvrow_coords.lowest_point
             is_shadow_left = False
-            vf_to_right_shadow = self._vf_hottel_shadows(
+            vf_to_right_shadow = self._vf_hottel_gnd_surf(
                 pvrow_element_highest_pt, pvrow_element_lowest_pt,
                 shadow_right.b1, shadow_right.b2, pt_obstr,
                 pvrow_element_length, is_shadow_left)
@@ -236,8 +236,8 @@ class VFTsMethods(object):
 
         return vf_to_shadow
 
-    def _vf_hottel_shadows(self, high_pt_pv, low_pt_pv, left_pt_gnd,
-                           right_pt_gnd, obstr_pt, width, shadow_is_left):
+    def _vf_hottel_gnd_surf(self, high_pt_pv, low_pt_pv, left_pt_gnd,
+                            right_pt_gnd, obstr_pt, width, shadow_is_left):
         """
         Calculate the timeseries view factors from a PV surface defined by low
         and high points, to a ground surface defined by left and right points,
@@ -460,3 +460,83 @@ class VFTsMethods(object):
                                           side_lowest_pt)
 
         return side_shaded_coords
+
+    def ts_pvrows_ground(self, ts_pvrow, ts_ground, vf_matrix):
+        pass
+
+    def vf_pvrow_surf_to_gnd_surf_obstruction_hottel(
+            self, pvrow_surf, pvrow_idx, n_shadows, n_steps, tilted_to_left,
+            ts_pvrows, gnd_surf, pvrow_surf_length, is_back=True,
+            is_left=True):
+        """Calculate view factors from timeseries pvrow_element to the shadow
+        of a specific timeseries PV row which is casted on the ground.
+
+        Parameters
+        ----------
+        pvrow_surf : :py:class:`~pvfactors.geometry.timeseries.TsSurface`
+            Timeseries pvrow_surf to use for calculation
+        pvrow_idx : int
+            Index of the timeseries PV row on the which the pvrow_surf is
+        n_shadows : int
+            Number of timeseries PV rows in the PV array, and therefore number
+            of shadows they cast on the ground
+        n_steps : int
+            Number of timesteps for which to calculate the pvfactors
+        tilted_to_left : list of bool
+            Flags indicating when the PV rows are strictly tilted to the left
+        ts_pvrows : list of :py:class:`~pvfactors.geometry.timeseries.TsPVRow`
+            Timeseries PV row geometries that will be used in the calculation
+        shadow_left : :py:class:`~pvfactors.geometry.timeseries.TsLineCoords`
+            Coordinates of the shadow that are on the left side of the cut
+            point of the PV row on which the pvrow_surf is
+        shadow_right : :py:class:`~pvfactors.geometry.timeseries.TsLineCoords`
+            Coordinates of the shadow that are on the right side of the cut
+            point of the PV row on which the pvrow_surf is
+        pvrow_surf_length : float or np.ndarray
+            Length (width) of the timeseries pvrow_surf [m]
+        is_back : bool
+            Flag specifying whether pv row surface is back or front surface
+            (Default = True)
+        is_left : bool
+            Flag specifying whether gnd surface is left of pv row cut point or
+            not (Default = True)
+
+        Returns
+        -------
+        vf_to_shadow : np.ndarray
+            View factors from timeseries pvrow_surf to the ground shadow of
+            a specific timeseries PV row
+        """
+
+        pvrow_surf_lowest_pt = pvrow_surf.lowest_point
+        pvrow_surf_highest_pt = pvrow_surf.highest_point
+        no_obstruction = (is_left & (pvrow_idx == 0)) \
+            or ((not is_left) & (pvrow_idx == n_shadows - 1))
+        if no_obstruction:
+            # There is no obstruction to the gnd surface
+            vf_pvrow_to_gnd_surf = self._vf_surface_to_surface(
+                pvrow_surf.coords, gnd_surf, pvrow_surf_length)
+        else:
+            # Get lowest point of obstructing point
+            idx_obstructing_pvrow = pvrow_idx - 1 if is_left else pvrow_idx + 1
+            pt_obstr = ts_pvrows[idx_obstructing_pvrow
+                                 ].full_pvrow_coords.lowest_point
+            # Calculate vf from pv row to gnd surface
+            vf_pvrow_to_gnd_surf = self._vf_hottel_gnd_surf(
+                pvrow_surf_highest_pt, pvrow_surf_lowest_pt,
+                gnd_surf.b1, gnd_surf.b2, pt_obstr, pvrow_surf_length,
+                is_left)
+
+        # Final result depends on whether front or back surface
+        if is_left:
+            vf_pvrow_to_gnd_surf = (
+                np.where(tilted_to_left, 0., vf_pvrow_to_gnd_surf) if is_back
+                else np.where(tilted_to_left, vf_pvrow_to_gnd_surf, 0.))
+        else:
+            vf_pvrow_to_gnd_surf = (
+                np.where(tilted_to_left, 0., vf_pvrow_to_gnd_surf) if is_back
+                else np.where(tilted_to_left, vf_pvrow_to_gnd_surf, 0.))
+
+        # TODO: calculate vf from gnd to pv row surface
+
+        return vf_pvrow_to_gnd_surf
