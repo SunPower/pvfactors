@@ -1349,7 +1349,7 @@ class TsSurface(object):
     """Timeseries surface class: vectorized representation of PV surface
     geometries."""
 
-    def __init__(self, coords, n_vector=None, param_names=None):
+    def __init__(self, coords, n_vector=None, param_names=None, index=None):
         """Initialize timeseries surface using timeseries coordinates.
 
         Parameters
@@ -1360,6 +1360,8 @@ class TsSurface(object):
             Index of segment (Default = None)
         n_vector : np.ndarray, optional
             Timeseries normal vectors of the side (Default = None)
+        index : int, optional
+            Index of the timeseries surfaces (Default = None)
         """
         self.coords = coords
         self.param_names = [] if param_names is None else param_names
@@ -1367,6 +1369,7 @@ class TsSurface(object):
         # because if the coords change, they won't be altered. But speed...
         self.n_vector = n_vector
         self.params = dict.fromkeys(self.param_names)
+        self.index = index
 
     def at(self, idx, shaded=None):
         """Generate a PV segment geometry for the desired index.

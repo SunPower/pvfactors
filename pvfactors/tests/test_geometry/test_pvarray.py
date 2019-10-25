@@ -335,6 +335,19 @@ def test_get_all_surface_indices(ordered_pvarray):
                                   range(ordered_pvarray.n_surfaces))
 
 
+def test_get_all_ts_surface_indices(ordered_pvarray):
+    """Check that the ts surface indices are created correctly, and that
+    are properly used to make dictionary of ts surfaces"""
+    # Check ts surface indices: indexing should happen at indexing
+    dict_ts_surfaces = ordered_pvarray.dict_ts_surfaces
+    indices = list(dict_ts_surfaces.keys())
+    expected_list_indices = set([ts_surf.index for ts_surf
+                                 in ordered_pvarray.all_ts_surfaces])
+    assert set(indices) == expected_list_indices
+    assert isinstance(indices[0], int)
+    assert np.max(indices) == (ordered_pvarray.n_ts_surfaces - 1)
+
+
 def test_view_matrix_flat(params):
 
     # Make flat

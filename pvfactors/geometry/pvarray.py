@@ -208,6 +208,9 @@ class OrderedPVArray(BasePVArray):
         # Save surface rotation angles
         self.rotation_vec = rotation_vec
 
+        # Index all timeseries surfaces
+        self._index_all_ts_surfaces()
+
     def transform(self, idx):
         """
         Transform the ordered PV array for the given index.

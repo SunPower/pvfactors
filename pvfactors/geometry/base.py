@@ -1312,6 +1312,12 @@ class BasePVArray(object):
         self.index_all_surfaces()
         return {surf.index: surf for surf in self.all_surfaces}
 
+    @property
+    def dict_ts_surfaces(self):
+        """Dictionay of timeseries surfaces in the PV array, where keys are
+        the surface indices."""
+        return {ts_surf.index: ts_surf for ts_surf in self.all_ts_surfaces}
+
     def update_params(self, new_dict):
         """Update surface parameters in the collection.
 
@@ -1328,6 +1334,11 @@ class BasePVArray(object):
         """Add unique indices to all surfaces in the PV array."""
         for idx, surface in enumerate(self.all_surfaces):
             surface.index = idx
+
+    def _index_all_ts_surfaces(self):
+        """Add unique indices to all surfaces in the PV array."""
+        for idx, ts_surface in enumerate(self.all_ts_surfaces):
+            ts_surface.index = idx
 
     def _build_view_matrix(self, *args, **kwargs):
         """Not implemented."""
