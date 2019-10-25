@@ -182,6 +182,11 @@ class TsPVRow(object):
                       index=self.index, original_linestring=original_line)
         return pvrow
 
+    @property
+    def n_ts_surfaces(self):
+        """Number of timeseries surfaces in the ts PV row"""
+        return self.front.n_ts_surfaces + self.back.n_ts_surfaces
+
 
 class TsSide(object):
     """Timeseries side class: this class is a vectorized version of the
@@ -421,11 +426,21 @@ class TsSide(object):
         for seg in self.list_segments:
             seg.update_params(new_dict)
 
+    @property
+    def n_ts_surfaces(self):
+        """Number of timeseries surfaces in the ts side"""
+        n_ts_surfaces = 0
+        for ts_segment in self.list_segments:
+            n_ts_surfaces += ts_segment.n_ts_surfaces
+        return n_ts_surfaces
+
 
 class TsDualSegment(object):
     """A TsDualSegment is a timeseries segment that can only have
     1 shaded surface and 1 illuminated surface. This allows indexing of the
     object."""
+
+    n_ts_surfaces = 2  # an illuminated and a shaded ts surface
 
     def __init__(self, coords, illum_ts_surface, shaded_ts_surface,
                  index=None, n_vector=None):
@@ -937,6 +952,16 @@ class TsGround(object):
                                                      cut_pt_coords)
                 for shadow_el in self.shadow_elements]
 
+    @property
+    def n_ts_surfaces(self):
+        """Number of timeseries surfaces in the ts ground"""
+        n_ts_surfaces = 0
+        for shadow_el in self.shadow_elements:
+            n_ts_surfaces += shadow_el.n_ts_surfaces
+        for illum_el in self.illum_elements:
+            n_ts_surfaces += illum_el.n_ts_surfaces
+        return n_ts_surfaces
+
     @staticmethod
     def _shadow_elements_from_coords_and_cut_pts(
             list_shadow_coords, cut_point_coords, param_names):
@@ -1148,6 +1173,7 @@ class TsGroundElement(object):
         list_ordered_cut_pts_coords = list_ordered_cut_pts_coords or []
         if len(list_ordered_cut_pts_coords) > 0:
             self._create_all_ts_surfaces(list_ordered_cut_pts_coords)
+        self.n_ts_surfaces = len(self.surface_list)
 
     @property
     def b1(self):

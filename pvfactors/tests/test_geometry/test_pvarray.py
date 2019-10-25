@@ -32,11 +32,13 @@ def test_ordered_pvarray_from_dict(params):
     distance_between_pvrows = \
         pvarray.pvrows[1].centroid.x - pvarray.pvrows[0].centroid.x
     assert distance_between_pvrows == 5.0
+    assert pvarray.n_ts_surfaces == 40
 
     # Orient the array the other way
     params.update({'surface_azimuth': 270.})
     pvarray = OrderedPVArray.transform_from_dict_of_scalars(params)
     assert pvarray.pvrows[0].front.n_vector[0] < 0
+    assert pvarray.n_ts_surfaces == 40
 
 
 def test_plot_ordered_pvarray():
@@ -80,10 +82,17 @@ def test_discretization_ordered_pvarray(discr_params):
     pvarray = OrderedPVArray.transform_from_dict_of_scalars(discr_params)
     pvrows = pvarray.pvrows
 
+    # Check the transformed geometries
     assert len(pvrows[0].front.list_segments) == 5
     assert len(pvrows[0].back.list_segments) == 1
     assert len(pvrows[1].back.list_segments) == 3
     assert len(pvrows[1].front.list_segments) == 2
+    # Check the timeseries geometries
+    assert pvarray.ts_pvrows[0].n_ts_surfaces == 12
+    assert pvarray.ts_pvrows[1].n_ts_surfaces == 10
+    assert pvarray.ts_pvrows[2].n_ts_surfaces == 4
+    assert pvarray.ts_ground.n_ts_surfaces == 28
+    assert pvarray.n_ts_surfaces == 54
 
 
 def test_ordered_pvarray_gnd_shadow_casting(params):
