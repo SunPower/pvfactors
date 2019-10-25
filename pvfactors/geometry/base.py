@@ -1252,6 +1252,15 @@ class BasePVArray(object):
         return n_ts_surfaces
 
     @property
+    def all_ts_surfaces(self):
+        """List of all timeseries surfaces in PV array"""
+        all_ts_surfaces = []
+        all_ts_surfaces += self.ts_ground.all_ts_surfaces
+        for ts_pvrow in self.ts_pvrows:
+            all_ts_surfaces += ts_pvrow.all_ts_surfaces
+        return all_ts_surfaces
+
+    @property
     def surface_registry(self):
         """Surface registry of the PV array, build if does not exist yet.
         The surface registry is a pandas DataFrame that contains all the

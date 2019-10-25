@@ -93,6 +93,8 @@ def test_discretization_ordered_pvarray(discr_params):
     assert pvarray.ts_pvrows[2].n_ts_surfaces == 4
     assert pvarray.ts_ground.n_ts_surfaces == 28
     assert pvarray.n_ts_surfaces == 54
+    # Check that the list of ts surfaces match
+    assert len(set(pvarray.all_ts_surfaces)) == 54
 
 
 def test_ordered_pvarray_gnd_shadow_casting(params):

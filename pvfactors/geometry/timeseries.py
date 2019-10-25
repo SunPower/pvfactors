@@ -187,6 +187,11 @@ class TsPVRow(object):
         """Number of timeseries surfaces in the ts PV row"""
         return self.front.n_ts_surfaces + self.back.n_ts_surfaces
 
+    @property
+    def all_ts_surfaces(self):
+        """List of all timeseries surfaces"""
+        return self.front.all_ts_surfaces + self.back.all_ts_surfaces
+
 
 class TsSide(object):
     """Timeseries side class: this class is a vectorized version of the
@@ -434,6 +439,14 @@ class TsSide(object):
             n_ts_surfaces += ts_segment.n_ts_surfaces
         return n_ts_surfaces
 
+    @property
+    def all_ts_surfaces(self):
+        """List of all timeseries surfaces"""
+        all_ts_surfaces = []
+        for ts_segment in self.list_segments:
+            all_ts_surfaces += ts_segment.all_ts_surfaces
+        return all_ts_surfaces
+
 
 class TsDualSegment(object):
     """A TsDualSegment is a timeseries segment that can only have
@@ -608,6 +621,11 @@ class TsDualSegment(object):
     def lowest_point(self):
         """Timeseries point coordinates of lowest point of segment"""
         return self.coords.lowest_point
+
+    @property
+    def all_ts_surfaces(self):
+        """List of all timeseries surfaces in dual segment"""
+        return [self.illum, self.shaded]
 
 
 class TsGround(object):
@@ -962,6 +980,16 @@ class TsGround(object):
             n_ts_surfaces += illum_el.n_ts_surfaces
         return n_ts_surfaces
 
+    @property
+    def all_ts_surfaces(self):
+        """Number of timeseries surfaces in the ts ground"""
+        all_ts_surfaces = []
+        for shadow_el in self.shadow_elements:
+            all_ts_surfaces += shadow_el.all_ts_surfaces
+        for illum_el in self.illum_elements:
+            all_ts_surfaces += illum_el.all_ts_surfaces
+        return all_ts_surfaces
+
     @staticmethod
     def _shadow_elements_from_coords_and_cut_pts(
             list_shadow_coords, cut_point_coords, param_names):
@@ -1189,6 +1217,11 @@ class TsGroundElement(object):
     def centroid(self):
         """Timeseries point coordinates of the element's centroid"""
         return self.coords.centroid
+
+    @property
+    def all_ts_surfaces(self):
+        """List of all ts surfaces making up the ts ground element"""
+        return self.surface_list
 
     def surfaces_at(self, idx):
         """Return list of surfaces (from left to right) at given index that
