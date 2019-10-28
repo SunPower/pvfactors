@@ -598,3 +598,75 @@ class VFTsMethods(object):
             vf_pvrow_to_gnd_surf * pvrow_surf_length / gnd_surf_length, 0.)
 
         return vf_pvrow_to_gnd_surf, vf_gnd_to_pvrow_surf
+
+    def vf_pvrow_to_pvrow(self, ts_pvrows, tilted_to_left, vf_matrix):
+        """Calculate view factors from timeseries pvrow element to timeseries
+        PV rows around it.
+
+        Parameters
+        ----------
+        pvrow_element_coords :
+        :py:class:`~pvfactors.geometry.timeseries.TsLineCoords`
+            Timeseries line coordinates of pvrow_element
+        pvrow_idx : int
+            Index of the timeseries PV row on which the pvrow_element is
+        n_pvrows : int
+            Number of timeseries PV rows in the PV array
+        n_steps : int
+            Number of timesteps for which to calculate the pvfactors
+        ts_pvrows : list of :py:class:`~pvfactors.geometry.timeseries.TsPVRow`
+            Timeseries PV row geometries that will be used in the calculation
+        pvrow_element_length : float or np.ndarray
+            Length (width) of the timeseries pvrow element [m]
+        tilted_to_left : list of bool
+            Flags indicating when the PV rows are strictly tilted to the left
+        pvrow_width : float
+            Width of the timeseries PV rows in the PV array [m], which is
+            constant
+        rotation_vec : np.ndarray
+            Rotation angles of the PV rows [deg]
+
+        Returns
+        -------
+        vf_to_pvrow : np.ndarray
+            View factors from timeseries pvrow_element to neighboring PV rows
+        vf_to_shaded_pvrow : np.ndarray
+            View factors from timeseries pvrow_element to shaded areas of the
+            neighboring PV rows
+        """
+
+        for idx_pvrow, ts_pvrow in enumerate(ts_pvrows[:-1]):
+            # Get the next pv row
+            right_ts_pvrow = ts_pvrows[idx_pvrow + 1]
+            # front side
+            front = ts_pvrow.front
+            for surf_i in front.all_ts_surfaces:
+                i = surf_i.index
+                length_i = surf_i.length
+                for surf_j in right_ts_pvrow.back.all_ts_surfaces:
+                    j = surf_j.index
+                    length_j = surf_j.length
+                    vf_i_to_j = self._vf_surface_to_surface(
+                        surf_i.coords, surf_j.coords, length_i)
+                    vf_i_to_j = np.where(tilted_to_left, 0., vf_i_to_j)
+                    vf_j_to_i = np.where(
+                        surf_j.length > DISTANCE_TOLERANCE,
+                        vf_i_to_j * length_i / length_j, 0.)
+                    vf_matrix[i, j, :] = vf_i_to_j
+                    vf_matrix[j, i, :] = vf_j_to_i
+            # back side
+            back = ts_pvrow.back
+            for surf_i in back.all_ts_surfaces:
+                i = surf_i.index
+                length_i = surf_i.length
+                for surf_j in right_ts_pvrow.front.all_ts_surfaces:
+                    j = surf_j.index
+                    length_j = surf_j.length
+                    vf_i_to_j = self._vf_surface_to_surface(
+                        surf_i.coords, surf_j.coords, length_i)
+                    vf_i_to_j = np.where(tilted_to_left, vf_i_to_j, 0.)
+                    vf_j_to_i = np.where(
+                        surf_j.length > DISTANCE_TOLERANCE,
+                        vf_i_to_j * length_i / length_j, 0.)
+                    vf_matrix[i, j, :] = vf_i_to_j
+                    vf_matrix[j, i, :] = vf_j_to_i

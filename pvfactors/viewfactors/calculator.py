@@ -266,8 +266,8 @@ class VFCalculator(object):
         tilted_to_left = rotation_vec > 0
         n_steps = len(rotation_vec)
         n_ts_surfaces = pvarray.n_ts_surfaces
-        vf_matrix = np.zeros((n_ts_surfaces, n_ts_surfaces, n_steps),
-                             dtype=float)
+        vf_matrix = np.zeros((n_ts_surfaces + 1, n_ts_surfaces + 1, n_steps),
+                             dtype=float)  # don't forget to include the sky
 
         # Get timeseries objects
         ts_ground = pvarray.ts_ground
@@ -276,5 +276,10 @@ class VFCalculator(object):
         # Calculate ts view factors between pvrow and ground surfaces
         self.vf_ts_methods.vf_pvrow_gnd_surf(ts_pvrows, ts_ground,
                                              tilted_to_left, vf_matrix)
+        # Calculate view factors between pv rows
+        self.vf_ts_methods.vf_pvrow_to_pvrow(ts_pvrows, tilted_to_left,
+                                             vf_matrix)
+        # Calculate view factors to sky
+        vf_matrix[:-1, -1, :] = 1. - np.sum(vf_matrix[:-1, :-1, :], axis=1)
 
         return vf_matrix

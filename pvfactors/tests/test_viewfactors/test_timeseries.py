@@ -9,7 +9,7 @@ def test_ts_vf_matrix(ordered_pvarray):
     vf_matrix = vfcalculator.build_ts_vf_matrix(ordered_pvarray)
 
     # Check that correct size
-    assert vf_matrix.shape == (40, 40, 1)
+    assert vf_matrix.shape == (41, 41, 1)
 
     # get all indices where surfaces have positive length
     list_idx = [surf.index for surf in ordered_pvarray.all_ts_surfaces
