@@ -461,11 +461,8 @@ class VFTsMethods(object):
 
         return side_shaded_coords
 
-    def ts_pvrows_ground(self, ts_pvrow, ts_ground, vf_matrix):
-        pass
-
-    def vf_pvrow_gnd_surf(
-            self, ts_pvrows, ts_ground, tilted_to_left, vf_matrix):
+    def vf_pvrow_gnd_surf(self, ts_pvrows, ts_ground, tilted_to_left,
+                          vf_matrix):
 
         n_pvrows = len(ts_pvrows)
         for idx_pvrow, ts_pvrow in enumerate(ts_pvrows):
@@ -481,20 +478,22 @@ class VFTsMethods(object):
                 i = pvrow_surf.index
                 for gnd_surf in left_gnd_surfaces:
                     j = gnd_surf.index
-                    vf_pvrow_to_gnd_surf = (
+                    vf_pvrow_to_gnd, vf_gnd_to_pvrow = (
                         self.vf_pvrow_surf_to_gnd_surf_obstruction_hottel(
                             pvrow_surf, idx_pvrow, n_pvrows,
                             tilted_to_left, ts_pvrows, gnd_surf, ts_length,
                             is_back=False, is_left=True))
-                    vf_matrix[i, j, :] = vf_pvrow_to_gnd_surf
+                    vf_matrix[i, j, :] = vf_pvrow_to_gnd
+                    vf_matrix[j, i, :] = vf_gnd_to_pvrow
                 for gnd_surf in right_gnd_surfaces:
                     j = gnd_surf.index
-                    vf_pvrow_to_gnd_surf = (
+                    vf_pvrow_to_gnd, vf_gnd_to_pvrow = (
                         self.vf_pvrow_surf_to_gnd_surf_obstruction_hottel(
                             pvrow_surf, idx_pvrow, n_pvrows,
                             tilted_to_left, ts_pvrows, gnd_surf, ts_length,
                             is_back=False, is_left=False))
-                    vf_matrix[i, j, :] = vf_pvrow_to_gnd_surf
+                    vf_matrix[i, j, :] = vf_pvrow_to_gnd
+                    vf_matrix[j, i, :] = vf_gnd_to_pvrow
             # Back side
             back = ts_pvrow.back
             for pvrow_surf in back.all_ts_surfaces:
@@ -502,21 +501,22 @@ class VFTsMethods(object):
                 i = pvrow_surf.index
                 for gnd_surf in left_gnd_surfaces:
                     j = gnd_surf.index
-                    vf_pvrow_to_gnd_surf = (
+                    vf_pvrow_to_gnd, vf_gnd_to_pvrow = (
                         self.vf_pvrow_surf_to_gnd_surf_obstruction_hottel(
                             pvrow_surf, idx_pvrow, n_pvrows,
                             tilted_to_left, ts_pvrows, gnd_surf, ts_length,
                             is_back=True, is_left=True))
-                    vf_matrix[i, j, :] = vf_pvrow_to_gnd_surf
+                    vf_matrix[i, j, :] = vf_pvrow_to_gnd
+                    vf_matrix[j, i, :] = vf_gnd_to_pvrow
                 for gnd_surf in right_gnd_surfaces:
                     j = gnd_surf.index
-                    vf_pvrow_to_gnd_surf = (
+                    vf_pvrow_to_gnd, vf_gnd_to_pvrow = (
                         self.vf_pvrow_surf_to_gnd_surf_obstruction_hottel(
                             pvrow_surf, idx_pvrow, n_pvrows,
                             tilted_to_left, ts_pvrows, gnd_surf, ts_length,
                             is_back=True, is_left=False))
-                    vf_matrix[i, j, :] = vf_pvrow_to_gnd_surf
-        pass
+                    vf_matrix[i, j, :] = vf_pvrow_to_gnd
+                    vf_matrix[j, i, :] = vf_gnd_to_pvrow
 
     def vf_pvrow_surf_to_gnd_surf_obstruction_hottel(
             self, pvrow_surf, pvrow_idx, n_pvrows, tilted_to_left,
@@ -591,6 +591,10 @@ class VFTsMethods(object):
                 np.where(tilted_to_left, vf_pvrow_to_gnd_surf, 0.) if is_back
                 else np.where(tilted_to_left, 0., vf_pvrow_to_gnd_surf))
 
-        # TODO: calculate vf from gnd to pv row surface
+        # Use reciprocity to calculate ts vf from gnd surf to pv row surface
+        gnd_surf_length = gnd_surf.length
+        vf_gnd_to_pvrow_surf = np.where(
+            gnd_surf_length > DISTANCE_TOLERANCE,
+            vf_pvrow_to_gnd_surf * pvrow_surf_length / gnd_surf_length, 0.)
 
-        return vf_pvrow_to_gnd_surf
+        return vf_pvrow_to_gnd_surf, vf_gnd_to_pvrow_surf
