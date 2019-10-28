@@ -263,6 +263,7 @@ class VFCalculator(object):
 
         # Initialize matrix
         rotation_vec = pvarray.rotation_vec
+        tilted_to_left = rotation_vec > 0
         n_steps = len(rotation_vec)
         n_ts_surfaces = pvarray.n_ts_surfaces
         vf_matrix = np.zeros((n_ts_surfaces, n_ts_surfaces, n_steps),
@@ -270,7 +271,58 @@ class VFCalculator(object):
 
         ts_ground = pvarray.ts_ground
         ts_pvrows = pvarray.ts_pvrows
+        n_pvrows = len(ts_pvrows)
         for idx_pvrow, ts_pvrow in enumerate(ts_pvrows):
-            self.vf_ts_methods(ts_pvrow, ts_ground, vf_matrix)
+            # Separate gnd surfaces depending on side
+            left_gnd_surfaces = ts_ground.ts_surfaces_side_of_cut_point(
+                'left', idx_pvrow)
+            right_gnd_surfaces = ts_ground.ts_surfaces_side_of_cut_point(
+                'right', idx_pvrow)
+            # Front side
+            front = ts_pvrow.front
+            for pvrow_surf in front.all_ts_surfaces:
+                ts_length = pvrow_surf.length
+                i = pvrow_surf.index
+                for gnd_surf in left_gnd_surfaces:
+                    j = gnd_surf.index
+                    vf_pvrow_to_gnd_surf = (
+                        self.vf_ts_methods
+                        .vf_pvrow_surf_to_gnd_surf_obstruction_hottel(
+                            pvrow_surf, idx_pvrow, n_pvrows, n_steps,
+                            tilted_to_left, ts_pvrows, gnd_surf, ts_length,
+                            is_back=False, is_left=True))
+                    vf_matrix[i, j, :] = vf_pvrow_to_gnd_surf
+                for gnd_surf in right_gnd_surfaces:
+                    j = gnd_surf.index
+                    vf_pvrow_to_gnd_surf = (
+                        self.vf_ts_methods
+                        .vf_pvrow_surf_to_gnd_surf_obstruction_hottel(
+                            pvrow_surf, idx_pvrow, n_pvrows, n_steps,
+                            tilted_to_left, ts_pvrows, gnd_surf, ts_length,
+                            is_back=False, is_left=False))
+                    vf_matrix[i, j, :] = vf_pvrow_to_gnd_surf
+            # Back side
+            back = ts_pvrow.back
+            for pvrow_surf in back.all_ts_surfaces:
+                ts_length = pvrow_surf.length
+                i = pvrow_surf.index
+                for gnd_surf in left_gnd_surfaces:
+                    j = gnd_surf.index
+                    vf_pvrow_to_gnd_surf = (
+                        self.vf_ts_methods
+                        .vf_pvrow_surf_to_gnd_surf_obstruction_hottel(
+                            pvrow_surf, idx_pvrow, n_pvrows, n_steps,
+                            tilted_to_left, ts_pvrows, gnd_surf, ts_length,
+                            is_back=True, is_left=True))
+                    vf_matrix[i, j, :] = vf_pvrow_to_gnd_surf
+                for gnd_surf in right_gnd_surfaces:
+                    j = gnd_surf.index
+                    vf_pvrow_to_gnd_surf = (
+                        self.vf_ts_methods
+                        .vf_pvrow_surf_to_gnd_surf_obstruction_hottel(
+                            pvrow_surf, idx_pvrow, n_pvrows, n_steps,
+                            tilted_to_left, ts_pvrows, gnd_surf, ts_length,
+                            is_back=True, is_left=False))
+                    vf_matrix[i, j, :] = vf_pvrow_to_gnd_surf
 
         return vf_matrix
