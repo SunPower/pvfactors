@@ -534,8 +534,8 @@ class VFTsMethods(object):
                 else np.where(tilted_to_left, vf_pvrow_to_gnd_surf, 0.))
         else:
             vf_pvrow_to_gnd_surf = (
-                np.where(tilted_to_left, 0., vf_pvrow_to_gnd_surf) if is_back
-                else np.where(tilted_to_left, vf_pvrow_to_gnd_surf, 0.))
+                np.where(tilted_to_left, vf_pvrow_to_gnd_surf, 0.) if is_back
+                else np.where(tilted_to_left, 0., vf_pvrow_to_gnd_surf))
 
         # TODO: calculate vf from gnd to pv row surface
 
