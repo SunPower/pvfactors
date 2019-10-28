@@ -97,6 +97,33 @@ def test_discretization_ordered_pvarray(discr_params):
     assert len(set(pvarray.all_ts_surfaces)) == 54
 
 
+def test_ts_surfaces_side_of_cut_point(params):
+    """Check that can successfully call list ts surfaces on side
+    of cut point"""
+    pvarray = OrderedPVArray.transform_from_dict_of_scalars(params)
+    # For first pvrow
+    list_left = pvarray.ts_ground.ts_surfaces_side_of_cut_point(
+        'left', 0)
+    list_right = pvarray.ts_ground.ts_surfaces_side_of_cut_point(
+        'right', 0)
+    assert len(list_left) == 7
+    assert len(list_right) == 21
+    # For second pv row
+    list_left = pvarray.ts_ground.ts_surfaces_side_of_cut_point(
+        'left', 1)
+    list_right = pvarray.ts_ground.ts_surfaces_side_of_cut_point(
+        'right', 1)
+    assert len(list_left) == 14
+    assert len(list_right) == 14
+    # For rightmost pv row
+    list_left = pvarray.ts_ground.ts_surfaces_side_of_cut_point(
+        'left', 2)
+    list_right = pvarray.ts_ground.ts_surfaces_side_of_cut_point(
+        'right', 2)
+    assert len(list_left) == 21
+    assert len(list_right) == 7
+
+
 def test_ordered_pvarray_gnd_shadow_casting(params):
     """Test shadow casting on ground, no inter-row shading"""
 

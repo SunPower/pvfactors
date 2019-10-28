@@ -970,6 +970,30 @@ class TsGround(object):
                                                      cut_pt_coords)
                 for shadow_el in self.shadow_elements]
 
+    def ts_surfaces_side_of_cut_point(self, side, idx_cut_pt):
+        """Get a list of all the ts ground surfaces an a request side of
+        a cut point
+
+        Parameters
+        ----------
+        side : str
+            Side of the cut point, either 'left' or 'right'
+        idx_cut_pt : int
+            Index of the cut point, on whose side we want to get the ground
+            surfaces
+
+        Returns
+        -------
+        list
+            List of timeseries ground surfaces on the side of the cut point
+        """
+        list_ts_surfaces = []
+        for shadow_el in self.shadow_elements:
+            list_ts_surfaces += shadow_el.surface_dict[idx_cut_pt][side]
+        for illum_el in self.illum_elements:
+            list_ts_surfaces += illum_el.surface_dict[idx_cut_pt][side]
+        return list_ts_surfaces
+
     @property
     def n_ts_surfaces(self):
         """Number of timeseries surfaces in the ts ground"""
