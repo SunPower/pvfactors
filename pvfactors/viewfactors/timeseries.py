@@ -464,8 +464,62 @@ class VFTsMethods(object):
     def ts_pvrows_ground(self, ts_pvrow, ts_ground, vf_matrix):
         pass
 
+    def vf_pvrow_gnd_surf(
+            self, ts_pvrows, ts_ground, tilted_to_left, vf_matrix):
+
+        n_pvrows = len(ts_pvrows)
+        for idx_pvrow, ts_pvrow in enumerate(ts_pvrows):
+            # Separate gnd surfaces depending on side
+            left_gnd_surfaces = ts_ground.ts_surfaces_side_of_cut_point(
+                'left', idx_pvrow)
+            right_gnd_surfaces = ts_ground.ts_surfaces_side_of_cut_point(
+                'right', idx_pvrow)
+            # Front side
+            front = ts_pvrow.front
+            for pvrow_surf in front.all_ts_surfaces:
+                ts_length = pvrow_surf.length
+                i = pvrow_surf.index
+                for gnd_surf in left_gnd_surfaces:
+                    j = gnd_surf.index
+                    vf_pvrow_to_gnd_surf = (
+                        self.vf_pvrow_surf_to_gnd_surf_obstruction_hottel(
+                            pvrow_surf, idx_pvrow, n_pvrows,
+                            tilted_to_left, ts_pvrows, gnd_surf, ts_length,
+                            is_back=False, is_left=True))
+                    vf_matrix[i, j, :] = vf_pvrow_to_gnd_surf
+                for gnd_surf in right_gnd_surfaces:
+                    j = gnd_surf.index
+                    vf_pvrow_to_gnd_surf = (
+                        self.vf_pvrow_surf_to_gnd_surf_obstruction_hottel(
+                            pvrow_surf, idx_pvrow, n_pvrows,
+                            tilted_to_left, ts_pvrows, gnd_surf, ts_length,
+                            is_back=False, is_left=False))
+                    vf_matrix[i, j, :] = vf_pvrow_to_gnd_surf
+            # Back side
+            back = ts_pvrow.back
+            for pvrow_surf in back.all_ts_surfaces:
+                ts_length = pvrow_surf.length
+                i = pvrow_surf.index
+                for gnd_surf in left_gnd_surfaces:
+                    j = gnd_surf.index
+                    vf_pvrow_to_gnd_surf = (
+                        self.vf_pvrow_surf_to_gnd_surf_obstruction_hottel(
+                            pvrow_surf, idx_pvrow, n_pvrows,
+                            tilted_to_left, ts_pvrows, gnd_surf, ts_length,
+                            is_back=True, is_left=True))
+                    vf_matrix[i, j, :] = vf_pvrow_to_gnd_surf
+                for gnd_surf in right_gnd_surfaces:
+                    j = gnd_surf.index
+                    vf_pvrow_to_gnd_surf = (
+                        self.vf_pvrow_surf_to_gnd_surf_obstruction_hottel(
+                            pvrow_surf, idx_pvrow, n_pvrows,
+                            tilted_to_left, ts_pvrows, gnd_surf, ts_length,
+                            is_back=True, is_left=False))
+                    vf_matrix[i, j, :] = vf_pvrow_to_gnd_surf
+        pass
+
     def vf_pvrow_surf_to_gnd_surf_obstruction_hottel(
-            self, pvrow_surf, pvrow_idx, n_shadows, n_steps, tilted_to_left,
+            self, pvrow_surf, pvrow_idx, n_pvrows, tilted_to_left,
             ts_pvrows, gnd_surf, pvrow_surf_length, is_back=True,
             is_left=True):
         """Calculate view factors from timeseries pvrow_element to the shadow
@@ -477,7 +531,7 @@ class VFTsMethods(object):
             Timeseries pvrow_surf to use for calculation
         pvrow_idx : int
             Index of the timeseries PV row on the which the pvrow_surf is
-        n_shadows : int
+        n_pvrows : int
             Number of timeseries PV rows in the PV array, and therefore number
             of shadows they cast on the ground
         n_steps : int
@@ -511,7 +565,7 @@ class VFTsMethods(object):
         pvrow_surf_lowest_pt = pvrow_surf.lowest_point
         pvrow_surf_highest_pt = pvrow_surf.highest_point
         no_obstruction = (is_left & (pvrow_idx == 0)) \
-            or ((not is_left) & (pvrow_idx == n_shadows - 1))
+            or ((not is_left) & (pvrow_idx == n_pvrows - 1))
         if no_obstruction:
             # There is no obstruction to the gnd surface
             vf_pvrow_to_gnd_surf = self._vf_surface_to_surface(

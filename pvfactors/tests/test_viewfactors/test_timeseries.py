@@ -11,6 +11,11 @@ def test_ts_vf_matrix(ordered_pvarray):
     # Check that correct size
     assert vf_matrix.shape == (40, 40, 1)
 
+    # get all indices where surfaces have positive length
+    list_idx = [surf.index for surf in ordered_pvarray.all_ts_surfaces
+                if surf.length[0] > 0]
+    print(vf_matrix[:, :, 0][np.ix_(list_idx, list_idx)])
+
 
 def test_vf_pvrow_to_gnd_surf_obstruction_hottel(ordered_pvarray):
     """Check that calculation of ts view factors between pv rows and ground
@@ -29,7 +34,7 @@ def test_vf_pvrow_to_gnd_surf_obstruction_hottel(ordered_pvarray):
     pvrow_surf = pvarray.ts_pvrows[pvrow_idx].back.all_ts_surfaces[0]
     ts_length = pvrow_surf.length
     vf = vf_ts_methods.vf_pvrow_surf_to_gnd_surf_obstruction_hottel(
-        pvrow_surf, pvrow_idx, 3, 1, tilted_to_left, pvarray.ts_pvrows,
+        pvrow_surf, pvrow_idx, 3, tilted_to_left, pvarray.ts_pvrows,
         gnd_surf, ts_length, is_back=True, is_left=True)
     # check
     np.testing.assert_allclose(vf, [0.33757309])
@@ -43,7 +48,7 @@ def test_vf_pvrow_to_gnd_surf_obstruction_hottel(ordered_pvarray):
     pvrow_surf = pvarray.ts_pvrows[pvrow_idx].front.all_ts_surfaces[0]
     ts_length = pvrow_surf.length
     vf = vf_ts_methods.vf_pvrow_surf_to_gnd_surf_obstruction_hottel(
-        pvrow_surf, pvrow_idx, 3, 1, tilted_to_left, pvarray.ts_pvrows,
+        pvrow_surf, pvrow_idx, 3, tilted_to_left, pvarray.ts_pvrows,
         gnd_surf, ts_length, is_back=False, is_left=False)
     # check
     np.testing.assert_allclose(vf, [0.00502823674])
@@ -57,7 +62,7 @@ def test_vf_pvrow_to_gnd_surf_obstruction_hottel(ordered_pvarray):
     pvrow_surf = pvarray.ts_pvrows[pvrow_idx].back.all_ts_surfaces[0]
     ts_length = pvrow_surf.length
     vf = vf_ts_methods.vf_pvrow_surf_to_gnd_surf_obstruction_hottel(
-        pvrow_surf, pvrow_idx, 3, 1, tilted_to_left, pvarray.ts_pvrows,
+        pvrow_surf, pvrow_idx, 3, tilted_to_left, pvarray.ts_pvrows,
         gnd_surf, ts_length, is_back=True, is_left=False)
     # check
     np.testing.assert_allclose(vf, [0.])
@@ -71,7 +76,7 @@ def test_vf_pvrow_to_gnd_surf_obstruction_hottel(ordered_pvarray):
     pvrow_surf = pvarray.ts_pvrows[pvrow_idx].back.all_ts_surfaces[0]
     ts_length = pvrow_surf.length
     vf = vf_ts_methods.vf_pvrow_surf_to_gnd_surf_obstruction_hottel(
-        pvrow_surf, pvrow_idx, 3, 1, tilted_to_left, pvarray.ts_pvrows,
+        pvrow_surf, pvrow_idx, 3, tilted_to_left, pvarray.ts_pvrows,
         gnd_surf, ts_length, is_back=True, is_left=True)
     # check
     np.testing.assert_allclose(vf, [0.01191152457])
