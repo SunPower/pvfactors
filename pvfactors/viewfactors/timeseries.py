@@ -463,6 +463,22 @@ class VFTsMethods(object):
 
     def vf_pvrow_gnd_surf(self, ts_pvrows, ts_ground, tilted_to_left,
                           vf_matrix):
+        """Calculate the view factors between timeseries PV row and ground
+        surfaces, and assign it to the passed view factor matrix using
+        the surface indices.
+
+        Parameters
+        ----------
+        ts_pvrows : list of :py:class:`~pvfactors.geometry.timeseries.TsPVRow`
+            List of timeseries PV rows in the PV array
+        ts_ground : :py:class:`~pvfactors.geometry.timeseries.TsGround`
+            Timeseries ground of the PV array
+        tilted_to_left : list of bool
+            Flags indicating when the PV rows are strictly tilted to the left
+        vf_matrix : np.ndarray
+            View factor matrix to update during calculation. Should have 3
+            dimensions as follows: [n_surfaces, n_surfaces, n_timesteps]
+        """
 
         n_pvrows = len(ts_pvrows)
         for idx_pvrow, ts_pvrow in enumerate(ts_pvrows):
@@ -522,34 +538,30 @@ class VFTsMethods(object):
             self, pvrow_surf, pvrow_idx, n_pvrows, tilted_to_left,
             ts_pvrows, gnd_surf, pvrow_surf_length, is_back=True,
             is_left=True):
-        """Calculate view factors from timeseries pvrow_element to the shadow
-        of a specific timeseries PV row which is casted on the ground.
+        """Calculate view factors from timeseries PV row surface to a
+        timeseries ground surface. This will return the calculated view
+        factors from the PV row surface to the ground surface, AND from the
+        ground surface to the PV row surface (using reciprocity).
 
         Parameters
         ----------
         pvrow_surf : :py:class:`~pvfactors.geometry.timeseries.TsSurface`
-            Timeseries pvrow_surf to use for calculation
+            Timeseries PV row surface to use for calculation
         pvrow_idx : int
             Index of the timeseries PV row on the which the pvrow_surf is
         n_pvrows : int
             Number of timeseries PV rows in the PV array, and therefore number
             of shadows they cast on the ground
-        n_steps : int
-            Number of timesteps for which to calculate the pvfactors
         tilted_to_left : list of bool
             Flags indicating when the PV rows are strictly tilted to the left
         ts_pvrows : list of :py:class:`~pvfactors.geometry.timeseries.TsPVRow`
-            Timeseries PV row geometries that will be used in the calculation
-        shadow_left : :py:class:`~pvfactors.geometry.timeseries.TsLineCoords`
-            Coordinates of the shadow that are on the left side of the cut
-            point of the PV row on which the pvrow_surf is
-        shadow_right : :py:class:`~pvfactors.geometry.timeseries.TsLineCoords`
-            Coordinates of the shadow that are on the right side of the cut
-            point of the PV row on which the pvrow_surf is
-        pvrow_surf_length : float or np.ndarray
-            Length (width) of the timeseries pvrow_surf [m]
+            List of timeseries PV rows in the PV array
+        gnd_surf : :py:class:`~pvfactors.geometry.timeseries.TsSurface`
+            Timeseries ground surface to use for calculation
+        pvrow_surf_length : np.ndarray
+            Length (width) of the timeseries PV row surface [m]
         is_back : bool
-            Flag specifying whether pv row surface is back or front surface
+            Flag specifying whether pv row surface is on  back or front surface
             (Default = True)
         is_left : bool
             Flag specifying whether gnd surface is left of pv row cut point or
@@ -557,9 +569,12 @@ class VFTsMethods(object):
 
         Returns
         -------
-        vf_to_shadow : np.ndarray
-            View factors from timeseries pvrow_surf to the ground shadow of
-            a specific timeseries PV row
+        vf_pvrow_to_gnd_surf : np.ndarray
+            View factors from timeseries PV row surface to timeseries ground
+            surface, dimension is [n_timesteps]
+        vf_gnd_to_pvrow_surf : np.ndarray
+            View factors from timeseries ground surface to timeseries PV row
+            surface, dimension is [n_timesteps]
         """
 
         pvrow_surf_lowest_pt = pvrow_surf.lowest_point
@@ -600,41 +615,20 @@ class VFTsMethods(object):
         return vf_pvrow_to_gnd_surf, vf_gnd_to_pvrow_surf
 
     def vf_pvrow_to_pvrow(self, ts_pvrows, tilted_to_left, vf_matrix):
-        """Calculate view factors from timeseries pvrow element to timeseries
-        PV rows around it.
+        """Calculate the view factors between timeseries PV row surfaces,
+        and assign values to the passed view factor matrix using
+        the surface indices.
 
         Parameters
         ----------
-        pvrow_element_coords :
-        :py:class:`~pvfactors.geometry.timeseries.TsLineCoords`
-            Timeseries line coordinates of pvrow_element
-        pvrow_idx : int
-            Index of the timeseries PV row on which the pvrow_element is
-        n_pvrows : int
-            Number of timeseries PV rows in the PV array
-        n_steps : int
-            Number of timesteps for which to calculate the pvfactors
         ts_pvrows : list of :py:class:`~pvfactors.geometry.timeseries.TsPVRow`
-            Timeseries PV row geometries that will be used in the calculation
-        pvrow_element_length : float or np.ndarray
-            Length (width) of the timeseries pvrow element [m]
+            List of timeseries PV rows in the PV array
         tilted_to_left : list of bool
             Flags indicating when the PV rows are strictly tilted to the left
-        pvrow_width : float
-            Width of the timeseries PV rows in the PV array [m], which is
-            constant
-        rotation_vec : np.ndarray
-            Rotation angles of the PV rows [deg]
-
-        Returns
-        -------
-        vf_to_pvrow : np.ndarray
-            View factors from timeseries pvrow_element to neighboring PV rows
-        vf_to_shaded_pvrow : np.ndarray
-            View factors from timeseries pvrow_element to shaded areas of the
-            neighboring PV rows
+        vf_matrix : np.ndarray
+            View factor matrix to update during calculation. Should have 3
+            dimensions as follows: [n_surfaces, n_surfaces, n_timesteps]
         """
-
         for idx_pvrow, ts_pvrow in enumerate(ts_pvrows[:-1]):
             # Get the next pv row
             right_ts_pvrow = ts_pvrows[idx_pvrow + 1]
