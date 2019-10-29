@@ -177,7 +177,8 @@ class VFCalculator(object):
         pvrow_idx : int
             Index of the timeseries PV row for which we want to calculate the
             back surface irradiance
-        pvrow_element : :py:class:`~pvfactors.geometry.timeseries.TsDualSegment` or :py:class:`~pvfactors.geometry.timeseries.TsSurface`
+        pvrow_element : :py:class:`~pvfactors.geometry.timeseries.TsDualSegment`
+        or :py:class:`~pvfactors.geometry.timeseries.TsSurface`
             Timeseries PV row element for which to calculate view factors
         ts_pvrows : list of :py:class:`~pvfactors.geometry.timeseries.TsPVRow`
             List of timeseries PV rows in the PV array
