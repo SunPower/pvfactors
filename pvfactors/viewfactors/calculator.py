@@ -1,5 +1,6 @@
 """Module with classes and functions to calculate views and view factors"""
 
+from pvfactors.config import DISTANCE_TOLERANCE
 from pvfactors.viewfactors.mapper import VFMapperOrderedPVArray
 from pvfactors.viewfactors.timeseries import VFTsMethods
 import numpy as np
@@ -296,5 +297,10 @@ class VFCalculator(object):
                                              vf_matrix)
         # Calculate view factors to sky
         vf_matrix[:-1, -1, :] = 1. - np.sum(vf_matrix[:-1, :-1, :], axis=1)
+        # This is not completely accurate yet, we need to set the sky vf
+        # to zero when the surfaces have zero length
+        for i, ts_surf in enumerate(pvarray.all_ts_surfaces):
+            vf_matrix[i, -1, :] = np.where(ts_surf.length > DISTANCE_TOLERANCE,
+                                           vf_matrix[i, -1, :], 0.)
 
         return vf_matrix
