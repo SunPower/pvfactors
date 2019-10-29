@@ -260,6 +260,20 @@ class VFCalculator(object):
         return view_factors
 
     def build_ts_vf_matrix(self, pvarray):
+        """Calculate timeseries view factor matrix for the given
+        ordered pv array
+
+        Parameters
+        ----------
+        pvarray : :py:class:`~pvfactors.geometry.pvarray.OrderedPVArray`
+            PV array whose timeseries view factor matrix to calculate
+
+        Returns
+        -------
+        np.ndarray
+            Timeseries view factor matrix, with 3 dimensions:
+            [n_surfaces, n_surfaces, n_timesteps]
+        """
 
         # Initialize matrix
         rotation_vec = pvarray.rotation_vec
