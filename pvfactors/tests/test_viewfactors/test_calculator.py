@@ -5,7 +5,8 @@ from pvfactors.engine import PVEngine
 from pvfactors.tests.test_engine import _fast_mode_with_loop
 import datetime as dt
 from pvfactors.tests.test_viewfactors.test_data import \
-    vf_matrix_left_cut, vf_left_cut_sum_axis_one_rounded
+    vf_matrix_left_cut, vf_left_cut_sum_axis_one_rounded, \
+    vf_left_cut_from_vectorized
 import numpy as np
 
 np.set_printoptions(precision=3)
@@ -30,6 +31,31 @@ def test_vfcalculator(params):
         np.sum(vf_matrix_rounded[:, :-1], axis=1),
         vf_left_cut_sum_axis_one_rounded)
     np.testing.assert_array_equal(vf_matrix_rounded, vf_matrix_left_cut)
+
+
+def test_vfcalculator_vectorized(params):
+    """The values from the expected matrix vf_left_cut_from_vectorized
+    should be the same as in vf_matrix_left_cut, except for the ordering."""
+
+    # Prepare pv array
+    params.update({'cut': {0: {'front': 3}, 1: {'back': 2}}})
+    pvarray = OrderedPVArray.transform_from_dict_of_scalars(params)
+
+    # Calculate vf_matrix vectorized
+    vfcalculator = VFCalculator()
+    vf_matrix = vfcalculator.build_ts_vf_matrix(pvarray)
+
+    # Check that correct size
+    assert vf_matrix.shape == (47, 47, 1)
+
+    # get all indices where surfaces have positive length + round up
+    list_idx = [surf.index for surf in pvarray.all_ts_surfaces
+                if surf.length[0] > 0]
+    vf_matrix_rounded = np.around(vf_matrix, decimals=3)
+    vf_matrix_rounded = vf_matrix_rounded[:, :, 0][np.ix_(list_idx, list_idx)]
+    # check that the values stay consistent
+    np.testing.assert_array_equal(vf_matrix_rounded,
+                                  vf_left_cut_from_vectorized)
 
 
 def test_vf_matrix_subset_calculation(params):
