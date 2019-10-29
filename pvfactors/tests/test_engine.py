@@ -628,21 +628,20 @@ def test_pvengine_ts_inputs_hyper_mode(params_serial,
 
     # Create report function
     def fn_report(pvarray): return {
-        'qinc_front': None,
-        'qinc_back': None,
-        'iso_front': None,
-        'iso_back': None}
+        'qinc_front': pvarray.ts_pvrows[1].front.get_param_weighted('qinc'),
+        'qinc_back': pvarray.ts_pvrows[1].back.get_param_weighted('qinc'),
+        'iso_front': pvarray.ts_pvrows[1]
+        .front.get_param_weighted('isotropic'),
+        'iso_back': pvarray.ts_pvrows[1].back.get_param_weighted('isotropic')}
     # Run all timesteps
     report = eng.run_hyper_mode(fn_build_report=fn_report)
 
-    print(report)
-
-    # Check values
-    # np.testing.assert_array_almost_equal(
-    #     report['qinc_front'], [1066.272392, 1065.979824])
-    # np.testing.assert_array_almost_equal(
-    #     report['qinc_back'], [135.897106, 136.01297])
-    # np.testing.assert_array_almost_equal(
-    #     report['iso_front'], [42.816637, 42.780206])
-    # np.testing.assert_array_almost_equal(
-    #     report['iso_back'], [1.727308, 1.726535])
+    # Check report values
+    np.testing.assert_array_almost_equal(
+        report['qinc_front'], [1066.272392, 1065.979824])
+    np.testing.assert_array_almost_equal(
+        report['qinc_back'], [135.897106, 136.01297])
+    np.testing.assert_array_almost_equal(
+        report['iso_front'], [42.816637, 42.780206])
+    np.testing.assert_array_almost_equal(
+        report['iso_back'], [1.727308, 1.726535])

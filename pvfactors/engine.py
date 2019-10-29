@@ -309,7 +309,10 @@ class PVEngine(object):
                  'qinc': qinc[idx_surf, :],
                  'isotropic': isotropic_mat[idx_surf, :],
                  'reflection': reflection_mat[idx_surf, :]})
-        return qinc
+
+        # Return report if function was passed
+        report = None if fn_build_report is None else fn_build_report(pvarray)
+        return report
 
     def _calculate_back_ts_segment_qinc(self, ts_segment, pvrow_idx):
         """Calculate the incident irradiance on a timeseries segment's surfaces
