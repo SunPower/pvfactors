@@ -264,6 +264,53 @@ class PVEngine(object):
 
         return pvarray
 
+    def run_hyper_mode(self, fn_build_report=None):
+
+        # Get pvarray
+        pvarray = self.pvarray
+
+        # Get the irradiance modeling matrices
+        # shape = n_surfaces, n_timesteps
+        irradiance_mat, _, invrho_mat, total__ = \
+            self.irradiance.get_full_ts_modeling_vectors(pvarray)
+
+        # Calculate view factors
+        # shape = n_surfaces, n_surfaces, n_timesteps
+        ts_vf_matrix = self.vf_calculator.build_ts_vf_matrix(pvarray)
+        pvarray.ts_vf_matrix = ts_vf_matrix
+        # Reshape for broadcasting and inverting
+        # shape = n_timesteps, n_surfaces, n_surfaces
+        ts_vf_matrix_reshaped = np.moveaxis(ts_vf_matrix, -1, 0)
+
+        # Build matrix of inverse reflectivities
+        # shape = n_surfaces, n_surfaces
+        invrho_mat = np.diag(invrho_mat[:, 0])
+        # Subtract matrices: will rely on broadcasting
+        a_mat = invrho_mat - ts_vf_matrix_reshaped
+        # Calculate inverse, requires specific shape
+        # shape = n_timesteps, n_surfaces, n_surfaces
+        inv_a_mat = np.linalg.inv(a_mat)
+        # Use einstein sum to get final timeseries radiosities
+        # shape = n_surfaces, n_timesteps
+        q0 = np.einsum('ijk,ki->ji', inv_a_mat, irradiance_mat)
+        # Calculate incident irradiance: will rely on broadcasting
+        # shape = n_surfaces, n_timesteps
+        qinc = np.dot(invrho_mat, q0)
+
+        # Derive other irradiance terms
+        # shape = n_surfaces, n_timesteps
+        isotropic_mat = ts_vf_matrix[:-1, -1, :] * irradiance_mat[-1, :]
+        reflection_mat = qinc[:-1, :] - irradiance_mat[:-1, :] - isotropic_mat
+
+        # Update surfaces with values: the list is ordered by index
+        for idx_surf, ts_surface in enumerate(pvarray.all_ts_surfaces):
+            ts_surface.update_params(
+                {'q0': q0[idx_surf, :],
+                 'qinc': qinc[idx_surf, :],
+                 'isotropic': isotropic_mat[idx_surf, :],
+                 'reflection': reflection_mat[idx_surf, :]})
+        return qinc
+
     def _calculate_back_ts_segment_qinc(self, ts_segment, pvrow_idx):
         """Calculate the incident irradiance on a timeseries segment's surfaces
         for the back side of a PV row, using the fast mode, so assuming that

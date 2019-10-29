@@ -604,3 +604,45 @@ def test_pvengine_float_inputs_perez_transparency_spacing_fast(params):
     np.testing.assert_almost_equal(
         w_spacing_transparency_back_qinc, expected_back_qinc)
     assert no_spacing_transparency_back_qinc < w_spacing_transparency_back_qinc
+
+
+def test_pvengine_ts_inputs_hyper_mode(params_serial,
+                                       df_inputs_serial_calculation):
+    """Test that PV engine works for timeseries inputs using hyper mode"""
+
+    # Break up inputs
+    (timestamps, surface_tilt, surface_azimuth,
+     solar_zenith, solar_azimuth, dni, dhi) = breakup_df_inputs(
+         df_inputs_serial_calculation)
+    albedo = params_serial['rho_ground']
+
+    # Create engine
+    irradiance_model = HybridPerezOrdered()
+    pvarray = OrderedPVArray.init_from_dict(
+        params_serial, param_names=irradiance_model.params)
+    eng = PVEngine(pvarray, irradiance_model=irradiance_model)
+
+    # Fit engine
+    eng.fit(timestamps, dni, dhi, solar_zenith, solar_azimuth, surface_tilt,
+            surface_azimuth, albedo)
+
+    # Create report function
+    def fn_report(pvarray): return {
+        'qinc_front': None,
+        'qinc_back': None,
+        'iso_front': None,
+        'iso_back': None}
+    # Run all timesteps
+    report = eng.run_hyper_mode(fn_build_report=fn_report)
+
+    print(report)
+
+    # Check values
+    # np.testing.assert_array_almost_equal(
+    #     report['qinc_front'], [1066.272392, 1065.979824])
+    # np.testing.assert_array_almost_equal(
+    #     report['qinc_back'], [135.897106, 136.01297])
+    # np.testing.assert_array_almost_equal(
+    #     report['iso_front'], [42.816637, 42.780206])
+    # np.testing.assert_array_almost_equal(
+    #     report['iso_back'], [1.727308, 1.726535])
