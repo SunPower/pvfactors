@@ -247,6 +247,42 @@ class IsotropicOrdered(BaseModel):
         return np.array(irradiance_vec), np.array(rho_vec), \
             np.array(inv_rho_vec), np.array(total_perez_vec)
 
+    def get_full_ts_modeling_vectors(self, pvarray):
+        """Get the modeling vectors used in matrix calculations of
+        the mathematical model, including the sky values.
+
+        Parameters
+        ----------
+        pvarray : PV array object
+            PV array on which the calculated irradiance values will be applied
+
+        Returns
+        -------
+        irradiance_mat : np.ndarray
+            List of summed up non-reflective irradiance values for all surfaces
+            and sky. Dimension = [n_surfaces + 1, n_timesteps]
+        rho_mat : np.ndarray
+            List of reflectivity values for all surfaces and sky.
+            Dimension = [n_surfaces + 1, n_timesteps]
+        invrho_mat : np.ndarray
+            List of inverse reflectivity for all surfaces and sky.
+            Dimension = [n_surfaces + 1, n_timesteps]
+        total_perez_mat : np.ndarray
+            List of total perez transposed irradiance values for all surfaces
+            and sky. Dimension = [n_surfaces + 1, n_timesteps]
+        """
+        # Sum up the necessary parameters to form the irradiance vector
+        irradiance_mat, rho_mat, inv_rho_mat, total_perez_mat = \
+            self.get_ts_modeling_vectors(pvarray)
+        # Add sky values
+        irradiance_mat.append(self.isotropic_luminance)
+        total_perez_mat.append(self.isotropic_luminance)
+        rho_mat.append(SKY_REFLECTIVITY_DUMMY * np.ones(pvarray.n_states))
+        inv_rho_mat.append(SKY_REFLECTIVITY_DUMMY * np.ones(pvarray.n_states))
+
+        return np.array(irradiance_mat), np.array(rho_mat), \
+            np.array(inv_rho_mat), np.array(total_perez_mat)
+
     @property
     def gnd_shaded(self):
         """Total timeseries irradiance incident on ground shaded areas"""
@@ -603,6 +639,42 @@ class HybridPerezOrdered(BaseModel):
 
         return np.array(irradiance_vec), np.array(rho_vec), \
             np.array(inv_rho_vec), np.array(total_perez_vec)
+
+    def get_full_ts_modeling_vectors(self, pvarray):
+        """Get the modeling vectors used in matrix calculations of
+        the mathematical model, including the sky values.
+
+        Parameters
+        ----------
+        pvarray : PV array object
+            PV array on which the calculated irradiance values will be applied
+
+        Returns
+        -------
+        irradiance_mat : np.ndarray
+            List of summed up non-reflective irradiance values for all surfaces
+            and sky. Dimension = [n_surfaces + 1, n_timesteps]
+        rho_mat : np.ndarray
+            List of reflectivity values for all surfaces and sky.
+            Dimension = [n_surfaces + 1, n_timesteps]
+        invrho_mat : np.ndarray
+            List of inverse reflectivity for all surfaces and sky.
+            Dimension = [n_surfaces + 1, n_timesteps]
+        total_perez_mat : np.ndarray
+            List of total perez transposed irradiance values for all surfaces
+            and sky. Dimension = [n_surfaces + 1, n_timesteps]
+        """
+        # Sum up the necessary parameters to form the irradiance vector
+        irradiance_mat, rho_mat, inv_rho_mat, total_perez_mat = \
+            self.get_ts_modeling_vectors(pvarray)
+        # Add sky values
+        irradiance_mat.append(self.isotropic_luminance)
+        total_perez_mat.append(self.isotropic_luminance)
+        rho_mat.append(SKY_REFLECTIVITY_DUMMY * np.ones(pvarray.n_states))
+        inv_rho_mat.append(SKY_REFLECTIVITY_DUMMY * np.ones(pvarray.n_states))
+
+        return np.array(irradiance_mat), np.array(rho_mat), \
+            np.array(inv_rho_mat), np.array(total_perez_mat)
 
     @property
     def gnd_shaded(self):
