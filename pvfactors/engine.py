@@ -117,60 +117,6 @@ class PVEngine(object):
         self.skip_step = (solar_zenith > 90) | (DNI < 0) | (DHI < 0) \
             | ((DNI == 0) & (DHI == 0))
 
-    def run_fast_mode(self, fn_build_report=None, pvrow_index=None,
-                      segment_index=None):
-        """Run all simulation timesteps using the fast mode for the back
-        surface of a PV row, and assuming that the incident irradiance on all
-        other surfaces is known (all but back surfaces).
-        The function will return a report that will be built by the function
-        passed by the user.
-
-        Parameters
-        ----------
-        fn_build_report : function, optional
-            Function that will build the report of the simulation
-            (Default value = None)
-        pvrow_index : int, optional
-            Index of the PV row for which we want to calculate back surface
-            irradiance; if used, this will override the
-            ``fast_mode_pvrow_index`` passed at engine initialization
-            (Default = None)
-        segment_index : int, optional
-            Index of the segment on the PV row's back side for which we want
-            to calculate the incident irradiance; if used, this will override
-            the ``fast_mode_segment_index`` passed at engine initialization
-            (Default = None)
-
-        Returns
-        -------
-        report
-            Results from the simulation, as specified by user's report
-            function. If no function is passed, nothing will be returned.
-        """
-
-        # Prepare variables
-        pvrow_idx = (self.fast_mode_pvrow_index if pvrow_index is None
-                     else pvrow_index)
-        segment_idx = (self.fast_mode_segment_index if segment_index is None
-                       else segment_index)
-        ts_pvrow = self.pvarray.ts_pvrows[pvrow_idx]
-
-        # Run calculations
-        if segment_idx is None:
-            # Run calculation for all segments of back surface
-            for ts_segment in ts_pvrow.back.list_segments:
-                self._calculate_back_ts_segment_qinc(ts_segment, pvrow_idx)
-        else:
-            # Run calculation for selected segment of back surface
-            ts_segment = ts_pvrow.back.list_segments[segment_idx]
-            self._calculate_back_ts_segment_qinc(ts_segment, pvrow_idx)
-
-        # Create report
-        report = (None if fn_build_report is None
-                  else fn_build_report(self.pvarray))
-
-        return report
-
     def run_full_mode(self, fn_build_report=None):
         """Run all simulation timesteps using the full mode, which calculates
         the equilibrium of reflections in the system, and return a report that
@@ -235,6 +181,60 @@ class PVEngine(object):
 
         # Return report if function was passed
         report = None if fn_build_report is None else fn_build_report(pvarray)
+        return report
+
+    def run_fast_mode(self, fn_build_report=None, pvrow_index=None,
+                      segment_index=None):
+        """Run all simulation timesteps using the fast mode for the back
+        surface of a PV row, and assuming that the incident irradiance on all
+        other surfaces is known (all but back surfaces).
+        The function will return a report that will be built by the function
+        passed by the user.
+
+        Parameters
+        ----------
+        fn_build_report : function, optional
+            Function that will build the report of the simulation
+            (Default value = None)
+        pvrow_index : int, optional
+            Index of the PV row for which we want to calculate back surface
+            irradiance; if used, this will override the
+            ``fast_mode_pvrow_index`` passed at engine initialization
+            (Default = None)
+        segment_index : int, optional
+            Index of the segment on the PV row's back side for which we want
+            to calculate the incident irradiance; if used, this will override
+            the ``fast_mode_segment_index`` passed at engine initialization
+            (Default = None)
+
+        Returns
+        -------
+        report
+            Results from the simulation, as specified by user's report
+            function. If no function is passed, nothing will be returned.
+        """
+
+        # Prepare variables
+        pvrow_idx = (self.fast_mode_pvrow_index if pvrow_index is None
+                     else pvrow_index)
+        segment_idx = (self.fast_mode_segment_index if segment_index is None
+                       else segment_index)
+        ts_pvrow = self.pvarray.ts_pvrows[pvrow_idx]
+
+        # Run calculations
+        if segment_idx is None:
+            # Run calculation for all segments of back surface
+            for ts_segment in ts_pvrow.back.list_segments:
+                self._calculate_back_ts_segment_qinc(ts_segment, pvrow_idx)
+        else:
+            # Run calculation for selected segment of back surface
+            ts_segment = ts_pvrow.back.list_segments[segment_idx]
+            self._calculate_back_ts_segment_qinc(ts_segment, pvrow_idx)
+
+        # Create report
+        report = (None if fn_build_report is None
+                  else fn_build_report(self.pvarray))
+
         return report
 
     def _calculate_back_ts_segment_qinc(self, ts_segment, pvrow_idx):

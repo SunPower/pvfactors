@@ -210,11 +210,9 @@ Requirements
 
 Requirements are included in the ``requirements.txt`` file of the package. Here is a list of important dependencies:
 
-* `shapely <https://pypi.python.org/pypi/Shapely>`_
 * `numpy <https://pypi.python.org/pypi/numpy>`_
-* `scipy <https://pypi.python.org/pypi/scipy>`_
-* `pandas <https://pypi.python.org/pypi/pandas>`_
 * `pvlib-python <https://pypi.python.org/pypi/pvlib>`_
+* `shapely <https://pypi.python.org/pypi/Shapely>`_
 
 
 Citing pvfactors
