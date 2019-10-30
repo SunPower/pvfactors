@@ -16,15 +16,14 @@ def example_fn_build_report(pvarray):
     report : dict
         Report updated with newly calculated values
     """
-    return {
-        'qinc_front': pvarray.ts_pvrows[1].front
-        .get_param_weighted('qinc').tolist(),
-        'qinc_back': pvarray.ts_pvrows[1].back
-        .get_param_weighted('qinc').tolist(),
-        'iso_front': pvarray.ts_pvrows[1].front
-        .get_param_weighted('isotropic').tolist(),
-        'iso_back': pvarray.ts_pvrows[1].back
-        .get_param_weighted('isotropic').tolist()}
+    return {'qinc_front': pvarray.ts_pvrows[1].front
+            .get_param_weighted('qinc').tolist(),
+            'qinc_back': pvarray.ts_pvrows[1].back
+            .get_param_weighted('qinc').tolist(),
+            'iso_front': pvarray.ts_pvrows[1].front
+            .get_param_weighted('isotropic').tolist(),
+            'iso_back': pvarray.ts_pvrows[1].back
+            .get_param_weighted('isotropic').tolist()}
 
 
 class ExampleReportBuilder(object):
