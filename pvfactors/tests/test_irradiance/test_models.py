@@ -116,6 +116,18 @@ def test_isotropic_model_front(params_irr):
     np.testing.assert_array_almost_equal(total_perez_vec,
                                          expected_total_perez_vec)
 
+    # Get ts modeling matrices
+    irradiance_mat, rho_mat, invrho_mat, total_perez_mat = \
+        irr_model.get_full_ts_modeling_vectors(pvarray)
+
+    list_idx = [surf.index for surf in pvarray.all_ts_surfaces
+                if surf.length[0] > 0] + [-1]
+    # check that 2 dimensional
+    assert irradiance_mat.shape == (41, 1)
+    # check that values like in previously expected (indices changed), use sum
+    np.testing.assert_allclose(irradiance_mat[list_idx, 0].sum(),
+                               np.sum(expected_irradiance_vec))
+
 
 def test_isotropic_model_back(params_irr):
     """Direct shading on back surface"""
@@ -206,6 +218,18 @@ def test_isotropic_model_back(params_irr):
         0., 0., 104.387248, 0., 100.]
     np.testing.assert_array_almost_equal(total_perez_vec,
                                          expected_total_perez_vec)
+
+    # Get ts modeling matrices
+    irradiance_mat, rho_mat, invrho_mat, total_perez_mat = \
+        irr_model.get_full_ts_modeling_vectors(pvarray)
+
+    list_idx = [surf.index for surf in pvarray.all_ts_surfaces
+                if surf.length[0] > 0] + [-1]
+    # check that 2 dimensional
+    assert irradiance_mat.shape == (41, 1)
+    # check that values like in previously expected (indices changed), use sum
+    np.testing.assert_allclose(irradiance_mat[list_idx, 0].sum(),
+                               np.sum(expected_irradiance_vec))
 
 
 def test_hybridperez_ordered_front(params_irr):
@@ -345,6 +369,18 @@ def test_hybridperez_ordered_front(params_irr):
         38.593656, 0., 807.243186, 0., 63.217593]
     np.testing.assert_array_almost_equal(total_perez_vec,
                                          expected_total_perez_vec)
+
+    # Get ts modeling matrices
+    irradiance_mat, rho_mat, invrho_mat, total_perez_mat = \
+        irr_model.get_full_ts_modeling_vectors(pvarray)
+
+    list_idx = [surf.index for surf in pvarray.all_ts_surfaces
+                if surf.length[0] > 0] + [-1]
+    # check that 2 dimensional
+    assert irradiance_mat.shape == (41, 1)
+    # check that values like in previously expected (indices changed), use sum
+    np.testing.assert_allclose(irradiance_mat[list_idx, 0].sum(),
+                               np.sum(expected_irradiance_vec))
 
 
 def test_hybridperez_ordered_back(params_irr):
@@ -495,6 +531,18 @@ def test_hybridperez_ordered_back(params_irr):
         0., 0., 104.387248, 0., 63.217593]
     np.testing.assert_array_almost_equal(total_perez_vec,
                                          expected_total_perez_vec)
+
+    # Get ts modeling matrices
+    irradiance_mat, rho_mat, invrho_mat, total_perez_mat = \
+        irr_model.get_full_ts_modeling_vectors(pvarray)
+
+    list_idx = [surf.index for surf in pvarray.all_ts_surfaces
+                if surf.length[0] > 0] + [-1]
+    # check that 2 dimensional
+    assert irradiance_mat.shape == (41, 1)
+    # check that values like in previously expected (indices changed), use sum
+    np.testing.assert_allclose(irradiance_mat[list_idx, 0].sum(),
+                               np.sum(expected_irradiance_vec))
 
 
 def test_hybridperez_circ_shading():

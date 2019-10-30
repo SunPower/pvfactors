@@ -286,6 +286,7 @@ class PVEngine(object):
         # shape = n_surfaces, n_surfaces
         invrho_mat = np.diag(invrho_mat[:, 0])
         # Subtract matrices: will rely on broadcasting
+        # shape = n_timesteps, n_surfaces, n_surfaces
         a_mat = invrho_mat - ts_vf_matrix_reshaped
         # Calculate inverse, requires specific shape
         # shape = n_timesteps, n_surfaces, n_surfaces
