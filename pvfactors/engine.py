@@ -4,8 +4,6 @@ timeseries simulations."""
 import numpy as np
 from pvfactors.viewfactors import VFCalculator
 from pvfactors.irradiance import HybridPerezOrdered
-from scipy import linalg
-from tqdm import tqdm
 
 
 class PVEngine(object):
