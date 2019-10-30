@@ -136,29 +136,12 @@ def params_serial():
 
 @pytest.fixture(scope='function')
 def fn_report_example():
-    def fn_report(report, pvarray):
-        # Initialize the report
-        if report is None:
-            list_keys = ['qinc_front', 'qinc_back', 'iso_front', 'iso_back']
-            report = OrderedDict({key: [] for key in list_keys})
-        # Add elements to the report
-        if pvarray is not None:
-            pvrow = pvarray.pvrows[1]  # use center pvrow
-            report['qinc_front'].append(
-                pvrow.front.get_param_weighted('qinc'))
-            report['qinc_back'].append(
-                pvrow.back.get_param_weighted('qinc'))
-            report['iso_front'].append(
-                pvrow.front.get_param_weighted('isotropic'))
-            report['iso_back'].append(
-                pvrow.back.get_param_weighted('isotropic'))
-        else:
-            # No calculation was performed, because sun was down
-            report['qinc_front'].append(np.nan)
-            report['qinc_back'].append(np.nan)
-            report['iso_front'].append(np.nan)
-            report['iso_back'].append(np.nan)
-        return report
+    def fn_report(pvarray): return {
+        'qinc_front': pvarray.ts_pvrows[1].front.get_param_weighted('qinc'),
+        'qinc_back': pvarray.ts_pvrows[1].back.get_param_weighted('qinc'),
+        'iso_front': pvarray.ts_pvrows[1]
+        .front.get_param_weighted('isotropic'),
+        'iso_back': pvarray.ts_pvrows[1].back.get_param_weighted('isotropic')}
     yield fn_report
 
 

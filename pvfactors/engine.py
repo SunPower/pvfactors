@@ -4,8 +4,6 @@ timeseries simulations."""
 import numpy as np
 from pvfactors.viewfactors import VFCalculator
 from pvfactors.irradiance import HybridPerezOrdered
-from scipy import linalg
-from tqdm import tqdm
 
 
 class PVEngine(object):
@@ -119,6 +117,72 @@ class PVEngine(object):
         self.skip_step = (solar_zenith > 90) | (DNI < 0) | (DHI < 0) \
             | ((DNI == 0) & (DHI == 0))
 
+    def run_full_mode(self, fn_build_report=None):
+        """Run all simulation timesteps using the full mode, which calculates
+        the equilibrium of reflections in the system, and return a report that
+        will be built by the function passed by the user.
+
+        Parameters
+        ----------
+        fn_build_report : function, optional
+            Function that will build the report of the simulation
+            (Default value = None)
+
+        Returns
+        -------
+        report
+            Saved results from the simulation, as specified by user's report
+            function. If no function is passed, nothing will be returned.
+        """
+        # Get pvarray
+        pvarray = self.pvarray
+
+        # Get the irradiance modeling matrices
+        # shape = n_surfaces, n_timesteps
+        irradiance_mat, _, invrho_mat, _ = \
+            self.irradiance.get_full_ts_modeling_vectors(pvarray)
+
+        # Calculate view factors
+        # shape = n_surfaces, n_surfaces, n_timesteps
+        ts_vf_matrix = self.vf_calculator.build_ts_vf_matrix(pvarray)
+        pvarray.ts_vf_matrix = ts_vf_matrix
+        # Reshape for broadcasting and inverting
+        # shape = n_timesteps, n_surfaces, n_surfaces
+        ts_vf_matrix_reshaped = np.moveaxis(ts_vf_matrix, -1, 0)
+
+        # Build matrix of inverse reflectivities
+        # shape = n_surfaces, n_surfaces
+        invrho_mat = np.diag(invrho_mat[:, 0])
+        # Subtract matrices: will rely on broadcasting
+        # shape = n_timesteps, n_surfaces, n_surfaces
+        a_mat = invrho_mat - ts_vf_matrix_reshaped
+        # Calculate inverse, requires specific shape
+        # shape = n_timesteps, n_surfaces, n_surfaces
+        inv_a_mat = np.linalg.inv(a_mat)
+        # Use einstein sum to get final timeseries radiosities
+        # shape = n_surfaces, n_timesteps
+        q0 = np.einsum('ijk,ki->ji', inv_a_mat, irradiance_mat)
+        # Calculate incident irradiance: will rely on broadcasting
+        # shape = n_surfaces, n_timesteps
+        qinc = np.dot(invrho_mat, q0)
+
+        # Derive other irradiance terms
+        # shape = n_surfaces, n_timesteps
+        isotropic_mat = ts_vf_matrix[:-1, -1, :] * irradiance_mat[-1, :]
+        reflection_mat = qinc[:-1, :] - irradiance_mat[:-1, :] - isotropic_mat
+
+        # Update surfaces with values: the list is ordered by index
+        for idx_surf, ts_surface in enumerate(pvarray.all_ts_surfaces):
+            ts_surface.update_params(
+                {'q0': q0[idx_surf, :],
+                 'qinc': qinc[idx_surf, :],
+                 'isotropic': isotropic_mat[idx_surf, :],
+                 'reflection': reflection_mat[idx_surf, :]})
+
+        # Return report if function was passed
+        report = None if fn_build_report is None else fn_build_report(pvarray)
+        return report
+
     def run_fast_mode(self, fn_build_report=None, pvrow_index=None,
                       segment_index=None):
         """Run all simulation timesteps using the fast mode for the back
@@ -172,97 +236,6 @@ class PVEngine(object):
                   else fn_build_report(self.pvarray))
 
         return report
-
-    def run_full_mode(self, fn_build_report=None):
-        """Run all simulation timesteps using the full mode, which calculates
-        the equilibrium of reflections in the system, and return a report that
-        will be built by the function passed by the user.
-
-        Parameters
-        ----------
-        fn_build_report : function, optional
-            Function that will build the report of the simulation
-            (Default value = None)
-
-        Returns
-        -------
-        report
-            Saved results from the simulation, as specified by user's report
-            function. If no function is passed, nothing will be returned.
-        """
-
-        report = None
-        for idx in tqdm(range(self.n_points)):
-            pvarray = self.run_full_mode_timestep(idx)
-            report = (None if fn_build_report is None
-                      else fn_build_report(report, pvarray))
-
-        return report
-
-    def run_full_mode_timestep(self, idx):
-        """Run simulation for a single timestep index and using the full mode,
-        which calculates the equilibrium of reflections in the system.
-
-        Timestep will be skipped when:
-            - solar zenith > 90, ie the sun is down
-            - DNI or DHI is negative, which does not make sense
-            - DNI and DHI are both zero
-
-        Parameters
-        ----------
-        idx : int
-            Index for which to run simulation
-
-        Returns
-        -------
-        pvarray : PV array object or None
-            PV array object after all the calculations are performed and
-            applied to it, ``None`` if the timestep is skipped
-
-        """
-
-        if self.skip_step[idx]:
-            pvarray = None
-        else:
-            # To be returned at the end
-            pvarray = self.pvarray
-
-            # Transform pvarray to time step idx to create geometries
-            pvarray.transform(idx)
-
-            # Get the irradiance modeling vectors used in final calculations
-            irradiance_vec, _, invrho_vec, _ = \
-                self.irradiance.get_full_modeling_vectors(pvarray, idx)
-
-            # Prepare inputs to view factor calculator
-            geom_dict = pvarray.dict_surfaces
-            view_matrix, obstr_matrix = pvarray.view_obstr_matrices
-
-            # Calculate view factors
-            vf_matrix = self.vf_calculator.get_vf_matrix(
-                geom_dict, view_matrix, obstr_matrix, pvarray.pvrows)
-            pvarray.vf_matrix = vf_matrix
-
-            # Calculate radiosities by solving system of equations
-            invrho_mat = np.diag(invrho_vec)
-            a_mat = invrho_mat - vf_matrix
-            q0 = linalg.solve(a_mat, irradiance_vec)
-            qinc = np.dot(invrho_mat, q0)
-
-            # Derive other irradiance terms
-            isotropic_vec = vf_matrix[:-1, -1] * irradiance_vec[-1]
-            reflection_vec = qinc[:-1] \
-                - irradiance_vec[:-1] - isotropic_vec
-
-            # Update surfaces with values
-            for idx_surf, surface in geom_dict.items():
-                surface.update_params(
-                    {'q0': q0[idx_surf],
-                     'qinc': qinc[idx_surf],
-                     'isotropic': isotropic_vec[idx_surf],
-                     'reflection': reflection_vec[idx_surf]})
-
-        return pvarray
 
     def _calculate_back_ts_segment_qinc(self, ts_segment, pvrow_idx):
         """Calculate the incident irradiance on a timeseries segment's surfaces

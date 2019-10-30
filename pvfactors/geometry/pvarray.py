@@ -78,6 +78,9 @@ class OrderedPVArray(BasePVArray):
         self.edge_points = None
         self.is_flat = None
 
+        # These attributes will be updated at calculation time
+        self.ts_vf_matrix = None
+
     @classmethod
     def init_from_dict(cls, pvarray_params, param_names=None):
         """Instantiate ordered PV array from dictionary of parameters

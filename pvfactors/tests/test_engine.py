@@ -30,15 +30,15 @@ def test_pvengine_float_inputs_iso(params):
                                    DNI)
 
     # Run timestep
-    pvarray = eng.run_full_mode_timestep(0)
+    pvarray = eng.run_full_mode(fn_build_report=lambda pvarray: pvarray)
     # Checks
     assert isinstance(pvarray, OrderedPVArray)
     np.testing.assert_almost_equal(
-        pvarray.pvrows[0].front.get_param_weighted('qinc'), 1099.22245374)
+        pvarray.ts_pvrows[0].front.get_param_weighted('qinc'), 1099.22245374)
     np.testing.assert_almost_equal(
-        pvarray.pvrows[1].front.get_param_weighted('qinc'), 1099.6948573)
+        pvarray.ts_pvrows[1].front.get_param_weighted('qinc'), 1099.6948573)
     np.testing.assert_almost_equal(
-        pvarray.pvrows[2].front.get_param_weighted('qinc'), 1102.76149246)
+        pvarray.ts_pvrows[2].front.get_param_weighted('qinc'), 1102.76149246)
 
 
 def test_pvengine_float_inputs_perez(params):
@@ -65,17 +65,19 @@ def test_pvengine_float_inputs_perez(params):
                                    DNI)
 
     # Run timestep
-    pvarray = eng.run_full_mode_timestep(0)
+    pvarray = eng.run_full_mode(fn_build_report=lambda pvarray: pvarray)
     # Checks
     assert isinstance(pvarray, OrderedPVArray)
     np.testing.assert_almost_equal(
-        pvarray.pvrows[0].front.get_param_weighted('qinc'), 1110.1164773159298)
+        pvarray.ts_pvrows[0].front.get_param_weighted('qinc'),
+        1110.1164773159298)
     np.testing.assert_almost_equal(
-        pvarray.pvrows[1].front.get_param_weighted('qinc'), 1110.595903991)
+        pvarray.ts_pvrows[1].front.get_param_weighted('qinc'), 1110.595903991)
     np.testing.assert_almost_equal(
-        pvarray.pvrows[2].front.get_param_weighted('qinc'), 1112.37717553)
+        pvarray.ts_pvrows[2].front.get_param_weighted('qinc'), 1112.37717553)
     np.testing.assert_almost_equal(
-        pvarray.pvrows[1].back.get_param_weighted('qinc'), 116.49050349491208)
+        pvarray.ts_pvrows[1].back.get_param_weighted('qinc'),
+        116.49050349491208)
 
 
 def test_pvengine_ts_inputs_perez(params_serial,
@@ -114,7 +116,7 @@ def test_pvengine_ts_inputs_perez(params_serial,
 
 
 def test_fast_mode_loop_like(params):
-    """Test value of older and decomissioned loop like fast mode"""
+    """Test value of older and decomissioned loop-like fast mode"""
 
     # Prepare some engine inputs
     irradiance_model = HybridPerezOrdered()
@@ -521,9 +523,9 @@ def test_pvengine_float_inputs_perez_transparency_spacing_full(params):
             params['surface_azimuth'],
             params['rho_ground'])
     # Run timestep
-    pvarray = eng.run_full_mode_timestep(0)
+    pvarray = eng.run_full_mode(fn_build_report=lambda pvarray: pvarray)
     no_spacing_transparency_back_qinc = (
-        pvarray.pvrows[1].back.get_param_weighted('qinc'))
+        pvarray.ts_pvrows[1].back.get_param_weighted('qinc'))
 
     # --- with non-0 transparency and spacing
     # Create models
@@ -541,11 +543,11 @@ def test_pvengine_float_inputs_perez_transparency_spacing_full(params):
             params['surface_azimuth'],
             params['rho_ground'])
     # Run timestep
-    pvarray = eng.run_full_mode_timestep(0)
+    pvarray = eng.run_full_mode(fn_build_report=lambda pvarray: pvarray)
     # Checks
     expected_back_qinc = 132.13881181118185  # higher than when params are 0
     w_spacing_transparency_back_qinc = (
-        pvarray.pvrows[1].back.get_param_weighted('qinc'))
+        pvarray.ts_pvrows[1].back.get_param_weighted('qinc'))
     np.testing.assert_almost_equal(
         w_spacing_transparency_back_qinc, expected_back_qinc)
     assert no_spacing_transparency_back_qinc < w_spacing_transparency_back_qinc

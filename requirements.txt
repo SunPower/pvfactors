@@ -1,7 +1,5 @@
 pvlib>=0.6.0
-scipy>=0.19.1
 shapely>=1.6.4.post2
 matplotlib
 future
 six
-tqdm

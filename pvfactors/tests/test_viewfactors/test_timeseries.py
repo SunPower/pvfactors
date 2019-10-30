@@ -1,20 +1,5 @@
-from pvfactors.viewfactors.calculator import VFCalculator
 from pvfactors.viewfactors.timeseries import VFTsMethods
 import numpy as np
-
-
-def test_ts_vf_matrix(ordered_pvarray):
-    """Test that timeseries vf matrix is calculated correctly"""
-    vfcalculator = VFCalculator()
-    vf_matrix = vfcalculator.build_ts_vf_matrix(ordered_pvarray)
-
-    # Check that correct size
-    assert vf_matrix.shape == (41, 41, 1)
-
-    # get all indices where surfaces have positive length
-    list_idx = [surf.index for surf in ordered_pvarray.all_ts_surfaces
-                if surf.length[0] > 0]
-    print(vf_matrix[:, :, 0][np.ix_(list_idx, list_idx)])
 
 
 def test_vf_pvrow_to_gnd_surf_obstruction_hottel(ordered_pvarray):
