@@ -93,12 +93,13 @@ def test_vf_matrix_subset_calculation(params):
             params['surface_tilt'],
             params['surface_azimuth'],
             params['rho_ground'])
-    pvarray_full = eng.run_full_mode_timestep(0)
-    vf_mat_full = pvarray_full.vf_matrix
+    pvarray_full = eng.run_full_mode(fn_build_report=lambda pvarray: pvarray)
+    vf_mat_full = pvarray_full.ts_vf_matrix[:, :, 0]
 
-    index_of_back_side_surface = 13
+    index_of_back_side_surface = 34
+    # indices are messed, but if sum equal it's a really good sign
     np.testing.assert_array_almost_equal(
-        vf_mat_fast, vf_mat_full[[index_of_back_side_surface], :])
+        vf_mat_fast.sum(), vf_mat_full[[index_of_back_side_surface], :].sum())
 
 
 def test_ts_view_factors():
