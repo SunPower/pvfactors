@@ -1,7 +1,6 @@
 """Module with classes and functions to calculate views and view factors"""
 
 from pvfactors.config import DISTANCE_TOLERANCE
-from pvfactors.viewfactors.mapper import VFMapperOrderedPVArray
 from pvfactors.viewfactors.timeseries import VFTsMethods
 import numpy as np
 
@@ -15,19 +14,11 @@ class VFCalculator(object):
 
         Parameters
         ----------
-        mapper : :py:class:`~pvfactors.geometry.mapper.VFMapperOrderedPVArray`, optional
-            View factor mapper, which will map elements of the PV array view
-            matrix to methods calculating view factors (Default =
-            :py:class:`~pvfactors.viewfactors.mapper.VFMapperOrderedPVArray`)
         vf_ts_methods : :py:class:`~pvfactors.geometry.calculator.VFTsMethods` object
             Object with methods to calculate timeseries view factors for the
             fast mode (Default = None)
         """
-        mapper = VFMapperOrderedPVArray() if mapper is None else mapper
-        vf_ts_methods = VFTsMethods() if vf_ts_methods is None \
-            else vf_ts_methods
-        self.mapper = mapper
-        self.vf_ts_methods = vf_ts_methods
+        self.vf_ts_methods = vf_ts_methods or VFTsMethods()
 
     def build_ts_vf_matrix(self, pvarray):
         """Calculate timeseries view factor matrix for the given
