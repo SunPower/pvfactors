@@ -339,14 +339,6 @@ def test_ordered_pvarray_list_surfaces(ordered_pvarray):
     assert isinstance(list_surfaces[0], PVSurface)
 
 
-def test_build_surface_registry(ordered_pvarray):
-    """Test that building surface registry correctly"""
-    reg = ordered_pvarray.surface_registry
-
-    assert reg.shape[0] == ordered_pvarray.n_surfaces
-    assert reg.shape[1] == len(ordered_pvarray.registry_cols)
-
-
 def test_get_all_surface_indices(ordered_pvarray):
 
     # Check surface indices before indexing
