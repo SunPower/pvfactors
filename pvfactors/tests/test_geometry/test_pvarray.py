@@ -4,8 +4,6 @@ import pandas as pd
 from pvfactors.geometry import OrderedPVArray, PVGround, PVSurface
 from pvfactors.geometry.utils import contains
 from pvfactors.config import MAX_X_GROUND, MIN_X_GROUND
-from pvfactors.tests.test_geometry.test_data import \
-    vm_flat_orderedpvarray, vm_right_orderedpvarray
 
 
 def test_ordered_pvarray_from_dict(params):
@@ -375,43 +373,6 @@ def test_get_all_ts_surface_indices(ordered_pvarray):
     assert np.max(indices) == (ordered_pvarray.n_ts_surfaces - 1)
 
 
-def test_view_matrix_flat(params):
-
-    # Make flat
-    params.update({'surface_tilt': 0})
-
-    # Create pvarray
-    pvarray = OrderedPVArray.transform_from_dict_of_scalars(params)
-
-    # Build view matrix
-    vm = pvarray.view_matrix
-
-    assert vm.shape[0] == pvarray.n_surfaces + 1
-    np.testing.assert_array_equal(vm, vm_flat_orderedpvarray)
-
-
-def test_view_matrix(params):
-
-    params.update({'surface_azimuth': 270})
-
-    # Create pvarray
-    pvarray = OrderedPVArray.transform_from_dict_of_scalars(params)
-
-    # Build view matrix and obstruction matrix
-    vm, om = pvarray._build_view_matrix()
-
-    assert vm.shape[0] == pvarray.n_surfaces + 1
-    np.testing.assert_array_equal(vm, vm_right_orderedpvarray)
-    # The view matrix mask should be symmetric
-    mask_vm = np.where(vm != 0, 1, 0)
-    np.testing.assert_array_equal(mask_vm[:-1, :-1], mask_vm.T[:-1, :-1])
-    # Removing sky row and column because didn't fill the last row
-
-    # The obstruction matrix should be symmetric
-    np.testing.assert_array_equal(om, om.T)
-    # TODO: test values against saved array
-
-
 def test_param_names(params):
 
     param_names = ['qinc']
@@ -446,22 +407,6 @@ def test_param_names(params):
             pvrow.back.get_param_ww('qinc'), pvrow.back.length)
 
 
-def test_orderedpvarray_neighbors(params):
-    """Check that pvrow neighbors are determined correctly"""
-
-    pvarray_right = OrderedPVArray.transform_from_dict_of_scalars(params)
-    params.update({'surface_azimuth': 270})
-    pvarray_left = OrderedPVArray.transform_from_dict_of_scalars(params)
-
-    # Check
-    l1 = [None, 0, 1]
-    l2 = [1, 2, None]
-    np.testing.assert_array_equal(pvarray_right.front_neighbors, l2)
-    np.testing.assert_array_equal(pvarray_right.back_neighbors, l1)
-    np.testing.assert_array_equal(pvarray_left.front_neighbors, l1)
-    np.testing.assert_array_equal(pvarray_left.back_neighbors, l2)
-
-
 def test_orderedpvarray_almost_flat():
     """Making sure that things are correct when the pvarray is almost flat
     and the sun is very low, which means that the shadows on the ground, and
@@ -480,7 +425,6 @@ def test_orderedpvarray_almost_flat():
     }
 
     pvarray = OrderedPVArray.transform_from_dict_of_scalars(params)
-    view_matrix = pvarray.view_matrix
 
     ground_seg = pvarray.ground.list_segments[0]
     # there should be no visible shadow on the ground
@@ -488,46 +432,6 @@ def test_orderedpvarray_almost_flat():
     # all of the edge points should be outside of range of ground geometry
     for edge_pt in pvarray.edge_points:
         assert not contains(pvarray.ground.original_linestring, edge_pt)
-
-    # Check values of view matrix mask, to make sure that front does not
-    # see the ground
-    vm_mask = np.where(view_matrix > 0, 1, 0)
-    expected_vm_mask = [
-        [0, 0, 1, 0, 1, 0, 1, 1],  # ground
-        [0, 0, 0, 0, 1, 0, 0, 1],  # front
-        [1, 0, 0, 0, 0, 0, 0, 1],  # back
-        [0, 0, 0, 0, 0, 0, 1, 1],  # front
-        [1, 1, 0, 0, 0, 0, 0, 1],  # back
-        [0, 0, 0, 0, 0, 0, 0, 1],  # front
-        [1, 0, 0, 1, 0, 0, 0, 1],  # back
-        [0, 0, 0, 0, 0, 0, 0, 0]]
-    np.testing.assert_array_equal(vm_mask, expected_vm_mask)
-
-
-def test_time_ordered_pvarray(params):
-
-    from pvfactors.viewfactors import VFCalculator
-
-    import time
-    n = 100
-    list_elapsed = []
-    for _ in range(n):
-        tic = time.time()
-        pvarray = OrderedPVArray.transform_from_dict_of_scalars(params)
-        pvarray.index_all_surfaces()
-        # sr = pvarray.surface_registry
-        # vm = pvarray.view_matrix
-        vm, om = pvarray._build_view_matrix()
-        geom_dict = pvarray.dict_surfaces
-
-        calculator = VFCalculator()
-        # number 1 time consuming, triples run time
-        vf_matrix = calculator.get_vf_matrix(geom_dict, vm, om,
-                                             pvarray.pvrows)
-        toc = time.time()
-        list_elapsed.append(toc - tic)
-
-    print("\nAvg time elapsed: {} s".format(np.mean(list_elapsed)))
 
 
 def test_ordered_pvarray_gnd_shadow_casting_tolerance():

@@ -1340,10 +1340,6 @@ class BasePVArray(object):
         for idx, ts_surface in enumerate(self.all_ts_surfaces):
             ts_surface.index = idx
 
-    def _build_view_matrix(self, *args, **kwargs):
-        """Not implemented."""
-        raise NotImplementedError
-
     def _build_surface_registry(self):
         """Build the surface registry of the PV array, which is a
         pandas DataFrame with most of the geometry information contained
