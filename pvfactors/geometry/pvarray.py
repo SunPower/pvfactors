@@ -70,13 +70,7 @@ class OrderedPVArray(BasePVArray):
         self.shaded_length_front = None
         self.shaded_length_back = None
 
-        # These attributes will be transformed at each iteration
-        self.pvrows = None
-        self.ground = None
-        self.edge_points = None
-        self.is_flat = None
-
-        # These attributes will be updated at calculation time
+        # These attributes will be updated by the engine
         self.ts_vf_matrix = None
 
     @classmethod
@@ -135,33 +129,6 @@ class OrderedPVArray(BasePVArray):
 
         return pvarray
 
-    @classmethod
-    def transform_from_dict_of_scalars(cls, pvarray_params, param_names=None):
-        """Instantiate, fit and transform ordered PV array using dictionary
-        of scalar inputs.
-
-        Parameters
-        ----------
-        pvarray_params : dict
-            The parameters used for instantiation, fitting, and transformation
-        param_names : list of str, optional
-            List of parameter names to pass to surfaces (Default = None)
-
-        Returns
-        -------
-        OrderedPVArray
-            Initialized, fitted, and transformed Ordered PV Array
-        """
-
-        # Create pv array
-        pvarray = cls.fit_from_dict_of_scalars(pvarray_params,
-                                               param_names=param_names)
-
-        # Transform pv array to first index (since scalar values were passed)
-        pvarray.transform(0)
-
-        return pvarray
-
     def fit(self, solar_zenith, solar_azimuth, surface_tilt, surface_azimuth):
         """Fit the ordered PV array to the list of solar and surface angles.
         All intermediate PV array results necessary to build the geometries
@@ -211,39 +178,6 @@ class OrderedPVArray(BasePVArray):
 
         # Index all timeseries surfaces
         self._index_all_ts_surfaces()
-
-    def transform(self, idx):
-        """
-        Transform the ordered PV array for the given index.
-        This means actually building the PV Row and Ground geometries. Note
-        that the list of PV rows will be ordered from left to right in the
-        geometry (along the x-axis), and indexed from 0 to n_pvrows - 1.
-        This can only be run after the ``fit()`` method.
-
-        Object attributes like ``pvrows`` and ``ground`` will be updated each
-        time this method is run.
-
-        Parameters
-        ----------
-        idx : int
-            Index for which to build the simulation.
-        """
-
-        if idx < self.n_states:
-            self.is_flat = self.rotation_vec[idx] == 0
-
-            # Create PV row geometries
-            self.pvrows = [ts_pvrow.at(idx) for ts_pvrow in self.ts_pvrows]
-
-            # Create ground geometry with its shadows and cut points
-            self.ground = self.ts_ground.at(idx)
-            self.edge_points = [Point(coord.at(idx))
-                                for coord in self.ts_ground.cut_point_coords]
-
-        else:
-            msg = "Step index {} is out of range: [0 to {}]".format(
-                idx, self.n_states - 1)
-            raise PVFactorsError(msg)
 
     def _calculate_pvrow_elements_coords(self, alpha_vec, rotation_vec):
         """Calculate PV row coordinate elements in a vectorized way, such as

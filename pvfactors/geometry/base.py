@@ -1307,7 +1307,3 @@ class BasePVArray(object):
     def fit(self, *args, **kwargs):
         """Not implemented."""
         raise NotImplementedError
-
-    def transform(self, *args, **kwargs):
-        """Not implemented."""
-        raise NotImplementedError

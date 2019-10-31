@@ -4,38 +4,40 @@ import pandas as pd
 from pvfactors.geometry import OrderedPVArray, PVGround, PVSurface
 from pvfactors.geometry.utils import contains
 from pvfactors.config import MAX_X_GROUND, MIN_X_GROUND
+from pvfactors.geometry.timeseries import TsGround
 
 
 def test_ordered_pvarray_from_dict(params):
     """Test that can successfully create ordered pvarray from parameters dict,
     and that the axis azimuth convention works correctly (via normal vector)
     """
-    pvarray = OrderedPVArray.transform_from_dict_of_scalars(params)
+    pvarray = OrderedPVArray.fit_from_dict_of_scalars(params)
 
     # Test that ground is created successfully
-    assert isinstance(pvarray.ground, PVGround)
+    assert isinstance(pvarray.ts_ground, TsGround)
     # TODO: check why this is not matching exactly: hint = look at length
     # of ground shaded surfaces, some small tolerance may be chipped away
-    np.testing.assert_allclose(pvarray.ground.length,
+    np.testing.assert_allclose(pvarray.ts_ground.length,
                                MAX_X_GROUND - MIN_X_GROUND)
 
     # Test the front and back sides
-    assert len(pvarray.pvrows) == 3
+    assert len(pvarray.ts_pvrows) == 3
     np.testing.assert_array_equal(
-        pvarray.pvrows[0].front.n_vector, -pvarray.pvrows[0].back.n_vector)
-    assert pvarray.pvrows[0].front.shaded_length == 0
+        pvarray.ts_pvrows[0].front.n_vector,
+        -pvarray.ts_pvrows[0].back.n_vector)
+    assert pvarray.ts_pvrows[0].front.shaded_length == 0
     assert pvarray.gcr == params['gcr']
     assert np.abs(pvarray.rotation_vec) == params['surface_tilt']
-    assert pvarray.pvrows[0].front.n_vector[0] > 0
+    assert pvarray.ts_pvrows[0].front.n_vector[0] > 0
     distance_between_pvrows = \
-        pvarray.pvrows[1].centroid.x - pvarray.pvrows[0].centroid.x
+        pvarray.ts_pvrows[1].centroid.x - pvarray.ts_pvrows[0].centroid.x
     assert distance_between_pvrows == 5.0
     assert pvarray.n_ts_surfaces == 40
 
     # Orient the array the other way
     params.update({'surface_azimuth': 270.})
-    pvarray = OrderedPVArray.transform_from_dict_of_scalars(params)
-    assert pvarray.pvrows[0].front.n_vector[0] < 0
+    pvarray = OrderedPVArray.fit_from_dict_of_scalars(params)
+    assert pvarray.ts_pvrows[0].front.n_vector[0] < 0
     assert pvarray.n_ts_surfaces == 40
 
 
@@ -62,23 +64,25 @@ def test_plot_ordered_pvarray():
         }
 
         # Plot simple ordered pv array
-        ordered_pvarray = OrderedPVArray.transform_from_dict_of_scalars(params)
+        ordered_pvarray = OrderedPVArray.fit_from_dict_of_scalars(params)
         f, ax = plt.subplots()
-        ordered_pvarray.plot(ax)
+        ordered_pvarray.plot_at_idx(0, ax)
         plt.show()
 
         # Plot discretized ordered pv array
         params.update({'cut': {0: {'front': 5}, 1: {'back': 3}},
                        'surface_azimuth': 270.})  # point left
-        ordered_pvarray = OrderedPVArray.transform_from_dict_of_scalars(params)
+        ordered_pvarray = OrderedPVArray.fit_from_dict_of_scalars(params)
         f, ax = plt.subplots()
-        ordered_pvarray.plot(ax)
+        ordered_pvarray.plot_at_idx(0, ax)
         plt.show()
 
 
 def test_discretization_ordered_pvarray(discr_params):
-    pvarray = OrderedPVArray.transform_from_dict_of_scalars(discr_params)
-    pvrows = pvarray.pvrows
+    """Test that the number of segments and surfaces is correct
+    when discretizing the PV rows"""
+    pvarray = OrderedPVArray.fit_from_dict_of_scalars(discr_params)
+    pvrows = pvarray.ts_pvrows
 
     # Check the transformed geometries
     assert len(pvrows[0].front.list_segments) == 5
@@ -98,7 +102,7 @@ def test_discretization_ordered_pvarray(discr_params):
 def test_ts_surfaces_side_of_cut_point(params):
     """Check that can successfully call list ts surfaces on side
     of cut point"""
-    pvarray = OrderedPVArray.transform_from_dict_of_scalars(params)
+    pvarray = OrderedPVArray.fit_from_dict_of_scalars(params)
     # For first pvrow
     list_left = pvarray.ts_ground.ts_surfaces_side_of_cut_point(
         'left', 0)

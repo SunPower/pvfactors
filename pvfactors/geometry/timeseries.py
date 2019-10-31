@@ -192,6 +192,11 @@ class TsPVRow(object):
         """List of all timeseries surfaces"""
         return self.front.all_ts_surfaces + self.back.all_ts_surfaces
 
+    @property
+    def centroid(self):
+        """Centroid point of the timeseries pv row"""
+        return self.full_pvrow_coords.centroid
+
 
 class TsSide(object):
     """Timeseries side class: this class is a vectorized version of the
@@ -997,9 +1002,20 @@ class TsGround(object):
     @property
     def n_ts_surfaces(self):
         """Number of timeseries surfaces in the ts ground"""
+        return self.n_ts_shaded_surfaces + self.n_ts_illum_surfaces
+
+    @property
+    def n_ts_shaded_surfaces(self):
+        """Number of shaded timeseries surfaces in the ts ground"""
         n_ts_surfaces = 0
         for shadow_el in self.shadow_elements:
             n_ts_surfaces += shadow_el.n_ts_surfaces
+        return n_ts_surfaces
+
+    @property
+    def n_ts_illum_surfaces(self):
+        """Number of illuminated timeseries surfaces in the ts ground"""
+        n_ts_surfaces = 0
         for illum_el in self.illum_elements:
             n_ts_surfaces += illum_el.n_ts_surfaces
         return n_ts_surfaces
@@ -1013,6 +1029,60 @@ class TsGround(object):
         for illum_el in self.illum_elements:
             all_ts_surfaces += illum_el.all_ts_surfaces
         return all_ts_surfaces
+
+    @property
+    def length(self):
+        """Length of the timeseries ground"""
+        length = 0
+        for shadow_el in self.shadow_elements:
+            length += shadow_el.length
+        for illum_el in self.illum_elements:
+            length += illum_el.length
+        return length
+
+    @property
+    def shaded_length(self):
+        """Length of the timeseries ground"""
+        length = 0
+        for shadow_el in self.shadow_elements:
+            length += shadow_el.length
+        return length
+
+    def non_point_shaded_surfaces_at(self, idx):
+        """Return a list of timeseries shaded surfaces, that are not points
+        at given index
+
+        Parameters
+        ----------
+        idx : int
+            Index at which we want the surfaces not to be points
+
+        Returns
+        -------
+        list
+        """
+        list_surfaces = []
+        for shadow_el in self.shadow_elements:
+            list_surfaces += shadow_el.non_point_surfaces_at(0)
+        return list_surfaces
+
+    def non_point_illum_surfaces_at(self, idx):
+        """Return a list of timeseries illuminated surfaces, that are not
+        points at given index
+
+        Parameters
+        ----------
+        idx : int
+            Index at which we want the surfaces not to be points
+
+        Returns
+        -------
+        list
+        """
+        list_surfaces = []
+        for illum_el in self.illum_elements:
+            list_surfaces += illum_el.non_point_surfaces_at(0)
+        return list_surfaces
 
     @staticmethod
     def _shadow_elements_from_coords_and_cut_pts(
@@ -1241,6 +1311,11 @@ class TsGroundElement(object):
     def centroid(self):
         """Timeseries point coordinates of the element's centroid"""
         return self.coords.centroid
+
+    @property
+    def length(self):
+        """Timeseries length of the ground"""
+        return self.coords.length
 
     @property
     def all_ts_surfaces(self):
