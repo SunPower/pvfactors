@@ -92,7 +92,8 @@ timeseries
    timeseries.TsPVRow
    timeseries.TsGround
    timeseries.TsSide
-   timeseries.TsDualSegment
+   timeseries.TsSegment
+   timeseries.TsShadeCollection
    timeseries.TsSurface
    timeseries.TsLineCoords
    timeseries.TsPointCoords

@@ -1,7 +1,6 @@
 """Base classes for pvfactors geometry subpackage."""
 
 import numpy as np
-import pandas as pd
 from pvfactors import PVFactorsError
 from pvfactors.config import (
     DEFAULT_NORMAL_VEC, COLOR_DIC, DISTANCE_TOLERANCE, PLOT_FONTSIZE,
