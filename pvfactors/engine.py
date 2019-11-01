@@ -7,8 +7,8 @@ from pvfactors.irradiance import HybridPerezOrdered
 
 
 class PVEngine(object):
-    """Class putting all of the calculations together, and able to run it
-    as a timeseries when the pvarrays can be build from dictionary parameters
+    """Class putting all of the calculations together into simple
+    workflows.
     """
 
     def __init__(self, pvarray, vf_calculator=None, irradiance_model=None,
@@ -254,7 +254,7 @@ class PVEngine(object):
         """
 
         # Get all timeseries surfaces in segment
-        list_ts_surfaces = [ts_segment.illum, ts_segment.shaded]
+        list_ts_surfaces = ts_segment.all_ts_surfaces
 
         # Get irradiance vectors for calculation
         albedo = self.irradiance.albedo

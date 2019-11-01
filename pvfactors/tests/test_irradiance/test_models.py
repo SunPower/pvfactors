@@ -56,77 +56,82 @@ def test_isotropic_model_front(params_irr):
     pvarray = OrderedPVArray.fit_from_dict_of_scalars(
         params_irr, param_names=IsotropicOrdered.params)
     irr_model.transform(pvarray)
-    pvarray.transform(idx=0)
 
     # there should be some direct shading
-    assert pvarray.pvrows[0].front.shaded_length
+    assert pvarray.ts_pvrows[0].front.shaded_length
 
     # Get modeling vectors
-    irradiance_vec, rho_vec, invrho_vec, total_perez_vec = \
-        irr_model.get_full_modeling_vectors(pvarray, 0)
+    irradiance_mat, rho_mat, invrho_mat, total_perez_mat = \
+        irr_model.get_ts_modeling_vectors(pvarray)
 
     # Check transform
     expected_irradiance_vec = [
-        422.61826174069944, 422.61826174069944, 422.61826174069944,
-        422.61826174069944, 422.61826174069944, 0.0,
-        707.10678118654744, 0.0, 0.0, 707.10678118654744, 0.0, 0.0,
-        707.10678118654744, 0.0, 100.]
+        0., 0., 0., 0., 0.,
+        0., 0., 0., 0., 0.,
+        0., 0., 422.61826174, 422.61826174, 422.61826174,
+        422.61826174, 422.61826174, 422.61826174, 422.61826174, 422.61826174,
+        422.61826174, 422.61826174, 422.61826174, 422.61826174, 422.61826174,
+        422.61826174, 422.61826174, 422.61826174, 707.10678119, 0.,
+        0., 0., 707.10678119, 0., 0.,
+        0., 707.10678119, 0., 0., 0.]
     # pvrow
     np.testing.assert_almost_equal(
-        pvarray.pvrows[2].front.get_param_weighted('direct'),
+        pvarray.ts_pvrows[2].front.get_param_weighted('direct'),
         expected_dni_pvrow)
     np.testing.assert_almost_equal(
-        pvarray.pvrows[1].front.list_segments[0]
-        .illum_collection.get_param_weighted('direct'), expected_dni_pvrow)
+        pvarray.ts_pvrows[1].front.list_segments[0]
+        .illum.get_param_weighted('direct'), expected_dni_pvrow)
     np.testing.assert_almost_equal(
-        pvarray.pvrows[1].front.list_segments[0]
-        .shaded_collection.get_param_weighted('direct'), 0.)
+        pvarray.ts_pvrows[1].front.list_segments[0]
+        .shaded.get_param_weighted('direct'), 0.)
     np.testing.assert_almost_equal(
-        pvarray.pvrows[0].back.get_param_weighted('direct'), 0.)
+        pvarray.ts_pvrows[0].back.get_param_weighted('direct'), 0.)
     # ground
     np.testing.assert_almost_equal(
-        pvarray.ground.list_segments[0]
-        .illum_collection.get_param_weighted('direct'), expected_dni_ground)
+        pvarray.ts_ground.illum.get_param_weighted('direct'),
+        expected_dni_ground)
     np.testing.assert_almost_equal(
-        pvarray.ground.list_segments[0]
-        .shaded_collection.get_param_weighted('direct'), 0.)
+        pvarray.ts_ground.shaded.get_param_weighted('direct'), 0.)
     np.testing.assert_array_almost_equal(expected_irradiance_vec,
-                                         irradiance_vec)
+                                         np.squeeze(irradiance_mat))
+
     # Check invrho_vec
-    expected_invrho_vec = np.array([
+    expected_invrho_vec = [
         5., 5., 5., 5., 5.,
-        5., 100., 100., 33.333333, 100.,
-        100., 33.333333, 100., 33.333333, 1.])
-    np.testing.assert_array_almost_equal(invrho_vec, expected_invrho_vec)
+        5., 5., 5., 5., 5.,
+        5., 5., 5., 5., 5.,
+        5., 5., 5., 5., 5.,
+        5., 5., 5., 5., 5.,
+        5., 5., 5., 100., 100.,
+        33.33333333, 33.33333333, 100., 100., 33.33333333,
+        33.33333333, 100., 100., 33.33333333, 33.33333333]
+    np.testing.assert_array_almost_equal(np.squeeze(invrho_mat),
+                                         expected_invrho_vec)
     np.testing.assert_almost_equal(
-        pvarray.pvrows[0].front.get_param_weighted('rho'),
+        pvarray.ts_pvrows[0].front.get_param_weighted('rho'),
         params_irr['rho_front_pvrow'])
     np.testing.assert_almost_equal(
-        pvarray.pvrows[0].back.get_param_weighted('rho'),
+        pvarray.ts_pvrows[0].back.get_param_weighted('rho'),
         params_irr['rho_back_pvrow'])
     np.testing.assert_almost_equal(
-        pvarray.ground.get_param_weighted('rho'),
+        pvarray.ts_ground.get_param_weighted('rho'),
         params_irr['rho_ground'])
 
     # Check total perez vec
     expected_total_perez_vec = [
+        100., 100., 100., 100., 100.,
+        100., 100., 100., 100., 100.,
+        100., 100., 522.61826174, 522.61826174, 522.61826174,
         522.61826174, 522.61826174, 522.61826174, 522.61826174, 522.61826174,
-        100., 807.243186, 100.13640481, 0., 807.243186,
-        100.13640481, 0., 807.243186, 0., 100.]
-    np.testing.assert_array_almost_equal(total_perez_vec,
+        522.61826174, 522.61826174, 522.61826174, 522.61826174, 522.61826174,
+        522.61826174, 522.61826174, 522.61826174, 807.243186, 100.13640481,
+        0., 0., 807.243186, 100.13640481, 0.,
+        0., 807.243186, 100.13640481, 0., 0.]
+    np.testing.assert_array_almost_equal(np.squeeze(total_perez_mat),
                                          expected_total_perez_vec)
 
-    # Get ts modeling matrices
-    irradiance_mat, rho_mat, invrho_mat, total_perez_mat = \
-        irr_model.get_full_ts_modeling_vectors(pvarray)
-
-    list_idx = [surf.index for surf in pvarray.all_ts_surfaces
-                if surf.length[0] > 0] + [-1]
     # check that 2 dimensional
-    assert irradiance_mat.shape == (41, 1)
-    # check that values like in previously expected (indices changed), use sum
-    np.testing.assert_allclose(irradiance_mat[list_idx, 0].sum(),
-                               np.sum(expected_irradiance_vec))
+    assert np.shape(irradiance_mat) == (40, 1)
 
 
 def test_isotropic_model_back(params_irr):
@@ -161,75 +166,92 @@ def test_isotropic_model_back(params_irr):
     pvarray = OrderedPVArray.fit_from_dict_of_scalars(
         params_irr, param_names=IsotropicOrdered.params)
     irr_model.transform(pvarray)
-    pvarray.transform(idx=0)
 
     # there should be some direct shading
-    assert pvarray.pvrows[0].back.shaded_length
+    assert pvarray.ts_pvrows[0].back.shaded_length
 
     # Get modeling vectors
-    irradiance_vec, rho_vec, invrho_vec, total_perez_vec = \
-        irr_model.get_full_modeling_vectors(pvarray, 0)
+    irradiance_mat, rho_mat, invrho_mat, total_perez_mat = \
+        irr_model.get_ts_modeling_vectors(pvarray)
 
     # Check
-    expected_irradiance_vec = [
-        422.61826174069944, 422.61826174069944, 422.61826174069944,
-        422.61826174069944, 422.61826174069944, 0.0, 0.0, 707.10678118654755,
-        0.0, 0.0, 707.10678118654755, 0.0, 0.0, 707.10678118654755, 100.]
+    expected_irradiance_mat = [
+        0., 0., 0., 0.,
+        0., 0., 0., 0.,
+        0., 0., 0., 0.,
+        422.61826174, 422.61826174, 422.61826174, 422.61826174,
+        422.61826174, 422.61826174, 422.61826174, 422.61826174,
+        422.61826174, 422.61826174, 422.61826174, 422.61826174,
+        422.61826174, 422.61826174, 422.61826174, 422.61826174,
+        0., 0., 707.10678119, 0.,
+        0., 0., 707.10678119, 0.,
+        0., 0., 707.10678119, 0.]
     # pvrow
     np.testing.assert_almost_equal(
-        pvarray.pvrows[2].back.get_param_weighted('direct'),
+        pvarray.ts_pvrows[2].back.get_param_weighted('direct'),
         expected_dni_pvrow)
     np.testing.assert_almost_equal(
-        pvarray.pvrows[1].back.list_segments[0]
-        .illum_collection.get_param_weighted('direct'), expected_dni_pvrow)
+        pvarray.ts_pvrows[1].back.list_segments[0]
+        .illum.get_param_weighted('direct'), expected_dni_pvrow)
     np.testing.assert_almost_equal(
-        pvarray.pvrows[1].back.list_segments[0]
-        .shaded_collection.get_param_weighted('direct'), 0.)
+        pvarray.ts_pvrows[1].back.list_segments[0]
+        .shaded.get_param_weighted('direct'), 0.)
     np.testing.assert_almost_equal(
-        pvarray.pvrows[0].front.get_param_weighted('direct'), 0.)
+        pvarray.ts_pvrows[0].front.get_param_weighted('direct'), 0.)
     # ground
     np.testing.assert_almost_equal(
-        pvarray.ground.list_segments[0]
-        .illum_collection.get_param_weighted('direct'), expected_dni_ground)
+        pvarray.ts_ground
+        .illum.get_param_weighted('direct'), expected_dni_ground)
     np.testing.assert_almost_equal(
-        pvarray.ground.list_segments[0]
-        .shaded_collection.get_param_weighted('direct'), 0.)
-    np.testing.assert_array_almost_equal(expected_irradiance_vec,
-                                         irradiance_vec)
-    # Check invrho_vec
-    expected_invrho_vec = np.array([5., 5., 5., 5., 5.,
-                                    5., 100., 33.333333, 33.333333, 100.,
-                                    33.333333, 33.333333, 100., 33.333333, 1.])
-    np.testing.assert_array_almost_equal(invrho_vec, expected_invrho_vec)
+        pvarray.ts_ground
+        .shaded.get_param_weighted('direct'), 0.)
+    np.testing.assert_array_almost_equal(expected_irradiance_mat,
+                                         np.squeeze(irradiance_mat))
+    # Check invrho_mat
+    expected_invrho_mat = [
+        5., 5., 5., 5.,
+        5., 5., 5., 5.,
+        5., 5., 5., 5.,
+        5., 5., 5., 5.,
+        5., 5., 5., 5.,
+        5., 5., 5., 5.,
+        5., 5., 5., 5.,
+        100., 100., 33.33333333, 33.33333333,
+        100., 100., 33.33333333, 33.33333333,
+        100., 100., 33.33333333, 33.33333333]
+    np.testing.assert_array_almost_equal(np.squeeze(invrho_mat),
+                                         expected_invrho_mat)
     np.testing.assert_almost_equal(
-        pvarray.pvrows[0].front.get_param_weighted('rho'),
+        pvarray.ts_pvrows[0].front.get_param_weighted('rho'),
         params_irr['rho_front_pvrow'])
     np.testing.assert_almost_equal(
-        pvarray.pvrows[0].back.get_param_weighted('rho'),
+        pvarray.ts_pvrows[0].back.get_param_weighted('rho'),
         params_irr['rho_back_pvrow'])
     np.testing.assert_almost_equal(
-        pvarray.ground.get_param_weighted('rho'),
+        pvarray.ts_ground.get_param_weighted('rho'),
         params_irr['rho_ground'])
 
     # Check total perez vec
-    expected_total_perez_vec = [
-        522.618262, 522.618262, 522.618262, 522.618262, 522.618262,
-        100., 104.387248, 0., 0., 104.387248,
-        0., 0., 104.387248, 0., 100.]
-    np.testing.assert_array_almost_equal(total_perez_vec,
-                                         expected_total_perez_vec)
+    expected_total_perez_mat = [
+        100., 100., 100., 100.,
+        100., 100., 100., 100.,
+        100., 100., 100., 100.,
+        522.61826174, 522.61826174, 522.61826174, 522.61826174,
+        522.61826174, 522.61826174, 522.61826174, 522.61826174,
+        522.61826174, 522.61826174, 522.61826174, 522.61826174,
+        522.61826174, 522.61826174, 522.61826174, 522.61826174,
+        104.38724754, 104.38724754, 0., 0.,
+        104.38724754, 104.38724754, 0., 0.,
+        104.38724754, 104.38724754, 0., 0.]
+    np.testing.assert_array_almost_equal(np.squeeze(total_perez_mat),
+                                         expected_total_perez_mat)
 
     # Get ts modeling matrices
     irradiance_mat, rho_mat, invrho_mat, total_perez_mat = \
         irr_model.get_full_ts_modeling_vectors(pvarray)
 
-    list_idx = [surf.index for surf in pvarray.all_ts_surfaces
-                if surf.length[0] > 0] + [-1]
     # check that 2 dimensional
     assert irradiance_mat.shape == (41, 1)
-    # check that values like in previously expected (indices changed), use sum
-    np.testing.assert_allclose(irradiance_mat[list_idx, 0].sum(),
-                               np.sum(expected_irradiance_vec))
 
 
 def test_hybridperez_ordered_front(params_irr):
@@ -267,120 +289,135 @@ def test_hybridperez_ordered_front(params_irr):
     pvarray = OrderedPVArray.fit_from_dict_of_scalars(
         params_irr, param_names=IsotropicOrdered.params)
     irr_model.transform(pvarray)
-    pvarray.transform(idx=0)
 
     # there should be some direct shading
-    assert pvarray.pvrows[0].front.shaded_length
+    assert pvarray.ts_pvrows[0].front.shaded_length
 
     # Get modeling vectors
-    irradiance_vec, rho_vec, invrho_vec, total_perez_vec = \
-        irr_model.get_full_modeling_vectors(pvarray, 0)
+    irradiance_mat, rho_mat, invrho_mat, total_perez_mat = \
+        irr_model.get_ts_modeling_vectors(pvarray)
 
     # Test isotropic_luminance
     np.testing.assert_almost_equal(irr_model.isotropic_luminance,
                                    63.21759296)
     # Check transform
-    expected_irradiance_vec = [
-        459.400669, 459.400669, 459.400669, 459.400669, 459.400669,
-        0., 775.898168, 7.248638, 7.248638, 775.898168,
-        7.248638, 2.145269, 775.898168, 2.145269, 63.217593]
+    expected_irradiance_mat = [
+        0., 0., 0., 0.,
+        0., 0., 0., 0.,
+        0., 0., 0., 0.,
+        459.40066878, 459.40066878, 459.40066878, 459.40066878,
+        459.40066878, 459.40066878, 459.40066878, 459.40066878,
+        459.40066878, 459.40066878, 459.40066878, 459.40066878,
+        459.40066878, 459.40066878, 459.40066878, 459.40066878,
+        775.89816756, 7.24863775, 7.24863775, 7.24863775,
+        775.89816756, 7.24863775, 2.14526923, 0.,
+        775.89816756, 7.24863775, 2.14526923, 0.]
     # pvrow direct
     np.testing.assert_almost_equal(
-        pvarray.pvrows[2].front.get_param_weighted('direct'),
+        pvarray.ts_pvrows[2].front.get_param_weighted('direct'),
         expected_dni_pvrow)
     np.testing.assert_almost_equal(
-        pvarray.pvrows[1].front.list_segments[0]
-        .illum_collection.get_param_weighted('direct'), expected_dni_pvrow)
+        pvarray.ts_pvrows[1].front.list_segments[0]
+        .illum.get_param_weighted('direct'), expected_dni_pvrow)
     np.testing.assert_almost_equal(
-        pvarray.pvrows[1].front.list_segments[0]
-        .shaded_collection.get_param_weighted('direct'), 0.)
+        pvarray.ts_pvrows[1].front.list_segments[0]
+        .shaded.get_param_weighted('direct'), 0.)
     np.testing.assert_almost_equal(
-        pvarray.pvrows[0].back.get_param_weighted('direct'), 0.)
+        pvarray.ts_pvrows[0].back.get_param_weighted('direct'), 0.)
     # pvrow circumsolar
     np.testing.assert_almost_equal(
-        pvarray.pvrows[2].front.get_param_weighted('circumsolar'),
+        pvarray.ts_pvrows[2].front.get_param_weighted('circumsolar'),
         expected_circ_pvrow)
     np.testing.assert_almost_equal(
-        pvarray.pvrows[1].front.list_segments[0]
-        .illum_collection.get_param_weighted('circumsolar'),
+        pvarray.ts_pvrows[1].front.list_segments[0]
+        .illum.get_param_weighted('circumsolar'),
         expected_circ_pvrow)
     np.testing.assert_almost_equal(
-        pvarray.pvrows[1].front.list_segments[0]
-        .shaded_collection.get_param_weighted('circumsolar'), 0.)
+        pvarray.ts_pvrows[1].front.list_segments[0]
+        .shaded.get_param_weighted('circumsolar'), 0.)
     np.testing.assert_almost_equal(
-        pvarray.pvrows[1].back.list_segments[0]
-        .illum_collection.get_param_weighted('circumsolar'), 0.)
+        pvarray.ts_pvrows[1].back.list_segments[0]
+        .illum.get_param_weighted('circumsolar'), 0.)
     # pvrow horizon
     np.testing.assert_almost_equal(
-        pvarray.pvrows[1].front.list_segments[0]
-        .illum_collection.get_param_weighted('horizon'),
+        pvarray.ts_pvrows[1].front.list_segments[0]
+        .illum.get_param_weighted('horizon'),
         expected_hor_pvrow_no_shad)
     np.testing.assert_almost_equal(
-        pvarray.pvrows[1].front.list_segments[0]
-        .shaded_collection.get_param_weighted('horizon'),
+        pvarray.ts_pvrows[1].front.list_segments[0]
+        .shaded.get_param_weighted('horizon'),
         expected_hor_pvrow_no_shad)
     np.testing.assert_almost_equal(
-        pvarray.pvrows[0].back.list_segments[0]
-        .illum_collection.get_param_weighted('horizon'),
+        pvarray.ts_pvrows[0].back.list_segments[0]
+        .illum.get_param_weighted('horizon'),
         expected_hor_pvrow_no_shad)
     np.testing.assert_almost_equal(
-        pvarray.pvrows[1].back.list_segments[0]
-        .illum_collection.get_param_weighted('horizon'),
+        pvarray.ts_pvrows[1].back.list_segments[0]
+        .illum.get_param_weighted('horizon'),
         expected_hor_pvrow_w_shad)
     np.testing.assert_almost_equal(
-        pvarray.pvrows[1].back.list_segments[0]
-        .illum_collection.get_param_weighted('horizon_shd_pct'),
+        pvarray.ts_pvrows[1].back.list_segments[0]
+        .illum.get_param_weighted('horizon_shd_pct'),
         horizon_shading_pct)
     # ground
     np.testing.assert_almost_equal(
-        pvarray.ground.get_param_weighted('horizon'), 0.)
+        pvarray.ts_ground.get_param_weighted('horizon'), 0.)
     np.testing.assert_almost_equal(
-        pvarray.ground.list_segments[0]
-        .illum_collection.get_param_weighted('direct'), expected_dni_ground)
+        pvarray.ts_ground
+        .illum.get_param_weighted('direct'), expected_dni_ground)
     np.testing.assert_almost_equal(
-        pvarray.ground.list_segments[0]
-        .illum_collection.get_param_weighted('circumsolar'),
+        pvarray.ts_ground
+        .illum.get_param_weighted('circumsolar'),
         expected_circ_ground)
     np.testing.assert_almost_equal(
-        pvarray.ground.list_segments[0]
-        .shaded_collection.get_param_weighted('direct'), 0.)
-    np.testing.assert_array_almost_equal(expected_irradiance_vec,
-                                         irradiance_vec)
-    # Check invrho_vec
-    expected_invrho_vec = np.array([
-        5., 5., 5., 5., 5.,
-        5., 100., 100., 33.333333, 100.,
-        100., 33.333333, 100., 33.333333, 1.])
-    np.testing.assert_array_almost_equal(invrho_vec, expected_invrho_vec)
+        pvarray.ts_ground
+        .shaded.get_param_weighted('direct'), 0.)
+    np.testing.assert_array_almost_equal(expected_irradiance_mat,
+                                         np.squeeze(irradiance_mat))
+    # Check invrho_mat
+    expected_invrho_mat = [
+        5., 5., 5., 5.,
+        5., 5., 5., 5.,
+        5., 5., 5., 5.,
+        5., 5., 5., 5.,
+        5., 5., 5., 5.,
+        5., 5., 5., 5.,
+        5., 5., 5., 5.,
+        100., 100., 33.33333333, 33.33333333,
+        100., 100., 33.33333333, 33.33333333,
+        100., 100., 33.33333333, 33.33333333]
+    np.testing.assert_array_almost_equal(np.squeeze(invrho_mat), expected_invrho_mat)
     np.testing.assert_almost_equal(
-        pvarray.pvrows[0].front.get_param_weighted('rho'),
+        pvarray.ts_pvrows[0].front.get_param_weighted('rho'),
         params_irr['rho_front_pvrow'])
     np.testing.assert_almost_equal(
-        pvarray.pvrows[0].back.get_param_weighted('rho'),
+        pvarray.ts_pvrows[0].back.get_param_weighted('rho'),
         params_irr['rho_back_pvrow'])
     np.testing.assert_almost_equal(
-        pvarray.ground.get_param_weighted('rho'),
+        pvarray.ts_ground.get_param_weighted('rho'),
         params_irr['rho_ground'])
 
     # Check total perez vec
-    expected_total_perez_vec = [
-        522.618262, 522.618262, 522.618262, 522.618262, 522.618262,
-        63.217593, 807.243186, 38.593656, 0., 807.243186,
-        38.593656, 0., 807.243186, 0., 63.217593]
-    np.testing.assert_array_almost_equal(total_perez_vec,
-                                         expected_total_perez_vec)
+    expected_total_perez_mat = [
+        63.21759296, 63.21759296, 63.21759296, 63.21759296,
+        63.21759296, 63.21759296, 63.21759296, 63.21759296,
+        63.21759296, 63.21759296, 63.21759296, 63.21759296,
+        522.61826174, 522.61826174, 522.61826174, 522.61826174,
+        522.61826174, 522.61826174, 522.61826174, 522.61826174,
+        522.61826174, 522.61826174, 522.61826174, 522.61826174,
+        522.61826174, 522.61826174, 522.61826174, 522.61826174,
+        807.243186, 38.59365619, 0., 0.,
+        807.243186, 38.59365619, 0., 0.,
+        807.243186, 38.59365619, 0., 0.]
+    np.testing.assert_array_almost_equal(np.squeeze(total_perez_mat),
+                                         expected_total_perez_mat)
 
     # Get ts modeling matrices
     irradiance_mat, rho_mat, invrho_mat, total_perez_mat = \
         irr_model.get_full_ts_modeling_vectors(pvarray)
 
-    list_idx = [surf.index for surf in pvarray.all_ts_surfaces
-                if surf.length[0] > 0] + [-1]
     # check that 2 dimensional
     assert irradiance_mat.shape == (41, 1)
-    # check that values like in previously expected (indices changed), use sum
-    np.testing.assert_allclose(irradiance_mat[list_idx, 0].sum(),
-                               np.sum(expected_irradiance_vec))
 
 
 def test_hybridperez_ordered_back(params_irr):
@@ -423,126 +460,143 @@ def test_hybridperez_ordered_back(params_irr):
     pvarray = OrderedPVArray.fit_from_dict_of_scalars(
         params_irr, param_names=IsotropicOrdered.params)
     irr_model.transform(pvarray)
-    pvarray.transform(idx=0)
 
     # there should be some direct shading
-    assert pvarray.pvrows[0].back.shaded_length
+    assert pvarray.ts_pvrows[0].back.shaded_length
 
     # Get modeling vectors
-    irradiance_vec, rho_vec, invrho_vec, total_perez_vec = \
-        irr_model.get_full_modeling_vectors(pvarray, 0)
+    irradiance_mat, rho_mat, invrho_mat, total_perez_mat = \
+        irr_model.get_ts_modeling_vectors(pvarray)
 
     # Test isotropic_luminance
     np.testing.assert_almost_equal(irr_model.isotropic_luminance,
                                    63.21759296)
     # Check transform
-    expected_irradiance_vec = [
-        459.400669, 459.400669, 459.400669, 459.400669, 459.400669,
-        0., 7.248638, 774.725556, 3.610163, 7.248638,
-        774.725556, 3.610163, 7.248638, 775.898168, 63.217593]
+    expected_irradiance_mat = [
+        0., 0., 0., 0.,
+        0., 0., 0., 0.,
+        0., 0., 0., 0.,
+        459.40066878, 459.40066878, 459.40066878, 459.40066878,
+        459.40066878, 459.40066878, 459.40066878, 459.40066878,
+        459.40066878, 459.40066878, 459.40066878, 459.40066878,
+        459.40066878, 459.40066878, 459.40066878, 459.40066878,
+        7.24863775, 7.24863775, 774.72555557, 3.61016321,
+        7.24863775, 7.24863775, 774.72555557, 3.61016321,
+        7.24863775, 7.24863775, 775.89816756, 7.24863775]
+
     # pvrow direct
     np.testing.assert_almost_equal(
-        pvarray.pvrows[2].back.get_param_weighted('direct'),
+        pvarray.ts_pvrows[2].back.get_param_weighted('direct'),
         expected_dni_pvrow)
     np.testing.assert_almost_equal(
-        pvarray.pvrows[1].back.list_segments[0]
-        .illum_collection.get_param_weighted('direct'), expected_dni_pvrow)
+        pvarray.ts_pvrows[1].back.list_segments[0]
+        .illum.get_param_weighted('direct'), expected_dni_pvrow)
     np.testing.assert_almost_equal(
-        pvarray.pvrows[1].back.list_segments[0]
-        .shaded_collection.get_param_weighted('direct'), 0.)
+        pvarray.ts_pvrows[1].back.list_segments[0]
+        .shaded.get_param_weighted('direct'), 0.)
     np.testing.assert_almost_equal(
-        pvarray.pvrows[0].front.get_param_weighted('direct'), 0.)
+        pvarray.ts_pvrows[0].front.get_param_weighted('direct'), 0.)
     # pvrow circumsolar
     np.testing.assert_almost_equal(
-        pvarray.pvrows[2].back.get_param_weighted('circumsolar'),
+        pvarray.ts_pvrows[2].back.get_param_weighted('circumsolar'),
         expected_circ_pvrow)
     np.testing.assert_almost_equal(
-        pvarray.pvrows[1].back.list_segments[0]
-        .illum_collection.get_param_weighted('circumsolar'),
+        pvarray.ts_pvrows[1].back.list_segments[0]
+        .illum.get_param_weighted('circumsolar'),
         expected_circ_pvrow)
     np.testing.assert_almost_equal(
-        pvarray.pvrows[1].back.list_segments[0]
-        .shaded_collection.get_param_weighted('circumsolar'), 0.)
+        pvarray.ts_pvrows[1].back.list_segments[0]
+        .shaded.get_param_weighted('circumsolar'), 0.)
     np.testing.assert_almost_equal(
-        pvarray.pvrows[1].front.list_segments[0]
-        .illum_collection.get_param_weighted('circumsolar'), 0.)
+        pvarray.ts_pvrows[1].front.list_segments[0]
+        .illum.get_param_weighted('circumsolar'), 0.)
     # pvrow horizon
     np.testing.assert_almost_equal(
-        pvarray.pvrows[1].front.get_param_weighted('horizon'),
+        pvarray.ts_pvrows[1].front.get_param_weighted('horizon'),
         expected_hor_pvrow_no_shad)
     np.testing.assert_almost_equal(
-        pvarray.pvrows[1].back.list_segments[0]
-        .illum_collection.get_param_weighted('horizon'),
+        pvarray.ts_pvrows[1].back.list_segments[0]
+        .illum.get_param_weighted('horizon'),
         expected_hor_pvrow_w_shad_1)
     np.testing.assert_almost_equal(
-        pvarray.pvrows[1].back.list_segments[0]
-        .shaded_collection.get_param_weighted('horizon'),
+        pvarray.ts_pvrows[1].back.list_segments[0]
+        .shaded.get_param_weighted('horizon'),
         expected_hor_pvrow_w_shad_2)
     np.testing.assert_almost_equal(
-        pvarray.pvrows[0].back.list_segments[0]
-        .illum_collection.get_param_weighted('horizon'),
+        pvarray.ts_pvrows[0].back.list_segments[0]
+        .illum.get_param_weighted('horizon'),
         expected_hor_pvrow_w_shad_1)
     np.testing.assert_almost_equal(
-        pvarray.pvrows[0].back.list_segments[0]
-        .shaded_collection.get_param_weighted('horizon'),
+        pvarray.ts_pvrows[0].back.list_segments[0]
+        .shaded.get_param_weighted('horizon'),
         expected_hor_pvrow_w_shad_2)
     np.testing.assert_almost_equal(
-        pvarray.pvrows[1].back.list_segments[0]
-        .illum_collection.get_param_weighted('horizon_shd_pct'),
+        pvarray.ts_pvrows[1].back.list_segments[0]
+        .illum.get_param_weighted('horizon_shd_pct'),
         horizon_shading_pct_1)
     np.testing.assert_almost_equal(
-        pvarray.pvrows[1].back.list_segments[0]
-        .shaded_collection.get_param_weighted('horizon_shd_pct'),
+        pvarray.ts_pvrows[1].back.list_segments[0]
+        .shaded.get_param_weighted('horizon_shd_pct'),
         horizon_shading_pct_2)
     # ground
     np.testing.assert_almost_equal(
-        pvarray.ground.get_param_weighted('horizon'), 0.)
+        pvarray.ts_ground.get_param_weighted('horizon'), 0.)
     np.testing.assert_almost_equal(
-        pvarray.ground.list_segments[0]
-        .illum_collection.get_param_weighted('direct'), expected_dni_ground)
+        pvarray.ts_ground
+        .illum.get_param_weighted('direct'), expected_dni_ground)
     np.testing.assert_almost_equal(
-        pvarray.ground.list_segments[0]
-        .illum_collection.get_param_weighted('circumsolar'),
+        pvarray.ts_ground
+        .illum.get_param_weighted('circumsolar'),
         expected_circ_ground)
     np.testing.assert_almost_equal(
-        pvarray.ground.list_segments[0]
-        .shaded_collection.get_param_weighted('direct'), 0.)
-    np.testing.assert_array_almost_equal(expected_irradiance_vec,
-                                         irradiance_vec)
-    # Check invrho_vec
-    expected_invrho_vec = np.array([5., 5., 5., 5., 5.,
-                                    5., 100., 33.333333, 33.333333, 100.,
-                                    33.333333, 33.333333, 100., 33.333333, 1.])
-    np.testing.assert_array_almost_equal(invrho_vec, expected_invrho_vec)
+        pvarray.ts_ground
+        .shaded.get_param_weighted('direct'), 0.)
+    np.testing.assert_array_almost_equal(expected_irradiance_mat,
+                                         np.squeeze(irradiance_mat))
+    # Check invrho_mat
+    expected_invrho_mat = [
+        5., 5., 5., 5.,
+        5., 5., 5., 5.,
+        5., 5., 5., 5.,
+        5., 5., 5., 5.,
+        5., 5., 5., 5.,
+        5., 5., 5., 5.,
+        5., 5., 5., 5.,
+        100., 100., 33.33333333, 33.33333333,
+        100., 100., 33.33333333, 33.33333333,
+        100., 100., 33.33333333, 33.33333333]
+    np.testing.assert_array_almost_equal(np.squeeze(invrho_mat), expected_invrho_mat)
     np.testing.assert_almost_equal(
-        pvarray.pvrows[0].front.get_param_weighted('rho'),
+        pvarray.ts_pvrows[0].front.get_param_weighted('rho'),
         params_irr['rho_front_pvrow'])
     np.testing.assert_almost_equal(
-        pvarray.pvrows[0].back.get_param_weighted('rho'),
+        pvarray.ts_pvrows[0].back.get_param_weighted('rho'),
         params_irr['rho_back_pvrow'])
     np.testing.assert_almost_equal(
-        pvarray.ground.get_param_weighted('rho'),
+        pvarray.ts_ground.get_param_weighted('rho'),
         params_irr['rho_ground'])
 
     # Check total perez vec
-    expected_total_perez_vec = [
-        522.618262, 522.618262, 522.618262, 522.618262, 522.618262,
-        63.217593, 104.387248, 0., 0., 104.387248,
-        0., 0., 104.387248, 0., 63.217593]
-    np.testing.assert_array_almost_equal(total_perez_vec,
-                                         expected_total_perez_vec)
+    expected_total_perez_mat = [
+        63.21759296, 63.21759296, 63.21759296, 63.21759296,
+        63.21759296, 63.21759296, 63.21759296, 63.21759296,
+        63.21759296, 63.21759296, 63.21759296, 63.21759296,
+        522.61826174, 522.61826174, 522.61826174, 522.61826174,
+        522.61826174, 522.61826174, 522.61826174, 522.61826174,
+        522.61826174, 522.61826174, 522.61826174, 522.61826174,
+        522.61826174, 522.61826174, 522.61826174, 522.61826174,
+        104.38724754, 104.38724754, 0., 0.,
+        104.38724754, 104.38724754, 0., 0.,
+        104.38724754, 104.38724754, 0., 0.]
+    np.testing.assert_array_almost_equal(np.squeeze(total_perez_mat),
+                                         expected_total_perez_mat)
 
     # Get ts modeling matrices
     irradiance_mat, rho_mat, invrho_mat, total_perez_mat = \
         irr_model.get_full_ts_modeling_vectors(pvarray)
 
-    list_idx = [surf.index for surf in pvarray.all_ts_surfaces
-                if surf.length[0] > 0] + [-1]
     # check that 2 dimensional
     assert irradiance_mat.shape == (41, 1)
-    # check that values like in previously expected (indices changed), use sum
-    np.testing.assert_allclose(irradiance_mat[list_idx, 0].sum(),
-                               np.sum(expected_irradiance_vec))
 
 
 def test_hybridperez_circ_shading():
@@ -636,9 +690,11 @@ def test_hybridperez_transform(df_inputs_clearsky_8760):
          0., 0.8244883, 4.43051118, 6.12136418, 6.03641816, 2.75109931,
          3.15586037, 6.14709947, 6.02242241, 4.25283177, 0.58518296, 0.,
          0., 0., 0., 0., 0., 0.])
+    list_idx = np.where(expected_middle_back_horizon != 0)
     np.testing.assert_allclose(
-        expected_middle_back_horizon,
-        pvarray.ts_pvrows[1].back.list_segments[0].illum.params['horizon'])
+        expected_middle_back_horizon[list_idx],
+        pvarray.ts_pvrows[1].back.list_segments[0]
+        .illum.get_param_weighted('horizon')[list_idx])
 
     expected_ground_circ = np.array(
         [0., 0., 0., 0., 0.,
@@ -656,8 +712,8 @@ def test_hybridperez_transform(df_inputs_clearsky_8760):
     # Check at a given time idx
     pvrow = pvarray.ts_pvrows[1].at(7)
     np.testing.assert_allclose(
-        pvrow.back.list_segments[0].illum_collection
-        .get_param_weighted('horizon'),
+        pvrow.back.list_segments[0]
+        .illum_collection.get_param_weighted('horizon'),
         expected_middle_back_horizon[7])
     pvground = pvarray.ts_ground.at(7)
     np.testing.assert_allclose(
@@ -689,25 +745,24 @@ def test_hybridperez_ordered_transparency_spacing_front(params_irr):
     pvarray = OrderedPVArray.fit_from_dict_of_scalars(
         params_irr, param_names=IsotropicOrdered.params)
     irr_model.transform(pvarray)
-    pvarray.transform(idx=0)
 
-    gnd_seg = pvarray.ground.list_segments[0]
-    pvrow_front = pvarray.pvrows[1].front
+    gnd_seg = pvarray.ts_ground
+    pvrow_front = pvarray.ts_pvrows[1].front
     # check that front is shaded
     assert pvrow_front.shaded_length > 0
 
     # Run some checks
-    surf_gnd_shaded = gnd_seg.shaded_collection.list_surfaces[0]
-    surf_gnd_illum = gnd_seg.illum_collection.list_surfaces[0]
+    surf_gnd_shaded = gnd_seg.shaded.list_ts_surfaces[0]
+    surf_gnd_illum = gnd_seg.illum.list_ts_surfaces[0]
     np.testing.assert_allclose(surf_gnd_illum.get_param('circumsolar') * 0.19,
                                surf_gnd_shaded.get_param('circumsolar'))
     np.testing.assert_allclose(surf_gnd_illum.get_param('direct') * 0.19,
                                surf_gnd_shaded.get_param('direct'))
     # Run check on pvrow surfaces
     surf_pvrow_shaded = (pvrow_front.list_segments[0]
-                         .shaded_collection.list_surfaces[0])
+                         .shaded.list_ts_surfaces[0])
     surf_pvrow_illum = (pvrow_front.list_segments[0]
-                        .illum_collection.list_surfaces[0])
+                        .illum.list_ts_surfaces[0])
     np.testing.assert_allclose(surf_pvrow_illum.get_param('direct') * 0.19,
                                surf_pvrow_shaded.get_param('direct'))
     np.testing.assert_allclose(
@@ -740,25 +795,24 @@ def test_hybridperez_ordered_transparency_spacing_back(params_irr):
     pvarray = OrderedPVArray.fit_from_dict_of_scalars(
         params_irr, param_names=IsotropicOrdered.params)
     irr_model.transform(pvarray)
-    pvarray.transform(idx=0)
 
-    gnd_seg = pvarray.ground.list_segments[0]
-    pvrow_back = pvarray.pvrows[1].back
+    gnd_seg = pvarray.ts_ground
+    pvrow_back = pvarray.ts_pvrows[1].back
     # check that back is shaded
     assert pvrow_back.shaded_length > 0
 
     # Run some checks on gnd surfaces
-    surf_gnd_shaded = gnd_seg.shaded_collection.list_surfaces[0]
-    surf_gnd_illum = gnd_seg.illum_collection.list_surfaces[0]
+    surf_gnd_shaded = gnd_seg.shaded.list_ts_surfaces[0]
+    surf_gnd_illum = gnd_seg.illum.list_ts_surfaces[0]
     np.testing.assert_allclose(surf_gnd_illum.get_param('circumsolar') * 0.19,
                                surf_gnd_shaded.get_param('circumsolar'))
     np.testing.assert_allclose(surf_gnd_illum.get_param('direct') * 0.19,
                                surf_gnd_shaded.get_param('direct'))
     # Run check on pvrow surfaces
     surf_pvrow_shaded = (pvrow_back.list_segments[0]
-                         .shaded_collection.list_surfaces[0])
+                         .shaded.list_ts_surfaces[0])
     surf_pvrow_illum = (pvrow_back.list_segments[0]
-                        .illum_collection.list_surfaces[0])
+                        .illum.list_ts_surfaces[0])
     np.testing.assert_allclose(surf_pvrow_illum.get_param('direct') * 0.19,
                                surf_pvrow_shaded.get_param('direct'))
     np.testing.assert_allclose(
@@ -788,22 +842,21 @@ def test_isotropic_ordered_transparency_spacing(params_irr):
     pvarray = OrderedPVArray.fit_from_dict_of_scalars(
         params_irr, param_names=IsotropicOrdered.params)
     irr_model.transform(pvarray)
-    pvarray.transform(idx=0)
 
-    gnd_seg = pvarray.ground.list_segments[0]
-    pvrow_front = pvarray.pvrows[1].front
+    gnd_seg = pvarray.ts_ground
+    pvrow_front = pvarray.ts_pvrows[1].front
     # check that front is shaded
     assert pvrow_front.shaded_length > 0
 
     # Run some checks
-    surf_gnd_shaded = gnd_seg.shaded_collection.list_surfaces[0]
-    surf_gnd_illum = gnd_seg.illum_collection.list_surfaces[0]
+    surf_gnd_shaded = gnd_seg.shaded.list_ts_surfaces[0]
+    surf_gnd_illum = gnd_seg.illum.list_ts_surfaces[0]
     np.testing.assert_allclose(surf_gnd_illum.get_param('direct') * 0.19,
                                surf_gnd_shaded.get_param('direct'))
     # Run check on pvrow surfaces
     surf_pvrow_shaded = (pvrow_front.list_segments[0]
-                         .shaded_collection.list_surfaces[0])
+                         .shaded.list_ts_surfaces[0])
     surf_pvrow_illum = (pvrow_front.list_segments[0]
-                        .illum_collection.list_surfaces[0])
+                        .illum.list_ts_surfaces[0])
     np.testing.assert_allclose(surf_pvrow_illum.get_param('direct') * 0.19,
                                surf_pvrow_shaded.get_param('direct'))

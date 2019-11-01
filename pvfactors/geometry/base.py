@@ -1,7 +1,6 @@
 """Base classes for pvfactors geometry subpackage."""
 
 import numpy as np
-import pandas as pd
 from pvfactors import PVFactorsError
 from pvfactors.config import (
     DEFAULT_NORMAL_VEC, COLOR_DIC, DISTANCE_TOLERANCE, PLOT_FONTSIZE,
@@ -616,10 +615,12 @@ class PVSegment(GeometryCollection):
 
         Parameters
         ----------
-        illum_collection : :py:class:`~pvfactors.geometry.base.ShadeCollection`, optional
+        illum_collection : \
+        :py:class:`~pvfactors.geometry.base.ShadeCollection`, optional
             Illuminated collection of the PV segment (Default = empty shade
             collection with no shading)
-        shaded_collection : :py:class:`~pvfactors.geometry.base.ShadeCollection`, optional
+        shaded_collection : \
+        :py:class:`~pvfactors.geometry.base.ShadeCollection`, optional
             Shaded collection of the PV segment (Default = empty shade
             collection with shading)
         index : int, optional
@@ -640,9 +641,11 @@ class PVSegment(GeometryCollection):
 
         Parameters
         ----------
-        illum_collection : :py:class:`~pvfactors.geometry.base.ShadeCollection`, optional
+        illum_collection :
+        :py:class:`~pvfactors.geometry.base.ShadeCollection`, optional
             Illuminated collection
-        shaded_collection : :py:class:`~pvfactors.geometry.base.ShadeCollection`, optional
+        shaded_collection :
+        :py:class:`~pvfactors.geometry.base.ShadeCollection`, optional
             Shaded collection
 
         Raises
@@ -907,7 +910,7 @@ class PVSegment(GeometryCollection):
 
         Returns
         -------
-        list of :py:class:`pvfactors.geometry.base.PVSurface`
+        list of :py:class:`~pvfactors.geometry.base.PVSurface`
             PV surfaces in the PV segment
         """
         if self._all_surfaces is None:
@@ -926,7 +929,7 @@ class BaseSide(GeometryCollection):
 
         Parameters
         ----------
-        list_segments : list of :py:class:`pvfactors.geometry.base.PVSegment`, optional
+        list_segments : list of :py:class:`~pvfactors.geometry.base.PVSegment`, optional
             List of PV segments for side (Default = None)
         """
         list_segments = [] if list_segments is None else list_segments
@@ -1144,39 +1147,32 @@ class BasePVArray(object):
         # All PV arrays should have a fixed axis azimuth in pvfactors
         self.axis_azimuth = axis_azimuth
 
-        # Initialize view factor matrix: will be calculated externally,
-        # i.e. not by the PV Array class itself
-        self.vf_matrix = None
+        # The are required attributes of any PV array
+        self.ts_pvrows = None
+        self.ts_ground = None
 
-    def plot(self, ax, with_index=False):
-        """Plot all the PV rows and the ground in the PV array.
+    @property
+    def n_ts_surfaces(self):
+        """Number of timeseries surfaces in the PV array."""
+        n_ts_surfaces = 0
+        n_ts_surfaces += self.ts_ground.n_ts_surfaces
+        for ts_pvrow in self.ts_pvrows:
+            n_ts_surfaces += ts_pvrow.n_ts_surfaces
+        return n_ts_surfaces
 
-        Parameters
-        ----------
-        ax : :py:class:`matplotlib.pyplot.axes` object
-            Axes for plotting
-        with_index : bool
-            Flag to annotate surfaces with their indices (Default = False)
-        """
-        # Plot pv array structures
-        self.ground.plot(ax, color_shaded=COLOR_DIC['ground_shaded'],
-                         color_illum=COLOR_DIC['ground_illum'],
-                         with_index=with_index)
-        for pvrow in self.pvrows:
-            pvrow.plot(ax, color_shaded=COLOR_DIC['pvrow_shaded'],
-                       color_illum=COLOR_DIC['pvrow_illum'],
-                       with_index=with_index)
+    @property
+    def all_ts_surfaces(self):
+        """List of all timeseries surfaces in PV array"""
+        all_ts_surfaces = []
+        all_ts_surfaces += self.ts_ground.all_ts_surfaces
+        for ts_pvrow in self.ts_pvrows:
+            all_ts_surfaces += ts_pvrow.all_ts_surfaces
+        return all_ts_surfaces
 
-        # Plot formatting
-        ax.axis('equal')
-        if self.distance is not None:
-            n_pvrows = self.n_pvrows
-            ax.set_xlim(- 0.5 * self.distance,
-                        (n_pvrows - 0.5) * self.distance)
-        if self.height is not None:
-            ax.set_ylim(- self.height, 2 * self.height)
-        ax.set_xlabel("x [m]", fontsize=PLOT_FONTSIZE)
-        ax.set_ylabel("y [m]", fontsize=PLOT_FONTSIZE)
+    @property
+    def ts_surface_indices(self):
+        """List of indices of all the timeseries surfaces"""
+        return [ts_surf.index for ts_surf in self.all_ts_surfaces]
 
     def plot_at_idx(self, idx, ax, merge_if_flag_overlap=True,
                     with_cut_points=True, x_min_max=None):
@@ -1223,218 +1219,22 @@ class BasePVArray(object):
         ax.set_xlabel("x [m]", fontsize=PLOT_FONTSIZE)
         ax.set_ylabel("y [m]", fontsize=PLOT_FONTSIZE)
 
-    @property
-    def all_surfaces(self):
-        """List of all surfaces in the PV array."""
-        list_surfaces = []
-        list_surfaces += self.ground.all_surfaces
-        for pvrow in self.pvrows:
-            list_surfaces += pvrow.all_surfaces
-        return list_surfaces
-
-    @property
-    def n_surfaces(self):
-        """Number of surfaces in the PV array."""
-        n_surfaces = 0
-        n_surfaces += self.ground.n_surfaces
-        for pvrow in self.pvrows:
-            n_surfaces += pvrow.front.n_surfaces
-            n_surfaces += pvrow.back.n_surfaces
-        return n_surfaces
-
-    @property
-    def n_ts_surfaces(self):
-        """Number of timeseries surfaces in the PV array."""
-        n_ts_surfaces = 0
-        n_ts_surfaces += self.ts_ground.n_ts_surfaces
-        for ts_pvrow in self.ts_pvrows:
-            n_ts_surfaces += ts_pvrow.n_ts_surfaces
-        return n_ts_surfaces
-
-    @property
-    def all_ts_surfaces(self):
-        """List of all timeseries surfaces in PV array"""
-        all_ts_surfaces = []
-        all_ts_surfaces += self.ts_ground.all_ts_surfaces
-        for ts_pvrow in self.ts_pvrows:
-            all_ts_surfaces += ts_pvrow.all_ts_surfaces
-        return all_ts_surfaces
-
-    @property
-    def surface_registry(self):
-        """Surface registry of the PV array, build if does not exist yet.
-        The surface registry is a pandas DataFrame that contains all the
-        indexed surfaces of the PV array, with some of their properties."""
-        return self._build_surface_registry()
-
-    @property
-    def view_obstr_matrices(self):
-        """How to build the view matrix will be specific to the pv array
-        considered, so ``_build_view_matrix()`` needs to be implemented in
-        the child class.
-        The view matrix will represent the views between all the surfaces.
-        The obstruction matrix will represent the obstructions in views
-        between all the surfaces."""
-        return self._build_view_matrix()
-
-    @property
-    def view_matrix(self):
-        """How to build the view matrix will be specific to the pv array
-        considered, so ``_build_view_matrix()`` needs to be implemented in
-        the child class.
-        The view matrix will represent the views between all the surfaces."""
-        view_matrix, _ = self._build_view_matrix()
-        return view_matrix
-
-    @property
-    def obstr_matrix(self):
-        """How to build the obstruction matrix will be specific to the pv array
-        considered, so ``_build_view_matrix()`` needs to be implemented in
-        the child class.
-        The obstruction matrix will represent the obstructions in views
-        between all the surfaces."""
-        _, obstr_matrix = self._build_view_matrix()
-        return obstr_matrix
-
-    @property
-    def surface_indices(self):
-        """List of all the surfaces in the PV array."""
-        list_indices = []
-        list_indices += self.ground.surface_indices
-        for pvrow in self.pvrows:
-            list_indices += pvrow.surface_indices
-        return list_indices
-
-    @property
-    def dict_surfaces(self):
-        """Dictionay of surfaces in the PV array, where keys are the surface
-        indices."""
-        self.index_all_surfaces()
-        return {surf.index: surf for surf in self.all_surfaces}
-
-    @property
-    def dict_ts_surfaces(self):
-        """Dictionay of timeseries surfaces in the PV array, where keys are
-        the surface indices."""
-        return {ts_surf.index: ts_surf for ts_surf in self.all_ts_surfaces}
+    def fit(self, *args, **kwargs):
+        """Not implemented."""
+        raise NotImplementedError
 
     def update_params(self, new_dict):
-        """Update surface parameters in the collection.
-
+        """Update timeseries surface parameters in the collection.
         Parameters
         ----------
         new_dict : dict
             Parameters to add or update for the surfaces
         """
-        self.ground.update_params(new_dict)
-        for pvrow in self.pvrows:
-            pvrow.update_params(new_dict)
-
-    def index_all_surfaces(self):
-        """Add unique indices to all surfaces in the PV array."""
-        for idx, surface in enumerate(self.all_surfaces):
-            surface.index = idx
+        self.ts_ground.update_params(new_dict)
+        for ts_pvrow in self.ts_pvrows:
+            ts_pvrow.update_params(new_dict)
 
     def _index_all_ts_surfaces(self):
         """Add unique indices to all surfaces in the PV array."""
         for idx, ts_surface in enumerate(self.all_ts_surfaces):
             ts_surface.index = idx
-
-    def _build_view_matrix(self, *args, **kwargs):
-        """Not implemented."""
-        raise NotImplementedError
-
-    def _build_surface_registry(self):
-        """Build the surface registry of the PV array, which is a
-        pandas DataFrame with most of the geometry information contained
-        in the class object"""
-        dict_registry = {k: [] for k in self.registry_cols}
-        # Fill up registry with ground surfaces
-        surf_line_type = 'ground'
-        pvrow_index = np.nan
-        side = np.nan
-        for idx_seg, gnd_seg in enumerate(self.ground.list_segments):
-            pvsegment_index = idx_seg
-            # Illuminated collection
-            shaded = False
-            for surf in gnd_seg.illum_collection.list_surfaces:
-                dict_registry['line_type'].append(surf_line_type)
-                dict_registry['pvsegment_index'].append(pvsegment_index)
-                dict_registry['pvrow_index'].append(pvrow_index)
-                dict_registry['side'].append(side)
-                dict_registry['shaded'].append(shaded)
-                dict_registry['geom'].append(surf)
-                dict_registry['surface_index'].append(surf.index)
-            shaded = True
-            for surf in gnd_seg.shaded_collection.list_surfaces:
-                dict_registry['line_type'].append(surf_line_type)
-                dict_registry['pvsegment_index'].append(pvsegment_index)
-                dict_registry['pvrow_index'].append(pvrow_index)
-                dict_registry['side'].append(side)
-                dict_registry['shaded'].append(shaded)
-                dict_registry['geom'].append(surf)
-                dict_registry['surface_index'].append(surf.index)
-        # Fill up registry with pvrow surfaces
-        surf_line_type = 'pvrow'
-        for idx_pvrow, pvrow in enumerate(self.pvrows):
-            pvrow_index = idx_pvrow
-            # Front side
-            side = 'front'
-            for idx_seg, seg in enumerate(pvrow.front.list_segments):
-                pvsegment_index = idx_seg
-                # Illuminated
-                shaded = False
-                for surf in seg.illum_collection.list_surfaces:
-                    dict_registry['line_type'].append(surf_line_type)
-                    dict_registry['pvsegment_index'].append(pvsegment_index)
-                    dict_registry['pvrow_index'].append(pvrow_index)
-                    dict_registry['side'].append(side)
-                    dict_registry['shaded'].append(shaded)
-                    dict_registry['geom'].append(surf)
-                    dict_registry['surface_index'].append(surf.index)
-                # Shaded
-                shaded = True
-                for surf in seg.shaded_collection.list_surfaces:
-                    dict_registry['line_type'].append(surf_line_type)
-                    dict_registry['pvsegment_index'].append(pvsegment_index)
-                    dict_registry['pvrow_index'].append(pvrow_index)
-                    dict_registry['side'].append(side)
-                    dict_registry['shaded'].append(shaded)
-                    dict_registry['geom'].append(surf)
-                    dict_registry['surface_index'].append(surf.index)
-            # Back side
-            side = 'back'
-            for idx_seg, seg in enumerate(pvrow.back.list_segments):
-                pvsegment_index = idx_seg
-                # Illuminated
-                shaded = False
-                for surf in seg.illum_collection.list_surfaces:
-                    dict_registry['line_type'].append(surf_line_type)
-                    dict_registry['pvsegment_index'].append(pvsegment_index)
-                    dict_registry['pvrow_index'].append(pvrow_index)
-                    dict_registry['side'].append(side)
-                    dict_registry['shaded'].append(shaded)
-                    dict_registry['geom'].append(surf)
-                    dict_registry['surface_index'].append(surf.index)
-                # Shaded
-                shaded = True
-                for surf in seg.shaded_collection.list_surfaces:
-                    dict_registry['line_type'].append(surf_line_type)
-                    dict_registry['pvsegment_index'].append(pvsegment_index)
-                    dict_registry['pvrow_index'].append(pvrow_index)
-                    dict_registry['side'].append(side)
-                    dict_registry['shaded'].append(shaded)
-                    dict_registry['geom'].append(surf)
-                    dict_registry['surface_index'].append(surf.index)
-
-        # Make dataframe
-        surface_registry = pd.DataFrame.from_dict(dict_registry)
-        return surface_registry
-
-    def fit(self, *args, **kwargs):
-        """Not implemented."""
-        raise NotImplementedError
-
-    def transform(self, *args, **kwargs):
-        """Not implemented."""
-        raise NotImplementedError

@@ -1,5 +1,4 @@
 """This module contains the default values and constants used in pvfactors """
-from future.utils import iteritems
 import numpy as np
 
 # Geometry params
@@ -30,25 +29,6 @@ ALPHA_TEXT = 0.20
 # Tolerance and thresholds to use from experience getting errors with shapely
 DISTANCE_TOLERANCE = 1e-8
 THRESHOLD_DISTANCE_TOO_CLOSE = 1e-10
-
-
-# The view dictionaries associate integer indices to 'types' of views. For
-# instance "ground_sky" would be the view between a ground surface and the
-# sky, and it would use the integer index ``1``.
-VIEW_DICT = {
-    None: 0,
-    "ground_sky": 1,
-    "back_gnd": 2,
-    "gnd_back": 3,
-    "front_sky": 4,
-    "back_sky": 5,
-    "back_gnd_obst": 6,
-    "gnd_back_obst": 7,
-    "front_gnd_obst": 8,
-    "gnd_front_obst": 9,
-    "pvrows": 10}
-REVERSE_VIEW_DICT = {v: k for (k, v) in iteritems(VIEW_DICT)}
-THRESHOLD_VF_12 = 5e-5
 
 
 # Gaussian shading default parameters: TOTAL_GAUSSIAN_AREA dependent on these

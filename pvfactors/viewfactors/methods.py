@@ -1,4 +1,4 @@
-"""Module with timeseries view factor calculation tools"""
+"""Module with view factor calculation tools"""
 
 from pvfactors.config import MIN_X_GROUND, MAX_X_GROUND, DISTANCE_TOLERANCE
 from pvfactors.geometry.timeseries import TsLineCoords, TsPointCoords

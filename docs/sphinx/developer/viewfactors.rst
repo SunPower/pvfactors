@@ -19,12 +19,11 @@ calculator
    :nosignatures:
 
    calculator.VFCalculator
-   calculator.VFTsMethods
 
-mapper
-^^^^^^
+methods
+^^^^^^^
 
-.. automodule:: mapper
+.. automodule:: methods
    :no-members:
    :no-inherited-members:
 
@@ -32,4 +31,4 @@ mapper
    :toctree: generated/
    :nosignatures:
 
-   mapper.VFMapperOrderedPVArray
+   methods.VFTsMethods

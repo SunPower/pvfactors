@@ -1,4 +1,4 @@
-from pvfactors.viewfactors.timeseries import VFTsMethods
+from pvfactors.viewfactors.methods import VFTsMethods
 import numpy as np
 
 
