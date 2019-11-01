@@ -474,11 +474,9 @@ class TsSegment(object):
     """A TsSegment is a timeseries segment that has a timeseries shaded
     collection and a timeseries illuminated collection."""
 
-    n_ts_surfaces = 2  # an illuminated and a shaded ts surface
-
     def __init__(self, coords, illum_collection, shaded_collection,
                  index=None, n_vector=None):
-        """Initialize timeseries dual segment using segment coordinates and
+        """Initialize timeseries segment using segment coordinates and
         timeseries illuminated and shaded surfaces.
 
         Parameters
@@ -607,7 +605,6 @@ class TsSegment(object):
         np.ndarray
             Timeseries parameter values multiplied by weights
         """
-
         return self.illum.get_param_ww(param) + self.shaded.get_param_ww(param)
 
     def update_params(self, new_dict):
@@ -633,8 +630,13 @@ class TsSegment(object):
 
     @property
     def all_ts_surfaces(self):
-        """List of all timeseries surfaces in dual segment"""
+        """List of all timeseries surfaces in segment"""
         return self.illum.list_ts_surfaces + self.shaded.list_ts_surfaces
+
+    @property
+    def n_ts_surfaces(self):
+        """Number of timeseries surfaces in the segment"""
+        return self.illum.n_ts_surfaces + self.shaded.n_ts_surfaces
 
 
 class TsShadeCollection(object):
@@ -650,16 +652,21 @@ class TsShadeCollection(object):
     def list_ts_surfaces(self):
         return self._list_ts_surfaces
 
-    def add(self, new_list_ts_surfaces):
-        # TODO: need to check that all new surfaces have same shading status
-        self._list_ts_surfaces += new_list_ts_surfaces
-
     @property
     def length(self):
         length = 0.
         for ts_surf in self._list_ts_surfaces:
             length += ts_surf.length
         return length
+
+    @property
+    def n_ts_surfaces(self):
+        """Number of timeseries surfaces in the collection"""
+        return len(self._list_ts_surfaces)
+
+    def add(self, new_list_ts_surfaces):
+        # TODO: need to check that all new surfaces have same shading status
+        self._list_ts_surfaces += new_list_ts_surfaces
 
     def get_param_weighted(self, param):
         """Get timeseries parameter for the collection, after weighting by
@@ -754,8 +761,19 @@ class TsGround(object):
         y_ground : float, optional
             Y coordinate of flat ground [m] (Default=None)
         """
+        # Lists of timeseries ground elements
         self.shadow_elements = shadow_elements
         self.illum_elements = illum_elements
+        # Shade collections
+        list_shaded_surf = []
+        list_illum_surf = []
+        for shadow_el in shadow_elements:
+            list_shaded_surf += shadow_el.all_ts_surfaces
+        for illum_el in illum_elements:
+            list_illum_surf += illum_el.all_ts_surfaces
+        self.illum = TsShadeCollection(list_illum_surf, False)
+        self.shaded = TsShadeCollection(list_shaded_surf, True)
+        # Other ground attributes
         self.param_names = [] if param_names is None else param_names
         self.flag_overlap = flag_overlap
         self.cut_point_coords = [] if cut_point_coords is None \
