@@ -641,19 +641,32 @@ class TsSegment(object):
 
 class TsShadeCollection(object):
     """Collection of timeseries surfaces that are all either shaded or
-    illuminated"""
+    illuminated. This will be used by both ground and PV row
+    geometries."""
 
     def __init__(self, list_ts_surfaces, shaded):
+        """Initialize using list of surfaces and shading status
+
+        Parameters
+        ----------
+        list_ts_surfaces :
+        list of :py:class:`~pvfactors.geometry.timeseries.TsSurface`
+            List of timeseries surfaces in collection
+        shaded : bool
+            Shading status of the collection
+        """
         self._list_ts_surfaces = list_ts_surfaces
         self.shaded = shaded
         # TODO: maybe the ts surfaces should have a "shaded" attribute
 
     @property
     def list_ts_surfaces(self):
+        """List of timeseries surfaces in collection"""
         return self._list_ts_surfaces
 
     @property
     def length(self):
+        """Total length of the collection"""
         length = 0.
         for ts_surf in self._list_ts_surfaces:
             length += ts_surf.length
@@ -663,10 +676,6 @@ class TsShadeCollection(object):
     def n_ts_surfaces(self):
         """Number of timeseries surfaces in the collection"""
         return len(self._list_ts_surfaces)
-
-    def add(self, new_list_ts_surfaces):
-        # TODO: need to check that all new surfaces have same shading status
-        self._list_ts_surfaces += new_list_ts_surfaces
 
     def get_param_weighted(self, param):
         """Get timeseries parameter for the collection, after weighting by
