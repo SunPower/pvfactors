@@ -1224,25 +1224,6 @@ class BasePVArray(object):
         ax.set_ylabel("y [m]", fontsize=PLOT_FONTSIZE)
 
     @property
-    def all_surfaces(self):
-        """List of all surfaces in the PV array."""
-        list_surfaces = []
-        list_surfaces += self.ground.all_surfaces
-        for pvrow in self.pvrows:
-            list_surfaces += pvrow.all_surfaces
-        return list_surfaces
-
-    @property
-    def n_surfaces(self):
-        """Number of surfaces in the PV array."""
-        n_surfaces = 0
-        n_surfaces += self.ground.n_surfaces
-        for pvrow in self.pvrows:
-            n_surfaces += pvrow.front.n_surfaces
-            n_surfaces += pvrow.back.n_surfaces
-        return n_surfaces
-
-    @property
     def n_ts_surfaces(self):
         """Number of timeseries surfaces in the PV array."""
         n_ts_surfaces = 0
@@ -1260,49 +1241,15 @@ class BasePVArray(object):
             all_ts_surfaces += ts_pvrow.all_ts_surfaces
         return all_ts_surfaces
 
-    @property
-    def surface_indices(self):
-        """List of all the surfaces in the PV array."""
-        list_indices = []
-        list_indices += self.ground.surface_indices
-        for pvrow in self.pvrows:
-            list_indices += pvrow.surface_indices
-        return list_indices
-
-    @property
-    def dict_surfaces(self):
-        """Dictionay of surfaces in the PV array, where keys are the surface
-        indices."""
-        self.index_all_surfaces()
-        return {surf.index: surf for surf in self.all_surfaces}
-
-    @property
-    def dict_ts_surfaces(self):
-        """Dictionay of timeseries surfaces in the PV array, where keys are
-        the surface indices."""
-        return {ts_surf.index: ts_surf for ts_surf in self.all_ts_surfaces}
-
-    def update_params(self, new_dict):
-        """Update surface parameters in the collection.
-
-        Parameters
-        ----------
-        new_dict : dict
-            Parameters to add or update for the surfaces
-        """
-        self.ground.update_params(new_dict)
-        for pvrow in self.pvrows:
-            pvrow.update_params(new_dict)
-
-    def index_all_surfaces(self):
-        """Add unique indices to all surfaces in the PV array."""
-        for idx, surface in enumerate(self.all_surfaces):
-            surface.index = idx
-
     def _index_all_ts_surfaces(self):
         """Add unique indices to all surfaces in the PV array."""
         for idx, ts_surface in enumerate(self.all_ts_surfaces):
             ts_surface.index = idx
+
+    @property
+    def ts_surface_indices(self):
+        """List of indices of all the timeseries surfaces"""
+        return [ts_surf.index for ts_surf in self.all_ts_surfaces]
 
     def fit(self, *args, **kwargs):
         """Not implemented."""

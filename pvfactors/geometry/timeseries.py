@@ -197,6 +197,11 @@ class TsPVRow(object):
         """Centroid point of the timeseries pv row"""
         return self.full_pvrow_coords.centroid
 
+    @property
+    def length(self):
+        """Length of both sides of the timeseries PV row"""
+        return self.front.length + self.back.length
+
 
 class TsSide(object):
     """Timeseries side class: this class is a vectorized version of the
@@ -1049,7 +1054,7 @@ class TsGround(object):
         return length
 
     def non_point_shaded_surfaces_at(self, idx):
-        """Return a list of timeseries shaded surfaces, that are not points
+        """Return a list of shaded surfaces, that are not points
         at given index
 
         Parameters
@@ -1059,7 +1064,7 @@ class TsGround(object):
 
         Returns
         -------
-        list
+        list of :py:class:`~pvfactors.geometry.base.PVSurface`
         """
         list_surfaces = []
         for shadow_el in self.shadow_elements:
@@ -1067,7 +1072,7 @@ class TsGround(object):
         return list_surfaces
 
     def non_point_illum_surfaces_at(self, idx):
-        """Return a list of timeseries illuminated surfaces, that are not
+        """Return a list of illuminated surfaces, that are not
         points at given index
 
         Parameters
@@ -1077,12 +1082,43 @@ class TsGround(object):
 
         Returns
         -------
-        list
+        list of :py:class:`~pvfactors.geometry.base.PVSurface`
         """
         list_surfaces = []
         for illum_el in self.illum_elements:
             list_surfaces += illum_el.non_point_surfaces_at(0)
         return list_surfaces
+
+    def non_point_surfaces_at(self, idx):
+        """Return a list of all surfaces that are not
+        points at given index
+
+        Parameters
+        ----------
+        idx : int
+            Index at which we want the surfaces not to be points
+
+        Returns
+        -------
+        list of :py:class:`~pvfactors.geometry.base.PVSurface`
+        """
+        return self.non_point_illum_surfaces_at(idx) \
+            + self.non_point_shaded_surfaces_at(idx)
+
+    def n_non_point_surfaces_at(self, idx):
+        """Return the number of :py:class:`~pvfactors.geometry.base.PVSurface`
+        that are not points at given index
+
+        Parameters
+        ----------
+        idx : int
+            Index at which we want the surfaces not to be points
+
+        Returns
+        -------
+        int
+        """
+        return len(self.non_point_surfaces_at(idx))
 
     @staticmethod
     def _shadow_elements_from_coords_and_cut_pts(
