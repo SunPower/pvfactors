@@ -615,11 +615,11 @@ class PVSegment(GeometryCollection):
 
         Parameters
         ----------
-        illum_collection :
+        illum_collection : \
         :py:class:`~pvfactors.geometry.base.ShadeCollection`, optional
             Illuminated collection of the PV segment (Default = empty shade
             collection with no shading)
-        shaded_collection :
+        shaded_collection : \
         :py:class:`~pvfactors.geometry.base.ShadeCollection`, optional
             Shaded collection of the PV segment (Default = empty shade
             collection with shading)
@@ -910,7 +910,7 @@ class PVSegment(GeometryCollection):
 
         Returns
         -------
-        list of :py:class:`pvfactors.geometry.base.PVSurface`
+        list of :py:class:`~pvfactors.geometry.base.PVSurface`
             PV surfaces in the PV segment
         """
         if self._all_surfaces is None:
@@ -929,7 +929,7 @@ class BaseSide(GeometryCollection):
 
         Parameters
         ----------
-        list_segments : list of :py:class:`pvfactors.geometry.base.PVSegment`, optional
+        list_segments : list of :py:class:`~pvfactors.geometry.base.PVSegment`, optional
             List of PV segments for side (Default = None)
         """
         list_segments = [] if list_segments is None else list_segments

@@ -1,7 +1,7 @@
 """Module with classes and functions to calculate views and view factors"""
 
 from pvfactors.config import DISTANCE_TOLERANCE
-from pvfactors.viewfactors.timeseries import VFTsMethods
+from pvfactors.viewfactors.methods import VFTsMethods
 import numpy as np
 
 
@@ -9,7 +9,7 @@ class VFCalculator(object):
     """This calculator class will be used for the calculation of view factors
     for PV arrays"""
 
-    def __init__(self, mapper=None, vf_ts_methods=None):
+    def __init__(self, vf_ts_methods=None):
         """Initialize the view factor mapper that will be used.
 
         Parameters

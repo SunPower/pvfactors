@@ -20,10 +20,10 @@ calculator
 
    calculator.VFCalculator
 
-timeseries methods
-^^^^^^^^^^^^^^^^^^
+methods
+^^^^^^^
 
-.. automodule:: timeseries
+.. automodule:: methods
    :no-members:
    :no-inherited-members:
 
@@ -31,4 +31,4 @@ timeseries methods
    :toctree: generated/
    :nosignatures:
 
-   timeseries.VFTsMethods
+   methods.VFTsMethods
