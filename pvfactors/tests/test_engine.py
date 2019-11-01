@@ -1,5 +1,5 @@
 from pvfactors.engine import PVEngine
-from pvfactors.geometry import OrderedPVArray
+from pvfactors.geometry.pvarray import OrderedPVArray
 from pvfactors.irradiance import IsotropicOrdered, HybridPerezOrdered
 from pvfactors.irradiance.utils import breakup_df_inputs
 import numpy as np

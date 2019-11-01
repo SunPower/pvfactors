@@ -1,6 +1,7 @@
 import os
-from pvfactors.geometry.timeseries import \
-    TsPVRow, TsGround, TsPointCoords, TsLineCoords, TsGroundElement
+from pvfactors.geometry.timeseries import TsPointCoords, TsLineCoords
+from pvfactors.geometry.pvrow import TsPVRow
+from pvfactors.geometry.pvground import TsGround, TsGroundElement
 import pandas as pd
 import numpy as np
 from pvfactors.geometry.pvrow import PVRow
