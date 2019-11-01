@@ -6,8 +6,6 @@ from pvfactors.config import X_ORIGIN_PVROWS, DISTANCE_TOLERANCE
 from pvfactors.geometry.base import \
     _get_solar_2d_vectors, BasePVArray, _get_rotation_from_tilt_azimuth
 from pvfactors.geometry.timeseries import TsPVRow, TsGround
-from shapely.geometry import Point
-from pvfactors import PVFactorsError
 
 
 class OrderedPVArray(BasePVArray):
@@ -62,8 +60,6 @@ class OrderedPVArray(BasePVArray):
 
         # These attributes will be updated at fitting time
         self.solar_2d_vectors = None
-        self.ts_pvrows = None
-        self.ts_ground = None
         self.n_states = None
         self.has_direct_shading = None
         self.rotation_vec = None

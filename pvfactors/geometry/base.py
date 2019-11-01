@@ -1144,39 +1144,32 @@ class BasePVArray(object):
         # All PV arrays should have a fixed axis azimuth in pvfactors
         self.axis_azimuth = axis_azimuth
 
-        # Initialize view factor matrix: will be calculated externally,
-        # i.e. not by the PV Array class itself
-        self.vf_matrix = None
+        # The are required attributes of any PV array
+        self.ts_pvrows = None
+        self.ts_ground = None
 
-    def plot(self, ax, with_index=False):
-        """Plot all the PV rows and the ground in the PV array.
+    @property
+    def n_ts_surfaces(self):
+        """Number of timeseries surfaces in the PV array."""
+        n_ts_surfaces = 0
+        n_ts_surfaces += self.ts_ground.n_ts_surfaces
+        for ts_pvrow in self.ts_pvrows:
+            n_ts_surfaces += ts_pvrow.n_ts_surfaces
+        return n_ts_surfaces
 
-        Parameters
-        ----------
-        ax : :py:class:`matplotlib.pyplot.axes` object
-            Axes for plotting
-        with_index : bool
-            Flag to annotate surfaces with their indices (Default = False)
-        """
-        # Plot pv array structures
-        self.ground.plot(ax, color_shaded=COLOR_DIC['ground_shaded'],
-                         color_illum=COLOR_DIC['ground_illum'],
-                         with_index=with_index)
-        for pvrow in self.pvrows:
-            pvrow.plot(ax, color_shaded=COLOR_DIC['pvrow_shaded'],
-                       color_illum=COLOR_DIC['pvrow_illum'],
-                       with_index=with_index)
+    @property
+    def all_ts_surfaces(self):
+        """List of all timeseries surfaces in PV array"""
+        all_ts_surfaces = []
+        all_ts_surfaces += self.ts_ground.all_ts_surfaces
+        for ts_pvrow in self.ts_pvrows:
+            all_ts_surfaces += ts_pvrow.all_ts_surfaces
+        return all_ts_surfaces
 
-        # Plot formatting
-        ax.axis('equal')
-        if self.distance is not None:
-            n_pvrows = self.n_pvrows
-            ax.set_xlim(- 0.5 * self.distance,
-                        (n_pvrows - 0.5) * self.distance)
-        if self.height is not None:
-            ax.set_ylim(- self.height, 2 * self.height)
-        ax.set_xlabel("x [m]", fontsize=PLOT_FONTSIZE)
-        ax.set_ylabel("y [m]", fontsize=PLOT_FONTSIZE)
+    @property
+    def ts_surface_indices(self):
+        """List of indices of all the timeseries surfaces"""
+        return [ts_surf.index for ts_surf in self.all_ts_surfaces]
 
     def plot_at_idx(self, idx, ax, merge_if_flag_overlap=True,
                     with_cut_points=True, x_min_max=None):
@@ -1223,34 +1216,22 @@ class BasePVArray(object):
         ax.set_xlabel("x [m]", fontsize=PLOT_FONTSIZE)
         ax.set_ylabel("y [m]", fontsize=PLOT_FONTSIZE)
 
-    @property
-    def n_ts_surfaces(self):
-        """Number of timeseries surfaces in the PV array."""
-        n_ts_surfaces = 0
-        n_ts_surfaces += self.ts_ground.n_ts_surfaces
-        for ts_pvrow in self.ts_pvrows:
-            n_ts_surfaces += ts_pvrow.n_ts_surfaces
-        return n_ts_surfaces
+    def fit(self, *args, **kwargs):
+        """Not implemented."""
+        raise NotImplementedError
 
-    @property
-    def all_ts_surfaces(self):
-        """List of all timeseries surfaces in PV array"""
-        all_ts_surfaces = []
-        all_ts_surfaces += self.ts_ground.all_ts_surfaces
+    def update_params(self, new_dict):
+        """Update timeseries surface parameters in the collection.
+        Parameters
+        ----------
+        new_dict : dict
+            Parameters to add or update for the surfaces
+        """
+        self.ts_ground.update_params(new_dict)
         for ts_pvrow in self.ts_pvrows:
-            all_ts_surfaces += ts_pvrow.all_ts_surfaces
-        return all_ts_surfaces
+            ts_pvrow.update_params(new_dict)
 
     def _index_all_ts_surfaces(self):
         """Add unique indices to all surfaces in the PV array."""
         for idx, ts_surface in enumerate(self.all_ts_surfaces):
             ts_surface.index = idx
-
-    @property
-    def ts_surface_indices(self):
-        """List of indices of all the timeseries surfaces"""
-        return [ts_surf.index for ts_surf in self.all_ts_surfaces]
-
-    def fit(self, *args, **kwargs):
-        """Not implemented."""
-        raise NotImplementedError

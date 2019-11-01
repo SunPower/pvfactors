@@ -182,6 +182,17 @@ class TsPVRow(object):
                       index=self.index, original_linestring=original_line)
         return pvrow
 
+    def update_params(self, new_dict):
+        """Update timeseries surface parameters of the PV row.
+
+        Parameters
+        ----------
+        new_dict : dict
+            Parameters to add or update for the surfaces
+        """
+        self.front.update_params(new_dict)
+        self.back.update_params(new_dict)
+
     @property
     def n_ts_surfaces(self):
         """Number of timeseries surfaces in the ts PV row"""
@@ -906,6 +917,19 @@ class TsGround(object):
         pvground.plot(ax, color_shaded=color_shaded, color_illum=color_illum,
                       with_index=False)
 
+    def update_params(self, new_dict):
+        """Update the illuminated parameters with new ones, not only for the
+        timeseries ground, but also for its ground elements and the timeseries
+        surfaces of the ground elements, so that they are all synced.
+
+        Parameters
+        ----------
+        new_dict : dict
+            New parameters
+        """
+        self.update_illum_params(new_dict)
+        self.update_shaded_params(new_dict)
+
     def update_illum_params(self, new_dict):
         """Update the illuminated parameters with new ones, not only for the
         timeseries ground, but also for its ground elements and the timeseries
@@ -937,6 +961,48 @@ class TsGround(object):
             shaded_el.params.update(new_dict)
             for surf in shaded_el.surface_list:
                 surf.params.update(new_dict)
+
+    def get_param_weighted(self, param):
+        """Get timeseries parameter for the ts ground, after weighting by
+        surface length.
+
+        Parameters
+        ----------
+        param : str
+            Name of parameter
+
+        Returns
+        -------
+        np.ndarray
+            Weighted parameter values
+        """
+        return self.get_param_ww(param) / self.length
+
+    def get_param_ww(self, param):
+        """Get timeseries parameter from the ground's surfaces with weight,
+        i.e. after multiplying by the surface lengths.
+
+        Parameters
+        ----------
+        param: str
+            Surface parameter to return
+
+        Returns
+        -------
+        np.ndarray
+            Timeseries parameter values multiplied by weights
+
+        Raises
+        ------
+        KeyError
+            if parameter name not in a surface parameters
+        """
+        value = 0.
+        for shadow_el in self.shadow_elements:
+            value += shadow_el.get_param_ww(param)
+        for illum_el in self.illum_elements:
+            value += illum_el.get_param_ww(param)
+        return value
 
     def shadow_coords_left_of_cut_point(self, idx_cut_pt):
         """Get coordinates of shadows located on the left side of the cut point
@@ -1390,6 +1456,46 @@ class TsGroundElement(object):
         return [surface.at(idx, shaded=self.shaded)
                 for surface in self.surface_list
                 if surface.length[idx] > DISTANCE_TOLERANCE]
+
+    def get_param_weighted(self, param):
+        """Get timeseries parameter for the ground element, after weighting by
+        surface length.
+
+        Parameters
+        ----------
+        param : str
+            Name of parameter
+
+        Returns
+        -------
+        np.ndarray
+            Weighted parameter values
+        """
+        return self.get_param_ww(param) / self.length
+
+    def get_param_ww(self, param):
+        """Get timeseries parameter from the ground element with weight,
+        i.e. after multiplying by the surface lengths.
+
+        Parameters
+        ----------
+        param: str
+            Surface parameter to return
+
+        Returns
+        -------
+        np.ndarray
+            Timeseries parameter values multiplied by weights
+
+        Raises
+        ------
+        KeyError
+            if parameter name not in a surface parameters
+        """
+        value = 0.
+        for ts_surf in self.surface_list:
+            value += ts_surf.length * ts_surf.get_param(param)
+        return value
 
     def _create_all_ts_surfaces(self, list_ordered_cut_pts):
         """Create all the n+1 timeseries surfaces that make up the timeseries

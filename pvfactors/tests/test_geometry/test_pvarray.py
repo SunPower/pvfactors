@@ -348,28 +348,28 @@ def test_param_names(params):
     pvarray.update_params({'qinc': 1})
 
     # Check that all surfaces of the correct surface params
-    all_surfaces = pvarray.all_surfaces
-    for surf in all_surfaces:
-        assert surf.param_names == param_names
-        assert surf.get_param('qinc') == 1
+    all_ts_surfaces = pvarray.all_ts_surfaces
+    for ts_surf in all_ts_surfaces:
+        assert ts_surf.param_names == param_names
+        assert ts_surf.get_param('qinc') == 1
 
     # Check weighted values
     np.testing.assert_almost_equal(
-        pvarray.ground.get_param_weighted('qinc'), 1)
+        pvarray.ts_ground.get_param_weighted('qinc'), 1)
     np.testing.assert_almost_equal(
-        pvarray.ground.get_param_ww('qinc'),
-        pvarray.ground.length)
-    for pvrow in pvarray.ts_pvrows:
+        pvarray.ts_ground.get_param_ww('qinc'),
+        pvarray.ts_ground.length)
+    for ts_pvrow in pvarray.ts_pvrows:
         # Front
         np.testing.assert_almost_equal(
-            pvrow.front.get_param_weighted('qinc'), 1)
+            ts_pvrow.front.get_param_weighted('qinc'), 1)
         np.testing.assert_almost_equal(
-            pvrow.front.get_param_ww('qinc'), pvrow.front.length)
+            ts_pvrow.front.get_param_ww('qinc'), ts_pvrow.front.length)
         # Back
         np.testing.assert_almost_equal(
-            pvrow.back.get_param_weighted('qinc'), 1)
+            ts_pvrow.back.get_param_weighted('qinc'), 1)
         np.testing.assert_almost_equal(
-            pvrow.back.get_param_ww('qinc'), pvrow.back.length)
+            ts_pvrow.back.get_param_ww('qinc'), ts_pvrow.back.length)
 
 
 def test_orderedpvarray_almost_flat():
