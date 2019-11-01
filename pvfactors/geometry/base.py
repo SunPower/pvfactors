@@ -616,10 +616,12 @@ class PVSegment(GeometryCollection):
 
         Parameters
         ----------
-        illum_collection : :py:class:`~pvfactors.geometry.base.ShadeCollection`, optional
+        illum_collection :
+        :py:class:`~pvfactors.geometry.base.ShadeCollection`, optional
             Illuminated collection of the PV segment (Default = empty shade
             collection with no shading)
-        shaded_collection : :py:class:`~pvfactors.geometry.base.ShadeCollection`, optional
+        shaded_collection :
+        :py:class:`~pvfactors.geometry.base.ShadeCollection`, optional
             Shaded collection of the PV segment (Default = empty shade
             collection with shading)
         index : int, optional
@@ -640,9 +642,11 @@ class PVSegment(GeometryCollection):
 
         Parameters
         ----------
-        illum_collection : :py:class:`~pvfactors.geometry.base.ShadeCollection`, optional
+        illum_collection :
+        :py:class:`~pvfactors.geometry.base.ShadeCollection`, optional
             Illuminated collection
-        shaded_collection : :py:class:`~pvfactors.geometry.base.ShadeCollection`, optional
+        shaded_collection :
+        :py:class:`~pvfactors.geometry.base.ShadeCollection`, optional
             Shaded collection
 
         Raises

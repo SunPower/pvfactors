@@ -572,7 +572,8 @@ class HybridPerezOrdered(BaseModel):
             # Back: apply back surface horizon shading
             for ts_seg in ts_pvrow.back.list_segments:
                 # Illum
-                centroid_illum = ts_seg.illum.centroid
+                # In ordered pv arrays, there should only be 1 surface -> 0
+                centroid_illum = ts_seg.illum.list_ts_surfaces[0].centroid
                 hor_shd_pct_illum = self._calculate_horizon_shading_pct_ts(
                     ts_pvrows, centroid_illum, idx_pvrow, tilted_to_left,
                     is_back_side=True)
@@ -587,7 +588,8 @@ class HybridPerezOrdered(BaseModel):
                     'inv_rho': inv_rho_back,
                     'total_perez': np.zeros(n_steps)})
                 # Back
-                centroid_shaded = ts_seg.shaded.centroid
+                # In ordered pv arrays, there should only be 1 surface -> 0
+                centroid_shaded = ts_seg.shaded.list_ts_surfaces[0].centroid
                 hor_shd_pct_shaded = self._calculate_horizon_shading_pct_ts(
                     ts_pvrows, centroid_shaded, idx_pvrow, tilted_to_left,
                     is_back_side=True)

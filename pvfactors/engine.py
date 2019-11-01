@@ -254,7 +254,7 @@ class PVEngine(object):
         """
 
         # Get all timeseries surfaces in segment
-        list_ts_surfaces = [ts_segment.illum, ts_segment.shaded]
+        list_ts_surfaces = ts_segment.all_ts_surfaces
 
         # Get irradiance vectors for calculation
         albedo = self.irradiance.albedo

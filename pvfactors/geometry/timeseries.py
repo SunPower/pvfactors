@@ -224,7 +224,7 @@ class TsSide(object):
 
         Parameters
         ----------
-        segments : list of :py:class:`~pvfactors.geometry.timeseries.TsDualSegment`
+        segments : list of :py:class:`~pvfactors.geometry.timeseries.TsSegment`
             List of timeseries segments of the side
         n_vector : np.ndarray, optional
             Timeseries normal vectors of the side (Default = None)
@@ -316,14 +316,16 @@ class TsSide(object):
                 np.array([[x1_illum, y1_illum], [x2_illum, y2_illum]]))
             shaded_coords = TsLineCoords.from_array(
                 np.array([[x1_shaded, y1_shaded], [x2_shaded, y2_shaded]]))
-            # Create illuminated and shaded surfaces
-            illum = TsSurface(illum_coords, n_vector=n_vector,
-                              param_names=param_names)
-            shaded = TsSurface(shaded_coords, n_vector=n_vector,
-                               param_names=param_names)
-            # Create dual segment
-            segment = TsDualSegment(segment_coords, illum, shaded,
-                                    n_vector=n_vector)
+            # Create illuminated and shaded collections
+            illum = TsShadeCollection(
+                [TsSurface(illum_coords, n_vector=n_vector,
+                           param_names=param_names)], False)
+            shaded = TsShadeCollection(
+                [TsSurface(shaded_coords, n_vector=n_vector,
+                           param_names=param_names)], True)
+            # Create segment
+            segment = TsSegment(segment_coords, illum, shaded,
+                                n_vector=n_vector)
             list_segments.append(segment)
 
         return cls(list_segments, n_vector=n_vector)
@@ -448,7 +450,6 @@ class TsSide(object):
         new_dict : dict
             Parameters to add or update for the surfaces
         """
-
         for seg in self.list_segments:
             seg.update_params(new_dict)
 
@@ -469,14 +470,13 @@ class TsSide(object):
         return all_ts_surfaces
 
 
-class TsDualSegment(object):
-    """A TsDualSegment is a timeseries segment that can only have
-    1 shaded surface and 1 illuminated surface. This allows indexing of the
-    object."""
+class TsSegment(object):
+    """A TsSegment is a timeseries segment that has a timeseries shaded
+    collection and a timeseries illuminated collection."""
 
     n_ts_surfaces = 2  # an illuminated and a shaded ts surface
 
-    def __init__(self, coords, illum_ts_surface, shaded_ts_surface,
+    def __init__(self, coords, illum_collection, shaded_collection,
                  index=None, n_vector=None):
         """Initialize timeseries dual segment using segment coordinates and
         timeseries illuminated and shaded surfaces.
@@ -485,19 +485,20 @@ class TsDualSegment(object):
         ----------
         coords : :py:class:`~pvfactors.geometry.timeseries.TsLineCoords`
             Timeseries coordinates of full segment
-        illum_ts_surface : :py:class:`~pvfactors.geometry.timeseries.TsSurface`
-            Timeseries surface for illuminated part of dual segment
-        shaded_ts_surface :
-        :py:class:`~pvfactors.geometry.timeseries.TsSurface`
-            Timeseries surface for shaded part of dual segment
+        illum_collection :
+        :py:class:`~pvfactors.geometry.timeseries.TsShadeCollection`
+            Timeseries collection for illuminated part of segment
+        shaded_collection :
+        :py:class:`~pvfactors.geometry.timeseries.TsShadeCollection`
+            Timeseries collection for shaded part of segment
         index : int, optional
             Index of segment (Default = None)
         n_vector : np.ndarray, optional
             Timeseries normal vectors of the side (Default = None)
         """
         self.coords = coords
-        self.illum = illum_ts_surface
-        self.shaded = shaded_ts_surface
+        self.illum = illum_collection
+        self.shaded = shaded_collection
         self.index = index
         self.n_vector = n_vector
 
@@ -552,19 +553,9 @@ class TsDualSegment(object):
         segment : :py:class:`~pvfactors.geometry.base.PVSegment`
         """
         # Create illum collection
-        illum_surface = self.illum.at(idx, shaded=False)
-        list_illum_surfaces = [] if illum_surface.is_empty \
-            else [illum_surface]
-        illum_collection = ShadeCollection(
-            list_surfaces=list_illum_surfaces, shaded=False,
-            param_names=None)
+        illum_collection = self.illum.at(idx)
         # Create shaded collection
-        shaded_surface = self.shaded.at(idx, shaded=True)
-        list_shaded_surfaces = [] if shaded_surface.is_empty \
-            else [shaded_surface]
-        shaded_collection = ShadeCollection(
-            list_surfaces=list_shaded_surfaces, shaded=True,
-            param_names=None)
+        shaded_collection = self.shaded.at(idx)
         # Create PV segment
         segment = PVSegment(illum_collection=illum_collection,
                             shaded_collection=shaded_collection,
@@ -617,10 +608,7 @@ class TsDualSegment(object):
             Timeseries parameter values multiplied by weights
         """
 
-        value = 0
-        value += self.illum.get_param(param) * self.illum.length
-        value += self.shaded.get_param(param) * self.shaded.length
-        return value
+        return self.illum.get_param_ww(param) + self.shaded.get_param_ww(param)
 
     def update_params(self, new_dict):
         """Update timeseries surface parameters of the segment.
@@ -646,7 +634,96 @@ class TsDualSegment(object):
     @property
     def all_ts_surfaces(self):
         """List of all timeseries surfaces in dual segment"""
-        return [self.illum, self.shaded]
+        return self.illum.list_ts_surfaces + self.shaded.list_ts_surfaces
+
+
+class TsShadeCollection(object):
+    """Collection of timeseries surfaces that are all either shaded or
+    illuminated"""
+
+    def __init__(self, list_ts_surfaces, shaded):
+        self._list_ts_surfaces = list_ts_surfaces
+        self.shaded = shaded
+        # TODO: maybe the ts surfaces should have a "shaded" attribute
+
+    @property
+    def list_ts_surfaces(self):
+        return self._list_ts_surfaces
+
+    def add(self, new_list_ts_surfaces):
+        # TODO: need to check that all new surfaces have same shading status
+        self._list_ts_surfaces += new_list_ts_surfaces
+
+    @property
+    def length(self):
+        length = 0.
+        for ts_surf in self._list_ts_surfaces:
+            length += ts_surf.length
+        return length
+
+    def get_param_weighted(self, param):
+        """Get timeseries parameter for the collection, after weighting by
+        surface length.
+
+        Parameters
+        ----------
+        param : str
+            Name of parameter
+
+        Returns
+        -------
+        np.ndarray
+            Weighted parameter values
+        """
+        return self.get_param_ww(param) / self.length
+
+    def get_param_ww(self, param):
+        """Get timeseries parameter from the collection with weight,
+        i.e. after multiplying by the surface lengths.
+
+        Parameters
+        ----------
+        param: str
+            Surface parameter to return
+
+        Returns
+        -------
+        np.ndarray
+            Timeseries parameter values multiplied by weights
+        """
+
+        value = 0
+        for ts_surf in self._list_ts_surfaces:
+            value += ts_surf.length * ts_surf.get_param(param)
+        return value
+
+    def update_params(self, new_dict):
+        """Update timeseries surface parameters of the segment.
+
+        Parameters
+        ----------
+        new_dict : dict
+            Parameters to add or update for the surfaces
+        """
+        for ts_surf in self._list_ts_surfaces:
+            ts_surf.params.update(new_dict)
+
+    def at(self, idx):
+        """Generate a ponctual shade collection for the desired index.
+
+        Parameters
+        ----------
+        idx : int
+            Index to use to generate shade collection
+
+        Returns
+        -------
+        collection : :py:class:`~pvfactors.geometry.base.ShadeCollection`
+        """
+        list_surfaces = [ts_surf.at(idx, shaded=self.shaded)
+                         for ts_surf in self._list_ts_surfaces
+                         if not ts_surf.at(idx, shaded=self.shaded).is_empty]
+        return ShadeCollection(list_surfaces, shaded=self.shaded)
 
 
 class TsGround(object):
@@ -1604,6 +1681,7 @@ class TsSurface(object):
         index : int, optional
             Index of the timeseries surfaces (Default = None)
         """
+        # TODO: ts surfaces should have a shaded attribute
         self.coords = coords
         self.param_names = [] if param_names is None else param_names
         # TODO: the following should probably be turned into properties,
