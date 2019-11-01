@@ -1,10 +1,10 @@
 import os
 import numpy as np
 import pandas as pd
-from pvfactors.geometry import OrderedPVArray, PVGround, PVSurface
-from pvfactors.geometry.utils import contains
+from pvfactors.geometry.pvarray import OrderedPVArray
 from pvfactors.config import MAX_X_GROUND, MIN_X_GROUND, DISTANCE_TOLERANCE
-from pvfactors.geometry.timeseries import TsGround, TsSurface
+from pvfactors.geometry.pvground import TsGround
+from pvfactors.geometry.timeseries import TsSurface
 
 
 def test_ordered_pvarray_from_dict(params):

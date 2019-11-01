@@ -5,7 +5,8 @@ import numpy as np
 from pvfactors.config import X_ORIGIN_PVROWS, DISTANCE_TOLERANCE
 from pvfactors.geometry.base import \
     _get_solar_2d_vectors, BasePVArray, _get_rotation_from_tilt_azimuth
-from pvfactors.geometry.timeseries import TsPVRow, TsGround
+from pvfactors.geometry.pvrow import TsPVRow
+from pvfactors.geometry.pvground import TsGround
 
 
 class OrderedPVArray(BasePVArray):

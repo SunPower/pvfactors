@@ -5,8 +5,6 @@ from pvfactors.geometry import \
 import pytest
 import os
 import pandas as pd
-import numpy as np
-from collections import OrderedDict
 import pvlib
 
 DIR_TEST = os.path.dirname(__file__)

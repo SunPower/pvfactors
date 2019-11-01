@@ -43,6 +43,9 @@ pvrow
    :nosignatures:
    :template: class_no_base.rst
 
+   pvrow.TsPVRow
+   pvrow.TsSide
+   pvrow.TsSegment
    pvrow.PVRowSide
    pvrow.PVRow
 
@@ -59,6 +62,8 @@ pvground
    :nosignatures:
    :template: class_no_base.rst
 
+   pvground.TsGround
+   pvground.TsGroundElement
    pvground.PVGround
 
 
@@ -89,10 +94,6 @@ timeseries
    :nosignatures:
    :template: class_no_base.rst
 
-   timeseries.TsPVRow
-   timeseries.TsGround
-   timeseries.TsSide
-   timeseries.TsSegment
    timeseries.TsShadeCollection
    timeseries.TsSurface
    timeseries.TsLineCoords
