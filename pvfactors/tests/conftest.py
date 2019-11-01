@@ -1,7 +1,8 @@
 """Contains the pytest fixtures for running tests"""
 
-from pvfactors.geometry import \
-    ShadeCollection, PVSegment, PVSurface, PVRowSide, OrderedPVArray
+from pvfactors.geometry.base import ShadeCollection, PVSegment, PVSurface
+from pvfactors.geometry.pvrow import PVRowSide
+from pvfactors.geometry.pvarray import OrderedPVArray
 import pytest
 import os
 import pandas as pd

@@ -1,6 +1,8 @@
 import pytest
 from pvfactors.irradiance import IsotropicOrdered, HybridPerezOrdered
-from pvfactors.geometry import OrderedPVArray, PVSurface, PVRow
+from pvfactors.geometry.pvarray import OrderedPVArray
+from pvfactors.geometry.base import PVSurface
+from pvfactors.geometry.pvrow import PVRow
 from pvlib.tools import cosd
 import numpy as np
 import pandas as pd

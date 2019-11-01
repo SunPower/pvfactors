@@ -1,4 +1,4 @@
-from pvfactors.geometry import PVRow
+from pvfactors.geometry.pvrow import PVRow
 from shapely.geometry import LineString
 
 
