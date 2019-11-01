@@ -649,7 +649,7 @@ class TsShadeCollection(object):
 
         Parameters
         ----------
-        list_ts_surfaces :
+        list_ts_surfaces : \
         list of :py:class:`~pvfactors.geometry.timeseries.TsSurface`
             List of timeseries surfaces in collection
         shaded : bool

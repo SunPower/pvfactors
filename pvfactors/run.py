@@ -26,8 +26,8 @@ def run_timeseries_engine(fn_build_report, pvarray_parameters,
                           fast_mode_segment_index=None,
                           irradiance_model_params=None,
                           ghi=None):
-    """Run timeseries simulation in normal mode, and using the specified
-    classes.
+    """Run timeseries simulation without multiprocessing. This is the
+    functional approach to the :py:class:`~pvfactors.engine.PVEngine` class.
 
     Parameters
     ----------
