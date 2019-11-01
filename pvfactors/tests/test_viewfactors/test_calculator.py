@@ -17,7 +17,7 @@ def test_vfcalculator_vectorized(params):
 
     # Prepare pv array
     params.update({'cut': {0: {'front': 3}, 1: {'back': 2}}})
-    pvarray = OrderedPVArray.transform_from_dict_of_scalars(params)
+    pvarray = OrderedPVArray.fit_from_dict_of_scalars(params)
 
     # Calculate vf_matrix vectorized
     vfcalculator = VFCalculator()
@@ -72,8 +72,8 @@ def test_ts_view_factors():
         pvarray.width)
     # Calculate view factors for segment's illum surface (should be identical)
     view_factors_illum = calculator.get_vf_ts_pvrow_element(
-        pvrow_idx, ts_segment.illum, ts_pvrows, ts_ground, rotation_vec,
-        pvarray.width)
+        pvrow_idx, ts_segment.illum.list_ts_surfaces[0], ts_pvrows, ts_ground,
+        rotation_vec, pvarray.width)
 
     expected_vf_to_obstructed_shadows = np.array([
         [0.053677, -0., 0.04077, 0.392779, 0.089299],
