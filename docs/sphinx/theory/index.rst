@@ -1,4 +1,4 @@
-.. pvfactors documentation
+.. _theory:
 
 Theory
 ======
@@ -13,7 +13,6 @@ Contents:
    intro
    view_factors
    problem_formulation
-   irradiance_models
 
 
 .. rubric:: Footnotes

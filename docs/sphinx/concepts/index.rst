@@ -33,7 +33,6 @@ The main interface for building the 2D geometry of a PV array is currently the :
 .. note::
    For more information on how the geometry sub-package is organized, the user can refer to :ref:`detailed geometry API <geometry_api>`.
 
-
 Understanding PV array 2D geometries
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -83,7 +82,7 @@ In ``pvfactors``, a PV array has a number of fixed parameters that do not change
    }
 
 
-The :ref:`tutorial section <getting_started_ref>` section shows how such a dictionary can be used to create a PV array in ``pvfactors``. Here is a description of what each parameter means:
+The :ref:`tutorial section <getting_started_ref>` section shows how such a dictionary can be used to create a PV array in ``pvfactors`` using the :py:class:`~pvfactors.geometry.pvarray.OrderedPVArray` class. Here is a description of what each parameter means:
 
 
 - ``n_pvrows``: is the number of PV rows that the PV array will contain. In Fig. 1, we have 3 PV rows.
@@ -95,19 +94,57 @@ The :ref:`tutorial section <getting_started_ref>` section shows how such a dicti
 - ``cut``: this optional parameter is used to discretize the PV row sides into equal-length segments. For instance here, the front side of the leftmost PV row (always with index 0) will have 3 segments, and the back side of the center PV row (with index 1) will have 2 segments.
 
 
-View factor calculator
-----------------------
-
-How the view factors are calculated
-
-
 Irradiance models
 -----------------
 
-The irradiance models
+The irradiance models then assign irradiance sky values like direct, or isotropic components to all the surfaces defined in the :py:class:`~pvfactors.geometry.pvarray.OrderedPVArray`.
 
+Description
+^^^^^^^^^^^
+
+As shown in the :ref:`full mode theory <full_mode_theory>` and
+:ref:`fast mode theory <fast_mode_theory>` sections, we always need to calculate a sky term for the different surfaces of the PV array.
+
+The sky term is the sum of all the irradiance components (for each surface) that are not directly related to the view factors or to the reflection process, but which still contribute to the incident irradiance on the surfaces. For instance, the direct component of the light incident on the front surface of a PV row is not directly dependent on the view factors, but we still need to account for it in the mathematical model, so this component will go into the sky term.
+
+A lot of different assumptions can be made, which will lead to more or less accurate results. But
+``pvfactors`` was designed to make the implementation of these assumptions modular: all of these assumptions can be implemented inside a single Python class which can be used by the other parts of the model. This was done to make it easy for users to create their own irradiance modeling assumptions (inside a new class), and to then plug it into the ``pvfactors`` :py:class:`~pvfactors.engine.PVEngine`.
+
+Available models
+^^^^^^^^^^^^^^^^
+
+``pvfactors`` currently provides two irradiance models that can be used interchangeably in the :py:class:`~pvfactors.engine.PVEngine` and with the :py:class:`~pvfactors.geometry.pvarray.OrderedPVArray`, and they are described in more details in the :ref:`irradiance developer API <irradiance_classes>`.
+
+- the isotropic model :py:class:`~pvfactors.irradiance.models.IsotropicOrdered` assumes that all of the diffuse light from the sky dome is isotropic. It is a very intuitive assumption, but it generally leads to less accurate results.
+- the (hybrid) perez model :py:class:`~pvfactors.irradiance.models.HybridPerezOrdered` follows [#perez_paper]_ and assumes that the diffuse light can be broken down into circumsolar, isotropic, and horizon components (see Fig. 2 below). Validation work shows that this model is more accurate for calculating back-side irradiance with ``pvfactors``.
+
+.. figure:: /concepts/static/Irradiance_components.PNG
+   :align: center
+   :width: 40%
+
+   Fig. 2: Schematic showing direct and diffuse irradiance components on a PV system and according to the Perez diffuse light model [#perez_paper]_
+
+
+View factor calculator
+----------------------
+
+After creating a 2D geometry, the :py:class:`~pvfactors.viewfactors.calculator.VFCalculator` class can be used to calculate the view factors between all the surfaces of the array. A detailed description of what view factors are can be found in the :ref:`theory section <view_factors_theory>`.
+
+.. figure:: /theory/configuration_factors_pictures/differential_areas.png
+   :width: 15%
+   :align: center
+
+   Fig. 3: The view factor from a surface 1 to a surface 2 is the proportion of the space occupied by surface 2 in the hemisphere seen by surface 1.
 
 Next steps
 ----------
 
-What I recommend to check after this section.
+- :ref:`get started <getting_started_ref>` using practical tutorials
+- learn more about the :ref:`theory <theory>` behind ``pvfactors``
+- dive into the :ref:`developer API <developer_api>`
+
+
+
+.. rubric:: Footnotes
+
+.. [#perez_paper] Perez, R., Seals, R., Ineichen, P., Stewart, R. and Menicucci, D., 1987. A new simplified version of the Perez diffuse irradiance model for tilted surfaces. Solar energy, 39(3), pp.221-231.

@@ -1,8 +1,8 @@
 .. _tutorials:
 
-========================
-User guide and tutorials
-========================
+=========
+Tutorials
+=========
 
 This section will cover some tutorials to help the users easily get started with ``pvfactors``. The notebooks used for this section are all located in the `tutorials folder`_ of the Github repository.
 
