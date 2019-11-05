@@ -1,11 +1,9 @@
 .. report
 
-.. currentmodule:: pvfactors
-
 report
 ------
 
-.. automodule:: report
+.. automodule:: ~pvfactors.report
    :no-members:
    :no-inherited-members:
 
@@ -13,5 +11,5 @@ report
    :toctree: generated/
    :nosignatures:
 
-   report.example_fn_build_report
-   report.ExampleReportBuilder
+   ~pvfactors.report.example_fn_build_report
+   ~pvfactors.report.ExampleReportBuilder

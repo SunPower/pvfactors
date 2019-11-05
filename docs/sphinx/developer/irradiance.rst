@@ -1,7 +1,5 @@
 .. _irradiance_classes:
 
-.. currentmodule:: pvfactors
-
 irradiance
 ----------
 
@@ -10,7 +8,7 @@ The irradiance sub-package of pvfactors implements all irradiance related models
 base
 ^^^^
 
-.. automodule:: irradiance.base
+.. automodule:: pvfactors.irradiance.base
    :no-members:
    :no-inherited-members:
 
@@ -18,14 +16,13 @@ base
    :toctree: generated/
    :nosignatures:
 
-   irradiance.base.BaseModel
+   ~pvfactors.irradiance.base.BaseModel
 
 
 models
 ^^^^^^
-.. currentmodule:: pvfactors.irradiance
 
-.. automodule:: models
+.. automodule:: pvfactors.irradiance.models
    :no-members:
    :no-inherited-members:
 
@@ -33,5 +30,5 @@ models
    :toctree: generated/
    :nosignatures:
 
-   models.IsotropicOrdered
-   models.HybridPerezOrdered
+   ~pvfactors.irradiance.models.IsotropicOrdered
+   ~pvfactors.irradiance.models.HybridPerezOrdered

@@ -1,11 +1,9 @@
-.. run
-
-.. currentmodule:: pvfactors
+.. _run:
 
 run
 ---
 
-.. automodule:: run
+.. automodule:: pvfactors.run
    :no-members:
    :no-inherited-members:
 
@@ -13,5 +11,5 @@ run
    :toctree: generated/
    :nosignatures:
 
-   run.run_timeseries_engine
-   run.run_parallel_engine
+   ~pvfactors.run.run_timeseries_engine
+   ~pvfactors.run.run_parallel_engine
