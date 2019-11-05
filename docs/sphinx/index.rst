@@ -27,6 +27,7 @@ Contents
    :maxdepth: 2
 
    installation/index.rst
+   concepts/index.rst
    tutorials/index.rst
    theory/index.rst
    developer/index.rst

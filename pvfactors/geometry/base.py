@@ -323,7 +323,7 @@ class PVSurface(BaseSurface):
 
 
 class ShadeCollection(GeometryCollection):
-    """A group of :py:class:`~pvfactors.pvsurface.PVSurface`
+    """A group of :py:class:`~pvfactors.geometry.base.PVSurface`
     objects that all have the same shading status. The PV surfaces are not
     necessarily contiguous or collinear."""
 
