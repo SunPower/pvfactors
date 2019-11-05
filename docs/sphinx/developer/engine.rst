@@ -6,6 +6,7 @@ engine
 .. automodule:: pvfactors.engine
    :no-members:
    :no-inherited-members:
+   :noindex:
 
 .. autosummary::
    :toctree: generated/

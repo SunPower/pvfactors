@@ -11,6 +11,7 @@ base
 .. automodule:: pvfactors.irradiance.base
    :no-members:
    :no-inherited-members:
+   :noindex:
 
 .. autosummary::
    :toctree: generated/
@@ -25,6 +26,7 @@ models
 .. automodule:: pvfactors.irradiance.models
    :no-members:
    :no-inherited-members:
+   :noindex:
 
 .. autosummary::
    :toctree: generated/

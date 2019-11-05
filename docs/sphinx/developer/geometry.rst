@@ -1,5 +1,3 @@
-.. _class_organization:
-
 .. _geometry_api:
 
 geometry

@@ -11,6 +11,7 @@ calculator
 .. automodule:: pvfactors.viewfactors.calculator
    :no-members:
    :no-inherited-members:
+   :noindex:
 
 .. autosummary::
    :toctree: generated/
@@ -24,6 +25,7 @@ methods
 .. automodule:: pvfactors.viewfactors.methods
    :no-members:
    :no-inherited-members:
+   :noindex:
 
 .. autosummary::
    :toctree: generated/

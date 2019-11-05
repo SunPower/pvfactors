@@ -3,9 +3,10 @@
 report
 ------
 
-.. automodule:: ~pvfactors.report
+.. automodule:: pvfactors.report
    :no-members:
    :no-inherited-members:
+   :noindex:
 
 .. autosummary::
    :toctree: generated/

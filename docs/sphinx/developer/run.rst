@@ -6,6 +6,7 @@ run
 .. automodule:: pvfactors.run
    :no-members:
    :no-inherited-members:
+   :noindex:
 
 .. autosummary::
    :toctree: generated/
