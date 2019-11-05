@@ -1,6 +1,6 @@
-.. class_organization
+.. _class_organization:
 
-.. currentmodule:: pvfactors.geometry
+.. _geometry_api:
 
 geometry
 --------
@@ -14,87 +14,92 @@ The geometry sub-package of pvfactors implements multiple classes that make the 
 base
 ^^^^
 
-.. automodule:: base
+.. automodule:: pvfactors.geometry.base
    :no-members:
    :no-inherited-members:
+   :noindex:
 
 .. autosummary::
    :toctree: generated/
    :nosignatures:
    :template: class_no_base.rst
 
-   base.BaseSurface
-   base.PVSurface
-   base.ShadeCollection
-   base.PVSegment
-   base.BaseSide
-   base.BasePVArray
+   ~pvfactors.geometry.base.BaseSurface
+   ~pvfactors.geometry.base.PVSurface
+   ~pvfactors.geometry.base.ShadeCollection
+   ~pvfactors.geometry.base.PVSegment
+   ~pvfactors.geometry.base.BaseSide
+   ~pvfactors.geometry.base.BasePVArray
 
 
 pvrow
 ^^^^^
 
-.. automodule:: pvrow
+.. automodule:: pvfactors.geometry.pvrow
    :no-members:
    :no-inherited-members:
+   :noindex:
 
 .. autosummary::
    :toctree: generated/
    :nosignatures:
    :template: class_no_base.rst
 
-   pvrow.TsPVRow
-   pvrow.TsSide
-   pvrow.TsSegment
-   pvrow.PVRowSide
-   pvrow.PVRow
+   ~pvfactors.geometry.pvrow.TsPVRow
+   ~pvfactors.geometry.pvrow.TsSide
+   ~pvfactors.geometry.pvrow.TsSegment
+   ~pvfactors.geometry.pvrow.PVRowSide
+   ~pvfactors.geometry.pvrow.PVRow
 
 
 pvground
 ^^^^^^^^
 
-.. automodule:: pvground
+.. automodule:: pvfactors.geometry.pvground
    :no-members:
    :no-inherited-members:
+   :noindex:
 
 .. autosummary::
    :toctree: generated/
    :nosignatures:
    :template: class_no_base.rst
 
-   pvground.TsGround
-   pvground.TsGroundElement
-   pvground.PVGround
+   ~pvfactors.geometry.pvground.TsGround
+   ~pvfactors.geometry.pvground.TsGroundElement
+   ~pvfactors.geometry.pvground.PVGround
 
 
 pvarray
 ^^^^^^^
 
-.. automodule:: pvarray
+.. automodule:: pvfactors.geometry.pvarray
    :no-members:
    :no-inherited-members:
+   :noindex:
 
 .. autosummary::
    :toctree: generated/
    :nosignatures:
    :template: class_no_base.rst
 
-   pvarray.OrderedPVArray
+   ~pvfactors.geometry.pvarray.OrderedPVArray
 
 
 timeseries
 ^^^^^^^^^^
 
-.. automodule:: timeseries
+.. automodule:: pvfactors.geometry.timeseries
    :no-members:
    :no-inherited-members:
+   :noindex:
 
 .. autosummary::
    :toctree: generated/
    :nosignatures:
    :template: class_no_base.rst
 
-   timeseries.TsShadeCollection
-   timeseries.TsSurface
-   timeseries.TsLineCoords
-   timeseries.TsPointCoords
+   ~pvfactors.geometry.timeseries.TsShadeCollection
+   ~pvfactors.geometry.timeseries.TsSurface
+   ~pvfactors.geometry.timeseries.TsLineCoords
+   ~pvfactors.geometry.timeseries.TsPointCoords
