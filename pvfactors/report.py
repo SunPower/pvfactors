@@ -3,7 +3,7 @@
 
 def example_fn_build_report(pvarray):
     """Example function that builds a report when used in the
-    :py:class:`~pvfactors.engine.PVEngine` with full mode simulations.
+    :py:class:`~pvfactors.engine.PVEngine` with full or fast mode simulations.
     Here it will be a dictionary with lists of calculated values.
 
     Parameters
