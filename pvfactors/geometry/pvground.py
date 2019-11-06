@@ -720,7 +720,8 @@ class TsGround(object):
                                     surface = PVSurface(
                                         coords, shaded=True,
                                         param_names=self.param_names,
-                                        params=surface.params)
+                                        params=surface.params,
+                                        index=surface.index)
                             if i_el == n_shadow_elements - 1:
                                 # last surface of last shadow element
                                 list_shadow_surfaces.append(surface)
@@ -735,7 +736,8 @@ class TsGround(object):
                                 list_shadow_surfaces.append(
                                     PVSurface(coords, shaded=True,
                                               param_names=self.param_names,
-                                              params=surface.params))
+                                              params=surface.params,
+                                              index=surface.index))
                             else:
                                 list_shadow_surfaces.append(surface)
                         else:
