@@ -826,7 +826,7 @@ class TsGroundElement(object):
         -------
         list of :py:class:`~pvfactors.geometry.base.PVSurface`
         """
-        return [surface.at(idx, shaded=self.shaded)
+        return [surface.at(idx)
                 for surface in self.surface_list]
 
     def non_point_surfaces_at(self, idx):
@@ -842,7 +842,7 @@ class TsGroundElement(object):
         -------
         list of :py:class:`~pvfactors.geometry.base.PVSurface`
         """
-        return [surface.at(idx, shaded=self.shaded)
+        return [surface.at(idx)
                 for surface in self.surface_list
                 if surface.length[idx] > DISTANCE_TOLERANCE]
 
@@ -908,7 +908,8 @@ class TsGroundElement(object):
             coords_left = self._coords_left_of_cut_point(next_coords,
                                                          cut_pt_coords)
             # Save that surface in the required structures
-            surface_left = TsSurface(coords_left, param_names=self.param_names)
+            surface_left = TsSurface(coords_left, param_names=self.param_names,
+                                     shaded=self.shaded)
             self.surface_list.append(surface_left)
             for i in range(idx_pt, n_cut_pts):
                 self.surface_dict[i]['left'].append(surface_left)
@@ -917,7 +918,8 @@ class TsGroundElement(object):
             next_coords = self._coords_right_of_cut_point(next_coords,
                                                           cut_pt_coords)
         # Save the right most portion
-        next_surface = TsSurface(next_coords, param_names=self.param_names)
+        next_surface = TsSurface(next_coords, param_names=self.param_names,
+                                 shaded=self.shaded)
         self.surface_list.append(next_surface)
         for j in range(0, n_cut_pts):
             self.surface_dict[j]['right'].append(next_surface)

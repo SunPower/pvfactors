@@ -314,12 +314,16 @@ class TsSide(object):
             shaded_coords = TsLineCoords.from_array(
                 np.array([[x1_shaded, y1_shaded], [x2_shaded, y2_shaded]]))
             # Create illuminated and shaded collections
+            is_shaded = False
             illum = TsShadeCollection(
                 [TsSurface(illum_coords, n_vector=n_vector,
-                           param_names=param_names)], False)
+                           param_names=param_names, shaded=is_shaded)],
+                is_shaded)
+            is_shaded = True
             shaded = TsShadeCollection(
                 [TsSurface(shaded_coords, n_vector=n_vector,
-                           param_names=param_names)], True)
+                           param_names=param_names, shaded=is_shaded)],
+                is_shaded)
             # Create segment
             segment = TsSegment(segment_coords, illum, shaded,
                                 n_vector=n_vector)
