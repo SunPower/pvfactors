@@ -139,7 +139,8 @@ class TsPVRow(object):
         return pvrow.all_surfaces
 
     def plot_at_idx(self, idx, ax, color_shaded=COLOR_DIC['pvrow_shaded'],
-                    color_illum=COLOR_DIC['pvrow_illum']):
+                    color_illum=COLOR_DIC['pvrow_illum'],
+                    with_surface_index=False):
         """Plot timeseries PV row at a certain index.
 
         Parameters
@@ -154,10 +155,12 @@ class TsPVRow(object):
         color_shaded : str, optional
             Color to use for plotting the illuminated surfaces (Default =
             COLOR_DIC['pvrow_illum'])
+        with_surface_index : bool, optional
+            Plot the surfaces with their index values (Default = False)
         """
         pvrow = self.at(idx)
         pvrow.plot(ax, color_shaded=color_shaded,
-                   color_illum=color_illum, with_index=False)
+                   color_illum=color_illum, with_index=with_surface_index)
 
     def at(self, idx):
         """Generate a PV row geometry for the desired index.
@@ -314,12 +317,16 @@ class TsSide(object):
             shaded_coords = TsLineCoords.from_array(
                 np.array([[x1_shaded, y1_shaded], [x2_shaded, y2_shaded]]))
             # Create illuminated and shaded collections
+            is_shaded = False
             illum = TsShadeCollection(
                 [TsSurface(illum_coords, n_vector=n_vector,
-                           param_names=param_names)], False)
+                           param_names=param_names, shaded=is_shaded)],
+                is_shaded)
+            is_shaded = True
             shaded = TsShadeCollection(
                 [TsSurface(shaded_coords, n_vector=n_vector,
-                           param_names=param_names)], True)
+                           param_names=param_names, shaded=is_shaded)],
+                is_shaded)
             # Create segment
             segment = TsSegment(segment_coords, illum, shaded,
                                 n_vector=n_vector)

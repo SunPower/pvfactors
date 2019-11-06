@@ -31,7 +31,7 @@ Finally, these 3 blocks will be assembled together inside the pvfactors engine (
 The main interface for building the 2D geometry of a PV array is currently the :py:class:`~pvfactors.geometry.pvarray.OrderedPVArray` class. It can be used for modeling both fixed tilt and single-axis tracker systems on a flat ground. Here are some details on the concepts behind the :py:class:`~pvfactors.geometry.pvarray.OrderedPVArray` class.
 
 .. note::
-   For more information on how the geometry sub-package is organized, the user can refer to :ref:`detailed geometry API <geometry_api>`.
+   For more information on how the geometry sub-package is organized, the user can refer to the :ref:`detailed geometry API <geometry_api>`.
 
 Understanding PV array 2D geometries
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -82,7 +82,7 @@ In ``pvfactors``, a PV array has a number of fixed parameters that do not change
    }
 
 
-The :ref:`tutorial section <getting_started_ref>` section shows how such a dictionary can be used to create a PV array in ``pvfactors`` using the :py:class:`~pvfactors.geometry.pvarray.OrderedPVArray` class. Here is a description of what each parameter means:
+The :ref:`tutorial section <getting_started_ref>` shows how such a dictionary can be used to create a PV array in ``pvfactors`` using the :py:class:`~pvfactors.geometry.pvarray.OrderedPVArray` class. Here is a description of what each parameter means:
 
 
 - ``n_pvrows``: is the number of PV rows that the PV array will contain. In Fig. 2, we have 3 PV rows.

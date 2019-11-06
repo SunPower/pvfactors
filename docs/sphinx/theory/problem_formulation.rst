@@ -5,7 +5,8 @@ Mathematical Model
 
 In order to use the view factors as follows, we need to assume that the surfaces considered are diffuse (lambertian). Which means that their optical properties are independent of the angle of the rays (incident, reflected, or emitted).
 
-The current version of the view factor model only addresses PV rows that are made out of straight lines (no "dual-tilt" for instance). But the PV array can have any azimuth or tilt angle for the simulations. Below is the 2D representation of such a PV array.
+The current version of the view factor model only addresses PV rows that are made out of straight lines
+(no "dual-tilt" for instance), with a flat ground. But the PV array can have any azimuth or tilt angle for the simulations. Below is the 2D representation of such a PV array, plotted with ``pvfactors``.
 
 
 .. figure:: /_static/pvarray.png
@@ -13,7 +14,12 @@ The current version of the view factor model only addresses PV rows that are mad
    :align: center
 
 
-The mathematical model used in pvfactors simulations is different depending on the simulation type that is run. In "full simulations", all of the reflections between the modeled surfaces are taken into account in the calculations. In "fast simulations", assumptions are made on the reflected irradiance from the environment surrounding the surfaces of interest.
+The mathematical model used in ``pvfactors`` simulations is different depending on the simulation type
+that is run.
+
+- in "full simulations", all of the reflections between the modeled surfaces are taken into account in the calculations, which leads to results that account for the equilibrium of reflections between surfaces.
+- in "fast simulations", assumptions are made on the reflected irradiance from the environment surrounding the surfaces of interest.
+
 
 .. _full_mode_theory:
 
@@ -32,7 +38,8 @@ Unit: :math:`W/m^2`.
 | * :math:`q_{emitted, i}` is the emitted radiative flux from that surface. For instance the total emitted radiative flux of a blackbody is known to be :math:`{\sigma}T^4` (with :math:`T` the surface temperature and :math:`{\sigma}` the Stefan–Boltzmann constant).
 | * :math:`q_{reflected, i}` is the reflected flux from that surface.
 
-Finding values of interest like back side irradiance can only be done after finding the radiosities :math:`q_{o, i}` of all surfaces ``i``. This can become a very complex system of equations where one would need to solve the energy balance on the considered systems .
+Finding values of interest like back side irradiance can only be done after finding the
+radiosity :math:`q_{o, i}` of each surface ``i``. This can become a very complex system of equations where one would need to solve the energy balance on the considered systems .
 
 | But if we decide to make the assumption that :math:`q_{emitted, i}` is negligible, we can simplify the problem in a way that would enable us to find more easily some approximations of the values of interest. For now, this assumption makes some sense because the temperatures of the PV systems and the surroundings are generally not very high (< 330K). Besides the surfaces are not real black bodies, which means that their total (or broadband) emissions and absorptions will be even lower.
 | Under this assumption, we end up with:
@@ -54,7 +61,7 @@ We can further develop this expression and involve configuration factors as well
 | where:
 | * :math:`{\sum_{j} q_{o, j} * F_{i, j}}` is the contribution of all the surfaces ``j`` surrounding ``i`` to the incident radiative flux onto surface ``i``.
 | * :math:`F_{i, j}` is the configuration factor (or view factor) of surface ``i`` to surface ``j``.
-| * :math:`Sky_i` is a sky irradiance term specific to surface ``i`` which contributes to the incident radiative flux  :math:`q_{incident, i}`, and associated with irradiance terms not represented in the geometrical model. For instance, it will be equal to :math:`DNI_{POA} + circumsolar_{POA} + horizon_{POA}` for the front side of the modules.
+| * :math:`Sky_i` is a sky irradiance term specific to surface ``i`` which contributes to the incident radiative flux  :math:`q_{incident, i}`, and associated with irradiance terms not represented in the geometrical model. For instance, it will be equal to :math:`DNI_{POA} + circumsolar_{POA} + horizon_{POA}` for the front (illuminated) side of the modules, when using the :py:class:`~pvfactors.irradiance.models.HybridPerezOrdered` model.
 
 This results into a linear system that can be written as follows:
 
@@ -119,9 +126,10 @@ And we realized that we needed to solve for :math:`\mathbf{q_o}` in order to fin
 
 	\mathbf{q_{o}} ≈ \mathbf{R} . \mathbf{q_{perez}}
 
-Here, :math:`\mathbf{q_{perez}}` can have values equal to zero for back side surfaces, which will lead to a good assumption if the back side surfaces don't see each other.
+Here, :math:`\mathbf{q_{perez}}` can have values equal to zero for back side surfaces, which will lead to a good assumption if the back side surfaces don't see each other,
+which is the case in :py:class:`~pvfactors.geometry.pvarray.OrderedPVArray`.
 
-2) we can then also reduce the calculation of view factors to the ones of the back side surfaces of interest, leading to the following:
+2) we can then also reduce the calculation of view factors to the view factors of the back side surfaces of interest, leading to the following:
 
 
 .. math::
@@ -167,7 +175,8 @@ For instance, if we are interested in back side surfaces with indices ``3`` and 
 Grouping terms
 ^^^^^^^^^^^^^^
 
-For each back surface element, we can then group reflection terms that have identical reflected irradiance values into something more intuitive:
+For each back surface element, we can then group reflection terms that have identical reflectivity
+and :math:`\mathbf{q_{perez}}` terms into something more intuitive:
 
 .. math::
 

@@ -267,7 +267,8 @@ class TsGround(object):
 
     def plot_at_idx(self, idx, ax, color_shaded=COLOR_DIC['pvrow_shaded'],
                     color_illum=COLOR_DIC['pvrow_illum'], x_min_max=None,
-                    merge_if_flag_overlap=True, with_cut_points=True):
+                    merge_if_flag_overlap=True, with_cut_points=True,
+                    with_surface_index=False):
         """Plot timeseries ground at a certain index.
 
         Parameters
@@ -291,12 +292,14 @@ class TsGround(object):
         with_cut_points :  bool, optional
             Decide whether to include the saved cut points in the created
             PV ground geometry (Default = True)
+        with_surface_index : bool, optional
+            Plot the surfaces with their index values (Default = False)
         """
         pvground = self.at(idx, x_min_max=x_min_max,
                            merge_if_flag_overlap=merge_if_flag_overlap,
                            with_cut_points=with_cut_points)
         pvground.plot(ax, color_shaded=color_shaded, color_illum=color_illum,
-                      with_index=False)
+                      with_index=with_surface_index)
 
     def update_params(self, new_dict):
         """Update the illuminated parameters with new ones, not only for the
@@ -717,7 +720,8 @@ class TsGround(object):
                                     surface = PVSurface(
                                         coords, shaded=True,
                                         param_names=self.param_names,
-                                        params=surface.params)
+                                        params=surface.params,
+                                        index=surface.index)
                             if i_el == n_shadow_elements - 1:
                                 # last surface of last shadow element
                                 list_shadow_surfaces.append(surface)
@@ -732,7 +736,8 @@ class TsGround(object):
                                 list_shadow_surfaces.append(
                                     PVSurface(coords, shaded=True,
                                               param_names=self.param_names,
-                                              params=surface.params))
+                                              params=surface.params,
+                                              index=surface.index))
                             else:
                                 list_shadow_surfaces.append(surface)
                         else:
@@ -826,7 +831,7 @@ class TsGroundElement(object):
         -------
         list of :py:class:`~pvfactors.geometry.base.PVSurface`
         """
-        return [surface.at(idx, shaded=self.shaded)
+        return [surface.at(idx)
                 for surface in self.surface_list]
 
     def non_point_surfaces_at(self, idx):
@@ -842,7 +847,7 @@ class TsGroundElement(object):
         -------
         list of :py:class:`~pvfactors.geometry.base.PVSurface`
         """
-        return [surface.at(idx, shaded=self.shaded)
+        return [surface.at(idx)
                 for surface in self.surface_list
                 if surface.length[idx] > DISTANCE_TOLERANCE]
 
@@ -908,7 +913,8 @@ class TsGroundElement(object):
             coords_left = self._coords_left_of_cut_point(next_coords,
                                                          cut_pt_coords)
             # Save that surface in the required structures
-            surface_left = TsSurface(coords_left, param_names=self.param_names)
+            surface_left = TsSurface(coords_left, param_names=self.param_names,
+                                     shaded=self.shaded)
             self.surface_list.append(surface_left)
             for i in range(idx_pt, n_cut_pts):
                 self.surface_dict[i]['left'].append(surface_left)
@@ -917,7 +923,8 @@ class TsGroundElement(object):
             next_coords = self._coords_right_of_cut_point(next_coords,
                                                           cut_pt_coords)
         # Save the right most portion
-        next_surface = TsSurface(next_coords, param_names=self.param_names)
+        next_surface = TsSurface(next_coords, param_names=self.param_names,
+                                 shaded=self.shaded)
         self.surface_list.append(next_surface)
         for j in range(0, n_cut_pts):
             self.surface_dict[j]['right'].append(next_surface)

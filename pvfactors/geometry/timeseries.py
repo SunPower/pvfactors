@@ -104,9 +104,8 @@ class TsShadeCollection(object):
         -------
         collection : :py:class:`~pvfactors.geometry.base.ShadeCollection`
         """
-        list_surfaces = [ts_surf.at(idx, shaded=self.shaded)
-                         for ts_surf in self._list_ts_surfaces
-                         if not ts_surf.at(idx, shaded=self.shaded).is_empty]
+        list_surfaces = [ts_surf.at(idx) for ts_surf in self._list_ts_surfaces
+                         if not ts_surf.at(idx).is_empty]
         return ShadeCollection(list_surfaces, shaded=self.shaded)
 
 
@@ -114,7 +113,8 @@ class TsSurface(object):
     """Timeseries surface class: vectorized representation of PV surface
     geometries."""
 
-    def __init__(self, coords, n_vector=None, param_names=None, index=None):
+    def __init__(self, coords, n_vector=None, param_names=None, index=None,
+                 shaded=False):
         """Initialize timeseries surface using timeseries coordinates.
 
         Parameters
@@ -127,6 +127,8 @@ class TsSurface(object):
             Timeseries normal vectors of the side (Default = None)
         index : int, optional
             Index of the timeseries surfaces (Default = None)
+        shaded : bool, optional
+            Is the surface shaded or not (Default = False)
         """
         # TODO: ts surfaces should have a shaded attribute
         self.coords = coords
@@ -136,8 +138,9 @@ class TsSurface(object):
         self.n_vector = n_vector
         self.params = dict.fromkeys(self.param_names)
         self.index = index
+        self.shaded = shaded
 
-    def at(self, idx, shaded=None):
+    def at(self, idx):
         """Generate a PV segment geometry for the desired index.
 
         Parameters
@@ -162,8 +165,8 @@ class TsSurface(object):
             # TODO: should find faster solution
             params = _get_params_at_idx(idx, self.params)
             # Return a pv surface geometry with given params
-            return PVSurface(self.coords.at(idx), shaded=shaded,
-                             normal_vector=n_vector,
+            return PVSurface(self.coords.at(idx), shaded=self.shaded,
+                             index=self.index, normal_vector=n_vector,
                              param_names=self.param_names,
                              params=params)
 

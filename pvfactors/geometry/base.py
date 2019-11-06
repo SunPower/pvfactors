@@ -1175,7 +1175,8 @@ class BasePVArray(object):
         return [ts_surf.index for ts_surf in self.all_ts_surfaces]
 
     def plot_at_idx(self, idx, ax, merge_if_flag_overlap=True,
-                    with_cut_points=True, x_min_max=None):
+                    with_cut_points=True, x_min_max=None,
+                    with_surface_index=False):
         """Plot all the PV rows and the ground in the PV array at a desired
         step index. This can be called before transforming the array, and
         after fitting it.
@@ -1195,18 +1196,22 @@ class BasePVArray(object):
         x_min_max : tuple, optional
             List of minimum and maximum x coordinates for the flat ground
             surface [m] (Default = None)
+        with_surface_index : bool, optional
+            Plot the surfaces with their index values (Default = False)
         """
         # Plot pv array structures
         self.ts_ground.plot_at_idx(
             idx, ax, color_shaded=COLOR_DIC['ground_shaded'],
             color_illum=COLOR_DIC['ground_illum'],
             merge_if_flag_overlap=merge_if_flag_overlap,
-            with_cut_points=with_cut_points, x_min_max=x_min_max)
+            with_cut_points=with_cut_points, x_min_max=x_min_max,
+            with_surface_index=with_surface_index)
 
         for ts_pvrow in self.ts_pvrows:
             ts_pvrow.plot_at_idx(
                 idx, ax, color_shaded=COLOR_DIC['pvrow_shaded'],
-                color_illum=COLOR_DIC['pvrow_illum'])
+                color_illum=COLOR_DIC['pvrow_illum'],
+                with_surface_index=with_surface_index)
 
         # Plot formatting
         ax.axis('equal')
