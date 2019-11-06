@@ -6,10 +6,8 @@ v1.3.0 (November 6, 2019)
 Enhancements
 ------------
 
-pvfactors is now only using timeseries geometries and vectorization for the view factor matrix calculation,
-even with the full reflection equilibrium mode.
-This resulted in an incredible speed boost, in which 8760 simulations now run in less than 2 seconds when using the full mode (it previously took a couple minutes).
-So there's not much reason anymore to use the "fast" mode, which is less accurate and not that faster anymore.
+pvfactors is now only using timeseries geometries and vectorization for the view factor matrix calculation, even with the full reflection equilibrium mode.
+This resulted in an incredible speed boost, in which 8760 simulations now run in less than 2 seconds when using the full mode (it previously took a couple minutes). So there's not much reason anymore to use the "fast" mode, which is less accurate and not that faster anymore.
 Lots of package clean up and documentation updates in addition to this.
 
 * Create timeseries ground elements (#80)
