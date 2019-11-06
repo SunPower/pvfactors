@@ -313,7 +313,7 @@ class IsotropicOrdered(BaseModel):
 
 class HybridPerezOrdered(BaseModel):
     """Model is based off Perez diffuse light model, and
-    applied to pvfactors :py:class:`~pvfactors.geometry.OrderedPVArray`
+    applied to pvfactors :py:class:`~pvfactors.geometry.pvarray.OrderedPVArray`
     objects.
     The model applies direct, circumsolar, and horizon irradiance to the PV
     array surfaces.

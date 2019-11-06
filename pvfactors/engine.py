@@ -1,4 +1,4 @@
-"""This module contains the engine classes that will run the complete
+"""This module contains the engine class that will run the complete
 timeseries simulations."""
 
 import numpy as np
@@ -39,10 +39,8 @@ class PVEngine(object):
             selected segment of the selected back surface (Default = None)
         """
         # Initialize the attributes of the PV engine
-        self.vf_calculator = (VFCalculator() if vf_calculator is None
-                              else vf_calculator)
-        self.irradiance = (HybridPerezOrdered() if irradiance_model is None
-                           else irradiance_model)
+        self.vf_calculator = vf_calculator or VFCalculator()
+        self.irradiance = irradiance_model or HybridPerezOrdered()
         self.pvarray = pvarray
         # Save fast mode indices
         self.fast_mode_pvrow_index = fast_mode_pvrow_index
@@ -119,7 +117,7 @@ class PVEngine(object):
 
     def run_full_mode(self, fn_build_report=None):
         """Run all simulation timesteps using the full mode, which calculates
-        the equilibrium of reflections in the system, and return a report that
+        the equilibrium of reflections in the system, and returns a report that
         will be built by the function passed by the user.
 
         Parameters
