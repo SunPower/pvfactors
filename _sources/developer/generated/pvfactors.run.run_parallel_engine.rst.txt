@@ -1,0 +1,6 @@
+pvfactors.run.run\_parallel\_engine
+===================================
+
+.. currentmodule:: pvfactors.run
+
+.. autofunction:: run_parallel_engine

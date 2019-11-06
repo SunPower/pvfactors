@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Run full timeseries simulations &mdash; pvfactors 1.2.2 documentation</title>
+  <title>Run full timeseries simulations &mdash; pvfactors 1.3.0 documentation</title>
   
 
   
@@ -68,7 +68,7 @@
             
             
               <div class="version">
-                1.2.2
+                1.3.0
               </div>
             
           
@@ -94,11 +94,9 @@
             
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../installation/index.html">Installation</a></li>
-<li class="toctree-l1 current"><a class="reference internal" href="index.html">User guide and tutorials</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="index.html#understanding-pv-array-2d-geometries">Understanding PV array 2D geometries</a></li>
-<li class="toctree-l2"><a class="reference internal" href="index.html#pv-array-parameters">PV array parameters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../concepts/index.html">Main concepts</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Tutorials</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="index.html#getting-started-running-simulations">Getting started: running simulations</a></li>
-<li class="toctree-l2"><a class="reference internal" href="index.html#details-on-the-fast-mode-simulations">Details on the “fast mode” simulations</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="index.html#details-on-the-full-mode-simulations">Details on the “full mode” simulations</a><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="PVArray_introduction.html">PV Array geometry introduction</a></li>
 <li class="toctree-l3"><a class="reference internal" href="Create_discretized_pvarray.html">Discretize PV row sides and indexing</a></li>
@@ -114,6 +112,7 @@
 <li class="toctree-l3"><a class="reference internal" href="Run_full_parallel_simulations.html">Run full simulations in parallel</a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="index.html#details-on-the-fast-mode-simulations">Details on the “fast mode” simulations</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../theory/index.html">Theory</a></li>
@@ -164,7 +163,7 @@
     
       <li><a href="../index.html">Docs</a> &raquo;</li>
         
-          <li><a href="index.html">User guide and tutorials</a> &raquo;</li>
+          <li><a href="index.html">Tutorials</a> &raquo;</li>
         
       <li>Run full timeseries simulations</li>
     
@@ -540,12 +539,12 @@ div.rendered_html tbody tr:hover {
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="c1"># Get pvarray at given timestamp</span>
-<span class="n">pvarray</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">run_full_mode_timestep</span><span class="p">(</span><span class="n">idx</span><span class="o">=</span><span class="mi">15</span><span class="p">)</span>
+<span></span><span class="c1"># Get the PV array</span>
+<span class="n">pvarray</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">run_full_mode</span><span class="p">(</span><span class="n">fn_build_report</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pvarray</span><span class="p">:</span> <span class="n">pvarray</span><span class="p">)</span>
 
 <span class="c1"># Plot pvarray shapely geometries</span>
 <span class="n">f</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
-<span class="n">pvarray</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="n">with_index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">pvarray</span><span class="o">.</span><span class="n">plot_at_idx</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="n">ax</span><span class="p">,</span> <span class="n">with_surface_index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="mi">15</span><span class="p">])</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </pre></div>
@@ -558,56 +557,23 @@ div.rendered_html tbody tr:hover {
 <img alt="../_images/tutorials_Run_full_timeseries_simulations_14_0.png" src="../_images/tutorials_Run_full_timeseries_simulations_14_0.png" />
 </div>
 </div>
-<p>The user can also visualize the view factor matrix calculated for the timestamp</p>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">pvarray</span><span class="o">.</span><span class="n">vf_matrix</span>
-</pre></div>
-</div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
-</pre></div>
-</div>
-<div class="output_area highlight-none notranslate"><div class="highlight"><pre>
-<span></span>array([[0.   , 0.   , 0.   , 0.   , 0.   , 0.   , 0.002, 0.   , 0.   , 0.   , 0.   , 0.   , 0.   , 0.   , 0.998],
-       [0.   , 0.   , 0.   , 0.   , 0.   , 0.   , 0.   , 0.239, 0.03 , 0.005, 0.   , 0.012, 0.001, 0.   , 0.712],
-       [0.   , 0.   , 0.   , 0.   , 0.   , 0.   , 0.   , 0.   , 0.   , 0.   , 0.   , 0.   , 0.   , 0.001, 0.999],
-       [0.   , 0.   , 0.   , 0.   , 0.   , 0.   , 0.   , 0.144, 0.015, 0.004, 0.   , 0.019, 0.002, 0.   , 0.816],
-       [0.   , 0.   , 0.   , 0.   , 0.   , 0.   , 0.   , 0.058, 0.   , 0.   , 0.23 , 0.029, 0.005, 0.   , 0.679],
-       [0.   , 0.   , 0.   , 0.   , 0.   , 0.   , 0.   , 0.004, 0.   , 0.   , 0.032, 0.   , 0.   , 0.143, 0.82 ],
-       [0.175, 0.   , 0.   , 0.   , 0.   , 0.   , 0.   , 0.   , 0.   , 0.   , 0.   , 0.   , 0.   , 0.   , 0.825],
-       [0.   , 0.54 , 0.004, 0.035, 0.144, 0.022, 0.   , 0.   , 0.104, 0.018, 0.   , 0.   , 0.   , 0.   , 0.133],
-       [0.047, 0.077, 0.   , 0.004, 0.   , 0.   , 0.   , 0.117, 0.   , 0.   , 0.   , 0.   , 0.   , 0.   , 0.755],
-       [0.067, 0.097, 0.   , 0.008, 0.   , 0.   , 0.   , 0.164, 0.   , 0.   , 0.   , 0.   , 0.   , 0.   , 0.663],
-       [0.   , 0.   , 0.007, 0.   , 0.575, 0.163, 0.   , 0.   , 0.   , 0.   , 0.   , 0.104, 0.018, 0.   , 0.133],
-       [0.011, 0.03 , 0.   , 0.005, 0.081, 0.   , 0.   , 0.   , 0.   , 0.   , 0.117, 0.   , 0.   , 0.   , 0.755],
-       [0.036, 0.026, 0.   , 0.005, 0.105, 0.   , 0.   , 0.   , 0.   , 0.   , 0.164, 0.   , 0.   , 0.   , 0.663],
-       [0.   , 0.   , 0.094, 0.   , 0.   , 0.723, 0.   , 0.   , 0.   , 0.   , 0.   , 0.   , 0.   , 0.   , 0.183],
-       [0.   , 0.   , 0.   , 0.   , 0.   , 0.   , 0.   , 0.   , 0.   , 0.   , 0.   , 0.   , 0.   , 0.   , 0.   ]])
-</pre></div>
-</div>
-</div>
 <p>The user can inspect the results very easily thanks to the simple geometry API</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
 <span></span><span class="c1"># Get the calculated outputs from the pv array</span>
-<span class="n">center_row_front_incident_irradiance</span> <span class="o">=</span> <span class="n">pvarray</span><span class="o">.</span><span class="n">pvrows</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">front</span><span class="o">.</span><span class="n">get_param_weighted</span><span class="p">(</span><span class="s1">&#39;qinc&#39;</span><span class="p">)</span>
-<span class="n">left_row_back_reflected_incident_irradiance</span> <span class="o">=</span> <span class="n">pvarray</span><span class="o">.</span><span class="n">pvrows</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">back</span><span class="o">.</span><span class="n">get_param_weighted</span><span class="p">(</span><span class="s1">&#39;reflection&#39;</span><span class="p">)</span>
-<span class="n">right_row_back_isotropic_incident_irradiance</span> <span class="o">=</span> <span class="n">pvarray</span><span class="o">.</span><span class="n">pvrows</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">back</span><span class="o">.</span><span class="n">get_param_weighted</span><span class="p">(</span><span class="s1">&#39;isotropic&#39;</span><span class="p">)</span>
+<span class="n">center_row_front_incident_irradiance</span> <span class="o">=</span> <span class="n">pvarray</span><span class="o">.</span><span class="n">ts_pvrows</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">front</span><span class="o">.</span><span class="n">get_param_weighted</span><span class="p">(</span><span class="s1">&#39;qinc&#39;</span><span class="p">)</span>
+<span class="n">left_row_back_reflected_incident_irradiance</span> <span class="o">=</span> <span class="n">pvarray</span><span class="o">.</span><span class="n">ts_pvrows</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">back</span><span class="o">.</span><span class="n">get_param_weighted</span><span class="p">(</span><span class="s1">&#39;reflection&#39;</span><span class="p">)</span>
+<span class="n">right_row_back_isotropic_incident_irradiance</span> <span class="o">=</span> <span class="n">pvarray</span><span class="o">.</span><span class="n">ts_pvrows</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">back</span><span class="o">.</span><span class="n">get_param_weighted</span><span class="p">(</span><span class="s1">&#39;isotropic&#39;</span><span class="p">)</span>
 
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Incident irradiance on front surface of middle pv row: </span><span class="si">%.2f</span><span class="s2"> W/m2&quot;</span>
-      <span class="o">%</span> <span class="n">center_row_front_incident_irradiance</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Reflected irradiance on back surface of left pv row: </span><span class="si">%.2f</span><span class="s2"> W/m2&quot;</span>
-      <span class="o">%</span> <span class="n">left_row_back_reflected_incident_irradiance</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Isotropic irradiance on back surface of right pv row: </span><span class="si">%.2f</span><span class="s2"> W/m2&quot;</span>
-      <span class="o">%</span> <span class="n">right_row_back_isotropic_incident_irradiance</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Incident irradiance on front surface of middle pv row: </span><span class="se">\n</span><span class="si">{}</span><span class="s2"> W/m2&quot;</span>
+      <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">center_row_front_incident_irradiance</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Reflected irradiance on back surface of left pv row: </span><span class="se">\n</span><span class="si">{}</span><span class="s2"> W/m2&quot;</span>
+      <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">left_row_back_reflected_incident_irradiance</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Isotropic irradiance on back surface of right pv row: </span><span class="se">\n</span><span class="si">{}</span><span class="s2"> W/m2&quot;</span>
+      <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">right_row_back_isotropic_incident_irradiance</span><span class="p">))</span>
 </pre></div>
 </div>
 </div>
@@ -616,17 +582,20 @@ div.rendered_html tbody tr:hover {
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Incident irradiance on front surface of middle pv row: 550.17 W/m2
-Reflected irradiance on back surface of left pv row: 25.22 W/m2
-Isotropic irradiance on back surface of right pv row: 2.83 W/m2
+Incident irradiance on front surface of middle pv row:
+[    nan     nan     nan     nan     nan     nan     nan 117.633 587.344 685.115 652.526 616.77  618.875 656.024 685.556 550.172  87.66      nan     nan     nan     nan     nan     nan     nan] W/m2
+Reflected irradiance on back surface of left pv row:
+[   nan    nan    nan    nan    nan    nan    nan  8.375  6.597 39.275 58.563 68.346 64.176 47.593 32.984 25.216  7.044    nan    nan    nan    nan    nan    nan    nan] W/m2
+Isotropic irradiance on back surface of right pv row:
+[  nan   nan   nan   nan   nan   nan   nan 0.076 2.15  3.116 1.697 0.199 0.414 2.627 4.208 2.83  0.066   nan   nan   nan   nan   nan   nan   nan] W/m2
 </pre></div></div>
 </div>
 </div>
 <div class="section" id="Run-multiple-timesteps-with-PVEngine">
 <h2>Run multiple timesteps with PVEngine<a class="headerlink" href="#Run-multiple-timesteps-with-PVEngine" title="Permalink to this headline">¶</a></h2>
-<p>The users can also run simulations for all timestamps, and obtain a “report” that will look like whatever the users want, and which will rely on the simple geometry API shown above. Here is an example:</p>
+<p>The users can also obtain a “report” that will look like whatever the users want, and which will rely on the simple geometry API shown above. Here is an example:</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -642,16 +611,8 @@ Isotropic irradiance on back surface of right pv row: 2.83 W/m2
 </pre></div>
 </div>
 </div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area stderr docutils container">
-<div class="highlight"><pre>
-100%|██████████| 24/24 [00:00&lt;00:00, 114.15it/s]
-</pre></div></div>
-</div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
 </pre></div>
 </div>
 <div class="output_area rendered_html docutils container">
@@ -690,14 +651,14 @@ Isotropic irradiance on back surface of right pv row: 2.83 W/m2
     <tr>
       <td>2019-01-01 08:00:00-07:00</td>
       <td>117.632919</td>
-      <td>9.703829</td>
+      <td>9.703464</td>
       <td>5.070103</td>
       <td>0.076232</td>
     </tr>
     <tr>
       <td>2019-01-01 09:00:00-07:00</td>
-      <td>587.344229</td>
-      <td>4.959138</td>
+      <td>587.344197</td>
+      <td>4.906038</td>
       <td>12.087407</td>
       <td>2.150237</td>
     </tr>
@@ -720,7 +681,7 @@ Isotropic irradiance on back surface of right pv row: 2.83 W/m2
 </div></div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -735,7 +696,7 @@ Isotropic irradiance on back surface of right pv row: 2.83 W/m2
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/tutorials_Run_full_timeseries_simulations_22_0.png" src="../_images/tutorials_Run_full_timeseries_simulations_22_0.png" />
+<img alt="../_images/tutorials_Run_full_timeseries_simulations_20_0.png" src="../_images/tutorials_Run_full_timeseries_simulations_20_0.png" />
 </div>
 </div>
 <div class="line-block">
@@ -743,31 +704,17 @@ Isotropic irradiance on back surface of right pv row: 2.83 W/m2
 <div class="line">Here is an example of a report function that will return the total incident irradiance (<code class="docutils literal notranslate"><span class="pre">'qinc'</span></code>) on the back surface of the rightmost PV row. A good way to get started building the reporting function is to use the example provided in the <code class="docutils literal notranslate"><span class="pre">report.py</span></code> module of the pvfactors package.</div>
 </div>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="k">def</span> <span class="nf">new_fn_build_report</span><span class="p">(</span><span class="n">report</span><span class="p">,</span> <span class="n">pvarray</span><span class="p">):</span>
-    <span class="c1"># Initialize the report as a dictionary</span>
-    <span class="k">if</span> <span class="n">report</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">list_keys</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;total_inc_back&#39;</span><span class="p">]</span>
-        <span class="n">report</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="p">[]</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">list_keys</span><span class="p">}</span>
-    <span class="c1"># Add elements to the report</span>
-    <span class="k">if</span> <span class="n">pvarray</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">pvrow</span> <span class="o">=</span> <span class="n">pvarray</span><span class="o">.</span><span class="n">pvrows</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>  <span class="c1"># use rightmost pvrow</span>
-        <span class="n">report</span><span class="p">[</span><span class="s1">&#39;total_inc_back&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-            <span class="n">pvrow</span><span class="o">.</span><span class="n">back</span><span class="o">.</span><span class="n">get_param_weighted</span><span class="p">(</span><span class="s1">&#39;qinc&#39;</span><span class="p">))</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="c1"># No calculation was performed, because sun was down</span>
-        <span class="n">report</span><span class="p">[</span><span class="s1">&#39;total_inc_back&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">)</span>
-
-    <span class="k">return</span> <span class="n">report</span>
+<span></span><span class="k">def</span> <span class="nf">new_fn_build_report</span><span class="p">(</span><span class="n">pvarray</span><span class="p">):</span> <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;total_inc_back&#39;</span><span class="p">:</span> <span class="n">pvarray</span><span class="o">.</span><span class="n">ts_pvrows</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">back</span><span class="o">.</span><span class="n">get_param_weighted</span><span class="p">(</span><span class="s1">&#39;qinc&#39;</span><span class="p">)}</span>
 </pre></div>
 </div>
 </div>
 <p>Now we can run the timeseries simulation again using the same engine but a different report function.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -780,16 +727,8 @@ Isotropic irradiance on back surface of right pv row: 2.83 W/m2
 </pre></div>
 </div>
 </div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area stderr docutils container">
-<div class="highlight"><pre>
-100%|██████████| 24/24 [00:00&lt;00:00, 112.21it/s]
-</pre></div></div>
-</div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
 </pre></div>
 </div>
 <div class="output_area rendered_html docutils container">
@@ -821,26 +760,26 @@ Isotropic irradiance on back surface of right pv row: 2.83 W/m2
     </tr>
     <tr>
       <td>2019-01-01 08:00:00-07:00</td>
-      <td>9.901971</td>
+      <td>9.703464</td>
     </tr>
     <tr>
       <td>2019-01-01 09:00:00-07:00</td>
-      <td>28.275688</td>
+      <td>4.906038</td>
     </tr>
     <tr>
       <td>2019-01-01 10:00:00-07:00</td>
-      <td>36.479082</td>
+      <td>33.478098</td>
     </tr>
     <tr>
       <td>2019-01-01 11:00:00-07:00</td>
-      <td>52.169775</td>
+      <td>52.534503</td>
     </tr>
   </tbody>
 </table>
 </div></div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -854,7 +793,7 @@ Isotropic irradiance on back surface of right pv row: 2.83 W/m2
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/tutorials_Run_full_timeseries_simulations_27_0.png" src="../_images/tutorials_Run_full_timeseries_simulations_27_0.png" />
+<img alt="../_images/tutorials_Run_full_timeseries_simulations_25_0.png" src="../_images/tutorials_Run_full_timeseries_simulations_25_0.png" />
 </div>
 </div>
 <div class="line-block">
@@ -868,8 +807,8 @@ Isotropic irradiance on back surface of right pv row: 2.83 W/m2
 <div class="line">The same thing can be accomplished using a function from the <code class="docutils literal notranslate"><span class="pre">run.py</span></code> module of the pvfactors package.</div>
 <div class="line">But only the report will be returned.</div>
 </div>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -888,16 +827,8 @@ Isotropic irradiance on back surface of right pv row: 2.83 W/m2
 </pre></div>
 </div>
 </div>
-<div class="nboutput nblast docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area stderr docutils container">
-<div class="highlight"><pre>
-100%|██████████| 24/24 [00:00&lt;00:00, 128.67it/s]
-</pre></div></div>
-</div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -911,7 +842,7 @@ Isotropic irradiance on back surface of right pv row: 2.83 W/m2
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/tutorials_Run_full_timeseries_simulations_32_0.png" src="../_images/tutorials_Run_full_timeseries_simulations_32_0.png" />
+<img alt="../_images/tutorials_Run_full_timeseries_simulations_30_0.png" src="../_images/tutorials_Run_full_timeseries_simulations_30_0.png" />
 </div>
 </div>
 <p>The plot above shows that we get the same results as previously.</p>

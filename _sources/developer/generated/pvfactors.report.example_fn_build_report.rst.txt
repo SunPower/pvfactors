@@ -1,0 +1,6 @@
+pvfactors.report.example\_fn\_build\_report
+===========================================
+
+.. currentmodule:: pvfactors.report
+
+.. autofunction:: example_fn_build_report

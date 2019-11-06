@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>geometry &mdash; pvfactors 1.2.2 documentation</title>
+  <title>geometry &mdash; pvfactors 1.3.0 documentation</title>
   
 
   
@@ -66,7 +66,7 @@
             
             
               <div class="version">
-                1.2.2
+                1.3.0
               </div>
             
           
@@ -92,7 +92,8 @@
             
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="../installation/index.html">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../tutorials/index.html">User guide and tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../concepts/index.html">Main concepts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/index.html">Tutorials</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../theory/index.html">Theory</a></li>
 <li class="toctree-l1"><a class="reference internal" href="index.html">Developer API</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../whatsnew.html">What’s New</a></li>
@@ -190,13 +191,13 @@
 }
 </style>
 <div class="section" id="geometry">
-<h1>geometry<a class="headerlink" href="#geometry" title="Permalink to this headline">¶</a></h1>
+<span id="geometry-api"></span><h1>geometry<a class="headerlink" href="#geometry" title="Permalink to this headline">¶</a></h1>
 <p>The geometry sub-package of pvfactors implements multiple classes that make the construction of a 2D geometry for a PV array intuitive and scalable. It is meant to be decoupled from irradiance and view factor calculations so that it can be used independently for other purposes, like visualization for instance. The following schematics summarizes the organization of the classes in this sub-package.</p>
 <div class="figure align-center">
 <a class="reference internal image-reference" href="../_images/class_organization.png"><img alt="../_images/class_organization.png" src="../_images/class_organization.png" style="width: 80%;" /></a>
 </div>
-<div class="section" id="module-base">
-<span id="base"></span><h2>base<a class="headerlink" href="#module-base" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="base">
+<h2>base<a class="headerlink" href="#base" title="Permalink to this headline">¶</a></h2>
 <p>Base classes for pvfactors geometry subpackage.</p>
 <table class="longtable docutils align-default">
 <colgroup>
@@ -204,29 +205,29 @@
 <col style="width: 90%" />
 </colgroup>
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="generated/base.BaseSurface.html#base.BaseSurface" title="base.BaseSurface"><code class="xref py py-obj docutils literal notranslate"><span class="pre">base.BaseSurface</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/pvfactors.geometry.base.BaseSurface.html#pvfactors.geometry.base.BaseSurface" title="pvfactors.geometry.base.BaseSurface"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BaseSurface</span></code></a></p></td>
 <td><p>Base surfaces will be extensions of <code class="xref py py-class docutils literal notranslate"><span class="pre">LineString</span></code> classes, but adding an orientation to it (normal vector).</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="generated/base.PVSurface.html#base.PVSurface" title="base.PVSurface"><code class="xref py py-obj docutils literal notranslate"><span class="pre">base.PVSurface</span></code></a></p></td>
-<td><p>PV surfaces inherit from <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseSurface</span></code>.</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/pvfactors.geometry.base.PVSurface.html#pvfactors.geometry.base.PVSurface" title="pvfactors.geometry.base.PVSurface"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PVSurface</span></code></a></p></td>
+<td><p>PV surfaces inherit from <a class="reference internal" href="generated/pvfactors.geometry.base.BaseSurface.html#pvfactors.geometry.base.BaseSurface" title="pvfactors.geometry.base.BaseSurface"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseSurface</span></code></a>.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="generated/base.ShadeCollection.html#base.ShadeCollection" title="base.ShadeCollection"><code class="xref py py-obj docutils literal notranslate"><span class="pre">base.ShadeCollection</span></code></a></p></td>
-<td><p>A group of <code class="xref py py-class docutils literal notranslate"><span class="pre">PVSurface</span></code> objects that all have the same shading status.</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/pvfactors.geometry.base.ShadeCollection.html#pvfactors.geometry.base.ShadeCollection" title="pvfactors.geometry.base.ShadeCollection"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ShadeCollection</span></code></a></p></td>
+<td><p>A group of <a class="reference internal" href="generated/pvfactors.geometry.base.PVSurface.html#pvfactors.geometry.base.PVSurface" title="pvfactors.geometry.base.PVSurface"><code class="xref py py-class docutils literal notranslate"><span class="pre">PVSurface</span></code></a> objects that all have the same shading status.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="generated/base.PVSegment.html#base.PVSegment" title="base.PVSegment"><code class="xref py py-obj docutils literal notranslate"><span class="pre">base.PVSegment</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/pvfactors.geometry.base.PVSegment.html#pvfactors.geometry.base.PVSegment" title="pvfactors.geometry.base.PVSegment"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PVSegment</span></code></a></p></td>
 <td><p>A PV segment will be a collection of 2 collinear and contiguous shade collections, a shaded one and an illuminated one.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="generated/base.BaseSide.html#base.BaseSide" title="base.BaseSide"><code class="xref py py-obj docutils literal notranslate"><span class="pre">base.BaseSide</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/pvfactors.geometry.base.BaseSide.html#pvfactors.geometry.base.BaseSide" title="pvfactors.geometry.base.BaseSide"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BaseSide</span></code></a></p></td>
 <td><p>A side represents a fixed collection of PV segments objects that should all be collinear, with the same normal vector</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="generated/base.BasePVArray.html#base.BasePVArray" title="base.BasePVArray"><code class="xref py py-obj docutils literal notranslate"><span class="pre">base.BasePVArray</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/pvfactors.geometry.base.BasePVArray.html#pvfactors.geometry.base.BasePVArray" title="pvfactors.geometry.base.BasePVArray"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BasePVArray</span></code></a></p></td>
 <td><p>Base class for PV arrays in pvfactors.</p></td>
 </tr>
 </tbody>
 </table>
 </div>
-<div class="section" id="module-pvrow">
-<span id="pvrow"></span><h2>pvrow<a class="headerlink" href="#module-pvrow" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="pvrow">
+<h2>pvrow<a class="headerlink" href="#pvrow" title="Permalink to this headline">¶</a></h2>
 <p>Module will classes related to PV row geometries</p>
 <table class="longtable docutils align-default">
 <colgroup>
@@ -234,17 +235,26 @@
 <col style="width: 90%" />
 </colgroup>
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="generated/pvrow.PVRowSide.html#pvrow.PVRowSide" title="pvrow.PVRowSide"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pvrow.PVRowSide</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/pvfactors.geometry.pvrow.TsPVRow.html#pvfactors.geometry.pvrow.TsPVRow" title="pvfactors.geometry.pvrow.TsPVRow"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TsPVRow</span></code></a></p></td>
+<td><p>Timeseries PV row class: this class is a vectorized version of the PV row geometries.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/pvfactors.geometry.pvrow.TsSide.html#pvfactors.geometry.pvrow.TsSide" title="pvfactors.geometry.pvrow.TsSide"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TsSide</span></code></a></p></td>
+<td><p>Timeseries side class: this class is a vectorized version of the BaseSide geometries.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/pvfactors.geometry.pvrow.TsSegment.html#pvfactors.geometry.pvrow.TsSegment" title="pvfactors.geometry.pvrow.TsSegment"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TsSegment</span></code></a></p></td>
+<td><p>A TsSegment is a timeseries segment that has a timeseries shaded collection and a timeseries illuminated collection.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/pvfactors.geometry.pvrow.PVRowSide.html#pvfactors.geometry.pvrow.PVRowSide" title="pvfactors.geometry.pvrow.PVRowSide"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PVRowSide</span></code></a></p></td>
 <td><p>A PV row side represents the whole surface of one side of a PV row.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="generated/pvrow.PVRow.html#pvrow.PVRow" title="pvrow.PVRow"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pvrow.PVRow</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/pvfactors.geometry.pvrow.PVRow.html#pvfactors.geometry.pvrow.PVRow" title="pvfactors.geometry.pvrow.PVRow"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PVRow</span></code></a></p></td>
 <td><p>A PV row is made of two PV row sides, a front and a back one.</p></td>
 </tr>
 </tbody>
 </table>
 </div>
-<div class="section" id="module-pvground">
-<span id="pvground"></span><h2>pvground<a class="headerlink" href="#module-pvground" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="pvground">
+<h2>pvground<a class="headerlink" href="#pvground" title="Permalink to this headline">¶</a></h2>
 <p>Classes for implementation of ground geometry</p>
 <table class="longtable docutils align-default">
 <colgroup>
@@ -252,14 +262,20 @@
 <col style="width: 90%" />
 </colgroup>
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="generated/pvground.PVGround.html#pvground.PVGround" title="pvground.PVGround"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pvground.PVGround</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/pvfactors.geometry.pvground.TsGround.html#pvfactors.geometry.pvground.TsGround" title="pvfactors.geometry.pvground.TsGround"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TsGround</span></code></a></p></td>
+<td><p>Timeseries ground class: this class is a vectorized version of the PV ground geometry class, and it will store timeseries shaded ground and illuminated ground elements, as well as pv row cut points.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/pvfactors.geometry.pvground.TsGroundElement.html#pvfactors.geometry.pvground.TsGroundElement" title="pvfactors.geometry.pvground.TsGroundElement"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TsGroundElement</span></code></a></p></td>
+<td><p>Special class for timeseries ground elements: a ground element has known timeseries coordinate boundaries, but it will also have a break down of its area into n+1 timeseries surfaces located in the n+1 ground zones defined by the n ground cutting points.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/pvfactors.geometry.pvground.PVGround.html#pvfactors.geometry.pvground.PVGround" title="pvfactors.geometry.pvground.PVGround"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PVGround</span></code></a></p></td>
 <td><p>Class that defines the ground geometry in PV arrays.</p></td>
 </tr>
 </tbody>
 </table>
 </div>
-<div class="section" id="module-pvarray">
-<span id="pvarray"></span><h2>pvarray<a class="headerlink" href="#module-pvarray" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="pvarray">
+<h2>pvarray<a class="headerlink" href="#pvarray" title="Permalink to this headline">¶</a></h2>
 <p>Module containing PV array classes, which will use PV rows and ground
 geometries.</p>
 <table class="longtable docutils align-default">
@@ -268,15 +284,15 @@ geometries.</p>
 <col style="width: 90%" />
 </colgroup>
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="generated/pvarray.OrderedPVArray.html#pvarray.OrderedPVArray" title="pvarray.OrderedPVArray"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pvarray.OrderedPVArray</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/pvfactors.geometry.pvarray.OrderedPVArray.html#pvfactors.geometry.pvarray.OrderedPVArray" title="pvfactors.geometry.pvarray.OrderedPVArray"><code class="xref py py-obj docutils literal notranslate"><span class="pre">OrderedPVArray</span></code></a></p></td>
 <td><p>An ordered PV array has a flat horizontal ground, and pv rows which are all at the same height, with the same surface tilt and azimuth angles, and also all equally spaced.</p></td>
 </tr>
 </tbody>
 </table>
 </div>
-<div class="section" id="module-timeseries">
-<span id="timeseries"></span><h2>timeseries<a class="headerlink" href="#module-timeseries" title="Permalink to this headline">¶</a></h2>
-<p>Timeseries geometry classes. They allow the vectorization of geometry
+<div class="section" id="timeseries">
+<h2>timeseries<a class="headerlink" href="#timeseries" title="Permalink to this headline">¶</a></h2>
+<p>Timeseries geometry tools. They allow the vectorization of geometry
 calculations.</p>
 <table class="longtable docutils align-default">
 <colgroup>
@@ -284,25 +300,16 @@ calculations.</p>
 <col style="width: 90%" />
 </colgroup>
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="generated/timeseries.TsPVRow.html#timeseries.TsPVRow" title="timeseries.TsPVRow"><code class="xref py py-obj docutils literal notranslate"><span class="pre">timeseries.TsPVRow</span></code></a></p></td>
-<td><p>Timeseries PV row class: this class is a vectorized version of the PV row geometries.</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/pvfactors.geometry.timeseries.TsShadeCollection.html#pvfactors.geometry.timeseries.TsShadeCollection" title="pvfactors.geometry.timeseries.TsShadeCollection"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TsShadeCollection</span></code></a></p></td>
+<td><p>Collection of timeseries surfaces that are all either shaded or illuminated.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="generated/timeseries.TsGround.html#timeseries.TsGround" title="timeseries.TsGround"><code class="xref py py-obj docutils literal notranslate"><span class="pre">timeseries.TsGround</span></code></a></p></td>
-<td><p>Timeseries ground class: this class is a vectorized version of the PV ground geometry class, and it will store timeseries coordinates for ground shadows and pv row cut points.</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="generated/timeseries.TsSide.html#timeseries.TsSide" title="timeseries.TsSide"><code class="xref py py-obj docutils literal notranslate"><span class="pre">timeseries.TsSide</span></code></a></p></td>
-<td><p>Timeseries side class: this class is a vectorized version of the BaseSide geometries.</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="generated/timeseries.TsDualSegment.html#timeseries.TsDualSegment" title="timeseries.TsDualSegment"><code class="xref py py-obj docutils literal notranslate"><span class="pre">timeseries.TsDualSegment</span></code></a></p></td>
-<td><p>A TsDualSegment is a timeseries segment that can only have 1 shaded surface and 1 illuminated surface.</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="generated/timeseries.TsSurface.html#timeseries.TsSurface" title="timeseries.TsSurface"><code class="xref py py-obj docutils literal notranslate"><span class="pre">timeseries.TsSurface</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/pvfactors.geometry.timeseries.TsSurface.html#pvfactors.geometry.timeseries.TsSurface" title="pvfactors.geometry.timeseries.TsSurface"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TsSurface</span></code></a></p></td>
 <td><p>Timeseries surface class: vectorized representation of PV surface geometries.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="generated/timeseries.TsLineCoords.html#timeseries.TsLineCoords" title="timeseries.TsLineCoords"><code class="xref py py-obj docutils literal notranslate"><span class="pre">timeseries.TsLineCoords</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/pvfactors.geometry.timeseries.TsLineCoords.html#pvfactors.geometry.timeseries.TsLineCoords" title="pvfactors.geometry.timeseries.TsLineCoords"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TsLineCoords</span></code></a></p></td>
 <td><p>Timeseries line coordinates class: will provide a helpful shapely-like API to invoke timeseries coordinates.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="generated/timeseries.TsPointCoords.html#timeseries.TsPointCoords" title="timeseries.TsPointCoords"><code class="xref py py-obj docutils literal notranslate"><span class="pre">timeseries.TsPointCoords</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/pvfactors.geometry.timeseries.TsPointCoords.html#pvfactors.geometry.timeseries.TsPointCoords" title="pvfactors.geometry.timeseries.TsPointCoords"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TsPointCoords</span></code></a></p></td>
 <td><p>Timeseries point coordinates: provides a shapely-like API for timeseries point coordinates.</p></td>
 </tr>
 </tbody>

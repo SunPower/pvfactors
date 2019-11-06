@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Run full simulations in parallel &mdash; pvfactors 1.2.2 documentation</title>
+  <title>Run full simulations in parallel &mdash; pvfactors 1.3.0 documentation</title>
   
 
   
@@ -40,7 +40,7 @@
   <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Theory" href="../theory/index.html" />
+    <link rel="next" title="Run fast simulations" href="Run_fast_simulations.html" />
     <link rel="prev" title="Run full timeseries simulations" href="Run_full_timeseries_simulations.html" /> 
 </head>
 
@@ -68,7 +68,7 @@
             
             
               <div class="version">
-                1.2.2
+                1.3.0
               </div>
             
           
@@ -94,11 +94,9 @@
             
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../installation/index.html">Installation</a></li>
-<li class="toctree-l1 current"><a class="reference internal" href="index.html">User guide and tutorials</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="index.html#understanding-pv-array-2d-geometries">Understanding PV array 2D geometries</a></li>
-<li class="toctree-l2"><a class="reference internal" href="index.html#pv-array-parameters">PV array parameters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../concepts/index.html">Main concepts</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Tutorials</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="index.html#getting-started-running-simulations">Getting started: running simulations</a></li>
-<li class="toctree-l2"><a class="reference internal" href="index.html#details-on-the-fast-mode-simulations">Details on the “fast mode” simulations</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="index.html#details-on-the-full-mode-simulations">Details on the “full mode” simulations</a><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="PVArray_introduction.html">PV Array geometry introduction</a></li>
 <li class="toctree-l3"><a class="reference internal" href="Create_discretized_pvarray.html">Discretize PV row sides and indexing</a></li>
@@ -113,6 +111,7 @@
 </li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="index.html#details-on-the-fast-mode-simulations">Details on the “fast mode” simulations</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../theory/index.html">Theory</a></li>
@@ -163,7 +162,7 @@
     
       <li><a href="../index.html">Docs</a> &raquo;</li>
         
-          <li><a href="index.html">User guide and tutorials</a> &raquo;</li>
+          <li><a href="index.html">Tutorials</a> &raquo;</li>
         
       <li>Run full simulations in parallel</li>
     
@@ -412,7 +411,7 @@ div.rendered_html tbody tr:hover {
 <h1>Run full simulations in parallel<a class="headerlink" href="#Run-full-simulations-in-parallel" title="Permalink to this headline">¶</a></h1>
 <p>In this section, we will learn how to:</p>
 <ul class="simple">
-<li><p>run full timeseries simulations in parallel using the <code class="docutils literal notranslate"><span class="pre">run_parallel_engine()</span></code> function</p></li>
+<li><p>run full timeseries simulations in parallel (with multiprocessing) using the <code class="docutils literal notranslate"><span class="pre">run_parallel_engine()</span></code> function</p></li>
 </ul>
 <p>Note: for a better understanding, it might help to read the previous tutorial section on running full timeseries simulations sequentially before going through the following</p>
 <p>Imports and settings</p>
@@ -556,10 +555,7 @@ div.rendered_html tbody tr:hover {
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-100%|██████████| 16/16 [00:00&lt;00:00, 299.47it/s]
-100%|██████████| 16/16 [00:00&lt;00:00, 87.01it/s]
-100%|██████████| 16/16 [00:00&lt;00:00, 89.82it/s]
-INFO:pvfactors.run:Parallel calculation elapsed time: 0.30209994316101074 sec
+INFO:pvfactors.run:Parallel calculation elapsed time: 0.19188380241394043 sec
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -602,14 +598,14 @@ INFO:pvfactors.run:Parallel calculation elapsed time: 0.30209994316101074 sec
     <tr>
       <td>2019-01-01 08:00:00-07:00</td>
       <td>117.632919</td>
-      <td>9.703829</td>
+      <td>9.703464</td>
       <td>5.070103</td>
       <td>0.076232</td>
     </tr>
     <tr>
       <td>2019-01-01 09:00:00-07:00</td>
-      <td>587.344229</td>
-      <td>4.959138</td>
+      <td>587.344197</td>
+      <td>4.906038</td>
       <td>12.087407</td>
       <td>2.150237</td>
     </tr>
@@ -673,21 +669,9 @@ INFO:pvfactors.run:Parallel calculation elapsed time: 0.30209994316101074 sec
 <span class="sd">    multiprocessing because of python constraints&quot;&quot;&quot;</span>
 
     <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">build</span><span class="p">(</span><span class="n">report</span><span class="p">,</span> <span class="n">pvarray</span><span class="p">):</span>
-        <span class="c1"># Initialize the report as a dictionary</span>
-        <span class="k">if</span> <span class="n">report</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">list_keys</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;total_inc_back&#39;</span><span class="p">]</span>
-            <span class="n">report</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="p">[]</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">list_keys</span><span class="p">}</span>
-        <span class="c1"># Add elements to the report</span>
-        <span class="k">if</span> <span class="n">pvarray</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">pvrow</span> <span class="o">=</span> <span class="n">pvarray</span><span class="o">.</span><span class="n">pvrows</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>  <span class="c1"># use rightmost pvrow</span>
-            <span class="n">report</span><span class="p">[</span><span class="s1">&#39;total_inc_back&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                <span class="n">pvrow</span><span class="o">.</span><span class="n">back</span><span class="o">.</span><span class="n">get_param_weighted</span><span class="p">(</span><span class="s1">&#39;qinc&#39;</span><span class="p">))</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="c1"># No calculation was performed, because sun was down</span>
-            <span class="n">report</span><span class="p">[</span><span class="s1">&#39;total_inc_back&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">)</span>
-
-        <span class="k">return</span> <span class="n">report</span>
+    <span class="k">def</span> <span class="nf">build</span><span class="p">(</span><span class="n">pvarray</span><span class="p">):</span>
+        <span class="c1"># Return back side qinc of rightmost PV row</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;total_inc_back&#39;</span><span class="p">:</span> <span class="n">pvarray</span><span class="o">.</span><span class="n">ts_pvrows</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">back</span><span class="o">.</span><span class="n">get_param_weighted</span><span class="p">(</span><span class="s1">&#39;qinc&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">()}</span>
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">merge</span><span class="p">(</span><span class="n">reports</span><span class="p">):</span>
@@ -725,10 +709,7 @@ INFO:pvfactors.run:Parallel calculation elapsed time: 0.30209994316101074 sec
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-100%|██████████| 16/16 [00:00&lt;00:00, 329.55it/s]
-100%|██████████| 16/16 [00:00&lt;00:00, 86.94it/s]
-100%|██████████| 16/16 [00:00&lt;00:00, 85.78it/s]
-INFO:pvfactors.run:Parallel calculation elapsed time: 0.30071592330932617 sec
+INFO:pvfactors.run:Parallel calculation elapsed time: 0.19736433029174805 sec
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
@@ -761,7 +742,7 @@ INFO:pvfactors.run:Parallel calculation elapsed time: 0.30071592330932617 sec
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="../theory/index.html" class="btn btn-neutral float-right" title="Theory" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="Run_fast_simulations.html" class="btn btn-neutral float-right" title="Run fast simulations" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="Run_full_timeseries_simulations.html" class="btn btn-neutral float-left" title="Run full timeseries simulations" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>

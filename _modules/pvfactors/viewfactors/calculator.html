@@ -1,0 +1,362 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>pvfactors.viewfactors.calculator &mdash; pvfactors 1.3.0 documentation</title>
+  
+
+  
+  
+    <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../../_static/doctools.js"></script>
+        <script type="text/javascript" src="../../../_static/language_data.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/css/custom.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> pvfactors
+          
+
+          
+            
+            <img src="../../../_static/logo_small.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.3.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation/index.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../concepts/index.html">Main concepts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/index.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../theory/index.html">Theory</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../developer/index.html">Developer API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../whatsnew.html">What’s New</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">pvfactors</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>pvfactors.viewfactors.calculator</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for pvfactors.viewfactors.calculator</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Module with classes and functions to calculate views and view factors&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">pvfactors.config</span> <span class="k">import</span> <span class="n">DISTANCE_TOLERANCE</span>
+<span class="kn">from</span> <span class="nn">pvfactors.viewfactors.methods</span> <span class="k">import</span> <span class="n">VFTsMethods</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+
+<div class="viewcode-block" id="VFCalculator"><a class="viewcode-back" href="../../../developer/generated/pvfactors.viewfactors.calculator.VFCalculator.html#pvfactors.viewfactors.calculator.VFCalculator">[docs]</a><span class="k">class</span> <span class="nc">VFCalculator</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;This calculator class will be used for the calculation of view factors</span>
+<span class="sd">    for PV arrays&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="VFCalculator.__init__"><a class="viewcode-back" href="../../../developer/generated/pvfactors.viewfactors.calculator.VFCalculator.html#pvfactors.viewfactors.calculator.VFCalculator.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vf_ts_methods</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Initialize the view factor mapper that will be used.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        vf_ts_methods : :py:class:`~pvfactors.geometry.calculator.VFTsMethods` object</span>
+<span class="sd">            Object with methods to calculate timeseries view factors for the</span>
+<span class="sd">            fast mode (Default = None)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vf_ts_methods</span> <span class="o">=</span> <span class="n">vf_ts_methods</span> <span class="ow">or</span> <span class="n">VFTsMethods</span><span class="p">()</span></div>
+
+    <span class="k">def</span> <span class="nf">build_ts_vf_matrix</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pvarray</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Calculate timeseries view factor matrix for the given</span>
+<span class="sd">        ordered pv array</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        pvarray : :py:class:`~pvfactors.geometry.pvarray.OrderedPVArray`</span>
+<span class="sd">            PV array whose timeseries view factor matrix to calculate</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        np.ndarray</span>
+<span class="sd">            Timeseries view factor matrix, with 3 dimensions:</span>
+<span class="sd">            [n_surfaces, n_surfaces, n_timesteps]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Initialize matrix</span>
+        <span class="n">rotation_vec</span> <span class="o">=</span> <span class="n">pvarray</span><span class="o">.</span><span class="n">rotation_vec</span>
+        <span class="n">tilted_to_left</span> <span class="o">=</span> <span class="n">rotation_vec</span> <span class="o">&gt;</span> <span class="mi">0</span>
+        <span class="n">n_steps</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">rotation_vec</span><span class="p">)</span>
+        <span class="n">n_ts_surfaces</span> <span class="o">=</span> <span class="n">pvarray</span><span class="o">.</span><span class="n">n_ts_surfaces</span>
+        <span class="n">vf_matrix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">n_ts_surfaces</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">n_ts_surfaces</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">n_steps</span><span class="p">),</span>
+                             <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>  <span class="c1"># don&#39;t forget to include the sky</span>
+
+        <span class="c1"># Get timeseries objects</span>
+        <span class="n">ts_ground</span> <span class="o">=</span> <span class="n">pvarray</span><span class="o">.</span><span class="n">ts_ground</span>
+        <span class="n">ts_pvrows</span> <span class="o">=</span> <span class="n">pvarray</span><span class="o">.</span><span class="n">ts_pvrows</span>
+
+        <span class="c1"># Calculate ts view factors between pvrow and ground surfaces</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vf_ts_methods</span><span class="o">.</span><span class="n">vf_pvrow_gnd_surf</span><span class="p">(</span><span class="n">ts_pvrows</span><span class="p">,</span> <span class="n">ts_ground</span><span class="p">,</span>
+                                             <span class="n">tilted_to_left</span><span class="p">,</span> <span class="n">vf_matrix</span><span class="p">)</span>
+        <span class="c1"># Calculate view factors between pv rows</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vf_ts_methods</span><span class="o">.</span><span class="n">vf_pvrow_to_pvrow</span><span class="p">(</span><span class="n">ts_pvrows</span><span class="p">,</span> <span class="n">tilted_to_left</span><span class="p">,</span>
+                                             <span class="n">vf_matrix</span><span class="p">)</span>
+        <span class="c1"># Calculate view factors to sky</span>
+        <span class="n">vf_matrix</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="mf">1.</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">vf_matrix</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">:],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="c1"># This is not completely accurate yet, we need to set the sky vf</span>
+        <span class="c1"># to zero when the surfaces have zero length</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">ts_surf</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">pvarray</span><span class="o">.</span><span class="n">all_ts_surfaces</span><span class="p">):</span>
+            <span class="n">vf_matrix</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">ts_surf</span><span class="o">.</span><span class="n">length</span> <span class="o">&gt;</span> <span class="n">DISTANCE_TOLERANCE</span><span class="p">,</span>
+                                           <span class="n">vf_matrix</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">:],</span> <span class="mf">0.</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">vf_matrix</span>
+
+    <span class="k">def</span> <span class="nf">get_vf_ts_pvrow_element</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pvrow_idx</span><span class="p">,</span> <span class="n">pvrow_element</span><span class="p">,</span> <span class="n">ts_pvrows</span><span class="p">,</span>
+                                <span class="n">ts_ground</span><span class="p">,</span> <span class="n">rotation_vec</span><span class="p">,</span> <span class="n">pvrow_width</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Calculate timeseries view factors of timeseries pvrow element</span>
+<span class="sd">        (segment or surface) to all other elements of the PV array.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        pvrow_idx : int</span>
+<span class="sd">            Index of the timeseries PV row for which we want to calculate the</span>
+<span class="sd">            back surface irradiance</span>
+<span class="sd">        pvrow_element : :py:class:`~pvfactors.geometry.timeseries.TsDualSegment`</span>
+<span class="sd">        or :py:class:`~pvfactors.geometry.timeseries.TsSurface`</span>
+<span class="sd">            Timeseries PV row element for which to calculate view factors</span>
+<span class="sd">        ts_pvrows : list of :py:class:`~pvfactors.geometry.timeseries.TsPVRow`</span>
+<span class="sd">            List of timeseries PV rows in the PV array</span>
+<span class="sd">        ts_ground : :py:class:`~pvfactors.geometry.timeseries.TsGround`</span>
+<span class="sd">            Timeseries ground of the PV array</span>
+<span class="sd">        rotation_vec : np.ndarray</span>
+<span class="sd">            Timeseries rotation vector of the PV rows in [deg]</span>
+<span class="sd">        pvrow_width : float</span>
+<span class="sd">            Width of the timeseries PV rows in the array in [m]</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        view_factors : dict</span>
+<span class="sd">            Dictionary of the timeseries view factors to all types of surfaces</span>
+<span class="sd">            in the PV array. List of keys include: &#39;to_each_gnd_shadow&#39;,</span>
+<span class="sd">            &#39;to_gnd_shaded&#39;, &#39;to_gnd_illum&#39;, &#39;to_gnd_total&#39;, &#39;to_pvrow_total&#39;,</span>
+<span class="sd">            &#39;to_pvrow_shaded&#39;, &#39;to_pvrow_illum&#39;, &#39;to_sky&#39;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">tilted_to_left</span> <span class="o">=</span> <span class="n">rotation_vec</span> <span class="o">&gt;</span> <span class="mi">0</span>
+        <span class="n">n_shadows</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">ts_pvrows</span><span class="p">)</span>
+        <span class="n">n_steps</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">rotation_vec</span><span class="p">)</span>
+        <span class="n">pvrow_element_coords</span> <span class="o">=</span> <span class="n">pvrow_element</span><span class="o">.</span><span class="n">coords</span>
+        <span class="n">pvrow_element_length</span> <span class="o">=</span> <span class="n">pvrow_element_coords</span><span class="o">.</span><span class="n">length</span>
+
+        <span class="c1"># Get shadows on left and right sides of PV row</span>
+        <span class="n">shadows_coords_left</span> <span class="o">=</span> \
+            <span class="n">ts_ground</span><span class="o">.</span><span class="n">shadow_coords_left_of_cut_point</span><span class="p">(</span><span class="n">pvrow_idx</span><span class="p">)</span>
+        <span class="n">shadows_coords_right</span> <span class="o">=</span> \
+            <span class="n">ts_ground</span><span class="o">.</span><span class="n">shadow_coords_right_of_cut_point</span><span class="p">(</span><span class="n">pvrow_idx</span><span class="p">)</span>
+        <span class="c1"># Calculate view factors to ground shadows</span>
+        <span class="n">list_vf_to_obstructed_gnd_shadows</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_shadows</span><span class="p">):</span>
+            <span class="n">shadow_left</span> <span class="o">=</span> <span class="n">shadows_coords_left</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="n">shadow_right</span> <span class="o">=</span> <span class="n">shadows_coords_right</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="c1"># vfs to obstructed gnd shadows</span>
+            <span class="n">vf_obstructed_shadow</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">vf_ts_methods</span><span class="o">.</span><span class="n">calculate_vf_to_shadow_obstruction_hottel</span><span class="p">(</span>
+                    <span class="n">pvrow_element</span><span class="p">,</span> <span class="n">pvrow_idx</span><span class="p">,</span> <span class="n">n_shadows</span><span class="p">,</span> <span class="n">n_steps</span><span class="p">,</span>
+                    <span class="n">tilted_to_left</span><span class="p">,</span> <span class="n">ts_pvrows</span><span class="p">,</span> <span class="n">shadow_left</span><span class="p">,</span> <span class="n">shadow_right</span><span class="p">,</span>
+                    <span class="n">pvrow_element_length</span><span class="p">))</span>
+            <span class="n">list_vf_to_obstructed_gnd_shadows</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">vf_obstructed_shadow</span><span class="p">)</span>
+        <span class="n">list_vf_to_obstructed_gnd_shadows</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+            <span class="n">list_vf_to_obstructed_gnd_shadows</span><span class="p">)</span>
+
+        <span class="c1"># Calculate view factors to shaded ground</span>
+        <span class="n">vf_shaded_gnd</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">list_vf_to_obstructed_gnd_shadows</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+        <span class="c1"># Calculate view factors to whole ground</span>
+        <span class="n">vf_gnd_total</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vf_ts_methods</span><span class="o">.</span><span class="n">calculate_vf_to_gnd</span><span class="p">(</span>
+            <span class="n">pvrow_element_coords</span><span class="p">,</span> <span class="n">pvrow_idx</span><span class="p">,</span> <span class="n">n_shadows</span><span class="p">,</span> <span class="n">n_steps</span><span class="p">,</span>
+            <span class="n">ts_ground</span><span class="o">.</span><span class="n">y_ground</span><span class="p">,</span> <span class="n">ts_ground</span><span class="o">.</span><span class="n">cut_point_coords</span><span class="p">[</span><span class="n">pvrow_idx</span><span class="p">],</span>
+            <span class="n">pvrow_element_length</span><span class="p">,</span> <span class="n">tilted_to_left</span><span class="p">,</span> <span class="n">ts_pvrows</span><span class="p">)</span>
+
+        <span class="c1"># Calculate view factors to illuminated ground</span>
+        <span class="n">vf_illum_gnd</span> <span class="o">=</span> <span class="n">vf_gnd_total</span> <span class="o">-</span> <span class="n">vf_shaded_gnd</span>
+
+        <span class="c1"># Calculate view factors to pv rows</span>
+        <span class="n">vf_pvrow_total</span><span class="p">,</span> <span class="n">vf_pvrow_shaded</span> <span class="o">=</span> \
+            <span class="bp">self</span><span class="o">.</span><span class="n">vf_ts_methods</span><span class="o">.</span><span class="n">calculate_vf_to_pvrow</span><span class="p">(</span>
+                <span class="n">pvrow_element_coords</span><span class="p">,</span> <span class="n">pvrow_idx</span><span class="p">,</span> <span class="n">n_shadows</span><span class="p">,</span> <span class="n">n_steps</span><span class="p">,</span> <span class="n">ts_pvrows</span><span class="p">,</span>
+                <span class="n">pvrow_element_length</span><span class="p">,</span> <span class="n">tilted_to_left</span><span class="p">,</span> <span class="n">pvrow_width</span><span class="p">,</span>
+                <span class="n">rotation_vec</span><span class="p">)</span>
+        <span class="n">vf_pvrow_illum</span> <span class="o">=</span> <span class="n">vf_pvrow_total</span> <span class="o">-</span> <span class="n">vf_pvrow_shaded</span>
+
+        <span class="c1"># Calculate view factors to sky</span>
+        <span class="n">vf_to_sky</span> <span class="o">=</span> <span class="mf">1.</span> <span class="o">-</span> <span class="n">vf_gnd_total</span> <span class="o">-</span> <span class="n">vf_pvrow_total</span>
+
+        <span class="c1"># return all timeseries view factors</span>
+        <span class="n">view_factors</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;to_each_gnd_shadow&#39;</span><span class="p">:</span> <span class="n">list_vf_to_obstructed_gnd_shadows</span><span class="p">,</span>
+            <span class="s1">&#39;to_gnd_shaded&#39;</span><span class="p">:</span> <span class="n">vf_shaded_gnd</span><span class="p">,</span>
+            <span class="s1">&#39;to_gnd_illum&#39;</span><span class="p">:</span> <span class="n">vf_illum_gnd</span><span class="p">,</span>
+            <span class="s1">&#39;to_gnd_total&#39;</span><span class="p">:</span> <span class="n">vf_gnd_total</span><span class="p">,</span>
+            <span class="s1">&#39;to_pvrow_total&#39;</span><span class="p">:</span> <span class="n">vf_pvrow_total</span><span class="p">,</span>
+            <span class="s1">&#39;to_pvrow_shaded&#39;</span><span class="p">:</span> <span class="n">vf_pvrow_shaded</span><span class="p">,</span>
+            <span class="s1">&#39;to_pvrow_illum&#39;</span><span class="p">:</span> <span class="n">vf_pvrow_illum</span><span class="p">,</span>
+            <span class="s1">&#39;to_sky&#39;</span><span class="p">:</span> <span class="n">vf_to_sky</span>
+        <span class="p">}</span>
+
+        <span class="k">return</span> <span class="n">view_factors</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2016, SunPower Corporation
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

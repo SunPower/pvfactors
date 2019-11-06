@@ -1,0 +1,68 @@
+pvfactors.geometry.pvrow.TsSegment
+==================================
+
+.. currentmodule:: pvfactors.geometry.pvrow
+
+.. autoclass:: TsSegment
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      
+         ~TsSegment.__init__
+      
+      
+         ~TsSegment.at
+      
+      
+         ~TsSegment.get_param_weighted
+      
+      
+         ~TsSegment.get_param_ww
+      
+      
+         ~TsSegment.plot_at_idx
+      
+      
+         ~TsSegment.surfaces_at_idx
+      
+      
+         ~TsSegment.update_params
+      
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      
+         ~TsSegment.all_ts_surfaces
+      
+      
+         ~TsSegment.centroid
+      
+      
+         ~TsSegment.highest_point
+      
+      
+         ~TsSegment.length
+      
+      
+         ~TsSegment.lowest_point
+      
+      
+         ~TsSegment.n_ts_surfaces
+      
+      
+         ~TsSegment.shaded_length
+      
+   
+   

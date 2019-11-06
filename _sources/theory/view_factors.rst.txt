@@ -1,3 +1,5 @@
+.. _view_factors_theory:
+
 View Factors
 ============
 

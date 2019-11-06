@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Mathematical Model &mdash; pvfactors 1.2.2 documentation</title>
+  <title>Mathematical Model &mdash; pvfactors 1.3.0 documentation</title>
   
 
   
@@ -40,7 +40,7 @@
   <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Irradiance models" href="irradiance_models.html" />
+    <link rel="next" title="Developer API" href="../developer/index.html" />
     <link rel="prev" title="View Factors" href="view_factors.html" /> 
 </head>
 
@@ -68,7 +68,7 @@
             
             
               <div class="version">
-                1.2.2
+                1.3.0
               </div>
             
           
@@ -94,7 +94,8 @@
             
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../installation/index.html">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../tutorials/index.html">User guide and tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../concepts/index.html">Main concepts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/index.html">Tutorials</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">Theory</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="intro.html">Introduction</a></li>
 <li class="toctree-l2"><a class="reference internal" href="view_factors.html">View Factors</a></li>
@@ -107,7 +108,6 @@
 </li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="irradiance_models.html">Irradiance models</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../developer/index.html">Developer API</a></li>
@@ -210,11 +210,17 @@
 <div class="section" id="mathematical-model">
 <span id="problem-formulation"></span><h1>Mathematical Model<a class="headerlink" href="#mathematical-model" title="Permalink to this headline">¶</a></h1>
 <p>In order to use the view factors as follows, we need to assume that the surfaces considered are diffuse (lambertian). Which means that their optical properties are independent of the angle of the rays (incident, reflected, or emitted).</p>
-<p>The current version of the view factor model only addresses PV rows that are made out of straight lines (no “dual-tilt” for instance). But the PV array can have any azimuth or tilt angle for the simulations. Below is the 2D representation of such a PV array.</p>
+<p>The current version of the view factor model only addresses PV rows that are made out of straight lines
+(no “dual-tilt” for instance), with a flat ground. But the PV array can have any azimuth or tilt angle for the simulations. Below is the 2D representation of such a PV array, plotted with <code class="docutils literal notranslate"><span class="pre">pvfactors</span></code>.</p>
 <div class="figure align-center">
 <a class="reference internal image-reference" href="../_images/pvarray.png"><img alt="../_images/pvarray.png" src="../_images/pvarray.png" style="width: 80%;" /></a>
 </div>
-<p>The mathematical model used in pvfactors simulations is different depending on the simulation type that is run. In “full simulations”, all of the reflections between the modeled surfaces are taken into account in the calculations. In “fast simulations”, assumptions are made on the reflected irradiance from the environment surrounding the surfaces of interest.</p>
+<p>The mathematical model used in <code class="docutils literal notranslate"><span class="pre">pvfactors</span></code> simulations is different depending on the simulation type
+that is run.</p>
+<ul class="simple">
+<li><p>in “full simulations”, all of the reflections between the modeled surfaces are taken into account in the calculations, which leads to results that account for the equilibrium of reflections between surfaces.</p></li>
+<li><p>in “fast simulations”, assumptions are made on the reflected irradiance from the environment surrounding the surfaces of interest.</p></li>
+</ul>
 <div class="section" id="full-simulations">
 <span id="full-mode-theory"></span><h2>Full simulations<a class="headerlink" href="#full-simulations" title="Permalink to this headline">¶</a></h2>
 <p>When making some assumptions, it is possible to represent the calculation of irradiance terms on each surface with a linear system. The dimension of this system changes depending on the number of surfaces considered. But we can formulate it for the general case of <code class="docutils literal notranslate"><span class="pre">n</span></code> surfaces.</p>
@@ -227,7 +233,8 @@
 <div class="line">* <span class="math notranslate nohighlight">\(q_{emitted, i}\)</span> is the emitted radiative flux from that surface. For instance the total emitted radiative flux of a blackbody is known to be <span class="math notranslate nohighlight">\({\sigma}T^4\)</span> (with <span class="math notranslate nohighlight">\(T\)</span> the surface temperature and <span class="math notranslate nohighlight">\({\sigma}\)</span> the Stefan–Boltzmann constant).</div>
 <div class="line">* <span class="math notranslate nohighlight">\(q_{reflected, i}\)</span> is the reflected flux from that surface.</div>
 </div>
-<p>Finding values of interest like back side irradiance can only be done after finding the radiosities <span class="math notranslate nohighlight">\(q_{o, i}\)</span> of all surfaces <code class="docutils literal notranslate"><span class="pre">i</span></code>. This can become a very complex system of equations where one would need to solve the energy balance on the considered systems .</p>
+<p>Finding values of interest like back side irradiance can only be done after finding the
+radiosity <span class="math notranslate nohighlight">\(q_{o, i}\)</span> of each surface <code class="docutils literal notranslate"><span class="pre">i</span></code>. This can become a very complex system of equations where one would need to solve the energy balance on the considered systems .</p>
 <div class="line-block">
 <div class="line">But if we decide to make the assumption that <span class="math notranslate nohighlight">\(q_{emitted, i}\)</span> is negligible, we can simplify the problem in a way that would enable us to find more easily some approximations of the values of interest. For now, this assumption makes some sense because the temperatures of the PV systems and the surroundings are generally not very high (&lt; 330K). Besides the surfaces are not real black bodies, which means that their total (or broadband) emissions and absorptions will be even lower.</div>
 <div class="line">Under this assumption, we end up with:</div>
@@ -249,7 +256,7 @@
 <div class="line">where:</div>
 <div class="line">* <span class="math notranslate nohighlight">\({\sum_{j} q_{o, j} * F_{i, j}}\)</span> is the contribution of all the surfaces <code class="docutils literal notranslate"><span class="pre">j</span></code> surrounding <code class="docutils literal notranslate"><span class="pre">i</span></code> to the incident radiative flux onto surface <code class="docutils literal notranslate"><span class="pre">i</span></code>.</div>
 <div class="line">* <span class="math notranslate nohighlight">\(F_{i, j}\)</span> is the configuration factor (or view factor) of surface <code class="docutils literal notranslate"><span class="pre">i</span></code> to surface <code class="docutils literal notranslate"><span class="pre">j</span></code>.</div>
-<div class="line">* <span class="math notranslate nohighlight">\(Sky_i\)</span> is a sky irradiance term specific to surface <code class="docutils literal notranslate"><span class="pre">i</span></code> which contributes to the incident radiative flux  <span class="math notranslate nohighlight">\(q_{incident, i}\)</span>, and associated with irradiance terms not represented in the geometrical model. For instance, it will be equal to <span class="math notranslate nohighlight">\(DNI_{POA} + circumsolar_{POA} + horizon_{POA}\)</span> for the front side of the modules.</div>
+<div class="line">* <span class="math notranslate nohighlight">\(Sky_i\)</span> is a sky irradiance term specific to surface <code class="docutils literal notranslate"><span class="pre">i</span></code> which contributes to the incident radiative flux  <span class="math notranslate nohighlight">\(q_{incident, i}\)</span>, and associated with irradiance terms not represented in the geometrical model. For instance, it will be equal to <span class="math notranslate nohighlight">\(DNI_{POA} + circumsolar_{POA} + horizon_{POA}\)</span> for the front (illuminated) side of the modules, when using the <a class="reference internal" href="../developer/generated/pvfactors.irradiance.models.HybridPerezOrdered.html#pvfactors.irradiance.models.HybridPerezOrdered" title="pvfactors.irradiance.models.HybridPerezOrdered"><code class="xref py py-class docutils literal notranslate"><span class="pre">HybridPerezOrdered</span></code></a> model.</div>
 </div>
 <p>This results into a linear system that can be written as follows:</p>
 <div class="math notranslate nohighlight">
@@ -295,9 +302,10 @@ Sky_n\\
 </ol>
 <div class="math notranslate nohighlight">
 \[\mathbf{q_{o}} ≈ \mathbf{R} . \mathbf{q_{perez}}\]</div>
-<p>Here, <span class="math notranslate nohighlight">\(\mathbf{q_{perez}}\)</span> can have values equal to zero for back side surfaces, which will lead to a good assumption if the back side surfaces don’t see each other.</p>
+<p>Here, <span class="math notranslate nohighlight">\(\mathbf{q_{perez}}\)</span> can have values equal to zero for back side surfaces, which will lead to a good assumption if the back side surfaces don’t see each other,
+which is the case in <a class="reference internal" href="../developer/generated/pvfactors.geometry.pvarray.OrderedPVArray.html#pvfactors.geometry.pvarray.OrderedPVArray" title="pvfactors.geometry.pvarray.OrderedPVArray"><code class="xref py py-class docutils literal notranslate"><span class="pre">OrderedPVArray</span></code></a>.</p>
 <ol class="arabic simple" start="2">
-<li><p>we can then also reduce the calculation of view factors to the ones of the back side surfaces of interest, leading to the following:</p></li>
+<li><p>we can then also reduce the calculation of view factors to the view factors of the back side surfaces of interest, leading to the following:</p></li>
 </ol>
 <div class="math notranslate nohighlight">
 \[\mathbf{q_{inc-back}} ≈ \mathbf{F_{back}} . \mathbf{R} . \mathbf{q_{perez}} + \mathbf{Sky_{back}}\]</div>
@@ -334,7 +342,8 @@ Sky_7\\
 </div>
 <div class="section" id="grouping-terms">
 <h3>Grouping terms<a class="headerlink" href="#grouping-terms" title="Permalink to this headline">¶</a></h3>
-<p>For each back surface element, we can then group reflection terms that have identical reflected irradiance values into something more intuitive:</p>
+<p>For each back surface element, we can then group reflection terms that have identical reflectivity
+and <span class="math notranslate nohighlight">\(\mathbf{q_{perez}}\)</span> terms into something more intuitive:</p>
 <div class="math notranslate nohighlight">
 \[\begin{split}q_{inc-back}
 &amp;≈ F_{to\ shaded\ ground} . albedo . q_{perez\ shaded\ ground} \\
@@ -362,7 +371,7 @@ Sky_7\\
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="irradiance_models.html" class="btn btn-neutral float-right" title="Irradiance models" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="../developer/index.html" class="btn btn-neutral float-right" title="Developer API" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="view_factors.html" class="btn btn-neutral float-left" title="View Factors" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>

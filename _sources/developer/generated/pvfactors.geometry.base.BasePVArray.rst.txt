@@ -1,0 +1,50 @@
+pvfactors.geometry.base.BasePVArray
+===================================
+
+.. currentmodule:: pvfactors.geometry.base
+
+.. autoclass:: BasePVArray
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      
+         ~BasePVArray.__init__
+      
+      
+         ~BasePVArray.fit
+      
+      
+         ~BasePVArray.plot_at_idx
+      
+      
+         ~BasePVArray.update_params
+      
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      
+         ~BasePVArray.all_ts_surfaces
+      
+      
+         ~BasePVArray.n_ts_surfaces
+      
+      
+         ~BasePVArray.registry_cols
+      
+      
+         ~BasePVArray.ts_surface_indices
+      
+   
+   

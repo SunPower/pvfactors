@@ -1,0 +1,95 @@
+pvfactors.geometry.pvground.TsGround
+====================================
+
+.. currentmodule:: pvfactors.geometry.pvground
+
+.. autoclass:: TsGround
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      
+         ~TsGround.__init__
+      
+      
+         ~TsGround.at
+      
+      
+         ~TsGround.from_ordered_shadows_coords
+      
+      
+         ~TsGround.from_ts_pvrows_and_angles
+      
+      
+         ~TsGround.get_param_weighted
+      
+      
+         ~TsGround.get_param_ww
+      
+      
+         ~TsGround.n_non_point_surfaces_at
+      
+      
+         ~TsGround.non_point_illum_surfaces_at
+      
+      
+         ~TsGround.non_point_shaded_surfaces_at
+      
+      
+         ~TsGround.non_point_surfaces_at
+      
+      
+         ~TsGround.plot_at_idx
+      
+      
+         ~TsGround.shadow_coords_left_of_cut_point
+      
+      
+         ~TsGround.shadow_coords_right_of_cut_point
+      
+      
+         ~TsGround.ts_surfaces_side_of_cut_point
+      
+      
+         ~TsGround.update_illum_params
+      
+      
+         ~TsGround.update_params
+      
+      
+         ~TsGround.update_shaded_params
+      
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      
+         ~TsGround.all_ts_surfaces
+      
+      
+         ~TsGround.length
+      
+      
+         ~TsGround.n_ts_illum_surfaces
+      
+      
+         ~TsGround.n_ts_shaded_surfaces
+      
+      
+         ~TsGround.n_ts_surfaces
+      
+      
+         ~TsGround.shaded_length
+      
+   
+   

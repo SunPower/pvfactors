@@ -1,0 +1,56 @@
+pvfactors.geometry.pvground.TsGroundElement
+===========================================
+
+.. currentmodule:: pvfactors.geometry.pvground
+
+.. autoclass:: TsGroundElement
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      
+         ~TsGroundElement.__init__
+      
+      
+         ~TsGroundElement.get_param_weighted
+      
+      
+         ~TsGroundElement.get_param_ww
+      
+      
+         ~TsGroundElement.non_point_surfaces_at
+      
+      
+         ~TsGroundElement.surfaces_at
+      
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      
+         ~TsGroundElement.all_ts_surfaces
+      
+      
+         ~TsGroundElement.b1
+      
+      
+         ~TsGroundElement.b2
+      
+      
+         ~TsGroundElement.centroid
+      
+      
+         ~TsGroundElement.length
+      
+   
+   

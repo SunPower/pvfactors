@@ -1,0 +1,870 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>pvfactors.viewfactors.methods &mdash; pvfactors 1.3.0 documentation</title>
+  
+
+  
+  
+    <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../../_static/doctools.js"></script>
+        <script type="text/javascript" src="../../../_static/language_data.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/css/custom.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> pvfactors
+          
+
+          
+            
+            <img src="../../../_static/logo_small.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.3.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation/index.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../concepts/index.html">Main concepts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/index.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../theory/index.html">Theory</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../developer/index.html">Developer API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../whatsnew.html">What’s New</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">pvfactors</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>pvfactors.viewfactors.methods</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for pvfactors.viewfactors.methods</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Module with view factor calculation tools&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">pvfactors.config</span> <span class="k">import</span> <span class="n">MIN_X_GROUND</span><span class="p">,</span> <span class="n">MAX_X_GROUND</span><span class="p">,</span> <span class="n">DISTANCE_TOLERANCE</span>
+<span class="kn">from</span> <span class="nn">pvfactors.geometry.timeseries</span> <span class="k">import</span> <span class="n">TsLineCoords</span><span class="p">,</span> <span class="n">TsPointCoords</span>
+<span class="kn">from</span> <span class="nn">pvlib.tools</span> <span class="k">import</span> <span class="n">cosd</span><span class="p">,</span> <span class="n">sind</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+
+<div class="viewcode-block" id="VFTsMethods"><a class="viewcode-back" href="../../../developer/generated/pvfactors.viewfactors.methods.VFTsMethods.html#pvfactors.viewfactors.methods.VFTsMethods">[docs]</a><span class="k">class</span> <span class="nc">VFTsMethods</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;This class contains all the methods used to calculate timeseries</span>
+<span class="sd">    view factors from PV row elements to all the other elements of a PV</span>
+<span class="sd">    array.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">calculate_vf_to_pvrow</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pvrow_element_coords</span><span class="p">,</span> <span class="n">pvrow_idx</span><span class="p">,</span> <span class="n">n_pvrows</span><span class="p">,</span>
+                              <span class="n">n_steps</span><span class="p">,</span> <span class="n">ts_pvrows</span><span class="p">,</span> <span class="n">pvrow_element_length</span><span class="p">,</span>
+                              <span class="n">tilted_to_left</span><span class="p">,</span> <span class="n">pvrow_width</span><span class="p">,</span> <span class="n">rotation_vec</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Calculate view factors from timeseries pvrow element to timeseries</span>
+<span class="sd">        PV rows around it.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        pvrow_element_coords :</span>
+<span class="sd">        :py:class:`~pvfactors.geometry.timeseries.TsLineCoords`</span>
+<span class="sd">            Timeseries line coordinates of pvrow_element</span>
+<span class="sd">        pvrow_idx : int</span>
+<span class="sd">            Index of the timeseries PV row on which the pvrow_element is</span>
+<span class="sd">        n_pvrows : int</span>
+<span class="sd">            Number of timeseries PV rows in the PV array</span>
+<span class="sd">        n_steps : int</span>
+<span class="sd">            Number of timesteps for which to calculate the pvfactors</span>
+<span class="sd">        ts_pvrows : list of :py:class:`~pvfactors.geometry.timeseries.TsPVRow`</span>
+<span class="sd">            Timeseries PV row geometries that will be used in the calculation</span>
+<span class="sd">        pvrow_element_length : float or np.ndarray</span>
+<span class="sd">            Length (width) of the timeseries pvrow element [m]</span>
+<span class="sd">        tilted_to_left : list of bool</span>
+<span class="sd">            Flags indicating when the PV rows are strictly tilted to the left</span>
+<span class="sd">        pvrow_width : float</span>
+<span class="sd">            Width of the timeseries PV rows in the PV array [m], which is</span>
+<span class="sd">            constant</span>
+<span class="sd">        rotation_vec : np.ndarray</span>
+<span class="sd">            Rotation angles of the PV rows [deg]</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        vf_to_pvrow : np.ndarray</span>
+<span class="sd">            View factors from timeseries pvrow_element to neighboring PV rows</span>
+<span class="sd">        vf_to_shaded_pvrow : np.ndarray</span>
+<span class="sd">            View factors from timeseries pvrow_element to shaded areas of the</span>
+<span class="sd">            neighboring PV rows</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">pvrow_idx</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">vf_left_pvrow</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">n_steps</span><span class="p">)</span>
+            <span class="n">vf_left_shaded_pvrow</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">n_steps</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Get vf to full pvrow</span>
+            <span class="n">left_ts_pvrow</span> <span class="o">=</span> <span class="n">ts_pvrows</span><span class="p">[</span><span class="n">pvrow_idx</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span>
+            <span class="n">left_ts_pvrow_coords</span> <span class="o">=</span> <span class="n">left_ts_pvrow</span><span class="o">.</span><span class="n">full_pvrow_coords</span>
+            <span class="n">vf_left_pvrow</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vf_surface_to_surface</span><span class="p">(</span>
+                <span class="n">pvrow_element_coords</span><span class="p">,</span> <span class="n">left_ts_pvrow_coords</span><span class="p">,</span>
+                <span class="n">pvrow_element_length</span><span class="p">)</span>
+            <span class="c1"># Get vf to shaded pvrow</span>
+            <span class="n">shaded_coords</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_create_shaded_side_coords</span><span class="p">(</span>
+                <span class="n">left_ts_pvrow</span><span class="o">.</span><span class="n">xy_center</span><span class="p">,</span> <span class="n">pvrow_width</span><span class="p">,</span>
+                <span class="n">left_ts_pvrow</span><span class="o">.</span><span class="n">front</span><span class="o">.</span><span class="n">shaded_length</span><span class="p">,</span> <span class="n">tilted_to_left</span><span class="p">,</span>
+                <span class="n">rotation_vec</span><span class="p">,</span> <span class="n">left_ts_pvrow</span><span class="o">.</span><span class="n">full_pvrow_coords</span><span class="o">.</span><span class="n">lowest_point</span><span class="p">)</span>
+            <span class="n">vf_left_shaded_pvrow</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vf_surface_to_surface</span><span class="p">(</span>
+                <span class="n">pvrow_element_coords</span><span class="p">,</span> <span class="n">shaded_coords</span><span class="p">,</span> <span class="n">pvrow_element_length</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">pvrow_idx</span> <span class="o">==</span> <span class="p">(</span><span class="n">n_pvrows</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="n">vf_right_pvrow</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">n_steps</span><span class="p">)</span>
+            <span class="n">vf_right_shaded_pvrow</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">n_steps</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Get vf to full pvrow</span>
+            <span class="n">right_ts_pvrow</span> <span class="o">=</span> <span class="n">ts_pvrows</span><span class="p">[</span><span class="n">pvrow_idx</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
+            <span class="n">right_ts_pvrow_coords</span> <span class="o">=</span> <span class="n">right_ts_pvrow</span><span class="o">.</span><span class="n">full_pvrow_coords</span>
+            <span class="n">vf_right_pvrow</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vf_surface_to_surface</span><span class="p">(</span>
+                <span class="n">pvrow_element_coords</span><span class="p">,</span> <span class="n">right_ts_pvrow_coords</span><span class="p">,</span>
+                <span class="n">pvrow_element_length</span><span class="p">)</span>
+            <span class="c1"># Get vf to shaded pvrow</span>
+            <span class="n">shaded_coords</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_create_shaded_side_coords</span><span class="p">(</span>
+                <span class="n">right_ts_pvrow</span><span class="o">.</span><span class="n">xy_center</span><span class="p">,</span> <span class="n">pvrow_width</span><span class="p">,</span>
+                <span class="n">right_ts_pvrow</span><span class="o">.</span><span class="n">front</span><span class="o">.</span><span class="n">shaded_length</span><span class="p">,</span> <span class="n">tilted_to_left</span><span class="p">,</span>
+                <span class="n">rotation_vec</span><span class="p">,</span> <span class="n">right_ts_pvrow</span><span class="o">.</span><span class="n">full_pvrow_coords</span><span class="o">.</span><span class="n">lowest_point</span><span class="p">)</span>
+            <span class="n">vf_right_shaded_pvrow</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vf_surface_to_surface</span><span class="p">(</span>
+                <span class="n">pvrow_element_coords</span><span class="p">,</span> <span class="n">shaded_coords</span><span class="p">,</span> <span class="n">pvrow_element_length</span><span class="p">)</span>
+
+        <span class="n">vf_to_pvrow</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">tilted_to_left</span><span class="p">,</span> <span class="n">vf_right_pvrow</span><span class="p">,</span> <span class="n">vf_left_pvrow</span><span class="p">)</span>
+        <span class="n">vf_to_shaded_pvrow</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">tilted_to_left</span><span class="p">,</span> <span class="n">vf_right_shaded_pvrow</span><span class="p">,</span>
+                                      <span class="n">vf_left_shaded_pvrow</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">vf_to_pvrow</span><span class="p">,</span> <span class="n">vf_to_shaded_pvrow</span>
+
+    <span class="k">def</span> <span class="nf">calculate_vf_to_gnd</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pvrow_element_coords</span><span class="p">,</span> <span class="n">pvrow_idx</span><span class="p">,</span> <span class="n">n_pvrows</span><span class="p">,</span>
+                            <span class="n">n_steps</span><span class="p">,</span> <span class="n">y_ground</span><span class="p">,</span> <span class="n">cut_point_coords</span><span class="p">,</span>
+                            <span class="n">pvrow_element_length</span><span class="p">,</span> <span class="n">tilted_to_left</span><span class="p">,</span> <span class="n">ts_pvrows</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Calculate view factors from timeseries pvrow_element to the entire</span>
+<span class="sd">        ground.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        pvrow_element_coords :</span>
+<span class="sd">        :py:class:`~pvfactors.geometry.timeseries.TsLineCoords`</span>
+<span class="sd">            Timeseries line coordinates of pvrow element</span>
+<span class="sd">        pvrow_idx : int</span>
+<span class="sd">            Index of the timeseries PV row on the which the pvrow_element is</span>
+<span class="sd">        n_pvrows : int</span>
+<span class="sd">            Number of timeseries PV rows in the PV array</span>
+<span class="sd">        n_steps : int</span>
+<span class="sd">            Number of timesteps for which to calculate the pvfactors</span>
+<span class="sd">        y_ground : float</span>
+<span class="sd">            Y-coordinate of the flat ground [m]</span>
+<span class="sd">        cut_point_coords : list of</span>
+<span class="sd">        :py:class:`~pvfactors.geometry.timeseries.TsPointCoords`</span>
+<span class="sd">            List of cut point coordinates, as calculated for timeseries PV rows</span>
+<span class="sd">        pvrow_element_length : float or np.ndarray</span>
+<span class="sd">            Length (width) of the timeseries pvrow_element [m]</span>
+<span class="sd">        tilted_to_left : list of bool</span>
+<span class="sd">            Flags indicating when the PV rows are strictly tilted to the left</span>
+<span class="sd">        ts_pvrows : list of :py:class:`~pvfactors.geometry.timeseries.TsPVRow`</span>
+<span class="sd">            Timeseries PV row geometries that will be used in the calculation</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        vf_to_gnd : np.ndarray</span>
+<span class="sd">            View factors from timeseries pvrow_element to the entire ground</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">pvrow_lowest_pt</span> <span class="o">=</span> <span class="n">ts_pvrows</span><span class="p">[</span><span class="n">pvrow_idx</span><span class="p">]</span><span class="o">.</span><span class="n">full_pvrow_coords</span><span class="o">.</span><span class="n">lowest_point</span>
+        <span class="k">if</span> <span class="n">pvrow_idx</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="c1"># There is no obstruction to view of the ground on the left</span>
+            <span class="n">coords_left_gnd</span> <span class="o">=</span> <span class="n">TsLineCoords</span><span class="p">(</span>
+                <span class="n">TsPointCoords</span><span class="p">(</span><span class="n">MIN_X_GROUND</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">n_steps</span><span class="p">),</span> <span class="n">y_ground</span><span class="p">),</span>
+                <span class="n">TsPointCoords</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">minimum</span><span class="p">(</span><span class="n">MAX_X_GROUND</span><span class="p">,</span> <span class="n">cut_point_coords</span><span class="o">.</span><span class="n">x</span><span class="p">),</span>
+                              <span class="n">y_ground</span><span class="p">))</span>
+            <span class="n">vf_left_ground</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vf_surface_to_surface</span><span class="p">(</span>
+                <span class="n">pvrow_element_coords</span><span class="p">,</span> <span class="n">coords_left_gnd</span><span class="p">,</span> <span class="n">pvrow_element_length</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># The left PV row obstructs the view of the ground on the left</span>
+            <span class="n">left_pt_neighbor</span> <span class="o">=</span> \
+                <span class="n">ts_pvrows</span><span class="p">[</span><span class="n">pvrow_idx</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">full_pvrow_coords</span><span class="o">.</span><span class="n">lowest_point</span>
+            <span class="n">coords_gnd_proxy</span> <span class="o">=</span> <span class="n">TsLineCoords</span><span class="p">(</span><span class="n">left_pt_neighbor</span><span class="p">,</span> <span class="n">pvrow_lowest_pt</span><span class="p">)</span>
+            <span class="n">vf_left_ground</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vf_surface_to_surface</span><span class="p">(</span>
+                <span class="n">pvrow_element_coords</span><span class="p">,</span> <span class="n">coords_gnd_proxy</span><span class="p">,</span> <span class="n">pvrow_element_length</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">pvrow_idx</span> <span class="o">==</span> <span class="p">(</span><span class="n">n_pvrows</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="c1"># There is no obstruction of the view of the ground on the right</span>
+            <span class="n">coords_right_gnd</span> <span class="o">=</span> <span class="n">TsLineCoords</span><span class="p">(</span>
+                <span class="n">TsPointCoords</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">MIN_X_GROUND</span><span class="p">,</span> <span class="n">cut_point_coords</span><span class="o">.</span><span class="n">x</span><span class="p">),</span>
+                              <span class="n">y_ground</span><span class="p">),</span>
+                <span class="n">TsPointCoords</span><span class="p">(</span><span class="n">MAX_X_GROUND</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">n_steps</span><span class="p">),</span> <span class="n">y_ground</span><span class="p">))</span>
+            <span class="n">vf_right_ground</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vf_surface_to_surface</span><span class="p">(</span>
+                <span class="n">pvrow_element_coords</span><span class="p">,</span> <span class="n">coords_right_gnd</span><span class="p">,</span> <span class="n">pvrow_element_length</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># The right PV row obstructs the view of the ground on the right</span>
+            <span class="n">right_pt_neighbor</span> <span class="o">=</span> \
+                <span class="n">ts_pvrows</span><span class="p">[</span><span class="n">pvrow_idx</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">full_pvrow_coords</span><span class="o">.</span><span class="n">lowest_point</span>
+            <span class="n">coords_gnd_proxy</span> <span class="o">=</span> <span class="n">TsLineCoords</span><span class="p">(</span><span class="n">pvrow_lowest_pt</span><span class="p">,</span> <span class="n">right_pt_neighbor</span><span class="p">)</span>
+            <span class="n">vf_right_ground</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vf_surface_to_surface</span><span class="p">(</span>
+                <span class="n">pvrow_element_coords</span><span class="p">,</span> <span class="n">coords_gnd_proxy</span><span class="p">,</span> <span class="n">pvrow_element_length</span><span class="p">)</span>
+
+        <span class="c1"># Merge the views of the ground for the back side</span>
+        <span class="n">vf_ground</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">tilted_to_left</span><span class="p">,</span> <span class="n">vf_right_ground</span><span class="p">,</span> <span class="n">vf_left_ground</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">vf_ground</span>
+
+    <span class="k">def</span> <span class="nf">calculate_vf_to_shadow_obstruction_hottel</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span> <span class="n">pvrow_element</span><span class="p">,</span> <span class="n">pvrow_idx</span><span class="p">,</span> <span class="n">n_shadows</span><span class="p">,</span> <span class="n">n_steps</span><span class="p">,</span> <span class="n">tilted_to_left</span><span class="p">,</span>
+            <span class="n">ts_pvrows</span><span class="p">,</span> <span class="n">shadow_left</span><span class="p">,</span> <span class="n">shadow_right</span><span class="p">,</span> <span class="n">pvrow_element_length</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Calculate view factors from timeseries pvrow_element to the shadow</span>
+<span class="sd">        of a specific timeseries PV row which is casted on the ground.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        pvrow_element : :py:class:`~pvfactors.geometry.timeseries.TsDualSegment` or :py:class:`~pvfactors.geometry.timeseries.TsSurface`</span>
+<span class="sd">            Timeseries pvrow_element to use for calculation</span>
+<span class="sd">        pvrow_idx : int</span>
+<span class="sd">            Index of the timeseries PV row on the which the pvrow_element is</span>
+<span class="sd">        n_shadows : int</span>
+<span class="sd">            Number of timeseries PV rows in the PV array, and therefore number</span>
+<span class="sd">            of shadows they cast on the ground</span>
+<span class="sd">        n_steps : int</span>
+<span class="sd">            Number of timesteps for which to calculate the pvfactors</span>
+<span class="sd">        tilted_to_left : list of bool</span>
+<span class="sd">            Flags indicating when the PV rows are strictly tilted to the left</span>
+<span class="sd">        ts_pvrows : list of :py:class:`~pvfactors.geometry.timeseries.TsPVRow`</span>
+<span class="sd">            Timeseries PV row geometries that will be used in the calculation</span>
+<span class="sd">        shadow_left : :py:class:`~pvfactors.geometry.timeseries.TsLineCoords`</span>
+<span class="sd">            Coordinates of the shadow that are on the left side of the cut</span>
+<span class="sd">            point of the PV row on which the pvrow_element is</span>
+<span class="sd">        shadow_right : :py:class:`~pvfactors.geometry.timeseries.TsLineCoords`</span>
+<span class="sd">            Coordinates of the shadow that are on the right side of the cut</span>
+<span class="sd">            point of the PV row on which the pvrow_element is</span>
+<span class="sd">        pvrow_element_length : float or np.ndarray</span>
+<span class="sd">            Length (width) of the timeseries pvrow_element [m]</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        vf_to_shadow : np.ndarray</span>
+<span class="sd">            View factors from timeseries pvrow_element to the ground shadow of</span>
+<span class="sd">            a specific timeseries PV row</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">pvrow_element_lowest_pt</span> <span class="o">=</span> <span class="n">pvrow_element</span><span class="o">.</span><span class="n">lowest_point</span>
+        <span class="n">pvrow_element_highest_pt</span> <span class="o">=</span> <span class="n">pvrow_element</span><span class="o">.</span><span class="n">highest_point</span>
+        <span class="c1"># Calculate view factors to left shadows</span>
+        <span class="k">if</span> <span class="n">pvrow_idx</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="c1"># There is no obstruction on the left</span>
+            <span class="n">vf_to_left_shadow</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vf_surface_to_surface</span><span class="p">(</span>
+                <span class="n">pvrow_element</span><span class="o">.</span><span class="n">coords</span><span class="p">,</span> <span class="n">shadow_left</span><span class="p">,</span> <span class="n">pvrow_element_length</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># There is potential obstruction on the left</span>
+            <span class="n">pt_obstr</span> <span class="o">=</span> <span class="n">ts_pvrows</span><span class="p">[</span><span class="n">pvrow_idx</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">full_pvrow_coords</span><span class="o">.</span><span class="n">lowest_point</span>
+            <span class="n">is_shadow_left</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="n">vf_to_left_shadow</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vf_hottel_gnd_surf</span><span class="p">(</span>
+                <span class="n">pvrow_element_highest_pt</span><span class="p">,</span> <span class="n">pvrow_element_lowest_pt</span><span class="p">,</span>
+                <span class="n">shadow_left</span><span class="o">.</span><span class="n">b1</span><span class="p">,</span> <span class="n">shadow_left</span><span class="o">.</span><span class="n">b2</span><span class="p">,</span> <span class="n">pt_obstr</span><span class="p">,</span> <span class="n">pvrow_element_length</span><span class="p">,</span>
+                <span class="n">is_shadow_left</span><span class="p">)</span>
+
+        <span class="c1"># Calculate view factors to right shadows</span>
+        <span class="k">if</span> <span class="n">pvrow_idx</span> <span class="o">==</span> <span class="n">n_shadows</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="c1"># There is no obstruction on the right</span>
+            <span class="n">vf_to_right_shadow</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vf_surface_to_surface</span><span class="p">(</span>
+                <span class="n">pvrow_element</span><span class="o">.</span><span class="n">coords</span><span class="p">,</span> <span class="n">shadow_right</span><span class="p">,</span> <span class="n">pvrow_element_length</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># There is potential obstruction on the right</span>
+            <span class="n">pt_obstr</span> <span class="o">=</span> <span class="n">ts_pvrows</span><span class="p">[</span><span class="n">pvrow_idx</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">full_pvrow_coords</span><span class="o">.</span><span class="n">lowest_point</span>
+            <span class="n">is_shadow_left</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="n">vf_to_right_shadow</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vf_hottel_gnd_surf</span><span class="p">(</span>
+                <span class="n">pvrow_element_highest_pt</span><span class="p">,</span> <span class="n">pvrow_element_lowest_pt</span><span class="p">,</span>
+                <span class="n">shadow_right</span><span class="o">.</span><span class="n">b1</span><span class="p">,</span> <span class="n">shadow_right</span><span class="o">.</span><span class="n">b2</span><span class="p">,</span> <span class="n">pt_obstr</span><span class="p">,</span>
+                <span class="n">pvrow_element_length</span><span class="p">,</span> <span class="n">is_shadow_left</span><span class="p">)</span>
+
+        <span class="c1"># Filter since we&#39;re considering the back surface only</span>
+        <span class="n">vf_to_shadow</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">tilted_to_left</span><span class="p">,</span> <span class="n">vf_to_right_shadow</span><span class="p">,</span>
+                                <span class="n">vf_to_left_shadow</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">vf_to_shadow</span>
+
+    <span class="k">def</span> <span class="nf">_vf_hottel_gnd_surf</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">high_pt_pv</span><span class="p">,</span> <span class="n">low_pt_pv</span><span class="p">,</span> <span class="n">left_pt_gnd</span><span class="p">,</span>
+                            <span class="n">right_pt_gnd</span><span class="p">,</span> <span class="n">obstr_pt</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">shadow_is_left</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculate the timeseries view factors from a PV surface defined by low</span>
+<span class="sd">        and high points, to a ground surface defined by left and right points,</span>
+<span class="sd">        while accounting for potentially obstructing neighboring PV rows,</span>
+<span class="sd">        defined by an obstruction point, and all of this using the Hottel</span>
+<span class="sd">        String method.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        high_pt_pv : :py:class:`~pvfactors.geometry.timeseries.TsPointCoords`</span>
+<span class="sd">            Highest point of the PV surface, for each timestamp</span>
+<span class="sd">        low_pt_pv : :py:class:`~pvfactors.geometry.timeseries.TsPointCoords`</span>
+<span class="sd">            Lowest point of the PV surface, for each timestamp</span>
+<span class="sd">        left_pt_gnd : :py:class:`~pvfactors.geometry.timeseries.TsPointCoords`</span>
+<span class="sd">            Leftmost point  of the ground surface, for each timestamp</span>
+<span class="sd">        right_pt_gnd : :py:class:`~pvfactors.geometry.timeseries.TsPointCoords`</span>
+<span class="sd">            Rightmost point  of the ground surface, for each timestamp</span>
+<span class="sd">        obstr_pt : :py:class:`~pvfactors.geometry.timeseries.TsPointCoords`</span>
+<span class="sd">            Obstructing point of neighboring PV row, for each timestamp</span>
+<span class="sd">        width : float or np.ndarray</span>
+<span class="sd">            Width of the PV row surface considered, from low to high point [m]</span>
+<span class="sd">        shadow_is_left : bool</span>
+<span class="sd">            Side of the considered shadow (or ground) surface with respect to</span>
+<span class="sd">            the edge point of the PV row on which the considered PV surface is</span>
+<span class="sd">            located</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        vf_1_to_2 : np.ndarray</span>
+<span class="sd">            View factors from PV surface to ground (shadow) surface</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">shadow_is_left</span><span class="p">:</span>
+            <span class="c1"># When the shadow is left</span>
+            <span class="c1"># - uncrossed strings are high_pv - left_gnd and low_pv - right_gnd</span>
+            <span class="c1"># - crossed strings are high_pv - right_gnd and low_pv - left_gnd</span>
+            <span class="n">l1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_hottel_string_length</span><span class="p">(</span><span class="n">high_pt_pv</span><span class="p">,</span> <span class="n">left_pt_gnd</span><span class="p">,</span> <span class="n">obstr_pt</span><span class="p">,</span>
+                                            <span class="n">shadow_is_left</span><span class="p">)</span>
+            <span class="n">l2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_hottel_string_length</span><span class="p">(</span><span class="n">low_pt_pv</span><span class="p">,</span> <span class="n">right_pt_gnd</span><span class="p">,</span> <span class="n">obstr_pt</span><span class="p">,</span>
+                                            <span class="n">shadow_is_left</span><span class="p">)</span>
+            <span class="n">d1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_hottel_string_length</span><span class="p">(</span><span class="n">high_pt_pv</span><span class="p">,</span> <span class="n">right_pt_gnd</span><span class="p">,</span> <span class="n">obstr_pt</span><span class="p">,</span>
+                                            <span class="n">shadow_is_left</span><span class="p">)</span>
+            <span class="n">d2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_hottel_string_length</span><span class="p">(</span><span class="n">low_pt_pv</span><span class="p">,</span> <span class="n">left_pt_gnd</span><span class="p">,</span> <span class="n">obstr_pt</span><span class="p">,</span>
+                                            <span class="n">shadow_is_left</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># When the shadow is right</span>
+            <span class="c1"># - uncrossed strings are high_pv - right_gnd and low_pv - left_gnd</span>
+            <span class="c1"># - crossed strings are high_pv - left_gnd and low_pv - right_gnd</span>
+            <span class="n">l1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_hottel_string_length</span><span class="p">(</span><span class="n">high_pt_pv</span><span class="p">,</span> <span class="n">right_pt_gnd</span><span class="p">,</span> <span class="n">obstr_pt</span><span class="p">,</span>
+                                            <span class="n">shadow_is_left</span><span class="p">)</span>
+            <span class="n">l2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_hottel_string_length</span><span class="p">(</span><span class="n">low_pt_pv</span><span class="p">,</span> <span class="n">left_pt_gnd</span><span class="p">,</span> <span class="n">obstr_pt</span><span class="p">,</span>
+                                            <span class="n">shadow_is_left</span><span class="p">)</span>
+            <span class="n">d1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_hottel_string_length</span><span class="p">(</span><span class="n">high_pt_pv</span><span class="p">,</span> <span class="n">left_pt_gnd</span><span class="p">,</span> <span class="n">obstr_pt</span><span class="p">,</span>
+                                            <span class="n">shadow_is_left</span><span class="p">)</span>
+            <span class="n">d2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_hottel_string_length</span><span class="p">(</span><span class="n">low_pt_pv</span><span class="p">,</span> <span class="n">right_pt_gnd</span><span class="p">,</span> <span class="n">obstr_pt</span><span class="p">,</span>
+                                            <span class="n">shadow_is_left</span><span class="p">)</span>
+        <span class="n">vf_1_to_2</span> <span class="o">=</span> <span class="p">(</span><span class="n">d1</span> <span class="o">+</span> <span class="n">d2</span> <span class="o">-</span> <span class="n">l1</span> <span class="o">-</span> <span class="n">l2</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mf">2.</span> <span class="o">*</span> <span class="n">width</span><span class="p">)</span>
+        <span class="c1"># The formula doesn&#39;t work if surface is a point</span>
+        <span class="n">vf_1_to_2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">width</span> <span class="o">&gt;</span> <span class="n">DISTANCE_TOLERANCE</span><span class="p">,</span> <span class="n">vf_1_to_2</span><span class="p">,</span> <span class="mf">0.</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">vf_1_to_2</span>
+
+    <span class="k">def</span> <span class="nf">_hottel_string_length</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pt_pv</span><span class="p">,</span> <span class="n">pt_gnd</span><span class="p">,</span> <span class="n">pt_obstr</span><span class="p">,</span> <span class="n">shadow_is_left</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculate a string length as defined by the Hottel String method in the</span>
+<span class="sd">        calculation of view factors, which allows to account for obstructions.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        left_pt_gnd : :py:class:`~pvfactors.geometry.timeseries.TsPointCoords`</span>
+<span class="sd">            Leftmost point  of the ground surface, for each timestamp</span>
+<span class="sd">        right_pt_gnd : :py:class:`~pvfactors.geometry.timeseries.TsPointCoords`</span>
+<span class="sd">            Rightmost point  of the ground surface, for each timestamp</span>
+<span class="sd">        obstr_pt : :py:class:`~pvfactors.geometry.timeseries.TsPointCoords`</span>
+<span class="sd">            Obstructing point of neighboring PV row, for each timestamp</span>
+<span class="sd">        shadow_is_left : bool</span>
+<span class="sd">            Side of the considered shadow (or ground) surface with respect to</span>
+<span class="sd">            the edge point of the PV row on which the considered PV surface is</span>
+<span class="sd">            located</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        hottel_length : np.ndarray</span>
+<span class="sd">            Return timeseries length of the string, while accounting for</span>
+<span class="sd">            obstructions, in [m]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Calculate length of string without obstruction</span>
+        <span class="n">l_pv</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_distance</span><span class="p">(</span><span class="n">pt_pv</span><span class="p">,</span> <span class="n">pt_gnd</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">pt_obstr</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># There can&#39;t be any obstruction</span>
+            <span class="n">hottel_length</span> <span class="o">=</span> <span class="n">l_pv</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Determine if there is obstruction by using the angles made by</span>
+            <span class="c1"># specific strings with the x-axis</span>
+            <span class="n">alpha_pv</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_angle_with_x_axis</span><span class="p">(</span><span class="n">pt_gnd</span><span class="p">,</span> <span class="n">pt_pv</span><span class="p">)</span>
+            <span class="n">alpha_ob</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_angle_with_x_axis</span><span class="p">(</span><span class="n">pt_gnd</span><span class="p">,</span> <span class="n">pt_obstr</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">shadow_is_left</span><span class="p">:</span>
+                <span class="n">is_obstructing</span> <span class="o">=</span> <span class="n">alpha_pv</span> <span class="o">&gt;</span> <span class="n">alpha_ob</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">is_obstructing</span> <span class="o">=</span> <span class="n">alpha_pv</span> <span class="o">&lt;</span> <span class="n">alpha_ob</span>
+            <span class="c1"># Calculate length of string with obstruction</span>
+            <span class="n">l_obstr</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_distance</span><span class="p">(</span><span class="n">pt_gnd</span><span class="p">,</span> <span class="n">pt_obstr</span><span class="p">)</span>
+                       <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_distance</span><span class="p">(</span><span class="n">pt_obstr</span><span class="p">,</span> <span class="n">pt_pv</span><span class="p">))</span>
+            <span class="c1"># Merge based on whether there is obstruction or not</span>
+            <span class="n">hottel_length</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">is_obstructing</span><span class="p">,</span> <span class="n">l_obstr</span><span class="p">,</span> <span class="n">l_pv</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">hottel_length</span>
+
+    <span class="k">def</span> <span class="nf">_vf_surface_to_surface</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">line_1</span><span class="p">,</span> <span class="n">line_2</span><span class="p">,</span> <span class="n">width_1</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Calculate view factors between timeseries line coords, and using</span>
+<span class="sd">        the Hottel String method for calculating view factors (without</span>
+<span class="sd">        obstruction).</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        line_1 : :py:class:`~pvfactors.geometry.timeseries.TsLineCoords`</span>
+<span class="sd">            Timeseries line coordinates of surface 1</span>
+<span class="sd">        line_2 : :py:class:`~pvfactors.geometry.timeseries.TsLineCoords`</span>
+<span class="sd">            Timeseries line coordinates of surface 2</span>
+<span class="sd">        width_1 : float or np.ndarray</span>
+<span class="sd">            Length of line_1 in [m]</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        vf_1_to_2 : np.ndarray</span>
+<span class="sd">            View factors from line_1 to line_2, for each timestep</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">length_1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_distance</span><span class="p">(</span><span class="n">line_1</span><span class="o">.</span><span class="n">b1</span><span class="p">,</span> <span class="n">line_2</span><span class="o">.</span><span class="n">b1</span><span class="p">)</span>
+        <span class="n">length_2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_distance</span><span class="p">(</span><span class="n">line_1</span><span class="o">.</span><span class="n">b2</span><span class="p">,</span> <span class="n">line_2</span><span class="o">.</span><span class="n">b2</span><span class="p">)</span>
+        <span class="n">length_3</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_distance</span><span class="p">(</span><span class="n">line_1</span><span class="o">.</span><span class="n">b1</span><span class="p">,</span> <span class="n">line_2</span><span class="o">.</span><span class="n">b2</span><span class="p">)</span>
+        <span class="n">length_4</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_distance</span><span class="p">(</span><span class="n">line_1</span><span class="o">.</span><span class="n">b2</span><span class="p">,</span> <span class="n">line_2</span><span class="o">.</span><span class="n">b1</span><span class="p">)</span>
+        <span class="n">sum_1</span> <span class="o">=</span> <span class="n">length_1</span> <span class="o">+</span> <span class="n">length_2</span>
+        <span class="n">sum_2</span> <span class="o">=</span> <span class="n">length_3</span> <span class="o">+</span> <span class="n">length_4</span>
+        <span class="n">vf_1_to_2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">sum_2</span> <span class="o">-</span> <span class="n">sum_1</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mf">2.</span> <span class="o">*</span> <span class="n">width_1</span><span class="p">)</span>
+        <span class="c1"># The formula doesn&#39;t work if the line is a point</span>
+        <span class="n">vf_1_to_2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">width_1</span> <span class="o">&gt;</span> <span class="n">DISTANCE_TOLERANCE</span><span class="p">,</span> <span class="n">vf_1_to_2</span><span class="p">,</span> <span class="mf">0.</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">vf_1_to_2</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_distance</span><span class="p">(</span><span class="n">pt_1</span><span class="p">,</span> <span class="n">pt_2</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Calculate distance between two timeseries points</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        pt_1 : :py:class:`~pvfactors.geometry.timeseries.TsPointCoords`</span>
+<span class="sd">            Timeseries point coordinates of point 1</span>
+<span class="sd">        pt_2 : :py:class:`~pvfactors.geometry.timeseries.TsPointCoords`</span>
+<span class="sd">            Timeseries point coordinates of point 2</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        np.ndarray</span>
+<span class="sd">            Distance between the two points, for each timestep</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">((</span><span class="n">pt_2</span><span class="o">.</span><span class="n">y</span> <span class="o">-</span> <span class="n">pt_1</span><span class="o">.</span><span class="n">y</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="p">(</span><span class="n">pt_2</span><span class="o">.</span><span class="n">x</span> <span class="o">-</span> <span class="n">pt_1</span><span class="o">.</span><span class="n">x</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_angle_with_x_axis</span><span class="p">(</span><span class="n">pt_1</span><span class="p">,</span> <span class="n">pt_2</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Angle with x-axis of vector going from pt_1 to pt_2</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        pt_1 : :py:class:`~pvfactors.geometry.timeseries.TsPointCoords`</span>
+<span class="sd">            Timeseries point coordinates of point 1</span>
+<span class="sd">        pt_2 : :py:class:`~pvfactors.geometry.timeseries.TsPointCoords`</span>
+<span class="sd">            Timeseries point coordinates of point 2</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        np.ndarray</span>
+<span class="sd">            Angle between vector pt_1-&gt;pt_2 and x-axis</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">arctan2</span><span class="p">(</span><span class="n">pt_2</span><span class="o">.</span><span class="n">y</span> <span class="o">-</span> <span class="n">pt_1</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="n">pt_2</span><span class="o">.</span><span class="n">x</span> <span class="o">-</span> <span class="n">pt_1</span><span class="o">.</span><span class="n">x</span><span class="p">)</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_create_shaded_side_coords</span><span class="p">(</span><span class="n">xy_center</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">shaded_length</span><span class="p">,</span>
+                                   <span class="n">mask_tilted_to_left</span><span class="p">,</span> <span class="n">rotation_vec</span><span class="p">,</span>
+                                   <span class="n">side_lowest_pt</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create the timeseries line coordinates for the shaded portion of a</span>
+<span class="sd">        PV row side, based on inputted shaded length.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        xy_center : tuple of float</span>
+<span class="sd">            x and y coordinates of the PV row center point (invariant)</span>
+<span class="sd">        width : float</span>
+<span class="sd">            width of the PV rows [m]</span>
+<span class="sd">        shaded_length : np.ndarray</span>
+<span class="sd">            Timeseries values of side shaded length [m]</span>
+<span class="sd">        tilted_to_left : list of bool</span>
+<span class="sd">            Flags indicating when the PV rows are strictly tilted to the left</span>
+<span class="sd">        rotation_vec : np.ndarray</span>
+<span class="sd">            Timeseries rotation vector of the PV rows in [deg]</span>
+<span class="sd">        side_lowest_pt : :py:class:`~pvfactors.geometry.timeseries.TsPointCoords`</span>
+<span class="sd">            Timeseries coordinates of lowest point of considered PV row side</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        side_shaded_coords : :py:class:`~pvfactors.geometry.timeseries.TsPointCoords`</span>
+<span class="sd">            Timeseries coordinates of the shaded portion of the PV row side</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Get invariant values</span>
+        <span class="n">x_center</span><span class="p">,</span> <span class="n">y_center</span> <span class="o">=</span> <span class="n">xy_center</span>
+        <span class="n">radius</span> <span class="o">=</span> <span class="n">width</span> <span class="o">/</span> <span class="mf">2.</span>
+
+        <span class="c1"># Calculate coords of shading point</span>
+        <span class="n">r_shade</span> <span class="o">=</span> <span class="n">radius</span> <span class="o">-</span> <span class="n">shaded_length</span>
+        <span class="n">x_sh</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span>
+            <span class="n">mask_tilted_to_left</span><span class="p">,</span>
+            <span class="n">r_shade</span> <span class="o">*</span> <span class="n">cosd</span><span class="p">(</span><span class="n">rotation_vec</span> <span class="o">+</span> <span class="mf">180.</span><span class="p">)</span> <span class="o">+</span> <span class="n">x_center</span><span class="p">,</span>
+            <span class="n">r_shade</span> <span class="o">*</span> <span class="n">cosd</span><span class="p">(</span><span class="n">rotation_vec</span><span class="p">)</span> <span class="o">+</span> <span class="n">x_center</span><span class="p">)</span>
+        <span class="n">y_sh</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span>
+            <span class="n">mask_tilted_to_left</span><span class="p">,</span>
+            <span class="n">r_shade</span> <span class="o">*</span> <span class="n">sind</span><span class="p">(</span><span class="n">rotation_vec</span> <span class="o">+</span> <span class="mf">180.</span><span class="p">)</span> <span class="o">+</span> <span class="n">y_center</span><span class="p">,</span>
+            <span class="n">r_shade</span> <span class="o">*</span> <span class="n">sind</span><span class="p">(</span><span class="n">rotation_vec</span><span class="p">)</span> <span class="o">+</span> <span class="n">y_center</span><span class="p">)</span>
+
+        <span class="n">side_shaded_coords</span> <span class="o">=</span> <span class="n">TsLineCoords</span><span class="p">(</span><span class="n">TsPointCoords</span><span class="p">(</span><span class="n">x_sh</span><span class="p">,</span> <span class="n">y_sh</span><span class="p">),</span>
+                                          <span class="n">side_lowest_pt</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">side_shaded_coords</span>
+
+    <span class="k">def</span> <span class="nf">vf_pvrow_gnd_surf</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ts_pvrows</span><span class="p">,</span> <span class="n">ts_ground</span><span class="p">,</span> <span class="n">tilted_to_left</span><span class="p">,</span>
+                          <span class="n">vf_matrix</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Calculate the view factors between timeseries PV row and ground</span>
+<span class="sd">        surfaces, and assign it to the passed view factor matrix using</span>
+<span class="sd">        the surface indices.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        ts_pvrows : list of :py:class:`~pvfactors.geometry.timeseries.TsPVRow`</span>
+<span class="sd">            List of timeseries PV rows in the PV array</span>
+<span class="sd">        ts_ground : :py:class:`~pvfactors.geometry.timeseries.TsGround`</span>
+<span class="sd">            Timeseries ground of the PV array</span>
+<span class="sd">        tilted_to_left : list of bool</span>
+<span class="sd">            Flags indicating when the PV rows are strictly tilted to the left</span>
+<span class="sd">        vf_matrix : np.ndarray</span>
+<span class="sd">            View factor matrix to update during calculation. Should have 3</span>
+<span class="sd">            dimensions as follows: [n_surfaces, n_surfaces, n_timesteps]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">n_pvrows</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">ts_pvrows</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">idx_pvrow</span><span class="p">,</span> <span class="n">ts_pvrow</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">ts_pvrows</span><span class="p">):</span>
+            <span class="c1"># Separate gnd surfaces depending on side</span>
+            <span class="n">left_gnd_surfaces</span> <span class="o">=</span> <span class="n">ts_ground</span><span class="o">.</span><span class="n">ts_surfaces_side_of_cut_point</span><span class="p">(</span>
+                <span class="s1">&#39;left&#39;</span><span class="p">,</span> <span class="n">idx_pvrow</span><span class="p">)</span>
+            <span class="n">right_gnd_surfaces</span> <span class="o">=</span> <span class="n">ts_ground</span><span class="o">.</span><span class="n">ts_surfaces_side_of_cut_point</span><span class="p">(</span>
+                <span class="s1">&#39;right&#39;</span><span class="p">,</span> <span class="n">idx_pvrow</span><span class="p">)</span>
+            <span class="c1"># Front side</span>
+            <span class="n">front</span> <span class="o">=</span> <span class="n">ts_pvrow</span><span class="o">.</span><span class="n">front</span>
+            <span class="k">for</span> <span class="n">pvrow_surf</span> <span class="ow">in</span> <span class="n">front</span><span class="o">.</span><span class="n">all_ts_surfaces</span><span class="p">:</span>
+                <span class="n">ts_length</span> <span class="o">=</span> <span class="n">pvrow_surf</span><span class="o">.</span><span class="n">length</span>
+                <span class="n">i</span> <span class="o">=</span> <span class="n">pvrow_surf</span><span class="o">.</span><span class="n">index</span>
+                <span class="k">for</span> <span class="n">gnd_surf</span> <span class="ow">in</span> <span class="n">left_gnd_surfaces</span><span class="p">:</span>
+                    <span class="n">j</span> <span class="o">=</span> <span class="n">gnd_surf</span><span class="o">.</span><span class="n">index</span>
+                    <span class="n">vf_pvrow_to_gnd</span><span class="p">,</span> <span class="n">vf_gnd_to_pvrow</span> <span class="o">=</span> <span class="p">(</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">vf_pvrow_surf_to_gnd_surf_obstruction_hottel</span><span class="p">(</span>
+                            <span class="n">pvrow_surf</span><span class="p">,</span> <span class="n">idx_pvrow</span><span class="p">,</span> <span class="n">n_pvrows</span><span class="p">,</span>
+                            <span class="n">tilted_to_left</span><span class="p">,</span> <span class="n">ts_pvrows</span><span class="p">,</span> <span class="n">gnd_surf</span><span class="p">,</span> <span class="n">ts_length</span><span class="p">,</span>
+                            <span class="n">is_back</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">is_left</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
+                    <span class="n">vf_matrix</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">vf_pvrow_to_gnd</span>
+                    <span class="n">vf_matrix</span><span class="p">[</span><span class="n">j</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">vf_gnd_to_pvrow</span>
+                <span class="k">for</span> <span class="n">gnd_surf</span> <span class="ow">in</span> <span class="n">right_gnd_surfaces</span><span class="p">:</span>
+                    <span class="n">j</span> <span class="o">=</span> <span class="n">gnd_surf</span><span class="o">.</span><span class="n">index</span>
+                    <span class="n">vf_pvrow_to_gnd</span><span class="p">,</span> <span class="n">vf_gnd_to_pvrow</span> <span class="o">=</span> <span class="p">(</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">vf_pvrow_surf_to_gnd_surf_obstruction_hottel</span><span class="p">(</span>
+                            <span class="n">pvrow_surf</span><span class="p">,</span> <span class="n">idx_pvrow</span><span class="p">,</span> <span class="n">n_pvrows</span><span class="p">,</span>
+                            <span class="n">tilted_to_left</span><span class="p">,</span> <span class="n">ts_pvrows</span><span class="p">,</span> <span class="n">gnd_surf</span><span class="p">,</span> <span class="n">ts_length</span><span class="p">,</span>
+                            <span class="n">is_back</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">is_left</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span>
+                    <span class="n">vf_matrix</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">vf_pvrow_to_gnd</span>
+                    <span class="n">vf_matrix</span><span class="p">[</span><span class="n">j</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">vf_gnd_to_pvrow</span>
+            <span class="c1"># Back side</span>
+            <span class="n">back</span> <span class="o">=</span> <span class="n">ts_pvrow</span><span class="o">.</span><span class="n">back</span>
+            <span class="k">for</span> <span class="n">pvrow_surf</span> <span class="ow">in</span> <span class="n">back</span><span class="o">.</span><span class="n">all_ts_surfaces</span><span class="p">:</span>
+                <span class="n">ts_length</span> <span class="o">=</span> <span class="n">pvrow_surf</span><span class="o">.</span><span class="n">length</span>
+                <span class="n">i</span> <span class="o">=</span> <span class="n">pvrow_surf</span><span class="o">.</span><span class="n">index</span>
+                <span class="k">for</span> <span class="n">gnd_surf</span> <span class="ow">in</span> <span class="n">left_gnd_surfaces</span><span class="p">:</span>
+                    <span class="n">j</span> <span class="o">=</span> <span class="n">gnd_surf</span><span class="o">.</span><span class="n">index</span>
+                    <span class="n">vf_pvrow_to_gnd</span><span class="p">,</span> <span class="n">vf_gnd_to_pvrow</span> <span class="o">=</span> <span class="p">(</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">vf_pvrow_surf_to_gnd_surf_obstruction_hottel</span><span class="p">(</span>
+                            <span class="n">pvrow_surf</span><span class="p">,</span> <span class="n">idx_pvrow</span><span class="p">,</span> <span class="n">n_pvrows</span><span class="p">,</span>
+                            <span class="n">tilted_to_left</span><span class="p">,</span> <span class="n">ts_pvrows</span><span class="p">,</span> <span class="n">gnd_surf</span><span class="p">,</span> <span class="n">ts_length</span><span class="p">,</span>
+                            <span class="n">is_back</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">is_left</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
+                    <span class="n">vf_matrix</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">vf_pvrow_to_gnd</span>
+                    <span class="n">vf_matrix</span><span class="p">[</span><span class="n">j</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">vf_gnd_to_pvrow</span>
+                <span class="k">for</span> <span class="n">gnd_surf</span> <span class="ow">in</span> <span class="n">right_gnd_surfaces</span><span class="p">:</span>
+                    <span class="n">j</span> <span class="o">=</span> <span class="n">gnd_surf</span><span class="o">.</span><span class="n">index</span>
+                    <span class="n">vf_pvrow_to_gnd</span><span class="p">,</span> <span class="n">vf_gnd_to_pvrow</span> <span class="o">=</span> <span class="p">(</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">vf_pvrow_surf_to_gnd_surf_obstruction_hottel</span><span class="p">(</span>
+                            <span class="n">pvrow_surf</span><span class="p">,</span> <span class="n">idx_pvrow</span><span class="p">,</span> <span class="n">n_pvrows</span><span class="p">,</span>
+                            <span class="n">tilted_to_left</span><span class="p">,</span> <span class="n">ts_pvrows</span><span class="p">,</span> <span class="n">gnd_surf</span><span class="p">,</span> <span class="n">ts_length</span><span class="p">,</span>
+                            <span class="n">is_back</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">is_left</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span>
+                    <span class="n">vf_matrix</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">vf_pvrow_to_gnd</span>
+                    <span class="n">vf_matrix</span><span class="p">[</span><span class="n">j</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">vf_gnd_to_pvrow</span>
+
+    <span class="k">def</span> <span class="nf">vf_pvrow_surf_to_gnd_surf_obstruction_hottel</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span> <span class="n">pvrow_surf</span><span class="p">,</span> <span class="n">pvrow_idx</span><span class="p">,</span> <span class="n">n_pvrows</span><span class="p">,</span> <span class="n">tilted_to_left</span><span class="p">,</span>
+            <span class="n">ts_pvrows</span><span class="p">,</span> <span class="n">gnd_surf</span><span class="p">,</span> <span class="n">pvrow_surf_length</span><span class="p">,</span> <span class="n">is_back</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">is_left</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Calculate view factors from timeseries PV row surface to a</span>
+<span class="sd">        timeseries ground surface. This will return the calculated view</span>
+<span class="sd">        factors from the PV row surface to the ground surface, AND from the</span>
+<span class="sd">        ground surface to the PV row surface (using reciprocity).</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        pvrow_surf : :py:class:`~pvfactors.geometry.timeseries.TsSurface`</span>
+<span class="sd">            Timeseries PV row surface to use for calculation</span>
+<span class="sd">        pvrow_idx : int</span>
+<span class="sd">            Index of the timeseries PV row on the which the pvrow_surf is</span>
+<span class="sd">        n_pvrows : int</span>
+<span class="sd">            Number of timeseries PV rows in the PV array, and therefore number</span>
+<span class="sd">            of shadows they cast on the ground</span>
+<span class="sd">        tilted_to_left : list of bool</span>
+<span class="sd">            Flags indicating when the PV rows are strictly tilted to the left</span>
+<span class="sd">        ts_pvrows : list of :py:class:`~pvfactors.geometry.timeseries.TsPVRow`</span>
+<span class="sd">            List of timeseries PV rows in the PV array</span>
+<span class="sd">        gnd_surf : :py:class:`~pvfactors.geometry.timeseries.TsSurface`</span>
+<span class="sd">            Timeseries ground surface to use for calculation</span>
+<span class="sd">        pvrow_surf_length : np.ndarray</span>
+<span class="sd">            Length (width) of the timeseries PV row surface [m]</span>
+<span class="sd">        is_back : bool</span>
+<span class="sd">            Flag specifying whether pv row surface is on  back or front surface</span>
+<span class="sd">            (Default = True)</span>
+<span class="sd">        is_left : bool</span>
+<span class="sd">            Flag specifying whether gnd surface is left of pv row cut point or</span>
+<span class="sd">            not (Default = True)</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        vf_pvrow_to_gnd_surf : np.ndarray</span>
+<span class="sd">            View factors from timeseries PV row surface to timeseries ground</span>
+<span class="sd">            surface, dimension is [n_timesteps]</span>
+<span class="sd">        vf_gnd_to_pvrow_surf : np.ndarray</span>
+<span class="sd">            View factors from timeseries ground surface to timeseries PV row</span>
+<span class="sd">            surface, dimension is [n_timesteps]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">pvrow_surf_lowest_pt</span> <span class="o">=</span> <span class="n">pvrow_surf</span><span class="o">.</span><span class="n">lowest_point</span>
+        <span class="n">pvrow_surf_highest_pt</span> <span class="o">=</span> <span class="n">pvrow_surf</span><span class="o">.</span><span class="n">highest_point</span>
+        <span class="n">no_obstruction</span> <span class="o">=</span> <span class="p">(</span><span class="n">is_left</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">pvrow_idx</span> <span class="o">==</span> <span class="mi">0</span><span class="p">))</span> \
+            <span class="ow">or</span> <span class="p">((</span><span class="ow">not</span> <span class="n">is_left</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">pvrow_idx</span> <span class="o">==</span> <span class="n">n_pvrows</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">no_obstruction</span><span class="p">:</span>
+            <span class="c1"># There is no obstruction to the gnd surface</span>
+            <span class="n">vf_pvrow_to_gnd_surf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vf_surface_to_surface</span><span class="p">(</span>
+                <span class="n">pvrow_surf</span><span class="o">.</span><span class="n">coords</span><span class="p">,</span> <span class="n">gnd_surf</span><span class="p">,</span> <span class="n">pvrow_surf_length</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Get lowest point of obstructing point</span>
+            <span class="n">idx_obstructing_pvrow</span> <span class="o">=</span> <span class="n">pvrow_idx</span> <span class="o">-</span> <span class="mi">1</span> <span class="k">if</span> <span class="n">is_left</span> <span class="k">else</span> <span class="n">pvrow_idx</span> <span class="o">+</span> <span class="mi">1</span>
+            <span class="n">pt_obstr</span> <span class="o">=</span> <span class="n">ts_pvrows</span><span class="p">[</span><span class="n">idx_obstructing_pvrow</span>
+                                 <span class="p">]</span><span class="o">.</span><span class="n">full_pvrow_coords</span><span class="o">.</span><span class="n">lowest_point</span>
+            <span class="c1"># Calculate vf from pv row to gnd surface</span>
+            <span class="n">vf_pvrow_to_gnd_surf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vf_hottel_gnd_surf</span><span class="p">(</span>
+                <span class="n">pvrow_surf_highest_pt</span><span class="p">,</span> <span class="n">pvrow_surf_lowest_pt</span><span class="p">,</span>
+                <span class="n">gnd_surf</span><span class="o">.</span><span class="n">b1</span><span class="p">,</span> <span class="n">gnd_surf</span><span class="o">.</span><span class="n">b2</span><span class="p">,</span> <span class="n">pt_obstr</span><span class="p">,</span> <span class="n">pvrow_surf_length</span><span class="p">,</span>
+                <span class="n">is_left</span><span class="p">)</span>
+
+        <span class="c1"># Final result depends on whether front or back surface</span>
+        <span class="k">if</span> <span class="n">is_left</span><span class="p">:</span>
+            <span class="n">vf_pvrow_to_gnd_surf</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">tilted_to_left</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="n">vf_pvrow_to_gnd_surf</span><span class="p">)</span> <span class="k">if</span> <span class="n">is_back</span>
+                <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">tilted_to_left</span><span class="p">,</span> <span class="n">vf_pvrow_to_gnd_surf</span><span class="p">,</span> <span class="mf">0.</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">vf_pvrow_to_gnd_surf</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">tilted_to_left</span><span class="p">,</span> <span class="n">vf_pvrow_to_gnd_surf</span><span class="p">,</span> <span class="mf">0.</span><span class="p">)</span> <span class="k">if</span> <span class="n">is_back</span>
+                <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">tilted_to_left</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="n">vf_pvrow_to_gnd_surf</span><span class="p">))</span>
+
+        <span class="c1"># Use reciprocity to calculate ts vf from gnd surf to pv row surface</span>
+        <span class="n">gnd_surf_length</span> <span class="o">=</span> <span class="n">gnd_surf</span><span class="o">.</span><span class="n">length</span>
+        <span class="n">vf_gnd_to_pvrow_surf</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span>
+            <span class="n">gnd_surf_length</span> <span class="o">&gt;</span> <span class="n">DISTANCE_TOLERANCE</span><span class="p">,</span>
+            <span class="n">vf_pvrow_to_gnd_surf</span> <span class="o">*</span> <span class="n">pvrow_surf_length</span> <span class="o">/</span> <span class="n">gnd_surf_length</span><span class="p">,</span> <span class="mf">0.</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">vf_pvrow_to_gnd_surf</span><span class="p">,</span> <span class="n">vf_gnd_to_pvrow_surf</span>
+
+    <span class="k">def</span> <span class="nf">vf_pvrow_to_pvrow</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ts_pvrows</span><span class="p">,</span> <span class="n">tilted_to_left</span><span class="p">,</span> <span class="n">vf_matrix</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Calculate the view factors between timeseries PV row surfaces,</span>
+<span class="sd">        and assign values to the passed view factor matrix using</span>
+<span class="sd">        the surface indices.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        ts_pvrows : list of :py:class:`~pvfactors.geometry.timeseries.TsPVRow`</span>
+<span class="sd">            List of timeseries PV rows in the PV array</span>
+<span class="sd">        tilted_to_left : list of bool</span>
+<span class="sd">            Flags indicating when the PV rows are strictly tilted to the left</span>
+<span class="sd">        vf_matrix : np.ndarray</span>
+<span class="sd">            View factor matrix to update during calculation. Should have 3</span>
+<span class="sd">            dimensions as follows: [n_surfaces, n_surfaces, n_timesteps]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">idx_pvrow</span><span class="p">,</span> <span class="n">ts_pvrow</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">ts_pvrows</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]):</span>
+            <span class="c1"># Get the next pv row</span>
+            <span class="n">right_ts_pvrow</span> <span class="o">=</span> <span class="n">ts_pvrows</span><span class="p">[</span><span class="n">idx_pvrow</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
+            <span class="c1"># front side</span>
+            <span class="n">front</span> <span class="o">=</span> <span class="n">ts_pvrow</span><span class="o">.</span><span class="n">front</span>
+            <span class="k">for</span> <span class="n">surf_i</span> <span class="ow">in</span> <span class="n">front</span><span class="o">.</span><span class="n">all_ts_surfaces</span><span class="p">:</span>
+                <span class="n">i</span> <span class="o">=</span> <span class="n">surf_i</span><span class="o">.</span><span class="n">index</span>
+                <span class="n">length_i</span> <span class="o">=</span> <span class="n">surf_i</span><span class="o">.</span><span class="n">length</span>
+                <span class="k">for</span> <span class="n">surf_j</span> <span class="ow">in</span> <span class="n">right_ts_pvrow</span><span class="o">.</span><span class="n">back</span><span class="o">.</span><span class="n">all_ts_surfaces</span><span class="p">:</span>
+                    <span class="n">j</span> <span class="o">=</span> <span class="n">surf_j</span><span class="o">.</span><span class="n">index</span>
+                    <span class="n">length_j</span> <span class="o">=</span> <span class="n">surf_j</span><span class="o">.</span><span class="n">length</span>
+                    <span class="n">vf_i_to_j</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vf_surface_to_surface</span><span class="p">(</span>
+                        <span class="n">surf_i</span><span class="o">.</span><span class="n">coords</span><span class="p">,</span> <span class="n">surf_j</span><span class="o">.</span><span class="n">coords</span><span class="p">,</span> <span class="n">length_i</span><span class="p">)</span>
+                    <span class="n">vf_i_to_j</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">tilted_to_left</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="n">vf_i_to_j</span><span class="p">)</span>
+                    <span class="n">vf_j_to_i</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span>
+                        <span class="n">surf_j</span><span class="o">.</span><span class="n">length</span> <span class="o">&gt;</span> <span class="n">DISTANCE_TOLERANCE</span><span class="p">,</span>
+                        <span class="n">vf_i_to_j</span> <span class="o">*</span> <span class="n">length_i</span> <span class="o">/</span> <span class="n">length_j</span><span class="p">,</span> <span class="mf">0.</span><span class="p">)</span>
+                    <span class="n">vf_matrix</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">vf_i_to_j</span>
+                    <span class="n">vf_matrix</span><span class="p">[</span><span class="n">j</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">vf_j_to_i</span>
+            <span class="c1"># back side</span>
+            <span class="n">back</span> <span class="o">=</span> <span class="n">ts_pvrow</span><span class="o">.</span><span class="n">back</span>
+            <span class="k">for</span> <span class="n">surf_i</span> <span class="ow">in</span> <span class="n">back</span><span class="o">.</span><span class="n">all_ts_surfaces</span><span class="p">:</span>
+                <span class="n">i</span> <span class="o">=</span> <span class="n">surf_i</span><span class="o">.</span><span class="n">index</span>
+                <span class="n">length_i</span> <span class="o">=</span> <span class="n">surf_i</span><span class="o">.</span><span class="n">length</span>
+                <span class="k">for</span> <span class="n">surf_j</span> <span class="ow">in</span> <span class="n">right_ts_pvrow</span><span class="o">.</span><span class="n">front</span><span class="o">.</span><span class="n">all_ts_surfaces</span><span class="p">:</span>
+                    <span class="n">j</span> <span class="o">=</span> <span class="n">surf_j</span><span class="o">.</span><span class="n">index</span>
+                    <span class="n">length_j</span> <span class="o">=</span> <span class="n">surf_j</span><span class="o">.</span><span class="n">length</span>
+                    <span class="n">vf_i_to_j</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vf_surface_to_surface</span><span class="p">(</span>
+                        <span class="n">surf_i</span><span class="o">.</span><span class="n">coords</span><span class="p">,</span> <span class="n">surf_j</span><span class="o">.</span><span class="n">coords</span><span class="p">,</span> <span class="n">length_i</span><span class="p">)</span>
+                    <span class="n">vf_i_to_j</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">tilted_to_left</span><span class="p">,</span> <span class="n">vf_i_to_j</span><span class="p">,</span> <span class="mf">0.</span><span class="p">)</span>
+                    <span class="n">vf_j_to_i</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span>
+                        <span class="n">surf_j</span><span class="o">.</span><span class="n">length</span> <span class="o">&gt;</span> <span class="n">DISTANCE_TOLERANCE</span><span class="p">,</span>
+                        <span class="n">vf_i_to_j</span> <span class="o">*</span> <span class="n">length_i</span> <span class="o">/</span> <span class="n">length_j</span><span class="p">,</span> <span class="mf">0.</span><span class="p">)</span>
+                    <span class="n">vf_matrix</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">vf_i_to_j</span>
+                    <span class="n">vf_matrix</span><span class="p">[</span><span class="n">j</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">vf_j_to_i</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2016, SunPower Corporation
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

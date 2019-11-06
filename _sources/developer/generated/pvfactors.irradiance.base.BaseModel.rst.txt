@@ -1,0 +1,40 @@
+pvfactors.irradiance.base.BaseModel
+===================================
+
+.. currentmodule:: pvfactors.irradiance.base
+
+.. autoclass:: BaseModel
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~BaseModel.__init__
+      ~BaseModel.fit
+      ~BaseModel.get_full_modeling_vectors
+      ~BaseModel.get_ts_modeling_vectors
+      ~BaseModel.transform
+      ~BaseModel.update_ts_surface_sky_term
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~BaseModel.cats
+      ~BaseModel.gnd_illum
+      ~BaseModel.gnd_shaded
+      ~BaseModel.irradiance_comp
+      ~BaseModel.params
+      ~BaseModel.pvrow_illum
+      ~BaseModel.pvrow_shaded
+      ~BaseModel.sky_luminance
+   
+   

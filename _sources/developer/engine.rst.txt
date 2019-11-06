@@ -1,16 +1,15 @@
 .. engine
 
-.. currentmodule:: pvfactors
-
 engine
 ------
 
-.. automodule:: engine
+.. automodule:: pvfactors.engine
    :no-members:
    :no-inherited-members:
+   :noindex:
 
 .. autosummary::
    :toctree: generated/
    :nosignatures:
 
-   engine.PVEngine
+   ~pvfactors.engine.PVEngine

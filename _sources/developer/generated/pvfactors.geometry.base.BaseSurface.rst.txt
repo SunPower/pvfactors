@@ -1,0 +1,95 @@
+pvfactors.geometry.base.BaseSurface
+===================================
+
+.. currentmodule:: pvfactors.geometry.base
+
+.. autoclass:: BaseSurface
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      
+         ~BaseSurface.__init__
+      
+      
+      
+      
+      
+      
+      
+      
+         ~BaseSurface.difference
+      
+      
+      
+      
+      
+      
+      
+      
+         ~BaseSurface.get_param
+      
+      
+      
+      
+      
+      
+      
+      
+         ~BaseSurface.plot
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+         ~BaseSurface.update_params
+      
+      
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+   
+   

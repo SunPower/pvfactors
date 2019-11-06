@@ -1,0 +1,1053 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>pvfactors.geometry.pvrow &mdash; pvfactors 1.3.0 documentation</title>
+  
+
+  
+  
+    <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../../_static/doctools.js"></script>
+        <script type="text/javascript" src="../../../_static/language_data.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/css/custom.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> pvfactors
+          
+
+          
+            
+            <img src="../../../_static/logo_small.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.3.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation/index.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../concepts/index.html">Main concepts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/index.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../theory/index.html">Theory</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../developer/index.html">Developer API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../whatsnew.html">What’s New</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">pvfactors</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>pvfactors.geometry.pvrow</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for pvfactors.geometry.pvrow</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Module will classes related to PV row geometries&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">pvfactors.config</span> <span class="k">import</span> <span class="n">COLOR_DIC</span>
+<span class="kn">from</span> <span class="nn">pvfactors.geometry.base</span> <span class="k">import</span> \
+    <span class="n">BaseSide</span><span class="p">,</span> <span class="n">_coords_from_center_tilt_length</span><span class="p">,</span> <span class="n">PVSegment</span>
+<span class="kn">from</span> <span class="nn">shapely.geometry</span> <span class="k">import</span> <span class="n">GeometryCollection</span><span class="p">,</span> <span class="n">LineString</span>
+<span class="kn">from</span> <span class="nn">pvfactors.geometry.timeseries</span> <span class="k">import</span> \
+    <span class="n">TsShadeCollection</span><span class="p">,</span> <span class="n">TsLineCoords</span><span class="p">,</span> <span class="n">TsSurface</span>
+<span class="kn">from</span> <span class="nn">pvlib.tools</span> <span class="k">import</span> <span class="n">cosd</span><span class="p">,</span> <span class="n">sind</span>
+
+
+<div class="viewcode-block" id="TsPVRow"><a class="viewcode-back" href="../../../developer/generated/pvfactors.geometry.pvrow.TsPVRow.html#pvfactors.geometry.pvrow.TsPVRow">[docs]</a><span class="k">class</span> <span class="nc">TsPVRow</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Timeseries PV row class: this class is a vectorized version of the</span>
+<span class="sd">    PV row geometries. The coordinates and attributes (front and back sides)</span>
+<span class="sd">    are all vectorized.&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="TsPVRow.__init__"><a class="viewcode-back" href="../../../developer/generated/pvfactors.geometry.pvrow.TsPVRow.html#pvfactors.geometry.pvrow.TsPVRow.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ts_front_side</span><span class="p">,</span> <span class="n">ts_back_side</span><span class="p">,</span> <span class="n">xy_center</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">full_pvrow_coords</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Initialize timeseries PV row with its front and back sides.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        ts_front_side : :py:class:`~pvfactors.geometry.pvrow.TsSide`</span>
+<span class="sd">            Timeseries front side of the PV row</span>
+<span class="sd">        ts_back_side : :py:class:`~pvfactors.geometry.pvrow.TsSide`</span>
+<span class="sd">            Timeseries back side of the PV row</span>
+<span class="sd">        xy_center : tuple of float</span>
+<span class="sd">            x and y coordinates of the PV row center point (invariant)</span>
+<span class="sd">        index : int, optional</span>
+<span class="sd">            index of the PV row (Default = None)</span>
+<span class="sd">        full_pvrow_coords : \</span>
+<span class="sd">        :py:class:`~pvfactors.geometry.timeseries.TsLineCoords`, optional</span>
+<span class="sd">            Timeseries coordinates of the full PV row, end to end</span>
+<span class="sd">            (Default = None)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">front</span> <span class="o">=</span> <span class="n">ts_front_side</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">back</span> <span class="o">=</span> <span class="n">ts_back_side</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">xy_center</span> <span class="o">=</span> <span class="n">xy_center</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="n">index</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">full_pvrow_coords</span> <span class="o">=</span> <span class="n">full_pvrow_coords</span></div>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">from_raw_inputs</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">xy_center</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">rotation_vec</span><span class="p">,</span>
+                        <span class="n">cut</span><span class="p">,</span> <span class="n">shaded_length_front</span><span class="p">,</span> <span class="n">shaded_length_back</span><span class="p">,</span>
+                        <span class="n">index</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">param_names</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Create timeseries PV row using raw inputs.</span>
+<span class="sd">        Note: shading will always be zero when pv rows are flat.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        xy_center : tuple of float</span>
+<span class="sd">            x and y coordinates of the PV row center point (invariant)</span>
+<span class="sd">        width : float</span>
+<span class="sd">            width of the PV rows [m]</span>
+<span class="sd">        rotation_vec : np.ndarray</span>
+<span class="sd">            Timeseries rotation values of the PV row [deg]</span>
+<span class="sd">        cut : dict</span>
+<span class="sd">            Discretization scheme of the PV row. Eg {&#39;front&#39;: 2, &#39;back&#39;: 4}.</span>
+<span class="sd">            Will create segments of equal length on the designated sides.</span>
+<span class="sd">        shaded_length_front : np.ndarray</span>
+<span class="sd">            Timeseries values of front side shaded length [m]</span>
+<span class="sd">        shaded_length_back : np.ndarray</span>
+<span class="sd">            Timeseries values of back side shaded length [m]</span>
+<span class="sd">        index : int, optional</span>
+<span class="sd">            Index of the pv row (default = None)</span>
+<span class="sd">        param_names : list of str, optional</span>
+<span class="sd">            List of names of surface parameters to use when creating geometries</span>
+<span class="sd">            (Default = None)</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        New timeseries PV row object</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Calculate full pvrow coords</span>
+        <span class="n">pvrow_coords</span> <span class="o">=</span> <span class="n">TsPVRow</span><span class="o">.</span><span class="n">_calculate_full_coords</span><span class="p">(</span>
+            <span class="n">xy_center</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">rotation_vec</span><span class="p">)</span>
+        <span class="c1"># Calculate normal vectors</span>
+        <span class="n">dx</span> <span class="o">=</span> <span class="n">pvrow_coords</span><span class="o">.</span><span class="n">b2</span><span class="o">.</span><span class="n">x</span> <span class="o">-</span> <span class="n">pvrow_coords</span><span class="o">.</span><span class="n">b1</span><span class="o">.</span><span class="n">x</span>
+        <span class="n">dy</span> <span class="o">=</span> <span class="n">pvrow_coords</span><span class="o">.</span><span class="n">b2</span><span class="o">.</span><span class="n">y</span> <span class="o">-</span> <span class="n">pvrow_coords</span><span class="o">.</span><span class="n">b1</span><span class="o">.</span><span class="n">y</span>
+        <span class="n">normal_vec_front</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">-</span><span class="n">dy</span><span class="p">,</span> <span class="n">dx</span><span class="p">])</span>
+        <span class="c1"># Calculate front side coords</span>
+        <span class="n">ts_front</span> <span class="o">=</span> <span class="n">TsSide</span><span class="o">.</span><span class="n">from_raw_inputs</span><span class="p">(</span>
+            <span class="n">xy_center</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">rotation_vec</span><span class="p">,</span> <span class="n">cut</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;front&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+            <span class="n">shaded_length_front</span><span class="p">,</span> <span class="n">n_vector</span><span class="o">=</span><span class="n">normal_vec_front</span><span class="p">,</span>
+            <span class="n">param_names</span><span class="o">=</span><span class="n">param_names</span><span class="p">)</span>
+        <span class="c1"># Calculate back side coords</span>
+        <span class="n">ts_back</span> <span class="o">=</span> <span class="n">TsSide</span><span class="o">.</span><span class="n">from_raw_inputs</span><span class="p">(</span>
+            <span class="n">xy_center</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">rotation_vec</span><span class="p">,</span> <span class="n">cut</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;back&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+            <span class="n">shaded_length_back</span><span class="p">,</span> <span class="n">n_vector</span><span class="o">=-</span><span class="n">normal_vec_front</span><span class="p">,</span>
+            <span class="n">param_names</span><span class="o">=</span><span class="n">param_names</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">ts_front</span><span class="p">,</span> <span class="n">ts_back</span><span class="p">,</span> <span class="n">xy_center</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">index</span><span class="p">,</span>
+                   <span class="n">full_pvrow_coords</span><span class="o">=</span><span class="n">pvrow_coords</span><span class="p">)</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_calculate_full_coords</span><span class="p">(</span><span class="n">xy_center</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">rotation</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Method to calculate the full PV row coordinaltes.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        xy_center : tuple of float</span>
+<span class="sd">            x and y coordinates of the PV row center point (invariant)</span>
+<span class="sd">        width : float</span>
+<span class="sd">            width of the PV rows [m]</span>
+<span class="sd">        rotation : np.ndarray</span>
+<span class="sd">            Timeseries rotation values of the PV row [deg]</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        coords: :py:class:`~pvfactors.geometry.timeseries.TsLineCoords`</span>
+<span class="sd">            Timeseries coordinates of full PV row</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">x_center</span><span class="p">,</span> <span class="n">y_center</span> <span class="o">=</span> <span class="n">xy_center</span>
+        <span class="n">radius</span> <span class="o">=</span> <span class="n">width</span> <span class="o">/</span> <span class="mf">2.</span>
+        <span class="c1"># Calculate coords</span>
+        <span class="n">x1</span> <span class="o">=</span> <span class="n">radius</span> <span class="o">*</span> <span class="n">cosd</span><span class="p">(</span><span class="n">rotation</span> <span class="o">+</span> <span class="mf">180.</span><span class="p">)</span> <span class="o">+</span> <span class="n">x_center</span>
+        <span class="n">y1</span> <span class="o">=</span> <span class="n">radius</span> <span class="o">*</span> <span class="n">sind</span><span class="p">(</span><span class="n">rotation</span> <span class="o">+</span> <span class="mf">180.</span><span class="p">)</span> <span class="o">+</span> <span class="n">y_center</span>
+        <span class="n">x2</span> <span class="o">=</span> <span class="n">radius</span> <span class="o">*</span> <span class="n">cosd</span><span class="p">(</span><span class="n">rotation</span><span class="p">)</span> <span class="o">+</span> <span class="n">x_center</span>
+        <span class="n">y2</span> <span class="o">=</span> <span class="n">radius</span> <span class="o">*</span> <span class="n">sind</span><span class="p">(</span><span class="n">rotation</span><span class="p">)</span> <span class="o">+</span> <span class="n">y_center</span>
+        <span class="n">coords</span> <span class="o">=</span> <span class="n">TsLineCoords</span><span class="o">.</span><span class="n">from_array</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="n">x1</span><span class="p">,</span> <span class="n">y1</span><span class="p">],</span> <span class="p">[</span><span class="n">x2</span><span class="p">,</span> <span class="n">y2</span><span class="p">]]))</span>
+        <span class="k">return</span> <span class="n">coords</span>
+
+    <span class="k">def</span> <span class="nf">surfaces_at_idx</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idx</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get all PV surface geometries in timeseries PV row for a certain</span>
+<span class="sd">        index.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        idx : int</span>
+<span class="sd">            Index to use to generate PV surface geometries</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        list of :py:class:`~pvfactors.geometry.base.PVSurface` objects</span>
+<span class="sd">            List of PV surfaces</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">pvrow</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">at</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">pvrow</span><span class="o">.</span><span class="n">all_surfaces</span>
+
+    <span class="k">def</span> <span class="nf">plot_at_idx</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idx</span><span class="p">,</span> <span class="n">ax</span><span class="p">,</span> <span class="n">color_shaded</span><span class="o">=</span><span class="n">COLOR_DIC</span><span class="p">[</span><span class="s1">&#39;pvrow_shaded&#39;</span><span class="p">],</span>
+                    <span class="n">color_illum</span><span class="o">=</span><span class="n">COLOR_DIC</span><span class="p">[</span><span class="s1">&#39;pvrow_illum&#39;</span><span class="p">],</span>
+                    <span class="n">with_surface_index</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Plot timeseries PV row at a certain index.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        idx : int</span>
+<span class="sd">            Index to use to plot timeseries PV rows</span>
+<span class="sd">        ax : :py:class:`matplotlib.pyplot.axes` object</span>
+<span class="sd">            Axes for plotting</span>
+<span class="sd">        color_shaded : str, optional</span>
+<span class="sd">            Color to use for plotting the shaded surfaces (Default =</span>
+<span class="sd">            COLOR_DIC[&#39;pvrow_shaded&#39;])</span>
+<span class="sd">        color_shaded : str, optional</span>
+<span class="sd">            Color to use for plotting the illuminated surfaces (Default =</span>
+<span class="sd">            COLOR_DIC[&#39;pvrow_illum&#39;])</span>
+<span class="sd">        with_surface_index : bool, optional</span>
+<span class="sd">            Plot the surfaces with their index values (Default = False)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">pvrow</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">at</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span>
+        <span class="n">pvrow</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="n">color_shaded</span><span class="o">=</span><span class="n">color_shaded</span><span class="p">,</span>
+                   <span class="n">color_illum</span><span class="o">=</span><span class="n">color_illum</span><span class="p">,</span> <span class="n">with_index</span><span class="o">=</span><span class="n">with_surface_index</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">at</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idx</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Generate a PV row geometry for the desired index.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        idx : int</span>
+<span class="sd">            Index to use to generate PV row geometry</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        pvrow : :py:class:`~pvfactors.geometry.pvrow.PVRow`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">front_geom</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">front</span><span class="o">.</span><span class="n">at</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span>
+        <span class="n">back_geom</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">back</span><span class="o">.</span><span class="n">at</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span>
+        <span class="n">original_line</span> <span class="o">=</span> <span class="n">LineString</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">full_pvrow_coords</span><span class="o">.</span><span class="n">as_array</span><span class="p">[:,</span> <span class="p">:,</span> <span class="n">idx</span><span class="p">])</span>
+        <span class="n">pvrow</span> <span class="o">=</span> <span class="n">PVRow</span><span class="p">(</span><span class="n">front_side</span><span class="o">=</span><span class="n">front_geom</span><span class="p">,</span> <span class="n">back_side</span><span class="o">=</span><span class="n">back_geom</span><span class="p">,</span>
+                      <span class="n">index</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">original_linestring</span><span class="o">=</span><span class="n">original_line</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">pvrow</span>
+
+    <span class="k">def</span> <span class="nf">update_params</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_dict</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Update timeseries surface parameters of the PV row.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        new_dict : dict</span>
+<span class="sd">            Parameters to add or update for the surfaces</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">front</span><span class="o">.</span><span class="n">update_params</span><span class="p">(</span><span class="n">new_dict</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">back</span><span class="o">.</span><span class="n">update_params</span><span class="p">(</span><span class="n">new_dict</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">n_ts_surfaces</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Number of timeseries surfaces in the ts PV row&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">front</span><span class="o">.</span><span class="n">n_ts_surfaces</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">back</span><span class="o">.</span><span class="n">n_ts_surfaces</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">all_ts_surfaces</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;List of all timeseries surfaces&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">front</span><span class="o">.</span><span class="n">all_ts_surfaces</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">back</span><span class="o">.</span><span class="n">all_ts_surfaces</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">centroid</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Centroid point of the timeseries pv row&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">full_pvrow_coords</span><span class="o">.</span><span class="n">centroid</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">length</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Length of both sides of the timeseries PV row&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">front</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">back</span><span class="o">.</span><span class="n">length</span></div>
+
+
+<div class="viewcode-block" id="TsSide"><a class="viewcode-back" href="../../../developer/generated/pvfactors.geometry.pvrow.TsSide.html#pvfactors.geometry.pvrow.TsSide">[docs]</a><span class="k">class</span> <span class="nc">TsSide</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Timeseries side class: this class is a vectorized version of the</span>
+<span class="sd">    BaseSide geometries. The coordinates and attributes (list of segments,</span>
+<span class="sd">    normal vector) are all vectorized.&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="TsSide.__init__"><a class="viewcode-back" href="../../../developer/generated/pvfactors.geometry.pvrow.TsSide.html#pvfactors.geometry.pvrow.TsSide.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">segments</span><span class="p">,</span> <span class="n">n_vector</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Initialize timeseries side using list of timeseries segments.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        segments : list of :py:class:`~pvfactors.geometry.pvrow.TsSegment`</span>
+<span class="sd">            List of timeseries segments of the side</span>
+<span class="sd">        n_vector : np.ndarray, optional</span>
+<span class="sd">            Timeseries normal vectors of the side (Default = None)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">list_segments</span> <span class="o">=</span> <span class="n">segments</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_vector</span> <span class="o">=</span> <span class="n">n_vector</span></div>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">from_raw_inputs</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">xy_center</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">rotation_vec</span><span class="p">,</span> <span class="n">cut</span><span class="p">,</span>
+                        <span class="n">shaded_length</span><span class="p">,</span> <span class="n">n_vector</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">param_names</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Create timeseries side using raw PV row inputs.</span>
+<span class="sd">        Note: shading will always be zero when PV rows are flat.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        xy_center : tuple of float</span>
+<span class="sd">            x and y coordinates of the PV row center point (invariant)</span>
+<span class="sd">        width : float</span>
+<span class="sd">            width of the PV rows [m]</span>
+<span class="sd">        rotation_vec : np.ndarray</span>
+<span class="sd">            Timeseries rotation values of the PV row [deg]</span>
+<span class="sd">        cut : int</span>
+<span class="sd">            Discretization scheme of the PV side.</span>
+<span class="sd">            Will create segments of equal length.</span>
+<span class="sd">        shaded_length : np.ndarray</span>
+<span class="sd">            Timeseries values of side shaded length from lowest point [m]</span>
+<span class="sd">        n_vector : np.ndarray, optional</span>
+<span class="sd">            Timeseries normal vectors of the side</span>
+<span class="sd">        param_names : list of str, optional</span>
+<span class="sd">            List of names of surface parameters to use when creating geometries</span>
+<span class="sd">            (Default = None)</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        New timeseries side object</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">mask_tilted_to_left</span> <span class="o">=</span> <span class="n">rotation_vec</span> <span class="o">&gt;=</span> <span class="mi">0</span>
+
+        <span class="c1"># Create Ts segments</span>
+        <span class="n">x_center</span><span class="p">,</span> <span class="n">y_center</span> <span class="o">=</span> <span class="n">xy_center</span>
+        <span class="n">radius</span> <span class="o">=</span> <span class="n">width</span> <span class="o">/</span> <span class="mf">2.</span>
+        <span class="n">segment_length</span> <span class="o">=</span> <span class="n">width</span> <span class="o">/</span> <span class="n">cut</span>
+        <span class="n">is_not_flat</span> <span class="o">=</span> <span class="n">rotation_vec</span> <span class="o">!=</span> <span class="mf">0.</span>
+
+        <span class="c1"># Calculate coords of shading point</span>
+        <span class="n">r_shade</span> <span class="o">=</span> <span class="n">radius</span> <span class="o">-</span> <span class="n">shaded_length</span>
+        <span class="n">x_sh</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span>
+            <span class="n">mask_tilted_to_left</span><span class="p">,</span>
+            <span class="n">r_shade</span> <span class="o">*</span> <span class="n">cosd</span><span class="p">(</span><span class="n">rotation_vec</span> <span class="o">+</span> <span class="mf">180.</span><span class="p">)</span> <span class="o">+</span> <span class="n">x_center</span><span class="p">,</span>
+            <span class="n">r_shade</span> <span class="o">*</span> <span class="n">cosd</span><span class="p">(</span><span class="n">rotation_vec</span><span class="p">)</span> <span class="o">+</span> <span class="n">x_center</span><span class="p">)</span>
+        <span class="n">y_sh</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span>
+            <span class="n">mask_tilted_to_left</span><span class="p">,</span>
+            <span class="n">r_shade</span> <span class="o">*</span> <span class="n">sind</span><span class="p">(</span><span class="n">rotation_vec</span> <span class="o">+</span> <span class="mf">180.</span><span class="p">)</span> <span class="o">+</span> <span class="n">y_center</span><span class="p">,</span>
+            <span class="n">r_shade</span> <span class="o">*</span> <span class="n">sind</span><span class="p">(</span><span class="n">rotation_vec</span><span class="p">)</span> <span class="o">+</span> <span class="n">y_center</span><span class="p">)</span>
+
+        <span class="c1"># Calculate coords</span>
+        <span class="n">list_segments</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">cut</span><span class="p">):</span>
+            <span class="c1"># Calculate segment coords</span>
+            <span class="n">r1</span> <span class="o">=</span> <span class="n">radius</span> <span class="o">-</span> <span class="n">i</span> <span class="o">*</span> <span class="n">segment_length</span>
+            <span class="n">r2</span> <span class="o">=</span> <span class="n">radius</span> <span class="o">-</span> <span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">segment_length</span>
+            <span class="n">x1</span> <span class="o">=</span> <span class="n">r1</span> <span class="o">*</span> <span class="n">cosd</span><span class="p">(</span><span class="n">rotation_vec</span> <span class="o">+</span> <span class="mf">180.</span><span class="p">)</span> <span class="o">+</span> <span class="n">x_center</span>
+            <span class="n">y1</span> <span class="o">=</span> <span class="n">r1</span> <span class="o">*</span> <span class="n">sind</span><span class="p">(</span><span class="n">rotation_vec</span> <span class="o">+</span> <span class="mf">180.</span><span class="p">)</span> <span class="o">+</span> <span class="n">y_center</span>
+            <span class="n">x2</span> <span class="o">=</span> <span class="n">r2</span> <span class="o">*</span> <span class="n">cosd</span><span class="p">(</span><span class="n">rotation_vec</span> <span class="o">+</span> <span class="mi">180</span><span class="p">)</span> <span class="o">+</span> <span class="n">x_center</span>
+            <span class="n">y2</span> <span class="o">=</span> <span class="n">r2</span> <span class="o">*</span> <span class="n">sind</span><span class="p">(</span><span class="n">rotation_vec</span> <span class="o">+</span> <span class="mi">180</span><span class="p">)</span> <span class="o">+</span> <span class="n">y_center</span>
+            <span class="n">segment_coords</span> <span class="o">=</span> <span class="n">TsLineCoords</span><span class="o">.</span><span class="n">from_array</span><span class="p">(</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="n">x1</span><span class="p">,</span> <span class="n">y1</span><span class="p">],</span> <span class="p">[</span><span class="n">x2</span><span class="p">,</span> <span class="n">y2</span><span class="p">]]))</span>
+            <span class="c1"># Determine lowest and highest points of segment</span>
+            <span class="n">x_highest</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">mask_tilted_to_left</span><span class="p">,</span> <span class="n">x2</span><span class="p">,</span> <span class="n">x1</span><span class="p">)</span>
+            <span class="n">y_highest</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">mask_tilted_to_left</span><span class="p">,</span> <span class="n">y2</span><span class="p">,</span> <span class="n">y1</span><span class="p">)</span>
+            <span class="n">x_lowest</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">mask_tilted_to_left</span><span class="p">,</span> <span class="n">x1</span><span class="p">,</span> <span class="n">x2</span><span class="p">)</span>
+            <span class="n">y_lowest</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">mask_tilted_to_left</span><span class="p">,</span> <span class="n">y1</span><span class="p">,</span> <span class="n">y2</span><span class="p">)</span>
+            <span class="c1"># Calculate illum and shaded coords</span>
+            <span class="n">x2_illum</span><span class="p">,</span> <span class="n">y2_illum</span> <span class="o">=</span> <span class="n">x_highest</span><span class="p">,</span> <span class="n">y_highest</span>
+            <span class="n">x1_shaded</span><span class="p">,</span> <span class="n">y1_shaded</span><span class="p">,</span> <span class="n">x2_shaded</span><span class="p">,</span> <span class="n">y2_shaded</span> <span class="o">=</span> \
+                <span class="n">x_lowest</span><span class="p">,</span> <span class="n">y_lowest</span><span class="p">,</span> <span class="n">x_lowest</span><span class="p">,</span> <span class="n">y_lowest</span>
+            <span class="n">mask_all_shaded</span> <span class="o">=</span> <span class="p">(</span><span class="n">y_sh</span> <span class="o">&gt;</span> <span class="n">y_highest</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">is_not_flat</span><span class="p">)</span>
+            <span class="n">mask_partial_shaded</span> <span class="o">=</span> <span class="p">(</span><span class="n">y_sh</span> <span class="o">&gt;</span> <span class="n">y_lowest</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="o">~</span> <span class="n">mask_all_shaded</span><span class="p">)</span> \
+                <span class="o">&amp;</span> <span class="p">(</span><span class="n">is_not_flat</span><span class="p">)</span>
+            <span class="c1"># Calculate second boundary point of shade</span>
+            <span class="n">x2_shaded</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">mask_all_shaded</span><span class="p">,</span> <span class="n">x_highest</span><span class="p">,</span> <span class="n">x2_shaded</span><span class="p">)</span>
+            <span class="n">x2_shaded</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">mask_partial_shaded</span><span class="p">,</span> <span class="n">x_sh</span><span class="p">,</span> <span class="n">x2_shaded</span><span class="p">)</span>
+            <span class="n">y2_shaded</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">mask_all_shaded</span><span class="p">,</span> <span class="n">y_highest</span><span class="p">,</span> <span class="n">y2_shaded</span><span class="p">)</span>
+            <span class="n">y2_shaded</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">mask_partial_shaded</span><span class="p">,</span> <span class="n">y_sh</span><span class="p">,</span> <span class="n">y2_shaded</span><span class="p">)</span>
+            <span class="n">x1_illum</span> <span class="o">=</span> <span class="n">x2_shaded</span>
+            <span class="n">y1_illum</span> <span class="o">=</span> <span class="n">y2_shaded</span>
+            <span class="n">illum_coords</span> <span class="o">=</span> <span class="n">TsLineCoords</span><span class="o">.</span><span class="n">from_array</span><span class="p">(</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="n">x1_illum</span><span class="p">,</span> <span class="n">y1_illum</span><span class="p">],</span> <span class="p">[</span><span class="n">x2_illum</span><span class="p">,</span> <span class="n">y2_illum</span><span class="p">]]))</span>
+            <span class="n">shaded_coords</span> <span class="o">=</span> <span class="n">TsLineCoords</span><span class="o">.</span><span class="n">from_array</span><span class="p">(</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="n">x1_shaded</span><span class="p">,</span> <span class="n">y1_shaded</span><span class="p">],</span> <span class="p">[</span><span class="n">x2_shaded</span><span class="p">,</span> <span class="n">y2_shaded</span><span class="p">]]))</span>
+            <span class="c1"># Create illuminated and shaded collections</span>
+            <span class="n">is_shaded</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="n">illum</span> <span class="o">=</span> <span class="n">TsShadeCollection</span><span class="p">(</span>
+                <span class="p">[</span><span class="n">TsSurface</span><span class="p">(</span><span class="n">illum_coords</span><span class="p">,</span> <span class="n">n_vector</span><span class="o">=</span><span class="n">n_vector</span><span class="p">,</span>
+                           <span class="n">param_names</span><span class="o">=</span><span class="n">param_names</span><span class="p">,</span> <span class="n">shaded</span><span class="o">=</span><span class="n">is_shaded</span><span class="p">)],</span>
+                <span class="n">is_shaded</span><span class="p">)</span>
+            <span class="n">is_shaded</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="n">shaded</span> <span class="o">=</span> <span class="n">TsShadeCollection</span><span class="p">(</span>
+                <span class="p">[</span><span class="n">TsSurface</span><span class="p">(</span><span class="n">shaded_coords</span><span class="p">,</span> <span class="n">n_vector</span><span class="o">=</span><span class="n">n_vector</span><span class="p">,</span>
+                           <span class="n">param_names</span><span class="o">=</span><span class="n">param_names</span><span class="p">,</span> <span class="n">shaded</span><span class="o">=</span><span class="n">is_shaded</span><span class="p">)],</span>
+                <span class="n">is_shaded</span><span class="p">)</span>
+            <span class="c1"># Create segment</span>
+            <span class="n">segment</span> <span class="o">=</span> <span class="n">TsSegment</span><span class="p">(</span><span class="n">segment_coords</span><span class="p">,</span> <span class="n">illum</span><span class="p">,</span> <span class="n">shaded</span><span class="p">,</span>
+                                <span class="n">n_vector</span><span class="o">=</span><span class="n">n_vector</span><span class="p">)</span>
+            <span class="n">list_segments</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">segment</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">list_segments</span><span class="p">,</span> <span class="n">n_vector</span><span class="o">=</span><span class="n">n_vector</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">surfaces_at_idx</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idx</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get all PV surface geometries in timeseries side for a certain</span>
+<span class="sd">        index.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        idx : int</span>
+<span class="sd">            Index to use to generate PV surface geometries</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        list of :py:class:`~pvfactors.geometry.base.PVSurface` objects</span>
+<span class="sd">            List of PV surfaces</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">side_geom</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">at</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">side_geom</span><span class="o">.</span><span class="n">all_surfaces</span>
+
+    <span class="k">def</span> <span class="nf">at</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idx</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Generate a side geometry for the desired index.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        idx : int</span>
+<span class="sd">            Index to use to generate side geometry</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        side : :py:class:`~pvfactors.geometry.base.BaseSide`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">list_geom_segments</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">ts_seg</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">list_segments</span><span class="p">:</span>
+            <span class="n">list_geom_segments</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ts_seg</span><span class="o">.</span><span class="n">at</span><span class="p">(</span><span class="n">idx</span><span class="p">))</span>
+        <span class="n">side</span> <span class="o">=</span> <span class="n">BaseSide</span><span class="p">(</span><span class="n">list_geom_segments</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">side</span>
+
+    <span class="k">def</span> <span class="nf">plot_at_idx</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idx</span><span class="p">,</span> <span class="n">ax</span><span class="p">,</span> <span class="n">color_shaded</span><span class="o">=</span><span class="n">COLOR_DIC</span><span class="p">[</span><span class="s1">&#39;pvrow_shaded&#39;</span><span class="p">],</span>
+                    <span class="n">color_illum</span><span class="o">=</span><span class="n">COLOR_DIC</span><span class="p">[</span><span class="s1">&#39;pvrow_illum&#39;</span><span class="p">]):</span>
+        <span class="sd">&quot;&quot;&quot;Plot timeseries side at a certain index.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        idx : int</span>
+<span class="sd">            Index to use to plot timeseries side</span>
+<span class="sd">        ax : :py:class:`matplotlib.pyplot.axes` object</span>
+<span class="sd">            Axes for plotting</span>
+<span class="sd">        color_shaded : str, optional</span>
+<span class="sd">            Color to use for plotting the shaded surfaces (Default =</span>
+<span class="sd">            COLOR_DIC[&#39;pvrow_shaded&#39;])</span>
+<span class="sd">        color_shaded : str, optional</span>
+<span class="sd">            Color to use for plotting the illuminated surfaces (Default =</span>
+<span class="sd">            COLOR_DIC[&#39;pvrow_illum&#39;])</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">side_geom</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">at</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span>
+        <span class="n">side_geom</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="n">color_shaded</span><span class="o">=</span><span class="n">color_shaded</span><span class="p">,</span> <span class="n">color_illum</span><span class="o">=</span><span class="n">color_illum</span><span class="p">,</span>
+                       <span class="n">with_index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">shaded_length</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Timeseries shaded length of the side.&quot;&quot;&quot;</span>
+        <span class="n">length</span> <span class="o">=</span> <span class="mf">0.</span>
+        <span class="k">for</span> <span class="n">seg</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">list_segments</span><span class="p">:</span>
+            <span class="n">length</span> <span class="o">+=</span> <span class="n">seg</span><span class="o">.</span><span class="n">shaded</span><span class="o">.</span><span class="n">length</span>
+        <span class="k">return</span> <span class="n">length</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">length</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Timeseries length of side.&quot;&quot;&quot;</span>
+        <span class="n">length</span> <span class="o">=</span> <span class="mf">0.</span>
+        <span class="k">for</span> <span class="n">seg</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">list_segments</span><span class="p">:</span>
+            <span class="n">length</span> <span class="o">+=</span> <span class="n">seg</span><span class="o">.</span><span class="n">length</span>
+        <span class="k">return</span> <span class="n">length</span>
+
+    <span class="k">def</span> <span class="nf">get_param_weighted</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">param</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get timeseries parameter for the side, after weighting by</span>
+<span class="sd">        surface length.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        param : str</span>
+<span class="sd">            Name of parameter</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        np.ndarray</span>
+<span class="sd">            Weighted parameter values</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_param_ww</span><span class="p">(</span><span class="n">param</span><span class="p">)</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">length</span>
+
+    <span class="k">def</span> <span class="nf">get_param_ww</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">param</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get timeseries parameter from the side&#39;s surfaces with weight, i.e.</span>
+<span class="sd">        after multiplying by the surface lengths.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        param: str</span>
+<span class="sd">            Surface parameter to return</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        np.ndarray</span>
+<span class="sd">            Timeseries parameter values multiplied by weights</span>
+
+<span class="sd">        Raises</span>
+<span class="sd">        ------</span>
+<span class="sd">        KeyError</span>
+<span class="sd">            if parameter name not in a surface parameters</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="mf">0.</span>
+        <span class="k">for</span> <span class="n">seg</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">list_segments</span><span class="p">:</span>
+            <span class="n">value</span> <span class="o">+=</span> <span class="n">seg</span><span class="o">.</span><span class="n">get_param_ww</span><span class="p">(</span><span class="n">param</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">value</span>
+
+    <span class="k">def</span> <span class="nf">update_params</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_dict</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Update timeseries surface parameters of the side.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        new_dict : dict</span>
+<span class="sd">            Parameters to add or update for the surfaces</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">seg</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">list_segments</span><span class="p">:</span>
+            <span class="n">seg</span><span class="o">.</span><span class="n">update_params</span><span class="p">(</span><span class="n">new_dict</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">n_ts_surfaces</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Number of timeseries surfaces in the ts side&quot;&quot;&quot;</span>
+        <span class="n">n_ts_surfaces</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">ts_segment</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">list_segments</span><span class="p">:</span>
+            <span class="n">n_ts_surfaces</span> <span class="o">+=</span> <span class="n">ts_segment</span><span class="o">.</span><span class="n">n_ts_surfaces</span>
+        <span class="k">return</span> <span class="n">n_ts_surfaces</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">all_ts_surfaces</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;List of all timeseries surfaces&quot;&quot;&quot;</span>
+        <span class="n">all_ts_surfaces</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">ts_segment</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">list_segments</span><span class="p">:</span>
+            <span class="n">all_ts_surfaces</span> <span class="o">+=</span> <span class="n">ts_segment</span><span class="o">.</span><span class="n">all_ts_surfaces</span>
+        <span class="k">return</span> <span class="n">all_ts_surfaces</span></div>
+
+
+<div class="viewcode-block" id="TsSegment"><a class="viewcode-back" href="../../../developer/generated/pvfactors.geometry.pvrow.TsSegment.html#pvfactors.geometry.pvrow.TsSegment">[docs]</a><span class="k">class</span> <span class="nc">TsSegment</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;A TsSegment is a timeseries segment that has a timeseries shaded</span>
+<span class="sd">    collection and a timeseries illuminated collection.&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="TsSegment.__init__"><a class="viewcode-back" href="../../../developer/generated/pvfactors.geometry.pvrow.TsSegment.html#pvfactors.geometry.pvrow.TsSegment.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coords</span><span class="p">,</span> <span class="n">illum_collection</span><span class="p">,</span> <span class="n">shaded_collection</span><span class="p">,</span>
+                 <span class="n">index</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">n_vector</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Initialize timeseries segment using segment coordinates and</span>
+<span class="sd">        timeseries illuminated and shaded surfaces.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        coords : :py:class:`~pvfactors.geometry.timeseries.TsLineCoords`</span>
+<span class="sd">            Timeseries coordinates of full segment</span>
+<span class="sd">        illum_collection : \</span>
+<span class="sd">        :py:class:`~pvfactors.geometry.timeseries.TsShadeCollection`</span>
+<span class="sd">            Timeseries collection for illuminated part of segment</span>
+<span class="sd">        shaded_collection : \</span>
+<span class="sd">        :py:class:`~pvfactors.geometry.timeseries.TsShadeCollection`</span>
+<span class="sd">            Timeseries collection for shaded part of segment</span>
+<span class="sd">        index : int, optional</span>
+<span class="sd">            Index of segment (Default = None)</span>
+<span class="sd">        n_vector : np.ndarray, optional</span>
+<span class="sd">            Timeseries normal vectors of the side (Default = None)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">coords</span> <span class="o">=</span> <span class="n">coords</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">illum</span> <span class="o">=</span> <span class="n">illum_collection</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">shaded</span> <span class="o">=</span> <span class="n">shaded_collection</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="n">index</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_vector</span> <span class="o">=</span> <span class="n">n_vector</span></div>
+
+    <span class="k">def</span> <span class="nf">surfaces_at_idx</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idx</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get all PV surface geometries in timeseries segment for a certain</span>
+<span class="sd">        index.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        idx : int</span>
+<span class="sd">            Index to use to generate PV surface geometries</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        list of :py:class:`~pvfactors.geometry.base.PVSurface` objects</span>
+<span class="sd">            List of PV surfaces</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">segment</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">at</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">segment</span><span class="o">.</span><span class="n">all_surfaces</span>
+
+    <span class="k">def</span> <span class="nf">plot_at_idx</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idx</span><span class="p">,</span> <span class="n">ax</span><span class="p">,</span> <span class="n">color_shaded</span><span class="o">=</span><span class="n">COLOR_DIC</span><span class="p">[</span><span class="s1">&#39;pvrow_shaded&#39;</span><span class="p">],</span>
+                    <span class="n">color_illum</span><span class="o">=</span><span class="n">COLOR_DIC</span><span class="p">[</span><span class="s1">&#39;pvrow_illum&#39;</span><span class="p">]):</span>
+        <span class="sd">&quot;&quot;&quot;Plot timeseries segment at a certain index.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        idx : int</span>
+<span class="sd">            Index to use to plot timeseries segment</span>
+<span class="sd">        ax : :py:class:`matplotlib.pyplot.axes` object</span>
+<span class="sd">            Axes for plotting</span>
+<span class="sd">        color_shaded : str, optional</span>
+<span class="sd">            Color to use for plotting the shaded surfaces (Default =</span>
+<span class="sd">            COLOR_DIC[&#39;pvrow_shaded&#39;])</span>
+<span class="sd">        color_shaded : str, optional</span>
+<span class="sd">            Color to use for plotting the illuminated surfaces (Default =</span>
+<span class="sd">            COLOR_DIC[&#39;pvrow_illum&#39;])</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">segment</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">at</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span>
+        <span class="n">segment</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="n">color_shaded</span><span class="o">=</span><span class="n">color_shaded</span><span class="p">,</span> <span class="n">color_illum</span><span class="o">=</span><span class="n">color_illum</span><span class="p">,</span>
+                     <span class="n">with_index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">at</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idx</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Generate a PV segment geometry for the desired index.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        idx : int</span>
+<span class="sd">            Index to use to generate PV segment geometry</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        segment : :py:class:`~pvfactors.geometry.base.PVSegment`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Create illum collection</span>
+        <span class="n">illum_collection</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">illum</span><span class="o">.</span><span class="n">at</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span>
+        <span class="c1"># Create shaded collection</span>
+        <span class="n">shaded_collection</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">shaded</span><span class="o">.</span><span class="n">at</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span>
+        <span class="c1"># Create PV segment</span>
+        <span class="n">segment</span> <span class="o">=</span> <span class="n">PVSegment</span><span class="p">(</span><span class="n">illum_collection</span><span class="o">=</span><span class="n">illum_collection</span><span class="p">,</span>
+                            <span class="n">shaded_collection</span><span class="o">=</span><span class="n">shaded_collection</span><span class="p">,</span>
+                            <span class="n">index</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">segment</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">length</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Timeseries length of segment.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">illum</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">shaded</span><span class="o">.</span><span class="n">length</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">shaded_length</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Timeseries length of shaded part of segment.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">shaded</span><span class="o">.</span><span class="n">length</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">centroid</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Timeseries point coordinates of the segment&#39;s centroid&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">coords</span><span class="o">.</span><span class="n">centroid</span>
+
+    <span class="k">def</span> <span class="nf">get_param_weighted</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">param</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get timeseries parameter for the segment, after weighting by</span>
+<span class="sd">        surface length.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        param : str</span>
+<span class="sd">            Name of parameter</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        np.ndarray</span>
+<span class="sd">            Weighted parameter values</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_param_ww</span><span class="p">(</span><span class="n">param</span><span class="p">)</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">length</span>
+
+    <span class="k">def</span> <span class="nf">get_param_ww</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">param</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get timeseries parameter from the segment&#39;s surfaces with weight,</span>
+<span class="sd">        i.e. after multiplying by the surface lengths.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        param: str</span>
+<span class="sd">            Surface parameter to return</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        np.ndarray</span>
+<span class="sd">            Timeseries parameter values multiplied by weights</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">illum</span><span class="o">.</span><span class="n">get_param_ww</span><span class="p">(</span><span class="n">param</span><span class="p">)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">shaded</span><span class="o">.</span><span class="n">get_param_ww</span><span class="p">(</span><span class="n">param</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">update_params</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_dict</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Update timeseries surface parameters of the segment.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        new_dict : dict</span>
+<span class="sd">            Parameters to add or update for the surfaces</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">illum</span><span class="o">.</span><span class="n">update_params</span><span class="p">(</span><span class="n">new_dict</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">shaded</span><span class="o">.</span><span class="n">update_params</span><span class="p">(</span><span class="n">new_dict</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">highest_point</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Timeseries point coordinates of highest point of segment&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">coords</span><span class="o">.</span><span class="n">highest_point</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">lowest_point</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Timeseries point coordinates of lowest point of segment&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">coords</span><span class="o">.</span><span class="n">lowest_point</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">all_ts_surfaces</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;List of all timeseries surfaces in segment&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">illum</span><span class="o">.</span><span class="n">list_ts_surfaces</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">shaded</span><span class="o">.</span><span class="n">list_ts_surfaces</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">n_ts_surfaces</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Number of timeseries surfaces in the segment&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">illum</span><span class="o">.</span><span class="n">n_ts_surfaces</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">shaded</span><span class="o">.</span><span class="n">n_ts_surfaces</span></div>
+
+
+<div class="viewcode-block" id="PVRowSide"><a class="viewcode-back" href="../../../developer/generated/pvfactors.geometry.pvrow.PVRowSide.html#pvfactors.geometry.pvrow.PVRowSide">[docs]</a><span class="k">class</span> <span class="nc">PVRowSide</span><span class="p">(</span><span class="n">BaseSide</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;A PV row side represents the whole surface of one side of a PV row.</span>
+<span class="sd">    At its core it will contain a fixed number of</span>
+<span class="sd">    :py:class:`~pvfactors.geometry.base.PVSegment` objects that will together</span>
+<span class="sd">    constitue one side of a PV row: a PV row side can also be</span>
+<span class="sd">    &quot;discretized&quot; into multiple segments&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="PVRowSide.__init__"><a class="viewcode-back" href="../../../developer/generated/pvfactors.geometry.pvrow.PVRowSide.html#pvfactors.geometry.pvrow.PVRowSide.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">list_segments</span><span class="o">=</span><span class="p">[]):</span>
+        <span class="sd">&quot;&quot;&quot;Initialize PVRowSide using its base class</span>
+<span class="sd">        :py:class:`pvfactors.geometry.base.BaseSide`</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        list_segments : list of :py:class:`~pvfactors.geometry.base.PVSegment`</span>
+<span class="sd">            List of PV segments for PV row side.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">PVRowSide</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">list_segments</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="PVRow"><a class="viewcode-back" href="../../../developer/generated/pvfactors.geometry.pvrow.PVRow.html#pvfactors.geometry.pvrow.PVRow">[docs]</a><span class="k">class</span> <span class="nc">PVRow</span><span class="p">(</span><span class="n">GeometryCollection</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;A PV row is made of two PV row sides, a front and a back one.&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="PVRow.__init__"><a class="viewcode-back" href="../../../developer/generated/pvfactors.geometry.pvrow.PVRow.html#pvfactors.geometry.pvrow.PVRow.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">front_side</span><span class="o">=</span><span class="n">PVRowSide</span><span class="p">(),</span> <span class="n">back_side</span><span class="o">=</span><span class="n">PVRowSide</span><span class="p">(),</span>
+                 <span class="n">index</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">original_linestring</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Initialize PV row.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        front_side : :py:class:`~pvfactors.geometry.pvrow.PVRowSide`, optional</span>
+<span class="sd">            Front side of the PV Row (Default = Empty PVRowSide)</span>
+<span class="sd">        back_side : :py:class:`~pvfactors.geometry.pvrow.PVRowSide`, optional</span>
+<span class="sd">            Back side of the PV Row (Default = Empty PVRowSide)</span>
+<span class="sd">        index : int, optional</span>
+<span class="sd">            Index of PV row (Default = None)</span>
+<span class="sd">        original_linestring : :py:class:`shapely.geometry.LineString`, optional</span>
+<span class="sd">            Full continuous linestring that the PV row will be made of</span>
+<span class="sd">            (Default = None)</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">front</span> <span class="o">=</span> <span class="n">front_side</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">back</span> <span class="o">=</span> <span class="n">back_side</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="n">index</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">original_linestring</span> <span class="o">=</span> <span class="n">original_linestring</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_all_surfaces</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">PVRow</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">front</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">back</span><span class="p">])</span></div>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">from_linestring_coords</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">coords</span><span class="p">,</span> <span class="n">shaded</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">normal_vector</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                               <span class="n">index</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">cut</span><span class="o">=</span><span class="p">{},</span> <span class="n">param_names</span><span class="o">=</span><span class="p">[]):</span>
+        <span class="sd">&quot;&quot;&quot;Create a PV row with a single PV surface and using linestring</span>
+<span class="sd">        coordinates.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        coords : list</span>
+<span class="sd">            List of linestring coordinates for the surface</span>
+<span class="sd">        shaded : bool, optional</span>
+<span class="sd">            Shading status desired for the PVRow sides (Default = False)</span>
+<span class="sd">        normal_vector : list, optional</span>
+<span class="sd">            Normal vector for the surface (Default = None)</span>
+<span class="sd">        index : int, optional</span>
+<span class="sd">            Index of PV row (Default = None)</span>
+<span class="sd">        cut : dict, optional</span>
+<span class="sd">            Scheme to decide how many segments to create on each side.</span>
+<span class="sd">            Eg {&#39;front&#39;: 3, &#39;back&#39;: 2} will lead to 3 segments on front side</span>
+<span class="sd">            and 2 segments on back side. (Default = {})</span>
+<span class="sd">        param_names : list of str, optional</span>
+<span class="sd">            Names of the surface parameters, eg reflectivity, total incident</span>
+<span class="sd">            irradiance, temperature, etc. (Default = [])</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        :py:class:`~pvfactors.geometry.pvrow.PVRow` object</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">index_single_segment</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">front_side</span> <span class="o">=</span> <span class="n">PVRowSide</span><span class="o">.</span><span class="n">from_linestring_coords</span><span class="p">(</span>
+            <span class="n">coords</span><span class="p">,</span> <span class="n">shaded</span><span class="o">=</span><span class="n">shaded</span><span class="p">,</span> <span class="n">normal_vector</span><span class="o">=</span><span class="n">normal_vector</span><span class="p">,</span>
+            <span class="n">index</span><span class="o">=</span><span class="n">index_single_segment</span><span class="p">,</span> <span class="n">n_segments</span><span class="o">=</span><span class="n">cut</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;front&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+            <span class="n">param_names</span><span class="o">=</span><span class="n">param_names</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">normal_vector</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">back_n_vec</span> <span class="o">=</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">normal_vector</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">back_n_vec</span> <span class="o">=</span> <span class="o">-</span> <span class="n">front_side</span><span class="o">.</span><span class="n">n_vector</span>
+        <span class="n">back_side</span> <span class="o">=</span> <span class="n">PVRowSide</span><span class="o">.</span><span class="n">from_linestring_coords</span><span class="p">(</span>
+            <span class="n">coords</span><span class="p">,</span> <span class="n">shaded</span><span class="o">=</span><span class="n">shaded</span><span class="p">,</span> <span class="n">normal_vector</span><span class="o">=</span><span class="n">back_n_vec</span><span class="p">,</span>
+            <span class="n">index</span><span class="o">=</span><span class="n">index_single_segment</span><span class="p">,</span> <span class="n">n_segments</span><span class="o">=</span><span class="n">cut</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;back&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+            <span class="n">param_names</span><span class="o">=</span><span class="n">param_names</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">front_side</span><span class="o">=</span><span class="n">front_side</span><span class="p">,</span> <span class="n">back_side</span><span class="o">=</span><span class="n">back_side</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">index</span><span class="p">,</span>
+                   <span class="n">original_linestring</span><span class="o">=</span><span class="n">LineString</span><span class="p">(</span><span class="n">coords</span><span class="p">))</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">from_center_tilt_width</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">xy_center</span><span class="p">,</span> <span class="n">tilt</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">surface_azimuth</span><span class="p">,</span>
+                               <span class="n">axis_azimuth</span><span class="p">,</span> <span class="n">shaded</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">normal_vector</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                               <span class="n">index</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">cut</span><span class="o">=</span><span class="p">{},</span> <span class="n">param_names</span><span class="o">=</span><span class="p">[]):</span>
+        <span class="sd">&quot;&quot;&quot;Create a PV row using mainly the coordinates of the line center,</span>
+<span class="sd">        a tilt angle, and its length.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        xy_center : tuple</span>
+<span class="sd">            x, y coordinates of center point of desired linestring</span>
+<span class="sd">        tilt : float</span>
+<span class="sd">            surface tilt angle desired [deg]</span>
+<span class="sd">        length : float</span>
+<span class="sd">            desired length of linestring [m]</span>
+<span class="sd">        surface_azimuth : float</span>
+<span class="sd">            Surface azimuth of PV surface [deg]</span>
+<span class="sd">        axis_azimuth : float</span>
+<span class="sd">            Axis azimuth of the PV surface, i.e. direction of axis of rotation</span>
+<span class="sd">            [deg]</span>
+<span class="sd">        shaded : bool, optional</span>
+<span class="sd">            Shading status desired for the PVRow sides (Default = False)</span>
+<span class="sd">        normal_vector : list, optional</span>
+<span class="sd">            Normal vector for the surface (Default = None)</span>
+<span class="sd">        index : int, optional</span>
+<span class="sd">            Index of PV row (Default = None)</span>
+<span class="sd">        cut : dict, optional</span>
+<span class="sd">            Scheme to decide how many segments to create on each side.</span>
+<span class="sd">            Eg {&#39;front&#39;: 3, &#39;back&#39;: 2} will lead to 3 segments on front side</span>
+<span class="sd">            and 2 segments on back side. (Default = {})</span>
+<span class="sd">        param_names : list of str, optional</span>
+<span class="sd">            Names of the surface parameters, eg reflectivity, total incident</span>
+<span class="sd">            irradiance, temperature, etc. (Default = [])</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        :py:class:`~pvfactors.geometry.pvrow.PVRow` object</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">coords</span> <span class="o">=</span> <span class="n">_coords_from_center_tilt_length</span><span class="p">(</span><span class="n">xy_center</span><span class="p">,</span> <span class="n">tilt</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span>
+                                                 <span class="n">surface_azimuth</span><span class="p">,</span> <span class="n">axis_azimuth</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">from_linestring_coords</span><span class="p">(</span><span class="n">coords</span><span class="p">,</span> <span class="n">shaded</span><span class="o">=</span><span class="n">shaded</span><span class="p">,</span>
+                                          <span class="n">normal_vector</span><span class="o">=</span><span class="n">normal_vector</span><span class="p">,</span>
+                                          <span class="n">index</span><span class="o">=</span><span class="n">index</span><span class="p">,</span> <span class="n">cut</span><span class="o">=</span><span class="n">cut</span><span class="p">,</span>
+                                          <span class="n">param_names</span><span class="o">=</span><span class="n">param_names</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ax</span><span class="p">,</span> <span class="n">color_shaded</span><span class="o">=</span><span class="n">COLOR_DIC</span><span class="p">[</span><span class="s1">&#39;pvrow_shaded&#39;</span><span class="p">],</span>
+             <span class="n">color_illum</span><span class="o">=</span><span class="n">COLOR_DIC</span><span class="p">[</span><span class="s1">&#39;pvrow_illum&#39;</span><span class="p">],</span> <span class="n">with_index</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Plot the surfaces of the PV Row.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        ax : :py:class:`matplotlib.pyplot.axes` object</span>
+<span class="sd">            Axes for plotting</span>
+<span class="sd">        color_shaded : str, optional</span>
+<span class="sd">            Color to use for plotting the shaded surfaces (Default =</span>
+<span class="sd">            COLOR_DIC[&#39;pvrow_shaded&#39;])</span>
+<span class="sd">        color_shaded : str, optional</span>
+<span class="sd">            Color to use for plotting the illuminated surfaces (Default =</span>
+<span class="sd">            COLOR_DIC[&#39;pvrow_illum&#39;])</span>
+<span class="sd">        with_index : bool</span>
+<span class="sd">            Flag to annotate surfaces with their indices (Default = False)</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">front</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="n">color_shaded</span><span class="o">=</span><span class="n">color_shaded</span><span class="p">,</span> <span class="n">color_illum</span><span class="o">=</span><span class="n">color_illum</span><span class="p">,</span>
+                        <span class="n">with_index</span><span class="o">=</span><span class="n">with_index</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">back</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="n">color_shaded</span><span class="o">=</span><span class="n">color_shaded</span><span class="p">,</span> <span class="n">color_illum</span><span class="o">=</span><span class="n">color_illum</span><span class="p">,</span>
+                       <span class="n">with_index</span><span class="o">=</span><span class="n">with_index</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">boundary</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Boundaries of the PV Row&#39;s orginal linestring.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">original_linestring</span><span class="o">.</span><span class="n">boundary</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">highest_point</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Highest point of the PV Row.&quot;&quot;&quot;</span>
+        <span class="n">b1</span><span class="p">,</span> <span class="n">b2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">boundary</span>
+        <span class="n">highest_point</span> <span class="o">=</span> <span class="n">b1</span> <span class="k">if</span> <span class="n">b1</span><span class="o">.</span><span class="n">y</span> <span class="o">&gt;</span> <span class="n">b2</span><span class="o">.</span><span class="n">y</span> <span class="k">else</span> <span class="n">b2</span>
+        <span class="k">return</span> <span class="n">highest_point</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">lowest_point</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Lowest point of the PV Row.&quot;&quot;&quot;</span>
+        <span class="n">b1</span><span class="p">,</span> <span class="n">b2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">boundary</span>
+        <span class="n">lowest_point</span> <span class="o">=</span> <span class="n">b1</span> <span class="k">if</span> <span class="n">b1</span><span class="o">.</span><span class="n">y</span> <span class="o">&lt;</span> <span class="n">b2</span><span class="o">.</span><span class="n">y</span> <span class="k">else</span> <span class="n">b2</span>
+        <span class="k">return</span> <span class="n">lowest_point</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">all_surfaces</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;List of all the surfaces in the PV row.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_all_surfaces</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_all_surfaces</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_all_surfaces</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">front</span><span class="o">.</span><span class="n">all_surfaces</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_all_surfaces</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">back</span><span class="o">.</span><span class="n">all_surfaces</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_all_surfaces</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">surface_indices</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;List of all surface indices in the PV Row.&quot;&quot;&quot;</span>
+        <span class="n">list_indices</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">list_indices</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">front</span><span class="o">.</span><span class="n">surface_indices</span>
+        <span class="n">list_indices</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">back</span><span class="o">.</span><span class="n">surface_indices</span>
+        <span class="k">return</span> <span class="n">list_indices</span>
+
+    <span class="k">def</span> <span class="nf">update_params</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_dict</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Update surface parameters for both front and back sides.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        new_dict : dict</span>
+<span class="sd">            Parameters to add or update for the surface</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">front</span><span class="o">.</span><span class="n">update_params</span><span class="p">(</span><span class="n">new_dict</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">back</span><span class="o">.</span><span class="n">update_params</span><span class="p">(</span><span class="n">new_dict</span><span class="p">)</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2016, SunPower Corporation
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

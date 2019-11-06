@@ -1,0 +1,41 @@
+pvfactors.irradiance.models.IsotropicOrdered
+============================================
+
+.. currentmodule:: pvfactors.irradiance.models
+
+.. autoclass:: IsotropicOrdered
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~IsotropicOrdered.__init__
+      ~IsotropicOrdered.fit
+      ~IsotropicOrdered.get_full_modeling_vectors
+      ~IsotropicOrdered.get_full_ts_modeling_vectors
+      ~IsotropicOrdered.get_ts_modeling_vectors
+      ~IsotropicOrdered.transform
+      ~IsotropicOrdered.update_ts_surface_sky_term
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~IsotropicOrdered.cats
+      ~IsotropicOrdered.gnd_illum
+      ~IsotropicOrdered.gnd_shaded
+      ~IsotropicOrdered.irradiance_comp
+      ~IsotropicOrdered.params
+      ~IsotropicOrdered.pvrow_illum
+      ~IsotropicOrdered.pvrow_shaded
+      ~IsotropicOrdered.sky_luminance
+   
+   

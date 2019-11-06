@@ -1,0 +1,50 @@
+pvfactors.geometry.timeseries.TsShadeCollection
+===============================================
+
+.. currentmodule:: pvfactors.geometry.timeseries
+
+.. autoclass:: TsShadeCollection
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      
+         ~TsShadeCollection.__init__
+      
+      
+         ~TsShadeCollection.at
+      
+      
+         ~TsShadeCollection.get_param_weighted
+      
+      
+         ~TsShadeCollection.get_param_ww
+      
+      
+         ~TsShadeCollection.update_params
+      
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      
+         ~TsShadeCollection.length
+      
+      
+         ~TsShadeCollection.list_ts_surfaces
+      
+      
+         ~TsShadeCollection.n_ts_surfaces
+      
+   
+   

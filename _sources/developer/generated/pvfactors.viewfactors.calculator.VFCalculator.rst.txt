@@ -1,0 +1,24 @@
+pvfactors.viewfactors.calculator.VFCalculator
+=============================================
+
+.. currentmodule:: pvfactors.viewfactors.calculator
+
+.. autoclass:: VFCalculator
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~VFCalculator.__init__
+      ~VFCalculator.build_ts_vf_matrix
+      ~VFCalculator.get_vf_ts_pvrow_element
+   
+   
+
+   
+   
+   

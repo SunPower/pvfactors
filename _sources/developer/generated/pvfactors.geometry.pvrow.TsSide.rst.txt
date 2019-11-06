@@ -1,0 +1,62 @@
+pvfactors.geometry.pvrow.TsSide
+===============================
+
+.. currentmodule:: pvfactors.geometry.pvrow
+
+.. autoclass:: TsSide
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      
+         ~TsSide.__init__
+      
+      
+         ~TsSide.at
+      
+      
+         ~TsSide.from_raw_inputs
+      
+      
+         ~TsSide.get_param_weighted
+      
+      
+         ~TsSide.get_param_ww
+      
+      
+         ~TsSide.plot_at_idx
+      
+      
+         ~TsSide.surfaces_at_idx
+      
+      
+         ~TsSide.update_params
+      
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      
+         ~TsSide.all_ts_surfaces
+      
+      
+         ~TsSide.length
+      
+      
+         ~TsSide.n_ts_surfaces
+      
+      
+         ~TsSide.shaded_length
+      
+   
+   

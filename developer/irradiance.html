@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>irradiance &mdash; pvfactors 1.2.2 documentation</title>
+  <title>irradiance &mdash; pvfactors 1.3.0 documentation</title>
   
 
   
@@ -66,7 +66,7 @@
             
             
               <div class="version">
-                1.2.2
+                1.3.0
               </div>
             
           
@@ -92,7 +92,8 @@
             
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="../installation/index.html">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../tutorials/index.html">User guide and tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../concepts/index.html">Main concepts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/index.html">Tutorials</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../theory/index.html">Theory</a></li>
 <li class="toctree-l1"><a class="reference internal" href="index.html">Developer API</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../whatsnew.html">What’s New</a></li>
@@ -192,8 +193,8 @@
 <div class="section" id="irradiance">
 <span id="irradiance-classes"></span><h1>irradiance<a class="headerlink" href="#irradiance" title="Permalink to this headline">¶</a></h1>
 <p>The irradiance sub-package of pvfactors implements all irradiance related models and methods that can be applied to pvfactors PV array objects.</p>
-<div class="section" id="module-irradiance.base">
-<span id="base"></span><h2>base<a class="headerlink" href="#module-irradiance.base" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="base">
+<h2>base<a class="headerlink" href="#base" title="Permalink to this headline">¶</a></h2>
 <p>Module with Base classes for irradiance models</p>
 <table class="longtable docutils align-default">
 <colgroup>
@@ -201,14 +202,14 @@
 <col style="width: 90%" />
 </colgroup>
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="generated/irradiance.base.BaseModel.html#irradiance.base.BaseModel" title="irradiance.base.BaseModel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">irradiance.base.BaseModel</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/pvfactors.irradiance.base.BaseModel.html#pvfactors.irradiance.base.BaseModel" title="pvfactors.irradiance.base.BaseModel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BaseModel</span></code></a></p></td>
 <td><p>Base class for irradiance models</p></td>
 </tr>
 </tbody>
 </table>
 </div>
-<div class="section" id="module-models">
-<span id="models"></span><h2>models<a class="headerlink" href="#module-models" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="models">
+<h2>models<a class="headerlink" href="#models" title="Permalink to this headline">¶</a></h2>
 <p>Module containing irradiance models used with pv array geometries</p>
 <table class="longtable docutils align-default">
 <colgroup>
@@ -216,11 +217,11 @@
 <col style="width: 90%" />
 </colgroup>
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="generated/models.IsotropicOrdered.html#models.IsotropicOrdered" title="models.IsotropicOrdered"><code class="xref py py-obj docutils literal notranslate"><span class="pre">models.IsotropicOrdered</span></code></a></p></td>
-<td><p>Diffuse isotropic sky model for <code class="xref py py-class docutils literal notranslate"><span class="pre">OrderedPVArray</span></code>.</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/pvfactors.irradiance.models.IsotropicOrdered.html#pvfactors.irradiance.models.IsotropicOrdered" title="pvfactors.irradiance.models.IsotropicOrdered"><code class="xref py py-obj docutils literal notranslate"><span class="pre">IsotropicOrdered</span></code></a></p></td>
+<td><p>Diffuse isotropic sky model for <a class="reference internal" href="generated/pvfactors.geometry.pvarray.OrderedPVArray.html#pvfactors.geometry.pvarray.OrderedPVArray" title="pvfactors.geometry.pvarray.OrderedPVArray"><code class="xref py py-class docutils literal notranslate"><span class="pre">OrderedPVArray</span></code></a>.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="generated/models.HybridPerezOrdered.html#models.HybridPerezOrdered" title="models.HybridPerezOrdered"><code class="xref py py-obj docutils literal notranslate"><span class="pre">models.HybridPerezOrdered</span></code></a></p></td>
-<td><p>Model is based off Perez diffuse light model, and applied to pvfactors <code class="xref py py-class docutils literal notranslate"><span class="pre">OrderedPVArray</span></code> objects.</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/pvfactors.irradiance.models.HybridPerezOrdered.html#pvfactors.irradiance.models.HybridPerezOrdered" title="pvfactors.irradiance.models.HybridPerezOrdered"><code class="xref py py-obj docutils literal notranslate"><span class="pre">HybridPerezOrdered</span></code></a></p></td>
+<td><p>Model is based off Perez diffuse light model, and applied to pvfactors <a class="reference internal" href="generated/pvfactors.geometry.pvarray.OrderedPVArray.html#pvfactors.geometry.pvarray.OrderedPVArray" title="pvfactors.geometry.pvarray.OrderedPVArray"><code class="xref py py-class docutils literal notranslate"><span class="pre">OrderedPVArray</span></code></a> objects.</p></td>
 </tr>
 </tbody>
 </table>

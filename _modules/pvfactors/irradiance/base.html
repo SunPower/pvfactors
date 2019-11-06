@@ -1,0 +1,316 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>pvfactors.irradiance.base &mdash; pvfactors 1.3.0 documentation</title>
+  
+
+  
+  
+    <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../../_static/doctools.js"></script>
+        <script type="text/javascript" src="../../../_static/language_data.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/css/custom.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> pvfactors
+          
+
+          
+            
+            <img src="../../../_static/logo_small.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.3.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation/index.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../concepts/index.html">Main concepts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/index.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../theory/index.html">Theory</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../developer/index.html">Developer API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../whatsnew.html">What’s New</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">pvfactors</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>pvfactors.irradiance.base</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for pvfactors.irradiance.base</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Module with Base classes for irradiance models&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+
+<div class="viewcode-block" id="BaseModel"><a class="viewcode-back" href="../../../developer/generated/pvfactors.irradiance.base.BaseModel.html#pvfactors.irradiance.base.BaseModel">[docs]</a><span class="k">class</span> <span class="nc">BaseModel</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Base class for irradiance models&quot;&quot;&quot;</span>
+
+    <span class="n">params</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">cats</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">irradiance_comp</span> <span class="o">=</span> <span class="kc">None</span>
+
+<div class="viewcode-block" id="BaseModel.__init__"><a class="viewcode-back" href="../../../developer/generated/pvfactors.irradiance.base.BaseModel.html#pvfactors.irradiance.base.BaseModel.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Not implemented&quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
+
+    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Not implemented&quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+    <span class="k">def</span> <span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Not implemented&quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+    <span class="k">def</span> <span class="nf">get_full_modeling_vectors</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Not implemented&quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">gnd_shaded</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Not implemented&quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">gnd_illum</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Not implemented&quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">pvrow_shaded</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Not implemented&quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">pvrow_illum</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Not implemented&quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">sky_luminance</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Not implemented&quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+    <span class="k">def</span> <span class="nf">get_ts_modeling_vectors</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pvarray</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get matrices of summed up irradiance values from a PV array, as well</span>
+<span class="sd">        as the inverse reflectivity values (the latter need to be named</span>
+<span class="sd">        &quot;inv_rho&quot;), and the total perez irradiance values.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        pvarray : PV array object</span>
+<span class="sd">            PV array with the irradiance and reflectivity values</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        irradiance_mat : list</span>
+<span class="sd">            Matrix of summed up non-reflective irradiance values for all</span>
+<span class="sd">            timeseries surfaces. Dimension = [n_surfaces, n_timesteps]</span>
+<span class="sd">        rho_mat : list</span>
+<span class="sd">            Matrix of reflectivity values for all timeseries surfaces</span>
+<span class="sd">            Dimension = [n_surfaces, n_timesteps]</span>
+<span class="sd">        invrho_mat : list</span>
+<span class="sd">            List of inverse reflectivity for all timeseries surfaces</span>
+<span class="sd">            Dimension = [n_surfaces, n_timesteps]</span>
+<span class="sd">        total_perez_mat : list</span>
+<span class="sd">            List of total perez transposed irradiance values for all timeseries</span>
+<span class="sd">            surfaces</span>
+<span class="sd">            Dimension = [n_surfaces, n_timesteps]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># TODO: this can probably be speeded up</span>
+        <span class="n">irradiance_mat</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">rho_mat</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">invrho_mat</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">total_perez_mat</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="c1"># In principle, the list all ts surfaces should be ordered</span>
+        <span class="c1"># with the ts surfaces&#39; indices. ie first element has index 0, etc</span>
+        <span class="k">for</span> <span class="n">ts_surface</span> <span class="ow">in</span> <span class="n">pvarray</span><span class="o">.</span><span class="n">all_ts_surfaces</span><span class="p">:</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">pvarray</span><span class="o">.</span><span class="n">n_states</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">component</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">irradiance_comp</span><span class="p">:</span>
+                <span class="n">value</span> <span class="o">+=</span> <span class="n">ts_surface</span><span class="o">.</span><span class="n">get_param</span><span class="p">(</span><span class="n">component</span><span class="p">)</span>
+            <span class="n">irradiance_mat</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+            <span class="n">invrho_mat</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ts_surface</span><span class="o">.</span><span class="n">get_param</span><span class="p">(</span><span class="s1">&#39;inv_rho&#39;</span><span class="p">))</span>
+            <span class="n">rho_mat</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ts_surface</span><span class="o">.</span><span class="n">get_param</span><span class="p">(</span><span class="s1">&#39;rho&#39;</span><span class="p">))</span>
+            <span class="n">total_perez_mat</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ts_surface</span><span class="o">.</span><span class="n">get_param</span><span class="p">(</span><span class="s1">&#39;total_perez&#39;</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="n">irradiance_mat</span><span class="p">,</span> <span class="n">rho_mat</span><span class="p">,</span> <span class="n">invrho_mat</span><span class="p">,</span> <span class="n">total_perez_mat</span>
+
+    <span class="k">def</span> <span class="nf">update_ts_surface_sky_term</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ts_surface</span><span class="p">,</span> <span class="n">name_sky_term</span><span class="o">=</span><span class="s1">&#39;sky_term&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Update the &#39;sky_term&#39; parameter of a timeseries surface.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        ts_surface :  :py:class:`~pvfactors.geometry.timeseries.TsSurface`</span>
+<span class="sd">            Timeseries surface whose &#39;sky_term&#39; parameter value we want to</span>
+<span class="sd">            update</span>
+<span class="sd">        name_sky_term : str, optional</span>
+<span class="sd">            Name of the sky term parameter (Default = &#39;sky_term&#39;)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="mf">0.</span>
+        <span class="k">for</span> <span class="n">component</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">irradiance_comp</span><span class="p">:</span>
+            <span class="n">value</span> <span class="o">+=</span> <span class="n">ts_surface</span><span class="o">.</span><span class="n">get_param</span><span class="p">(</span><span class="n">component</span><span class="p">)</span>
+        <span class="n">ts_surface</span><span class="o">.</span><span class="n">update_params</span><span class="p">({</span><span class="n">name_sky_term</span><span class="p">:</span> <span class="n">value</span><span class="p">})</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2016, SunPower Corporation
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

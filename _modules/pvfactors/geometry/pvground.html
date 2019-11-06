@@ -1,0 +1,1293 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>pvfactors.geometry.pvground &mdash; pvfactors 1.3.0 documentation</title>
+  
+
+  
+  
+    <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../../_static/doctools.js"></script>
+        <script type="text/javascript" src="../../../_static/language_data.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/css/custom.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> pvfactors
+          
+
+          
+            
+            <img src="../../../_static/logo_small.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.3.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation/index.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../concepts/index.html">Main concepts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/index.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../theory/index.html">Theory</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../developer/index.html">Developer API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../whatsnew.html">What’s New</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">pvfactors</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>pvfactors.geometry.pvground</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for pvfactors.geometry.pvground</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Classes for implementation of ground geometry&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">pvfactors</span> <span class="k">import</span> <span class="n">PVFactorsError</span>
+<span class="kn">from</span> <span class="nn">pvfactors.config</span> <span class="k">import</span> <span class="p">(</span>
+    <span class="n">MAX_X_GROUND</span><span class="p">,</span> <span class="n">MIN_X_GROUND</span><span class="p">,</span> <span class="n">Y_GROUND</span><span class="p">,</span> <span class="n">DISTANCE_TOLERANCE</span><span class="p">,</span> <span class="n">COLOR_DIC</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">pvfactors.geometry.base</span> <span class="k">import</span> <span class="p">(</span>
+    <span class="n">BaseSide</span><span class="p">,</span> <span class="n">PVSegment</span><span class="p">,</span> <span class="n">ShadeCollection</span><span class="p">,</span> <span class="n">PVSurface</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">pvfactors.geometry.timeseries</span> <span class="k">import</span> <span class="p">(</span>
+    <span class="n">TsShadeCollection</span><span class="p">,</span> <span class="n">TsLineCoords</span><span class="p">,</span> <span class="n">TsPointCoords</span><span class="p">,</span> <span class="n">TsSurface</span><span class="p">,</span>
+    <span class="n">_get_params_at_idx</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">shapely.geometry</span> <span class="k">import</span> <span class="n">LineString</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">copy</span> <span class="k">import</span> <span class="n">deepcopy</span>
+
+
+<div class="viewcode-block" id="TsGround"><a class="viewcode-back" href="../../../developer/generated/pvfactors.geometry.pvground.TsGround.html#pvfactors.geometry.pvground.TsGround">[docs]</a><span class="k">class</span> <span class="nc">TsGround</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Timeseries ground class: this class is a vectorized version of the</span>
+<span class="sd">    PV ground geometry class, and it will store timeseries shaded ground</span>
+<span class="sd">    and illuminated ground elements, as well as pv row cut points.&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="TsGround.__init__"><a class="viewcode-back" href="../../../developer/generated/pvfactors.geometry.pvground.TsGround.html#pvfactors.geometry.pvground.TsGround.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">shadow_elements</span><span class="p">,</span> <span class="n">illum_elements</span><span class="p">,</span> <span class="n">param_names</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">flag_overlap</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">cut_point_coords</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">y_ground</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Initialize timeseries ground using list of timeseries surfaces</span>
+<span class="sd">        for the ground shadows</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        shadow_elements : \</span>
+<span class="sd">        list of :py:class:`~pvfactors.geometry.pvground.TsGroundElement`</span>
+<span class="sd">            Timeseries shaded ground elements</span>
+<span class="sd">        illum_elements : \</span>
+<span class="sd">        list of :py:class:`~pvfactors.geometry.pvground.TsGroundElement`</span>
+<span class="sd">            Timeseries illuminated ground elements</span>
+<span class="sd">        param_names : list of str, optional</span>
+<span class="sd">            List of names of surface parameters to use when creating geometries</span>
+<span class="sd">            (Default = None)</span>
+<span class="sd">        flag_overlap : list of bool, optional</span>
+<span class="sd">            Flags indicating if the ground shadows are overlapping, for all</span>
+<span class="sd">            time steps (Default=None). I.e. is there direct shading on pv rows?</span>
+<span class="sd">        cut_point_coords : \</span>
+<span class="sd">        list of :py:class:`~pvfactors.geometry.timeseries.TsPointCoords`, \</span>
+<span class="sd">        optional</span>
+<span class="sd">            List of cut point coordinates, as calculated for timeseries PV rows</span>
+<span class="sd">            (Default = None)</span>
+<span class="sd">        y_ground : float, optional</span>
+<span class="sd">            Y coordinate of flat ground [m] (Default=None)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Lists of timeseries ground elements</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">shadow_elements</span> <span class="o">=</span> <span class="n">shadow_elements</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">illum_elements</span> <span class="o">=</span> <span class="n">illum_elements</span>
+        <span class="c1"># Shade collections</span>
+        <span class="n">list_shaded_surf</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">list_illum_surf</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">shadow_el</span> <span class="ow">in</span> <span class="n">shadow_elements</span><span class="p">:</span>
+            <span class="n">list_shaded_surf</span> <span class="o">+=</span> <span class="n">shadow_el</span><span class="o">.</span><span class="n">all_ts_surfaces</span>
+        <span class="k">for</span> <span class="n">illum_el</span> <span class="ow">in</span> <span class="n">illum_elements</span><span class="p">:</span>
+            <span class="n">list_illum_surf</span> <span class="o">+=</span> <span class="n">illum_el</span><span class="o">.</span><span class="n">all_ts_surfaces</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">illum</span> <span class="o">=</span> <span class="n">TsShadeCollection</span><span class="p">(</span><span class="n">list_illum_surf</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">shaded</span> <span class="o">=</span> <span class="n">TsShadeCollection</span><span class="p">(</span><span class="n">list_shaded_surf</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+        <span class="c1"># Other ground attributes</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">param_names</span> <span class="o">=</span> <span class="p">[]</span> <span class="k">if</span> <span class="n">param_names</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">param_names</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">flag_overlap</span> <span class="o">=</span> <span class="n">flag_overlap</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cut_point_coords</span> <span class="o">=</span> <span class="p">[]</span> <span class="k">if</span> <span class="n">cut_point_coords</span> <span class="ow">is</span> <span class="kc">None</span> \
+            <span class="k">else</span> <span class="n">cut_point_coords</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">y_ground</span> <span class="o">=</span> <span class="n">y_ground</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">shaded_params</span> <span class="o">=</span> <span class="nb">dict</span><span class="o">.</span><span class="n">fromkeys</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">param_names</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">illum_params</span> <span class="o">=</span> <span class="nb">dict</span><span class="o">.</span><span class="n">fromkeys</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">param_names</span><span class="p">)</span></div>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">from_ts_pvrows_and_angles</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">list_ts_pvrows</span><span class="p">,</span> <span class="n">alpha_vec</span><span class="p">,</span> <span class="n">rotation_vec</span><span class="p">,</span>
+                                  <span class="n">y_ground</span><span class="o">=</span><span class="n">Y_GROUND</span><span class="p">,</span> <span class="n">flag_overlap</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                                  <span class="n">param_names</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Create timeseries ground from list of timeseries PV rows, and</span>
+<span class="sd">        PV array and solar angles.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        list_ts_pvrows : \</span>
+<span class="sd">        list of :py:class:`~pvfactors.geometry.pvrow.TsPVRow`</span>
+<span class="sd">            Timeseries PV rows to use to calculate timeseries ground shadows</span>
+<span class="sd">        alpha_vec : np.ndarray</span>
+<span class="sd">            Angle made by 2d solar vector and PV array x-axis [rad]</span>
+<span class="sd">        rotation_vec : np.ndarray</span>
+<span class="sd">            Timeseries rotation values of the PV row [deg]</span>
+<span class="sd">        y_ground : float, optional</span>
+<span class="sd">            Fixed y coordinate of flat ground [m] (Default = Y_GROUND constant)</span>
+<span class="sd">        flag_overlap : list of bool, optional</span>
+<span class="sd">            Flags indicating if the ground shadows are overlapping, for all</span>
+<span class="sd">            time steps (Default=None). I.e. is there direct shading on pv rows?</span>
+<span class="sd">        param_names : list of str, optional</span>
+<span class="sd">            List of names of surface parameters to use when creating geometries</span>
+<span class="sd">            (Default = None)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">rotation_vec</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">deg2rad</span><span class="p">(</span><span class="n">rotation_vec</span><span class="p">)</span>
+        <span class="n">n_steps</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">rotation_vec</span><span class="p">)</span>
+        <span class="c1"># Calculate coords of ground shadows and cutting points</span>
+        <span class="n">ground_shadow_coords</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">cut_point_coords</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">ts_pvrow</span> <span class="ow">in</span> <span class="n">list_ts_pvrows</span><span class="p">:</span>
+            <span class="c1"># Get pvrow coords</span>
+            <span class="n">x1s_pvrow</span> <span class="o">=</span> <span class="n">ts_pvrow</span><span class="o">.</span><span class="n">full_pvrow_coords</span><span class="o">.</span><span class="n">b1</span><span class="o">.</span><span class="n">x</span>
+            <span class="n">y1s_pvrow</span> <span class="o">=</span> <span class="n">ts_pvrow</span><span class="o">.</span><span class="n">full_pvrow_coords</span><span class="o">.</span><span class="n">b1</span><span class="o">.</span><span class="n">y</span>
+            <span class="n">x2s_pvrow</span> <span class="o">=</span> <span class="n">ts_pvrow</span><span class="o">.</span><span class="n">full_pvrow_coords</span><span class="o">.</span><span class="n">b2</span><span class="o">.</span><span class="n">x</span>
+            <span class="n">y2s_pvrow</span> <span class="o">=</span> <span class="n">ts_pvrow</span><span class="o">.</span><span class="n">full_pvrow_coords</span><span class="o">.</span><span class="n">b2</span><span class="o">.</span><span class="n">y</span>
+            <span class="c1"># --- Shadow coords calculation</span>
+            <span class="c1"># Calculate x coords of shadow</span>
+            <span class="n">x1s_shadow</span> <span class="o">=</span> <span class="n">x1s_pvrow</span> <span class="o">-</span> <span class="p">(</span><span class="n">y1s_pvrow</span> <span class="o">-</span> <span class="n">y_ground</span><span class="p">)</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">tan</span><span class="p">(</span><span class="n">alpha_vec</span><span class="p">)</span>
+            <span class="n">x2s_shadow</span> <span class="o">=</span> <span class="n">x2s_pvrow</span> <span class="o">-</span> <span class="p">(</span><span class="n">y2s_pvrow</span> <span class="o">-</span> <span class="n">y_ground</span><span class="p">)</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">tan</span><span class="p">(</span><span class="n">alpha_vec</span><span class="p">)</span>
+            <span class="c1"># Order x coords from left to right</span>
+            <span class="n">x1s_on_left</span> <span class="o">=</span> <span class="n">x1s_shadow</span> <span class="o">&lt;=</span> <span class="n">x2s_shadow</span>
+            <span class="n">xs_left_shadow</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">x1s_on_left</span><span class="p">,</span> <span class="n">x1s_shadow</span><span class="p">,</span> <span class="n">x2s_shadow</span><span class="p">)</span>
+            <span class="n">xs_right_shadow</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">x1s_on_left</span><span class="p">,</span> <span class="n">x2s_shadow</span><span class="p">,</span> <span class="n">x1s_shadow</span><span class="p">)</span>
+            <span class="c1"># Append shadow coords to list</span>
+            <span class="n">ground_shadow_coords</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="p">[[</span><span class="n">xs_left_shadow</span><span class="p">,</span> <span class="n">y_ground</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">n_steps</span><span class="p">)],</span>
+                 <span class="p">[</span><span class="n">xs_right_shadow</span><span class="p">,</span> <span class="n">y_ground</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">n_steps</span><span class="p">)]])</span>
+            <span class="c1"># --- Cutting points coords calculation</span>
+            <span class="n">dx</span> <span class="o">=</span> <span class="p">(</span><span class="n">y1s_pvrow</span> <span class="o">-</span> <span class="n">y_ground</span><span class="p">)</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">tan</span><span class="p">(</span><span class="n">rotation_vec</span><span class="p">)</span>
+            <span class="n">cut_point_coords</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="n">TsPointCoords</span><span class="p">(</span><span class="n">x1s_pvrow</span> <span class="o">-</span> <span class="n">dx</span><span class="p">,</span> <span class="n">y_ground</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">n_steps</span><span class="p">)))</span>
+
+        <span class="n">ground_shadow_coords</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">ground_shadow_coords</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">from_ordered_shadows_coords</span><span class="p">(</span>
+            <span class="n">ground_shadow_coords</span><span class="p">,</span> <span class="n">flag_overlap</span><span class="o">=</span><span class="n">flag_overlap</span><span class="p">,</span>
+            <span class="n">cut_point_coords</span><span class="o">=</span><span class="n">cut_point_coords</span><span class="p">,</span> <span class="n">param_names</span><span class="o">=</span><span class="n">param_names</span><span class="p">,</span>
+            <span class="n">y_ground</span><span class="o">=</span><span class="n">y_ground</span><span class="p">)</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">from_ordered_shadows_coords</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">shadow_coords</span><span class="p">,</span> <span class="n">flag_overlap</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                                    <span class="n">param_names</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">cut_point_coords</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                                    <span class="n">y_ground</span><span class="o">=</span><span class="n">Y_GROUND</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Create timeseries ground from list of ground shadow coordinates.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        shadow_coords : np.ndarray</span>
+<span class="sd">            List of ordered ground shadow coordinates (from left to right)</span>
+<span class="sd">        flag_overlap : list of bool, optional</span>
+<span class="sd">            Flags indicating if the ground shadows are overlapping, for all</span>
+<span class="sd">            time steps (Default=None). I.e. is there direct shading on pv rows?</span>
+<span class="sd">        param_names : list of str, optional</span>
+<span class="sd">            List of names of surface parameters to use when creating geometries</span>
+<span class="sd">            (Default = None)</span>
+<span class="sd">        cut_point_coords : \</span>
+<span class="sd">        list of :py:class:`~pvfactors.geometry.timeseries.TsPointCoords`, \</span>
+<span class="sd">        optional</span>
+<span class="sd">            List of cut point coordinates, as calculated for timeseries PV rows</span>
+<span class="sd">            (Default = None)</span>
+<span class="sd">        y_ground : float, optional</span>
+<span class="sd">            Fixed y coordinate of flat ground [m] (Default = Y_GROUND constant)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Get cut point coords if any</span>
+        <span class="n">cut_point_coords</span> <span class="o">=</span> <span class="n">cut_point_coords</span> <span class="ow">or</span> <span class="p">[]</span>
+        <span class="c1"># Create shadow coordinate objects</span>
+        <span class="n">list_shadow_coords</span> <span class="o">=</span> <span class="p">[</span><span class="n">TsLineCoords</span><span class="o">.</span><span class="n">from_array</span><span class="p">(</span><span class="n">coords</span><span class="p">)</span>
+                              <span class="k">for</span> <span class="n">coords</span> <span class="ow">in</span> <span class="n">shadow_coords</span><span class="p">]</span>
+        <span class="c1"># If the overlap flags were passed, make sure shadows don&#39;t overlap</span>
+        <span class="k">if</span> <span class="n">flag_overlap</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">list_shadow_coords</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">coords</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">list_shadow_coords</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]):</span>
+                    <span class="n">coords</span><span class="o">.</span><span class="n">b2</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">flag_overlap</span><span class="p">,</span>
+                                           <span class="n">list_shadow_coords</span><span class="p">[</span><span class="n">idx</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">b1</span><span class="o">.</span><span class="n">x</span><span class="p">,</span>
+                                           <span class="n">coords</span><span class="o">.</span><span class="n">b2</span><span class="o">.</span><span class="n">x</span><span class="p">)</span>
+        <span class="c1"># Create shaded ground elements</span>
+        <span class="n">ts_shadows_elements</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_shadow_elements_from_coords_and_cut_pts</span><span class="p">(</span>
+            <span class="n">list_shadow_coords</span><span class="p">,</span> <span class="n">cut_point_coords</span><span class="p">,</span> <span class="n">param_names</span><span class="p">)</span>
+        <span class="c1"># Create illuminated ground elements</span>
+        <span class="n">ts_illum_elements</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_illum_elements_from_coords_and_cut_pts</span><span class="p">(</span>
+            <span class="n">ts_shadows_elements</span><span class="p">,</span> <span class="n">cut_point_coords</span><span class="p">,</span> <span class="n">param_names</span><span class="p">,</span> <span class="n">y_ground</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">ts_shadows_elements</span><span class="p">,</span> <span class="n">ts_illum_elements</span><span class="p">,</span>
+                   <span class="n">param_names</span><span class="o">=</span><span class="n">param_names</span><span class="p">,</span> <span class="n">flag_overlap</span><span class="o">=</span><span class="n">flag_overlap</span><span class="p">,</span>
+                   <span class="n">cut_point_coords</span><span class="o">=</span><span class="n">cut_point_coords</span><span class="p">,</span> <span class="n">y_ground</span><span class="o">=</span><span class="n">y_ground</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">at</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idx</span><span class="p">,</span> <span class="n">x_min_max</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">merge_if_flag_overlap</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+           <span class="n">with_cut_points</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Generate a PV ground geometry for the desired index. This will</span>
+<span class="sd">        only return non-point surfaces within the ground bounds, i.e.</span>
+<span class="sd">        surfaces that are not points, and which are within x_min and x_max.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        idx : int</span>
+<span class="sd">            Index to use to generate PV ground geometry</span>
+<span class="sd">        x_min_max : tuple, optional</span>
+<span class="sd">            List of minimum and maximum x coordinates for the flat surface [m]</span>
+<span class="sd">            (Default = None)</span>
+<span class="sd">        merge_if_flag_overlap : bool, optional</span>
+<span class="sd">            Decide whether to merge all shadows if they overlap or not</span>
+<span class="sd">            (Default = True)</span>
+<span class="sd">        with_cut_points :  bool, optional</span>
+<span class="sd">            Decide whether to include the saved cut points in the created</span>
+<span class="sd">            PV ground geometry (Default = True)</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        pvground : :py:class:`~pvfactors.geometry.pvground.PVGround`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Get shadow elements that are not points at the given index</span>
+        <span class="n">non_pt_shadow_elements</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">shadow_el</span> <span class="k">for</span> <span class="n">shadow_el</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">shadow_elements</span>
+            <span class="k">if</span> <span class="n">shadow_el</span><span class="o">.</span><span class="n">coords</span><span class="o">.</span><span class="n">length</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">DISTANCE_TOLERANCE</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">with_cut_points</span><span class="p">:</span>
+            <span class="c1"># We want the ground surfaces broken up at the cut points</span>
+            <span class="k">if</span> <span class="n">merge_if_flag_overlap</span><span class="p">:</span>
+                <span class="c1"># We want to merge the shadow surfaces when they overlap</span>
+                <span class="n">list_shadow_surfaces</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_merge_shadow_surfaces</span><span class="p">(</span>
+                    <span class="n">idx</span><span class="p">,</span> <span class="n">non_pt_shadow_elements</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># No need to merge the shadow surfaces</span>
+                <span class="n">list_shadow_surfaces</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="k">for</span> <span class="n">shadow_el</span> <span class="ow">in</span> <span class="n">non_pt_shadow_elements</span><span class="p">:</span>
+                    <span class="n">list_shadow_surfaces</span> <span class="o">+=</span> \
+                        <span class="n">shadow_el</span><span class="o">.</span><span class="n">non_point_surfaces_at</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span>
+            <span class="c1"># Get the illuminated surfaces</span>
+            <span class="n">list_illum_surfaces</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">illum_el</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">illum_elements</span><span class="p">:</span>
+                <span class="n">list_illum_surfaces</span> <span class="o">+=</span> <span class="n">illum_el</span><span class="o">.</span><span class="n">non_point_surfaces_at</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># No need to break up the surfaces at the cut points</span>
+            <span class="c1"># We will need to build up new surfaces (since not done by classes)</span>
+
+            <span class="c1"># Get the parameters at the given index</span>
+            <span class="n">illum_params</span> <span class="o">=</span> <span class="n">_get_params_at_idx</span><span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">illum_params</span><span class="p">)</span>
+            <span class="n">shaded_params</span> <span class="o">=</span> <span class="n">_get_params_at_idx</span><span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">shaded_params</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">merge_if_flag_overlap</span> <span class="ow">and</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">flag_overlap</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">):</span>
+                <span class="c1"># We want to merge the shadow surfaces when they overlap</span>
+                <span class="n">is_overlap</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">flag_overlap</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">is_overlap</span> <span class="ow">and</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">non_pt_shadow_elements</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">):</span>
+                    <span class="n">coords</span> <span class="o">=</span> <span class="p">[</span><span class="n">non_pt_shadow_elements</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">b1</span><span class="o">.</span><span class="n">at</span><span class="p">(</span><span class="n">idx</span><span class="p">),</span>
+                              <span class="n">non_pt_shadow_elements</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">b2</span><span class="o">.</span><span class="n">at</span><span class="p">(</span><span class="n">idx</span><span class="p">)]</span>
+                    <span class="n">list_shadow_surfaces</span> <span class="o">=</span> <span class="p">[</span><span class="n">PVSurface</span><span class="p">(</span>
+                        <span class="n">coords</span><span class="p">,</span> <span class="n">shaded</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">param_names</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">param_names</span><span class="p">,</span>
+                        <span class="n">params</span><span class="o">=</span><span class="n">shaded_params</span><span class="p">)]</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="c1"># No overlap for the given index or config</span>
+                    <span class="n">list_shadow_surfaces</span> <span class="o">=</span> <span class="p">[</span>
+                        <span class="n">PVSurface</span><span class="p">(</span><span class="n">shadow_el</span><span class="o">.</span><span class="n">coords</span><span class="o">.</span><span class="n">at</span><span class="p">(</span><span class="n">idx</span><span class="p">),</span>
+                                  <span class="n">shaded</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="n">shaded_params</span><span class="p">,</span>
+                                  <span class="n">param_names</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">param_names</span><span class="p">)</span>
+                        <span class="k">for</span> <span class="n">shadow_el</span> <span class="ow">in</span> <span class="n">non_pt_shadow_elements</span>
+                        <span class="k">if</span> <span class="n">shadow_el</span><span class="o">.</span><span class="n">coords</span><span class="o">.</span><span class="n">length</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
+                        <span class="o">&gt;</span> <span class="n">DISTANCE_TOLERANCE</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># No need to merge the shadow surfaces</span>
+                <span class="n">list_shadow_surfaces</span> <span class="o">=</span> <span class="p">[</span>
+                    <span class="n">PVSurface</span><span class="p">(</span><span class="n">shadow_el</span><span class="o">.</span><span class="n">coords</span><span class="o">.</span><span class="n">at</span><span class="p">(</span><span class="n">idx</span><span class="p">),</span>
+                              <span class="n">shaded</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="n">shaded_params</span><span class="p">,</span>
+                              <span class="n">param_names</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">param_names</span><span class="p">)</span>
+                    <span class="k">for</span> <span class="n">shadow_el</span> <span class="ow">in</span> <span class="n">non_pt_shadow_elements</span>
+                    <span class="k">if</span> <span class="n">shadow_el</span><span class="o">.</span><span class="n">coords</span><span class="o">.</span><span class="n">length</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
+                    <span class="o">&gt;</span> <span class="n">DISTANCE_TOLERANCE</span><span class="p">]</span>
+            <span class="c1"># Get the illuminated surfaces</span>
+            <span class="n">list_illum_surfaces</span> <span class="o">=</span> <span class="p">[</span><span class="n">PVSurface</span><span class="p">(</span><span class="n">illum_el</span><span class="o">.</span><span class="n">coords</span><span class="o">.</span><span class="n">at</span><span class="p">(</span><span class="n">idx</span><span class="p">),</span>
+                                             <span class="n">shaded</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="n">illum_params</span><span class="p">,</span>
+                                             <span class="n">param_names</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">param_names</span><span class="p">)</span>
+                                   <span class="k">for</span> <span class="n">illum_el</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">illum_elements</span>
+                                   <span class="k">if</span> <span class="n">illum_el</span><span class="o">.</span><span class="n">coords</span><span class="o">.</span><span class="n">length</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
+                                   <span class="o">&gt;</span> <span class="n">DISTANCE_TOLERANCE</span><span class="p">]</span>
+
+        <span class="c1"># Pass the created lists to the PVGround builder</span>
+        <span class="k">return</span> <span class="n">PVGround</span><span class="o">.</span><span class="n">from_lists_surfaces</span><span class="p">(</span>
+            <span class="n">list_shadow_surfaces</span><span class="p">,</span> <span class="n">list_illum_surfaces</span><span class="p">,</span>
+            <span class="n">param_names</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">param_names</span><span class="p">,</span> <span class="n">y_ground</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">y_ground</span><span class="p">,</span>
+            <span class="n">x_min_max</span><span class="o">=</span><span class="n">x_min_max</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">plot_at_idx</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idx</span><span class="p">,</span> <span class="n">ax</span><span class="p">,</span> <span class="n">color_shaded</span><span class="o">=</span><span class="n">COLOR_DIC</span><span class="p">[</span><span class="s1">&#39;pvrow_shaded&#39;</span><span class="p">],</span>
+                    <span class="n">color_illum</span><span class="o">=</span><span class="n">COLOR_DIC</span><span class="p">[</span><span class="s1">&#39;pvrow_illum&#39;</span><span class="p">],</span> <span class="n">x_min_max</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                    <span class="n">merge_if_flag_overlap</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">with_cut_points</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                    <span class="n">with_surface_index</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Plot timeseries ground at a certain index.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        idx : int</span>
+<span class="sd">            Index to use to plot timeseries side</span>
+<span class="sd">        ax : :py:class:`matplotlib.pyplot.axes` object</span>
+<span class="sd">            Axes for plotting</span>
+<span class="sd">        color_shaded : str, optional</span>
+<span class="sd">            Color to use for plotting the shaded surfaces (Default =</span>
+<span class="sd">            COLOR_DIC[&#39;pvrow_shaded&#39;])</span>
+<span class="sd">        color_shaded : str, optional</span>
+<span class="sd">            Color to use for plotting the illuminated surfaces (Default =</span>
+<span class="sd">            COLOR_DIC[&#39;pvrow_illum&#39;])</span>
+<span class="sd">        x_min_max : tuple, optional</span>
+<span class="sd">            List of minimum and maximum x coordinates for the flat surface [m]</span>
+<span class="sd">            (Default = None)</span>
+<span class="sd">        merge_if_flag_overlap : bool, optional</span>
+<span class="sd">            Decide whether to merge all shadows if they overlap or not</span>
+<span class="sd">            (Default = True)</span>
+<span class="sd">        with_cut_points :  bool, optional</span>
+<span class="sd">            Decide whether to include the saved cut points in the created</span>
+<span class="sd">            PV ground geometry (Default = True)</span>
+<span class="sd">        with_surface_index : bool, optional</span>
+<span class="sd">            Plot the surfaces with their index values (Default = False)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">pvground</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">at</span><span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="n">x_min_max</span><span class="o">=</span><span class="n">x_min_max</span><span class="p">,</span>
+                           <span class="n">merge_if_flag_overlap</span><span class="o">=</span><span class="n">merge_if_flag_overlap</span><span class="p">,</span>
+                           <span class="n">with_cut_points</span><span class="o">=</span><span class="n">with_cut_points</span><span class="p">)</span>
+        <span class="n">pvground</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="n">color_shaded</span><span class="o">=</span><span class="n">color_shaded</span><span class="p">,</span> <span class="n">color_illum</span><span class="o">=</span><span class="n">color_illum</span><span class="p">,</span>
+                      <span class="n">with_index</span><span class="o">=</span><span class="n">with_surface_index</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">update_params</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_dict</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Update the illuminated parameters with new ones, not only for the</span>
+<span class="sd">        timeseries ground, but also for its ground elements and the timeseries</span>
+<span class="sd">        surfaces of the ground elements, so that they are all synced.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        new_dict : dict</span>
+<span class="sd">            New parameters</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">update_illum_params</span><span class="p">(</span><span class="n">new_dict</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">update_shaded_params</span><span class="p">(</span><span class="n">new_dict</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">update_illum_params</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_dict</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Update the illuminated parameters with new ones, not only for the</span>
+<span class="sd">        timeseries ground, but also for its ground elements and the timeseries</span>
+<span class="sd">        surfaces of the ground elements, so that they are all synced.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        new_dict : dict</span>
+<span class="sd">            New parameters</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">illum_params</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">new_dict</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">illum_el</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">illum_elements</span><span class="p">:</span>
+            <span class="n">illum_el</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">new_dict</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">surf</span> <span class="ow">in</span> <span class="n">illum_el</span><span class="o">.</span><span class="n">surface_list</span><span class="p">:</span>
+                <span class="n">surf</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">new_dict</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">update_shaded_params</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_dict</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Update the shaded parameters with new ones, not only for the</span>
+<span class="sd">        timeseries ground, but also for its ground elements and the timeseries</span>
+<span class="sd">        surfaces of the ground elements, so that they are all synced.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        new_dict : dict</span>
+<span class="sd">            New parameters</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">shaded_params</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">new_dict</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">shaded_el</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">shadow_elements</span><span class="p">:</span>
+            <span class="n">shaded_el</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">new_dict</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">surf</span> <span class="ow">in</span> <span class="n">shaded_el</span><span class="o">.</span><span class="n">surface_list</span><span class="p">:</span>
+                <span class="n">surf</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">new_dict</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">get_param_weighted</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">param</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get timeseries parameter for the ts ground, after weighting by</span>
+<span class="sd">        surface length.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        param : str</span>
+<span class="sd">            Name of parameter</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        np.ndarray</span>
+<span class="sd">            Weighted parameter values</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_param_ww</span><span class="p">(</span><span class="n">param</span><span class="p">)</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">length</span>
+
+    <span class="k">def</span> <span class="nf">get_param_ww</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">param</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get timeseries parameter from the ground&#39;s surfaces with weight,</span>
+<span class="sd">        i.e. after multiplying by the surface lengths.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        param: str</span>
+<span class="sd">            Surface parameter to return</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        np.ndarray</span>
+<span class="sd">            Timeseries parameter values multiplied by weights</span>
+
+<span class="sd">        Raises</span>
+<span class="sd">        ------</span>
+<span class="sd">        KeyError</span>
+<span class="sd">            if parameter name not in a surface parameters</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="mf">0.</span>
+        <span class="k">for</span> <span class="n">shadow_el</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">shadow_elements</span><span class="p">:</span>
+            <span class="n">value</span> <span class="o">+=</span> <span class="n">shadow_el</span><span class="o">.</span><span class="n">get_param_ww</span><span class="p">(</span><span class="n">param</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">illum_el</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">illum_elements</span><span class="p">:</span>
+            <span class="n">value</span> <span class="o">+=</span> <span class="n">illum_el</span><span class="o">.</span><span class="n">get_param_ww</span><span class="p">(</span><span class="n">param</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">value</span>
+
+    <span class="k">def</span> <span class="nf">shadow_coords_left_of_cut_point</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idx_cut_pt</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get coordinates of shadows located on the left side of the cut point</span>
+<span class="sd">        with given index. The coordinates of the shadows will be bounded</span>
+<span class="sd">        by the coordinates of the cut point and the default minimum</span>
+<span class="sd">        ground x values.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        idx_cut_pt : int</span>
+<span class="sd">            Index of the cut point of interest</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        list of :py:class:`~pvfactors.geometry.timeseries.TsLineCoords`</span>
+<span class="sd">            Coordinates of the shadows on the left side of the cut point</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">cut_pt_coords</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cut_point_coords</span><span class="p">[</span><span class="n">idx_cut_pt</span><span class="p">]</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">shadow_el</span><span class="o">.</span><span class="n">_coords_left_of_cut_point</span><span class="p">(</span><span class="n">shadow_el</span><span class="o">.</span><span class="n">coords</span><span class="p">,</span>
+                                                    <span class="n">cut_pt_coords</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">shadow_el</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">shadow_elements</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">shadow_coords_right_of_cut_point</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idx_cut_pt</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get coordinates of shadows located on the right side of the cut</span>
+<span class="sd">        point with given index. The coordinates of the shadows will be bounded</span>
+<span class="sd">        by the coordinates of the cut point and the default maximum</span>
+<span class="sd">        ground x values.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        idx_cut_pt : int</span>
+<span class="sd">            Index of the cut point of interest</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        list of :py:class:`~pvfactors.geometry.timeseries.TsLineCoords`</span>
+<span class="sd">            Coordinates of the shadows on the right side of the cut point</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">cut_pt_coords</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cut_point_coords</span><span class="p">[</span><span class="n">idx_cut_pt</span><span class="p">]</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">shadow_el</span><span class="o">.</span><span class="n">_coords_right_of_cut_point</span><span class="p">(</span><span class="n">shadow_el</span><span class="o">.</span><span class="n">coords</span><span class="p">,</span>
+                                                     <span class="n">cut_pt_coords</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">shadow_el</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">shadow_elements</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">ts_surfaces_side_of_cut_point</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">side</span><span class="p">,</span> <span class="n">idx_cut_pt</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get a list of all the ts ground surfaces an a request side of</span>
+<span class="sd">        a cut point</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        side : str</span>
+<span class="sd">            Side of the cut point, either &#39;left&#39; or &#39;right&#39;</span>
+<span class="sd">        idx_cut_pt : int</span>
+<span class="sd">            Index of the cut point, on whose side we want to get the ground</span>
+<span class="sd">            surfaces</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        list</span>
+<span class="sd">            List of timeseries ground surfaces on the side of the cut point</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">list_ts_surfaces</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">shadow_el</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">shadow_elements</span><span class="p">:</span>
+            <span class="n">list_ts_surfaces</span> <span class="o">+=</span> <span class="n">shadow_el</span><span class="o">.</span><span class="n">surface_dict</span><span class="p">[</span><span class="n">idx_cut_pt</span><span class="p">][</span><span class="n">side</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">illum_el</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">illum_elements</span><span class="p">:</span>
+            <span class="n">list_ts_surfaces</span> <span class="o">+=</span> <span class="n">illum_el</span><span class="o">.</span><span class="n">surface_dict</span><span class="p">[</span><span class="n">idx_cut_pt</span><span class="p">][</span><span class="n">side</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">list_ts_surfaces</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">n_ts_surfaces</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Number of timeseries surfaces in the ts ground&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_ts_shaded_surfaces</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_ts_illum_surfaces</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">n_ts_shaded_surfaces</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Number of shaded timeseries surfaces in the ts ground&quot;&quot;&quot;</span>
+        <span class="n">n_ts_surfaces</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">shadow_el</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">shadow_elements</span><span class="p">:</span>
+            <span class="n">n_ts_surfaces</span> <span class="o">+=</span> <span class="n">shadow_el</span><span class="o">.</span><span class="n">n_ts_surfaces</span>
+        <span class="k">return</span> <span class="n">n_ts_surfaces</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">n_ts_illum_surfaces</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Number of illuminated timeseries surfaces in the ts ground&quot;&quot;&quot;</span>
+        <span class="n">n_ts_surfaces</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">illum_el</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">illum_elements</span><span class="p">:</span>
+            <span class="n">n_ts_surfaces</span> <span class="o">+=</span> <span class="n">illum_el</span><span class="o">.</span><span class="n">n_ts_surfaces</span>
+        <span class="k">return</span> <span class="n">n_ts_surfaces</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">all_ts_surfaces</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Number of timeseries surfaces in the ts ground&quot;&quot;&quot;</span>
+        <span class="n">all_ts_surfaces</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">shadow_el</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">shadow_elements</span><span class="p">:</span>
+            <span class="n">all_ts_surfaces</span> <span class="o">+=</span> <span class="n">shadow_el</span><span class="o">.</span><span class="n">all_ts_surfaces</span>
+        <span class="k">for</span> <span class="n">illum_el</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">illum_elements</span><span class="p">:</span>
+            <span class="n">all_ts_surfaces</span> <span class="o">+=</span> <span class="n">illum_el</span><span class="o">.</span><span class="n">all_ts_surfaces</span>
+        <span class="k">return</span> <span class="n">all_ts_surfaces</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">length</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Length of the timeseries ground&quot;&quot;&quot;</span>
+        <span class="n">length</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">shadow_el</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">shadow_elements</span><span class="p">:</span>
+            <span class="n">length</span> <span class="o">+=</span> <span class="n">shadow_el</span><span class="o">.</span><span class="n">length</span>
+        <span class="k">for</span> <span class="n">illum_el</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">illum_elements</span><span class="p">:</span>
+            <span class="n">length</span> <span class="o">+=</span> <span class="n">illum_el</span><span class="o">.</span><span class="n">length</span>
+        <span class="k">return</span> <span class="n">length</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">shaded_length</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Length of the timeseries ground&quot;&quot;&quot;</span>
+        <span class="n">length</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">shadow_el</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">shadow_elements</span><span class="p">:</span>
+            <span class="n">length</span> <span class="o">+=</span> <span class="n">shadow_el</span><span class="o">.</span><span class="n">length</span>
+        <span class="k">return</span> <span class="n">length</span>
+
+    <span class="k">def</span> <span class="nf">non_point_shaded_surfaces_at</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idx</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return a list of shaded surfaces, that are not points</span>
+<span class="sd">        at given index</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        idx : int</span>
+<span class="sd">            Index at which we want the surfaces not to be points</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        list of :py:class:`~pvfactors.geometry.base.PVSurface`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">list_surfaces</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">shadow_el</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">shadow_elements</span><span class="p">:</span>
+            <span class="n">list_surfaces</span> <span class="o">+=</span> <span class="n">shadow_el</span><span class="o">.</span><span class="n">non_point_surfaces_at</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">list_surfaces</span>
+
+    <span class="k">def</span> <span class="nf">non_point_illum_surfaces_at</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idx</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return a list of illuminated surfaces, that are not</span>
+<span class="sd">        points at given index</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        idx : int</span>
+<span class="sd">            Index at which we want the surfaces not to be points</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        list of :py:class:`~pvfactors.geometry.base.PVSurface`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">list_surfaces</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">illum_el</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">illum_elements</span><span class="p">:</span>
+            <span class="n">list_surfaces</span> <span class="o">+=</span> <span class="n">illum_el</span><span class="o">.</span><span class="n">non_point_surfaces_at</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">list_surfaces</span>
+
+    <span class="k">def</span> <span class="nf">non_point_surfaces_at</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idx</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return a list of all surfaces that are not</span>
+<span class="sd">        points at given index</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        idx : int</span>
+<span class="sd">            Index at which we want the surfaces not to be points</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        list of :py:class:`~pvfactors.geometry.base.PVSurface`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">non_point_illum_surfaces_at</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span> \
+            <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">non_point_shaded_surfaces_at</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">n_non_point_surfaces_at</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idx</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return the number of :py:class:`~pvfactors.geometry.base.PVSurface`</span>
+<span class="sd">        that are not points at given index</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        idx : int</span>
+<span class="sd">            Index at which we want the surfaces not to be points</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        int</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">non_point_surfaces_at</span><span class="p">(</span><span class="n">idx</span><span class="p">))</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_shadow_elements_from_coords_and_cut_pts</span><span class="p">(</span>
+            <span class="n">list_shadow_coords</span><span class="p">,</span> <span class="n">cut_point_coords</span><span class="p">,</span> <span class="n">param_names</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Create ground shadow elements from a list of ordered shadow</span>
+<span class="sd">        coordinates (from left to right), and the ground cut point coordinates.</span>
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+<span class="sd">        This method will clip the shadow coords to the limit of ground,</span>
+<span class="sd">        i.e. the shadow coordinates shouldn&#39;t be outside of the range</span>
+<span class="sd">        [MIN_X_GROUND, MAX_X_GROUND].</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        list_shadow_coords : \</span>
+<span class="sd">        list of :py:class:`~pvfactors.geometry.timeseries.TsLineCoords`</span>
+<span class="sd">            List of ordered ground shadow coordinates (from left to right)</span>
+<span class="sd">        cut_point_coords : \</span>
+<span class="sd">        list of :py:class:`~pvfactors.geometry.timeseries.TsLineCoords`</span>
+<span class="sd">            List of cut point coordinates (from left to right)</span>
+<span class="sd">        param_names : list</span>
+<span class="sd">            List of parameter names for the ground elements</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        list_shadow_elements : \</span>
+<span class="sd">        list of :py:class:`~pvfactors.geometry.pvground.TsGroundElement`</span>
+<span class="sd">            Ordered list of shadow elements (from left to right)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">list_shadow_elements</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="c1"># FIXME: x_min and x_max should be passed as inputs</span>
+        <span class="k">for</span> <span class="n">shadow_coords</span> <span class="ow">in</span> <span class="n">list_shadow_coords</span><span class="p">:</span>
+            <span class="n">shadow_coords</span><span class="o">.</span><span class="n">b1</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">shadow_coords</span><span class="o">.</span><span class="n">b1</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">MIN_X_GROUND</span><span class="p">,</span>
+                                         <span class="n">MAX_X_GROUND</span><span class="p">)</span>
+            <span class="n">shadow_coords</span><span class="o">.</span><span class="n">b2</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">shadow_coords</span><span class="o">.</span><span class="n">b2</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">MIN_X_GROUND</span><span class="p">,</span>
+                                         <span class="n">MAX_X_GROUND</span><span class="p">)</span>
+            <span class="n">list_shadow_elements</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="n">TsGroundElement</span><span class="p">(</span><span class="n">shadow_coords</span><span class="p">,</span>
+                                <span class="n">list_ordered_cut_pts_coords</span><span class="o">=</span><span class="n">cut_point_coords</span><span class="p">,</span>
+                                <span class="n">param_names</span><span class="o">=</span><span class="n">param_names</span><span class="p">,</span> <span class="n">shaded</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="n">list_shadow_elements</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_illum_elements_from_coords_and_cut_pts</span><span class="p">(</span>
+            <span class="n">list_shadow_elements</span><span class="p">,</span> <span class="n">cut_pt_coords</span><span class="p">,</span> <span class="n">param_names</span><span class="p">,</span> <span class="n">y_ground</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Create ground illuminated elements from a list of ordered shadow</span>
+<span class="sd">        elements (from left to right), and the ground cut point coordinates.</span>
+<span class="sd">        This method will make sure that the illuminated ground elements are</span>
+<span class="sd">        all within the ground limits [MIN_X_GROUND, MAX_X_GROUND].</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        list_shadow_coords : \</span>
+<span class="sd">        list of :py:class:`~pvfactors.geometry.timeseries.TsLineCoords`</span>
+<span class="sd">            List of ordered ground shadow coordinates (from left to right)</span>
+<span class="sd">        cut_point_coords : \</span>
+<span class="sd">        list of :py:class:`~pvfactors.geometry.timeseries.TsLineCoords`</span>
+<span class="sd">            List of cut point coordinates (from left to right)</span>
+<span class="sd">        param_names : list</span>
+<span class="sd">            List of parameter names for the ground elements</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        list_shadow_elements : \</span>
+<span class="sd">        list of :py:class:`~pvfactors.geometry.pvground.TsGroundElement`</span>
+<span class="sd">            Ordered list of shadow elements (from left to right)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">list_illum_elements</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">list_shadow_elements</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;There must be at least one shadow element on the ground,</span>
+<span class="s2">            otherwise it probably means that no PV rows were created, so</span>
+<span class="s2">            there&#39;s no point in running a simulation...&quot;&quot;&quot;</span>
+            <span class="k">raise</span> <span class="n">PVFactorsError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+        <span class="n">n_steps</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">list_shadow_elements</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">coords</span><span class="o">.</span><span class="n">b1</span><span class="o">.</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">y_ground_vec</span> <span class="o">=</span> <span class="n">y_ground</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">n_steps</span><span class="p">)</span>
+        <span class="c1"># FIXME: x_min and x_max should be passed as inputs</span>
+        <span class="n">next_x</span> <span class="o">=</span> <span class="n">MIN_X_GROUND</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">n_steps</span><span class="p">)</span>
+        <span class="c1"># Build the groud elements from left to right, starting at x_min</span>
+        <span class="c1"># and covering the ground with illuminated elements where there&#39;s no</span>
+        <span class="c1"># shadow</span>
+        <span class="k">for</span> <span class="n">shadow_element</span> <span class="ow">in</span> <span class="n">list_shadow_elements</span><span class="p">:</span>
+            <span class="n">x1</span> <span class="o">=</span> <span class="n">next_x</span>
+            <span class="n">x2</span> <span class="o">=</span> <span class="n">shadow_element</span><span class="o">.</span><span class="n">coords</span><span class="o">.</span><span class="n">b1</span><span class="o">.</span><span class="n">x</span>
+            <span class="n">coords</span> <span class="o">=</span> <span class="n">TsLineCoords</span><span class="o">.</span><span class="n">from_array</span><span class="p">(</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="n">x1</span><span class="p">,</span> <span class="n">y_ground_vec</span><span class="p">],</span> <span class="p">[</span><span class="n">x2</span><span class="p">,</span> <span class="n">y_ground_vec</span><span class="p">]]))</span>
+            <span class="n">list_illum_elements</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">TsGroundElement</span><span class="p">(</span>
+                <span class="n">coords</span><span class="p">,</span> <span class="n">list_ordered_cut_pts_coords</span><span class="o">=</span><span class="n">cut_pt_coords</span><span class="p">,</span>
+                <span class="n">param_names</span><span class="o">=</span><span class="n">param_names</span><span class="p">,</span> <span class="n">shaded</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span>
+            <span class="n">next_x</span> <span class="o">=</span> <span class="n">shadow_element</span><span class="o">.</span><span class="n">coords</span><span class="o">.</span><span class="n">b2</span><span class="o">.</span><span class="n">x</span>
+        <span class="c1"># Add the last illuminated element to the list</span>
+        <span class="n">coords</span> <span class="o">=</span> <span class="n">TsLineCoords</span><span class="o">.</span><span class="n">from_array</span><span class="p">(</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="n">next_x</span><span class="p">,</span> <span class="n">y_ground_vec</span><span class="p">],</span>
+                      <span class="p">[</span><span class="n">MAX_X_GROUND</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">n_steps</span><span class="p">),</span> <span class="n">y_ground_vec</span><span class="p">]]))</span>
+        <span class="n">list_illum_elements</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">TsGroundElement</span><span class="p">(</span>
+            <span class="n">coords</span><span class="p">,</span> <span class="n">list_ordered_cut_pts_coords</span><span class="o">=</span><span class="n">cut_pt_coords</span><span class="p">,</span>
+            <span class="n">param_names</span><span class="o">=</span><span class="n">param_names</span><span class="p">,</span> <span class="n">shaded</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="n">list_illum_elements</span>
+
+    <span class="k">def</span> <span class="nf">_merge_shadow_surfaces</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idx</span><span class="p">,</span> <span class="n">non_pt_shadow_elements</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Merge the shadow surfaces in a list of shadow elements</span>
+<span class="sd">        at the shadow boundaries only, at a given index, but keep the shadow</span>
+<span class="sd">        surfaces broken up at the cut points.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        idx : int</span>
+<span class="sd">            Index at which we want to merge the surfaces</span>
+<span class="sd">        non_pt_shadow_elements : \</span>
+<span class="sd">        list of :py:class:`~pvfactors.geometry.pvground.TsGroundElement`</span>
+<span class="sd">            List of non point shadow elements</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        list_shadow_surfaces : \</span>
+<span class="sd">        list of :py:class:`~pvfactors.geometry.base.PVSurface`</span>
+<span class="sd">            List of shadow surfaces at a given index</span>
+<span class="sd">            (ordered from left to right)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># TODO: check if it would be faster to merge the ground elements first,</span>
+        <span class="c1"># and then break it down with the cut points</span>
+
+        <span class="c1"># Decide whether to merge all shadows or not</span>
+        <span class="n">list_shadow_surfaces</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">flag_overlap</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># Get the overlap flags</span>
+            <span class="n">is_overlap</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">flag_overlap</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
+            <span class="n">n_shadow_elements</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">non_pt_shadow_elements</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">is_overlap</span> <span class="ow">and</span> <span class="p">(</span><span class="n">n_shadow_elements</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">):</span>
+                <span class="c1"># If there&#39;s only one shadow, not point in going through this</span>
+
+                <span class="c1"># Now go from left to right and merge shadow surfaces</span>
+                <span class="n">surface_to_merge</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="k">for</span> <span class="n">i_el</span><span class="p">,</span> <span class="n">shadow_el</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">non_pt_shadow_elements</span><span class="p">):</span>
+                    <span class="n">surfaces</span> <span class="o">=</span> <span class="n">shadow_el</span><span class="o">.</span><span class="n">non_point_surfaces_at</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span>
+                    <span class="n">n_surf</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">surfaces</span><span class="p">)</span>
+                    <span class="k">for</span> <span class="n">i_surf</span><span class="p">,</span> <span class="n">surface</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">surfaces</span><span class="p">):</span>
+                        <span class="k">if</span> <span class="n">i_surf</span> <span class="o">==</span> <span class="n">n_surf</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
+                            <span class="c1"># last surface, could also be first</span>
+                            <span class="k">if</span> <span class="n">i_surf</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                                <span class="c1"># Need to merge with preceding if exists</span>
+                                <span class="k">if</span> <span class="n">surface_to_merge</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                                    <span class="n">coords</span> <span class="o">=</span> <span class="p">[</span><span class="n">surface_to_merge</span><span class="o">.</span><span class="n">boundary</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                                              <span class="n">surface</span><span class="o">.</span><span class="n">boundary</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span>
+                                    <span class="n">surface</span> <span class="o">=</span> <span class="n">PVSurface</span><span class="p">(</span>
+                                        <span class="n">coords</span><span class="p">,</span> <span class="n">shaded</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                                        <span class="n">param_names</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">param_names</span><span class="p">,</span>
+                                        <span class="n">params</span><span class="o">=</span><span class="n">surface</span><span class="o">.</span><span class="n">params</span><span class="p">,</span>
+                                        <span class="n">index</span><span class="o">=</span><span class="n">surface</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
+                            <span class="k">if</span> <span class="n">i_el</span> <span class="o">==</span> <span class="n">n_shadow_elements</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
+                                <span class="c1"># last surface of last shadow element</span>
+                                <span class="n">list_shadow_surfaces</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">surface</span><span class="p">)</span>
+                            <span class="k">else</span><span class="p">:</span>
+                                <span class="c1"># keep for merging with next element</span>
+                                <span class="n">surface_to_merge</span> <span class="o">=</span> <span class="n">surface</span>
+                        <span class="k">elif</span> <span class="n">i_surf</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                            <span class="c1"># first surface but definitely not last either</span>
+                            <span class="k">if</span> <span class="n">surface_to_merge</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                                <span class="n">coords</span> <span class="o">=</span> <span class="p">[</span><span class="n">surface_to_merge</span><span class="o">.</span><span class="n">boundary</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                                          <span class="n">surface</span><span class="o">.</span><span class="n">boundary</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span>
+                                <span class="n">list_shadow_surfaces</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                                    <span class="n">PVSurface</span><span class="p">(</span><span class="n">coords</span><span class="p">,</span> <span class="n">shaded</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                                              <span class="n">param_names</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">param_names</span><span class="p">,</span>
+                                              <span class="n">params</span><span class="o">=</span><span class="n">surface</span><span class="o">.</span><span class="n">params</span><span class="p">,</span>
+                                              <span class="n">index</span><span class="o">=</span><span class="n">surface</span><span class="o">.</span><span class="n">index</span><span class="p">))</span>
+                            <span class="k">else</span><span class="p">:</span>
+                                <span class="n">list_shadow_surfaces</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">surface</span><span class="p">)</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="c1"># not first nor last surface</span>
+                            <span class="n">list_shadow_surfaces</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">surface</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># There&#39;s no need to merge anything</span>
+                <span class="k">for</span> <span class="n">shadow_el</span> <span class="ow">in</span> <span class="n">non_pt_shadow_elements</span><span class="p">:</span>
+                    <span class="n">list_shadow_surfaces</span> <span class="o">+=</span> \
+                        <span class="n">shadow_el</span><span class="o">.</span><span class="n">non_point_surfaces_at</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># There&#39;s no need to merge anything</span>
+            <span class="k">for</span> <span class="n">shadow_el</span> <span class="ow">in</span> <span class="n">non_pt_shadow_elements</span><span class="p">:</span>
+                <span class="n">list_shadow_surfaces</span> <span class="o">+=</span> <span class="n">shadow_el</span><span class="o">.</span><span class="n">non_point_surfaces_at</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">list_shadow_surfaces</span></div>
+
+
+<div class="viewcode-block" id="TsGroundElement"><a class="viewcode-back" href="../../../developer/generated/pvfactors.geometry.pvground.TsGroundElement.html#pvfactors.geometry.pvground.TsGroundElement">[docs]</a><span class="k">class</span> <span class="nc">TsGroundElement</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Special class for timeseries ground elements: a ground element has known</span>
+<span class="sd">    timeseries coordinate boundaries, but it will also have a break down of</span>
+<span class="sd">    its area into n+1 timeseries surfaces located in the n+1 ground zones</span>
+<span class="sd">    defined by the n ground cutting points.</span>
+<span class="sd">    This is crucial to calculate view factors in a vectorized way.&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="TsGroundElement.__init__"><a class="viewcode-back" href="../../../developer/generated/pvfactors.geometry.pvground.TsGroundElement.html#pvfactors.geometry.pvground.TsGroundElement.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coords</span><span class="p">,</span> <span class="n">list_ordered_cut_pts_coords</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">param_names</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">shaded</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Initialize the timeseries ground element using its timeseries</span>
+<span class="sd">        line coordinates, and build the timeseries surfaces for all the</span>
+<span class="sd">        cut point zones.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        coords : :py:class:`~pvfactors.geometry.timeseries.TsLineCoords`</span>
+<span class="sd">            Timeseries line coordinates of the ground element</span>
+<span class="sd">        list_ordered_cut_pts_coords : list, optional</span>
+<span class="sd">            List of all the cut point timeseries coordinates</span>
+<span class="sd">            (Default = [])</span>
+<span class="sd">        param_names : list of str, optional</span>
+<span class="sd">            List of names of surface parameters to use when creating geometries</span>
+<span class="sd">            (Default = None)</span>
+<span class="sd">        shaded : bool, optional</span>
+<span class="sd">            Flag specifying is element is a shadow or not (Default = False)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">coords</span> <span class="o">=</span> <span class="n">coords</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">param_names</span> <span class="o">=</span> <span class="n">param_names</span> <span class="ow">or</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">params</span> <span class="o">=</span> <span class="nb">dict</span><span class="o">.</span><span class="n">fromkeys</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">param_names</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">shaded</span> <span class="o">=</span> <span class="n">shaded</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">surface_dict</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># will be necessary for view factor calcs</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">surface_list</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># will be necessary for vf matrix formation</span>
+        <span class="n">list_ordered_cut_pts_coords</span> <span class="o">=</span> <span class="n">list_ordered_cut_pts_coords</span> <span class="ow">or</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">list_ordered_cut_pts_coords</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_create_all_ts_surfaces</span><span class="p">(</span><span class="n">list_ordered_cut_pts_coords</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_ts_surfaces</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">surface_list</span><span class="p">)</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">b1</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Timeseries coordinates of first boundary point&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">coords</span><span class="o">.</span><span class="n">b1</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">b2</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Timeseries coordinates of second boundary point&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">coords</span><span class="o">.</span><span class="n">b2</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">centroid</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Timeseries point coordinates of the element&#39;s centroid&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">coords</span><span class="o">.</span><span class="n">centroid</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">length</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Timeseries length of the ground&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">coords</span><span class="o">.</span><span class="n">length</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">all_ts_surfaces</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;List of all ts surfaces making up the ts ground element&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">surface_list</span>
+
+    <span class="k">def</span> <span class="nf">surfaces_at</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idx</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return list of surfaces (from left to right) at given index that</span>
+<span class="sd">        make up the ground element.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        idx : int</span>
+<span class="sd">            Index of interest</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        list of :py:class:`~pvfactors.geometry.base.PVSurface`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">surface</span><span class="o">.</span><span class="n">at</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">surface</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">surface_list</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">non_point_surfaces_at</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idx</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return list of non-point surfaces (from left to right) at given</span>
+<span class="sd">        index that make up the ground element.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        idx : int</span>
+<span class="sd">            Index of interest</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        list of :py:class:`~pvfactors.geometry.base.PVSurface`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">surface</span><span class="o">.</span><span class="n">at</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">surface</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">surface_list</span>
+                <span class="k">if</span> <span class="n">surface</span><span class="o">.</span><span class="n">length</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">DISTANCE_TOLERANCE</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">get_param_weighted</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">param</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get timeseries parameter for the ground element, after weighting by</span>
+<span class="sd">        surface length.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        param : str</span>
+<span class="sd">            Name of parameter</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        np.ndarray</span>
+<span class="sd">            Weighted parameter values</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_param_ww</span><span class="p">(</span><span class="n">param</span><span class="p">)</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">length</span>
+
+    <span class="k">def</span> <span class="nf">get_param_ww</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">param</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get timeseries parameter from the ground element with weight,</span>
+<span class="sd">        i.e. after multiplying by the surface lengths.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        param: str</span>
+<span class="sd">            Surface parameter to return</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        np.ndarray</span>
+<span class="sd">            Timeseries parameter values multiplied by weights</span>
+
+<span class="sd">        Raises</span>
+<span class="sd">        ------</span>
+<span class="sd">        KeyError</span>
+<span class="sd">            if parameter name not in a surface parameters</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="mf">0.</span>
+        <span class="k">for</span> <span class="n">ts_surf</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">surface_list</span><span class="p">:</span>
+            <span class="n">value</span> <span class="o">+=</span> <span class="n">ts_surf</span><span class="o">.</span><span class="n">length</span> <span class="o">*</span> <span class="n">ts_surf</span><span class="o">.</span><span class="n">get_param</span><span class="p">(</span><span class="n">param</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">value</span>
+
+    <span class="k">def</span> <span class="nf">_create_all_ts_surfaces</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">list_ordered_cut_pts</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Create all the n+1 timeseries surfaces that make up the timeseries</span>
+<span class="sd">        ground element, and which are located in the n+1 zones defined by</span>
+<span class="sd">        the n cut points.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        list_ordered_cut_pts : list of :py:class:`~pvfactors.geometry.timeseries.TsPointCoords`</span>
+<span class="sd">            List of timeseries coordinates of all cut points, ordered from</span>
+<span class="sd">            left to right</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Initialize dict</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">surface_dict</span> <span class="o">=</span> <span class="p">{</span><span class="n">i</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;right&#39;</span><span class="p">:</span> <span class="p">[],</span> <span class="s1">&#39;left&#39;</span><span class="p">:</span> <span class="p">[]}</span>
+                             <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">list_ordered_cut_pts</span><span class="p">))}</span>
+        <span class="n">n_cut_pts</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">list_ordered_cut_pts</span><span class="p">)</span>
+
+        <span class="n">next_coords</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">coords</span>
+        <span class="k">for</span> <span class="n">idx_pt</span><span class="p">,</span> <span class="n">cut_pt_coords</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">list_ordered_cut_pts</span><span class="p">):</span>
+            <span class="c1"># Get coords on left of cut pt</span>
+            <span class="n">coords_left</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_coords_left_of_cut_point</span><span class="p">(</span><span class="n">next_coords</span><span class="p">,</span>
+                                                         <span class="n">cut_pt_coords</span><span class="p">)</span>
+            <span class="c1"># Save that surface in the required structures</span>
+            <span class="n">surface_left</span> <span class="o">=</span> <span class="n">TsSurface</span><span class="p">(</span><span class="n">coords_left</span><span class="p">,</span> <span class="n">param_names</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">param_names</span><span class="p">,</span>
+                                     <span class="n">shaded</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">shaded</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">surface_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">surface_left</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">idx_pt</span><span class="p">,</span> <span class="n">n_cut_pts</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">surface_dict</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;left&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">surface_left</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">idx_pt</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">surface_dict</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="s1">&#39;right&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">surface_left</span><span class="p">)</span>
+            <span class="n">next_coords</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_coords_right_of_cut_point</span><span class="p">(</span><span class="n">next_coords</span><span class="p">,</span>
+                                                          <span class="n">cut_pt_coords</span><span class="p">)</span>
+        <span class="c1"># Save the right most portion</span>
+        <span class="n">next_surface</span> <span class="o">=</span> <span class="n">TsSurface</span><span class="p">(</span><span class="n">next_coords</span><span class="p">,</span> <span class="n">param_names</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">param_names</span><span class="p">,</span>
+                                 <span class="n">shaded</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">shaded</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">surface_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">next_surface</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">n_cut_pts</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">surface_dict</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="s1">&#39;right&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">next_surface</span><span class="p">)</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_coords_right_of_cut_point</span><span class="p">(</span><span class="n">coords</span><span class="p">,</span> <span class="n">cut_pt_coords</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Calculate timeseries line coordinates that are right of the given</span>
+<span class="sd">        cut point coordinates, but still within the ground area</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        coords : :py:class:`~pvfactors.geometry.timeseries.TsLineCoords`</span>
+<span class="sd">            Original timeseries coordinates</span>
+<span class="sd">        cut_pt_coords :</span>
+<span class="sd">        :py:class:`~pvfactors.geometry.timeseries.TsPointCoords`</span>
+<span class="sd">            Timeseries coordinates of cut point</span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        :py:class:`~pvfactors.geometry.timeseries.TsLineCoords`</span>
+<span class="sd">            Timeseries line coordinates that are located right of the cut</span>
+<span class="sd">            point</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">coords</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">coords</span><span class="p">)</span>
+        <span class="c1"># FIXME: should be using x_min x_max inputs instead of global constant</span>
+        <span class="n">coords</span><span class="o">.</span><span class="n">b1</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">coords</span><span class="o">.</span><span class="n">b1</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">cut_pt_coords</span><span class="o">.</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">coords</span><span class="o">.</span><span class="n">b1</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">minimum</span><span class="p">(</span><span class="n">coords</span><span class="o">.</span><span class="n">b1</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">MAX_X_GROUND</span><span class="p">)</span>
+        <span class="n">coords</span><span class="o">.</span><span class="n">b2</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">coords</span><span class="o">.</span><span class="n">b2</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">cut_pt_coords</span><span class="o">.</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">coords</span><span class="o">.</span><span class="n">b2</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">minimum</span><span class="p">(</span><span class="n">coords</span><span class="o">.</span><span class="n">b2</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">MAX_X_GROUND</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">coords</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_coords_left_of_cut_point</span><span class="p">(</span><span class="n">coords</span><span class="p">,</span> <span class="n">cut_pt_coords</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Calculate timeseries line coordinates that are left of the given</span>
+<span class="sd">        cut point coordinates, but still within the ground area</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        coords : :py:class:`~pvfactors.geometry.timeseries.TsLineCoords`</span>
+<span class="sd">            Original timeseries coordinates</span>
+<span class="sd">        cut_pt_coords :</span>
+<span class="sd">        :py:class:`~pvfactors.geometry.timeseries.TsPointCoords`</span>
+<span class="sd">            Timeseries coordinates of cut point</span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        :py:class:`~pvfactors.geometry.timeseries.TsLineCoords`</span>
+<span class="sd">            Timeseries line coordinates that are located left of the cut</span>
+<span class="sd">            point</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">coords</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">coords</span><span class="p">)</span>
+        <span class="c1"># FIXME: should be using x_min x_max inputs instead of global constant</span>
+        <span class="n">coords</span><span class="o">.</span><span class="n">b1</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">minimum</span><span class="p">(</span><span class="n">coords</span><span class="o">.</span><span class="n">b1</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">cut_pt_coords</span><span class="o">.</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">coords</span><span class="o">.</span><span class="n">b1</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">coords</span><span class="o">.</span><span class="n">b1</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">MIN_X_GROUND</span><span class="p">)</span>
+        <span class="n">coords</span><span class="o">.</span><span class="n">b2</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">minimum</span><span class="p">(</span><span class="n">coords</span><span class="o">.</span><span class="n">b2</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">cut_pt_coords</span><span class="o">.</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">coords</span><span class="o">.</span><span class="n">b2</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">coords</span><span class="o">.</span><span class="n">b2</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">MIN_X_GROUND</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">coords</span></div>
+
+
+<div class="viewcode-block" id="PVGround"><a class="viewcode-back" href="../../../developer/generated/pvfactors.geometry.pvground.PVGround.html#pvfactors.geometry.pvground.PVGround">[docs]</a><span class="k">class</span> <span class="nc">PVGround</span><span class="p">(</span><span class="n">BaseSide</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Class that defines the ground geometry in PV arrays.&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="PVGround.__init__"><a class="viewcode-back" href="../../../developer/generated/pvfactors.geometry.pvground.PVGround.html#pvfactors.geometry.pvground.PVGround.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">list_segments</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">original_linestring</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Initialize PV ground geometry.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        list_segments : list of :py:class:`~pvfactors.geometry.base.PVSegment`, optional</span>
+<span class="sd">            List of PV segments that will constitute the ground (Default = [])</span>
+<span class="sd">        original_linestring : :py:class:`shapely.geometry.LineString`, optional</span>
+<span class="sd">            Full continuous linestring that the ground will be made of</span>
+<span class="sd">            (Default = None)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">list_segments</span> <span class="o">=</span> <span class="n">list_segments</span> <span class="ow">or</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">original_linestring</span> <span class="o">=</span> <span class="n">original_linestring</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">PVGround</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">list_segments</span><span class="p">)</span></div>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">as_flat</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">x_min_max</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">shaded</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">y_ground</span><span class="o">=</span><span class="n">Y_GROUND</span><span class="p">,</span>
+                <span class="n">param_names</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Build a horizontal flat ground surface, made of 1 PV segment.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        x_min_max : tuple, optional</span>
+<span class="sd">            List of minimum and maximum x coordinates for the flat surface [m]</span>
+<span class="sd">            (Default = None)</span>
+<span class="sd">        shaded : bool, optional</span>
+<span class="sd">            Shaded status of the created PV surfaces (Default = False)</span>
+<span class="sd">        y_ground : float, optional</span>
+<span class="sd">            Location of flat ground on y axis in [m] (Default = Y_GROUND)</span>
+<span class="sd">        param_names : list of str, optional</span>
+<span class="sd">            Names of the surface parameters, eg reflectivity, total incident</span>
+<span class="sd">            irradiance, temperature, etc. (Default = [])</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        PVGround object</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">param_names</span> <span class="o">=</span> <span class="n">param_names</span> <span class="ow">or</span> <span class="p">[]</span>
+        <span class="c1"># Get ground boundaries</span>
+        <span class="k">if</span> <span class="n">x_min_max</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">x_min</span><span class="p">,</span> <span class="n">x_max</span> <span class="o">=</span> <span class="n">MIN_X_GROUND</span><span class="p">,</span> <span class="n">MAX_X_GROUND</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">x_min</span><span class="p">,</span> <span class="n">x_max</span> <span class="o">=</span> <span class="n">x_min_max</span>
+        <span class="c1"># Create PV segment for flat ground</span>
+        <span class="n">coords</span> <span class="o">=</span> <span class="p">[(</span><span class="n">x_min</span><span class="p">,</span> <span class="n">y_ground</span><span class="p">),</span> <span class="p">(</span><span class="n">x_max</span><span class="p">,</span> <span class="n">y_ground</span><span class="p">)]</span>
+        <span class="n">seg</span> <span class="o">=</span> <span class="n">PVSegment</span><span class="o">.</span><span class="n">from_linestring_coords</span><span class="p">(</span><span class="n">coords</span><span class="p">,</span> <span class="n">shaded</span><span class="o">=</span><span class="n">shaded</span><span class="p">,</span>
+                                               <span class="n">normal_vector</span><span class="o">=</span><span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">],</span>
+                                               <span class="n">param_names</span><span class="o">=</span><span class="n">param_names</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">list_segments</span><span class="o">=</span><span class="p">[</span><span class="n">seg</span><span class="p">],</span> <span class="n">original_linestring</span><span class="o">=</span><span class="n">LineString</span><span class="p">(</span><span class="n">coords</span><span class="p">))</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">from_lists_surfaces</span><span class="p">(</span>
+            <span class="bp">cls</span><span class="p">,</span> <span class="n">list_shaded_surfaces</span><span class="p">,</span> <span class="n">list_illum_surfaces</span><span class="p">,</span> <span class="n">x_min_max</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">y_ground</span><span class="o">=</span><span class="n">Y_GROUND</span><span class="p">,</span> <span class="n">param_names</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Create ground from lists of shaded and illuminated PV surfaces.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        list_shaded_surfaces : list of :py:class:`~pvfactors.geometry.base.PVSurface`</span>
+<span class="sd">            List of shaded ground PV surfaces</span>
+<span class="sd">        list_illum_surfaces : list of :py:class:`~pvfactors.geometry.base.PVSurface`</span>
+<span class="sd">            List of illuminated ground PV surfaces</span>
+<span class="sd">        x_min_max : tuple, optional</span>
+<span class="sd">            List of minimum and maximum x coordinates for the flat surface [m]</span>
+<span class="sd">            (Default = None)</span>
+<span class="sd">        y_ground : float, optional</span>
+<span class="sd">            Location of flat ground on y axis in [m] (Default = Y_GROUND)</span>
+<span class="sd">        param_names : list of str, optional</span>
+<span class="sd">            Names of the surface parameters, eg reflectivity, total incident</span>
+<span class="sd">            irradiance, temperature, etc. (Default = [])</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        PVGround object</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">param_names</span> <span class="o">=</span> <span class="n">param_names</span> <span class="ow">or</span> <span class="p">[]</span>
+        <span class="c1"># Get ground boundaries</span>
+        <span class="k">if</span> <span class="n">x_min_max</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">x_min</span><span class="p">,</span> <span class="n">x_max</span> <span class="o">=</span> <span class="n">MIN_X_GROUND</span><span class="p">,</span> <span class="n">MAX_X_GROUND</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">x_min</span><span class="p">,</span> <span class="n">x_max</span> <span class="o">=</span> <span class="n">x_min_max</span>
+        <span class="n">full_extent_coords</span> <span class="o">=</span> <span class="p">[(</span><span class="n">x_min</span><span class="p">,</span> <span class="n">y_ground</span><span class="p">),</span> <span class="p">(</span><span class="n">x_max</span><span class="p">,</span> <span class="n">y_ground</span><span class="p">)]</span>
+
+        <span class="c1"># Create the shade collections</span>
+        <span class="n">shaded_collection</span> <span class="o">=</span> <span class="n">ShadeCollection</span><span class="p">(</span>
+            <span class="n">list_surfaces</span><span class="o">=</span><span class="n">list_shaded_surfaces</span><span class="p">,</span> <span class="n">shaded</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">param_names</span><span class="o">=</span><span class="n">param_names</span><span class="p">)</span>
+        <span class="n">illum_collection</span> <span class="o">=</span> <span class="n">ShadeCollection</span><span class="p">(</span>
+            <span class="n">list_surfaces</span><span class="o">=</span><span class="n">list_illum_surfaces</span><span class="p">,</span> <span class="n">shaded</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+            <span class="n">param_names</span><span class="o">=</span><span class="n">param_names</span><span class="p">)</span>
+
+        <span class="c1"># Create the ground segment</span>
+        <span class="n">segment</span> <span class="o">=</span> <span class="n">PVSegment</span><span class="p">(</span><span class="n">illum_collection</span><span class="o">=</span><span class="n">illum_collection</span><span class="p">,</span>
+                            <span class="n">shaded_collection</span><span class="o">=</span><span class="n">shaded_collection</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">list_segments</span><span class="o">=</span><span class="p">[</span><span class="n">segment</span><span class="p">],</span>
+                   <span class="n">original_linestring</span><span class="o">=</span><span class="n">LineString</span><span class="p">(</span><span class="n">full_extent_coords</span><span class="p">))</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">boundary</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Boundaries of the ground&#39;s original linestring.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">original_linestring</span><span class="o">.</span><span class="n">boundary</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2016, SunPower Corporation
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

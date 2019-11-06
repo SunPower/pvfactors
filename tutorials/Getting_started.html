@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Getting started &mdash; pvfactors 1.2.2 documentation</title>
+  <title>Getting started &mdash; pvfactors 1.3.0 documentation</title>
   
 
   
@@ -40,8 +40,8 @@
   <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Run fast simulations with 8760 annual inputs" href="Run_fast_simulations.html" />
-    <link rel="prev" title="User guide and tutorials" href="index.html" /> 
+    <link rel="next" title="PV Array geometry introduction" href="PVArray_introduction.html" />
+    <link rel="prev" title="Tutorials" href="index.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -68,7 +68,7 @@
             
             
               <div class="version">
-                1.2.2
+                1.3.0
               </div>
             
           
@@ -94,22 +94,21 @@
             
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../installation/index.html">Installation</a></li>
-<li class="toctree-l1 current"><a class="reference internal" href="index.html">User guide and tutorials</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="index.html#understanding-pv-array-2d-geometries">Understanding PV array 2D geometries</a></li>
-<li class="toctree-l2"><a class="reference internal" href="index.html#pv-array-parameters">PV array parameters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../concepts/index.html">Main concepts</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Tutorials</a><ul class="current">
 <li class="toctree-l2 current"><a class="reference internal" href="index.html#getting-started-running-simulations">Getting started: running simulations</a><ul class="current">
 <li class="toctree-l3 current"><a class="current reference internal" href="#">Getting started</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#Get-timeseries-inputs">Get timeseries inputs</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#Prepare-some-PV-array-parameters">Prepare some PV array parameters</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#Create-a-PV-array-and-update-it-with-the-engine">Create a PV array and update it with the engine</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#Run-simulation-using-the-fast-mode">Run simulation using the fast mode</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#Run-simulation-using-the-full-mode">Run simulation using the full mode</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#Run-simulation-using-the-fast-mode">Run simulation using the fast mode</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="index.html#details-on-the-fast-mode-simulations">Details on the “fast mode” simulations</a></li>
 <li class="toctree-l2"><a class="reference internal" href="index.html#details-on-the-full-mode-simulations">Details on the “full mode” simulations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="index.html#details-on-the-fast-mode-simulations">Details on the “fast mode” simulations</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../theory/index.html">Theory</a></li>
@@ -160,7 +159,7 @@
     
       <li><a href="../index.html">Docs</a> &raquo;</li>
         
-          <li><a href="index.html">User guide and tutorials</a> &raquo;</li>
+          <li><a href="index.html">Tutorials</a> &raquo;</li>
         
       <li>Getting started</li>
     
@@ -412,8 +411,8 @@ div.rendered_html tbody tr:hover {
 <li><p>create a PV array</p></li>
 <li><p>use the engine to update the PV array</p></li>
 <li><p>plot the PV array 2D geometry for a given timestamp index</p></li>
-<li><p>run a timeseries bifacial simulation using the “fast mode”</p></li>
 <li><p>run a timeseries bifacial simulation using the “full mode”</p></li>
+<li><p>run a timeseries bifacial simulation using the “fast mode”</p></li>
 </ul>
 <p>Imports and settings</p>
 <div class="nbinput nblast docutils container">
@@ -576,10 +575,10 @@ div.rendered_html tbody tr:hover {
 </div>
 </div>
 </div>
-<div class="section" id="Run-simulation-using-the-fast-mode">
-<h2>Run simulation using the fast mode<a class="headerlink" href="#Run-simulation-using-the-fast-mode" title="Permalink to this headline">¶</a></h2>
-<p>The “fast mode” allows the user to get almost instantaneous calculation results for the incident irradiance on the back surface of the PV rows. It assumes that the incident irradiance values on surfaces other than back surfaces are known (e.g. from the Perez transposition model).</p>
-<div class="nbinput docutils container">
+<div class="section" id="Run-simulation-using-the-full-mode">
+<h2>Run simulation using the full mode<a class="headerlink" href="#Run-simulation-using-the-full-mode" title="Permalink to this headline">¶</a></h2>
+<p>The “full mode” allows the user to run the irradiance calculations by accounting for the equilibrium of reflections between all the surfaces in the system. So it is more precise than the “fast mode”, and it happens to be almost as fast.</p>
+<div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
 </div>
@@ -588,7 +587,86 @@ div.rendered_html tbody tr:hover {
 <span class="c1"># incident irradiance on the back surface of the middle PV row</span>
 <span class="k">def</span> <span class="nf">fn_report</span><span class="p">(</span><span class="n">pvarray</span><span class="p">):</span> <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s1">&#39;qinc_back&#39;</span><span class="p">:</span> <span class="n">pvarray</span><span class="o">.</span><span class="n">ts_pvrows</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">back</span><span class="o">.</span><span class="n">get_param_weighted</span><span class="p">(</span><span class="s1">&#39;qinc&#39;</span><span class="p">)})</span>
 
-<span class="c1"># Run the fast mode calculation on the middle PV row</span>
+<span class="c1"># Run full mode simulation</span>
+<span class="n">report</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">run_full_mode</span><span class="p">(</span><span class="n">fn_build_report</span><span class="o">=</span><span class="n">fn_report</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="c1"># Print results (report is defined by report function passed by user)</span>
+<span class="n">df_report_full</span> <span class="o">=</span> <span class="n">report</span><span class="o">.</span><span class="n">assign</span><span class="p">(</span><span class="n">timestamps</span><span class="o">=</span><span class="n">df_inputs</span><span class="o">.</span><span class="n">index</span><span class="p">)</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s1">&#39;timestamps&#39;</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Incident irradiance on back surface of middle PV row: </span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+<span class="n">df_report_full</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Incident irradiance on back surface of middle PV row:
+
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>qinc_back</th>
+    </tr>
+    <tr>
+      <th>timestamps</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>2017-08-31 11:00:00</td>
+      <td>106.627832</td>
+    </tr>
+    <tr>
+      <td>2017-08-31 15:00:00</td>
+      <td>79.668878</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+</div>
+<div class="section" id="Run-simulation-using-the-fast-mode">
+<h2>Run simulation using the fast mode<a class="headerlink" href="#Run-simulation-using-the-fast-mode" title="Permalink to this headline">¶</a></h2>
+<p>The “fast mode” allows the user to get slightly faster but less accurate results for the incident irradiance on the back surface of a single PV row. It assumes that the incident irradiance values on surfaces other than back surfaces are known (e.g. from the Perez transposition model).</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="c1"># Run the fast mode calculation on the middle PV row: use the same report function as previously</span>
 <span class="n">df_report_fast</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">run_fast_mode</span><span class="p">(</span><span class="n">fn_build_report</span><span class="o">=</span><span class="n">fn_report</span><span class="p">,</span> <span class="n">pvrow_index</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 
 <span class="c1"># Print the results</span>
@@ -607,92 +685,6 @@ Incident irradiance on back surface of middle PV row:
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
-</pre></div>
-</div>
-<div class="output_area rendered_html docutils container">
-<div>
-<style scoped>
-    .dataframe tbody tr th:only-of-type {
-        vertical-align: middle;
-    }
-
-    .dataframe tbody tr th {
-        vertical-align: top;
-    }
-
-    .dataframe thead th {
-        text-align: right;
-    }
-</style>
-<table border="1" class="dataframe">
-  <thead>
-    <tr style="text-align: right;">
-      <th></th>
-      <th>qinc_back</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>2017-08-31 11:00:00</td>
-      <td>110.586509</td>
-    </tr>
-    <tr>
-      <td>2017-08-31 15:00:00</td>
-      <td>86.943571</td>
-    </tr>
-  </tbody>
-</table>
-</div></div>
-</div>
-</div>
-<div class="section" id="Run-simulation-using-the-full-mode">
-<h2>Run simulation using the full mode<a class="headerlink" href="#Run-simulation-using-the-full-mode" title="Permalink to this headline">¶</a></h2>
-<p>The “full mode” allows the user to run the irradiance calculations by accounting for the equilibrium of reflections between all the surfaces in the system. So it is more precise than the “fast mode”, but it takes a little longer to run.</p>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="c1"># Create a function that will build a report: here we use an example that reports irradiance on center PV row</span>
-<span class="kn">from</span> <span class="nn">pvfactors.report</span> <span class="k">import</span> <span class="n">example_fn_build_report</span>
-
-<span class="c1"># Run full mode simulation</span>
-<span class="n">report</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">run_full_mode</span><span class="p">(</span><span class="n">fn_build_report</span><span class="o">=</span><span class="n">example_fn_build_report</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area stderr docutils container">
-<div class="highlight"><pre>
-100%|██████████| 2/2 [00:00&lt;00:00, 37.55it/s]
-</pre></div></div>
-</div>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="c1"># Print results (report is defined by report function passed by user)</span>
-<span class="n">df_report_full</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">report</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">df_inputs</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
-
-<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Incident irradiance on back surface of middle PV row: </span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
-<span class="n">df_report_full</span><span class="p">[[</span><span class="s1">&#39;qinc_back&#39;</span><span class="p">]]</span>
-</pre></div>
-</div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-Incident irradiance on back surface of middle PV row:
-
-</pre></div></div>
-</div>
-<div class="nboutput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
@@ -721,17 +713,17 @@ Incident irradiance on back surface of middle PV row:
   <tbody>
     <tr>
       <td>2017-08-31 11:00:00</td>
-      <td>106.627832</td>
+      <td>107.934226</td>
     </tr>
     <tr>
       <td>2017-08-31 15:00:00</td>
-      <td>79.668878</td>
+      <td>83.495861</td>
     </tr>
   </tbody>
 </table>
 </div></div>
 </div>
-<p>We can observe here some differences between the fast and full modes for the back surface total irradiance, which are mainly due the difference in how reflections are accounted for.</p>
+<p>We can observe here some differences between the fast and full modes for the back surface total irradiance, which are mainly due to the difference in how reflections are accounted for.</p>
 </div>
 </div>
 
@@ -743,10 +735,10 @@ Incident irradiance on back surface of middle PV row:
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="Run_fast_simulations.html" class="btn btn-neutral float-right" title="Run fast simulations with 8760 annual inputs" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="PVArray_introduction.html" class="btn btn-neutral float-right" title="PV Array geometry introduction" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="index.html" class="btn btn-neutral float-left" title="User guide and tutorials" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="index.html" class="btn btn-neutral float-left" title="Tutorials" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

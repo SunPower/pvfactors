@@ -1,6 +1,4 @@
-.. viewfactors
-
-.. currentmodule:: pvfactors.viewfactors
+.. _viewfactors:
 
 viewfactors
 -----------
@@ -10,26 +8,27 @@ The viewfactors sub-package of pvfactors implements the methods used to calculat
 calculator
 ^^^^^^^^^^
 
-.. automodule:: calculator
+.. automodule:: pvfactors.viewfactors.calculator
    :no-members:
    :no-inherited-members:
+   :noindex:
 
 .. autosummary::
    :toctree: generated/
    :nosignatures:
 
-   calculator.VFCalculator
-   calculator.VFTsMethods
+   ~pvfactors.viewfactors.calculator.VFCalculator
 
-mapper
-^^^^^^
+methods
+^^^^^^^
 
-.. automodule:: mapper
+.. automodule:: pvfactors.viewfactors.methods
    :no-members:
    :no-inherited-members:
+   :noindex:
 
 .. autosummary::
    :toctree: generated/
    :nosignatures:
 
-   mapper.VFMapperOrderedPVArray
+   ~pvfactors.viewfactors.methods.VFTsMethods

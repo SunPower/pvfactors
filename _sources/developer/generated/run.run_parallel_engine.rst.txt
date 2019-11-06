@@ -1,6 +1,0 @@
-run.run\_parallel\_engine
-=========================
-
-.. currentmodule:: run
-
-.. autofunction:: run_parallel_engine

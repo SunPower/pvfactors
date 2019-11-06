@@ -1,0 +1,41 @@
+pvfactors.irradiance.models.HybridPerezOrdered
+==============================================
+
+.. currentmodule:: pvfactors.irradiance.models
+
+.. autoclass:: HybridPerezOrdered
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~HybridPerezOrdered.__init__
+      ~HybridPerezOrdered.fit
+      ~HybridPerezOrdered.get_full_modeling_vectors
+      ~HybridPerezOrdered.get_full_ts_modeling_vectors
+      ~HybridPerezOrdered.get_ts_modeling_vectors
+      ~HybridPerezOrdered.transform
+      ~HybridPerezOrdered.update_ts_surface_sky_term
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~HybridPerezOrdered.cats
+      ~HybridPerezOrdered.gnd_illum
+      ~HybridPerezOrdered.gnd_shaded
+      ~HybridPerezOrdered.irradiance_comp
+      ~HybridPerezOrdered.params
+      ~HybridPerezOrdered.pvrow_illum
+      ~HybridPerezOrdered.pvrow_shaded
+      ~HybridPerezOrdered.sky_luminance
+   
+   

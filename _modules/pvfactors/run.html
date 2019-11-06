@@ -1,0 +1,492 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>pvfactors.run &mdash; pvfactors 1.3.0 documentation</title>
+  
+
+  
+  
+    <link rel="shortcut icon" href="../../_static/favicon.ico"/>
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../_static/doctools.js"></script>
+        <script type="text/javascript" src="../../_static/language_data.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/css/custom.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> pvfactors
+          
+
+          
+            
+            <img src="../../_static/logo_small.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.3.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../installation/index.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../concepts/index.html">Main concepts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorials/index.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../theory/index.html">Theory</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../developer/index.html">Developer API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../whatsnew.html">What’s New</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">pvfactors</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>pvfactors.run</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for pvfactors.run</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Module containing the functions to run engine calculations in normal or</span>
+<span class="sd">parallel mode.&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">pvfactors</span> <span class="k">import</span> <span class="n">logging</span>
+<span class="kn">from</span> <span class="nn">pvfactors.geometry</span> <span class="k">import</span> <span class="n">OrderedPVArray</span>
+<span class="kn">from</span> <span class="nn">pvfactors.irradiance</span> <span class="k">import</span> <span class="n">HybridPerezOrdered</span>
+<span class="kn">from</span> <span class="nn">pvfactors.viewfactors</span> <span class="k">import</span> <span class="n">VFCalculator</span>
+<span class="kn">from</span> <span class="nn">pvfactors.engine</span> <span class="k">import</span> <span class="n">PVEngine</span>
+<span class="kn">from</span> <span class="nn">multiprocessing</span> <span class="k">import</span> <span class="n">Pool</span><span class="p">,</span> <span class="n">cpu_count</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">from</span> <span class="nn">time</span> <span class="k">import</span> <span class="n">time</span>
+
+
+<span class="n">LOGGER</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+<span class="n">LOGGER</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="run_timeseries_engine"><a class="viewcode-back" href="../../developer/generated/pvfactors.run.run_timeseries_engine.html#pvfactors.run.run_timeseries_engine">[docs]</a><span class="k">def</span> <span class="nf">run_timeseries_engine</span><span class="p">(</span><span class="n">fn_build_report</span><span class="p">,</span> <span class="n">pvarray_parameters</span><span class="p">,</span>
+                          <span class="n">timestamps</span><span class="p">,</span> <span class="n">dni</span><span class="p">,</span> <span class="n">dhi</span><span class="p">,</span> <span class="n">solar_zenith</span><span class="p">,</span> <span class="n">solar_azimuth</span><span class="p">,</span>
+                          <span class="n">surface_tilt</span><span class="p">,</span> <span class="n">surface_azimuth</span><span class="p">,</span> <span class="n">albedo</span><span class="p">,</span>
+                          <span class="n">cls_pvarray</span><span class="o">=</span><span class="n">OrderedPVArray</span><span class="p">,</span> <span class="n">cls_engine</span><span class="o">=</span><span class="n">PVEngine</span><span class="p">,</span>
+                          <span class="n">cls_irradiance</span><span class="o">=</span><span class="n">HybridPerezOrdered</span><span class="p">,</span>
+                          <span class="n">cls_vf</span><span class="o">=</span><span class="n">VFCalculator</span><span class="p">,</span>
+                          <span class="n">fast_mode_pvrow_index</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                          <span class="n">fast_mode_segment_index</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                          <span class="n">irradiance_model_params</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                          <span class="n">ghi</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Run timeseries simulation without multiprocessing. This is the</span>
+<span class="sd">    functional approach to the :py:class:`~pvfactors.engine.PVEngine` class.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    fn_build_report : function</span>
+<span class="sd">        Function that will build the report of the simulation</span>
+<span class="sd">    pvarray_parameters : dict</span>
+<span class="sd">        The parameters defining the PV array</span>
+<span class="sd">    timestamps : array-like</span>
+<span class="sd">        List of timestamps of the simulation.</span>
+<span class="sd">    dni : array-like</span>
+<span class="sd">        Direct normal irradiance values [W/m2]</span>
+<span class="sd">    dhi : array-like</span>
+<span class="sd">        Diffuse horizontal irradiance values [W/m2]</span>
+<span class="sd">    solar_zenith : array-like</span>
+<span class="sd">        Solar zenith angles [deg]</span>
+<span class="sd">    solar_azimuth : array-like</span>
+<span class="sd">        Solar azimuth angles [deg]</span>
+<span class="sd">    surface_tilt : array-like</span>
+<span class="sd">        Surface tilt angles, from 0 to 180 [deg]</span>
+<span class="sd">    surface_azimuth : array-like</span>
+<span class="sd">        Surface azimuth angles [deg]</span>
+<span class="sd">    albedo : array-like</span>
+<span class="sd">        Albedo values (or ground reflectivity)</span>
+<span class="sd">    cls_pvarray : class of PV array, optional</span>
+<span class="sd">        Class that will be used to build the PV array</span>
+<span class="sd">        (Default =</span>
+<span class="sd">        :py:class:`~pvfactors.geometry.pvarray.OrderedPVArray` class)</span>
+<span class="sd">    cls_engine : class of PV engine, optional</span>
+<span class="sd">        Class of the engine to use to run the simulations (Default =</span>
+<span class="sd">        :py:class:`~pvfactors.engine.PVEngine` class)</span>
+<span class="sd">    cls_irradiance : class of irradiance model, optional</span>
+<span class="sd">        The irradiance model that will be applied to the PV array</span>
+<span class="sd">        (Default =</span>
+<span class="sd">        :py:class:`~pvfactors.irradiance.models.HybridPerezOrdered` class)</span>
+<span class="sd">    cls_vf : class of VF calculator, optional</span>
+<span class="sd">        Calculator that will be used to calculate the view factor matrices</span>
+<span class="sd">        (Default =</span>
+<span class="sd">        :py:class:`~pvfactors.viewfactors.calculator.VFCalculator` class)</span>
+<span class="sd">    fast_mode_pvrow_index : int, optional</span>
+<span class="sd">        If a valid pvrow index is passed, then the PVEngine fast mode</span>
+<span class="sd">        will be activated and the engine calculation will be done only</span>
+<span class="sd">        for the back surface of the selected pvrow (Default = None)</span>
+<span class="sd">    fast_mode_segment_index : int, optional</span>
+<span class="sd">        If a segment index is passed, then the PVEngine fast mode</span>
+<span class="sd">        will calculate back surface irradiance only for the</span>
+<span class="sd">        selected segment of the selected back surface (Default = None)</span>
+<span class="sd">    irradiance_model_params : dict, optional</span>
+<span class="sd">        Dictionary of parameters that will be passed to the irradiance model</span>
+<span class="sd">        class as kwargs at instantiation (Default = None)</span>
+<span class="sd">    ghi : array-like, optional</span>
+<span class="sd">        Global horizontal irradiance values [W/m2] (Default = None)</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    report</span>
+<span class="sd">        Saved results from the simulation, as specified by user&#39;s report</span>
+<span class="sd">        function</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Prepare irradiance model inputs</span>
+    <span class="n">irradiance_model_params</span> <span class="o">=</span> <span class="p">({}</span> <span class="k">if</span> <span class="n">irradiance_model_params</span> <span class="ow">is</span> <span class="kc">None</span>
+                               <span class="k">else</span> <span class="n">irradiance_model_params</span><span class="p">)</span>
+    <span class="c1"># Instantiate classes and engine</span>
+    <span class="n">irradiance_model</span> <span class="o">=</span> <span class="n">cls_irradiance</span><span class="p">(</span><span class="o">**</span><span class="n">irradiance_model_params</span><span class="p">)</span>
+    <span class="n">pvarray</span> <span class="o">=</span> <span class="n">cls_pvarray</span><span class="o">.</span><span class="n">init_from_dict</span><span class="p">(</span><span class="n">pvarray_parameters</span><span class="p">)</span>
+    <span class="n">vf_calculator</span> <span class="o">=</span> <span class="n">cls_vf</span><span class="p">()</span>
+    <span class="n">eng</span> <span class="o">=</span> <span class="n">cls_engine</span><span class="p">(</span><span class="n">pvarray</span><span class="p">,</span> <span class="n">irradiance_model</span><span class="o">=</span><span class="n">irradiance_model</span><span class="p">,</span>
+                     <span class="n">vf_calculator</span><span class="o">=</span><span class="n">vf_calculator</span><span class="p">,</span>
+                     <span class="n">fast_mode_pvrow_index</span><span class="o">=</span><span class="n">fast_mode_pvrow_index</span><span class="p">,</span>
+                     <span class="n">fast_mode_segment_index</span><span class="o">=</span><span class="n">fast_mode_segment_index</span><span class="p">)</span>
+
+    <span class="c1"># Fit engine</span>
+    <span class="n">eng</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">timestamps</span><span class="p">,</span> <span class="n">dni</span><span class="p">,</span> <span class="n">dhi</span><span class="p">,</span> <span class="n">solar_zenith</span><span class="p">,</span> <span class="n">solar_azimuth</span><span class="p">,</span> <span class="n">surface_tilt</span><span class="p">,</span>
+            <span class="n">surface_azimuth</span><span class="p">,</span> <span class="n">albedo</span><span class="p">,</span> <span class="n">ghi</span><span class="o">=</span><span class="n">ghi</span><span class="p">)</span>
+
+    <span class="c1"># Run all timesteps</span>
+    <span class="n">report</span> <span class="o">=</span> <span class="p">(</span><span class="n">eng</span><span class="o">.</span><span class="n">run_full_mode</span><span class="p">(</span><span class="n">fn_build_report</span><span class="o">=</span><span class="n">fn_build_report</span><span class="p">)</span>
+              <span class="k">if</span> <span class="n">fast_mode_pvrow_index</span> <span class="ow">is</span> <span class="kc">None</span>
+              <span class="k">else</span> <span class="n">eng</span><span class="o">.</span><span class="n">run_fast_mode</span><span class="p">(</span><span class="n">fn_build_report</span><span class="o">=</span><span class="n">fn_build_report</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="n">report</span></div>
+
+
+<div class="viewcode-block" id="run_parallel_engine"><a class="viewcode-back" href="../../developer/generated/pvfactors.run.run_parallel_engine.html#pvfactors.run.run_parallel_engine">[docs]</a><span class="k">def</span> <span class="nf">run_parallel_engine</span><span class="p">(</span><span class="n">report_builder</span><span class="p">,</span> <span class="n">pvarray_parameters</span><span class="p">,</span>
+                        <span class="n">timestamps</span><span class="p">,</span> <span class="n">dni</span><span class="p">,</span> <span class="n">dhi</span><span class="p">,</span> <span class="n">solar_zenith</span><span class="p">,</span> <span class="n">solar_azimuth</span><span class="p">,</span>
+                        <span class="n">surface_tilt</span><span class="p">,</span> <span class="n">surface_azimuth</span><span class="p">,</span> <span class="n">albedo</span><span class="p">,</span>
+                        <span class="n">cls_pvarray</span><span class="o">=</span><span class="n">OrderedPVArray</span><span class="p">,</span> <span class="n">cls_engine</span><span class="o">=</span><span class="n">PVEngine</span><span class="p">,</span>
+                        <span class="n">cls_irradiance</span><span class="o">=</span><span class="n">HybridPerezOrdered</span><span class="p">,</span>
+                        <span class="n">cls_vf</span><span class="o">=</span><span class="n">VFCalculator</span><span class="p">,</span> <span class="n">fast_mode_pvrow_index</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                        <span class="n">fast_mode_segment_index</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                        <span class="n">irradiance_model_params</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">n_processes</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+                        <span class="n">ghi</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Run timeseries simulation using multiprocessing. Here, instead of a</span>
+<span class="sd">    function that will build the report, the users will need to pass a class</span>
+<span class="sd">    (or an object).</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    report_builder : class or object</span>
+<span class="sd">        Class or object that will build and merge the reports. It **must**</span>
+<span class="sd">        have a ``build()`` and a ``merge()`` method that perform the tasks</span>
+<span class="sd">    pvarray_parameters : dict</span>
+<span class="sd">        The parameters defining the PV array</span>
+<span class="sd">    timestamps : array-like</span>
+<span class="sd">        List of timestamps of the simulation.</span>
+<span class="sd">    dni : array-like</span>
+<span class="sd">        Direct normal irradiance values [W/m2]</span>
+<span class="sd">    dhi : array-like</span>
+<span class="sd">        Diffuse horizontal irradiance values [W/m2]</span>
+<span class="sd">    solar_zenith : array-like</span>
+<span class="sd">        Solar zenith angles [deg]</span>
+<span class="sd">    solar_azimuth : array-like</span>
+<span class="sd">        Solar azimuth angles [deg]</span>
+<span class="sd">    surface_tilt : array-like</span>
+<span class="sd">        Surface tilt angles, from 0 to 180 [deg]</span>
+<span class="sd">    surface_azimuth : array-like</span>
+<span class="sd">        Surface azimuth angles [deg]</span>
+<span class="sd">    albedo : array-like</span>
+<span class="sd">        Albedo values (or ground reflectivity)</span>
+<span class="sd">    cls_pvarray : class of PV array, optional</span>
+<span class="sd">        Class that will be used to build the PV array</span>
+<span class="sd">        (Default =</span>
+<span class="sd">        :py:class:`~pvfactors.geometry.pvarray.OrderedPVArray` class)</span>
+<span class="sd">    cls_engine : class of PV engine, optional</span>
+<span class="sd">        Class of the engine to use to run the simulations (Default =</span>
+<span class="sd">        :py:class:`~pvfactors.engine.PVEngine` class)</span>
+<span class="sd">    cls_irradiance : class of irradiance model, optional</span>
+<span class="sd">        The irradiance model that will be applied to the PV array</span>
+<span class="sd">        (Default =</span>
+<span class="sd">        :py:class:`~pvfactors.irradiance.models.HybridPerezOrdered` class)</span>
+<span class="sd">    cls_vf : class of VF calculator, optional</span>
+<span class="sd">        Calculator that will be used to calculate the view factor matrices</span>
+<span class="sd">        (Default =</span>
+<span class="sd">        :py:class:`~pvfactors.viewfactors.calculator.VFCalculator` class)</span>
+<span class="sd">    fast_mode_pvrow_index : int, optional</span>
+<span class="sd">        If a valid pvrow index is passed, then the PVEngine fast mode</span>
+<span class="sd">        will be activated and the engine calculation will be done only</span>
+<span class="sd">        for the back surface of the selected pvrow (Default = None)</span>
+<span class="sd">    fast_mode_segment_index : int, optional</span>
+<span class="sd">        If a segment index is passed, then the PVEngine fast mode</span>
+<span class="sd">        will calculate back surface irradiance only for the</span>
+<span class="sd">        selected segment of the selected back surface (Default = None)</span>
+<span class="sd">    irradiance_model_params : dict, optional</span>
+<span class="sd">        Dictionary of parameters that will be passed to the irradiance model</span>
+<span class="sd">        class as kwargs at instantiation (Default = None)</span>
+<span class="sd">    n_processes : int, optional</span>
+<span class="sd">        Number of parallel processes to run for the calculation (Default = 2)</span>
+<span class="sd">    ghi : array-like, optional</span>
+<span class="sd">        Global horizontal irradiance values [W/m2] (Default = None)</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    report</span>
+<span class="sd">        Saved results from the simulation, as specified by user&#39;s report</span>
+<span class="sd">        class (or object)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Choose number of workers</span>
+    <span class="k">if</span> <span class="n">n_processes</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+        <span class="n">n_processes</span> <span class="o">=</span> <span class="n">cpu_count</span><span class="p">()</span>
+
+    <span class="c1"># Make sure albedo is iterable</span>
+    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isscalar</span><span class="p">(</span><span class="n">albedo</span><span class="p">):</span>
+        <span class="n">albedo</span> <span class="o">=</span> <span class="n">albedo</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">dni</span><span class="p">))</span>
+
+    <span class="c1"># Prepare irradiance model inputs</span>
+    <span class="n">irradiance_model_params</span> <span class="o">=</span> <span class="p">({}</span> <span class="k">if</span> <span class="n">irradiance_model_params</span> <span class="ow">is</span> <span class="kc">None</span>
+                               <span class="k">else</span> <span class="n">irradiance_model_params</span><span class="p">)</span>
+
+    <span class="c1"># Fix: np.array_split doesn&#39;t work well on pd.DatetimeIndex objects</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">timestamps</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DatetimeIndex</span><span class="p">):</span>
+        <span class="n">timestamps</span> <span class="o">=</span> <span class="n">timestamps</span><span class="o">.</span><span class="n">to_pydatetime</span><span class="p">()</span>
+
+    <span class="c1"># Split all arguments according to number of processes</span>
+    <span class="p">(</span><span class="n">folds_timestamps</span><span class="p">,</span> <span class="n">folds_surface_azimuth</span><span class="p">,</span> <span class="n">folds_surface_tilt</span><span class="p">,</span>
+     <span class="n">folds_solar_zenith</span><span class="p">,</span> <span class="n">folds_solar_azimuth</span><span class="p">,</span> <span class="n">folds_dni</span><span class="p">,</span> <span class="n">folds_dhi</span><span class="p">,</span>
+     <span class="n">folds_albedo</span><span class="p">)</span> <span class="o">=</span> <span class="nb">map</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array_split</span><span class="p">,</span>
+                         <span class="p">[</span><span class="n">timestamps</span><span class="p">,</span> <span class="n">surface_azimuth</span><span class="p">,</span> <span class="n">surface_tilt</span><span class="p">,</span>
+                          <span class="n">solar_zenith</span><span class="p">,</span> <span class="n">solar_azimuth</span><span class="p">,</span> <span class="n">dni</span><span class="p">,</span> <span class="n">dhi</span><span class="p">,</span> <span class="n">albedo</span><span class="p">],</span>
+                         <span class="p">[</span><span class="n">n_processes</span><span class="p">]</span> <span class="o">*</span> <span class="mi">8</span><span class="p">)</span>
+    <span class="n">folds_report_builder</span> <span class="o">=</span> <span class="p">[</span><span class="n">report_builder</span><span class="p">]</span> <span class="o">*</span> <span class="n">n_processes</span>
+    <span class="n">folds_params</span> <span class="o">=</span> <span class="p">[</span><span class="n">pvarray_parameters</span><span class="p">]</span> <span class="o">*</span> <span class="n">n_processes</span>
+    <span class="n">folds_cls_pvarray</span> <span class="o">=</span> <span class="p">[</span><span class="n">cls_pvarray</span><span class="p">]</span> <span class="o">*</span> <span class="n">n_processes</span>
+    <span class="n">folds_cls_engine</span> <span class="o">=</span> <span class="p">[</span><span class="n">cls_engine</span><span class="p">]</span> <span class="o">*</span> <span class="n">n_processes</span>
+    <span class="n">folds_cls_irradiance</span> <span class="o">=</span> <span class="p">[</span><span class="n">cls_irradiance</span><span class="p">]</span> <span class="o">*</span> <span class="n">n_processes</span>
+    <span class="n">folds_cls_vf</span> <span class="o">=</span> <span class="p">[</span><span class="n">cls_vf</span><span class="p">]</span> <span class="o">*</span> <span class="n">n_processes</span>
+    <span class="n">folds_fast_mode_pvrow_index</span> <span class="o">=</span> <span class="p">[</span><span class="n">fast_mode_pvrow_index</span><span class="p">]</span> <span class="o">*</span> <span class="n">n_processes</span>
+    <span class="n">folds_fast_mode_segment_index</span> <span class="o">=</span> <span class="p">[</span><span class="n">fast_mode_segment_index</span><span class="p">]</span> <span class="o">*</span> <span class="n">n_processes</span>
+    <span class="n">folds_irradiance_model_params</span> <span class="o">=</span> <span class="p">[</span><span class="n">irradiance_model_params</span><span class="p">]</span> <span class="o">*</span> <span class="n">n_processes</span>
+    <span class="n">folds_ghi</span> <span class="o">=</span> <span class="p">([</span><span class="n">ghi</span><span class="p">]</span> <span class="o">*</span> <span class="n">n_processes</span> <span class="k">if</span> <span class="n">ghi</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span>
+                 <span class="n">np</span><span class="o">.</span><span class="n">array_split</span><span class="p">(</span><span class="n">ghi</span><span class="p">,</span> <span class="n">n_processes</span><span class="p">))</span>
+    <span class="n">report_indices</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">n_processes</span><span class="p">))</span>
+
+    <span class="c1"># Zip all the folds together</span>
+    <span class="n">list_folds</span> <span class="o">=</span> <span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="p">(</span><span class="n">folds_report_builder</span><span class="p">,</span> <span class="n">folds_params</span><span class="p">,</span> <span class="n">folds_timestamps</span><span class="p">,</span>
+                       <span class="n">folds_dni</span><span class="p">,</span> <span class="n">folds_dhi</span><span class="p">,</span> <span class="n">folds_solar_zenith</span><span class="p">,</span>
+                       <span class="n">folds_solar_azimuth</span><span class="p">,</span> <span class="n">folds_surface_tilt</span><span class="p">,</span>
+                       <span class="n">folds_surface_azimuth</span><span class="p">,</span> <span class="n">folds_albedo</span><span class="p">,</span> <span class="n">folds_cls_pvarray</span><span class="p">,</span>
+                       <span class="n">folds_cls_engine</span><span class="p">,</span> <span class="n">folds_cls_irradiance</span><span class="p">,</span> <span class="n">folds_cls_vf</span><span class="p">,</span>
+                       <span class="n">folds_fast_mode_pvrow_index</span><span class="p">,</span>
+                       <span class="n">folds_fast_mode_segment_index</span><span class="p">,</span>
+                       <span class="n">folds_irradiance_model_params</span><span class="p">,</span> <span class="n">folds_ghi</span><span class="p">,</span>
+                       <span class="n">report_indices</span><span class="p">))</span>
+
+    <span class="c1"># Start multiprocessing</span>
+    <span class="n">pool</span> <span class="o">=</span> <span class="n">Pool</span><span class="p">(</span><span class="n">n_processes</span><span class="p">)</span>
+    <span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
+    <span class="n">indexed_reports</span> <span class="o">=</span> <span class="n">pool</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">_run_serially</span><span class="p">,</span> <span class="n">list_folds</span><span class="p">)</span>
+    <span class="n">end</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
+    <span class="n">pool</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="n">pool</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>
+    <span class="n">sorted_indexed_reports</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">indexed_reports</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">tup</span><span class="p">:</span> <span class="n">tup</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">sorted_reports</span> <span class="o">=</span> <span class="p">[</span><span class="n">tup</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">tup</span> <span class="ow">in</span> <span class="n">sorted_indexed_reports</span><span class="p">]</span>
+
+    <span class="n">LOGGER</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Parallel calculation elapsed time: </span><span class="si">%s</span><span class="s2"> sec&quot;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">end</span> <span class="o">-</span> <span class="n">start</span><span class="p">))</span>
+
+    <span class="n">report</span> <span class="o">=</span> <span class="n">report_builder</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">sorted_reports</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">report</span></div>
+
+
+<span class="c1"># Utility function for parallel run</span>
+<span class="k">def</span> <span class="nf">_run_serially</span><span class="p">(</span><span class="n">args</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Helper function used to run calculations in parallel</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    args : tuple</span>
+<span class="sd">        List of arguments where most will be used in</span>
+<span class="sd">        :py:function:`~pvfactors.run.run_timeseries_engine`</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    report</span>
+<span class="sd">        Saved results from the simulation, as specified by user&#39;s report</span>
+<span class="sd">        class (or object)</span>
+<span class="sd">    idx : int</span>
+<span class="sd">        Index of the report, which will be used to sort the final list of</span>
+<span class="sd">        reports after all the parallel simulations are over</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">report_builder</span><span class="p">,</span> <span class="n">pvarray_parameters</span><span class="p">,</span> <span class="n">timestamps</span><span class="p">,</span> <span class="n">dni</span><span class="p">,</span> <span class="n">dhi</span><span class="p">,</span> \
+        <span class="n">solar_zenith</span><span class="p">,</span> <span class="n">solar_azimuth</span><span class="p">,</span> <span class="n">surface_tilt</span><span class="p">,</span> <span class="n">surface_azimuth</span><span class="p">,</span>\
+        <span class="n">albedo</span><span class="p">,</span> <span class="n">cls_pvarray</span><span class="p">,</span> <span class="n">cls_engine</span><span class="p">,</span> <span class="n">cls_irradiance</span><span class="p">,</span> <span class="n">cls_vf</span><span class="p">,</span> \
+        <span class="n">fast_mode_pvrow_index</span><span class="p">,</span> <span class="n">fast_mode_segment_index</span><span class="p">,</span> \
+        <span class="n">irradiance_model_params</span><span class="p">,</span> <span class="n">ghi</span><span class="p">,</span> <span class="n">idx</span> <span class="o">=</span> <span class="n">args</span>
+
+    <span class="n">report</span> <span class="o">=</span> <span class="n">run_timeseries_engine</span><span class="p">(</span>
+        <span class="n">report_builder</span><span class="o">.</span><span class="n">build</span><span class="p">,</span> <span class="n">pvarray_parameters</span><span class="p">,</span>
+        <span class="n">timestamps</span><span class="p">,</span> <span class="n">dni</span><span class="p">,</span> <span class="n">dhi</span><span class="p">,</span> <span class="n">solar_zenith</span><span class="p">,</span> <span class="n">solar_azimuth</span><span class="p">,</span>
+        <span class="n">surface_tilt</span><span class="p">,</span> <span class="n">surface_azimuth</span><span class="p">,</span> <span class="n">albedo</span><span class="p">,</span>
+        <span class="n">cls_pvarray</span><span class="o">=</span><span class="n">cls_pvarray</span><span class="p">,</span> <span class="n">cls_engine</span><span class="o">=</span><span class="n">cls_engine</span><span class="p">,</span>
+        <span class="n">cls_irradiance</span><span class="o">=</span><span class="n">cls_irradiance</span><span class="p">,</span> <span class="n">cls_vf</span><span class="o">=</span><span class="n">cls_vf</span><span class="p">,</span>
+        <span class="n">fast_mode_pvrow_index</span><span class="o">=</span><span class="n">fast_mode_pvrow_index</span><span class="p">,</span>
+        <span class="n">fast_mode_segment_index</span><span class="o">=</span><span class="n">fast_mode_segment_index</span><span class="p">,</span>
+        <span class="n">irradiance_model_params</span><span class="o">=</span><span class="n">irradiance_model_params</span><span class="p">,</span>
+        <span class="n">ghi</span><span class="o">=</span><span class="n">ghi</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">report</span><span class="p">,</span> <span class="n">idx</span>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2016, SunPower Corporation
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

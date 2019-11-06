@@ -1,0 +1,25 @@
+pvfactors.engine.PVEngine
+=========================
+
+.. currentmodule:: pvfactors.engine
+
+.. autoclass:: PVEngine
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~PVEngine.__init__
+      ~PVEngine.fit
+      ~PVEngine.run_fast_mode
+      ~PVEngine.run_full_mode
+   
+   
+
+   
+   
+   
