@@ -113,7 +113,7 @@ It is then very easy to run simulations using the defined engine:
 
 .. code:: python
 
-   pvarray = engine.run_full_mode_timestep(1)
+    pvarray = engine.run_full_mode(fn_build_report=lambda pvarray: pvarray)
 
 
 And inspect the results thanks to the simple geometry API
@@ -121,76 +121,44 @@ And inspect the results thanks to the simple geometry API
 
 .. code:: python
 
-   print("Incident irradiance on front surface of middle pv row: %.2f W/m2"
-         % (pvarray.pvrows[1].front.get_param_weighted('qinc')))
-   print("Reflected irradiance on back surface of left pv row: %.2f W/m2"
-         % (pvarray.pvrows[0].back.get_param_weighted('reflection')))
-   print("Isotropic irradiance on back surface of right pv row: %.2f W/m2"
-         % (pvarray.pvrows[2].back.get_param_weighted('isotropic')))
+    print("Incident irradiance on front surface of middle pv row: {} W/m2"
+          .format(pvarray.ts_pvrows[1].front.get_param_weighted('qinc')))
+    print("Reflected irradiance on back surface of left pv row: {} W/m2"
+          .format(pvarray.ts_pvrows[0].back.get_param_weighted('reflection')))
+    print("Isotropic irradiance on back surface of right pv row: {} W/m2"
+          .format(pvarray.ts_pvrows[2].back.get_param_weighted('isotropic')))
+
 
 .. parsed-literal::
 
-   Incident irradiance on front surface of middle pv row: 886.38 W/m2
-   Reflected irradiance on back surface of left pv row: 86.40 W/m2
-   Isotropic irradiance on back surface of right pv row: 1.85 W/m2
+    Incident irradiance on front surface of middle pv row: [1034.968  886.377] W/m2
+    Reflected irradiance on back surface of left pv row: [112.139  86.404] W/m2
+    Isotropic irradiance on back surface of right pv row: [0.116 1.849] W/m2
 
 
-The users can also run simulations for all provided timestamps, and obtain a "report" that will look like whatever the users want, and which can rely on the simple API shown above.
-The two options to run the simulations are:
-
-- `fast mode`_: almost instantaneous results for back side irradiance calculations, but using simple reflection assumptions
-
+The users can also create a "report" while running the simulations that will rely on the simple API shown above, and which will look like whatever the users want.
 
 .. code:: python
 
-   # Create a function that will build a report
-   def fn_report(pvarray): return {'qinc_back': pvarray.ts_pvrows[1].back.get_param_weighted('qinc')}
+    # Create a function that will build a report
+    def fn_report(pvarray): return {'qinc_back': pvarray.ts_pvrows[1].back.get_param_weighted('qinc')}
 
-   # Run fast mode simulation
-   report = engine.run_fast_mode(fn_build_report=fn_report, pvrow_index=1)
+    # Run full mode simulation
+    report = engine.run_full_mode(fn_build_report=fn_report)
 
-   # Print results (report is defined by report function passed by user)
-   df_report = pd.DataFrame(report, index=df_inputs.index)
-   df_report
+    # Print results (report is defined by report function passed by user)
+    df_report = pd.DataFrame(report, index=df_inputs.index)
+    df_report
 
 
 +---------------------+------------+
 |                     | qinc_back  |
 +=====================+============+
-| 2017-08-31 11:00:00 | 110.586509 |
+| 2017-08-31 11:00:00 | 106.627832 |
 +---------------------+------------+
-| 2017-08-31 15:00:00 | 86.943571  |
+| 2017-08-31 15:00:00 | 79.668878  |
 +---------------------+------------+
 
-
-- `full mode`_: which calculates the equilibrium of reflections for all timestamps and all surfaces
-
-
-.. code:: python
-
-   # Create a function that will build a report
-   from pvfactors.report import example_fn_build_report
-
-   # Run full mode simulation
-   report = engine.run_full_mode(fn_build_report=example_fn_build_report)
-
-   # Print results (report is defined by report function passed by user)
-   df_report = pd.DataFrame(report, index=df_inputs.index)
-   df_report
-
-
-.. parsed-literal::
-
-    100%|██████████| 2/2 [00:00<00:00, 51.08it/s]
-
-
-+---------------------+-------------+------------+-----------+----------+
-|                     | qinc_front  | qinc_back  | iso_front | iso_back |
-+=====================+=============+============+===========+==========+
-| 2017-08-31 11:00:00 | 1034.967753 | 106.627832 | 20.848345 | 0.115792 |
-+---------------------+-------------+------------+-----------+----------+
-| 2017-08-31 15:00:00 | 886.376819  | 79.668878  | 54.995702 | 1.255482 |
-+---------------------+-------------+------------+-----------+----------+
 
 
 Installation
