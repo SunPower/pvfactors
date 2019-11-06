@@ -267,7 +267,8 @@ class TsGround(object):
 
     def plot_at_idx(self, idx, ax, color_shaded=COLOR_DIC['pvrow_shaded'],
                     color_illum=COLOR_DIC['pvrow_illum'], x_min_max=None,
-                    merge_if_flag_overlap=True, with_cut_points=True):
+                    merge_if_flag_overlap=True, with_cut_points=True,
+                    with_surface_index=False):
         """Plot timeseries ground at a certain index.
 
         Parameters
@@ -291,12 +292,14 @@ class TsGround(object):
         with_cut_points :  bool, optional
             Decide whether to include the saved cut points in the created
             PV ground geometry (Default = True)
+        with_surface_index : bool, optional
+            Plot the surfaces with their index values (Default = False)
         """
         pvground = self.at(idx, x_min_max=x_min_max,
                            merge_if_flag_overlap=merge_if_flag_overlap,
                            with_cut_points=with_cut_points)
         pvground.plot(ax, color_shaded=color_shaded, color_illum=color_illum,
-                      with_index=False)
+                      with_index=with_surface_index)
 
     def update_params(self, new_dict):
         """Update the illuminated parameters with new ones, not only for the

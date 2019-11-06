@@ -166,7 +166,7 @@ class TsSurface(object):
             params = _get_params_at_idx(idx, self.params)
             # Return a pv surface geometry with given params
             return PVSurface(self.coords.at(idx), shaded=self.shaded,
-                             normal_vector=n_vector,
+                             index=self.index, normal_vector=n_vector,
                              param_names=self.param_names,
                              params=params)
 
