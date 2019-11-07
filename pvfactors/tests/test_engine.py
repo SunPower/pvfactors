@@ -481,3 +481,63 @@ def test_pvengine_float_inputs_perez_transparency_spacing_fast(params):
     np.testing.assert_almost_equal(
         w_spacing_transparency_back_qinc, expected_back_qinc)
     assert no_spacing_transparency_back_qinc < w_spacing_transparency_back_qinc
+
+
+def test_check_direct_shading_continuity():
+    """Make sure the calculation is correct when direct shading happens.
+    - before v1.3.0, there's a discontinuity (big jump) in prediction
+    when direct shading happens. The values are the same as >=v1.3.0 for
+    no direct shading, but they are different with direct shading.
+    - starting at v1.3.0, the values are more continuous (no big change) when
+    going from no direct shading to direct shading, which means it's
+    most certainly a better implementation.
+
+    The issue before v1.3.0 could be due to the fact that shadows are merged,
+    and there might be a piece of geometry lost there, but not entirely sure.
+    Since it's still relatively small, will not dig further.
+
+    Here, we're testing the outputs at 2 timestamps, right before and
+    right after direct shading, when varying only solar zenith.
+    """
+
+    # Prepare inputs
+    n = 2
+    inputs = {
+        'solar_zenith': [81.275, 81.276],  # right at the limit of direct shadg
+        'solar_azimuth': [295.9557133] * n,
+        'surface_tilt': [15.18714669] * n,
+        'surface_azimuth': [270.] * n,
+        'dni': [1000.] * n,
+        'dhi': [100.] * n,
+        'albedo': [0.2] * n,
+        'times': [dt.datetime(2014, 6, 25, 3)] * n}
+    # Array parameters
+    params = {'n_pvrows': 3,
+              'axis_azimuth': 0.0,
+              'pvrow_height': 1.5,
+              'pvrow_width': 2.5,
+              'gcr': 0.4}
+
+    # Create engine and fit to inputs
+    pvarray = OrderedPVArray.init_from_dict(params)
+    eng = PVEngine(pvarray)
+    eng.fit(np.array(inputs['times']),
+            np.array(inputs['dni']),
+            np.array(inputs['dhi']),
+            np.array(inputs['solar_zenith']),
+            np.array(inputs['solar_azimuth']),
+            np.array(inputs['surface_tilt']),
+            np.array(inputs['surface_azimuth']),
+            np.array(inputs['albedo']))
+
+    # Check there we are indeed right at the limit of direct shading
+    np.testing.assert_array_equal(pvarray.has_direct_shading, [False, True])
+
+    # Run simulation and get output
+    pvarray = eng.run_full_mode(fn_build_report=lambda pvarray: pvarray)
+    out = pvarray.ts_pvrows[1].back.get_param_weighted('qinc')
+
+    # Check expected outputs: before v1.3.0, expected output is
+    # [20.4971271991293, 21.389095477613356], which shows discontinuity
+    expected_out = [20.497127, 20.50229]
+    np.testing.assert_allclose(out, expected_out)
