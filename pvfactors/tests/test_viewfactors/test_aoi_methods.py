@@ -26,6 +26,30 @@ def test_faoi_fn_from_pvlib():
 
 def test_ts_aoi_methods(pvmodule_canadian):
     """Check that can create aoi methods correctly"""
-    aoi_methods = TsAOIMethods(faoi_fn_from_pvlib_sandia(pvmodule_canadian))
+    n_timestamps = 5
+    n_points = 6
+    aoi_methods = TsAOIMethods(faoi_fn_from_pvlib_sandia(pvmodule_canadian),
+                               n_timestamps, n_integral_sections=n_points)
     # Check that function was passed correctly
     assert callable(aoi_methods.faoi_fn)
+    assert aoi_methods.aoi_angles_low.shape == (n_timestamps, n_points)
+    assert aoi_methods.aoi_angles_high.shape == (n_timestamps, n_points)
+    assert aoi_methods.faoi_values.shape == (n_timestamps, n_points)
+
+    print('\n')
+    print(aoi_methods.aoi_angles_low)
+    print(aoi_methods.aoi_angles_high)
+    print(aoi_methods.faoi_values)
+
+    # Check that integrand is calculated correctly
+    low_angles = [0., 2., 108., 72., 179.]
+    high_angles = [31., 30., 144., 144., 180.]
+    faoi_integrand = aoi_methods._calculate_faoi_integrand(
+        low_angles, high_angles)
+    expected_integrand = np.array([
+        [0.75485313, 0.99750363, 0., 0., 0., 0.],
+        [0.75485313, 0., 0., 0., 0., 0.],
+        [0., 0., 0., 1., 0.99750363, 0.],
+        [0., 0., 1., 1., 0.99750363, 0.],
+        [0., 0., 0., 0., 0., 0.75485313]])
+    np.testing.assert_allclose(faoi_integrand, expected_integrand)
