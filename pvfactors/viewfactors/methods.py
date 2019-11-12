@@ -11,6 +11,210 @@ class VFTsMethods(object):
     view factors from PV row elements to all the other elements of a PV
     array."""
 
+    def vf_pvrow_gnd_surf(self, ts_pvrows, ts_ground, tilted_to_left,
+                          vf_matrix):
+        """Calculate the view factors between timeseries PV row and ground
+        surfaces, and assign it to the passed view factor matrix using
+        the surface indices.
+
+        Parameters
+        ----------
+        ts_pvrows : list of :py:class:`~pvfactors.geometry.timeseries.TsPVRow`
+            List of timeseries PV rows in the PV array
+        ts_ground : :py:class:`~pvfactors.geometry.timeseries.TsGround`
+            Timeseries ground of the PV array
+        tilted_to_left : list of bool
+            Flags indicating when the PV rows are strictly tilted to the left
+        vf_matrix : np.ndarray
+            View factor matrix to update during calculation. Should have 3
+            dimensions as follows: [n_surfaces, n_surfaces, n_timesteps]
+        """
+
+        n_pvrows = len(ts_pvrows)
+        for idx_pvrow, ts_pvrow in enumerate(ts_pvrows):
+            # Separate gnd surfaces depending on side
+            left_gnd_surfaces = ts_ground.ts_surfaces_side_of_cut_point(
+                'left', idx_pvrow)
+            right_gnd_surfaces = ts_ground.ts_surfaces_side_of_cut_point(
+                'right', idx_pvrow)
+            # Front side
+            front = ts_pvrow.front
+            for pvrow_surf in front.all_ts_surfaces:
+                ts_length = pvrow_surf.length
+                i = pvrow_surf.index
+                for gnd_surf in left_gnd_surfaces:
+                    j = gnd_surf.index
+                    vf_pvrow_to_gnd, vf_gnd_to_pvrow = (
+                        self.vf_pvrow_surf_to_gnd_surf_obstruction_hottel(
+                            pvrow_surf, idx_pvrow, n_pvrows,
+                            tilted_to_left, ts_pvrows, gnd_surf, ts_length,
+                            is_back=False, is_left=True))
+                    vf_matrix[i, j, :] = vf_pvrow_to_gnd
+                    vf_matrix[j, i, :] = vf_gnd_to_pvrow
+                for gnd_surf in right_gnd_surfaces:
+                    j = gnd_surf.index
+                    vf_pvrow_to_gnd, vf_gnd_to_pvrow = (
+                        self.vf_pvrow_surf_to_gnd_surf_obstruction_hottel(
+                            pvrow_surf, idx_pvrow, n_pvrows,
+                            tilted_to_left, ts_pvrows, gnd_surf, ts_length,
+                            is_back=False, is_left=False))
+                    vf_matrix[i, j, :] = vf_pvrow_to_gnd
+                    vf_matrix[j, i, :] = vf_gnd_to_pvrow
+            # Back side
+            back = ts_pvrow.back
+            for pvrow_surf in back.all_ts_surfaces:
+                ts_length = pvrow_surf.length
+                i = pvrow_surf.index
+                for gnd_surf in left_gnd_surfaces:
+                    j = gnd_surf.index
+                    vf_pvrow_to_gnd, vf_gnd_to_pvrow = (
+                        self.vf_pvrow_surf_to_gnd_surf_obstruction_hottel(
+                            pvrow_surf, idx_pvrow, n_pvrows,
+                            tilted_to_left, ts_pvrows, gnd_surf, ts_length,
+                            is_back=True, is_left=True))
+                    vf_matrix[i, j, :] = vf_pvrow_to_gnd
+                    vf_matrix[j, i, :] = vf_gnd_to_pvrow
+                for gnd_surf in right_gnd_surfaces:
+                    j = gnd_surf.index
+                    vf_pvrow_to_gnd, vf_gnd_to_pvrow = (
+                        self.vf_pvrow_surf_to_gnd_surf_obstruction_hottel(
+                            pvrow_surf, idx_pvrow, n_pvrows,
+                            tilted_to_left, ts_pvrows, gnd_surf, ts_length,
+                            is_back=True, is_left=False))
+                    vf_matrix[i, j, :] = vf_pvrow_to_gnd
+                    vf_matrix[j, i, :] = vf_gnd_to_pvrow
+
+    def vf_pvrow_surf_to_gnd_surf_obstruction_hottel(
+            self, pvrow_surf, pvrow_idx, n_pvrows, tilted_to_left,
+            ts_pvrows, gnd_surf, pvrow_surf_length, is_back=True,
+            is_left=True):
+        """Calculate view factors from timeseries PV row surface to a
+        timeseries ground surface. This will return the calculated view
+        factors from the PV row surface to the ground surface, AND from the
+        ground surface to the PV row surface (using reciprocity).
+
+        Parameters
+        ----------
+        pvrow_surf : :py:class:`~pvfactors.geometry.timeseries.TsSurface`
+            Timeseries PV row surface to use for calculation
+        pvrow_idx : int
+            Index of the timeseries PV row on the which the pvrow_surf is
+        n_pvrows : int
+            Number of timeseries PV rows in the PV array, and therefore number
+            of shadows they cast on the ground
+        tilted_to_left : list of bool
+            Flags indicating when the PV rows are strictly tilted to the left
+        ts_pvrows : list of :py:class:`~pvfactors.geometry.timeseries.TsPVRow`
+            List of timeseries PV rows in the PV array
+        gnd_surf : :py:class:`~pvfactors.geometry.timeseries.TsSurface`
+            Timeseries ground surface to use for calculation
+        pvrow_surf_length : np.ndarray
+            Length (width) of the timeseries PV row surface [m]
+        is_back : bool
+            Flag specifying whether pv row surface is on  back or front surface
+            (Default = True)
+        is_left : bool
+            Flag specifying whether gnd surface is left of pv row cut point or
+            not (Default = True)
+
+        Returns
+        -------
+        vf_pvrow_to_gnd_surf : np.ndarray
+            View factors from timeseries PV row surface to timeseries ground
+            surface, dimension is [n_timesteps]
+        vf_gnd_to_pvrow_surf : np.ndarray
+            View factors from timeseries ground surface to timeseries PV row
+            surface, dimension is [n_timesteps]
+        """
+
+        pvrow_surf_lowest_pt = pvrow_surf.lowest_point
+        pvrow_surf_highest_pt = pvrow_surf.highest_point
+        no_obstruction = (is_left & (pvrow_idx == 0)) \
+            or ((not is_left) & (pvrow_idx == n_pvrows - 1))
+        if no_obstruction:
+            # There is no obstruction to the gnd surface
+            vf_pvrow_to_gnd_surf = self._vf_surface_to_surface(
+                pvrow_surf.coords, gnd_surf, pvrow_surf_length)
+        else:
+            # Get lowest point of obstructing point
+            idx_obstructing_pvrow = pvrow_idx - 1 if is_left else pvrow_idx + 1
+            pt_obstr = ts_pvrows[idx_obstructing_pvrow
+                                 ].full_pvrow_coords.lowest_point
+            # Calculate vf from pv row to gnd surface
+            vf_pvrow_to_gnd_surf = self._vf_hottel_gnd_surf(
+                pvrow_surf_highest_pt, pvrow_surf_lowest_pt,
+                gnd_surf.b1, gnd_surf.b2, pt_obstr, pvrow_surf_length,
+                is_left)
+
+        # Final result depends on whether front or back surface
+        if is_left:
+            vf_pvrow_to_gnd_surf = (
+                np.where(tilted_to_left, 0., vf_pvrow_to_gnd_surf) if is_back
+                else np.where(tilted_to_left, vf_pvrow_to_gnd_surf, 0.))
+        else:
+            vf_pvrow_to_gnd_surf = (
+                np.where(tilted_to_left, vf_pvrow_to_gnd_surf, 0.) if is_back
+                else np.where(tilted_to_left, 0., vf_pvrow_to_gnd_surf))
+
+        # Use reciprocity to calculate ts vf from gnd surf to pv row surface
+        gnd_surf_length = gnd_surf.length
+        vf_gnd_to_pvrow_surf = np.where(
+            gnd_surf_length > DISTANCE_TOLERANCE,
+            vf_pvrow_to_gnd_surf * pvrow_surf_length / gnd_surf_length, 0.)
+
+        return vf_pvrow_to_gnd_surf, vf_gnd_to_pvrow_surf
+
+    def vf_pvrow_to_pvrow(self, ts_pvrows, tilted_to_left, vf_matrix):
+        """Calculate the view factors between timeseries PV row surfaces,
+        and assign values to the passed view factor matrix using
+        the surface indices.
+
+        Parameters
+        ----------
+        ts_pvrows : list of :py:class:`~pvfactors.geometry.timeseries.TsPVRow`
+            List of timeseries PV rows in the PV array
+        tilted_to_left : list of bool
+            Flags indicating when the PV rows are strictly tilted to the left
+        vf_matrix : np.ndarray
+            View factor matrix to update during calculation. Should have 3
+            dimensions as follows: [n_surfaces, n_surfaces, n_timesteps]
+        """
+        for idx_pvrow, ts_pvrow in enumerate(ts_pvrows[:-1]):
+            # Get the next pv row
+            right_ts_pvrow = ts_pvrows[idx_pvrow + 1]
+            # front side
+            front = ts_pvrow.front
+            for surf_i in front.all_ts_surfaces:
+                i = surf_i.index
+                length_i = surf_i.length
+                for surf_j in right_ts_pvrow.back.all_ts_surfaces:
+                    j = surf_j.index
+                    length_j = surf_j.length
+                    vf_i_to_j = self._vf_surface_to_surface(
+                        surf_i.coords, surf_j.coords, length_i)
+                    vf_i_to_j = np.where(tilted_to_left, 0., vf_i_to_j)
+                    vf_j_to_i = np.where(
+                        surf_j.length > DISTANCE_TOLERANCE,
+                        vf_i_to_j * length_i / length_j, 0.)
+                    vf_matrix[i, j, :] = vf_i_to_j
+                    vf_matrix[j, i, :] = vf_j_to_i
+            # back side
+            back = ts_pvrow.back
+            for surf_i in back.all_ts_surfaces:
+                i = surf_i.index
+                length_i = surf_i.length
+                for surf_j in right_ts_pvrow.front.all_ts_surfaces:
+                    j = surf_j.index
+                    length_j = surf_j.length
+                    vf_i_to_j = self._vf_surface_to_surface(
+                        surf_i.coords, surf_j.coords, length_i)
+                    vf_i_to_j = np.where(tilted_to_left, vf_i_to_j, 0.)
+                    vf_j_to_i = np.where(
+                        surf_j.length > DISTANCE_TOLERANCE,
+                        vf_i_to_j * length_i / length_j, 0.)
+                    vf_matrix[i, j, :] = vf_i_to_j
+                    vf_matrix[j, i, :] = vf_j_to_i
+
     def calculate_vf_to_pvrow(self, pvrow_element_coords, pvrow_idx, n_pvrows,
                               n_steps, ts_pvrows, pvrow_element_length,
                               tilted_to_left, pvrow_width, rotation_vec):
@@ -460,207 +664,3 @@ class VFTsMethods(object):
                                           side_lowest_pt)
 
         return side_shaded_coords
-
-    def vf_pvrow_gnd_surf(self, ts_pvrows, ts_ground, tilted_to_left,
-                          vf_matrix):
-        """Calculate the view factors between timeseries PV row and ground
-        surfaces, and assign it to the passed view factor matrix using
-        the surface indices.
-
-        Parameters
-        ----------
-        ts_pvrows : list of :py:class:`~pvfactors.geometry.timeseries.TsPVRow`
-            List of timeseries PV rows in the PV array
-        ts_ground : :py:class:`~pvfactors.geometry.timeseries.TsGround`
-            Timeseries ground of the PV array
-        tilted_to_left : list of bool
-            Flags indicating when the PV rows are strictly tilted to the left
-        vf_matrix : np.ndarray
-            View factor matrix to update during calculation. Should have 3
-            dimensions as follows: [n_surfaces, n_surfaces, n_timesteps]
-        """
-
-        n_pvrows = len(ts_pvrows)
-        for idx_pvrow, ts_pvrow in enumerate(ts_pvrows):
-            # Separate gnd surfaces depending on side
-            left_gnd_surfaces = ts_ground.ts_surfaces_side_of_cut_point(
-                'left', idx_pvrow)
-            right_gnd_surfaces = ts_ground.ts_surfaces_side_of_cut_point(
-                'right', idx_pvrow)
-            # Front side
-            front = ts_pvrow.front
-            for pvrow_surf in front.all_ts_surfaces:
-                ts_length = pvrow_surf.length
-                i = pvrow_surf.index
-                for gnd_surf in left_gnd_surfaces:
-                    j = gnd_surf.index
-                    vf_pvrow_to_gnd, vf_gnd_to_pvrow = (
-                        self.vf_pvrow_surf_to_gnd_surf_obstruction_hottel(
-                            pvrow_surf, idx_pvrow, n_pvrows,
-                            tilted_to_left, ts_pvrows, gnd_surf, ts_length,
-                            is_back=False, is_left=True))
-                    vf_matrix[i, j, :] = vf_pvrow_to_gnd
-                    vf_matrix[j, i, :] = vf_gnd_to_pvrow
-                for gnd_surf in right_gnd_surfaces:
-                    j = gnd_surf.index
-                    vf_pvrow_to_gnd, vf_gnd_to_pvrow = (
-                        self.vf_pvrow_surf_to_gnd_surf_obstruction_hottel(
-                            pvrow_surf, idx_pvrow, n_pvrows,
-                            tilted_to_left, ts_pvrows, gnd_surf, ts_length,
-                            is_back=False, is_left=False))
-                    vf_matrix[i, j, :] = vf_pvrow_to_gnd
-                    vf_matrix[j, i, :] = vf_gnd_to_pvrow
-            # Back side
-            back = ts_pvrow.back
-            for pvrow_surf in back.all_ts_surfaces:
-                ts_length = pvrow_surf.length
-                i = pvrow_surf.index
-                for gnd_surf in left_gnd_surfaces:
-                    j = gnd_surf.index
-                    vf_pvrow_to_gnd, vf_gnd_to_pvrow = (
-                        self.vf_pvrow_surf_to_gnd_surf_obstruction_hottel(
-                            pvrow_surf, idx_pvrow, n_pvrows,
-                            tilted_to_left, ts_pvrows, gnd_surf, ts_length,
-                            is_back=True, is_left=True))
-                    vf_matrix[i, j, :] = vf_pvrow_to_gnd
-                    vf_matrix[j, i, :] = vf_gnd_to_pvrow
-                for gnd_surf in right_gnd_surfaces:
-                    j = gnd_surf.index
-                    vf_pvrow_to_gnd, vf_gnd_to_pvrow = (
-                        self.vf_pvrow_surf_to_gnd_surf_obstruction_hottel(
-                            pvrow_surf, idx_pvrow, n_pvrows,
-                            tilted_to_left, ts_pvrows, gnd_surf, ts_length,
-                            is_back=True, is_left=False))
-                    vf_matrix[i, j, :] = vf_pvrow_to_gnd
-                    vf_matrix[j, i, :] = vf_gnd_to_pvrow
-
-    def vf_pvrow_surf_to_gnd_surf_obstruction_hottel(
-            self, pvrow_surf, pvrow_idx, n_pvrows, tilted_to_left,
-            ts_pvrows, gnd_surf, pvrow_surf_length, is_back=True,
-            is_left=True):
-        """Calculate view factors from timeseries PV row surface to a
-        timeseries ground surface. This will return the calculated view
-        factors from the PV row surface to the ground surface, AND from the
-        ground surface to the PV row surface (using reciprocity).
-
-        Parameters
-        ----------
-        pvrow_surf : :py:class:`~pvfactors.geometry.timeseries.TsSurface`
-            Timeseries PV row surface to use for calculation
-        pvrow_idx : int
-            Index of the timeseries PV row on the which the pvrow_surf is
-        n_pvrows : int
-            Number of timeseries PV rows in the PV array, and therefore number
-            of shadows they cast on the ground
-        tilted_to_left : list of bool
-            Flags indicating when the PV rows are strictly tilted to the left
-        ts_pvrows : list of :py:class:`~pvfactors.geometry.timeseries.TsPVRow`
-            List of timeseries PV rows in the PV array
-        gnd_surf : :py:class:`~pvfactors.geometry.timeseries.TsSurface`
-            Timeseries ground surface to use for calculation
-        pvrow_surf_length : np.ndarray
-            Length (width) of the timeseries PV row surface [m]
-        is_back : bool
-            Flag specifying whether pv row surface is on  back or front surface
-            (Default = True)
-        is_left : bool
-            Flag specifying whether gnd surface is left of pv row cut point or
-            not (Default = True)
-
-        Returns
-        -------
-        vf_pvrow_to_gnd_surf : np.ndarray
-            View factors from timeseries PV row surface to timeseries ground
-            surface, dimension is [n_timesteps]
-        vf_gnd_to_pvrow_surf : np.ndarray
-            View factors from timeseries ground surface to timeseries PV row
-            surface, dimension is [n_timesteps]
-        """
-
-        pvrow_surf_lowest_pt = pvrow_surf.lowest_point
-        pvrow_surf_highest_pt = pvrow_surf.highest_point
-        no_obstruction = (is_left & (pvrow_idx == 0)) \
-            or ((not is_left) & (pvrow_idx == n_pvrows - 1))
-        if no_obstruction:
-            # There is no obstruction to the gnd surface
-            vf_pvrow_to_gnd_surf = self._vf_surface_to_surface(
-                pvrow_surf.coords, gnd_surf, pvrow_surf_length)
-        else:
-            # Get lowest point of obstructing point
-            idx_obstructing_pvrow = pvrow_idx - 1 if is_left else pvrow_idx + 1
-            pt_obstr = ts_pvrows[idx_obstructing_pvrow
-                                 ].full_pvrow_coords.lowest_point
-            # Calculate vf from pv row to gnd surface
-            vf_pvrow_to_gnd_surf = self._vf_hottel_gnd_surf(
-                pvrow_surf_highest_pt, pvrow_surf_lowest_pt,
-                gnd_surf.b1, gnd_surf.b2, pt_obstr, pvrow_surf_length,
-                is_left)
-
-        # Final result depends on whether front or back surface
-        if is_left:
-            vf_pvrow_to_gnd_surf = (
-                np.where(tilted_to_left, 0., vf_pvrow_to_gnd_surf) if is_back
-                else np.where(tilted_to_left, vf_pvrow_to_gnd_surf, 0.))
-        else:
-            vf_pvrow_to_gnd_surf = (
-                np.where(tilted_to_left, vf_pvrow_to_gnd_surf, 0.) if is_back
-                else np.where(tilted_to_left, 0., vf_pvrow_to_gnd_surf))
-
-        # Use reciprocity to calculate ts vf from gnd surf to pv row surface
-        gnd_surf_length = gnd_surf.length
-        vf_gnd_to_pvrow_surf = np.where(
-            gnd_surf_length > DISTANCE_TOLERANCE,
-            vf_pvrow_to_gnd_surf * pvrow_surf_length / gnd_surf_length, 0.)
-
-        return vf_pvrow_to_gnd_surf, vf_gnd_to_pvrow_surf
-
-    def vf_pvrow_to_pvrow(self, ts_pvrows, tilted_to_left, vf_matrix):
-        """Calculate the view factors between timeseries PV row surfaces,
-        and assign values to the passed view factor matrix using
-        the surface indices.
-
-        Parameters
-        ----------
-        ts_pvrows : list of :py:class:`~pvfactors.geometry.timeseries.TsPVRow`
-            List of timeseries PV rows in the PV array
-        tilted_to_left : list of bool
-            Flags indicating when the PV rows are strictly tilted to the left
-        vf_matrix : np.ndarray
-            View factor matrix to update during calculation. Should have 3
-            dimensions as follows: [n_surfaces, n_surfaces, n_timesteps]
-        """
-        for idx_pvrow, ts_pvrow in enumerate(ts_pvrows[:-1]):
-            # Get the next pv row
-            right_ts_pvrow = ts_pvrows[idx_pvrow + 1]
-            # front side
-            front = ts_pvrow.front
-            for surf_i in front.all_ts_surfaces:
-                i = surf_i.index
-                length_i = surf_i.length
-                for surf_j in right_ts_pvrow.back.all_ts_surfaces:
-                    j = surf_j.index
-                    length_j = surf_j.length
-                    vf_i_to_j = self._vf_surface_to_surface(
-                        surf_i.coords, surf_j.coords, length_i)
-                    vf_i_to_j = np.where(tilted_to_left, 0., vf_i_to_j)
-                    vf_j_to_i = np.where(
-                        surf_j.length > DISTANCE_TOLERANCE,
-                        vf_i_to_j * length_i / length_j, 0.)
-                    vf_matrix[i, j, :] = vf_i_to_j
-                    vf_matrix[j, i, :] = vf_j_to_i
-            # back side
-            back = ts_pvrow.back
-            for surf_i in back.all_ts_surfaces:
-                i = surf_i.index
-                length_i = surf_i.length
-                for surf_j in right_ts_pvrow.front.all_ts_surfaces:
-                    j = surf_j.index
-                    length_j = surf_j.length
-                    vf_i_to_j = self._vf_surface_to_surface(
-                        surf_i.coords, surf_j.coords, length_i)
-                    vf_i_to_j = np.where(tilted_to_left, vf_i_to_j, 0.)
-                    vf_j_to_i = np.where(
-                        surf_j.length > DISTANCE_TOLERANCE,
-                        vf_i_to_j * length_i / length_j, 0.)
-                    vf_matrix[i, j, :] = vf_i_to_j
-                    vf_matrix[j, i, :] = vf_j_to_i

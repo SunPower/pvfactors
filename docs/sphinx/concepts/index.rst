@@ -97,7 +97,7 @@ The :ref:`tutorial section <getting_started_ref>` shows how such a dictionary ca
 Irradiance models
 -----------------
 
-The irradiance models then assign irradiance sky values like direct, or isotropic components to all the surfaces defined in the :py:class:`~pvfactors.geometry.pvarray.OrderedPVArray`.
+The irradiance models then assign irradiance sky values like direct, or circumsolar components to all the surfaces defined in the :py:class:`~pvfactors.geometry.pvarray.OrderedPVArray`.
 
 Description
 ^^^^^^^^^^^

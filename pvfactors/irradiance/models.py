@@ -868,7 +868,8 @@ class HybridPerezOrdered(BaseModel):
         # Will be used for back surface adjustments: from Perez model
         # FIXME: pvlib clips the angle values to calculate vf -> adjust here
         vf_circumsolar_backsurface = cosd(aoi_back_pvrow) / cosd(solar_zenith)
-        poa_circumsolar_back = luminance_circumsolar * vf_circumsolar_backsurface
+        poa_circumsolar_back = (luminance_circumsolar
+                                * vf_circumsolar_backsurface)
 
         # Return only >0 values for poa_horizon
         poa_horizon = np.abs(poa_horizon)

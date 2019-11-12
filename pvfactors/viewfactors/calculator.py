@@ -10,11 +10,13 @@ class VFCalculator(object):
     for PV arrays"""
 
     def __init__(self, vf_ts_methods=None):
-        """Initialize the view factor mapper that will be used.
+        """Initialize the view factor calculator with the calculation methods
+        that will be used.
 
         Parameters
         ----------
-        vf_ts_methods : :py:class:`~pvfactors.geometry.calculator.VFTsMethods` object
+        vf_ts_methods : \
+        :py:class:`~pvfactors.viewfactors.methods.VFTsMethods` object
             Object with methods to calculate timeseries view factors for the
             fast mode (Default = None)
         """
@@ -74,7 +76,8 @@ class VFCalculator(object):
         pvrow_idx : int
             Index of the timeseries PV row for which we want to calculate the
             back surface irradiance
-        pvrow_element : :py:class:`~pvfactors.geometry.timeseries.TsDualSegment`
+        pvrow_element : \
+        :py:class:`~pvfactors.geometry.timeseries.TsDualSegment` \
         or :py:class:`~pvfactors.geometry.timeseries.TsSurface`
             Timeseries PV row element for which to calculate view factors
         ts_pvrows : list of :py:class:`~pvfactors.geometry.timeseries.TsPVRow`
