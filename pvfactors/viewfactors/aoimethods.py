@@ -41,8 +41,17 @@ class TsAOIMethods:
         self.aoi_angles_high = np.tile(aoi_angles_high, (n_timestamps, 1))
         self.faoi_values = np.tile(faoi_values, (n_timestamps, 1))
 
-    def _calculate_faoi_values(self, low_angles, high_angles):
-        pass
+    def _calculate_pct_absorbed(self, low_angles, high_angles):
+
+        # Calculate integrand
+        faoi_integrand = self._calculate_faoi_integrand(low_angles,
+                                                        high_angles)
+        n_intervals_covered = (faoi_integrand > 0.).sum(axis=1)
+
+        # no need to multiply by interval below, because the max value is 1
+        percent_absorbed = faoi_integrand.sum(axis=1) / n_intervals_covered
+
+        return percent_absorbed
 
     def _calculate_faoi_integrand(self, low_angles, high_angles):
         """
