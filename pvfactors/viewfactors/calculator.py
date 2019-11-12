@@ -1,7 +1,7 @@
 """Module with classes and functions to calculate views and view factors"""
 
 from pvfactors.config import DISTANCE_TOLERANCE
-from pvfactors.viewfactors.methods import VFTsMethods
+from pvfactors.viewfactors.vfmethods import VFTsMethods
 import numpy as np
 
 
