@@ -9,7 +9,7 @@ class TsAOIMethods:
     """Class containing methods related to calculating AOI losses for
     :py:class:`~pvfactors.geometry.pvarray.OrderedPVArray` objects."""
 
-    def __init__(self, faoi_fn, n_timestamps, n_integral_sections=180):
+    def __init__(self, faoi_fn, n_timestamps, n_integral_sections=300):
         """Instantiate class with faoi function
 
         Parameters
@@ -48,15 +48,13 @@ class TsAOIMethods:
 
     def _calculate_vf_aoi(self, low_angles, high_angles):
 
-        # Calculate integrand
+        # Calculate integrand: all d_vf_aoi values
         faoi_integrand = self._calculate_vfaoi_integrand(low_angles,
                                                          high_angles)
-        n_intervals_covered = (faoi_integrand > 0.).sum(axis=1)
+        # Total vf_aoi will be sum of all smaller d_vf_aoi values
+        total_vf_aoi = faoi_integrand.sum(axis=1)
 
-        # no need to multiply by interval below, because the max value is 1
-        percent_absorbed = faoi_integrand.sum(axis=1) / n_intervals_covered
-
-        return percent_absorbed
+        return total_vf_aoi
 
     def _calculate_vfaoi_integrand(self, low_angles, high_angles):
         """

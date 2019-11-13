@@ -25,8 +25,11 @@ def test_faoi_fn_from_pvlib():
 
 
 def test_ts_aoi_methods(pvmodule_canadian):
-    """Check that can create aoi methods correctly"""
-    n_timestamps = 5  # using 5 timestamps
+    """Checks
+    - can create aoi methods correctly
+    - vf_aoi_integrand matrix makes sense and stays consistent
+    - vf_aoi values stay consistent"""
+    n_timestamps = 6  # using 5 timestamps
     n_points = 6  # using only 6 sections for the integral from 0 to 180 deg
     aoi_methods = TsAOIMethods(faoi_fn_from_pvlib_sandia(pvmodule_canadian),
                                n_timestamps, n_integral_sections=n_points)
@@ -37,8 +40,8 @@ def test_ts_aoi_methods(pvmodule_canadian):
     assert aoi_methods.integrand_values.shape == (n_timestamps, n_points)
 
     # Create some dummy angle values
-    low_angles = [0., 2., 108., 72., 179.]
-    high_angles = [31., 30., 144., 144., 180.]
+    low_angles = [0., 2., 108., 72., 179., 0.]
+    high_angles = [31., 30., 144., 144., 180., 180.]
 
     # Check that integrand is calculated correctly
     faoi_integrand = aoi_methods._calculate_vfaoi_integrand(
@@ -48,15 +51,31 @@ def test_ts_aoi_methods(pvmodule_canadian):
          [0.05056557, 0., 0., 0., 0., 0.],
          [0., 0., 0., 0.25, 0.18255583, 0.],
          [0., 0., 0.25, 0.25, 0.18255583, 0.],
-         [0., 0., 0., 0., 0., 0.05056557]]
+         [0., 0., 0., 0., 0., 0.05056557],
+         [0.05056557, 0.18255583, 0.25, 0.25, 0.18255583, 0.05056557]]
     np.testing.assert_allclose(faoi_integrand, expected_integrand)
 
     # Check that faoi values calculated correctly
-    low_angles = [0., 2., 108., 72., 179.]
-    high_angles = [31., 30., 144., 144., 180.]
     vf_aoi = aoi_methods._calculate_vf_aoi(low_angles, high_angles)
-    expected_vf_aoi = [0.1165607, 0.05056557, 0.21627792,
-                       0.22751861, 0.05056557]
+    expected_vf_aoi = [0.2331214, 0.05056557, 0.43255583, 0.68255583,
+                       0.05056557, 0.96624281]
+    np.testing.assert_allclose(vf_aoi, expected_vf_aoi)
+
+
+def test_sanity_check(pvmodule_canadian):
+    """Sanity check: make sure than when faoi = 1 everywhere, the calculated
+    view factor values make sense"""
+    n_timestamps = 3  # using 5 timestamps
+    n_points = 300  # using only 6 sections for the integral from 0 to 180 deg
+    aoi_methods = TsAOIMethods(lambda aoi_angles: np.ones_like(aoi_angles),
+                               n_timestamps, n_integral_sections=n_points)
+    # Create some dummy angle values
+    low_angles = [0., 90., 0.]
+    high_angles = [180., 180., 90.]
+
+    # Check that faoi values calculated correctly
+    vf_aoi = aoi_methods._calculate_vf_aoi(low_angles, high_angles)
+    expected_vf_aoi = [1., 0.5, 0.5]
     np.testing.assert_allclose(vf_aoi, expected_vf_aoi)
 
 
