@@ -1,6 +1,7 @@
 """Module containing AOI loss calculation methods"""
 
 import pvlib
+from pvlib.tools import cosd
 import numpy as np
 
 
@@ -35,17 +36,21 @@ class TsAOIMethods:
         aoi_angles_middle = aoi_angles_low + self.interval / 2.
         # Calculate faoi values using middle points of integral intervals
         faoi_values = faoi_fn(aoi_angles_middle)
+        # Calculate small view factor values for each section
+        vf_values = self._vf(aoi_angles_low, aoi_angles_high)
+        # Multiply to get integrand
+        integrand_values = faoi_values * vf_values
         # Replicate these values for all timestamps such that shapes
         # becomes: [n_timestamps, n_integral_sections]
         self.aoi_angles_low = np.tile(aoi_angles_low, (n_timestamps, 1))
         self.aoi_angles_high = np.tile(aoi_angles_high, (n_timestamps, 1))
-        self.faoi_values = np.tile(faoi_values, (n_timestamps, 1))
+        self.integrand_values = np.tile(integrand_values, (n_timestamps, 1))
 
-    def _calculate_pct_absorbed(self, low_angles, high_angles):
+    def _calculate_vf_aoi(self, low_angles, high_angles):
 
         # Calculate integrand
-        faoi_integrand = self._calculate_faoi_integrand(low_angles,
-                                                        high_angles)
+        faoi_integrand = self._calculate_vfaoi_integrand(low_angles,
+                                                         high_angles)
         n_intervals_covered = (faoi_integrand > 0.).sum(axis=1)
 
         # no need to multiply by interval below, because the max value is 1
@@ -53,10 +58,10 @@ class TsAOIMethods:
 
         return percent_absorbed
 
-    def _calculate_faoi_integrand(self, low_angles, high_angles):
+    def _calculate_vfaoi_integrand(self, low_angles, high_angles):
         """
-        Calculate the timeseries fAOI loss integrand given the low and high
-        angles to use in the fAOI function.
+        Calculate the timeseries view factors with aoi loss integrand
+        given the low and high angles that define the surface.
 
         Parameters
         ----------
@@ -69,7 +74,7 @@ class TsAOIMethods:
         Returns
         -------
         np.ndarray
-            fAOI integrand values for all timestamps
+            vf_aoi integrand values for all timestamps
             shape = (n_timestamps, n_integral_sections)
         """
 
@@ -80,9 +85,32 @@ class TsAOIMethods:
         # Filter out integrand values outside of range
         count_integral_section = ((low_angles_mat <= self.aoi_angles_high) &
                                   (high_angles_mat > self.aoi_angles_low))
-        faoi_integrand = np.where(count_integral_section, self.faoi_values, 0.)
+        faoi_integrand = np.where(count_integral_section,
+                                  self.integrand_values, 0.)
 
         return faoi_integrand
+
+    @staticmethod
+    def _vf(aoi_1, aoi_2):
+        """Calculate view factor from infinitesimal surface to infinite band.
+
+        See illustration: http://www.thermalradiation.net/sectionb/B-71.html
+        Here we're using angles measured from the horizontal
+
+        Parameters
+        ----------
+        aoi_1 : np.ndarray
+            Lower angles defining the infinite band
+        aoi_2 : np.ndarray
+            Higher angles defining the infinite band
+
+        Returns
+        -------
+        np.ndarray
+            View factors from infinitesimal surface to infinite strip
+
+        """
+        return 0.5 * np.abs(cosd(aoi_1) - cosd(aoi_2))
 
 
 def faoi_fn_from_pvlib_sandia(pvmodule_name):

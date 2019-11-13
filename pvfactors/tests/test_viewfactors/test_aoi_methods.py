@@ -34,28 +34,39 @@ def test_ts_aoi_methods(pvmodule_canadian):
     assert callable(aoi_methods.faoi_fn)
     assert aoi_methods.aoi_angles_low.shape == (n_timestamps, n_points)
     assert aoi_methods.aoi_angles_high.shape == (n_timestamps, n_points)
-    assert aoi_methods.faoi_values.shape == (n_timestamps, n_points)
+    assert aoi_methods.integrand_values.shape == (n_timestamps, n_points)
 
     # Create some dummy angle values
     low_angles = [0., 2., 108., 72., 179.]
     high_angles = [31., 30., 144., 144., 180.]
 
     # Check that integrand is calculated correctly
-    faoi_integrand = aoi_methods._calculate_faoi_integrand(
+    faoi_integrand = aoi_methods._calculate_vfaoi_integrand(
         low_angles, high_angles)
-    expected_integrand = np.array([
-        [0.75485313, 0.99750363, 0., 0., 0., 0.],
-        [0.75485313, 0., 0., 0., 0., 0.],
-        [0., 0., 0., 1., 0.99750363, 0.],
-        [0., 0., 1., 1., 0.99750363, 0.],
-        [0., 0., 0., 0., 0., 0.75485313]])
+    expected_integrand = \
+        [[0.05056557, 0.18255583, 0., 0., 0., 0.],
+         [0.05056557, 0., 0., 0., 0., 0.],
+         [0., 0., 0., 0.25, 0.18255583, 0.],
+         [0., 0., 0.25, 0.25, 0.18255583, 0.],
+         [0., 0., 0., 0., 0., 0.05056557]]
     np.testing.assert_allclose(faoi_integrand, expected_integrand)
 
     # Check that faoi values calculated correctly
     low_angles = [0., 2., 108., 72., 179.]
     high_angles = [31., 30., 144., 144., 180.]
-    pct_absorbed = aoi_methods._calculate_pct_absorbed(
-        low_angles, high_angles)
-    expected_pct_absorbed = [0.87617838, 0.75485313, 0.99875181,
-                             0.99916788, 0.75485313]
-    np.testing.assert_allclose(pct_absorbed, expected_pct_absorbed)
+    vf_aoi = aoi_methods._calculate_vf_aoi(low_angles, high_angles)
+    expected_vf_aoi = [0.1165607, 0.05056557, 0.21627792,
+                       0.22751861, 0.05056557]
+    np.testing.assert_allclose(vf_aoi, expected_vf_aoi)
+
+
+def test_vf():
+    """Make sure that view factor from infinitesimal strip
+    to parallel infinite strip is calculated correctly"""
+    # Input AOI angles
+    aoi_1 = [0, 90, 45, 0]
+    aoi_2 = [90, 0, 135, 10]
+    # Calculate view factors and check values
+    vf = TsAOIMethods._vf(aoi_1, aoi_2)
+    expected_vf = [0.5, 0.5, 0.70710678, 0.00759612]
+    np.testing.assert_allclose(vf, expected_vf, atol=0, rtol=1e-6)
