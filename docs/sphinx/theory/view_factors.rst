@@ -70,3 +70,21 @@ Application
 * View factor of parallel planes: http://www.thermalradiation.net/sectionc/C-2a.htm
 * View factor of angled planes: http://www.thermalradiation.net/sectionc/C-5a.html
 * The Hottel method is also widely used in the model
+
+
+Adding non-diffuse reflection losses
+------------------------------------
+
+For the derivation shown above, we assumed that the surfaces were diffuse. But as shown in [#bifacialvf_paper]_, it is possible to add an approximation of non-diffuse losses related to angle-of-incidence (AOI).
+
+If we're interested in calculating the **absorbed** irradiance coming from an infinite strip to an infinitesimal surface, we can calculate a view factor derated by AOI losses by starting with the formula derived in http://www.thermalradiation.net/sectionb/B-71.html.
+
+
+.. figure:: /theory/static/AOI_strips.png
+   :align: center
+   :width: 40%
+
+   Fig. 1: Schematics illustrating view factor formula from dA1 to infinite strips
+
+
+.. [#bifacialvf_paper] Marion, B., MacAlpine, S., Deline, C., Asgharzadeh, A., Toor, F., Riley, D., Stein, J. and Hansen, C., 2017, June. A practical irradiance model for bifacial PV modules. In 2017 IEEE 44th Photovoltaic Specialist Conference (PVSC) (pp. 1537-1542). IEEE.
