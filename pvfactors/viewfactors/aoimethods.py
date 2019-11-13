@@ -47,7 +47,23 @@ class TsAOIMethods:
         self.integrand_values = np.tile(integrand_values, (n_timestamps, 1))
 
     def _calculate_vf_aoi(self, low_angles, high_angles):
+        """Calculate faoi modified view factors for a wedge defined by
+        low and high angles.
 
+        Parameters
+        ----------
+        low_angles : np.ndarray
+            Low AOI angles (between 0 and 180 deg), length = n_timestamps
+        high_angles : np.ndarray
+            High AOI angles (between 0 and 180 deg), length = n_timestamps.
+            Should be bigger than ``low_angles``
+
+        Returns
+        -------
+        np.ndarray
+            faoi modified view factors for wedge
+            shape = (n_timestamps, )
+        """
         # Calculate integrand: all d_vf_aoi values
         faoi_integrand = self._calculate_vfaoi_integrand(low_angles,
                                                          high_angles)
