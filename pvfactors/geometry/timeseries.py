@@ -242,6 +242,13 @@ class TsSurface(object):
         """Timeseries point coordinates of lowest point of surface"""
         return self.coords.lowest_point
 
+    @property
+    def u_vector(self):
+        """Vector orthogonal to the surface's normal vector"""
+        u_vector = (None if self.n_vector is None else
+                    np.array([-self.n_vector[1, :], self.n_vector[0, :]]))
+        return u_vector
+
 
 class TsLineCoords(object):
     """Timeseries line coordinates class: will provide a helpful shapely-like
@@ -336,8 +343,10 @@ class TsPointCoords(object):
 
         Parameters
         ----------
-        coords : np.ndarray
-            Numpy array of timeseries point coordinates
+        x : np.ndarray
+            Timeseries x coordinates
+        y : np.ndarray
+            Timeseries y coordinates
         """
         self.x = x
         self.y = y
