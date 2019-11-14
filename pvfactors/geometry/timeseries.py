@@ -150,7 +150,8 @@ class TsSurface(object):
 
         Returns
         -------
-        segment : :py:class:`~pvfactors.geometry.base.PVSurface` or :py:class:`~shapely.geometry.GeometryCollection`
+        segment : :py:class:`~pvfactors.geometry.base.PVSurface` \
+        or :py:class:`~shapely.geometry.GeometryCollection`
             The returned object will be an empty geometry if its length is
             really small, otherwise it will be a PV surface geometry
         """

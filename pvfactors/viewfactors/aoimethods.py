@@ -1,5 +1,6 @@
 """Module containing AOI loss calculation methods"""
 
+from pvfactors.config import DISTANCE_TOLERANCE
 import pvlib
 from pvlib.tools import cosd
 import numpy as np
@@ -59,7 +60,109 @@ class AOIMethods:
         self.aoi_angles_high = np.tile(aoi_angles_high, (n_timestamps, 1))
         self.integrand_values = np.tile(integrand_values, (n_timestamps, 1))
 
-    def _calculate_vf_aoi_pvrow_to_gnd(self, ts_surface):
+    def vf_aoi_pvrow_to_gnd(self, ts_pvrows, ts_ground, tilted_to_left,
+                            vf_aoi_matrix):
+        """
+        """
+        n_pvrows = len(ts_pvrows)
+        for idx_pvrow, ts_pvrow in enumerate(ts_pvrows):
+            # Separate gnd surfaces depending on side
+            left_gnd_surfaces = ts_ground.ts_surfaces_side_of_cut_point(
+                'left', idx_pvrow)
+            right_gnd_surfaces = ts_ground.ts_surfaces_side_of_cut_point(
+                'right', idx_pvrow)
+            # Front side
+            front = ts_pvrow.front
+            for pvrow_surf in front.all_ts_surfaces:
+                ts_length = pvrow_surf.length
+                i = pvrow_surf.index
+                for gnd_surf in left_gnd_surfaces:
+                    j = gnd_surf.index
+                    vf_pvrow_to_gnd = (
+                        self.vf_aoi_pvrow_surf_to_gnd_surf_obstruction(
+                            pvrow_surf, idx_pvrow, n_pvrows,
+                            tilted_to_left, ts_pvrows, gnd_surf, ts_length,
+                            is_back=False, is_left=True))
+                    vf_aoi_matrix[i, j, :] = vf_pvrow_to_gnd
+                for gnd_surf in right_gnd_surfaces:
+                    j = gnd_surf.index
+                    vf_pvrow_to_gnd = (
+                        self.vf_aoi_pvrow_surf_to_gnd_surf_obstruction(
+                            pvrow_surf, idx_pvrow, n_pvrows,
+                            tilted_to_left, ts_pvrows, gnd_surf, ts_length,
+                            is_back=False, is_left=False))
+                    vf_aoi_matrix[i, j, :] = vf_pvrow_to_gnd
+            # Back side
+            back = ts_pvrow.back
+            for pvrow_surf in back.all_ts_surfaces:
+                ts_length = pvrow_surf.length
+                i = pvrow_surf.index
+                for gnd_surf in left_gnd_surfaces:
+                    j = gnd_surf.index
+                    vf_pvrow_to_gnd = (
+                        self.vf_aoi_pvrow_surf_to_gnd_surf_obstruction(
+                            pvrow_surf, idx_pvrow, n_pvrows,
+                            tilted_to_left, ts_pvrows, gnd_surf, ts_length,
+                            is_back=True, is_left=True))
+                    vf_aoi_matrix[i, j, :] = vf_pvrow_to_gnd
+                for gnd_surf in right_gnd_surfaces:
+                    j = gnd_surf.index
+                    vf_pvrow_to_gnd = (
+                        self.vf_aoi_pvrow_surf_to_gnd_surf_obstruction(
+                            pvrow_surf, idx_pvrow, n_pvrows,
+                            tilted_to_left, ts_pvrows, gnd_surf, ts_length,
+                            is_back=True, is_left=False))
+                    vf_aoi_matrix[i, j, :] = vf_pvrow_to_gnd
+
+    def _vf_aoi_pvrow_surf_to_gnd_surf_obstruction(
+            self, pvrow_surf, pvrow_idx, n_pvrows, tilted_to_left, ts_pvrows,
+            gnd_surf, ts_length, is_back=True, is_left=True):
+
+        centroid = pvrow_surf.centroid
+        # TODO: make sure ts surf has u_vector always available
+        # can calculate it at the side level
+        u_vector = pvrow_surf.u_vector
+        no_obstruction = (is_left & (pvrow_idx == 0)) \
+            or ((not is_left) & (pvrow_idx == n_pvrows - 1))
+        if no_obstruction:
+            # There is no obstruction to the ground surface
+            aoi_angles_1 = self._calculate_aoi_angles(u_vector, centroid,
+                                                      pvrow_surf.b1)
+            aoi_angles_2 = self._calculate_aoi_angles(u_vector, centroid,
+                                                      pvrow_surf.b2)
+        else:
+            # Get lowest point of obstructing point
+            idx_obstructing_pvrow = pvrow_idx - 1 if is_left else pvrow_idx + 1
+            pt_obstr = ts_pvrows[idx_obstructing_pvrow
+                                 ].full_pvrow_coords.lowest_point
+            # TODO: detect when obstructing and adjust accordingly
+            aoi_angles_1 = None
+            aoi_angles_2 = None
+
+        low_aoi_angles = np.where(aoi_angles_1 < aoi_angles_2, aoi_angles_1,
+                                  aoi_angles_2)
+        high_aoi_angles = np.where(aoi_angles_1 < aoi_angles_2, aoi_angles_2,
+                                   aoi_angles_1)
+        vf_aoi_raw = self._calculate_vf_aoi_wedge_level(low_aoi_angles,
+                                                        high_aoi_angles)
+        # Should be zero where either of the surfaces have zero length
+        vf_aoi_raw = np.where((ts_length < DISTANCE_TOLERANCE)
+                              | (gnd_surf.length < DISTANCE_TOLERANCE), 0.,
+                              vf_aoi_raw)
+
+        # Final result depends on whether front or back surface
+        if is_left:
+            vf_aoi = (
+                np.where(tilted_to_left, 0., vf_aoi_raw) if is_back
+                else np.where(tilted_to_left, vf_aoi_raw, 0.))
+        else:
+            vf_aoi = (
+                np.where(tilted_to_left, vf_aoi_raw, 0.) if is_back
+                else np.where(tilted_to_left, 0., vf_aoi_raw))
+
+        return vf_aoi
+
+    def _calculate_aoi_angles(u_vector, point_1, point_2):
         pass
 
     def _calculate_vf_aoi_wedge_level(self, low_angles, high_angles):

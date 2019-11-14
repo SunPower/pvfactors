@@ -28,6 +28,8 @@ class VFCalculator(object):
         self.vf_ts_methods = VFTsMethods()
         self.vf_aoi_methods = AOIMethods(
             faoi_fn, n_integral_sections=n_aoi_integral_sections)
+        # Attribute needed for AOI method
+        self.vf_matrix = None
 
     def fit(self, n_timestamps):
         """Fit the view factor calculator to the timeseries inputs.
@@ -83,8 +85,43 @@ class VFCalculator(object):
 
         return vf_matrix
 
-    def build_ts_vf_aoi_matrix():
-        pass
+    def build_ts_vf_aoi_matrix(self, pvarray):
+        """Calculate the view factor aoi matrix elements from all PV row
+        surfaces to all other surfaces, only. This will not calculate
+        view factors from ground surfaces to PV row surfaces, so the users
+        will need to run
+        :py:meth:`~pvfactors.viewfactors.calculator.VFCalculator.build_ts_vf_matrix`
+        first if they want the complete matrix, otherwise those entries will
+        have zero values in them.
+
+        Parameters
+        ----------
+        pvarray : :py:class:`~pvfactors.geometry.pvarray.OrderedPVArray`
+            PV array whose timeseries view factor AOI matrix to calculate
+
+        Returns
+        -------
+        np.ndarray
+            Timeseries view factor matrix, with 3 dimensions:
+            [n_surfaces, n_surfaces, n_timesteps]
+        """
+        # Initialize matrix
+        rotation_vec = pvarray.rotation_vec
+        tilted_to_left = rotation_vec > 0
+        n_steps = len(rotation_vec)
+        n_ts_surfaces = pvarray.n_ts_surfaces
+        vf_aoi_matrix = self.vf_matrix or np.zeros(
+            (n_ts_surfaces + 1, n_ts_surfaces + 1, n_steps),
+            dtype=float)  # don't forget to include the sky
+
+        # Get timeseries objects
+        ts_ground = pvarray.ts_ground
+        ts_pvrows = pvarray.ts_pvrows
+
+        # Calculate ts view factors between pvrow and ground surfaces
+        self.vf_aoi_methods.vf_aoi_pvrow_gnd_surf(ts_pvrows, ts_ground,
+                                                  tilted_to_left,
+                                                  vf_aoi_matrix)
 
     def get_vf_ts_pvrow_element(self, pvrow_idx, pvrow_element, ts_pvrows,
                                 ts_ground, rotation_vec, pvrow_width):
