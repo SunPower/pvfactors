@@ -1,6 +1,7 @@
 """Module containing AOI loss calculation methods"""
 
 from pvfactors.config import DISTANCE_TOLERANCE
+from pvfactors.geometry.timeseries import TsPointCoords
 import pvlib
 from pvlib.tools import cosd
 import numpy as np
@@ -62,7 +63,26 @@ class AOIMethods:
 
     def vf_aoi_pvrow_to_gnd(self, ts_pvrows, ts_ground, tilted_to_left,
                             vf_aoi_matrix):
-        """
+        """Calculate the view factors between timeseries PV row and ground
+        surfaces while accounting for non-diffuse AOI losses,
+        and assign it to the passed view factor aoi matrix using
+        the surface indices.
+
+        Notes
+        -----
+        This assumes that the PV row surfaces are infinitesimal (very small)
+
+        Parameters
+        ----------
+        ts_pvrows : list of :py:class:`~pvfactors.geometry.timeseries.TsPVRow`
+            List of timeseries PV rows in the PV array
+        ts_ground : :py:class:`~pvfactors.geometry.timeseries.TsGround`
+            Timeseries ground of the PV array
+        tilted_to_left : list of bool
+            Flags indicating when the PV rows are strictly tilted to the left
+        vf_aoi_matrix : np.ndarray
+            View factor aoi matrix to update during calculation. Should have 3
+            dimensions as follows: [n_surfaces, n_surfaces, n_timesteps]
         """
         n_pvrows = len(ts_pvrows)
         for idx_pvrow, ts_pvrow in enumerate(ts_pvrows):
@@ -117,27 +137,65 @@ class AOIMethods:
     def _vf_aoi_pvrow_surf_to_gnd_surf_obstruction(
             self, pvrow_surf, pvrow_idx, n_pvrows, tilted_to_left, ts_pvrows,
             gnd_surf, ts_length, is_back=True, is_left=True):
+        """Calculate view factors from timeseries PV row surface to a
+        timeseries ground surface, accounting for AOI losses.
+        This will return the calculated view
+        factors from the PV row surface to the ground surface.
 
+        Notes
+        -----
+        This assumes that the PV row surfaces are infinitesimal (very small)
+
+        Parameters
+        ----------
+        pvrow_surf : :py:class:`~pvfactors.geometry.timeseries.TsSurface`
+            Timeseries PV row surface to use for calculation
+        pvrow_idx : int
+            Index of the timeseries PV row on the which the pvrow_surf is
+        n_pvrows : int
+            Number of timeseries PV rows in the PV array, and therefore number
+            of shadows they cast on the ground
+        tilted_to_left : list of bool
+            Flags indicating when the PV rows are strictly tilted to the left
+        ts_pvrows : list of :py:class:`~pvfactors.geometry.timeseries.TsPVRow`
+            List of timeseries PV rows in the PV array
+        gnd_surf : :py:class:`~pvfactors.geometry.timeseries.TsSurface`
+            Timeseries ground surface to use for calculation
+        pvrow_surf_length : np.ndarray
+            Length (width) of the timeseries PV row surface [m]
+        is_back : bool
+            Flag specifying whether pv row surface is on  back or front surface
+            (Default = True)
+        is_left : bool
+            Flag specifying whether gnd surface is left of pv row cut point or
+            not (Default = True)
+
+        Returns
+        -------
+        vf_aoi_pvrow_to_gnd_surf : np.ndarray
+            View factors aoi from timeseries PV row surface to timeseries
+            ground surface, dimension is [n_timesteps]
+        """
         centroid = pvrow_surf.centroid
-        # TODO: make sure ts surf has u_vector always available
-        # can calculate it at the side level
         u_vector = pvrow_surf.u_vector
         no_obstruction = (is_left & (pvrow_idx == 0)) \
             or ((not is_left) & (pvrow_idx == n_pvrows - 1))
         if no_obstruction:
             # There is no obstruction to the ground surface
             aoi_angles_1 = self._calculate_aoi_angles(u_vector, centroid,
-                                                      pvrow_surf.b1)
+                                                      gnd_surf.b1)
             aoi_angles_2 = self._calculate_aoi_angles(u_vector, centroid,
-                                                      pvrow_surf.b2)
+                                                      gnd_surf.b2)
         else:
             # Get lowest point of obstructing point
             idx_obstructing_pvrow = pvrow_idx - 1 if is_left else pvrow_idx + 1
             pt_obstr = ts_pvrows[idx_obstructing_pvrow
                                  ].full_pvrow_coords.lowest_point
-            # TODO: detect when obstructing and adjust accordingly
-            aoi_angles_1 = None
-            aoi_angles_2 = None
+            # Adjust angle seen when there is obstruction
+            aoi_angles_1 = self._calculate_aoi_angles_w_obstruction(
+                u_vector, centroid, gnd_surf.b1, pt_obstr, is_left)
+            aoi_angles_2 = self._calculate_aoi_angles_w_obstruction(
+                u_vector, centroid, gnd_surf.b2, pt_obstr, is_left)
 
         low_aoi_angles = np.where(aoi_angles_1 < aoi_angles_2, aoi_angles_1,
                                   aoi_angles_2)
