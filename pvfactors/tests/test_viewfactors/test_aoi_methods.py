@@ -1,5 +1,6 @@
 from pvfactors.viewfactors.aoimethods import \
     AOIMethods, faoi_fn_from_pvlib_sandia
+from pvfactors.geometry.timeseries import TsPointCoords
 import numpy as np
 import pvlib
 import pytest
@@ -95,3 +96,15 @@ def test_vf():
 
 def test_vf_aoi_pvrow_gnd_surf():
     pass
+
+
+def test_calculate_aoi_angles():
+    """Make sure calculation of AOI angles is correct"""
+    u_vector = np.array([[1, 2, 3], [0, 0, 0]])
+    centroid = TsPointCoords(np.array([0.5, 1, 1]), np.array([0, 0, 0]))
+    point_2 = TsPointCoords(np.array([1, 0, 1]), np.array([0.5, 1, 5]))
+
+    aoi_angles = AOIMethods._calculate_aoi_angles(u_vector, point_1, point_2)
+    expected_aoi_angles = [45, 135, 90]
+    np.testing.assert_allclose(aoi_angles, expected_aoi_angles)
+    # np.testing.assert_allclose(aoi_angles, expected_aoi_angles)

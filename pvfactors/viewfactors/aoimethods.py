@@ -152,18 +152,49 @@ class AOIMethods:
 
         # Final result depends on whether front or back surface
         if is_left:
-            vf_aoi = (
-                np.where(tilted_to_left, 0., vf_aoi_raw) if is_back
-                else np.where(tilted_to_left, vf_aoi_raw, 0.))
+            vf_aoi = (np.where(tilted_to_left, 0., vf_aoi_raw) if is_back
+                      else np.where(tilted_to_left, vf_aoi_raw, 0.))
         else:
-            vf_aoi = (
-                np.where(tilted_to_left, vf_aoi_raw, 0.) if is_back
-                else np.where(tilted_to_left, 0., vf_aoi_raw))
+            vf_aoi = (np.where(tilted_to_left, vf_aoi_raw, 0.) if is_back
+                      else np.where(tilted_to_left, 0., vf_aoi_raw))
 
         return vf_aoi
 
-    def _calculate_aoi_angles(u_vector, point_1, point_2):
-        pass
+    def _calculate_aoi_angles_w_obstruction(
+            self, u_vector, centroid, point_gnd, point_obstr,
+            gnd_surf_is_left):
+        if point_obstr is None:
+            # There is no obstruction
+            point = point_gnd
+        else:
+            # Determine if there is obstruction by using the angles made by
+            # specific strings with the x-axis
+            alpha_pv = self._angle_with_x_axis(point_gnd, centroid)
+            alpha_ob = self._angle_with_x_axis(point_gnd, point_obstr)
+            if gnd_surf_is_left:
+                is_obstructing = alpha_pv > alpha_ob
+            else:
+                is_obstructing = alpha_pv < alpha_ob
+            x = np.where(is_obstructing, point_obstr.x, point_gnd.x)
+            y = np.where(is_obstructing, point_obstr.y, point_gnd.y)
+            point = TsPointCoords(x, y)
+
+        aoi_angles = self._calculate_aoi_angles(u_vector, centroid, point)
+        return aoi_angles
+
+    @staticmethod
+    def _calculate_aoi_angles(u_vector, centroid, point):
+        """Calculate AOI angles from direction vector of surface,
+        centroid point of that surface, and point from another surface
+        """
+        v_vector = np.array([point.x - centroid.x, point.y - centroid.y])
+        dot_product = u_vector[0, :] * v_vector[0, :] \
+            + u_vector[1, :] * v_vector[1, :]
+        u_norm = np.linalg.norm(u_vector, axis=0)
+        v_norm = np.linalg.norm(v_vector, axis=0)
+        cos_theta = dot_product / (u_norm * v_norm)
+        aoi_angles = np.rad2deg(np.arccos(cos_theta))
+        return aoi_angles
 
     def _calculate_vf_aoi_wedge_level(self, low_angles, high_angles):
         """Calculate faoi modified view factors for a wedge defined by
@@ -244,6 +275,24 @@ class AOIMethods:
 
         """
         return 0.5 * np.abs(cosd(aoi_1) - cosd(aoi_2))
+
+    @staticmethod
+    def _angle_with_x_axis(pt_1, pt_2):
+        """Angle with x-axis of vector going from pt_1 to pt_2
+
+        Parameters
+        ----------
+        pt_1 : :py:class:`~pvfactors.geometry.timeseries.TsPointCoords`
+            Timeseries point coordinates of point 1
+        pt_2 : :py:class:`~pvfactors.geometry.timeseries.TsPointCoords`
+            Timeseries point coordinates of point 2
+
+        Returns
+        -------
+        np.ndarray
+            Angle between vector pt_1->pt_2 and x-axis
+        """
+        return np.arctan2(pt_2.y - pt_1.y, pt_2.x - pt_1.x)
 
 
 def faoi_fn_from_pvlib_sandia(pvmodule_name):
