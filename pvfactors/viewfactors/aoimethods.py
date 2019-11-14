@@ -5,11 +5,11 @@ from pvlib.tools import cosd
 import numpy as np
 
 
-class TsAOIMethods:
+class AOIMethods:
     """Class containing methods related to calculating AOI losses for
     :py:class:`~pvfactors.geometry.pvarray.OrderedPVArray` objects."""
 
-    def __init__(self, faoi_fn, n_timestamps, n_integral_sections=300):
+    def __init__(self, faoi_fn, n_integral_sections=300):
         """Instantiate class with faoi function
 
         Parameters
@@ -18,16 +18,29 @@ class TsAOIMethods:
             Function which takes a list (or numpy array) of incidence angles
             measured from the surface horizontal
             (with values from 0 to 180 deg) and returns the fAOI values
-        n_timestamps : int
-            Number of simulation timestamps
         n_integral_sections : int, optional
             Number of integral divisions of the 0 to 180 deg interval
-            to use for the fAOI loss integral (default = 180)
+            to use for the fAOI loss integral (default = 300)
         """
         self.faoi_fn = faoi_fn
         self.n_integral_sections = n_integral_sections
+        # The following will be updated at fitting time
+        self.interval = None
+        self.aoi_angles_low = None
+        self.aoi_angles_high = None
+        self.integrand_values = None
+
+    def fit(self, n_timestamps):
+        """Fit the AOI methods to timeseries inputs: create all the necessary
+        integration attributes.
+
+        Parameters
+        ----------
+        n_timestamps : int
+            Number of simulation timestamps
+        """
         # Will use x values at the middle of the integral sections
-        aoi_angles = np.linspace(0., 180., num=n_integral_sections + 1)
+        aoi_angles = np.linspace(0., 180., num=self.n_integral_sections + 1)
         # Assumes that at least 2 aoi angle values, otherwise what's the point
         self.interval = aoi_angles[1] - aoi_angles[0]
         # Get integral intervals' low, high, and middle points
@@ -35,18 +48,21 @@ class TsAOIMethods:
         aoi_angles_high = aoi_angles_low + self.interval
         aoi_angles_middle = aoi_angles_low + self.interval / 2.
         # Calculate faoi values using middle points of integral intervals
-        faoi_values = faoi_fn(aoi_angles_middle)
+        faoi_values = self.faoi_fn(aoi_angles_middle)
         # Calculate small view factor values for each section
         vf_values = self._vf(aoi_angles_low, aoi_angles_high)
         # Multiply to get integrand
         integrand_values = faoi_values * vf_values
         # Replicate these values for all timestamps such that shapes
-        # becomes: [n_timestamps, n_integral_sections]
+        # becomes: [n_timestamps, n_integral_sections]map
         self.aoi_angles_low = np.tile(aoi_angles_low, (n_timestamps, 1))
         self.aoi_angles_high = np.tile(aoi_angles_high, (n_timestamps, 1))
         self.integrand_values = np.tile(integrand_values, (n_timestamps, 1))
 
-    def _calculate_vf_aoi(self, low_angles, high_angles):
+    def _calculate_vf_aoi_pvrow_to_gnd(self, ts_surface):
+        pass
+
+    def _calculate_vf_aoi_wedge_level(self, low_angles, high_angles):
         """Calculate faoi modified view factors for a wedge defined by
         low and high angles.
 

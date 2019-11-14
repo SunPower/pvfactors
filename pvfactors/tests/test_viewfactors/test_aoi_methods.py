@@ -1,5 +1,5 @@
 from pvfactors.viewfactors.aoimethods import \
-    TsAOIMethods, faoi_fn_from_pvlib_sandia
+    AOIMethods, faoi_fn_from_pvlib_sandia
 import numpy as np
 import pvlib
 import pytest
@@ -31,8 +31,9 @@ def test_ts_aoi_methods(pvmodule_canadian):
     - vf_aoi values stay consistent"""
     n_timestamps = 6  # using 5 timestamps
     n_points = 6  # using only 6 sections for the integral from 0 to 180 deg
-    aoi_methods = TsAOIMethods(faoi_fn_from_pvlib_sandia(pvmodule_canadian),
-                               n_timestamps, n_integral_sections=n_points)
+    aoi_methods = AOIMethods(faoi_fn_from_pvlib_sandia(pvmodule_canadian),
+                             n_integral_sections=n_points)
+    aoi_methods.fit(n_timestamps)
     # Check that function was passed correctly
     assert callable(aoi_methods.faoi_fn)
     assert aoi_methods.aoi_angles_low.shape == (n_timestamps, n_points)
@@ -56,7 +57,7 @@ def test_ts_aoi_methods(pvmodule_canadian):
     np.testing.assert_allclose(faoi_integrand, expected_integrand)
 
     # Check that faoi values calculated correctly
-    vf_aoi = aoi_methods._calculate_vf_aoi(low_angles, high_angles)
+    vf_aoi = aoi_methods._calculate_vf_aoi_wedge_level(low_angles, high_angles)
     expected_vf_aoi = [0.2331214, 0.05056557, 0.43255583, 0.68255583,
                        0.05056557, 0.96624281]
     np.testing.assert_allclose(vf_aoi, expected_vf_aoi)
@@ -67,14 +68,15 @@ def test_sanity_check(pvmodule_canadian):
     view factor values make sense"""
     n_timestamps = 3  # using 5 timestamps
     n_points = 300  # using only 6 sections for the integral from 0 to 180 deg
-    aoi_methods = TsAOIMethods(lambda aoi_angles: np.ones_like(aoi_angles),
-                               n_timestamps, n_integral_sections=n_points)
+    aoi_methods = AOIMethods(lambda aoi_angles: np.ones_like(aoi_angles),
+                             n_integral_sections=n_points)
+    aoi_methods.fit(n_timestamps)
     # Create some dummy angle values
     low_angles = [0., 90., 0.]
     high_angles = [180., 180., 90.]
 
     # Check that faoi values calculated correctly
-    vf_aoi = aoi_methods._calculate_vf_aoi(low_angles, high_angles)
+    vf_aoi = aoi_methods._calculate_vf_aoi_wedge_level(low_angles, high_angles)
     expected_vf_aoi = [1., 0.5, 0.5]
     np.testing.assert_allclose(vf_aoi, expected_vf_aoi)
 
@@ -86,6 +88,10 @@ def test_vf():
     aoi_1 = [0, 90, 45, 0]
     aoi_2 = [90, 0, 135, 10]
     # Calculate view factors and check values
-    vf = TsAOIMethods._vf(aoi_1, aoi_2)
+    vf = AOIMethods._vf(aoi_1, aoi_2)
     expected_vf = [0.5, 0.5, 0.70710678, 0.00759612]
     np.testing.assert_allclose(vf, expected_vf, atol=0, rtol=1e-6)
+
+
+def test_vf_aoi_pvrow_gnd_surf():
+    pass

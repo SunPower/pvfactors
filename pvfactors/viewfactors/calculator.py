@@ -2,6 +2,7 @@
 
 from pvfactors.config import DISTANCE_TOLERANCE
 from pvfactors.viewfactors.vfmethods import VFTsMethods
+from pvfactors.viewfactors.aoimethods import AOIMethods
 import numpy as np
 
 
@@ -9,18 +10,34 @@ class VFCalculator(object):
     """This calculator class will be used for the calculation of view factors
     for PV arrays"""
 
-    def __init__(self, vf_ts_methods=None):
+    def __init__(self, faoi_fn=None, n_aoi_integral_sections=300):
         """Initialize the view factor calculator with the calculation methods
         that will be used.
 
         Parameters
         ----------
-        vf_ts_methods : \
-        :py:class:`~pvfactors.viewfactors.methods.VFTsMethods` object
-            Object with methods to calculate timeseries view factors for the
-            fast mode (Default = None)
+        faoi_fn : function, optional
+            Function which takes a list (or numpy array) of incidence angles
+            measured from the surface horizontal
+            (with values from 0 to 180 deg) and returns the fAOI values
+            (Default = None)
+        n_integral_sections : int, optional
+            Number of integral divisions of the 0 to 180 deg interval
+            to use for the fAOI loss integral (default = 300)
         """
-        self.vf_ts_methods = vf_ts_methods or VFTsMethods()
+        self.vf_ts_methods = VFTsMethods()
+        self.vf_aoi_methods = AOIMethods(
+            faoi_fn, n_integral_sections=n_aoi_integral_sections)
+
+    def fit(self, n_timestamps):
+        """Fit the view factor calculator to the timeseries inputs.
+
+        Parameters
+        ----------
+        n_timestamps : int
+            Number of simulation timestamps
+        """
+        self.vf_aoi_methods.fit(n_timestamps)
 
     def build_ts_vf_matrix(self, pvarray):
         """Calculate timeseries view factor matrix for the given
@@ -65,6 +82,9 @@ class VFCalculator(object):
                                            vf_matrix[i, -1, :], 0.)
 
         return vf_matrix
+
+    def build_ts_vf_aoi_matrix():
+        pass
 
     def get_vf_ts_pvrow_element(self, pvrow_idx, pvrow_element, ts_pvrows,
                                 ts_ground, rotation_vec, pvrow_width):
