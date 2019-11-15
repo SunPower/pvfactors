@@ -81,18 +81,18 @@ class AOIMethods:
             View factor matrix to update during calculation. Should have 3
             dimensions as follows: [n_surfaces, n_surfaces, n_timesteps]
         """
-        sky_index = len(ts_pvrows)
+        sky_index = vf_matrix.shape[0] - 1
         # --- Build list of dummy sky surfaces
         # create sky left open area
         pt_1 = TsPointCoords(ts_ground.x_min * np.ones_like(tilted_to_left),
-                             ts_ground.y_ground)
+                             ts_ground.y_ground * np.ones_like(tilted_to_left))
         pt_2 = ts_pvrows[0].highest_point
         sky_left = TsSurface(TsLineCoords(pt_1, pt_2))
         # create sky right open area
         pt_1 = TsPointCoords(ts_ground.x_max * np.ones_like(tilted_to_left),
-                             ts_ground.y_ground)
+                             ts_ground.y_ground * np.ones_like(tilted_to_left))
         pt_2 = ts_pvrows[-1].highest_point
-        sky_right = TsSurface(TsLineCoords(pt_1, pt_2))
+        sky_right = TsSurface(TsLineCoords(pt_2, pt_1))
         # Add sky surfaces in-between PV rows
         dummy_sky_surfaces = [sky_left]
         for idx_pvrow, ts_pvrow in enumerate(ts_pvrows[:-1]):
@@ -454,6 +454,8 @@ class AOIMethods:
         u_norm = np.linalg.norm(u_vector, axis=0)
         v_norm = np.linalg.norm(v_vector, axis=0)
         cos_theta = dot_product / (u_norm * v_norm)
+        # because of round off errors, cos_theta can be slightly > 1, fix it
+        cos_theta = np.minimum(cos_theta, 1.)
         aoi_angles = np.rad2deg(np.arccos(cos_theta))
         return aoi_angles
 

@@ -131,7 +131,7 @@ def test_vf_aoi_pvrow_gnd_benchmark_no_obstruction():
     # -- Check situation when the segments are small, and no obstruction at all
     discretization = {pvrow_idx: {'back': 10}}
     pvrow_surf, pvrow_idx, tilted_to_left, ts_pvrows, \
-        gnd_surf, ts_length = _get_vf_method_inputs(
+        gnd_surf, ts_length, _ = _get_vf_method_inputs(
             discretization, pvrow_idx, side, segment_idx, idx_gnd_surf)
     # --- There is no obstruction
     # Calculate using VFTsMethods
@@ -151,7 +151,7 @@ def test_vf_aoi_pvrow_gnd_benchmark_no_obstruction():
     # -- Check situation when the segments are large, and no obstruction at all
     discretization = {pvrow_idx: {'back': 1}}
     pvrow_surf, pvrow_idx, tilted_to_left, ts_pvrows, \
-        gnd_surf, ts_length = _get_vf_method_inputs(
+        gnd_surf, ts_length, _ = _get_vf_method_inputs(
             discretization, pvrow_idx, side, segment_idx, idx_gnd_surf)
     # --- There is no obstruction
     # Calculate using VFTsMethods
@@ -197,7 +197,7 @@ def test_vf_aoi_pvrow_gnd_benchmark_with_obstruction():
     # -- Check situation when the segments are small, and no obstruction at all
     discretization = {pvrow_idx: {'back': 10}}
     pvrow_surf, pvrow_idx, tilted_to_left, ts_pvrows, \
-        gnd_surf, ts_length = _get_vf_method_inputs(
+        gnd_surf, ts_length, _ = _get_vf_method_inputs(
             discretization, pvrow_idx, side, segment_idx, idx_gnd_surf,
             gcr=0.8)
     # --- There is no obstruction
@@ -219,7 +219,7 @@ def test_vf_aoi_pvrow_gnd_benchmark_with_obstruction():
     # -- Check situation when the segments are large, and no obstruction at all
     discretization = {pvrow_idx: {'back': 1}}
     pvrow_surf, pvrow_idx, tilted_to_left, ts_pvrows, \
-        gnd_surf, ts_length = _get_vf_method_inputs(
+        gnd_surf, ts_length, _ = _get_vf_method_inputs(
             discretization, pvrow_idx, side, segment_idx, idx_gnd_surf)
     # --- There is no obstruction
     # Calculate using VFTsMethods
@@ -263,7 +263,6 @@ def _get_vf_method_inputs(discretization, pvrow_idx, side, segment_idx,
     # pv array is tilted to right
     pvarray = OrderedPVArray.fit_from_dict_of_scalars(params)
     tilted_to_left = pvarray.rotation_vec > 0
-    n_timestamps = len(tilted_to_left)
 
     # left pvrow & back side & left surface
     left_gnd_surfaces = (
@@ -275,4 +274,37 @@ def _get_vf_method_inputs(discretization, pvrow_idx, side, segment_idx,
     ts_length = pvrow_surf.length
 
     return (pvrow_surf, pvrow_idx, tilted_to_left, pvarray.ts_pvrows,
-            gnd_surf, ts_length)
+            gnd_surf, ts_length, pvarray)
+
+
+def test_vf_aoi_pvrow_to_sky(params):
+    """Check aoi methods for vf_aoi from pvrow to sky"""
+    # Create aoi methods
+    n_timestamps = 1
+    n_points = 300  # using only 6 sections for the integral from 0 to 180 deg
+    aoi_methods = AOIMethods(lambda aoi_angles: np.ones_like(aoi_angles),
+                             n_integral_sections=n_points)
+    aoi_methods.fit(n_timestamps)
+
+    # Create pv array
+    params.update({'cut': {0: {'front': 3}, 1: {'back': 2}}})
+    pvarray = OrderedPVArray.fit_from_dict_of_scalars(params)
+
+    # Initialize vf_aoi_matrix
+    n_ts_surfaces = pvarray.n_ts_surfaces
+    n_steps = n_timestamps
+    vf_aoi_matrix = np.zeros((n_ts_surfaces + 1, n_ts_surfaces + 1, n_steps),
+                             dtype=float)
+
+    # Calculate pvrow to sky vf_aoi values
+    tilted_to_left = pvarray.rotation_vec > 0
+    aoi_methods.vf_aoi_pvrow_to_sky(
+        pvarray.ts_pvrows, pvarray.ts_ground, tilted_to_left, vf_aoi_matrix)
+
+    sky_column = np.squeeze(vf_aoi_matrix[:, -1, :])
+    expected_sky_column = [0., 0., 0., 0., 0., 0., 0., 0., 0., 0.,
+                           0., 0., 0., 0., 0., 0., 0., 0., 0., 0.,
+                           0., 0., 0., 0., 0., 0., 0., 0., 0.96679021, 0.,
+                           0.95461805, 0., 0.93560691, 0., 0., 0., 0.95461805,
+                           0., 0., 0., 0., 0., 0.97552826, 0., 0., 0., 0.]
+    np.testing.assert_allclose(sky_column, expected_sky_column)
