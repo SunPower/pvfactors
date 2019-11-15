@@ -318,6 +318,10 @@ class AOIMethods:
                                                          high_angles)
         # Total vf_aoi will be sum of all smaller d_vf_aoi values
         total_vf_aoi = faoi_integrand.sum(axis=1)
+        # Make sure vf is counted as zero if the wedge is super small
+        total_vf_aoi = np.where(
+            np.abs(high_angles - low_angles) < DISTANCE_TOLERANCE, 0.,
+            total_vf_aoi)
 
         return total_vf_aoi
 

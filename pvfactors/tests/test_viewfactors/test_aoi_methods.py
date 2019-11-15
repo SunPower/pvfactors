@@ -44,8 +44,8 @@ def test_ts_aoi_methods(pvmodule_canadian):
     assert aoi_methods.integrand_values.shape == (n_timestamps, n_points)
 
     # Create some dummy angle values
-    low_angles = [0., 2., 108., 72., 179., 0.]
-    high_angles = [31., 30., 144., 144., 180., 180.]
+    low_angles = np.array([0., 2., 108., 72., 179., 0.])
+    high_angles = np.array([31., 30., 144., 144., 180., 180.])
 
     # Check that integrand is calculated correctly
     faoi_integrand = aoi_methods._calculate_vfaoi_integrand(
@@ -75,8 +75,8 @@ def test_sanity_check(pvmodule_canadian):
                              n_integral_sections=n_points)
     aoi_methods.fit(n_timestamps)
     # Create some dummy angle values
-    low_angles = [0., 90., 0.]
-    high_angles = [180., 180., 90.]
+    low_angles = np.array([0., 90., 0.])
+    high_angles = np.array([180., 180., 90.])
 
     # Check that faoi values calculated correctly
     vf_aoi = aoi_methods._calculate_vf_aoi_wedge_level(low_angles, high_angles)
