@@ -4,7 +4,6 @@ from pvfactors.geometry.timeseries import TsPointCoords
 from pvfactors.geometry.pvarray import OrderedPVArray
 from pvfactors.viewfactors.vfmethods import VFTsMethods
 import numpy as np
-import pvlib
 import pytest
 
 

@@ -8,7 +8,9 @@ import numpy as np
 
 class VFCalculator(object):
     """This calculator class will be used for the calculation of view factors
-    for :py:class:`~pvfactors.geometry.pvarray.OrderedPVArray`"""
+    for :py:class:`~pvfactors.geometry.pvarray.OrderedPVArray`, and it will
+    rely on both :py:class:`~pvfactors.viewfactors.vfmethods.VFTsMethods`
+    and :py:class:`~pvfactors.viewfactors.aoimethods.AOIMethods`"""
 
     def __init__(self, faoi_fn=None, n_aoi_integral_sections=300):
         """Initialize the view factor calculator with the calculation methods

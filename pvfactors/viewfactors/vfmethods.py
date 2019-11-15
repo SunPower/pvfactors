@@ -8,8 +8,8 @@ import numpy as np
 
 class VFTsMethods(object):
     """This class contains all the methods used to calculate timeseries
-    view factors from PV row elements to all the other elements of a PV
-    array."""
+    view factors for all the surfaces in
+    :py:class:`~pvfactors.geometry.pvarray.OrderedPVArray`"""
 
     def vf_pvrow_gnd_surf(self, ts_pvrows, ts_ground, tilted_to_left,
                           vf_matrix):

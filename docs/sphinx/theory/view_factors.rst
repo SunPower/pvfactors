@@ -75,7 +75,7 @@ Application
 Adding non-diffuse reflection losses
 ------------------------------------
 
-For the derivation shown above, we assumed that the surfaces were diffuse. But as shown in [#bifacialvf_paper]_, it is possible to add an approximation of non-diffuse losses related to angle-of-incidence (AOI).
+For the derivation shown above, we assumed that the surfaces were diffuse. But as shown in [#bifacialvf_paper]_, it is possible to add an approximation of non-diffuse effects by calculating absorption losses that are function of the angle-of-incidence (AOI) of the light.
 
 If we're interested in calculating the **absorbed** irradiance coming from an infinite strip to an infinitesimal surface, we can calculate a view factor derated by AOI losses by starting with the formula derived in http://www.thermalradiation.net/sectionb/B-71.html.
 
@@ -85,6 +85,25 @@ If we're interested in calculating the **absorbed** irradiance coming from an in
    :width: 40%
 
    Fig. 1: Schematics illustrating view factor formula from dA1 to infinite strips
+
+
+The view factor from the infinitesimal surface :math:`dA_1` to the infinite strip :math:`A_{2,1}` is equal to:
+
+.. math::
+	dF_{dA_{1}-A_{2,1}}{\;} = {\frac{1}{2}}{\;}({cos{\theta}_2{\;}-{\;}cos{\theta}_1})
+
+For this small view of the strip, we can assume that a given AOI modifier function (:math:`f(AOI)`), which represents reflection losses, is constant. Such that:
+
+.. math::
+	dF_{dA_{1}-A_{2,1},AOI}{\;} = {\frac{1}{2}}{\;}f(AOI){\;}({cos{\theta}_2{\;}-{\;}cos{\theta}_1})
+
+We can then calculate the view factor derated by AOI losses from the infinitesimal surface :math:`dA_{1}` to the whole surface :math:`A_{2}` by summing up the values for all the small strips constituting that surface. Such that:
+
+.. math::
+	dF_{dA_{1}-A_{2},AOI}{\;} = {\sum}_{j=1}^{3}{\;}dF_{dA_{1}-A_{2,j},AOI}
+
+.. note::
+   Since this formula was derived for "infinitesimal" surfaces, in practice we can cut up the PV row sides into "small" segments to make this approximation more valid.
 
 
 .. [#bifacialvf_paper] Marion, B., MacAlpine, S., Deline, C., Asgharzadeh, A., Toor, F., Riley, D., Stein, J. and Hansen, C., 2017, June. A practical irradiance model for bifacial PV modules. In 2017 IEEE 44th Photovoltaic Specialist Conference (PVSC) (pp. 1537-1542). IEEE.
