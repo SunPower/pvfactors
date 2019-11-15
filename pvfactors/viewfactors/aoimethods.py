@@ -1,7 +1,8 @@
 """Module containing AOI loss calculation methods"""
 
 from pvfactors.config import DISTANCE_TOLERANCE
-from pvfactors.geometry.timeseries import TsPointCoords
+from pvfactors.geometry.timeseries import (
+    TsPointCoords, TsSurface, TsLineCoords)
 import pvlib
 from pvlib.tools import cosd
 import numpy as np
@@ -60,6 +61,73 @@ class AOIMethods:
         self.aoi_angles_low = np.tile(aoi_angles_low, (n_timestamps, 1))
         self.aoi_angles_high = np.tile(aoi_angles_high, (n_timestamps, 1))
         self.integrand_values = np.tile(integrand_values, (n_timestamps, 1))
+
+    def vf_aoi_pvrow_to_sky(self, ts_pvrows, ts_ground, tilted_to_left,
+                            vf_matrix):
+        """Calculate the view factors between timeseries PV row surface and sky
+        while accounting for AOI losses,
+        and assign values to the passed view factor matrix using
+        the surface indices.
+
+        Parameters
+        ----------
+        ts_pvrows : list of :py:class:`~pvfactors.geometry.timeseries.TsPVRow`
+            List of timeseries PV rows in the PV array
+        ts_ground : :py:class:`~pvfactors.geometry.timeseries.TsGround`
+            Timeseries ground of the PV array
+        tilted_to_left : list of bool
+            Flags indicating when the PV rows are strictly tilted to the left
+        vf_matrix : np.ndarray
+            View factor matrix to update during calculation. Should have 3
+            dimensions as follows: [n_surfaces, n_surfaces, n_timesteps]
+        """
+        sky_index = len(ts_pvrows)
+        # --- Build list of dummy sky surfaces
+        # create sky left open area
+        pt_1 = TsPointCoords(ts_ground.x_min * np.ones_like(tilted_to_left),
+                             ts_ground.y_ground)
+        pt_2 = ts_pvrows[0].highest_point
+        sky_left = TsSurface(TsLineCoords(pt_1, pt_2))
+        # create sky right open area
+        pt_1 = TsPointCoords(ts_ground.x_max * np.ones_like(tilted_to_left),
+                             ts_ground.y_ground)
+        pt_2 = ts_pvrows[-1].highest_point
+        sky_right = TsSurface(TsLineCoords(pt_1, pt_2))
+        # Add sky surfaces in-between PV rows
+        dummy_sky_surfaces = [sky_left]
+        for idx_pvrow, ts_pvrow in enumerate(ts_pvrows[:-1]):
+            right_ts_pvrow = ts_pvrows[idx_pvrow + 1]
+            pt_1 = ts_pvrow.highest_point
+            pt_2 = right_ts_pvrow.highest_point
+            sky_surface = TsSurface(TsLineCoords(pt_1, pt_2))
+            dummy_sky_surfaces.append(sky_surface)
+        # Add sky right open area
+        dummy_sky_surfaces.append(sky_right)
+
+        # Now calculate vf_aoi for all PV row surfaces to sky
+        for idx_pvrow, ts_pvrow in enumerate(ts_pvrows):
+            # Get dummy sky surfaces
+            sky_left = dummy_sky_surfaces[idx_pvrow]
+            sky_right = dummy_sky_surfaces[idx_pvrow + 1]
+            # Calculate vf_aoi for surfaces in PV row
+            # front side
+            front = ts_pvrow.front
+            for front_surf in front.all_ts_surfaces:
+                vf_aoi_left = self._vf_aoi_surface_to_surface(front_surf,
+                                                              sky_left)
+                vf_aoi_right = self._vf_aoi_surface_to_surface(front_surf,
+                                                               sky_right)
+                vf_aoi = np.where(tilted_to_left, vf_aoi_left, vf_aoi_right)
+                vf_matrix[front_surf.index, sky_index, :] = vf_aoi
+            # back side
+            back = ts_pvrow.back
+            for back_surf in back.all_ts_surfaces:
+                vf_aoi_left = self._vf_aoi_surface_to_surface(back_surf,
+                                                              sky_left)
+                vf_aoi_right = self._vf_aoi_surface_to_surface(back_surf,
+                                                               sky_right)
+                vf_aoi = np.where(tilted_to_left, vf_aoi_right, vf_aoi_left)
+                vf_matrix[back_surf.index, sky_index, :] = vf_aoi
 
     def vf_aoi_pvrow_to_pvrow(self, ts_pvrows, tilted_to_left, vf_matrix):
         """Calculate the view factors between timeseries PV row surfaces
