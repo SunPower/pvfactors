@@ -13,7 +13,8 @@ class AOIMethods:
     :py:class:`~pvfactors.geometry.pvarray.OrderedPVArray` objects."""
 
     def __init__(self, faoi_fn, n_integral_sections=300):
-        """Instantiate class with faoi function
+        """Instantiate class with faoi function and number of sections to use
+        to calculate integrals of view factors with faoi losses
 
         Parameters
         ----------
@@ -428,38 +429,6 @@ class AOIMethods:
         aoi_angles = self._calculate_aoi_angles(u_vector, centroid, point)
         return aoi_angles
 
-    @staticmethod
-    def _calculate_aoi_angles(u_vector, centroid, point):
-        """Calculate AOI angles from direction vector of surface,
-        centroid point of that surface, and point from another surface
-
-        Parameters
-        ----------
-        u_vector : np.ndarray
-            Direction vector of the surface for which to calculate AOI angles
-        centroid : :py:class:`~pvfactors.geometry.timeseries.TsPointCoords`
-            Centroid point of surface for which to calculate AOI angles
-        point : :py:class:`~pvfactors.geometry.timeseries.TsPointCoords`
-            Point of remote surface that will determine AOI angle
-
-        Returns
-        -------
-        np.ndarray
-            AOI angles formed by remote point and centroid on surface,
-            measured against surface direction vector [degrees]
-        """
-        v_vector = np.array([point.x - centroid.x, point.y - centroid.y])
-        dot_product = u_vector[0, :] * v_vector[0, :] \
-            + u_vector[1, :] * v_vector[1, :]
-        u_norm = np.linalg.norm(u_vector, axis=0)
-        v_norm = np.linalg.norm(v_vector, axis=0)
-        cos_theta = dot_product / (u_norm * v_norm)
-        # because of round off errors, cos_theta can be slightly > 1,
-        # or slightly < -1, so clip it
-        cos_theta = np.clip(cos_theta, -1., 1.)
-        aoi_angles = np.rad2deg(np.arccos(cos_theta))
-        return aoi_angles
-
     def _calculate_vf_aoi_wedge_level(self, low_angles, high_angles):
         """Calculate faoi modified view factors for a wedge defined by
         low and high angles.
@@ -521,6 +490,38 @@ class AOIMethods:
                                   self.integrand_values, 0.)
 
         return faoi_integrand
+
+    @staticmethod
+    def _calculate_aoi_angles(u_vector, centroid, point):
+        """Calculate AOI angles from direction vector of surface,
+        centroid point of that surface, and point from another surface
+
+        Parameters
+        ----------
+        u_vector : np.ndarray
+            Direction vector of the surface for which to calculate AOI angles
+        centroid : :py:class:`~pvfactors.geometry.timeseries.TsPointCoords`
+            Centroid point of surface for which to calculate AOI angles
+        point : :py:class:`~pvfactors.geometry.timeseries.TsPointCoords`
+            Point of remote surface that will determine AOI angle
+
+        Returns
+        -------
+        np.ndarray
+            AOI angles formed by remote point and centroid on surface,
+            measured against surface direction vector [degrees]
+        """
+        v_vector = np.array([point.x - centroid.x, point.y - centroid.y])
+        dot_product = u_vector[0, :] * v_vector[0, :] \
+            + u_vector[1, :] * v_vector[1, :]
+        u_norm = np.linalg.norm(u_vector, axis=0)
+        v_norm = np.linalg.norm(v_vector, axis=0)
+        cos_theta = dot_product / (u_norm * v_norm)
+        # because of round off errors, cos_theta can be slightly > 1,
+        # or slightly < -1, so clip it
+        cos_theta = np.clip(cos_theta, -1., 1.)
+        aoi_angles = np.rad2deg(np.arccos(cos_theta))
+        return aoi_angles
 
     @staticmethod
     def _vf(aoi_1, aoi_2):

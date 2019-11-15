@@ -8,7 +8,7 @@ import numpy as np
 
 class VFCalculator(object):
     """This calculator class will be used for the calculation of view factors
-    for PV arrays"""
+    for :py:class:`~pvfactors.geometry.pvarray.OrderedPVArray`"""
 
     def __init__(self, faoi_fn=None, n_aoi_integral_sections=300):
         """Initialize the view factor calculator with the calculation methods
@@ -106,7 +106,8 @@ class VFCalculator(object):
         Returns
         -------
         np.ndarray
-            Timeseries view factor matrix, with 3 dimensions:
+            Timeseries view factor matrix for infinitesimal PV row surfaces,
+            and accounting for AOI losses, with 3 dimensions:
             [n_surfaces, n_surfaces, n_timesteps]
         """
         # Initialize matrix
