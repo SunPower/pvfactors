@@ -114,9 +114,9 @@ class VFCalculator(object):
         tilted_to_left = rotation_vec > 0
         n_steps = len(rotation_vec)
         n_ts_surfaces = pvarray.n_ts_surfaces
-        vf_aoi_matrix = self.vf_matrix or np.zeros(
+        vf_aoi_matrix = np.zeros(
             (n_ts_surfaces + 1, n_ts_surfaces + 1, n_steps),
-            dtype=float)  # don't forget to include the sky
+            dtype=float) if self.vf_matrix is None else self.vf_matrix
 
         # Get timeseries objects
         ts_ground = pvarray.ts_ground
