@@ -221,6 +221,32 @@ class AOIMethods:
     def _calculate_aoi_angles_w_obstruction(
             self, u_vector, centroid, point_gnd, point_obstr,
             gnd_surf_is_left):
+        """Calculate AOI angles for a PV row surface of the
+        :py:class:`~pvfactors.geometry.pvarray.OrderedPVArray` that sees
+        a ground surface, while being potentially obstructed by another
+        PV row
+
+        Parameters
+        ----------
+        u_vector : np.ndarray
+            Direction vector of the surface for which to calculate AOI angles
+        centroid : :py:class:`~pvfactors.geometry.timeseries.TsPointCoords`
+            Centroid point of PV row surface for which to calculate AOI angles
+        point : :py:class:`~pvfactors.geometry.timeseries.TsPointCoords`
+            Point of ground surface that will determine AOI angle
+        point_obstr: :py:class:`~pvfactors.geometry.timeseries.TsPointCoords`
+            Potentially obstructing point for the view aoi angle calculation
+        gnd_surf_is_left : bool
+            Flag specifying whether ground surface is left of PV row's cut
+            point or not
+
+        Returns
+        -------
+        np.ndarray
+            AOI angles formed by remote point and centroid on surface,
+            measured against surface direction vector, accounting for
+            potential obstruction [degrees]
+        """
         if point_obstr is None:
             # There is no obstruction
             point = point_gnd
@@ -244,6 +270,21 @@ class AOIMethods:
     def _calculate_aoi_angles(u_vector, centroid, point):
         """Calculate AOI angles from direction vector of surface,
         centroid point of that surface, and point from another surface
+
+        Parameters
+        ----------
+        u_vector : np.ndarray
+            Direction vector of the surface for which to calculate AOI angles
+        centroid : :py:class:`~pvfactors.geometry.timeseries.TsPointCoords`
+            Centroid point of surface for which to calculate AOI angles
+        point : :py:class:`~pvfactors.geometry.timeseries.TsPointCoords`
+            Point of remote surface that will determine AOI angle
+
+        Returns
+        -------
+        np.ndarray
+            AOI angles formed by remote point and centroid on surface,
+            measured against surface direction vector [degrees]
         """
         v_vector = np.array([point.x - centroid.x, point.y - centroid.y])
         dot_product = u_vector[0, :] * v_vector[0, :] \

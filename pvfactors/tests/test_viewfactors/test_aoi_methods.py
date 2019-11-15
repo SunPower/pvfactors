@@ -227,6 +227,8 @@ def test_vf_aoi_pvrow_gnd_benchmark_with_obstruction():
         pvrow_surf, pvrow_idx, n_pvrows, tilted_to_left, ts_pvrows,
         gnd_surf, ts_length, is_back=True, is_left=True)
     # Calculate using AOIMethods
+    # Since it uses the centroid, here the surface is not even considered
+    # to be obstructed...
     vf1_nrel = aoi_methods._vf_aoi_pvrow_surf_to_gnd_surf_obstruction(
         pvrow_surf, pvrow_idx, n_pvrows, tilted_to_left, ts_pvrows,
         gnd_surf, ts_length, is_back=True, is_left=True)
