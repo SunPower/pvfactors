@@ -1,6 +1,8 @@
 from pvfactors.viewfactors.aoimethods import \
     AOIMethods, faoi_fn_from_pvlib_sandia
 from pvfactors.geometry.timeseries import TsPointCoords
+from pvfactors.geometry.pvarray import OrderedPVArray
+from pvfactors.viewfactors.vfmethods import VFTsMethods
 import numpy as np
 import pvlib
 import pytest
@@ -94,17 +96,181 @@ def test_vf():
     np.testing.assert_allclose(vf, expected_vf, atol=0, rtol=1e-6)
 
 
-def test_vf_aoi_pvrow_gnd_surf():
-    pass
-
-
 def test_calculate_aoi_angles():
     """Make sure calculation of AOI angles is correct"""
     u_vector = np.array([[1, 2, 3], [0, 0, 0]])
     centroid = TsPointCoords(np.array([0.5, 1, 1]), np.array([0, 0, 0]))
-    point_2 = TsPointCoords(np.array([1, 0, 1]), np.array([0.5, 1, 5]))
+    point = TsPointCoords(np.array([1, 0, 1]), np.array([0.5, 1, 5]))
 
-    aoi_angles = AOIMethods._calculate_aoi_angles(u_vector, point_1, point_2)
+    aoi_angles = AOIMethods._calculate_aoi_angles(u_vector, centroid, point)
     expected_aoi_angles = [45, 135, 90]
     np.testing.assert_allclose(aoi_angles, expected_aoi_angles)
-    # np.testing.assert_allclose(aoi_angles, expected_aoi_angles)
+
+
+def test_vf_aoi_pvrow_gnd_benchmark_no_obstruction():
+    """Check that the NREL view factors are close to the truth for small
+    segments, but further away when segments are large
+    Assumption: no obstruction"""
+
+    # Create vf ts methods
+    vf_ts_methods = VFTsMethods()
+    # Create aoi methods
+    n_timestamps = 1
+    n_points = 300  # using only 6 sections for the integral from 0 to 180 deg
+    aoi_methods = AOIMethods(lambda aoi_angles: np.ones_like(aoi_angles),
+                             n_integral_sections=n_points)
+    aoi_methods.fit(n_timestamps)
+
+    # Get parameters
+    n_pvrows = 3
+    pvrow_idx = 0  # leftmost pv row
+    side = 'back'
+    segment_idx = 0  # top segment
+    idx_gnd_surf = 0  # first shadow left
+
+    # -- Check situation when the segments are small, and no obstruction at all
+    discretization = {pvrow_idx: {'back': 10}}
+    pvrow_surf, pvrow_idx, tilted_to_left, ts_pvrows, \
+        gnd_surf, ts_length = _get_vf_method_inputs(
+            discretization, pvrow_idx, side, segment_idx, idx_gnd_surf)
+    # --- There is no obstruction
+    # Calculate using VFTsMethods
+    vf1_vf, _ = vf_ts_methods.vf_pvrow_surf_to_gnd_surf_obstruction_hottel(
+        pvrow_surf, pvrow_idx, n_pvrows, tilted_to_left, ts_pvrows,
+        gnd_surf, ts_length, is_back=True, is_left=True)
+    # Calculate using AOIMethods
+    vf1_nrel = aoi_methods._vf_aoi_pvrow_surf_to_gnd_surf_obstruction(
+        pvrow_surf, pvrow_idx, n_pvrows, tilted_to_left, ts_pvrows,
+        gnd_surf, ts_length, is_back=True, is_left=True)
+
+    # The segments are small, so there should be good agreement between methods
+    np.testing.assert_allclose(vf1_vf, [0.29276516])
+    np.testing.assert_allclose(vf1_nrel, [0.29674707])
+    np.testing.assert_allclose(vf1_vf, vf1_nrel, atol=0, rtol=1.4e-2)
+
+    # -- Check situation when the segments are large, and no obstruction at all
+    discretization = {pvrow_idx: {'back': 1}}
+    pvrow_surf, pvrow_idx, tilted_to_left, ts_pvrows, \
+        gnd_surf, ts_length = _get_vf_method_inputs(
+            discretization, pvrow_idx, side, segment_idx, idx_gnd_surf)
+    # --- There is no obstruction
+    # Calculate using VFTsMethods
+    vf1_vf, _ = vf_ts_methods.vf_pvrow_surf_to_gnd_surf_obstruction_hottel(
+        pvrow_surf, pvrow_idx, n_pvrows, tilted_to_left, ts_pvrows,
+        gnd_surf, ts_length, is_back=True, is_left=True)
+    # Calculate using AOIMethods
+    vf1_nrel = aoi_methods._vf_aoi_pvrow_surf_to_gnd_surf_obstruction(
+        pvrow_surf, pvrow_idx, n_pvrows, tilted_to_left, ts_pvrows,
+        gnd_surf, ts_length, is_back=True, is_left=True)
+
+    # The segments are small, the view factors are different
+    np.testing.assert_allclose(vf1_vf, [0.2898575])
+    np.testing.assert_allclose(vf1_nrel, [0.30886451])
+    np.testing.assert_allclose(vf1_vf, vf1_nrel, atol=0, rtol=6.2e-2)
+
+
+def test_vf_aoi_pvrow_gnd_benchmark_with_obstruction():
+    """Check that the NREL view factors are close to the truth for small
+    segments, but further away when segments are large
+    Assumption: the left pvrow is an obstruction
+
+    Note: when there is obstruction, the interpretation of the differences
+    is a little more difficult
+    """
+
+    # Create vf ts methods
+    vf_ts_methods = VFTsMethods()
+    # Create aoi methods
+    n_timestamps = 1
+    n_points = 300  # using only 6 sections for the integral from 0 to 180 deg
+    aoi_methods = AOIMethods(lambda aoi_angles: np.ones_like(aoi_angles),
+                             n_integral_sections=n_points)
+    aoi_methods.fit(n_timestamps)
+
+    # Get parameters
+    n_pvrows = 3
+    pvrow_idx = 1  # center pv row
+    side = 'back'
+    segment_idx = 0  # top segment
+    idx_gnd_surf = 0  # first shadow left
+
+    # -- Check situation when the segments are small, and no obstruction at all
+    discretization = {pvrow_idx: {'back': 10}}
+    pvrow_surf, pvrow_idx, tilted_to_left, ts_pvrows, \
+        gnd_surf, ts_length = _get_vf_method_inputs(
+            discretization, pvrow_idx, side, segment_idx, idx_gnd_surf,
+            gcr=0.8)
+    # --- There is no obstruction
+    # Calculate using VFTsMethods
+    vf1_vf, _ = vf_ts_methods.vf_pvrow_surf_to_gnd_surf_obstruction_hottel(
+        pvrow_surf, pvrow_idx, n_pvrows, tilted_to_left, ts_pvrows,
+        gnd_surf, ts_length, is_back=True, is_left=True)
+    # Calculate using AOIMethods
+    vf1_nrel = aoi_methods._vf_aoi_pvrow_surf_to_gnd_surf_obstruction(
+        pvrow_surf, pvrow_idx, n_pvrows, tilted_to_left, ts_pvrows,
+        gnd_surf, ts_length, is_back=True, is_left=True)
+
+    # The segments are small, so there should be good agreement between methods
+    # but there is an obstruction
+    np.testing.assert_allclose(vf1_vf, [0.16756797])
+    np.testing.assert_allclose(vf1_nrel, [0.17880681])
+    np.testing.assert_allclose(vf1_vf, vf1_nrel, atol=0, rtol=6.3e-2)
+
+    # -- Check situation when the segments are large, and no obstruction at all
+    discretization = {pvrow_idx: {'back': 1}}
+    pvrow_surf, pvrow_idx, tilted_to_left, ts_pvrows, \
+        gnd_surf, ts_length = _get_vf_method_inputs(
+            discretization, pvrow_idx, side, segment_idx, idx_gnd_surf)
+    # --- There is no obstruction
+    # Calculate using VFTsMethods
+    vf1_vf, _ = vf_ts_methods.vf_pvrow_surf_to_gnd_surf_obstruction_hottel(
+        pvrow_surf, pvrow_idx, n_pvrows, tilted_to_left, ts_pvrows,
+        gnd_surf, ts_length, is_back=True, is_left=True)
+    # Calculate using AOIMethods
+    vf1_nrel = aoi_methods._vf_aoi_pvrow_surf_to_gnd_surf_obstruction(
+        pvrow_surf, pvrow_idx, n_pvrows, tilted_to_left, ts_pvrows,
+        gnd_surf, ts_length, is_back=True, is_left=True)
+
+    # The segments are small, the view factors are different
+    # but somehow, due to the obstruction, they tend to agree more
+    np.testing.assert_allclose(vf1_vf, [0.05269675])
+    np.testing.assert_allclose(vf1_nrel, [0.05338835])
+    np.testing.assert_allclose(vf1_vf, vf1_nrel, atol=0, rtol=1.3e-2)
+
+
+def _get_vf_method_inputs(discretization, pvrow_idx, side, segment_idx,
+                          idx_gnd_surf, gcr=0.4):
+    """Helper function to be able to play with discretization and vf method
+    inputs"""
+    params = {
+        'n_pvrows': 3,
+        'pvrow_height': 1.5,
+        'pvrow_width': 1.,
+        'surface_tilt': 20.,
+        'surface_azimuth': 180.,
+        'gcr': gcr,
+        'solar_zenith': 20.,
+        'solar_azimuth': 90.,  # sun located in the east
+        'axis_azimuth': 0.,  # axis of rotation towards North
+        'rho_ground': 0.2,
+        'rho_front_pvrow': 0.01,
+        'rho_back_pvrow': 0.03,
+    }
+    # Update discretization scheme
+    params.update({'cut': discretization})
+    # pv array is tilted to right
+    pvarray = OrderedPVArray.fit_from_dict_of_scalars(params)
+    tilted_to_left = pvarray.rotation_vec > 0
+    n_timestamps = len(tilted_to_left)
+
+    # left pvrow & back side & left surface
+    left_gnd_surfaces = (
+        pvarray.ts_ground.ts_surfaces_side_of_cut_point('left',
+                                                        pvrow_idx))
+    gnd_surf = left_gnd_surfaces[idx_gnd_surf]
+    pvrow_side = getattr(pvarray.ts_pvrows[pvrow_idx], side)
+    pvrow_surf = pvrow_side.all_ts_surfaces[segment_idx]
+    ts_length = pvrow_surf.length
+
+    return (pvrow_surf, pvrow_idx, tilted_to_left, pvarray.ts_pvrows,
+            gnd_surf, ts_length)
