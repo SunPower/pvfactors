@@ -217,7 +217,7 @@ class AOIMethods:
                 for gnd_surf in left_gnd_surfaces:
                     j = gnd_surf.index
                     vf_pvrow_to_gnd = (
-                        self.vf_aoi_pvrow_surf_to_gnd_surf_obstruction(
+                        self._vf_aoi_pvrow_surf_to_gnd_surf_obstruction(
                             pvrow_surf, idx_pvrow, n_pvrows,
                             tilted_to_left, ts_pvrows, gnd_surf, ts_length,
                             is_back=False, is_left=True))
@@ -225,7 +225,7 @@ class AOIMethods:
                 for gnd_surf in right_gnd_surfaces:
                     j = gnd_surf.index
                     vf_pvrow_to_gnd = (
-                        self.vf_aoi_pvrow_surf_to_gnd_surf_obstruction(
+                        self._vf_aoi_pvrow_surf_to_gnd_surf_obstruction(
                             pvrow_surf, idx_pvrow, n_pvrows,
                             tilted_to_left, ts_pvrows, gnd_surf, ts_length,
                             is_back=False, is_left=False))
@@ -238,7 +238,7 @@ class AOIMethods:
                 for gnd_surf in left_gnd_surfaces:
                     j = gnd_surf.index
                     vf_pvrow_to_gnd = (
-                        self.vf_aoi_pvrow_surf_to_gnd_surf_obstruction(
+                        self._vf_aoi_pvrow_surf_to_gnd_surf_obstruction(
                             pvrow_surf, idx_pvrow, n_pvrows,
                             tilted_to_left, ts_pvrows, gnd_surf, ts_length,
                             is_back=True, is_left=True))
@@ -246,7 +246,7 @@ class AOIMethods:
                 for gnd_surf in right_gnd_surfaces:
                     j = gnd_surf.index
                     vf_pvrow_to_gnd = (
-                        self.vf_aoi_pvrow_surf_to_gnd_surf_obstruction(
+                        self._vf_aoi_pvrow_surf_to_gnd_surf_obstruction(
                             pvrow_surf, idx_pvrow, n_pvrows,
                             tilted_to_left, ts_pvrows, gnd_surf, ts_length,
                             is_back=True, is_left=False))
@@ -291,7 +291,7 @@ class AOIMethods:
         vf_aoi_raw = self._calculate_vf_aoi_wedge_level(low_aoi_angles,
                                                         high_aoi_angles)
         # Should be zero where either of the surfaces have zero length
-        vf_aoi = np.where((surf_1.ts_length < DISTANCE_TOLERANCE)
+        vf_aoi = np.where((surf_1.length < DISTANCE_TOLERANCE)
                           | (surf_2.length < DISTANCE_TOLERANCE), 0.,
                           vf_aoi_raw)
         return vf_aoi

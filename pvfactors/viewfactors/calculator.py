@@ -28,8 +28,9 @@ class VFCalculator(object):
         self.vf_ts_methods = VFTsMethods()
         self.vf_aoi_methods = AOIMethods(
             faoi_fn, n_integral_sections=n_aoi_integral_sections)
-        # Attribute needed for AOI method
+        # Saved matrices
         self.vf_matrix = None
+        self.vf_aoi_matrix = None
 
     def fit(self, n_timestamps):
         """Fit the view factor calculator to the timeseries inputs.
@@ -83,6 +84,9 @@ class VFCalculator(object):
             vf_matrix[i, -1, :] = np.where(ts_surf.length > DISTANCE_TOLERANCE,
                                            vf_matrix[i, -1, :], 0.)
 
+        # Save in calculator
+        self.vf_matrix = vf_matrix
+
         return vf_matrix
 
     def build_ts_vf_aoi_matrix(self, pvarray):
@@ -118,10 +122,21 @@ class VFCalculator(object):
         ts_ground = pvarray.ts_ground
         ts_pvrows = pvarray.ts_pvrows
 
-        # Calculate ts view factors between pvrow and ground surfaces
-        self.vf_aoi_methods.vf_aoi_pvrow_gnd_surf(ts_pvrows, ts_ground,
-                                                  tilted_to_left,
+        # Calculate vf_aoi between pvrow and ground surfaces
+        self.vf_aoi_methods.vf_aoi_pvrow_to_gnd(ts_pvrows, ts_ground,
+                                                tilted_to_left,
+                                                vf_aoi_matrix)
+        # Calculate vf_aoi between pvrows
+        self.vf_aoi_methods.vf_aoi_pvrow_to_pvrow(ts_pvrows, tilted_to_left,
                                                   vf_aoi_matrix)
+        # Calculate vf_aoi between prows and sky
+        self.vf_aoi_methods.vf_aoi_pvrow_to_sky(ts_pvrows, ts_ground,
+                                                tilted_to_left, vf_aoi_matrix)
+
+        # Save results
+        self.vf_aoi_matrix = vf_aoi_matrix
+
+        return vf_aoi_matrix
 
     def get_vf_ts_pvrow_element(self, pvrow_idx, pvrow_element, ts_pvrows,
                                 ts_ground, rotation_vec, pvrow_width):

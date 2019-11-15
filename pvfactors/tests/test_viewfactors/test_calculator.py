@@ -1,10 +1,6 @@
 from pvfactors.viewfactors.calculator import VFCalculator
 from pvfactors.geometry import OrderedPVArray
-from pvfactors.irradiance import HybridPerezOrdered
-from pvfactors.engine import PVEngine
-import datetime as dt
 from pvfactors.tests.test_viewfactors.test_data import \
-    vf_matrix_left_cut, vf_left_cut_sum_axis_one_rounded, \
     vf_left_cut_from_vectorized
 import numpy as np
 
@@ -34,6 +30,25 @@ def test_vfcalculator_vectorized(params):
     # check that the values stay consistent
     np.testing.assert_array_equal(vf_matrix_rounded,
                                   vf_left_cut_from_vectorized)
+
+
+def test_vfcalculator_aoi_methods(params):
+    """Check that calculation of vf_aoi_matrix makes sense:
+    all vfs should sum up to 1"""
+
+    # Prepare pv array
+    params.update({'cut': {0: {'front': 3}, 1: {'back': 2}}})
+    pvarray = OrderedPVArray.fit_from_dict_of_scalars(params)
+    n_timestamps = 1
+
+    # Create vf calculator
+    vfcalculator = VFCalculator(
+        faoi_fn=lambda aoi_angles: np.ones_like(aoi_angles))
+    vfcalculator.fit(n_timestamps)
+    vf_aoi_matrix = vfcalculator.build_ts_vf_aoi_matrix(pvarray)
+
+    # Check that correct size
+    assert vf_aoi_matrix.shape == (47, 47, 1)
 
 
 def test_ts_view_factors():
