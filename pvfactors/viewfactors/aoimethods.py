@@ -454,8 +454,9 @@ class AOIMethods:
         u_norm = np.linalg.norm(u_vector, axis=0)
         v_norm = np.linalg.norm(v_vector, axis=0)
         cos_theta = dot_product / (u_norm * v_norm)
-        # because of round off errors, cos_theta can be slightly > 1, fix it
-        cos_theta = np.minimum(cos_theta, 1.)
+        # because of round off errors, cos_theta can be slightly > 1,
+        # or slightly < -1, so clip it
+        cos_theta = np.clip(cos_theta, -1., 1.)
         aoi_angles = np.rad2deg(np.arccos(cos_theta))
         return aoi_angles
 

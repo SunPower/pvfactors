@@ -302,9 +302,15 @@ def test_vf_aoi_pvrow_to_sky(params):
         pvarray.ts_pvrows, pvarray.ts_ground, tilted_to_left, vf_aoi_matrix)
 
     sky_column = np.squeeze(vf_aoi_matrix[:, -1, :])
-    expected_sky_column = [0., 0., 0., 0., 0., 0., 0., 0., 0., 0.,
-                           0., 0., 0., 0., 0., 0., 0., 0., 0., 0.,
-                           0., 0., 0., 0., 0., 0., 0., 0., 0.96679021, 0.,
-                           0.95461805, 0., 0.93560691, 0., 0., 0., 0.95461805,
-                           0., 0., 0., 0., 0., 0.97552826, 0., 0., 0., 0.]
-    np.testing.assert_allclose(sky_column, expected_sky_column)
+    expected_sky_column = [0., 0., 0., 0., 0.,
+                           0., 0., 0., 0., 0.,
+                           0., 0., 0., 0., 0.,
+                           0., 0., 0., 0., 0.,
+                           0., 0., 0., 0., 0.,
+                           0., 0., 0., 0.96679021, 0.,
+                           0.95461805, 0., 0.93560691, 0., 0.03511176,
+                           0., 0.95461805, 0., 0.02611579, 0.,
+                           0.01841872, 0., 0.97552826, 0., 0.02134025,
+                           0., 0.]
+    np.testing.assert_array_almost_equal(sky_column, expected_sky_column,
+                                         decimal=7)
