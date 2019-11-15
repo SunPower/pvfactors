@@ -61,6 +61,56 @@ class AOIMethods:
         self.aoi_angles_high = np.tile(aoi_angles_high, (n_timestamps, 1))
         self.integrand_values = np.tile(integrand_values, (n_timestamps, 1))
 
+    def vf_aoi_pvrow_to_pvrow(self, ts_pvrows, tilted_to_left, vf_matrix):
+        """Calculate the view factors between timeseries PV row surfaces
+        while accounting for AOI losses,
+        and assign values to the passed view factor matrix using
+        the surface indices.
+
+        Parameters
+        ----------
+        ts_pvrows : list of :py:class:`~pvfactors.geometry.timeseries.TsPVRow`
+            List of timeseries PV rows in the PV array
+        tilted_to_left : list of bool
+            Flags indicating when the PV rows are strictly tilted to the left
+        vf_matrix : np.ndarray
+            View factor matrix to update during calculation. Should have 3
+            dimensions as follows: [n_surfaces, n_surfaces, n_timesteps]
+        """
+        for idx_pvrow, ts_pvrow in enumerate(ts_pvrows[:-1]):
+            # Get the next pv row
+            right_ts_pvrow = ts_pvrows[idx_pvrow + 1]
+            # front side
+            front = ts_pvrow.front
+            for surf_i in front.all_ts_surfaces:
+                i = surf_i.index
+                for surf_j in right_ts_pvrow.back.all_ts_surfaces:
+                    j = surf_j.index
+                    # vf aoi from i to j
+                    vf_i_to_j = self._vf_aoi_surface_to_surface(surf_i, surf_j)
+                    vf_i_to_j = np.where(tilted_to_left, 0., vf_i_to_j)
+                    # vf aoi from j to i
+                    vf_j_to_i = self._vf_aoi_surface_to_surface(surf_j, surf_i)
+                    vf_j_to_i = np.where(tilted_to_left, 0., vf_j_to_i)
+                    # save results
+                    vf_matrix[i, j, :] = vf_i_to_j
+                    vf_matrix[j, i, :] = vf_j_to_i
+            # back side
+            back = ts_pvrow.back
+            for surf_i in back.all_ts_surfaces:
+                i = surf_i.index
+                for surf_j in right_ts_pvrow.front.all_ts_surfaces:
+                    j = surf_j.index
+                    # vf aoi from i to j
+                    vf_i_to_j = self._vf_aoi_surface_to_surface(surf_i, surf_j)
+                    vf_i_to_j = np.where(tilted_to_left, vf_i_to_j, 0.)
+                    # vf aoi from j to i
+                    vf_j_to_i = self._vf_aoi_surface_to_surface(surf_j, surf_i)
+                    vf_j_to_i = np.where(tilted_to_left, vf_j_to_i, 0.)
+                    # save results
+                    vf_matrix[i, j, :] = vf_i_to_j
+                    vf_matrix[j, i, :] = vf_j_to_i
+
     def vf_aoi_pvrow_to_gnd(self, ts_pvrows, ts_ground, tilted_to_left,
                             vf_aoi_matrix):
         """Calculate the view factors between timeseries PV row and ground
@@ -133,6 +183,50 @@ class AOIMethods:
                             tilted_to_left, ts_pvrows, gnd_surf, ts_length,
                             is_back=True, is_left=False))
                     vf_aoi_matrix[i, j, :] = vf_pvrow_to_gnd
+
+    def _vf_aoi_surface_to_surface(self, surf_1, surf_2):
+        """Calculate view factor, while accounting from AOI losses, from
+        surface 1 to surface 2.
+
+        Notes
+        -----
+        This assumes that surf_1 is infinitesimal (very small)
+
+        Parameters
+        ----------
+        surf_1 : :py:class:`~pvfactors.geometry.timeseries.TsSurface`
+            Infinitesimal surface from which to calculate view factor with
+            AOI losses
+        surf_2 : :py:class:`~pvfactors.geometry.timeseries.TsSurface`
+            Surface to which the view factor with AOI losses should be
+            calculated
+
+        Returns
+        -------
+        vf_aoi : np.ndarray
+            View factors with aoi losses from surface 1 to surface 2,
+            dimension is [n_timesteps]
+        """
+        # Get surface 1 params
+        u_vector = surf_1.u_vector
+        centroid = surf_1.centroid
+        # Calculate AOI angles
+        aoi_angles_1 = self._calculate_aoi_angles(u_vector, centroid,
+                                                  surf_2.b1)
+        aoi_angles_2 = self._calculate_aoi_angles(u_vector, centroid,
+                                                  surf_2.b2)
+        low_aoi_angles = np.where(aoi_angles_1 < aoi_angles_2, aoi_angles_1,
+                                  aoi_angles_2)
+        high_aoi_angles = np.where(aoi_angles_1 < aoi_angles_2, aoi_angles_2,
+                                   aoi_angles_1)
+        # Calculate vf_aoi
+        vf_aoi_raw = self._calculate_vf_aoi_wedge_level(low_aoi_angles,
+                                                        high_aoi_angles)
+        # Should be zero where either of the surfaces have zero length
+        vf_aoi = np.where((surf_1.ts_length < DISTANCE_TOLERANCE)
+                          | (surf_2.length < DISTANCE_TOLERANCE), 0.,
+                          vf_aoi_raw)
+        return vf_aoi
 
     def _vf_aoi_pvrow_surf_to_gnd_surf_obstruction(
             self, pvrow_surf, pvrow_idx, n_pvrows, tilted_to_left, ts_pvrows,
