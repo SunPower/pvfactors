@@ -17,6 +17,10 @@ class TsGround(object):
     PV ground geometry class, and it will store timeseries shaded ground
     and illuminated ground elements, as well as pv row cut points."""
 
+    # TODO: this needs to be passed at initialization for flexibility
+    x_min = MIN_X_GROUND
+    x_max = MAX_X_GROUND
+
     def __init__(self, shadow_elements, illum_elements, param_names=None,
                  flag_overlap=None, cut_point_coords=None, y_ground=None):
         """Initialize timeseries ground using list of timeseries surfaces
@@ -1043,9 +1047,11 @@ class PVGround(BaseSide):
 
         Parameters
         ----------
-        list_shaded_surfaces : list of :py:class:`~pvfactors.geometry.base.PVSurface`
+        list_shaded_surfaces : \
+        list of :py:class:`~pvfactors.geometry.base.PVSurface`
             List of shaded ground PV surfaces
-        list_illum_surfaces : list of :py:class:`~pvfactors.geometry.base.PVSurface`
+        list_illum_surfaces : \
+        list of :py:class:`~pvfactors.geometry.base.PVSurface`
             List of illuminated ground PV surfaces
         x_min_max : tuple, optional
             List of minimum and maximum x coordinates for the flat surface [m]

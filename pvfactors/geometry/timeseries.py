@@ -150,7 +150,8 @@ class TsSurface(object):
 
         Returns
         -------
-        segment : :py:class:`~pvfactors.geometry.base.PVSurface` or :py:class:`~shapely.geometry.GeometryCollection`
+        segment : :py:class:`~pvfactors.geometry.base.PVSurface` \
+        or :py:class:`~shapely.geometry.GeometryCollection`
             The returned object will be an empty geometry if its length is
             really small, otherwise it will be a PV surface geometry
         """
@@ -240,6 +241,13 @@ class TsSurface(object):
     def lowest_point(self):
         """Timeseries point coordinates of lowest point of surface"""
         return self.coords.lowest_point
+
+    @property
+    def u_vector(self):
+        """Vector orthogonal to the surface's normal vector"""
+        u_vector = (None if self.n_vector is None else
+                    np.array([-self.n_vector[1, :], self.n_vector[0, :]]))
+        return u_vector
 
 
 class TsLineCoords(object):
@@ -335,8 +343,10 @@ class TsPointCoords(object):
 
         Parameters
         ----------
-        coords : np.ndarray
-            Numpy array of timeseries point coordinates
+        x : np.ndarray
+            Timeseries x coordinates
+        y : np.ndarray
+            Timeseries y coordinates
         """
         self.x = x
         self.y = y

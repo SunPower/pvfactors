@@ -1,10 +1,6 @@
 from pvfactors.viewfactors.calculator import VFCalculator
 from pvfactors.geometry import OrderedPVArray
-from pvfactors.irradiance import HybridPerezOrdered
-from pvfactors.engine import PVEngine
-import datetime as dt
 from pvfactors.tests.test_viewfactors.test_data import \
-    vf_matrix_left_cut, vf_left_cut_sum_axis_one_rounded, \
     vf_left_cut_from_vectorized
 import numpy as np
 
@@ -34,6 +30,42 @@ def test_vfcalculator_vectorized(params):
     # check that the values stay consistent
     np.testing.assert_array_equal(vf_matrix_rounded,
                                   vf_left_cut_from_vectorized)
+
+
+def test_vfcalculator_aoi_methods(params):
+    """Check that calculation of vf_aoi_matrix makes sense:
+    all NREL-like vfs should sum up to 1 when taking many integration points"""
+
+    # Prepare pv array
+    params.update({'cut': {0: {'front': 3}, 1: {'back': 2}}})
+    pvarray = OrderedPVArray.fit_from_dict_of_scalars(params)
+    n_timestamps = 1
+    # Using an excessive number of integration points to prove that
+    # calculation converges
+    n_integration_sections = 10000
+
+    # Create vf calculator
+    vfcalculator = VFCalculator(
+        faoi_fn=lambda aoi_angles: np.ones_like(aoi_angles),
+        n_aoi_integral_sections=n_integration_sections)
+    vfcalculator.fit(n_timestamps)
+    vf_aoi_matrix = vfcalculator.build_ts_vf_aoi_matrix(pvarray)
+
+    # Check that correct size
+    assert vf_aoi_matrix.shape == (47, 47, 1)
+
+    list_pvrow_idx = []
+    for pvrow in pvarray.ts_pvrows:
+        tmp = [surf.index for surf in pvrow.all_ts_surfaces
+               if surf.length[0] > 0]
+        list_pvrow_idx += tmp
+
+    summed_pvrow_vf_aoi_values = np.squeeze(
+        np.sum(vf_aoi_matrix, axis=1)[list_pvrow_idx, :])
+    expected_summed_pvrow_vf_aoi_values = np.ones(9)
+    np.testing.assert_allclose(summed_pvrow_vf_aoi_values,
+                               expected_summed_pvrow_vf_aoi_values,
+                               atol=0, rtol=1.1e-3)
 
 
 def test_ts_view_factors():

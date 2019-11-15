@@ -1,4 +1,4 @@
-from pvfactors.viewfactors.methods import VFTsMethods
+from pvfactors.viewfactors.vfmethods import VFTsMethods
 import numpy as np
 
 

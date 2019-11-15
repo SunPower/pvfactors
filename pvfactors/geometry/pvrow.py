@@ -206,12 +206,21 @@ class TsPVRow(object):
     @property
     def centroid(self):
         """Centroid point of the timeseries pv row"""
-        return self.full_pvrow_coords.centroid
+        centroid = (self.full_pvrow_coords.centroid
+                    if self.full_pvrow_coords is not None else None)
+        return centroid
 
     @property
     def length(self):
         """Length of both sides of the timeseries PV row"""
         return self.front.length + self.back.length
+
+    @property
+    def highest_point(self):
+        """Timeseries point coordinates of highest point of PV row"""
+        high_pt = (self.full_pvrow_coords.highest_point
+                   if self.full_pvrow_coords is not None else None)
+        return high_pt
 
 
 class TsSide(object):

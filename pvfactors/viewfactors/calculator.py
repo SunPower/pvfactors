@@ -1,24 +1,48 @@
 """Module with classes and functions to calculate views and view factors"""
 
 from pvfactors.config import DISTANCE_TOLERANCE
-from pvfactors.viewfactors.methods import VFTsMethods
+from pvfactors.viewfactors.vfmethods import VFTsMethods
+from pvfactors.viewfactors.aoimethods import AOIMethods
 import numpy as np
 
 
 class VFCalculator(object):
     """This calculator class will be used for the calculation of view factors
-    for PV arrays"""
+    for :py:class:`~pvfactors.geometry.pvarray.OrderedPVArray`, and it will
+    rely on both :py:class:`~pvfactors.viewfactors.vfmethods.VFTsMethods`
+    and :py:class:`~pvfactors.viewfactors.aoimethods.AOIMethods`"""
 
-    def __init__(self, vf_ts_methods=None):
-        """Initialize the view factor mapper that will be used.
+    def __init__(self, faoi_fn=None, n_aoi_integral_sections=300):
+        """Initialize the view factor calculator with the calculation methods
+        that will be used.
 
         Parameters
         ----------
-        vf_ts_methods : :py:class:`~pvfactors.geometry.calculator.VFTsMethods` object
-            Object with methods to calculate timeseries view factors for the
-            fast mode (Default = None)
+        faoi_fn : function, optional
+            Function which takes a list (or numpy array) of incidence angles
+            measured from the surface horizontal
+            (with values from 0 to 180 deg) and returns the fAOI values
+            (Default = None)
+        n_integral_sections : int, optional
+            Number of integral divisions of the 0 to 180 deg interval
+            to use for the fAOI loss integral (default = 300)
         """
-        self.vf_ts_methods = vf_ts_methods or VFTsMethods()
+        self.vf_ts_methods = VFTsMethods()
+        self.vf_aoi_methods = AOIMethods(
+            faoi_fn, n_integral_sections=n_aoi_integral_sections)
+        # Saved matrices
+        self.vf_matrix = None
+        self.vf_aoi_matrix = None
+
+    def fit(self, n_timestamps):
+        """Fit the view factor calculator to the timeseries inputs.
+
+        Parameters
+        ----------
+        n_timestamps : int
+            Number of simulation timestamps
+        """
+        self.vf_aoi_methods.fit(n_timestamps)
 
     def build_ts_vf_matrix(self, pvarray):
         """Calculate timeseries view factor matrix for the given
@@ -62,7 +86,60 @@ class VFCalculator(object):
             vf_matrix[i, -1, :] = np.where(ts_surf.length > DISTANCE_TOLERANCE,
                                            vf_matrix[i, -1, :], 0.)
 
+        # Save in calculator
+        self.vf_matrix = vf_matrix
+
         return vf_matrix
+
+    def build_ts_vf_aoi_matrix(self, pvarray):
+        """Calculate the view factor aoi matrix elements from all PV row
+        surfaces to all other surfaces, only. This will not calculate
+        view factors from ground surfaces to PV row surfaces, so the users
+        will need to run
+        :py:meth:`~pvfactors.viewfactors.calculator.VFCalculator.build_ts_vf_matrix`
+        first if they want the complete matrix, otherwise those entries will
+        have zero values in them.
+
+        Parameters
+        ----------
+        pvarray : :py:class:`~pvfactors.geometry.pvarray.OrderedPVArray`
+            PV array whose timeseries view factor AOI matrix to calculate
+
+        Returns
+        -------
+        np.ndarray
+            Timeseries view factor matrix for infinitesimal PV row surfaces,
+            and accounting for AOI losses, with 3 dimensions:
+            [n_surfaces, n_surfaces, n_timesteps]
+        """
+        # Initialize matrix
+        rotation_vec = pvarray.rotation_vec
+        tilted_to_left = rotation_vec > 0
+        n_steps = len(rotation_vec)
+        n_ts_surfaces = pvarray.n_ts_surfaces
+        vf_aoi_matrix = np.zeros(
+            (n_ts_surfaces + 1, n_ts_surfaces + 1, n_steps),
+            dtype=float) if self.vf_matrix is None else self.vf_matrix
+
+        # Get timeseries objects
+        ts_ground = pvarray.ts_ground
+        ts_pvrows = pvarray.ts_pvrows
+
+        # Calculate vf_aoi between pvrow and ground surfaces
+        self.vf_aoi_methods.vf_aoi_pvrow_to_gnd(ts_pvrows, ts_ground,
+                                                tilted_to_left,
+                                                vf_aoi_matrix)
+        # Calculate vf_aoi between pvrows
+        self.vf_aoi_methods.vf_aoi_pvrow_to_pvrow(ts_pvrows, tilted_to_left,
+                                                  vf_aoi_matrix)
+        # Calculate vf_aoi between prows and sky
+        self.vf_aoi_methods.vf_aoi_pvrow_to_sky(ts_pvrows, ts_ground,
+                                                tilted_to_left, vf_aoi_matrix)
+
+        # Save results
+        self.vf_aoi_matrix = vf_aoi_matrix
+
+        return vf_aoi_matrix
 
     def get_vf_ts_pvrow_element(self, pvrow_idx, pvrow_element, ts_pvrows,
                                 ts_ground, rotation_vec, pvrow_width):
@@ -74,7 +151,8 @@ class VFCalculator(object):
         pvrow_idx : int
             Index of the timeseries PV row for which we want to calculate the
             back surface irradiance
-        pvrow_element : :py:class:`~pvfactors.geometry.timeseries.TsDualSegment`
+        pvrow_element : \
+        :py:class:`~pvfactors.geometry.timeseries.TsDualSegment` \
         or :py:class:`~pvfactors.geometry.timeseries.TsSurface`
             Timeseries PV row element for which to calculate view factors
         ts_pvrows : list of :py:class:`~pvfactors.geometry.timeseries.TsPVRow`
