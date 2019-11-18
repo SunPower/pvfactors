@@ -19,24 +19,28 @@ class VFCalculator(object):
 
         Parameters
         ----------
-        faoi_fn_front : function
+        faoi_fn_front : function, optional
             Function which takes a list (or numpy array) of incidence angles
             measured from the surface horizontal
             (with values from 0 to 180 deg) and returns the fAOI values for
-            the front side of PV rows
-        faoi_fn_back : function
+            the front side of PV rows (default = None)
+        faoi_fn_back : function, optional
             Function which takes a list (or numpy array) of incidence angles
             measured from the surface horizontal
             (with values from 0 to 180 deg) and returns the fAOI values for
-            the back side of PV rows
+            the back side of PV rows (default = None)
         n_integral_sections : int, optional
             Number of integral divisions of the 0 to 180 deg interval
             to use for the fAOI loss integral (default = 300)
         """
         self.vf_ts_methods = VFTsMethods()
-        self.vf_aoi_methods = AOIMethods(
-            faoi_fn_front, faoi_fn_back,
-            n_integral_sections=n_aoi_integral_sections)
+        # Do not instantiate AOIMethods if missing faoi function
+        if (faoi_fn_front is None) or (faoi_fn_back is None):
+            self.vf_aoi_methods = None
+        else:
+            self.vf_aoi_methods = AOIMethods(
+                faoi_fn_front, faoi_fn_back,
+                n_integral_sections=n_aoi_integral_sections)
         # Saved matrices
         self.vf_matrix = None
         self.vf_aoi_matrix = None
@@ -49,7 +53,8 @@ class VFCalculator(object):
         n_timestamps : int
             Number of simulation timestamps
         """
-        self.vf_aoi_methods.fit(n_timestamps)
+        if self.vf_aoi_methods is not None:
+            self.vf_aoi_methods.fit(n_timestamps)
 
     def build_ts_vf_matrix(self, pvarray):
         """Calculate timeseries view factor matrix for the given

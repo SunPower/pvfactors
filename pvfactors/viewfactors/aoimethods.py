@@ -3,6 +3,7 @@
 from pvfactors.config import DISTANCE_TOLERANCE
 from pvfactors.geometry.timeseries import (
     TsPointCoords, TsSurface, TsLineCoords)
+from pvfactors import PVFactorsError
 import pvlib
 from pvlib.tools import cosd
 import numpy as np
@@ -32,6 +33,12 @@ class AOIMethods:
             Number of integral divisions of the 0 to 180 deg interval
             to use for the fAOI loss integral (default = 300)
         """
+        # Check that faoi fn where passed
+        faoi_fns_ok = callable(faoi_fn_front) and callable(faoi_fn_back)
+        if not faoi_fns_ok:
+            raise PVFactorsError("The faoi_fn passed to the AOI methods are "
+                                 "not callable. Please check the fAOI "
+                                 "functions again")
         self.faoi_fn_front = faoi_fn_front
         self.faoi_fn_back = faoi_fn_back
         self.n_integral_sections = n_integral_sections
