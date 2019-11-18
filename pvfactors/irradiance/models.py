@@ -23,6 +23,7 @@ class IsotropicOrdered(BaseModel):
     cats = ['ground_illum', 'ground_shaded', 'front_illum_pvrow',
             'back_illum_pvrow', 'front_shaded_pvrow', 'back_shaded_pvrow']
     irradiance_comp = ['direct']
+    irradiance_comp_absorbed = ['direct_absorbed']
 
     def __init__(self, rho_front=0.01, rho_back=0.03, module_transparency=0.,
                  module_spacing_ratio=0., faoi_fn_front=None,
@@ -199,12 +200,16 @@ class IsotropicOrdered(BaseModel):
             {'direct': self.direct['ground_illum'],
              'rho': self.albedo,
              'inv_rho': 1. / self.albedo,
-             'total_perez': self.gnd_illum})
+             'total_perez': self.gnd_illum,
+             'direct_absorbed': self.faoi_ground * self.direct['ground_illum']
+             })
         pvarray.ts_ground.update_shaded_params(
             {'direct': self.direct['ground_shaded'],
              'rho': self.albedo,
              'inv_rho': 1. / self.albedo,
-             'total_perez': self.gnd_shaded})
+             'total_perez': self.gnd_shaded,
+             'direct_absorbed': self.faoi_ground * self.direct['ground_shaded']
+             })
 
         for ts_pvrow in pvarray.ts_pvrows:
             # Front
@@ -213,24 +218,32 @@ class IsotropicOrdered(BaseModel):
                     {'direct': self.direct['front_illum_pvrow'],
                      'rho': rho_front,
                      'inv_rho': inv_rho_front,
-                     'total_perez': self.pvrow_illum})
+                     'total_perez': self.pvrow_illum,
+                     'direct_absorbed': self.faoi_front['direct']
+                     * self.direct['front_illum_pvrow']})
                 ts_seg.shaded.update_params(
                     {'direct': self.direct['front_shaded_pvrow'],
                      'rho': rho_front,
                      'inv_rho': inv_rho_front,
-                     'total_perez': self.pvrow_shaded})
+                     'total_perez': self.pvrow_shaded,
+                     'direct_absorbed': self.faoi_front['direct']
+                     * self.direct['front_shaded_pvrow']})
             # Back
             for ts_seg in ts_pvrow.back.list_segments:
                 ts_seg.illum.update_params(
                     {'direct': self.direct['back_illum_pvrow'],
                      'rho': rho_back,
                      'inv_rho': inv_rho_back,
-                     'total_perez': np.zeros(n_steps)})
+                     'total_perez': np.zeros(n_steps),
+                     'direct_absorbed': self.faoi_back['direct']
+                     * self.direct['back_illum_pvrow']})
                 ts_seg.shaded.update_params(
                     {'direct': self.direct['back_shaded_pvrow'],
                      'rho': rho_back,
                      'inv_rho': inv_rho_back,
-                     'total_perez': np.zeros(n_steps)})
+                     'total_perez': np.zeros(n_steps),
+                     'direct_absorbed': self.faoi_back['direct']
+                     * self.direct['back_shaded_pvrow']})
 
     def get_full_modeling_vectors(self, pvarray, idx):
         """Get the modeling vectors used in matrix calculations of mathematical
@@ -378,6 +391,8 @@ class HybridPerezOrdered(BaseModel):
     cats = ['ground_illum', 'ground_shaded', 'front_illum_pvrow',
             'back_illum_pvrow', 'front_shaded_pvrow', 'back_shaded_pvrow']
     irradiance_comp = ['direct', 'circumsolar', 'horizon']
+    irradiance_comp_absorbed = ['direct_absorbed', 'circumsolar_absorbed',
+                                'horizon_absorbed']
 
     def __init__(self, horizon_band_angle=DEFAULT_HORIZON_BAND_ANGLE,
                  circumsolar_angle=DEFAULT_CIRCUMSOLAR_ANGLE,
@@ -615,14 +630,22 @@ class HybridPerezOrdered(BaseModel):
             'horizon': np.zeros(n_steps),
             'rho': self.albedo,
             'inv_rho': 1. / self.albedo,
-            'total_perez': self.gnd_illum})
+            'total_perez': self.gnd_illum,
+            'direct_absorbed': self.faoi_ground * self.direct['ground_illum'],
+            'circumsolar_absorbed': self.faoi_ground
+            * self.circumsolar['ground_illum'],
+            'horizon_absorbed': np.zeros(n_steps)})
         pvarray.ts_ground.update_shaded_params({
             'direct': self.direct['ground_shaded'],
             'circumsolar': self.circumsolar['ground_shaded'],
             'horizon': np.zeros(n_steps),
             'rho': self.albedo,
             'inv_rho': 1. / self.albedo,
-            'total_perez': self.gnd_shaded})
+            'total_perez': self.gnd_shaded,
+            'direct_absorbed': self.faoi_ground * self.direct['ground_shaded'],
+            'circumsolar_absorbed': self.faoi_ground
+            * self.circumsolar['ground_shaded'],
+            'horizon_absorbed': np.zeros(n_steps)})
 
         # Transform timeseries PV rows
         for idx_pvrow, ts_pvrow in enumerate(ts_pvrows):
@@ -634,14 +657,26 @@ class HybridPerezOrdered(BaseModel):
                     'horizon': self.horizon['front_pvrow'],
                     'rho': rho_front,
                     'inv_rho': inv_rho_front,
-                    'total_perez': self.pvrow_illum})
+                    'total_perez': self.pvrow_illum,
+                    'direct_absorbed': self.faoi_front['direct']
+                    * self.direct['front_illum_pvrow'],
+                    'circumsolar_absorbed': self.faoi_front['circumsolar']
+                    * self.circumsolar['front_illum_pvrow'],
+                    'horizon_absorbed': self.faoi_front['horizon']
+                    * self.horizon['front_pvrow']})
                 ts_seg.shaded.update_params({
                     'direct': self.direct['front_shaded_pvrow'],
                     'circumsolar': self.circumsolar['front_shaded_pvrow'],
                     'horizon': self.horizon['front_pvrow'],
                     'rho': rho_front,
                     'inv_rho': inv_rho_front,
-                    'total_perez': self.pvrow_shaded})
+                    'total_perez': self.pvrow_shaded,
+                    'direct_absorbed': self.faoi_front['direct']
+                    * self.direct['front_shaded_pvrow'],
+                    'circumsolar_absorbed': self.faoi_front['circumsolar']
+                    * self.circumsolar['front_shaded_pvrow'],
+                    'horizon_absorbed': self.faoi_front['horizon']
+                    * self.horizon['front_pvrow']})
             # Back: apply back surface horizon shading
             for ts_seg in ts_pvrow.back.list_segments:
                 # Illum
@@ -659,7 +694,14 @@ class HybridPerezOrdered(BaseModel):
                     'horizon_shd_pct': hor_shd_pct_illum,
                     'rho': rho_back,
                     'inv_rho': inv_rho_back,
-                    'total_perez': np.zeros(n_steps)})
+                    'total_perez': np.zeros(n_steps),
+                    'direct_absorbed': self.faoi_back['direct']
+                    * self.direct['back_illum_pvrow'],
+                    'circumsolar_absorbed': self.faoi_back['circumsolar']
+                    * self.circumsolar['back_illum_pvrow'],
+                    'horizon_absorbed': self.faoi_back['horizon']
+                    * self.horizon['back_pvrow']
+                    * (1. - hor_shd_pct_illum / 100.)})
                 # Back
                 # In ordered pv arrays, there should only be 1 surface -> 0
                 centroid_shaded = ts_seg.shaded.list_ts_surfaces[0].centroid
@@ -675,7 +717,14 @@ class HybridPerezOrdered(BaseModel):
                     'horizon_shd_pct': hor_shd_pct_shaded,
                     'rho': rho_back,
                     'inv_rho': inv_rho_back,
-                    'total_perez': np.zeros(n_steps)})
+                    'total_perez': np.zeros(n_steps),
+                    'direct_absorbed': self.faoi_back['direct']
+                    * self.direct['back_shaded_pvrow'],
+                    'circumsolar_absorbed': self.faoi_back['circumsolar']
+                    * self.circumsolar['back_shaded_pvrow'],
+                    'horizon_absorbed': self.faoi_back['horizon']
+                    * self.horizon['back_pvrow']
+                    * (1. - hor_shd_pct_shaded / 100.)})
 
     def get_full_modeling_vectors(self, pvarray, idx):
         """Get the modeling vectors used in matrix calculations of mathematical
@@ -704,8 +753,7 @@ class HybridPerezOrdered(BaseModel):
         """
 
         # Sum up the necessary parameters to form the irradiance vector
-        irradiance_vec, rho_vec, inv_rho_vec, total_perez_vec = \
-            self.get_modeling_vectors(pvarray)
+        irradiance_vec, rho_vec, inv_rho_vec, total_perez_vec = self.get_modeling_vectors(pvarray)
         # Add sky values
         irradiance_vec.append(self.isotropic_luminance[idx])
         total_perez_vec.append(self.isotropic_luminance[idx])
@@ -740,8 +788,7 @@ class HybridPerezOrdered(BaseModel):
             and sky. Dimension = [n_surfaces + 1, n_timesteps]
         """
         # Sum up the necessary parameters to form the irradiance vector
-        irradiance_mat, rho_mat, inv_rho_mat, total_perez_mat = \
-            self.get_ts_modeling_vectors(pvarray)
+        irradiance_mat, rho_mat, inv_rho_mat, total_perez_mat = self.get_ts_modeling_vectors(pvarray)
         # Add sky values
         irradiance_mat.append(self.isotropic_luminance)
         total_perez_mat.append(self.isotropic_luminance)
