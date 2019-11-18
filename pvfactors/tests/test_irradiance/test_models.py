@@ -449,7 +449,6 @@ def test_hybridperez_ordered_front(params_irr):
     np.testing.assert_allclose(np.array(irr_comp_absorbed)[12, 0],
                                (1. - params_irr['rho_ground']) *
                                np.array(irradiance_mat)[12, 0])
-    print(np.squeeze(irr_comp_absorbed))
 
 
 def test_hybridperez_ordered_back(params_irr):

@@ -443,6 +443,7 @@ class HybridPerezOrdered(BaseModel):
         self.total_perez = dict.fromkeys(self.cats)
         self.faoi_front = dict.fromkeys(self.cats)
         self.faoi_back = dict.fromkeys(self.cats)
+        self.faoi_ground = None
         self.horizon_band_angle = horizon_band_angle
         self.circumsolar_angle = circumsolar_angle
         self.circumsolar_model = circumsolar_model
