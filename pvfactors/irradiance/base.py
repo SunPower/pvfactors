@@ -91,6 +91,35 @@ class BaseModel(object):
 
         return irradiance_mat, rho_mat, invrho_mat, total_perez_mat
 
+    def get_summed_components(self, pvarray, absorbed=True):
+        """Get sum of irradiance components for irradiance model,
+        either absorbed or only incident.
+
+        Parameters
+        ----------
+        pvarray : PV array object
+            PV array with the irradiance and reflectivity values
+        absorbed : bool, optional
+            Flag to decide whether to use the absorbed components are not
+            (default = True)
+
+        Returns
+        -------
+        irradiance_mat : list
+            Matrix of summed up non-reflective irradiance values for all
+            timeseries surfaces. Dimension = [n_surfaces, n_timesteps]"""
+        # Initialize
+        list_components = (self.irradiance_comp_absorbed if absorbed
+                           else self.irradiance_comp)
+        # Build list
+        irradiance_mat = []
+        for ts_surface in pvarray.all_ts_surfaces:
+            value = np.zeros(pvarray.n_states, dtype=float)
+            for component in list_components:
+                value += ts_surface.get_param(component)
+            irradiance_mat.append(value)
+        return irradiance_mat
+
     def update_ts_surface_sky_term(self, ts_surface, name_sky_term='sky_term'):
         """Update the 'sky_term' parameter of a timeseries surface.
 

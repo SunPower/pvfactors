@@ -141,6 +141,14 @@ def test_isotropic_model_front(params_irr):
     assert irr_model.faoi_front['direct'] == 0.99
     assert irr_model.faoi_ground == 0.8
 
+    # get absorbed sum of sky components
+    irr_comp_absorbed = irr_model.get_summed_components(pvarray, absorbed=True)
+    assert np.shape(irr_comp_absorbed) == (40, 1)
+    # Check a ground surface value
+    np.testing.assert_allclose(np.array(irr_comp_absorbed)[12, 0],
+                               (1. - params_irr['rho_ground']) *
+                               np.array(irradiance_mat)[12, 0])
+
 
 def test_isotropic_model_back(params_irr):
     """Direct shading on back surface"""
@@ -394,7 +402,8 @@ def test_hybridperez_ordered_front(params_irr):
         100., 100., 33.33333333, 33.33333333,
         100., 100., 33.33333333, 33.33333333,
         100., 100., 33.33333333, 33.33333333]
-    np.testing.assert_array_almost_equal(np.squeeze(invrho_mat), expected_invrho_mat)
+    np.testing.assert_array_almost_equal(np.squeeze(invrho_mat),
+                                         expected_invrho_mat)
     np.testing.assert_almost_equal(
         pvarray.ts_pvrows[0].front.get_param_weighted('rho'),
         params_irr['rho_front_pvrow'])
@@ -432,6 +441,15 @@ def test_hybridperez_ordered_front(params_irr):
     assert irr_model.faoi_back['horizon'] == 0.97
     assert irr_model.faoi_front['direct'] == 0.99
     assert irr_model.faoi_ground == 0.8
+
+    # get absorbed sum of sky components
+    irr_comp_absorbed = irr_model.get_summed_components(pvarray, absorbed=True)
+    assert np.shape(irr_comp_absorbed) == (40, 1)
+    # Check a ground surface value
+    np.testing.assert_allclose(np.array(irr_comp_absorbed)[12, 0],
+                               (1. - params_irr['rho_ground']) *
+                               np.array(irradiance_mat)[12, 0])
+    print(np.squeeze(irr_comp_absorbed))
 
 
 def test_hybridperez_ordered_back(params_irr):
