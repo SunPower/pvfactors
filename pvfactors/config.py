@@ -12,6 +12,8 @@ Y_GROUND = 0.
 
 # PV rows parameters
 X_ORIGIN_PVROWS = 0.
+DEFAULT_RHO_FRONT = 0.01
+DEFAULT_RHO_BACK = 0.03
 
 # Define colors used for plotting the 2D arrays
 COLOR_DIC = {

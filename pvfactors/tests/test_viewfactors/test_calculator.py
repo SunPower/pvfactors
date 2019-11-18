@@ -45,9 +45,9 @@ def test_vfcalculator_aoi_methods(params):
     n_integration_sections = 10000
 
     # Create vf calculator
+    def faoi_fn(aoi_angles): return np.ones_like(aoi_angles)
     vfcalculator = VFCalculator(
-        faoi_fn=lambda aoi_angles: np.ones_like(aoi_angles),
-        n_aoi_integral_sections=n_integration_sections)
+        faoi_fn, faoi_fn, n_aoi_integral_sections=n_integration_sections)
     vfcalculator.fit(n_timestamps)
     vf_aoi_matrix = vfcalculator.build_ts_vf_aoi_matrix(pvarray)
 

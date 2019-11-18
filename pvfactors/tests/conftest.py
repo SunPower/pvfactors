@@ -190,3 +190,9 @@ def df_inputs_clearsky_8760():
     df = pd.read_csv(fp, index_col=0)
     df.index = pd.DatetimeIndex(df.index).tz_convert(tz)
     yield df
+
+
+@pytest.fixture(scope='function')
+def pvmodule_canadian():
+    """Example of pvlib PV module name to use in tests"""
+    yield 'Canadian_Solar_CS5P_220M___2009_'

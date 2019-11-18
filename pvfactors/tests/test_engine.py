@@ -2,6 +2,8 @@ from pvfactors.engine import PVEngine
 from pvfactors.geometry.pvarray import OrderedPVArray
 from pvfactors.irradiance import IsotropicOrdered, HybridPerezOrdered
 from pvfactors.irradiance.utils import breakup_df_inputs
+from pvfactors.viewfactors.aoimethods import faoi_fn_from_pvlib_sandia
+from pvfactors.viewfactors.calculator import VFCalculator
 import numpy as np
 import datetime as dt
 
@@ -541,3 +543,19 @@ def test_check_direct_shading_continuity():
     # [20.4971271991293, 21.389095477613356], which shows discontinuity
     expected_out = [20.497127, 20.50229]
     np.testing.assert_allclose(out, expected_out)
+
+
+def test_create_with_rho_init(params, pvmodule_canadian):
+    """Check that can create PV engine with rho initialization
+    from faoi functions"""
+    # Create inputs
+    pvarray = OrderedPVArray.init_from_dict(params)
+    irradiance = HybridPerezOrdered(rho_front=None, rho_back=None)
+    faoi_fn = faoi_fn_from_pvlib_sandia(pvmodule_canadian)
+    vfcalculator = VFCalculator(faoi_fn_front=faoi_fn, faoi_fn_back=faoi_fn)
+    # Create engine
+    engine = PVEngine.with_rho_initialization(pvarray, vfcalculator,
+                                              irradiance)
+    # Check that rho values are the ones calculated
+    np.testing.assert_allclose(engine.irradiance.rho_front, 0.02900688)
+    np.testing.assert_allclose(engine.irradiance.rho_back, 0.02900688)

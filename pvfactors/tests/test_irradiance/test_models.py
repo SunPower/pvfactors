@@ -1,5 +1,6 @@
 import pytest
 from pvfactors.irradiance import IsotropicOrdered, HybridPerezOrdered
+from pvfactors.irradiance.base import BaseModel
 from pvfactors.geometry.pvarray import OrderedPVArray
 from pvfactors.geometry.base import PVSurface
 from pvfactors.geometry.pvrow import PVRow
@@ -134,6 +135,19 @@ def test_isotropic_model_front(params_irr):
 
     # check that 2 dimensional
     assert np.shape(irradiance_mat) == (40, 1)
+
+    # check faoi modifiers
+    assert irr_model.faoi_back['direct'] == 0.97
+    assert irr_model.faoi_front['direct'] == 0.99
+    assert irr_model.faoi_ground == 0.8
+
+    # get absorbed sum of sky components
+    irr_comp_absorbed = irr_model.get_summed_components(pvarray, absorbed=True)
+    assert np.shape(irr_comp_absorbed) == (40, 1)
+    # Check a ground surface value
+    np.testing.assert_allclose(np.array(irr_comp_absorbed)[12, 0],
+                               (1. - params_irr['rho_ground']) *
+                               np.array(irradiance_mat)[12, 0])
 
 
 def test_isotropic_model_back(params_irr):
@@ -388,7 +402,8 @@ def test_hybridperez_ordered_front(params_irr):
         100., 100., 33.33333333, 33.33333333,
         100., 100., 33.33333333, 33.33333333,
         100., 100., 33.33333333, 33.33333333]
-    np.testing.assert_array_almost_equal(np.squeeze(invrho_mat), expected_invrho_mat)
+    np.testing.assert_array_almost_equal(np.squeeze(invrho_mat),
+                                         expected_invrho_mat)
     np.testing.assert_almost_equal(
         pvarray.ts_pvrows[0].front.get_param_weighted('rho'),
         params_irr['rho_front_pvrow'])
@@ -420,6 +435,20 @@ def test_hybridperez_ordered_front(params_irr):
 
     # check that 2 dimensional
     assert irradiance_mat.shape == (41, 1)
+
+    # check faoi modifiers
+    assert irr_model.faoi_back['circumsolar'] == 0.97
+    assert irr_model.faoi_back['horizon'] == 0.97
+    assert irr_model.faoi_front['direct'] == 0.99
+    assert irr_model.faoi_ground == 0.8
+
+    # get absorbed sum of sky components
+    irr_comp_absorbed = irr_model.get_summed_components(pvarray, absorbed=True)
+    assert np.shape(irr_comp_absorbed) == (40, 1)
+    # Check a ground surface value
+    np.testing.assert_allclose(np.array(irr_comp_absorbed)[12, 0],
+                               (1. - params_irr['rho_ground']) *
+                               np.array(irradiance_mat)[12, 0])
 
 
 def test_hybridperez_ordered_back(params_irr):
@@ -862,3 +891,21 @@ def test_isotropic_ordered_transparency_spacing(params_irr):
                         .illum.list_ts_surfaces[0])
     np.testing.assert_allclose(surf_pvrow_illum.get_param('direct') * 0.19,
                                surf_pvrow_shaded.get_param('direct'))
+
+
+def test_initialize_rho():
+    """Make sure that rho is initialized correctly"""
+    model = BaseModel()
+    # rho values
+    rho_scalar = 0.50
+    rho_default = 0.01
+    rho_calculated = 0.10
+    # Should use scalar input
+    rho_out = model.initialize_rho(rho_scalar, rho_calculated, rho_default)
+    assert rho_out == rho_scalar
+    # Should use calculated
+    rho_out = model.initialize_rho(None, rho_calculated, rho_default)
+    np.testing.assert_allclose(rho_out, rho_calculated)
+    # Should use default
+    rho_out = model.initialize_rho(None, None, rho_default)
+    np.testing.assert_allclose(rho_out, rho_default)

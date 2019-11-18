@@ -4,6 +4,7 @@ timeseries simulations."""
 import numpy as np
 from pvfactors.viewfactors import VFCalculator
 from pvfactors.irradiance import HybridPerezOrdered
+from pvfactors.config import DEFAULT_RHO_FRONT, DEFAULT_RHO_BACK
 
 
 class PVEngine(object):
@@ -49,6 +50,61 @@ class PVEngine(object):
         # These values will be updated at fitting time
         self.n_points = None
         self.skip_step = None
+
+    @classmethod
+    def with_rho_initialization(
+            cls, pvarray, vf_calculator, irradiance_model,
+            fast_mode_pvrow_index=None, fast_mode_segment_index=None):
+        """Before creating the PV engine object, update the front and
+        back reflectivity scalars using the faoi functions, if those values
+        weren't passed originally
+
+        Parameters
+        ----------
+        pvarray : :py:class:`~pvfactors.geometry.pvarray.OrderedPVArray`
+            The initialized PV array object that will be used for calculations
+        vf_calculator : \
+        :py:class:`~pvfactors.viewfactors.calculator.VFCalculator`
+            Calculator that will be used to calculate the view factor matrices,
+            and AOI losses
+        irradiance_model : irradiance model object
+            The irradiance model that will be applied to the PV array,
+            for instance
+            :py:class:`~pvfactors.irradiance.models.HybridPerezOrdered`
+        fast_mode_pvrow_index : int, optional
+            If a pvrow index is passed, then the PVEngine fast mode
+            will be activated and the engine calculation will be done only
+            for the back surface of the pvrow with the corresponding
+            index (Default = None)
+        fast_mode_segment_index : int, optional
+            If a segment index is passed, then the PVEngine fast mode
+            will calculate back surface irradiance only for the
+            selected segment of the selected back surface (Default = None)
+
+        Returns
+        -------
+        PV engine
+            PV engine where the rho values have been initialized
+        """
+        # Calculate global average reflectivity using VF calculator
+        is_back = False
+        rho_front_calculated = (vf_calculator.vf_aoi_methods
+                                .rho_from_faoi_fn(is_back))
+        is_back = True
+        rho_back_calculated = (vf_calculator.vf_aoi_methods
+                               .rho_from_faoi_fn(is_back))
+        # Initialize rho values for irradiance model
+        irradiance_model.rho_front = irradiance_model.initialize_rho(
+            irradiance_model.rho_front, rho_front_calculated,
+            DEFAULT_RHO_FRONT)
+        irradiance_model.rho_back = irradiance_model.initialize_rho(
+            irradiance_model.rho_back, rho_back_calculated,
+            DEFAULT_RHO_BACK)
+
+        return cls(pvarray, vf_calculator=vf_calculator,
+                   irradiance_model=irradiance_model,
+                   fast_mode_pvrow_index=fast_mode_pvrow_index,
+                   fast_mode_segment_index=fast_mode_segment_index)
 
     def fit(self, timestamps, DNI, DHI, solar_zenith, solar_azimuth,
             surface_tilt, surface_azimuth, albedo, ghi=None):

@@ -4,12 +4,6 @@ from pvfactors.geometry.timeseries import TsPointCoords
 from pvfactors.geometry.pvarray import OrderedPVArray
 from pvfactors.viewfactors.vfmethods import VFTsMethods
 import numpy as np
-import pytest
-
-
-@pytest.fixture(scope='function')
-def pvmodule_canadian():
-    yield 'Canadian_Solar_CS5P_220M___2009_'
 
 
 def test_faoi_fn_from_pvlib():
@@ -33,14 +27,17 @@ def test_ts_aoi_methods(pvmodule_canadian):
     - vf_aoi values stay consistent"""
     n_timestamps = 6  # using 5 timestamps
     n_points = 6  # using only 6 sections for the integral from 0 to 180 deg
-    aoi_methods = AOIMethods(faoi_fn_from_pvlib_sandia(pvmodule_canadian),
-                             n_integral_sections=n_points)
+    faoi_fn = faoi_fn_from_pvlib_sandia(pvmodule_canadian)
+    # use same faoi fn for front and back
+    aoi_methods = AOIMethods(faoi_fn, faoi_fn, n_integral_sections=n_points)
     aoi_methods.fit(n_timestamps)
     # Check that function was passed correctly
-    assert callable(aoi_methods.faoi_fn)
+    assert callable(aoi_methods.faoi_fn_front)
+    assert callable(aoi_methods.faoi_fn_back)
     assert aoi_methods.aoi_angles_low.shape == (n_timestamps, n_points)
     assert aoi_methods.aoi_angles_high.shape == (n_timestamps, n_points)
-    assert aoi_methods.integrand_values.shape == (n_timestamps, n_points)
+    assert aoi_methods.integrand_front.shape == (n_timestamps, n_points)
+    assert aoi_methods.integrand_back.shape == (n_timestamps, n_points)
 
     # Create some dummy angle values
     low_angles = np.array([0., 2., 108., 72., 179., 0.])
@@ -70,8 +67,8 @@ def test_sanity_check(pvmodule_canadian):
     view factor values make sense"""
     n_timestamps = 3  # using 5 timestamps
     n_points = 300  # using only 6 sections for the integral from 0 to 180 deg
-    aoi_methods = AOIMethods(lambda aoi_angles: np.ones_like(aoi_angles),
-                             n_integral_sections=n_points)
+    def faoi_fn(aoi_angles): return np.ones_like(aoi_angles)
+    aoi_methods = AOIMethods(faoi_fn, faoi_fn, n_integral_sections=n_points)
     aoi_methods.fit(n_timestamps)
     # Create some dummy angle values
     low_angles = np.array([0., 90., 0.])
@@ -116,8 +113,8 @@ def test_vf_aoi_pvrow_gnd_benchmark_no_obstruction():
     # Create aoi methods
     n_timestamps = 1
     n_points = 300  # using only 6 sections for the integral from 0 to 180 deg
-    aoi_methods = AOIMethods(lambda aoi_angles: np.ones_like(aoi_angles),
-                             n_integral_sections=n_points)
+    def faoi_fn(aoi_angles): return np.ones_like(aoi_angles)
+    aoi_methods = AOIMethods(faoi_fn, faoi_fn, n_integral_sections=n_points)
     aoi_methods.fit(n_timestamps)
 
     # Get parameters
@@ -182,8 +179,8 @@ def test_vf_aoi_pvrow_gnd_benchmark_with_obstruction():
     # Create aoi methods
     n_timestamps = 1
     n_points = 300  # using only 6 sections for the integral from 0 to 180 deg
-    aoi_methods = AOIMethods(lambda aoi_angles: np.ones_like(aoi_angles),
-                             n_integral_sections=n_points)
+    def faoi_fn(aoi_angles): return np.ones_like(aoi_angles)
+    aoi_methods = AOIMethods(faoi_fn, faoi_fn, n_integral_sections=n_points)
     aoi_methods.fit(n_timestamps)
 
     # Get parameters
@@ -281,8 +278,8 @@ def test_vf_aoi_pvrow_to_sky(params):
     # Create aoi methods
     n_timestamps = 1
     n_points = 300  # using only 6 sections for the integral from 0 to 180 deg
-    aoi_methods = AOIMethods(lambda aoi_angles: np.ones_like(aoi_angles),
-                             n_integral_sections=n_points)
+    def faoi_fn(aoi_angles): return np.ones_like(aoi_angles)
+    aoi_methods = AOIMethods(faoi_fn, faoi_fn, n_integral_sections=n_points)
     aoi_methods.fit(n_timestamps)
 
     # Create pv array
@@ -313,3 +310,17 @@ def test_vf_aoi_pvrow_to_sky(params):
                            0., 0.]
     np.testing.assert_array_almost_equal(sky_column, expected_sky_column,
                                          decimal=7)
+
+
+def test_rho_from_faoi_fn(pvmodule_canadian):
+    """Check that can correctly calculate rho from faoi function"""
+    faoi_fn = faoi_fn_from_pvlib_sandia(pvmodule_canadian)
+    n_points = 300
+    # use same faoi fn for front and back
+    aoi_methods = AOIMethods(faoi_fn, faoi_fn, n_integral_sections=n_points)
+
+    # Should be identical for front and back
+    rho_out = aoi_methods.rho_from_faoi_fn(True)
+    np.testing.assert_allclose(rho_out, 0.02900688, atol=0, rtol=1e-6)
+    rho_out = aoi_methods.rho_from_faoi_fn(False)
+    np.testing.assert_allclose(rho_out, 0.02900688, atol=0, rtol=1e-6)
