@@ -4,12 +4,6 @@ from pvfactors.geometry.timeseries import TsPointCoords
 from pvfactors.geometry.pvarray import OrderedPVArray
 from pvfactors.viewfactors.vfmethods import VFTsMethods
 import numpy as np
-import pytest
-
-
-@pytest.fixture(scope='function')
-def pvmodule_canadian():
-    yield 'Canadian_Solar_CS5P_220M___2009_'
 
 
 def test_faoi_fn_from_pvlib():

@@ -15,7 +15,8 @@ class VFCalculator(object):
     def __init__(self, faoi_fn_front=None, faoi_fn_back=None,
                  n_aoi_integral_sections=300):
         """Initialize the view factor calculator with the calculation methods
-        that will be used.
+        that will be used. The AOI methods will not be instantiated if an
+        fAOI function is missing.
 
         Parameters
         ----------

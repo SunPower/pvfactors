@@ -9,10 +9,6 @@ class BaseModel(object):
     cats = None
     irradiance_comp = None
 
-    def __init__(self, *args, **kwargs):
-        """Not implemented"""
-        raise NotImplementedError
-
     def fit(self, *args, **kwargs):
         """Not implemented"""
         raise NotImplementedError
@@ -110,3 +106,31 @@ class BaseModel(object):
         for component in self.irradiance_comp:
             value += ts_surface.get_param(component)
         ts_surface.update_params({name_sky_term: value})
+
+    def initialize_rho(self, rho_scalar, rho_calculated, default_value):
+        """Initialize reflectivity value:
+        - if a scalar value is passed, use it
+        - otherwise try to use calculated value
+        - else use default value
+
+        Parameters
+        ----------
+        rho_scalar : float
+            Global average reflectivity value that is supposed to be used
+        rho_calculated : float
+            Reflectivity value calculated
+        default_value : float
+            Default value to use if everything fails
+
+        Returns
+        -------
+        rho_scalar : float
+            Global average reflectivity
+        """
+        if np.isscalar(rho_scalar):
+            rho_scalar = rho_scalar
+        elif np.isscalar(rho_calculated):
+            rho_scalar = rho_calculated
+        else:
+            rho_scalar = default_value
+        return rho_scalar

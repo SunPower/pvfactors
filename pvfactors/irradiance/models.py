@@ -25,7 +25,8 @@ class IsotropicOrdered(BaseModel):
     irradiance_comp = ['direct']
 
     def __init__(self, rho_front=0.01, rho_back=0.03, module_transparency=0.,
-                 module_spacing_ratio=0.):
+                 module_spacing_ratio=0., faoi_fn_front=None,
+                 faoi_fn_back=None):
         """Initialize irradiance model values that will be saved later on.
 
         Parameters
@@ -44,17 +45,31 @@ class IsotropicOrdered(BaseModel):
             PV rows, and which determines how much direct light will reach the
             shaded ground through the PV rows
             (Default = 0., no spacing at all)
+        faoi_fn_front : function, optional
+            Function which takes a list (or numpy array) of incidence angles
+            measured from the surface horizontal
+            (with values from 0 to 180 deg) and returns the fAOI values for
+            the front side of PV rows (default=None)
+        faoi_fn_back : function, optional
+            Function which takes a list (or numpy array) of incidence angles
+            measured from the surface horizontal
+            (with values from 0 to 180 deg) and returns the fAOI values for
+            the back side of PV rows (default=None)
         """
         self.direct = dict.fromkeys(self.cats)
         self.total_perez = dict.fromkeys(self.cats)
-        self.isotropic_luminance = None
-        self.rho_front = rho_front
-        self.rho_back = rho_back
         self.module_transparency = module_transparency
         self.module_spacing_ratio = module_spacing_ratio
+        self.rho_front = rho_front
+        self.rho_back = rho_back
+        self.faoi_fn_front = faoi_fn_front
+        self.faoi_fn_back = faoi_fn_back
+
+        # The following will be updated at fitting time
         self.albedo = None
         self.GHI = None
         self.DHI = None
+        self.isotropic_luminance = None
 
     def fit(self, timestamps, DNI, DHI, solar_zenith, solar_azimuth,
             surface_tilt, surface_azimuth, albedo,

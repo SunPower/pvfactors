@@ -1,5 +1,6 @@
 import pytest
 from pvfactors.irradiance import IsotropicOrdered, HybridPerezOrdered
+from pvfactors.irradiance.base import BaseModel
 from pvfactors.geometry.pvarray import OrderedPVArray
 from pvfactors.geometry.base import PVSurface
 from pvfactors.geometry.pvrow import PVRow
@@ -862,3 +863,21 @@ def test_isotropic_ordered_transparency_spacing(params_irr):
                         .illum.list_ts_surfaces[0])
     np.testing.assert_allclose(surf_pvrow_illum.get_param('direct') * 0.19,
                                surf_pvrow_shaded.get_param('direct'))
+
+
+def test_initialize_rho():
+    """Make sure that rho is initialized correctly"""
+    model = BaseModel()
+    # rho values
+    rho_scalar = 0.50
+    rho_default = 0.01
+    rho_calculated = 0.10
+    # Should use scalar input
+    rho_out = model.initialize_rho(rho_scalar, rho_calculated, rho_default)
+    assert rho_out == rho_scalar
+    # Should use calculated
+    rho_out = model.initialize_rho(None, rho_calculated, rho_default)
+    np.testing.assert_allclose(rho_out, rho_calculated)
+    # Should use default
+    rho_out = model.initialize_rho(None, None, rho_default)
+    np.testing.assert_allclose(rho_out, rho_default)
