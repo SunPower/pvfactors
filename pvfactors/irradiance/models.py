@@ -58,6 +58,9 @@ class IsotropicOrdered(BaseModel):
         """
         self.direct = dict.fromkeys(self.cats)
         self.total_perez = dict.fromkeys(self.cats)
+        self.faoi_front = dict.fromkeys(self.cats)
+        self.faoi_back = dict.fromkeys(self.cats)
+        self.faoi_ground = None
         self.module_transparency = module_transparency
         self.module_spacing_ratio = module_spacing_ratio
         self.rho_front = rho_front
@@ -140,6 +143,10 @@ class IsotropicOrdered(BaseModel):
         aoi_front_pvrow = aoi_function(
             surface_tilt, surface_azimuth, solar_zenith, solar_azimuth)
         aoi_back_pvrow = 180. - aoi_front_pvrow
+
+        # calculate faoi modifiers
+        self._calculate_faoi_modifiers(aoi_front_pvrow, aoi_back_pvrow,
+                                       surface_tilt, albedo)
 
         # DNI seen by pvrow illuminated surfaces
         front_is_illum = aoi_front_pvrow <= 90
@@ -325,6 +332,38 @@ class IsotropicOrdered(BaseModel):
         """Total timeseries isotropic luminance of sky"""
         return self.isotropic_luminance
 
+    def _calculate_faoi_modifiers(self, aoi_front_pvrow, aoi_back_pvrow,
+                                  surface_tilt, albedo):
+        """Calculate fAOI modifier values for all surface types: front PV row,
+        back PV row, and ground.
+
+        Parameters
+        ----------
+        aoi_front_pvrow : np.ndarray
+            Direct light angle of incidence values for PV row front side [deg]
+        aoi_back_pvrow : np.ndarray
+            Direct light angle of incidence values for PV row back side [deg]
+        surface_tilt : np.ndarray
+            Surface tilt of PV row surfaces, measured from horizontal,
+            ranging from 0 to 180 [deg]
+        albedo : np.ndarray
+            Ground albedo values
+        """
+        # --- front
+        self.faoi_front['direct'] = (
+            self.faoi_fn_front(aoi_front_pvrow)
+            if self.faoi_fn_front is not None
+            else (1. - self.rho_front) * np.ones_like(surface_tilt))
+
+        # --- back
+        self.faoi_back['direct'] = (
+            self.faoi_fn_back(aoi_back_pvrow)
+            if self.faoi_fn_back is not None
+            else (1. - self.rho_back) * np.ones_like(surface_tilt))
+
+        # --- ground
+        self.faoi_ground = (1. - albedo)
+
 
 class HybridPerezOrdered(BaseModel):
     """Model is based off Perez diffuse light model, and
@@ -344,7 +383,8 @@ class HybridPerezOrdered(BaseModel):
                  circumsolar_angle=DEFAULT_CIRCUMSOLAR_ANGLE,
                  circumsolar_model='uniform_disk', rho_front=0.01,
                  rho_back=0.03, module_transparency=0.,
-                 module_spacing_ratio=0.):
+                 module_spacing_ratio=0., faoi_fn_front=None,
+                 faoi_fn_back=None):
         """Initialize irradiance model values that will be saved later on.
 
         Parameters
@@ -371,23 +411,37 @@ class HybridPerezOrdered(BaseModel):
             PV rows, and which determines how much direct light will reach the
             shaded ground through the PV rows
             (Default = 0., no spacing at all)
+        faoi_fn_front : function, optional
+            Function which takes a list (or numpy array) of incidence angles
+            measured from the surface horizontal
+            (with values from 0 to 180 deg) and returns the fAOI values for
+            the front side of PV rows (default=None)
+        faoi_fn_back : function, optional
+            Function which takes a list (or numpy array) of incidence angles
+            measured from the surface horizontal
+            (with values from 0 to 180 deg) and returns the fAOI values for
+            the back side of PV rows (default=None)
         """
         self.direct = dict.fromkeys(self.cats)
         self.circumsolar = dict.fromkeys(self.cats)
         self.horizon = dict.fromkeys(self.cats)
         self.total_perez = dict.fromkeys(self.cats)
-        self.isotropic_luminance = None
+        self.faoi_front = dict.fromkeys(self.cats)
+        self.faoi_back = dict.fromkeys(self.cats)
         self.horizon_band_angle = horizon_band_angle
         self.circumsolar_angle = circumsolar_angle
         self.circumsolar_model = circumsolar_model
         self.rho_front = rho_front
         self.rho_back = rho_back
+        self.faoi_fn_front = faoi_fn_front
+        self.faoi_fn_back = faoi_fn_back
         self.module_transparency = module_transparency
         self.module_spacing_ratio = module_spacing_ratio
         self.albedo = None
         self.GHI = None
         self.DNI = None
         self.n_steps = None
+        self.isotropic_luminance = None
 
     def fit(self, timestamps, DNI, DHI, solar_zenith, solar_azimuth,
             surface_tilt, surface_azimuth, albedo,
@@ -439,6 +493,10 @@ class HybridPerezOrdered(BaseModel):
             self._calculate_luminance_poa_components(
                 timestamps, DNI, DHI, solar_zenith, solar_azimuth,
                 surface_tilt, surface_azimuth)
+
+        # calculate faoi modifiers
+        self._calculate_faoi_modifiers(aoi_front_pvrow, aoi_back_pvrow,
+                                       surface_tilt, albedo)
 
         # Save and calculate total POA values from Perez model
         ghi = DNI * cosd(solar_zenith) + DHI if ghi is None else ghi
@@ -892,3 +950,53 @@ class HybridPerezOrdered(BaseModel):
         return luminance_isotropic, luminance_circumsolar, poa_horizon, \
             poa_circumsolar_front, poa_circumsolar_back, \
             aoi_front_pvrow, aoi_back_pvrow
+
+    def _calculate_faoi_modifiers(self, aoi_front_pvrow, aoi_back_pvrow,
+                                  surface_tilt, albedo):
+        """Calculate fAOI modifier values for all surface types: front PV row,
+        back PV row, and ground.
+
+        Parameters
+        ----------
+        aoi_front_pvrow : np.ndarray
+            Direct light angle of incidence values for PV row front side [deg]
+        aoi_back_pvrow : np.ndarray
+            Direct light angle of incidence values for PV row back side [deg]
+        surface_tilt : np.ndarray
+            Surface tilt of PV row surfaces, measured from horizontal,
+            ranging from 0 to 180 [deg]
+        albedo : np.ndarray
+            Ground albedo values
+        """
+        # --- front
+        if self.faoi_fn_front is not None:
+            faoi_direct_rays = self.faoi_fn_front(aoi_front_pvrow)
+            self.faoi_front['direct'] = faoi_direct_rays
+            # Assume that circumsolar is just a point for this
+            self.faoi_front['circumsolar'] = faoi_direct_rays
+            # Assume horizon band has zero width
+            self.faoi_front['horizon'] = self.faoi_fn_front(surface_tilt)
+        else:
+            faoi_diffuse_front = ((1. - self.rho_front)
+                                  * np.ones_like(surface_tilt))
+            self.faoi_front['direct'] = faoi_diffuse_front
+            self.faoi_front['circumsolar'] = faoi_diffuse_front
+            self.faoi_front['horizon'] = faoi_diffuse_front
+
+        # --- back
+        if self.faoi_fn_back is not None:
+            faoi_direct_rays = self.faoi_fn_back(aoi_back_pvrow)
+            self.faoi_back['direct'] = faoi_direct_rays
+            # Assume that circumsolar is just a point for this
+            self.faoi_back['circumsolar'] = faoi_direct_rays
+            # Assume horizon band has zero width
+            self.faoi_back['horizon'] = self.faoi_fn_back(surface_tilt)
+        else:
+            faoi_diffuse_back = ((1. - self.rho_back)
+                                 * np.ones_like(surface_tilt))
+            self.faoi_back['direct'] = faoi_diffuse_back
+            self.faoi_back['circumsolar'] = faoi_diffuse_back
+            self.faoi_back['horizon'] = faoi_diffuse_back
+
+        # --- ground
+        self.faoi_ground = (1. - albedo)

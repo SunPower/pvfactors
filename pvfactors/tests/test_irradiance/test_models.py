@@ -136,6 +136,11 @@ def test_isotropic_model_front(params_irr):
     # check that 2 dimensional
     assert np.shape(irradiance_mat) == (40, 1)
 
+    # check faoi modifiers
+    assert irr_model.faoi_back['direct'] == 0.97
+    assert irr_model.faoi_front['direct'] == 0.99
+    assert irr_model.faoi_ground == 0.8
+
 
 def test_isotropic_model_back(params_irr):
     """Direct shading on back surface"""
@@ -421,6 +426,12 @@ def test_hybridperez_ordered_front(params_irr):
 
     # check that 2 dimensional
     assert irradiance_mat.shape == (41, 1)
+
+    # check faoi modifiers
+    assert irr_model.faoi_back['circumsolar'] == 0.97
+    assert irr_model.faoi_back['horizon'] == 0.97
+    assert irr_model.faoi_front['direct'] == 0.99
+    assert irr_model.faoi_ground == 0.8
 
 
 def test_hybridperez_ordered_back(params_irr):
