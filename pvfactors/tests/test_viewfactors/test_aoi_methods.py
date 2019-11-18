@@ -316,3 +316,17 @@ def test_vf_aoi_pvrow_to_sky(params):
                            0., 0.]
     np.testing.assert_array_almost_equal(sky_column, expected_sky_column,
                                          decimal=7)
+
+
+def test_rho_from_faoi_fn(pvmodule_canadian):
+    """Check that can correctly calculate rho from faoi function"""
+    faoi_fn = faoi_fn_from_pvlib_sandia(pvmodule_canadian)
+    n_points = 300
+    # use same faoi fn for front and back
+    aoi_methods = AOIMethods(faoi_fn, faoi_fn, n_integral_sections=n_points)
+
+    # Should be identical for front and back
+    rho_out = aoi_methods.rho_from_faoi_fn(True)
+    np.testing.assert_allclose(rho_out, 0.02900688, atol=0, rtol=1e-6)
+    rho_out = aoi_methods.rho_from_faoi_fn(False)
+    np.testing.assert_allclose(rho_out, 0.02900688, atol=0, rtol=1e-6)

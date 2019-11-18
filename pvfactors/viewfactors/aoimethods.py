@@ -599,6 +599,38 @@ class AOIMethods:
         """
         return np.arctan2(pt_2.y - pt_1.y, pt_2.x - pt_1.x)
 
+    def rho_from_faoi_fn(self, is_back):
+        """Calculate global average reflectivity from faoi function
+        for either side of the PV row (requires calculating view factors)
+
+        Parameters
+        ----------
+        is_back : bool
+            Flag specifying whether to use front or back faoi function
+        Returns
+        -------
+        rho_average : float
+            Global average reflectivity value of surface
+        """
+        # Will use x values at the middle of the integral sections
+        aoi_angles = np.linspace(0., 180., num=self.n_integral_sections + 1)
+        # Assumes that at least 2 aoi angle values, otherwise what's the point
+        self.interval = aoi_angles[1] - aoi_angles[0]
+        # Get integral intervals' low, high, and middle points
+        aoi_angles_low = aoi_angles[:-1]
+        aoi_angles_high = aoi_angles_low + self.interval
+        aoi_angles_middle = aoi_angles_low + self.interval / 2.
+        # Calculate faoi values using middle points of integral intervals
+        if is_back:
+            faoi_values = self.faoi_fn_back(aoi_angles_middle)
+        else:
+            faoi_values = self.faoi_fn_front(aoi_angles_middle)
+        # Calculate small view factor values for each section
+        vf_values = self._vf(aoi_angles_low, aoi_angles_high)
+        # Multiply to get integrand
+        integrand_values = faoi_values * vf_values
+        return (1. - integrand_values.sum())
+
 
 def faoi_fn_from_pvlib_sandia(pvmodule_name):
     """Generate a faoi function from a pvlib sandia PV module name
