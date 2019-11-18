@@ -12,27 +12,35 @@ class AOIMethods:
     """Class containing methods related to calculating AOI losses for
     :py:class:`~pvfactors.geometry.pvarray.OrderedPVArray` objects."""
 
-    def __init__(self, faoi_fn, n_integral_sections=300):
+    def __init__(self, faoi_fn_front, faoi_fn_back, n_integral_sections=300):
         """Instantiate class with faoi function and number of sections to use
         to calculate integrals of view factors with faoi losses
 
         Parameters
         ----------
-        faoi_fn : function
+        faoi_fn_front : function
             Function which takes a list (or numpy array) of incidence angles
             measured from the surface horizontal
-            (with values from 0 to 180 deg) and returns the fAOI values
+            (with values from 0 to 180 deg) and returns the fAOI values for
+            the front side of PV rows
+        faoi_fn_back : function
+            Function which takes a list (or numpy array) of incidence angles
+            measured from the surface horizontal
+            (with values from 0 to 180 deg) and returns the fAOI values for
+            the back side of PV rows
         n_integral_sections : int, optional
             Number of integral divisions of the 0 to 180 deg interval
             to use for the fAOI loss integral (default = 300)
         """
-        self.faoi_fn = faoi_fn
+        self.faoi_fn_front = faoi_fn_front
+        self.faoi_fn_back = faoi_fn_back
         self.n_integral_sections = n_integral_sections
         # The following will be updated at fitting time
         self.interval = None
         self.aoi_angles_low = None
         self.aoi_angles_high = None
-        self.integrand_values = None
+        self.integrand_front = None
+        self.integrand_back = None
 
     def fit(self, n_timestamps):
         """Fit the AOI methods to timeseries inputs: create all the necessary
@@ -52,16 +60,19 @@ class AOIMethods:
         aoi_angles_high = aoi_angles_low + self.interval
         aoi_angles_middle = aoi_angles_low + self.interval / 2.
         # Calculate faoi values using middle points of integral intervals
-        faoi_values = self.faoi_fn(aoi_angles_middle)
+        faoi_front = self.faoi_fn_front(aoi_angles_middle)
+        faoi_back = self.faoi_fn_back(aoi_angles_middle)
         # Calculate small view factor values for each section
         vf_values = self._vf(aoi_angles_low, aoi_angles_high)
         # Multiply to get integrand
-        integrand_values = faoi_values * vf_values
+        integrand_front = faoi_front * vf_values
+        integrand_back = faoi_back * vf_values
         # Replicate these values for all timestamps such that shapes
         # becomes: [n_timestamps, n_integral_sections]map
         self.aoi_angles_low = np.tile(aoi_angles_low, (n_timestamps, 1))
         self.aoi_angles_high = np.tile(aoi_angles_high, (n_timestamps, 1))
-        self.integrand_values = np.tile(integrand_values, (n_timestamps, 1))
+        self.integrand_front = np.tile(integrand_front, (n_timestamps, 1))
+        self.integrand_back = np.tile(integrand_back, (n_timestamps, 1))
 
     def vf_aoi_pvrow_to_sky(self, ts_pvrows, ts_ground, tilted_to_left,
                             vf_matrix):
@@ -114,19 +125,19 @@ class AOIMethods:
             # front side
             front = ts_pvrow.front
             for front_surf in front.all_ts_surfaces:
-                vf_aoi_left = self._vf_aoi_surface_to_surface(front_surf,
-                                                              sky_left)
-                vf_aoi_right = self._vf_aoi_surface_to_surface(front_surf,
-                                                               sky_right)
+                vf_aoi_left = self._vf_aoi_surface_to_surface(
+                    front_surf, sky_left, is_back=False)
+                vf_aoi_right = self._vf_aoi_surface_to_surface(
+                    front_surf, sky_right, is_back=False)
                 vf_aoi = np.where(tilted_to_left, vf_aoi_left, vf_aoi_right)
                 vf_matrix[front_surf.index, sky_index, :] = vf_aoi
             # back side
             back = ts_pvrow.back
             for back_surf in back.all_ts_surfaces:
-                vf_aoi_left = self._vf_aoi_surface_to_surface(back_surf,
-                                                              sky_left)
-                vf_aoi_right = self._vf_aoi_surface_to_surface(back_surf,
-                                                               sky_right)
+                vf_aoi_left = self._vf_aoi_surface_to_surface(
+                    back_surf, sky_left, is_back=True)
+                vf_aoi_right = self._vf_aoi_surface_to_surface(
+                    back_surf, sky_right, is_back=True)
                 vf_aoi = np.where(tilted_to_left, vf_aoi_right, vf_aoi_left)
                 vf_matrix[back_surf.index, sky_index, :] = vf_aoi
 
@@ -156,10 +167,12 @@ class AOIMethods:
                 for surf_j in right_ts_pvrow.back.all_ts_surfaces:
                     j = surf_j.index
                     # vf aoi from i to j
-                    vf_i_to_j = self._vf_aoi_surface_to_surface(surf_i, surf_j)
+                    vf_i_to_j = self._vf_aoi_surface_to_surface(
+                        surf_i, surf_j, is_back=False)
                     vf_i_to_j = np.where(tilted_to_left, 0., vf_i_to_j)
                     # vf aoi from j to i
-                    vf_j_to_i = self._vf_aoi_surface_to_surface(surf_j, surf_i)
+                    vf_j_to_i = self._vf_aoi_surface_to_surface(
+                        surf_j, surf_i, is_back=True)
                     vf_j_to_i = np.where(tilted_to_left, 0., vf_j_to_i)
                     # save results
                     vf_matrix[i, j, :] = vf_i_to_j
@@ -171,10 +184,12 @@ class AOIMethods:
                 for surf_j in right_ts_pvrow.front.all_ts_surfaces:
                     j = surf_j.index
                     # vf aoi from i to j
-                    vf_i_to_j = self._vf_aoi_surface_to_surface(surf_i, surf_j)
+                    vf_i_to_j = self._vf_aoi_surface_to_surface(
+                        surf_i, surf_j, is_back=True)
                     vf_i_to_j = np.where(tilted_to_left, vf_i_to_j, 0.)
                     # vf aoi from j to i
-                    vf_j_to_i = self._vf_aoi_surface_to_surface(surf_j, surf_i)
+                    vf_j_to_i = self._vf_aoi_surface_to_surface(
+                        surf_j, surf_i, is_back=False)
                     vf_j_to_i = np.where(tilted_to_left, vf_j_to_i, 0.)
                     # save results
                     vf_matrix[i, j, :] = vf_i_to_j
@@ -253,7 +268,7 @@ class AOIMethods:
                             is_back=True, is_left=False))
                     vf_aoi_matrix[i, j, :] = vf_pvrow_to_gnd
 
-    def _vf_aoi_surface_to_surface(self, surf_1, surf_2):
+    def _vf_aoi_surface_to_surface(self, surf_1, surf_2, is_back=True):
         """Calculate view factor, while accounting from AOI losses, from
         surface 1 to surface 2.
 
@@ -269,7 +284,9 @@ class AOIMethods:
         surf_2 : :py:class:`~pvfactors.geometry.timeseries.TsSurface`
             Surface to which the view factor with AOI losses should be
             calculated
-
+        is_back : bool
+            Flag specifying whether pv row surface is on back or front side
+            of PV row (Default = True)
         Returns
         -------
         vf_aoi : np.ndarray
@@ -289,8 +306,8 @@ class AOIMethods:
         high_aoi_angles = np.where(aoi_angles_1 < aoi_angles_2, aoi_angles_2,
                                    aoi_angles_1)
         # Calculate vf_aoi
-        vf_aoi_raw = self._calculate_vf_aoi_wedge_level(low_aoi_angles,
-                                                        high_aoi_angles)
+        vf_aoi_raw = self._calculate_vf_aoi_wedge_level(
+            low_aoi_angles, high_aoi_angles, is_back=is_back)
         # Should be zero where either of the surfaces have zero length
         vf_aoi = np.where((surf_1.length < DISTANCE_TOLERANCE)
                           | (surf_2.length < DISTANCE_TOLERANCE), 0.,
@@ -327,8 +344,8 @@ class AOIMethods:
         pvrow_surf_length : np.ndarray
             Length (width) of the timeseries PV row surface [m]
         is_back : bool
-            Flag specifying whether pv row surface is on  back or front surface
-            (Default = True)
+            Flag specifying whether pv row surface is on back or front side
+            of PV row (Default = True)
         is_left : bool
             Flag specifying whether gnd surface is left of pv row cut point or
             not (Default = True)
@@ -364,8 +381,8 @@ class AOIMethods:
                                   aoi_angles_2)
         high_aoi_angles = np.where(aoi_angles_1 < aoi_angles_2, aoi_angles_2,
                                    aoi_angles_1)
-        vf_aoi_raw = self._calculate_vf_aoi_wedge_level(low_aoi_angles,
-                                                        high_aoi_angles)
+        vf_aoi_raw = self._calculate_vf_aoi_wedge_level(
+            low_aoi_angles, high_aoi_angles, is_back=is_back)
         # Should be zero where either of the surfaces have zero length
         vf_aoi_raw = np.where((ts_length < DISTANCE_TOLERANCE)
                               | (gnd_surf.length < DISTANCE_TOLERANCE), 0.,
@@ -429,7 +446,8 @@ class AOIMethods:
         aoi_angles = self._calculate_aoi_angles(u_vector, centroid, point)
         return aoi_angles
 
-    def _calculate_vf_aoi_wedge_level(self, low_angles, high_angles):
+    def _calculate_vf_aoi_wedge_level(self, low_angles, high_angles,
+                                      is_back=True):
         """Calculate faoi modified view factors for a wedge defined by
         low and high angles.
 
@@ -440,6 +458,9 @@ class AOIMethods:
         high_angles : np.ndarray
             High AOI angles (between 0 and 180 deg), length = n_timestamps.
             Should be bigger than ``low_angles``
+        is_back : bool
+            Flag specifying whether pv row surface is on back or front side
+            of PV row (Default = True)
 
         Returns
         -------
@@ -448,8 +469,8 @@ class AOIMethods:
             shape = (n_timestamps, )
         """
         # Calculate integrand: all d_vf_aoi values
-        faoi_integrand = self._calculate_vfaoi_integrand(low_angles,
-                                                         high_angles)
+        faoi_integrand = self._calculate_vfaoi_integrand(
+            low_angles, high_angles, is_back=is_back)
         # Total vf_aoi will be sum of all smaller d_vf_aoi values
         total_vf_aoi = faoi_integrand.sum(axis=1)
         # Make sure vf is counted as zero if the wedge is super small
@@ -459,7 +480,8 @@ class AOIMethods:
 
         return total_vf_aoi
 
-    def _calculate_vfaoi_integrand(self, low_angles, high_angles):
+    def _calculate_vfaoi_integrand(self, low_angles, high_angles,
+                                   is_back=True):
         """
         Calculate the timeseries view factors with aoi loss integrand
         given the low and high angles that define the surface.
@@ -471,7 +493,9 @@ class AOIMethods:
         high_angles : np.ndarray
             High AOI angles (between 0 and 180 deg), length = n_timestamps.
             Should be bigger than ``low_angles``
-
+        is_back : bool
+            Flag specifying whether pv row surface is on back or front side
+            of PV row (Default = True)
         Returns
         -------
         np.ndarray
@@ -484,10 +508,15 @@ class AOIMethods:
         high_angles_mat = np.tile(high_angles, (self.n_integral_sections, 1)).T
 
         # Filter out integrand values outside of range
-        count_integral_section = ((low_angles_mat <= self.aoi_angles_high) &
-                                  (high_angles_mat > self.aoi_angles_low))
-        faoi_integrand = np.where(count_integral_section,
-                                  self.integrand_values, 0.)
+        include_integral_section = ((low_angles_mat <= self.aoi_angles_high) &
+                                    (high_angles_mat > self.aoi_angles_low))
+        # The integrand values are different for front and back sides
+        if is_back:
+            faoi_integrand = np.where(include_integral_section,
+                                      self.integrand_back, 0.)
+        else:
+            faoi_integrand = np.where(include_integral_section,
+                                      self.integrand_front, 0.)
 
         return faoi_integrand
 

@@ -12,24 +12,31 @@ class VFCalculator(object):
     rely on both :py:class:`~pvfactors.viewfactors.vfmethods.VFTsMethods`
     and :py:class:`~pvfactors.viewfactors.aoimethods.AOIMethods`"""
 
-    def __init__(self, faoi_fn=None, n_aoi_integral_sections=300):
+    def __init__(self, faoi_fn_front=None, faoi_fn_back=None,
+                 n_aoi_integral_sections=300):
         """Initialize the view factor calculator with the calculation methods
         that will be used.
 
         Parameters
         ----------
-        faoi_fn : function, optional
+        faoi_fn_front : function
             Function which takes a list (or numpy array) of incidence angles
             measured from the surface horizontal
-            (with values from 0 to 180 deg) and returns the fAOI values
-            (Default = None)
+            (with values from 0 to 180 deg) and returns the fAOI values for
+            the front side of PV rows
+        faoi_fn_back : function
+            Function which takes a list (or numpy array) of incidence angles
+            measured from the surface horizontal
+            (with values from 0 to 180 deg) and returns the fAOI values for
+            the back side of PV rows
         n_integral_sections : int, optional
             Number of integral divisions of the 0 to 180 deg interval
             to use for the fAOI loss integral (default = 300)
         """
         self.vf_ts_methods = VFTsMethods()
         self.vf_aoi_methods = AOIMethods(
-            faoi_fn, n_integral_sections=n_aoi_integral_sections)
+            faoi_fn_front, faoi_fn_back,
+            n_integral_sections=n_aoi_integral_sections)
         # Saved matrices
         self.vf_matrix = None
         self.vf_aoi_matrix = None
