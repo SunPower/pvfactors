@@ -164,6 +164,9 @@ class PVEngine(object):
         # Add timeseries irradiance results to pvarray
         self.irradiance.transform(self.pvarray)
 
+        # Fit VF calculator
+        self.vf_calculator.fit(self.n_points)
+
         # Skip timesteps when:
         #    - solar zenith > 90, ie the sun is down
         #    - DNI or DHI is negative, which does not make sense
