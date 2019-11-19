@@ -69,6 +69,7 @@ class OrderedPVArray(BasePVArray):
 
         # These attributes will be updated by the engine
         self.ts_vf_matrix = None
+        self.ts_vf_aoi_matrix = None
 
     @classmethod
     def init_from_dict(cls, pvarray_params, param_names=None):
