@@ -300,12 +300,11 @@ class AOIMethods:
             View factors with aoi losses from surface 1 to surface 2,
             dimension is [n_timesteps]
         """
-        # do not run calculation if either of the surfaces always
-        # has zero length
-        run_calculation = (
-            (np.nansum(surf_1.length) > DISTANCE_TOLERANCE)
-            and (np.nansum(surf_2.length) > DISTANCE_TOLERANCE))
-        if run_calculation:
+        # skip calculation if either surface is empty (always zero length)
+        skip = surf_1.is_empty or surf_2.is_empty
+        if skip:
+            vf_aoi = np.zeros_like(surf_2.length)
+        else:
             # Get surface 1 params
             u_vector = surf_1.u_vector
             centroid = surf_1.centroid
@@ -325,9 +324,7 @@ class AOIMethods:
             vf_aoi = np.where((surf_1.length < DISTANCE_TOLERANCE)
                               | (surf_2.length < DISTANCE_TOLERANCE), 0.,
                               vf_aoi_raw)
-            return vf_aoi
-        else:
-            return np.zeros_like(surf_2.length)
+        return vf_aoi
 
     def _vf_aoi_pvrow_surf_to_gnd_surf_obstruction(
             self, pvrow_surf, pvrow_idx, n_pvrows, tilted_to_left, ts_pvrows,
@@ -371,12 +368,11 @@ class AOIMethods:
             View factors aoi from timeseries PV row surface to timeseries
             ground surface, dimension is [n_timesteps]
         """
-        # do not run calculation if either of the surfaces always
-        # has zero length
-        run_calculation = (
-            (np.nansum(gnd_surf.length) > DISTANCE_TOLERANCE)
-            and (np.nansum(pvrow_surf.length) > DISTANCE_TOLERANCE))
-        if run_calculation:
+        # skip calculation if either surface is empty (always zero length)
+        skip = pvrow_surf.is_empty or gnd_surf.is_empty
+        if skip:
+            vf_aoi = np.zeros_like(gnd_surf.length)
+        else:
             centroid = pvrow_surf.centroid
             u_vector = pvrow_surf.u_vector
             no_obstruction = (is_left & (pvrow_idx == 0)) \
@@ -418,9 +414,7 @@ class AOIMethods:
                 vf_aoi = (np.where(tilted_to_left, vf_aoi_raw, 0.) if is_back
                           else np.where(tilted_to_left, 0., vf_aoi_raw))
 
-            return vf_aoi
-        else:
-            return np.zeros_like(gnd_surf.length)
+        return vf_aoi
 
     def _calculate_aoi_angles_w_obstruction(
             self, u_vector, centroid, point_gnd, point_obstr,
