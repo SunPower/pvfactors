@@ -138,6 +138,7 @@ def fn_report_example():
     def fn_report(pvarray): return {
         'qinc_front': pvarray.ts_pvrows[1].front.get_param_weighted('qinc'),
         'qinc_back': pvarray.ts_pvrows[1].back.get_param_weighted('qinc'),
+        'qabs_back': pvarray.ts_pvrows[1].back.get_param_weighted('qabs'),
         'iso_front': pvarray.ts_pvrows[1]
         .front.get_param_weighted('isotropic'),
         'iso_back': pvarray.ts_pvrows[1].back.get_param_weighted('isotropic')}

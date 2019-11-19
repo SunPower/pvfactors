@@ -50,7 +50,6 @@ def test_vfcalculator_aoi_methods(params):
         faoi_fn, faoi_fn, n_aoi_integral_sections=n_integration_sections)
     vfcalculator.fit(n_timestamps)
     vf_aoi_matrix = vfcalculator.build_ts_vf_aoi_matrix(pvarray, None)
-    vf_matrix = vfcalculator.build_ts_vf_matrix(pvarray)
 
     # Check that correct size
     assert vf_aoi_matrix.shape == (47, 47, 1)

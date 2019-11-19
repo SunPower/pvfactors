@@ -41,6 +41,10 @@ def test_pvengine_float_inputs_iso(params):
         pvarray.ts_pvrows[1].front.get_param_weighted('qinc'), 1099.6948573)
     np.testing.assert_almost_equal(
         pvarray.ts_pvrows[2].front.get_param_weighted('qinc'), 1102.76149246)
+    # Check absorbed
+    np.testing.assert_almost_equal(
+        pvarray.ts_pvrows[1].front.get_param_weighted('qabs'),
+        1099.6948573 * 0.99)
 
 
 def test_pvengine_float_inputs_perez(params):
@@ -80,6 +84,13 @@ def test_pvengine_float_inputs_perez(params):
     np.testing.assert_almost_equal(
         pvarray.ts_pvrows[1].back.get_param_weighted('qinc'),
         116.49050349491208)
+    # Check absorbed irradiance
+    np.testing.assert_almost_equal(
+        pvarray.ts_pvrows[2].front.get_param_weighted('qabs'),
+        1112.37717553 * 0.99)
+    np.testing.assert_almost_equal(
+        pvarray.ts_pvrows[1].back.get_param_weighted('qabs'),
+        116.49050349491208 * 0.97)
 
 
 def test_pvengine_ts_inputs_perez(params_serial,
@@ -115,6 +126,8 @@ def test_pvengine_ts_inputs_perez(params_serial,
         report['iso_front'], [42.816637, 42.780206])
     np.testing.assert_array_almost_equal(
         report['iso_back'], [1.727308, 1.726535])
+    np.testing.assert_array_almost_equal(
+        report['qabs_back'], report['qinc_back'] * 0.97)
 
 
 def test_run_fast_mode_isotropic(params):
@@ -545,7 +558,7 @@ def test_check_direct_shading_continuity():
     np.testing.assert_allclose(out, expected_out)
 
 
-def test_create_with_rho_init(params, pvmodule_canadian):
+def test_create_engine_with_rho_init(params, pvmodule_canadian):
     """Check that can create PV engine with rho initialization
     from faoi functions"""
     # Create inputs

@@ -118,7 +118,7 @@ class BaseModel(object):
             for component in list_components:
                 value += ts_surface.get_param(component)
             irradiance_mat.append(value)
-        return irradiance_mat
+        return np.array(irradiance_mat)
 
     def update_ts_surface_sky_term(self, ts_surface, name_sky_term='sky_term'):
         """Update the 'sky_term' parameter of a timeseries surface.

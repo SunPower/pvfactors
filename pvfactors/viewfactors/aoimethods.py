@@ -294,6 +294,7 @@ class AOIMethods:
         is_back : bool
             Flag specifying whether pv row surface is on back or front side
             of PV row (Default = True)
+
         Returns
         -------
         vf_aoi : np.ndarray
