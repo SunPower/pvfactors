@@ -33,7 +33,8 @@ def test_vfcalculator_vectorized(params):
 
 
 def test_vfcalculator_aoi_methods(params):
-    """Check that calculation of vf_aoi_matrix makes sense:
+    """Check that calculation of vf_aoi_matrix makes sense when using
+    faoi function is passed:
     all NREL-like vfs should sum up to 1 when taking many integration points"""
 
     # Prepare pv array
@@ -66,6 +67,33 @@ def test_vfcalculator_aoi_methods(params):
     np.testing.assert_allclose(summed_pvrow_vf_aoi_values,
                                expected_summed_pvrow_vf_aoi_values,
                                atol=0, rtol=1.1e-3)
+
+
+def test_vfcalculator_no_aoi_functions(params):
+    """Check that the VF calculator calculates aoi losses
+    with diffuse reflection values when no faoi_fn is passed"""
+
+    # Prepare pv array
+    params.update({'cut': {0: {'front': 3}, 1: {'back': 2}}})
+    pvarray = OrderedPVArray.fit_from_dict_of_scalars(params)
+    n_timestamps = 1
+    # Create calculator without faoi functions
+    vfcalculator = VFCalculator()
+    vfcalculator.fit(n_timestamps)
+    # Run calculation of view factors first
+    vf_matrix = vfcalculator.build_ts_vf_matrix(pvarray)
+    # Make sure that the matrix was saved
+    assert np.sum(vfcalculator.vf_matrix) > 0
+    # Compute reflectivity
+    rho_mat = np.tile([0.03] * (pvarray.n_ts_surfaces + 1),
+                      (pvarray.n_ts_surfaces + 1, 1)).T
+    assert rho_mat.shape == (pvarray.n_ts_surfaces + 1,
+                             pvarray.n_ts_surfaces + 1)
+    vf_aoi_matrix = vfcalculator.build_ts_vf_aoi_matrix(pvarray, rho_mat)
+
+    # Check that correct size
+    assert vf_aoi_matrix.shape == (47, 47, 1)
+    np.testing.assert_allclose(vf_matrix * 0.97, vf_aoi_matrix)
 
 
 def test_ts_view_factors():
