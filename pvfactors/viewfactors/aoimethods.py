@@ -300,7 +300,7 @@ class AOIMethods:
             View factors with aoi losses from surface 1 to surface 2,
             dimension is [n_timesteps]
         """
-        # do not run calculation if either of the surfaces is always
+        # do not run calculation if either of the surfaces always
         # has zero length
         run_calculation = (
             (np.nansum(surf_1.length) > DISTANCE_TOLERANCE)
@@ -371,7 +371,7 @@ class AOIMethods:
             View factors aoi from timeseries PV row surface to timeseries
             ground surface, dimension is [n_timesteps]
         """
-        # do not run calculation if either of the surfaces is always
+        # do not run calculation if either of the surfaces always
         # has zero length
         run_calculation = (
             (np.nansum(gnd_surf.length) > DISTANCE_TOLERANCE)
