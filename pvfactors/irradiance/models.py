@@ -362,15 +362,19 @@ class IsotropicOrdered(BaseModel):
         albedo : np.ndarray
             Ground albedo values
         """
+        # Need to update aoi measurement: input measured from normal,
+        # but functions require to measure it from surface horizontal
+        aoi_front = np.abs(90. - aoi_front_pvrow)
+        aoi_back = np.abs(90. - aoi_back_pvrow)
         # --- front
         self.faoi_front['direct'] = (
-            self.faoi_fn_front(aoi_front_pvrow)
+            self.faoi_fn_front(aoi_front)
             if self.faoi_fn_front is not None
             else (1. - self.rho_front) * np.ones_like(surface_tilt))
 
         # --- back
         self.faoi_back['direct'] = (
-            self.faoi_fn_back(aoi_back_pvrow)
+            self.faoi_fn_back(aoi_back)
             if self.faoi_fn_back is not None
             else (1. - self.rho_back) * np.ones_like(surface_tilt))
 
@@ -426,16 +430,18 @@ class HybridPerezOrdered(BaseModel):
             PV rows, and which determines how much direct light will reach the
             shaded ground through the PV rows
             (Default = 0., no spacing at all)
-        faoi_fn_front : function, optional
-            Function which takes a list (or numpy array) of incidence angles
+        faoi_fn_front : function or object, optional
+            Function (or object containing ``faoi`` method)
+            which takes a list (or numpy array) of incidence angles
             measured from the surface horizontal
             (with values from 0 to 180 deg) and returns the fAOI values for
-            the front side of PV rows (default=None)
-        faoi_fn_back : function, optional
-            Function which takes a list (or numpy array) of incidence angles
+            the front side of PV rows (default = None)
+        faoi_fn_back : function or object, optional
+            Function (or object containing ``faoi`` method)
+            which takes a list (or numpy array) of incidence angles
             measured from the surface horizontal
             (with values from 0 to 180 deg) and returns the fAOI values for
-            the back side of PV rows (default=None)
+            the back side of PV rows (default = None)
         """
         self.direct = dict.fromkeys(self.cats)
         self.circumsolar = dict.fromkeys(self.cats)
@@ -449,10 +455,16 @@ class HybridPerezOrdered(BaseModel):
         self.circumsolar_model = circumsolar_model
         self.rho_front = rho_front
         self.rho_back = rho_back
-        self.faoi_fn_front = faoi_fn_front
-        self.faoi_fn_back = faoi_fn_back
         self.module_transparency = module_transparency
         self.module_spacing_ratio = module_spacing_ratio
+        # Treatment of faoi functions
+        faoi_fn_front = (faoi_fn_front.faoi if hasattr(faoi_fn_front, 'faoi')
+                         else faoi_fn_front)
+        faoi_fn_back = (faoi_fn_back.faoi if hasattr(faoi_fn_back, 'faoi')
+                        else faoi_fn_back)
+        self.faoi_fn_front = faoi_fn_front
+        self.faoi_fn_back = faoi_fn_back
+        # Attributes that will be updated at fitting time
         self.albedo = None
         self.GHI = None
         self.DNI = None
@@ -1016,9 +1028,13 @@ class HybridPerezOrdered(BaseModel):
         albedo : np.ndarray
             Ground albedo values
         """
+        # Need to update aoi measurement: input measured from normal,
+        # but functions require to measure it from surface horizontal
+        aoi_front = np.abs(90. - aoi_front_pvrow)
+        aoi_back = np.abs(90. - aoi_back_pvrow)
         # --- front
         if self.faoi_fn_front is not None:
-            faoi_direct_rays = self.faoi_fn_front(aoi_front_pvrow)
+            faoi_direct_rays = self.faoi_fn_front(aoi_front)
             self.faoi_front['direct'] = faoi_direct_rays
             # Assume that circumsolar is just a point for this
             self.faoi_front['circumsolar'] = faoi_direct_rays
@@ -1033,7 +1049,7 @@ class HybridPerezOrdered(BaseModel):
 
         # --- back
         if self.faoi_fn_back is not None:
-            faoi_direct_rays = self.faoi_fn_back(aoi_back_pvrow)
+            faoi_direct_rays = self.faoi_fn_back(aoi_back)
             self.faoi_back['direct'] = faoi_direct_rays
             # Assume that circumsolar is just a point for this
             self.faoi_back['circumsolar'] = faoi_direct_rays

@@ -254,7 +254,7 @@ def test_run_timeseries_faoi_fn(params_serial, pvmodule_canadian,
         report_fn_with_tests_no_faoi, params_serial,
         timestamps, dni, dhi, solar_zenith, solar_azimuth, surface_tilt,
         surface_azimuth, params_serial['rho_ground'],
-        vf_calculator_params=None)
+        vf_calculator_params=None, irradiance_model_params=None)
 
     np.testing.assert_allclose(np.nansum(report['qinc_back']),
                                expected_qinc_back)
@@ -272,6 +272,8 @@ def test_run_timeseries_faoi_fn(params_serial, pvmodule_canadian,
     vf_calc_params = {'faoi_fn_front': faoi_fn,
                       'faoi_fn_back': faoi_fn,
                       'n_aoi_integral_sections': n_sections}
+    irr_params = {'faoi_fn_front': faoi_fn,
+                  'faoi_fn_back': faoi_fn}
 
     def report_fn_with_tests_w_faoi(pvarray):
         vf_aoi_matrix = pvarray.ts_vf_aoi_matrix
@@ -293,14 +295,15 @@ def test_run_timeseries_faoi_fn(params_serial, pvmodule_canadian,
         report_fn_with_tests_w_faoi, params_serial,
         timestamps, dni, dhi, solar_zenith, solar_azimuth, surface_tilt,
         surface_azimuth, params_serial['rho_ground'],
-        vf_calculator_params=vf_calc_params)
+        vf_calculator_params=vf_calc_params,
+        irradiance_model_params=irr_params)
 
     np.testing.assert_allclose(np.nansum(report['qinc_back']),
                                expected_qinc_back)
-    np.testing.assert_allclose(np.nansum(report['qabs_back']), 522.299276)
+    np.testing.assert_allclose(np.nansum(report['qabs_back']), 520.892016)
     np.testing.assert_allclose(np.nansum(report['qinc_front']),
                                expected_qinc_front)
-    np.testing.assert_allclose(np.nansum(report['qabs_front']), 5389.644557)
+    np.testing.assert_allclose(np.nansum(report['qabs_front']), 5347.050682)
 
 
 def test_run_parallel_faoi_fn(params_serial, df_inputs_clearsky_8760):
@@ -324,7 +327,8 @@ def test_run_parallel_faoi_fn(params_serial, df_inputs_clearsky_8760):
         TestFAOIReportBuilder, params_serial,
         timestamps, dni, dhi, solar_zenith, solar_azimuth, surface_tilt,
         surface_azimuth, params_serial['rho_ground'],
-        vf_calculator_params=None)
+        vf_calculator_params=None,
+        irradiance_model_params=None)
 
     np.testing.assert_allclose(np.nansum(report['qinc_back']),
                                expected_qinc_back)
@@ -340,20 +344,23 @@ def test_run_parallel_faoi_fn(params_serial, df_inputs_clearsky_8760):
     vf_calc_params = {'faoi_fn_front': FaoiClass,
                       'faoi_fn_back': FaoiClass,
                       'n_aoi_integral_sections': n_sections}
+    irr_params = {'faoi_fn_front': FaoiClass,
+                  'faoi_fn_back': FaoiClass}
 
     # create calculator
     report = run_parallel_engine(
         TestFAOIReportBuilder, params_serial,
         timestamps, dni, dhi, solar_zenith, solar_azimuth, surface_tilt,
         surface_azimuth, params_serial['rho_ground'],
-        vf_calculator_params=vf_calc_params)
+        vf_calculator_params=vf_calc_params,
+        irradiance_model_params=irr_params)
 
     np.testing.assert_allclose(np.nansum(report['qinc_back']),
                                expected_qinc_back)
-    np.testing.assert_allclose(np.nansum(report['qabs_back']), 522.299276)
+    np.testing.assert_allclose(np.nansum(report['qabs_back']), 520.892016)
     np.testing.assert_allclose(np.nansum(report['qinc_front']),
                                expected_qinc_front)
-    np.testing.assert_allclose(np.nansum(report['qabs_front']), 5389.644557)
+    np.testing.assert_allclose(np.nansum(report['qabs_front']), 5347.050682)
 
 
 class TestFAOIReportBuilder(object):
