@@ -40,9 +40,15 @@ class VFTsMethods(object):
             # Front side
             front = ts_pvrow.front
             for pvrow_surf in front.all_ts_surfaces:
+                if pvrow_surf.is_empty:
+                    # do no run calculation for this surface
+                    continue
                 ts_length = pvrow_surf.length
                 i = pvrow_surf.index
                 for gnd_surf in left_gnd_surfaces:
+                    if gnd_surf.is_empty:
+                        # do no run this calculation
+                        continue
                     j = gnd_surf.index
                     vf_pvrow_to_gnd, vf_gnd_to_pvrow = (
                         self.vf_pvrow_surf_to_gnd_surf_obstruction_hottel(
@@ -52,6 +58,9 @@ class VFTsMethods(object):
                     vf_matrix[i, j, :] = vf_pvrow_to_gnd
                     vf_matrix[j, i, :] = vf_gnd_to_pvrow
                 for gnd_surf in right_gnd_surfaces:
+                    if gnd_surf.is_empty:
+                        # do no run this calculation
+                        continue
                     j = gnd_surf.index
                     vf_pvrow_to_gnd, vf_gnd_to_pvrow = (
                         self.vf_pvrow_surf_to_gnd_surf_obstruction_hottel(
@@ -63,9 +72,15 @@ class VFTsMethods(object):
             # Back side
             back = ts_pvrow.back
             for pvrow_surf in back.all_ts_surfaces:
+                if pvrow_surf.is_empty:
+                    # do no run calculation for this surface
+                    continue
                 ts_length = pvrow_surf.length
                 i = pvrow_surf.index
                 for gnd_surf in left_gnd_surfaces:
+                    if gnd_surf.is_empty:
+                        # do no run this calculation
+                        continue
                     j = gnd_surf.index
                     vf_pvrow_to_gnd, vf_gnd_to_pvrow = (
                         self.vf_pvrow_surf_to_gnd_surf_obstruction_hottel(
@@ -75,6 +90,9 @@ class VFTsMethods(object):
                     vf_matrix[i, j, :] = vf_pvrow_to_gnd
                     vf_matrix[j, i, :] = vf_gnd_to_pvrow
                 for gnd_surf in right_gnd_surfaces:
+                    if gnd_surf.is_empty:
+                        # do no run this calculation
+                        continue
                     j = gnd_surf.index
                     vf_pvrow_to_gnd, vf_gnd_to_pvrow = (
                         self.vf_pvrow_surf_to_gnd_surf_obstruction_hottel(
@@ -185,9 +203,15 @@ class VFTsMethods(object):
             # front side
             front = ts_pvrow.front
             for surf_i in front.all_ts_surfaces:
+                if surf_i.is_empty:
+                    # do no run calculation for this surface
+                    continue
                 i = surf_i.index
                 length_i = surf_i.length
                 for surf_j in right_ts_pvrow.back.all_ts_surfaces:
+                    if surf_j.is_empty:
+                        # do no run calculation for this surface
+                        continue
                     j = surf_j.index
                     length_j = surf_j.length
                     vf_i_to_j = self._vf_surface_to_surface(
@@ -201,9 +225,15 @@ class VFTsMethods(object):
             # back side
             back = ts_pvrow.back
             for surf_i in back.all_ts_surfaces:
+                if surf_i.is_empty:
+                    # do no run calculation for this surface
+                    continue
                 i = surf_i.index
                 length_i = surf_i.length
                 for surf_j in right_ts_pvrow.front.all_ts_surfaces:
+                    if surf_j.is_empty:
+                        # do no run calculation for this surface
+                        continue
                     j = surf_j.index
                     length_j = surf_j.length
                     vf_i_to_j = self._vf_surface_to_surface(

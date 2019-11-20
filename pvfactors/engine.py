@@ -164,6 +164,9 @@ class PVEngine(object):
         # Add timeseries irradiance results to pvarray
         self.irradiance.transform(self.pvarray)
 
+        # Fit VF calculator
+        self.vf_calculator.fit(self.n_points)
+
         # Skip timesteps when:
         #    - solar zenith > 90, ie the sun is down
         #    - DNI or DHI is negative, which does not make sense
@@ -193,10 +196,10 @@ class PVEngine(object):
 
         # Get the irradiance modeling matrices
         # shape = n_surfaces, n_timesteps
-        irradiance_mat, _, invrho_mat, _ = \
+        irradiance_mat, rho_mat, invrho_mat, _ = \
             self.irradiance.get_full_ts_modeling_vectors(pvarray)
 
-        # Calculate view factors
+        # --- Calculate view factors
         # shape = n_surfaces, n_surfaces, n_timesteps
         ts_vf_matrix = self.vf_calculator.build_ts_vf_matrix(pvarray)
         pvarray.ts_vf_matrix = ts_vf_matrix
@@ -204,6 +207,7 @@ class PVEngine(object):
         # shape = n_timesteps, n_surfaces, n_surfaces
         ts_vf_matrix_reshaped = np.moveaxis(ts_vf_matrix, -1, 0)
 
+        # --- Solve mathematical problem
         # Build matrix of inverse reflectivities
         # shape = n_surfaces, n_surfaces
         invrho_mat = np.diag(invrho_mat[:, 0])
@@ -220,18 +224,32 @@ class PVEngine(object):
         # shape = n_surfaces, n_timesteps
         qinc = np.dot(invrho_mat, q0)
 
-        # Derive other irradiance terms
+        # --- Derive other irradiance terms
         # shape = n_surfaces, n_timesteps
         isotropic_mat = ts_vf_matrix[:-1, -1, :] * irradiance_mat[-1, :]
         reflection_mat = qinc[:-1, :] - irradiance_mat[:-1, :] - isotropic_mat
 
-        # Update surfaces with values: the list is ordered by index
+        # --- Calculate AOI losses and absorbed irradiance
+        rho_mat = np.tile(rho_mat[:, 0], (rho_mat.shape[0], 1)).T
+        # shape [n_surfaces + 1, n_surfaces + 1, n_timestamps]
+        vf_aoi_matrix = (self.vf_calculator
+                         .build_ts_vf_aoi_matrix(pvarray, rho_mat))
+        pvarray.ts_vf_aoi_matrix = vf_aoi_matrix
+        # shape [n_surfaces, n_surfaces]
+        irradiance_abs_mat = (
+            self.irradiance.get_summed_components(pvarray, absorbed=True))
+        # Calculate absorbed irradiance
+        qabs = (np.einsum('ijk,jk->ik', vf_aoi_matrix, q0)[:-1, :]
+                + irradiance_abs_mat)
+
+        # --- Update surfaces with values: the lists are ordered by index
         for idx_surf, ts_surface in enumerate(pvarray.all_ts_surfaces):
             ts_surface.update_params(
                 {'q0': q0[idx_surf, :],
                  'qinc': qinc[idx_surf, :],
                  'isotropic': isotropic_mat[idx_surf, :],
-                 'reflection': reflection_mat[idx_surf, :]})
+                 'reflection': reflection_mat[idx_surf, :],
+                 'qabs': qabs[idx_surf, :]})
 
         # Return report if function was passed
         report = None if fn_build_report is None else fn_build_report(pvarray)

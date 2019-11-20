@@ -249,6 +249,12 @@ class TsSurface(object):
                     np.array([-self.n_vector[1, :], self.n_vector[0, :]]))
         return u_vector
 
+    @property
+    def is_empty(self):
+        """Check if surface is "empty" by checking if its length is always
+        zero"""
+        return np.nansum(self.length) < DISTANCE_TOLERANCE
+
 
 class TsLineCoords(object):
     """Timeseries line coordinates class: will provide a helpful shapely-like

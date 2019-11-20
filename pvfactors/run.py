@@ -25,6 +25,7 @@ def run_timeseries_engine(fn_build_report, pvarray_parameters,
                           fast_mode_pvrow_index=None,
                           fast_mode_segment_index=None,
                           irradiance_model_params=None,
+                          vf_calculator_params=None,
                           ghi=None):
     """Run timeseries simulation without multiprocessing. This is the
     functional approach to the :py:class:`~pvfactors.engine.PVEngine` class.
@@ -77,6 +78,9 @@ def run_timeseries_engine(fn_build_report, pvarray_parameters,
     irradiance_model_params : dict, optional
         Dictionary of parameters that will be passed to the irradiance model
         class as kwargs at instantiation (Default = None)
+    vf_calculator_params : dict, optional
+        Dictionary of parameters that will be passed to the VF calculator
+        class as kwargs at instantiation (Default = None)
     ghi : array-like, optional
         Global horizontal irradiance values [W/m2] (Default = None)
 
@@ -87,18 +91,17 @@ def run_timeseries_engine(fn_build_report, pvarray_parameters,
         function
     """
 
-    # Prepare irradiance model inputs
-    irradiance_model_params = ({} if irradiance_model_params is None
-                               else irradiance_model_params)
+    # Prepare input parameters
+    irradiance_model_params = irradiance_model_params or {}
+    vf_calculator_params = vf_calculator_params or {}
     # Instantiate classes and engine
     irradiance_model = cls_irradiance(**irradiance_model_params)
+    vf_calculator = cls_vf(**vf_calculator_params)
     pvarray = cls_pvarray.init_from_dict(pvarray_parameters)
-    vf_calculator = cls_vf()
     eng = cls_engine(pvarray, irradiance_model=irradiance_model,
                      vf_calculator=vf_calculator,
                      fast_mode_pvrow_index=fast_mode_pvrow_index,
                      fast_mode_segment_index=fast_mode_segment_index)
-
     # Fit engine
     eng.fit(timestamps, dni, dhi, solar_zenith, solar_azimuth, surface_tilt,
             surface_azimuth, albedo, ghi=ghi)
@@ -118,7 +121,8 @@ def run_parallel_engine(report_builder, pvarray_parameters,
                         cls_irradiance=HybridPerezOrdered,
                         cls_vf=VFCalculator, fast_mode_pvrow_index=None,
                         fast_mode_segment_index=None,
-                        irradiance_model_params=None, n_processes=2,
+                        irradiance_model_params=None,
+                        vf_calculator_params=None, n_processes=2,
                         ghi=None):
     """Run timeseries simulation using multiprocessing. Here, instead of a
     function that will build the report, the users will need to pass a class
@@ -173,6 +177,9 @@ def run_parallel_engine(report_builder, pvarray_parameters,
     irradiance_model_params : dict, optional
         Dictionary of parameters that will be passed to the irradiance model
         class as kwargs at instantiation (Default = None)
+    vf_calculator_params : dict, optional
+        Dictionary of parameters that will be passed to the VF calculator
+        class as kwargs at instantiation (Default = None)
     n_processes : int, optional
         Number of parallel processes to run for the calculation (Default = 2)
     ghi : array-like, optional
@@ -192,9 +199,9 @@ def run_parallel_engine(report_builder, pvarray_parameters,
     if np.isscalar(albedo):
         albedo = albedo * np.ones(len(dni))
 
-    # Prepare irradiance model inputs
-    irradiance_model_params = ({} if irradiance_model_params is None
-                               else irradiance_model_params)
+    # Prepare class input parameters
+    irradiance_model_params = irradiance_model_params or {}
+    vf_calculator_params = vf_calculator_params or {}
 
     # Fix: np.array_split doesn't work well on pd.DatetimeIndex objects
     if isinstance(timestamps, pd.DatetimeIndex):
@@ -216,6 +223,7 @@ def run_parallel_engine(report_builder, pvarray_parameters,
     folds_fast_mode_pvrow_index = [fast_mode_pvrow_index] * n_processes
     folds_fast_mode_segment_index = [fast_mode_segment_index] * n_processes
     folds_irradiance_model_params = [irradiance_model_params] * n_processes
+    folds_vf_calculator_params = [vf_calculator_params] * n_processes
     folds_ghi = ([ghi] * n_processes if ghi is None else
                  np.array_split(ghi, n_processes))
     report_indices = list(range(n_processes))
@@ -228,7 +236,8 @@ def run_parallel_engine(report_builder, pvarray_parameters,
                        folds_cls_engine, folds_cls_irradiance, folds_cls_vf,
                        folds_fast_mode_pvrow_index,
                        folds_fast_mode_segment_index,
-                       folds_irradiance_model_params, folds_ghi,
+                       folds_irradiance_model_params,
+                       folds_vf_calculator_params, folds_ghi,
                        report_indices))
 
     # Start multiprocessing
@@ -272,7 +281,7 @@ def _run_serially(args):
         solar_zenith, solar_azimuth, surface_tilt, surface_azimuth,\
         albedo, cls_pvarray, cls_engine, cls_irradiance, cls_vf, \
         fast_mode_pvrow_index, fast_mode_segment_index, \
-        irradiance_model_params, ghi, idx = args
+        irradiance_model_params, vf_calculator_params, ghi, idx = args
 
     report = run_timeseries_engine(
         report_builder.build, pvarray_parameters,
@@ -283,6 +292,7 @@ def _run_serially(args):
         fast_mode_pvrow_index=fast_mode_pvrow_index,
         fast_mode_segment_index=fast_mode_segment_index,
         irradiance_model_params=irradiance_model_params,
+        vf_calculator_params=vf_calculator_params,
         ghi=ghi)
 
     return report, idx

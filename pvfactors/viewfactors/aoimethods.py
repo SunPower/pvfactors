@@ -294,31 +294,37 @@ class AOIMethods:
         is_back : bool
             Flag specifying whether pv row surface is on back or front side
             of PV row (Default = True)
+
         Returns
         -------
         vf_aoi : np.ndarray
             View factors with aoi losses from surface 1 to surface 2,
             dimension is [n_timesteps]
         """
-        # Get surface 1 params
-        u_vector = surf_1.u_vector
-        centroid = surf_1.centroid
-        # Calculate AOI angles
-        aoi_angles_1 = self._calculate_aoi_angles(u_vector, centroid,
-                                                  surf_2.b1)
-        aoi_angles_2 = self._calculate_aoi_angles(u_vector, centroid,
-                                                  surf_2.b2)
-        low_aoi_angles = np.where(aoi_angles_1 < aoi_angles_2, aoi_angles_1,
-                                  aoi_angles_2)
-        high_aoi_angles = np.where(aoi_angles_1 < aoi_angles_2, aoi_angles_2,
-                                   aoi_angles_1)
-        # Calculate vf_aoi
-        vf_aoi_raw = self._calculate_vf_aoi_wedge_level(
-            low_aoi_angles, high_aoi_angles, is_back=is_back)
-        # Should be zero where either of the surfaces have zero length
-        vf_aoi = np.where((surf_1.length < DISTANCE_TOLERANCE)
-                          | (surf_2.length < DISTANCE_TOLERANCE), 0.,
-                          vf_aoi_raw)
+        # skip calculation if either surface is empty (always zero length)
+        skip = surf_1.is_empty or surf_2.is_empty
+        if skip:
+            vf_aoi = np.zeros_like(surf_2.length)
+        else:
+            # Get surface 1 params
+            u_vector = surf_1.u_vector
+            centroid = surf_1.centroid
+            # Calculate AOI angles
+            aoi_angles_1 = self._calculate_aoi_angles(u_vector, centroid,
+                                                      surf_2.b1)
+            aoi_angles_2 = self._calculate_aoi_angles(u_vector, centroid,
+                                                      surf_2.b2)
+            low_aoi_angles = np.where(aoi_angles_1 < aoi_angles_2, aoi_angles_1,
+                                      aoi_angles_2)
+            high_aoi_angles = np.where(aoi_angles_1 < aoi_angles_2, aoi_angles_2,
+                                       aoi_angles_1)
+            # Calculate vf_aoi
+            vf_aoi_raw = self._calculate_vf_aoi_wedge_level(
+                low_aoi_angles, high_aoi_angles, is_back=is_back)
+            # Should be zero where either of the surfaces have zero length
+            vf_aoi = np.where((surf_1.length < DISTANCE_TOLERANCE)
+                              | (surf_2.length < DISTANCE_TOLERANCE), 0.,
+                              vf_aoi_raw)
         return vf_aoi
 
     def _vf_aoi_pvrow_surf_to_gnd_surf_obstruction(
@@ -363,45 +369,51 @@ class AOIMethods:
             View factors aoi from timeseries PV row surface to timeseries
             ground surface, dimension is [n_timesteps]
         """
-        centroid = pvrow_surf.centroid
-        u_vector = pvrow_surf.u_vector
-        no_obstruction = (is_left & (pvrow_idx == 0)) \
-            or ((not is_left) & (pvrow_idx == n_pvrows - 1))
-        if no_obstruction:
-            # There is no obstruction to the ground surface
-            aoi_angles_1 = self._calculate_aoi_angles(u_vector, centroid,
-                                                      gnd_surf.b1)
-            aoi_angles_2 = self._calculate_aoi_angles(u_vector, centroid,
-                                                      gnd_surf.b2)
+        # skip calculation if either surface is empty (always zero length)
+        skip = pvrow_surf.is_empty or gnd_surf.is_empty
+        if skip:
+            vf_aoi = np.zeros_like(gnd_surf.length)
         else:
-            # Get lowest point of obstructing point
-            idx_obstructing_pvrow = pvrow_idx - 1 if is_left else pvrow_idx + 1
-            pt_obstr = ts_pvrows[idx_obstructing_pvrow
-                                 ].full_pvrow_coords.lowest_point
-            # Adjust angle seen when there is obstruction
-            aoi_angles_1 = self._calculate_aoi_angles_w_obstruction(
-                u_vector, centroid, gnd_surf.b1, pt_obstr, is_left)
-            aoi_angles_2 = self._calculate_aoi_angles_w_obstruction(
-                u_vector, centroid, gnd_surf.b2, pt_obstr, is_left)
+            centroid = pvrow_surf.centroid
+            u_vector = pvrow_surf.u_vector
+            no_obstruction = (is_left & (pvrow_idx == 0)) \
+                or ((not is_left) & (pvrow_idx == n_pvrows - 1))
+            if no_obstruction:
+                # There is no obstruction to the ground surface
+                aoi_angles_1 = self._calculate_aoi_angles(u_vector, centroid,
+                                                          gnd_surf.b1)
+                aoi_angles_2 = self._calculate_aoi_angles(u_vector, centroid,
+                                                          gnd_surf.b2)
+            else:
+                # Get lowest point of obstructing point
+                idx_obstructing_pvrow = (pvrow_idx - 1 if is_left
+                                         else pvrow_idx + 1)
+                pt_obstr = ts_pvrows[idx_obstructing_pvrow
+                                     ].full_pvrow_coords.lowest_point
+                # Adjust angle seen when there is obstruction
+                aoi_angles_1 = self._calculate_aoi_angles_w_obstruction(
+                    u_vector, centroid, gnd_surf.b1, pt_obstr, is_left)
+                aoi_angles_2 = self._calculate_aoi_angles_w_obstruction(
+                    u_vector, centroid, gnd_surf.b2, pt_obstr, is_left)
 
-        low_aoi_angles = np.where(aoi_angles_1 < aoi_angles_2, aoi_angles_1,
-                                  aoi_angles_2)
-        high_aoi_angles = np.where(aoi_angles_1 < aoi_angles_2, aoi_angles_2,
-                                   aoi_angles_1)
-        vf_aoi_raw = self._calculate_vf_aoi_wedge_level(
-            low_aoi_angles, high_aoi_angles, is_back=is_back)
-        # Should be zero where either of the surfaces have zero length
-        vf_aoi_raw = np.where((ts_length < DISTANCE_TOLERANCE)
-                              | (gnd_surf.length < DISTANCE_TOLERANCE), 0.,
-                              vf_aoi_raw)
+            low_aoi_angles = np.where(aoi_angles_1 < aoi_angles_2,
+                                      aoi_angles_1, aoi_angles_2)
+            high_aoi_angles = np.where(aoi_angles_1 < aoi_angles_2,
+                                       aoi_angles_2, aoi_angles_1)
+            vf_aoi_raw = self._calculate_vf_aoi_wedge_level(
+                low_aoi_angles, high_aoi_angles, is_back=is_back)
+            # Should be zero where either of the surfaces have zero length
+            vf_aoi_raw = np.where((ts_length < DISTANCE_TOLERANCE)
+                                  | (gnd_surf.length < DISTANCE_TOLERANCE), 0.,
+                                  vf_aoi_raw)
 
-        # Final result depends on whether front or back surface
-        if is_left:
-            vf_aoi = (np.where(tilted_to_left, 0., vf_aoi_raw) if is_back
-                      else np.where(tilted_to_left, vf_aoi_raw, 0.))
-        else:
-            vf_aoi = (np.where(tilted_to_left, vf_aoi_raw, 0.) if is_back
-                      else np.where(tilted_to_left, 0., vf_aoi_raw))
+            # Final result depends on whether front or back surface
+            if is_left:
+                vf_aoi = (np.where(tilted_to_left, 0., vf_aoi_raw) if is_back
+                          else np.where(tilted_to_left, vf_aoi_raw, 0.))
+            else:
+                vf_aoi = (np.where(tilted_to_left, vf_aoi_raw, 0.) if is_back
+                          else np.where(tilted_to_left, 0., vf_aoi_raw))
 
         return vf_aoi
 
