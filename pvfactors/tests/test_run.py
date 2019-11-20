@@ -355,6 +355,7 @@ class TestFAOIReportBuilder(object):
 
 class FaoiClass(object):
 
+    @staticmethod
     def faoi(*args, **kwargs):
         fn = faoi_fn_from_pvlib_sandia('Canadian_Solar_CS5P_220M___2009_')
         return fn(*args, **kwargs)
