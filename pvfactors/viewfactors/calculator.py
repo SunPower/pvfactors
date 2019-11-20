@@ -20,13 +20,15 @@ class VFCalculator(object):
 
         Parameters
         ----------
-        faoi_fn_front : function, optional
-            Function which takes a list (or numpy array) of incidence angles
+        faoi_fn_front : function or object, optional
+            Function (or object containing ``faoi`` method)
+            which takes a list (or numpy array) of incidence angles
             measured from the surface horizontal
             (with values from 0 to 180 deg) and returns the fAOI values for
             the front side of PV rows (default = None)
-        faoi_fn_back : function, optional
-            Function which takes a list (or numpy array) of incidence angles
+        faoi_fn_back : function or object, optional
+            Function (or object containing ``faoi`` method)
+            which takes a list (or numpy array) of incidence angles
             measured from the surface horizontal
             (with values from 0 to 180 deg) and returns the fAOI values for
             the back side of PV rows (default = None)
@@ -39,6 +41,13 @@ class VFCalculator(object):
         if (faoi_fn_front is None) or (faoi_fn_back is None):
             self.vf_aoi_methods = None
         else:
+            # Check whether got function or object, and take ``faoi`` method
+            # if object was passed
+            faoi_fn_front = (faoi_fn_front.faoi
+                             if hasattr(faoi_fn_front, 'faoi')
+                             else faoi_fn_front)
+            faoi_fn_back = (faoi_fn_back.faoi
+                            if hasattr(faoi_fn_back, 'faoi') else faoi_fn_back)
             self.vf_aoi_methods = AOIMethods(
                 faoi_fn_front, faoi_fn_back,
                 n_integral_sections=n_aoi_integral_sections)

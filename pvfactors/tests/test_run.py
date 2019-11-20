@@ -291,9 +291,8 @@ def test_run_timeseries_faoi_fn(params_serial, pvmodule_canadian,
     np.testing.assert_allclose(np.nansum(report['qabs_back']), 522.299276)
 
 
-def test_run_parallel_faoi_fn(params_serial, pvmodule_canadian,
-                              df_inputs_clearsky_8760):
-    """Test that in run_timeseries function, faoi functions are used
+def test_run_parallel_faoi_fn(params_serial, df_inputs_clearsky_8760):
+    """Test that in run_parallel function, faoi functions are used
     correctly"""
     # Prepare timeseries inputs
     df_inputs = df_inputs_clearsky_8760.iloc[:24, :]
@@ -317,13 +316,11 @@ def test_run_parallel_faoi_fn(params_serial, pvmodule_canadian,
     np.testing.assert_allclose(np.nansum(report['qabs_back']), 525.757995)
 
     # --- Test when passing vf parameters
-    # Prepare vf calc params
-    faoi_fn = faoi_fn_from_pvlib_sandia(pvmodule_canadian)
     # the following is a very high number to get agreement in
     # integral sums between back and front surfaces
     n_sections = 10000
-    vf_calc_params = {'faoi_fn_front': faoi_fn,
-                      'faoi_fn_back': faoi_fn,
+    vf_calc_params = {'faoi_fn_front': FaoiClass,
+                      'faoi_fn_back': FaoiClass,
                       'n_aoi_integral_sections': n_sections}
 
     # create calculator
@@ -348,11 +345,16 @@ class TestFAOIReportBuilder(object):
 
     @staticmethod
     def merge(reports):
-
         report = reports[0]
         keys = report.keys()
         for other_report in reports[1:]:
             for key in keys:
                 report[key] += other_report[key]
-
         return report
+
+
+class FaoiClass(object):
+
+    def faoi(*args, **kwargs):
+        fn = faoi_fn_from_pvlib_sandia('Canadian_Solar_CS5P_220M___2009_')
+        return fn(*args, **kwargs)
