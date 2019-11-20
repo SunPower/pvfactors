@@ -1,7 +1,6 @@
 from pvfactors.run import run_timeseries_engine, run_parallel_engine
 from pvfactors.report import ExampleReportBuilder
 from pvfactors.viewfactors.aoimethods import faoi_fn_from_pvlib_sandia
-from pvfactors.viewfactors.calculator import VFCalculator
 import numpy as np
 import mock
 

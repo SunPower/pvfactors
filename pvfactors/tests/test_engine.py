@@ -574,7 +574,7 @@ def test_create_engine_with_rho_init(params, pvmodule_canadian):
     np.testing.assert_allclose(engine.irradiance.rho_back, 0.02900688)
 
 
-def test_create_engine_with_rho_init(params, pvmodule_canadian):
+def test_engine_w_faoi_fn_in_irradiance_vfcalcs(params, pvmodule_canadian):
     """Run PV engine calcs with faoi functions for AOI losses"""
 
     # Irradiance inputs
@@ -582,10 +582,14 @@ def test_create_engine_with_rho_init(params, pvmodule_canadian):
     DNI = 1000.
     DHI = 100.
 
-    irradiance_model = HybridPerezOrdered()
     pvarray = OrderedPVArray.init_from_dict(params)
+    # create faoi function
     faoi_fn = faoi_fn_from_pvlib_sandia(pvmodule_canadian)
+    # create vf_calculator with faoi function
     vfcalculator = VFCalculator(faoi_fn_front=faoi_fn, faoi_fn_back=faoi_fn)
+    # create irradiance model with faoi function
+    irradiance_model = HybridPerezOrdered(faoi_fn_front=faoi_fn,
+                                          faoi_fn_back=faoi_fn)
     eng = PVEngine(pvarray, irradiance_model=irradiance_model,
                    vf_calculator=vfcalculator)
 
@@ -616,7 +620,7 @@ def test_create_engine_with_rho_init(params, pvmodule_canadian):
     # Check absorbed irradiance: calculated using faoi functions
     np.testing.assert_almost_equal(
         pvarray.ts_pvrows[2].front.get_param_weighted('qabs'),
-        [1099.1251094])
+        [1109.1180884])
     np.testing.assert_almost_equal(
         pvarray.ts_pvrows[1].back.get_param_weighted('qabs'),
-        [114.4690984])
+        [114.2143503])
