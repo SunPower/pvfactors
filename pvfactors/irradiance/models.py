@@ -46,16 +46,18 @@ class IsotropicOrdered(BaseModel):
             PV rows, and which determines how much direct light will reach the
             shaded ground through the PV rows
             (Default = 0., no spacing at all)
-        faoi_fn_front : function, optional
-            Function which takes a list (or numpy array) of incidence angles
+        faoi_fn_front : function or object, optional
+            Function (or object containing ``faoi`` method)
+            which takes a list (or numpy array) of incidence angles
             measured from the surface horizontal
             (with values from 0 to 180 deg) and returns the fAOI values for
-            the front side of PV rows (default=None)
-        faoi_fn_back : function, optional
-            Function which takes a list (or numpy array) of incidence angles
+            the front side of PV rows (default = None)
+        faoi_fn_back : function or object, optional
+            Function (or object containing ``faoi`` method)
+            which takes a list (or numpy array) of incidence angles
             measured from the surface horizontal
             (with values from 0 to 180 deg) and returns the fAOI values for
-            the back side of PV rows (default=None)
+            the back side of PV rows (default = None)
         """
         self.direct = dict.fromkeys(self.cats)
         self.total_perez = dict.fromkeys(self.cats)
@@ -66,9 +68,13 @@ class IsotropicOrdered(BaseModel):
         self.module_spacing_ratio = module_spacing_ratio
         self.rho_front = rho_front
         self.rho_back = rho_back
+        # Treatment of faoi functions
+        faoi_fn_front = (faoi_fn_front.faoi if hasattr(faoi_fn_front, 'faoi')
+                         else faoi_fn_front)
+        faoi_fn_back = (faoi_fn_back.faoi if hasattr(faoi_fn_back, 'faoi')
+                        else faoi_fn_back)
         self.faoi_fn_front = faoi_fn_front
         self.faoi_fn_back = faoi_fn_back
-
         # The following will be updated at fitting time
         self.albedo = None
         self.GHI = None
