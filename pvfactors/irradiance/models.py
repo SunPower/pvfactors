@@ -61,8 +61,8 @@ class IsotropicOrdered(BaseModel):
         """
         self.direct = dict.fromkeys(self.cats)
         self.total_perez = dict.fromkeys(self.cats)
-        self.faoi_front = dict.fromkeys(self.cats)
-        self.faoi_back = dict.fromkeys(self.cats)
+        self.faoi_front = dict.fromkeys(self.irradiance_comp)
+        self.faoi_back = dict.fromkeys(self.irradiance_comp)
         self.faoi_ground = None
         self.module_transparency = module_transparency
         self.module_spacing_ratio = module_spacing_ratio
@@ -453,8 +453,8 @@ class HybridPerezOrdered(BaseModel):
         self.circumsolar = dict.fromkeys(self.cats)
         self.horizon = dict.fromkeys(self.cats)
         self.total_perez = dict.fromkeys(self.cats)
-        self.faoi_front = dict.fromkeys(self.cats)
-        self.faoi_back = dict.fromkeys(self.cats)
+        self.faoi_front = dict.fromkeys(self.irradiance_comp)
+        self.faoi_back = dict.fromkeys(self.irradiance_comp)
         self.faoi_ground = None
         self.horizon_band_angle = horizon_band_angle
         self.circumsolar_angle = circumsolar_angle
