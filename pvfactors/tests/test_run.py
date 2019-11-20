@@ -228,7 +228,8 @@ def test_run_timeseries_faoi_fn(params_serial, pvmodule_canadian,
     surface_tilt = df_inputs.surface_tilt.values
     surface_azimuth = df_inputs.surface_azimuth.values
 
-    expected_qinc = 542.018551
+    expected_qinc_back = 542.018551
+    expected_qinc_front = 5452.858863
 
     # --- Test without passing vf parameters
     # report function with test in it
@@ -243,7 +244,9 @@ def test_run_timeseries_faoi_fn(params_serial, pvmodule_canadian,
             vf_aoi_matrix[list_back_pvrow_idx, :, 12].sum(axis=1),
             [0.99, 0., 0.97, 0.])
 
-        return {'qinc_back': pvrow.back.get_param_weighted('qinc'),
+        return {'qinc_front': pvrow.front.get_param_weighted('qinc'),
+                'qabs_front': pvrow.front.get_param_weighted('qabs'),
+                'qinc_back': pvrow.back.get_param_weighted('qinc'),
                 'qabs_back': pvrow.back.get_param_weighted('qabs')}
 
     # create calculator
@@ -253,8 +256,12 @@ def test_run_timeseries_faoi_fn(params_serial, pvmodule_canadian,
         surface_azimuth, params_serial['rho_ground'],
         vf_calculator_params=None)
 
-    np.testing.assert_allclose(np.nansum(report['qinc_back']), expected_qinc)
+    np.testing.assert_allclose(np.nansum(report['qinc_back']),
+                               expected_qinc_back)
     np.testing.assert_allclose(np.nansum(report['qabs_back']), 525.757995)
+    np.testing.assert_allclose(np.nansum(report['qinc_front']),
+                               expected_qinc_front)
+    np.testing.assert_allclose(np.nansum(report['qabs_front']), 5398.330275)
 
     # --- Test when passing vf parameters
     # Prepare vf calc params
@@ -277,7 +284,9 @@ def test_run_timeseries_faoi_fn(params_serial, pvmodule_canadian,
             vf_aoi_matrix[list_back_pvrow_idx, :, 12].sum(axis=1),
             [0.97102, 0., 0.971548, 0.], atol=0, rtol=1e-6)
 
-        return {'qinc_back': pvrow.back.get_param_weighted('qinc'),
+        return {'qinc_front': pvrow.front.get_param_weighted('qinc'),
+                'qabs_front': pvrow.front.get_param_weighted('qabs'),
+                'qinc_back': pvrow.back.get_param_weighted('qinc'),
                 'qabs_back': pvrow.back.get_param_weighted('qabs')}
     # create calculator
     report = run_timeseries_engine(
@@ -286,8 +295,12 @@ def test_run_timeseries_faoi_fn(params_serial, pvmodule_canadian,
         surface_azimuth, params_serial['rho_ground'],
         vf_calculator_params=vf_calc_params)
 
-    np.testing.assert_allclose(np.nansum(report['qinc_back']), expected_qinc)
+    np.testing.assert_allclose(np.nansum(report['qinc_back']),
+                               expected_qinc_back)
     np.testing.assert_allclose(np.nansum(report['qabs_back']), 522.299276)
+    np.testing.assert_allclose(np.nansum(report['qinc_front']),
+                               expected_qinc_front)
+    np.testing.assert_allclose(np.nansum(report['qabs_front']), 5389.644557)
 
 
 def test_run_parallel_faoi_fn(params_serial, df_inputs_clearsky_8760):
@@ -303,7 +316,9 @@ def test_run_parallel_faoi_fn(params_serial, df_inputs_clearsky_8760):
     surface_tilt = df_inputs.surface_tilt.values
     surface_azimuth = df_inputs.surface_azimuth.values
 
-    expected_qinc = 542.018551
+    expected_qinc_back = 542.018551
+    expected_qinc_front = 5452.858863
+
     # create calculator
     report = run_parallel_engine(
         TestFAOIReportBuilder, params_serial,
@@ -311,8 +326,12 @@ def test_run_parallel_faoi_fn(params_serial, df_inputs_clearsky_8760):
         surface_azimuth, params_serial['rho_ground'],
         vf_calculator_params=None)
 
-    np.testing.assert_allclose(np.nansum(report['qinc_back']), expected_qinc)
+    np.testing.assert_allclose(np.nansum(report['qinc_back']),
+                               expected_qinc_back)
     np.testing.assert_allclose(np.nansum(report['qabs_back']), 525.757995)
+    np.testing.assert_allclose(np.nansum(report['qinc_front']),
+                               expected_qinc_front)
+    np.testing.assert_allclose(np.nansum(report['qabs_front']), 5398.330275)
 
     # --- Test when passing vf parameters
     # the following is a very high number to get agreement in
@@ -329,18 +348,23 @@ def test_run_parallel_faoi_fn(params_serial, df_inputs_clearsky_8760):
         surface_azimuth, params_serial['rho_ground'],
         vf_calculator_params=vf_calc_params)
 
-    np.testing.assert_allclose(np.nansum(report['qinc_back']), expected_qinc)
+    np.testing.assert_allclose(np.nansum(report['qinc_back']),
+                               expected_qinc_back)
     np.testing.assert_allclose(np.nansum(report['qabs_back']), 522.299276)
+    np.testing.assert_allclose(np.nansum(report['qinc_front']),
+                               expected_qinc_front)
+    np.testing.assert_allclose(np.nansum(report['qabs_front']), 5389.644557)
 
 
 class TestFAOIReportBuilder(object):
 
     @staticmethod
     def build(pvarray):
-        return {'qinc_back': pvarray.ts_pvrows[0].back
-                .get_param_weighted('qinc').tolist(),
-                'qabs_back': pvarray.ts_pvrows[0].back
-                .get_param_weighted('qabs').tolist()}
+        pvrow = pvarray.ts_pvrows[0]
+        return {'qinc_front': pvrow.front.get_param_weighted('qinc').tolist(),
+                'qabs_front': pvrow.front.get_param_weighted('qabs').tolist(),
+                'qinc_back': pvrow.back.get_param_weighted('qinc').tolist(),
+                'qabs_back': pvrow.back.get_param_weighted('qabs').tolist()}
 
     @staticmethod
     def merge(reports):
