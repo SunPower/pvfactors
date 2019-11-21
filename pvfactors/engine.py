@@ -235,7 +235,7 @@ class PVEngine(object):
         vf_aoi_matrix = (self.vf_calculator
                          .build_ts_vf_aoi_matrix(pvarray, rho_mat))
         pvarray.ts_vf_aoi_matrix = vf_aoi_matrix
-        # shape [n_surfaces, n_surfaces]
+        # shape [n_surfaces, n_timestamps]
         irradiance_abs_mat = (
             self.irradiance.get_summed_components(pvarray, absorbed=True))
         # Calculate absorbed irradiance
