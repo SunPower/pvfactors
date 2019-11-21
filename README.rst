@@ -141,7 +141,8 @@ The users can also create a "report" while running the simulations that will rel
 .. code:: python
 
     # Create a function that will build a report
-    def fn_report(pvarray): return {'qinc_back': pvarray.ts_pvrows[1].back.get_param_weighted('qinc')}
+    def fn_report(pvarray): return {'total_incident_back': pvarray.ts_pvrows[1].back.get_param_weighted('qinc'),
+                                    'total_absorbed_back': pvarray.ts_pvrows[1].back.get_param_weighted('qabs')}
 
     # Run full mode simulation
     report = engine.run_full_mode(fn_build_report=fn_report)
@@ -151,13 +152,13 @@ The users can also create a "report" while running the simulations that will rel
     df_report
 
 
-+---------------------+------------+
-|                     | qinc_back  |
-+=====================+============+
-| 2017-08-31 11:00:00 | 106.627832 |
-+---------------------+------------+
-| 2017-08-31 15:00:00 | 79.668878  |
-+---------------------+------------+
++---------------------+---------------------+---------------------+
+|                     | total_incident_back | total_absorbed_back |
++=====================+=====================+=====================+
+| 2017-08-31 11:00:00 |          106.627832 |          103.428997 |
++---------------------+---------------------+---------------------+
+| 2017-08-31 15:00:00 |          79.668878  |           77.278812 |
++---------------------+---------------------+---------------------+
 
 
 
