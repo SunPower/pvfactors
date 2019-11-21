@@ -1,0 +1,22 @@
+.. _whatsnew_1400:
+
+v1.4.0 (November 21, 2019)
+==========================
+
+Enhancements
+------------
+
+pvfactors can now account for AOI losses by either using constant diffuse losses, are by using an fAOI function that will provide the corresponding loss for each value of angle of incidence.
+
+* Test for continuity of results with direct shading (#91)
+* Implement non-diffuse AOI loss methods (#92)
+* Implement fAOI modifiers for irradiance models (#93)
+* Merge new AOI methods into full mode workflow (#94)
+* Include fAOI losses from irradiance models in tests (#95)
+* Update docs for AOI methods (#96)
+
+
+Contributors
+------------
+
+* Marc Anoma (:ghuser:`anomam`)
