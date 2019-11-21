@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>pvfactors.viewfactors.calculator.VFCalculator &mdash; pvfactors 1.3.0 documentation</title>
+  <title>pvfactors.viewfactors.calculator.VFCalculator &mdash; pvfactors 1.4.0 documentation</title>
   
 
   
@@ -40,7 +40,7 @@
   <link rel="stylesheet" href="../../_static/css/custom.css" type="text/css" />
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="pvfactors.viewfactors.methods.VFTsMethods" href="pvfactors.viewfactors.methods.VFTsMethods.html" />
+    <link rel="next" title="pvfactors.viewfactors.vfmethods.VFTsMethods" href="pvfactors.viewfactors.vfmethods.VFTsMethods.html" />
     <link rel="prev" title="pvfactors.geometry.timeseries.TsPointCoords" href="pvfactors.geometry.timeseries.TsPointCoords.html" /> 
 </head>
 
@@ -68,7 +68,7 @@
             
             
               <div class="version">
-                1.3.0
+                1.4.0
               </div>
             
           
@@ -198,17 +198,33 @@
 <h1>pvfactors.viewfactors.calculator.VFCalculator<a class="headerlink" href="#pvfactors-viewfactors-calculator-vfcalculator" title="Permalink to this headline">¶</a></h1>
 <dl class="class">
 <dt id="pvfactors.viewfactors.calculator.VFCalculator">
-<em class="property">class </em><code class="sig-prename descclassname">pvfactors.viewfactors.calculator.</code><code class="sig-name descname">VFCalculator</code><span class="sig-paren">(</span><em class="sig-param">vf_ts_methods=None</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pvfactors/viewfactors/calculator.html#VFCalculator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pvfactors.viewfactors.calculator.VFCalculator" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">pvfactors.viewfactors.calculator.</code><code class="sig-name descname">VFCalculator</code><span class="sig-paren">(</span><em class="sig-param">faoi_fn_front=None</em>, <em class="sig-param">faoi_fn_back=None</em>, <em class="sig-param">n_aoi_integral_sections=300</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pvfactors/viewfactors/calculator.html#VFCalculator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pvfactors.viewfactors.calculator.VFCalculator" title="Permalink to this definition">¶</a></dt>
 <dd><p>This calculator class will be used for the calculation of view factors
-for PV arrays</p>
+for <a class="reference internal" href="pvfactors.geometry.pvarray.OrderedPVArray.html#pvfactors.geometry.pvarray.OrderedPVArray" title="pvfactors.geometry.pvarray.OrderedPVArray"><code class="xref py py-class docutils literal notranslate"><span class="pre">OrderedPVArray</span></code></a>, and it will
+rely on both <a class="reference internal" href="pvfactors.viewfactors.vfmethods.VFTsMethods.html#pvfactors.viewfactors.vfmethods.VFTsMethods" title="pvfactors.viewfactors.vfmethods.VFTsMethods"><code class="xref py py-class docutils literal notranslate"><span class="pre">VFTsMethods</span></code></a>
+and <a class="reference internal" href="pvfactors.viewfactors.aoimethods.AOIMethods.html#pvfactors.viewfactors.aoimethods.AOIMethods" title="pvfactors.viewfactors.aoimethods.AOIMethods"><code class="xref py py-class docutils literal notranslate"><span class="pre">AOIMethods</span></code></a></p>
 <dl class="method">
 <dt id="pvfactors.viewfactors.calculator.VFCalculator.__init__">
-<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param">vf_ts_methods=None</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pvfactors/viewfactors/calculator.html#VFCalculator.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pvfactors.viewfactors.calculator.VFCalculator.__init__" title="Permalink to this definition">¶</a></dt>
-<dd><p>Initialize the view factor mapper that will be used.</p>
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param">faoi_fn_front=None</em>, <em class="sig-param">faoi_fn_back=None</em>, <em class="sig-param">n_aoi_integral_sections=300</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pvfactors/viewfactors/calculator.html#VFCalculator.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pvfactors.viewfactors.calculator.VFCalculator.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize the view factor calculator with the calculation methods
+that will be used. The AOI methods will not be instantiated if an
+fAOI function is missing.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>vf_ts_methods</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">VFTsMethods</span></code> object) – Object with methods to calculate timeseries view factors for the
-fast mode (Default = None)</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>faoi_fn_front</strong> (<em>function</em><em> or </em><em>object</em><em>, </em><em>optional</em>) – Function (or object containing <code class="docutils literal notranslate"><span class="pre">faoi</span></code> method)
+which takes a list (or numpy array) of incidence angles
+measured from the surface horizontal
+(with values from 0 to 180 deg) and returns the fAOI values for
+the front side of PV rows (default = None)</p></li>
+<li><p><strong>faoi_fn_back</strong> (<em>function</em><em> or </em><em>object</em><em>, </em><em>optional</em>) – Function (or object containing <code class="docutils literal notranslate"><span class="pre">faoi</span></code> method)
+which takes a list (or numpy array) of incidence angles
+measured from the surface horizontal
+(with values from 0 to 180 deg) and returns the fAOI values for
+the back side of PV rows (default = None)</p></li>
+<li><p><strong>n_integral_sections</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of integral divisions of the 0 to 180 deg interval
+to use for the fAOI loss integral (default = 300)</p></li>
+</ul>
 </dd>
 </dl>
 </dd></dl>
@@ -220,11 +236,17 @@ fast mode (Default = None)</p>
 <col style="width: 90%" />
 </colgroup>
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#pvfactors.viewfactors.calculator.VFCalculator.__init__" title="pvfactors.viewfactors.calculator.VFCalculator.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>([vf_ts_methods])</p></td>
-<td><p>Initialize the view factor mapper that will be used.</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pvfactors.viewfactors.calculator.VFCalculator.__init__" title="pvfactors.viewfactors.calculator.VFCalculator.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>([faoi_fn_front, faoi_fn_back, …])</p></td>
+<td><p>Initialize the view factor calculator with the calculation methods that will be used.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">build_ts_vf_matrix</span></code>(pvarray)</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">build_ts_vf_aoi_matrix</span></code>(pvarray, rho_mat)</p></td>
+<td><p>Calculate the view factor aoi matrix elements from all PV row surfaces to all other surfaces, only.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">build_ts_vf_matrix</span></code>(pvarray)</p></td>
 <td><p>Calculate timeseries view factor matrix for the given ordered pv array</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">fit</span></code>(n_timestamps)</p></td>
+<td><p>Fit the view factor calculator to the timeseries inputs.</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_vf_ts_pvrow_element</span></code>(pvrow_idx, …)</p></td>
 <td><p>Calculate timeseries view factors of timeseries pvrow element (segment or surface) to all other elements of the PV array.</p></td>
@@ -243,7 +265,7 @@ fast mode (Default = None)</p>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="pvfactors.viewfactors.methods.VFTsMethods.html" class="btn btn-neutral float-right" title="pvfactors.viewfactors.methods.VFTsMethods" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="pvfactors.viewfactors.vfmethods.VFTsMethods.html" class="btn btn-neutral float-right" title="pvfactors.viewfactors.vfmethods.VFTsMethods" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="pvfactors.geometry.timeseries.TsPointCoords.html" class="btn btn-neutral float-left" title="pvfactors.geometry.timeseries.TsPointCoords" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>

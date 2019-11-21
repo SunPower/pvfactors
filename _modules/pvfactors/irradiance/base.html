@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>pvfactors.irradiance.base &mdash; pvfactors 1.3.0 documentation</title>
+  <title>pvfactors.irradiance.base &mdash; pvfactors 1.4.0 documentation</title>
   
 
   
@@ -66,7 +66,7 @@
             
             
               <div class="version">
-                1.3.0
+                1.4.0
               </div>
             
           
@@ -171,10 +171,6 @@
     <span class="n">cats</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">irradiance_comp</span> <span class="o">=</span> <span class="kc">None</span>
 
-<div class="viewcode-block" id="BaseModel.__init__"><a class="viewcode-back" href="../../../developer/generated/pvfactors.irradiance.base.BaseModel.html#pvfactors.irradiance.base.BaseModel.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Not implemented&quot;&quot;&quot;</span>
-        <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
-
     <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Not implemented&quot;&quot;&quot;</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span>
@@ -257,6 +253,35 @@
 
         <span class="k">return</span> <span class="n">irradiance_mat</span><span class="p">,</span> <span class="n">rho_mat</span><span class="p">,</span> <span class="n">invrho_mat</span><span class="p">,</span> <span class="n">total_perez_mat</span>
 
+    <span class="k">def</span> <span class="nf">get_summed_components</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pvarray</span><span class="p">,</span> <span class="n">absorbed</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get sum of irradiance components for irradiance model,</span>
+<span class="sd">        either absorbed or only incident.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        pvarray : PV array object</span>
+<span class="sd">            PV array with the irradiance and reflectivity values</span>
+<span class="sd">        absorbed : bool, optional</span>
+<span class="sd">            Flag to decide whether to use the absorbed components are not</span>
+<span class="sd">            (default = True)</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        irradiance_mat : list</span>
+<span class="sd">            Matrix of summed up non-reflective irradiance values for all</span>
+<span class="sd">            timeseries surfaces. Dimension = [n_surfaces, n_timesteps]&quot;&quot;&quot;</span>
+        <span class="c1"># Initialize</span>
+        <span class="n">list_components</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">irradiance_comp_absorbed</span> <span class="k">if</span> <span class="n">absorbed</span>
+                           <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">irradiance_comp</span><span class="p">)</span>
+        <span class="c1"># Build list</span>
+        <span class="n">irradiance_mat</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">ts_surface</span> <span class="ow">in</span> <span class="n">pvarray</span><span class="o">.</span><span class="n">all_ts_surfaces</span><span class="p">:</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">pvarray</span><span class="o">.</span><span class="n">n_states</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">component</span> <span class="ow">in</span> <span class="n">list_components</span><span class="p">:</span>
+                <span class="n">value</span> <span class="o">+=</span> <span class="n">ts_surface</span><span class="o">.</span><span class="n">get_param</span><span class="p">(</span><span class="n">component</span><span class="p">)</span>
+            <span class="n">irradiance_mat</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">irradiance_mat</span><span class="p">)</span>
+
     <span class="k">def</span> <span class="nf">update_ts_surface_sky_term</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ts_surface</span><span class="p">,</span> <span class="n">name_sky_term</span><span class="o">=</span><span class="s1">&#39;sky_term&#39;</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Update the &#39;sky_term&#39; parameter of a timeseries surface.</span>
 
@@ -271,7 +296,35 @@
         <span class="n">value</span> <span class="o">=</span> <span class="mf">0.</span>
         <span class="k">for</span> <span class="n">component</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">irradiance_comp</span><span class="p">:</span>
             <span class="n">value</span> <span class="o">+=</span> <span class="n">ts_surface</span><span class="o">.</span><span class="n">get_param</span><span class="p">(</span><span class="n">component</span><span class="p">)</span>
-        <span class="n">ts_surface</span><span class="o">.</span><span class="n">update_params</span><span class="p">({</span><span class="n">name_sky_term</span><span class="p">:</span> <span class="n">value</span><span class="p">})</span></div>
+        <span class="n">ts_surface</span><span class="o">.</span><span class="n">update_params</span><span class="p">({</span><span class="n">name_sky_term</span><span class="p">:</span> <span class="n">value</span><span class="p">})</span>
+
+    <span class="k">def</span> <span class="nf">initialize_rho</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rho_scalar</span><span class="p">,</span> <span class="n">rho_calculated</span><span class="p">,</span> <span class="n">default_value</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Initialize reflectivity value:</span>
+<span class="sd">        - if a scalar value is passed, use it</span>
+<span class="sd">        - otherwise try to use calculated value</span>
+<span class="sd">        - else use default value</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        rho_scalar : float</span>
+<span class="sd">            Global average reflectivity value that is supposed to be used</span>
+<span class="sd">        rho_calculated : float</span>
+<span class="sd">            Reflectivity value calculated</span>
+<span class="sd">        default_value : float</span>
+<span class="sd">            Default value to use if everything fails</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        rho_scalar : float</span>
+<span class="sd">            Global average reflectivity</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isscalar</span><span class="p">(</span><span class="n">rho_scalar</span><span class="p">):</span>
+            <span class="n">rho_scalar</span> <span class="o">=</span> <span class="n">rho_scalar</span>
+        <span class="k">elif</span> <span class="n">np</span><span class="o">.</span><span class="n">isscalar</span><span class="p">(</span><span class="n">rho_calculated</span><span class="p">):</span>
+            <span class="n">rho_scalar</span> <span class="o">=</span> <span class="n">rho_calculated</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">rho_scalar</span> <span class="o">=</span> <span class="n">default_value</span>
+        <span class="k">return</span> <span class="n">rho_scalar</span></div>
 </pre></div>
 
            </div>

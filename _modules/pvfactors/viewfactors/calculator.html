@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>pvfactors.viewfactors.calculator &mdash; pvfactors 1.3.0 documentation</title>
+  <title>pvfactors.viewfactors.calculator &mdash; pvfactors 1.4.0 documentation</title>
   
 
   
@@ -66,7 +66,7 @@
             
             
               <div class="version">
-                1.3.0
+                1.4.0
               </div>
             
           
@@ -163,24 +163,70 @@
 <span></span><span class="sd">&quot;&quot;&quot;Module with classes and functions to calculate views and view factors&quot;&quot;&quot;</span>
 
 <span class="kn">from</span> <span class="nn">pvfactors.config</span> <span class="k">import</span> <span class="n">DISTANCE_TOLERANCE</span>
-<span class="kn">from</span> <span class="nn">pvfactors.viewfactors.methods</span> <span class="k">import</span> <span class="n">VFTsMethods</span>
+<span class="kn">from</span> <span class="nn">pvfactors.viewfactors.vfmethods</span> <span class="k">import</span> <span class="n">VFTsMethods</span>
+<span class="kn">from</span> <span class="nn">pvfactors.viewfactors.aoimethods</span> <span class="k">import</span> <span class="n">AOIMethods</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
 
 <div class="viewcode-block" id="VFCalculator"><a class="viewcode-back" href="../../../developer/generated/pvfactors.viewfactors.calculator.VFCalculator.html#pvfactors.viewfactors.calculator.VFCalculator">[docs]</a><span class="k">class</span> <span class="nc">VFCalculator</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;This calculator class will be used for the calculation of view factors</span>
-<span class="sd">    for PV arrays&quot;&quot;&quot;</span>
+<span class="sd">    for :py:class:`~pvfactors.geometry.pvarray.OrderedPVArray`, and it will</span>
+<span class="sd">    rely on both :py:class:`~pvfactors.viewfactors.vfmethods.VFTsMethods`</span>
+<span class="sd">    and :py:class:`~pvfactors.viewfactors.aoimethods.AOIMethods`&quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="VFCalculator.__init__"><a class="viewcode-back" href="../../../developer/generated/pvfactors.viewfactors.calculator.VFCalculator.html#pvfactors.viewfactors.calculator.VFCalculator.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vf_ts_methods</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Initialize the view factor mapper that will be used.</span>
+<div class="viewcode-block" id="VFCalculator.__init__"><a class="viewcode-back" href="../../../developer/generated/pvfactors.viewfactors.calculator.VFCalculator.html#pvfactors.viewfactors.calculator.VFCalculator.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">faoi_fn_front</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">faoi_fn_back</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">n_aoi_integral_sections</span><span class="o">=</span><span class="mi">300</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Initialize the view factor calculator with the calculation methods</span>
+<span class="sd">        that will be used. The AOI methods will not be instantiated if an</span>
+<span class="sd">        fAOI function is missing.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        vf_ts_methods : :py:class:`~pvfactors.geometry.calculator.VFTsMethods` object</span>
-<span class="sd">            Object with methods to calculate timeseries view factors for the</span>
-<span class="sd">            fast mode (Default = None)</span>
+<span class="sd">        faoi_fn_front : function or object, optional</span>
+<span class="sd">            Function (or object containing ``faoi`` method)</span>
+<span class="sd">            which takes a list (or numpy array) of incidence angles</span>
+<span class="sd">            measured from the surface horizontal</span>
+<span class="sd">            (with values from 0 to 180 deg) and returns the fAOI values for</span>
+<span class="sd">            the front side of PV rows (default = None)</span>
+<span class="sd">        faoi_fn_back : function or object, optional</span>
+<span class="sd">            Function (or object containing ``faoi`` method)</span>
+<span class="sd">            which takes a list (or numpy array) of incidence angles</span>
+<span class="sd">            measured from the surface horizontal</span>
+<span class="sd">            (with values from 0 to 180 deg) and returns the fAOI values for</span>
+<span class="sd">            the back side of PV rows (default = None)</span>
+<span class="sd">        n_integral_sections : int, optional</span>
+<span class="sd">            Number of integral divisions of the 0 to 180 deg interval</span>
+<span class="sd">            to use for the fAOI loss integral (default = 300)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">vf_ts_methods</span> <span class="o">=</span> <span class="n">vf_ts_methods</span> <span class="ow">or</span> <span class="n">VFTsMethods</span><span class="p">()</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vf_ts_methods</span> <span class="o">=</span> <span class="n">VFTsMethods</span><span class="p">()</span>
+        <span class="c1"># Do not instantiate AOIMethods if missing faoi function</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">faoi_fn_front</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">faoi_fn_back</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">vf_aoi_methods</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Check whether got function or object, and take ``faoi`` method</span>
+            <span class="c1"># if object was passed</span>
+            <span class="n">faoi_fn_front</span> <span class="o">=</span> <span class="p">(</span><span class="n">faoi_fn_front</span><span class="o">.</span><span class="n">faoi</span>
+                             <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">faoi_fn_front</span><span class="p">,</span> <span class="s1">&#39;faoi&#39;</span><span class="p">)</span>
+                             <span class="k">else</span> <span class="n">faoi_fn_front</span><span class="p">)</span>
+            <span class="n">faoi_fn_back</span> <span class="o">=</span> <span class="p">(</span><span class="n">faoi_fn_back</span><span class="o">.</span><span class="n">faoi</span>
+                            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">faoi_fn_back</span><span class="p">,</span> <span class="s1">&#39;faoi&#39;</span><span class="p">)</span> <span class="k">else</span> <span class="n">faoi_fn_back</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">vf_aoi_methods</span> <span class="o">=</span> <span class="n">AOIMethods</span><span class="p">(</span>
+                <span class="n">faoi_fn_front</span><span class="p">,</span> <span class="n">faoi_fn_back</span><span class="p">,</span>
+                <span class="n">n_integral_sections</span><span class="o">=</span><span class="n">n_aoi_integral_sections</span><span class="p">)</span>
+        <span class="c1"># Saved matrices</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vf_matrix</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vf_aoi_matrix</span> <span class="o">=</span> <span class="kc">None</span></div>
+
+    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_timestamps</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Fit the view factor calculator to the timeseries inputs.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        n_timestamps : int</span>
+<span class="sd">            Number of simulation timestamps</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">vf_aoi_methods</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">vf_aoi_methods</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">n_timestamps</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">build_ts_vf_matrix</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pvarray</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Calculate timeseries view factor matrix for the given</span>
@@ -224,7 +270,78 @@
             <span class="n">vf_matrix</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">ts_surf</span><span class="o">.</span><span class="n">length</span> <span class="o">&gt;</span> <span class="n">DISTANCE_TOLERANCE</span><span class="p">,</span>
                                            <span class="n">vf_matrix</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">:],</span> <span class="mf">0.</span><span class="p">)</span>
 
+        <span class="c1"># Save in calculator</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vf_matrix</span> <span class="o">=</span> <span class="n">vf_matrix</span>
+
         <span class="k">return</span> <span class="n">vf_matrix</span>
+
+    <span class="k">def</span> <span class="nf">build_ts_vf_aoi_matrix</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pvarray</span><span class="p">,</span> <span class="n">rho_mat</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Calculate the view factor aoi matrix elements from all PV row</span>
+<span class="sd">        surfaces to all other surfaces, only.</span>
+<span class="sd">        If the AOI methods are available, the vf_aoi_matrix will account</span>
+<span class="sd">        for reflection losses that are AOI specific. Otherwise it will</span>
+<span class="sd">        assume that all the reflection losses are diffuse.</span>
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+<span class="sd">        When using fAOI methods, this will not calculate</span>
+<span class="sd">        view factors from ground surfaces to PV row surfaces, so the users</span>
+<span class="sd">        will need to run</span>
+<span class="sd">        :py:meth:`~pvfactors.viewfactors.calculator.VFCalculator.build_ts_vf_matrix`</span>
+<span class="sd">        first if they want the complete matrix, otherwise those entries will</span>
+<span class="sd">        have zero values in them.</span>
+
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        pvarray : :py:class:`~pvfactors.geometry.pvarray.OrderedPVArray`</span>
+<span class="sd">            PV array whose timeseries view factor AOI matrix to calculate</span>
+<span class="sd">        rho_mat : np.ndarray</span>
+<span class="sd">            2D matrix of reflectivity values for all the surfaces in the</span>
+<span class="sd">            PV array + sky. Shape = [n_ts_surfaces + 1, n_ts_surfaces + 1]</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        np.ndarray</span>
+<span class="sd">            Timeseries view factor matrix for infinitesimal PV row surfaces,</span>
+<span class="sd">            and accounting for AOI losses, with 3 dimensions:</span>
+<span class="sd">            [n_surfaces, n_surfaces, n_timesteps]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Initialize matrix</span>
+        <span class="n">rotation_vec</span> <span class="o">=</span> <span class="n">pvarray</span><span class="o">.</span><span class="n">rotation_vec</span>
+        <span class="n">tilted_to_left</span> <span class="o">=</span> <span class="n">rotation_vec</span> <span class="o">&gt;</span> <span class="mi">0</span>
+        <span class="n">n_steps</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">rotation_vec</span><span class="p">)</span>
+        <span class="n">n_ts_surfaces</span> <span class="o">=</span> <span class="n">pvarray</span><span class="o">.</span><span class="n">n_ts_surfaces</span>
+        <span class="n">vf_aoi_matrix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span>
+            <span class="p">(</span><span class="n">n_ts_surfaces</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">n_ts_surfaces</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">n_steps</span><span class="p">),</span>
+            <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">vf_matrix</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">vf_matrix</span>
+
+        <span class="c1"># Get timeseries objects</span>
+        <span class="n">ts_ground</span> <span class="o">=</span> <span class="n">pvarray</span><span class="o">.</span><span class="n">ts_ground</span>
+        <span class="n">ts_pvrows</span> <span class="o">=</span> <span class="n">pvarray</span><span class="o">.</span><span class="n">ts_pvrows</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">vf_aoi_methods</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># The reflection losses will be considered all diffuse.</span>
+            <span class="n">faoi_diffuse</span> <span class="o">=</span> <span class="mf">1.</span> <span class="o">-</span> <span class="n">rho_mat</span>
+            <span class="c1"># use broadcasting</span>
+            <span class="n">vf_aoi_matrix</span> <span class="o">=</span> <span class="n">faoi_diffuse</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">moveaxis</span><span class="p">(</span><span class="n">vf_aoi_matrix</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+            <span class="n">vf_aoi_matrix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">moveaxis</span><span class="p">(</span><span class="n">vf_aoi_matrix</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Calculate vf_aoi between pvrow and ground surfaces</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">vf_aoi_methods</span><span class="o">.</span><span class="n">vf_aoi_pvrow_to_gnd</span><span class="p">(</span><span class="n">ts_pvrows</span><span class="p">,</span> <span class="n">ts_ground</span><span class="p">,</span>
+                                                    <span class="n">tilted_to_left</span><span class="p">,</span>
+                                                    <span class="n">vf_aoi_matrix</span><span class="p">)</span>
+            <span class="c1"># Calculate vf_aoi between pvrows</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">vf_aoi_methods</span><span class="o">.</span><span class="n">vf_aoi_pvrow_to_pvrow</span><span class="p">(</span>
+                <span class="n">ts_pvrows</span><span class="p">,</span> <span class="n">tilted_to_left</span><span class="p">,</span> <span class="n">vf_aoi_matrix</span><span class="p">)</span>
+            <span class="c1"># Calculate vf_aoi between prows and sky</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">vf_aoi_methods</span><span class="o">.</span><span class="n">vf_aoi_pvrow_to_sky</span><span class="p">(</span>
+                <span class="n">ts_pvrows</span><span class="p">,</span> <span class="n">ts_ground</span><span class="p">,</span> <span class="n">tilted_to_left</span><span class="p">,</span> <span class="n">vf_aoi_matrix</span><span class="p">)</span>
+
+        <span class="c1"># Save results</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vf_aoi_matrix</span> <span class="o">=</span> <span class="n">vf_aoi_matrix</span>
+
+        <span class="k">return</span> <span class="n">vf_aoi_matrix</span>
 
     <span class="k">def</span> <span class="nf">get_vf_ts_pvrow_element</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pvrow_idx</span><span class="p">,</span> <span class="n">pvrow_element</span><span class="p">,</span> <span class="n">ts_pvrows</span><span class="p">,</span>
                                 <span class="n">ts_ground</span><span class="p">,</span> <span class="n">rotation_vec</span><span class="p">,</span> <span class="n">pvrow_width</span><span class="p">):</span>
@@ -236,7 +353,8 @@
 <span class="sd">        pvrow_idx : int</span>
 <span class="sd">            Index of the timeseries PV row for which we want to calculate the</span>
 <span class="sd">            back surface irradiance</span>
-<span class="sd">        pvrow_element : :py:class:`~pvfactors.geometry.timeseries.TsDualSegment`</span>
+<span class="sd">        pvrow_element : \</span>
+<span class="sd">        :py:class:`~pvfactors.geometry.timeseries.TsDualSegment` \</span>
 <span class="sd">        or :py:class:`~pvfactors.geometry.timeseries.TsSurface`</span>
 <span class="sd">            Timeseries PV row element for which to calculate view factors</span>
 <span class="sd">        ts_pvrows : list of :py:class:`~pvfactors.geometry.timeseries.TsPVRow`</span>

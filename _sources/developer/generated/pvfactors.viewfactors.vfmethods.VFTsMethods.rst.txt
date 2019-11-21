@@ -1,7 +1,7 @@
-pvfactors.viewfactors.methods.VFTsMethods
-=========================================
+pvfactors.viewfactors.vfmethods.VFTsMethods
+===========================================
 
-.. currentmodule:: pvfactors.viewfactors.methods
+.. currentmodule:: pvfactors.viewfactors.vfmethods
 
 .. autoclass:: VFTsMethods
 

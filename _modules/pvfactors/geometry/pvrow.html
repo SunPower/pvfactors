@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>pvfactors.geometry.pvrow &mdash; pvfactors 1.3.0 documentation</title>
+  <title>pvfactors.geometry.pvrow &mdash; pvfactors 1.4.0 documentation</title>
   
 
   
@@ -66,7 +66,7 @@
             
             
               <div class="version">
-                1.3.0
+                1.4.0
               </div>
             
           
@@ -368,12 +368,21 @@
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">centroid</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Centroid point of the timeseries pv row&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">full_pvrow_coords</span><span class="o">.</span><span class="n">centroid</span>
+        <span class="n">centroid</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">full_pvrow_coords</span><span class="o">.</span><span class="n">centroid</span>
+                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">full_pvrow_coords</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">centroid</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">length</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Length of both sides of the timeseries PV row&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">front</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">back</span><span class="o">.</span><span class="n">length</span></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">front</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">back</span><span class="o">.</span><span class="n">length</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">highest_point</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Timeseries point coordinates of highest point of PV row&quot;&quot;&quot;</span>
+        <span class="n">high_pt</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">full_pvrow_coords</span><span class="o">.</span><span class="n">highest_point</span>
+                   <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">full_pvrow_coords</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">high_pt</span></div>
 
 
 <div class="viewcode-block" id="TsSide"><a class="viewcode-back" href="../../../developer/generated/pvfactors.geometry.pvrow.TsSide.html#pvfactors.geometry.pvrow.TsSide">[docs]</a><span class="k">class</span> <span class="nc">TsSide</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>

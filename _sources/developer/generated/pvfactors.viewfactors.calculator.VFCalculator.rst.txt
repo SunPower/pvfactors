@@ -14,7 +14,9 @@ pvfactors.viewfactors.calculator.VFCalculator
    .. autosummary::
    
       ~VFCalculator.__init__
+      ~VFCalculator.build_ts_vf_aoi_matrix
       ~VFCalculator.build_ts_vf_matrix
+      ~VFCalculator.fit
       ~VFCalculator.get_vf_ts_pvrow_element
    
    

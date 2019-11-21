@@ -1,0 +1,26 @@
+pvfactors.viewfactors.aoimethods.AOIMethods
+===========================================
+
+.. currentmodule:: pvfactors.viewfactors.aoimethods
+
+.. autoclass:: AOIMethods
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~AOIMethods.__init__
+      ~AOIMethods.fit
+      ~AOIMethods.vf_aoi_pvrow_to_gnd
+      ~AOIMethods.vf_aoi_pvrow_to_pvrow
+      ~AOIMethods.vf_aoi_pvrow_to_sky
+   
+   
+
+   
+   
+   

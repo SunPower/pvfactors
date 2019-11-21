@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>pvfactors.geometry.timeseries &mdash; pvfactors 1.3.0 documentation</title>
+  <title>pvfactors.geometry.timeseries &mdash; pvfactors 1.4.0 documentation</title>
   
 
   
@@ -66,7 +66,7 @@
             
             
               <div class="version">
-                1.3.0
+                1.4.0
               </div>
             
           
@@ -312,7 +312,8 @@
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        segment : :py:class:`~pvfactors.geometry.base.PVSurface` or :py:class:`~shapely.geometry.GeometryCollection`</span>
+<span class="sd">        segment : :py:class:`~pvfactors.geometry.base.PVSurface` \</span>
+<span class="sd">        or :py:class:`~shapely.geometry.GeometryCollection`</span>
 <span class="sd">            The returned object will be an empty geometry if its length is</span>
 <span class="sd">            really small, otherwise it will be a PV surface geometry</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -401,7 +402,20 @@
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">lowest_point</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Timeseries point coordinates of lowest point of surface&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">coords</span><span class="o">.</span><span class="n">lowest_point</span></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">coords</span><span class="o">.</span><span class="n">lowest_point</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">u_vector</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Vector orthogonal to the surface&#39;s normal vector&quot;&quot;&quot;</span>
+        <span class="n">u_vector</span> <span class="o">=</span> <span class="p">(</span><span class="kc">None</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_vector</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span>
+                    <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">n_vector</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="p">:],</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_vector</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:]]))</span>
+        <span class="k">return</span> <span class="n">u_vector</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">is_empty</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Check if surface is &quot;empty&quot; by checking if its length is always</span>
+<span class="sd">        zero&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">nansum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">length</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">DISTANCE_TOLERANCE</span></div>
 
 
 <div class="viewcode-block" id="TsLineCoords"><a class="viewcode-back" href="../../../developer/generated/pvfactors.geometry.timeseries.TsLineCoords.html#pvfactors.geometry.timeseries.TsLineCoords">[docs]</a><span class="k">class</span> <span class="nc">TsLineCoords</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
@@ -497,8 +511,10 @@
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        coords : np.ndarray</span>
-<span class="sd">            Numpy array of timeseries point coordinates</span>
+<span class="sd">        x : np.ndarray</span>
+<span class="sd">            Timeseries x coordinates</span>
+<span class="sd">        y : np.ndarray</span>
+<span class="sd">            Timeseries y coordinates</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">x</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="n">y</span></div>

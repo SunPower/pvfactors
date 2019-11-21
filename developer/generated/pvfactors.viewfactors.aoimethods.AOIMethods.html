@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>pvfactors.viewfactors.methods.VFTsMethods &mdash; pvfactors 1.3.0 documentation</title>
+  <title>pvfactors.viewfactors.aoimethods.AOIMethods &mdash; pvfactors 1.4.0 documentation</title>
   
 
   
@@ -41,7 +41,7 @@
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
     <link rel="next" title="pvfactors.irradiance.base.BaseModel" href="pvfactors.irradiance.base.BaseModel.html" />
-    <link rel="prev" title="pvfactors.viewfactors.calculator.VFCalculator" href="pvfactors.viewfactors.calculator.VFCalculator.html" /> 
+    <link rel="prev" title="pvfactors.viewfactors.vfmethods.VFTsMethods" href="pvfactors.viewfactors.vfmethods.VFTsMethods.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -68,7 +68,7 @@
             
             
               <div class="version">
-                1.3.0
+                1.4.0
               </div>
             
           
@@ -148,7 +148,7 @@
         
           <li><a href="../index.html">Developer API</a> &raquo;</li>
         
-      <li>pvfactors.viewfactors.methods.VFTsMethods</li>
+      <li>pvfactors.viewfactors.aoimethods.AOIMethods</li>
     
     
       <li class="wy-breadcrumbs-aside">
@@ -194,18 +194,34 @@
     text-align: unset;
 }
 </style>
-<div class="section" id="pvfactors-viewfactors-methods-vftsmethods">
-<h1>pvfactors.viewfactors.methods.VFTsMethods<a class="headerlink" href="#pvfactors-viewfactors-methods-vftsmethods" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="pvfactors-viewfactors-aoimethods-aoimethods">
+<h1>pvfactors.viewfactors.aoimethods.AOIMethods<a class="headerlink" href="#pvfactors-viewfactors-aoimethods-aoimethods" title="Permalink to this headline">¶</a></h1>
 <dl class="class">
-<dt id="pvfactors.viewfactors.methods.VFTsMethods">
-<em class="property">class </em><code class="sig-prename descclassname">pvfactors.viewfactors.methods.</code><code class="sig-name descname">VFTsMethods</code><a class="reference internal" href="../../_modules/pvfactors/viewfactors/methods.html#VFTsMethods"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pvfactors.viewfactors.methods.VFTsMethods" title="Permalink to this definition">¶</a></dt>
-<dd><p>This class contains all the methods used to calculate timeseries
-view factors from PV row elements to all the other elements of a PV
-array.</p>
+<dt id="pvfactors.viewfactors.aoimethods.AOIMethods">
+<em class="property">class </em><code class="sig-prename descclassname">pvfactors.viewfactors.aoimethods.</code><code class="sig-name descname">AOIMethods</code><span class="sig-paren">(</span><em class="sig-param">faoi_fn_front</em>, <em class="sig-param">faoi_fn_back</em>, <em class="sig-param">n_integral_sections=300</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pvfactors/viewfactors/aoimethods.html#AOIMethods"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pvfactors.viewfactors.aoimethods.AOIMethods" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class containing methods related to calculating AOI losses for
+<a class="reference internal" href="pvfactors.geometry.pvarray.OrderedPVArray.html#pvfactors.geometry.pvarray.OrderedPVArray" title="pvfactors.geometry.pvarray.OrderedPVArray"><code class="xref py py-class docutils literal notranslate"><span class="pre">OrderedPVArray</span></code></a> objects.</p>
 <dl class="method">
-<dt id="pvfactors.viewfactors.methods.VFTsMethods.__init__">
-<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pvfactors.viewfactors.methods.VFTsMethods.__init__" title="Permalink to this definition">¶</a></dt>
-<dd><p>Initialize self.  See help(type(self)) for accurate signature.</p>
+<dt id="pvfactors.viewfactors.aoimethods.AOIMethods.__init__">
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param">faoi_fn_front</em>, <em class="sig-param">faoi_fn_back</em>, <em class="sig-param">n_integral_sections=300</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pvfactors/viewfactors/aoimethods.html#AOIMethods.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pvfactors.viewfactors.aoimethods.AOIMethods.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Instantiate class with faoi function and number of sections to use
+to calculate integrals of view factors with faoi losses</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>faoi_fn_front</strong> (<em>function</em>) – Function which takes a list (or numpy array) of incidence angles
+measured from the surface horizontal
+(with values from 0 to 180 deg) and returns the fAOI values for
+the front side of PV rows</p></li>
+<li><p><strong>faoi_fn_back</strong> (<em>function</em>) – Function which takes a list (or numpy array) of incidence angles
+measured from the surface horizontal
+(with values from 0 to 180 deg) and returns the fAOI values for
+the back side of PV rows</p></li>
+<li><p><strong>n_integral_sections</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of integral divisions of the 0 to 180 deg interval
+to use for the fAOI loss integral (default = 300)</p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 <p class="rubric">Methods</p>
@@ -215,26 +231,20 @@ array.</p>
 <col style="width: 90%" />
 </colgroup>
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#pvfactors.viewfactors.methods.VFTsMethods.__init__" title="pvfactors.viewfactors.methods.VFTsMethods.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a></p></td>
-<td><p>Initialize self.</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pvfactors.viewfactors.aoimethods.AOIMethods.__init__" title="pvfactors.viewfactors.aoimethods.AOIMethods.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(faoi_fn_front, faoi_fn_back[, …])</p></td>
+<td><p>Instantiate class with faoi function and number of sections to use to calculate integrals of view factors with faoi losses</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">calculate_vf_to_gnd</span></code>(pvrow_element_coords, …)</p></td>
-<td><p>Calculate view factors from timeseries pvrow_element to the entire ground.</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">fit</span></code>(n_timestamps)</p></td>
+<td><p>Fit the AOI methods to timeseries inputs: create all the necessary integration attributes.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">calculate_vf_to_pvrow</span></code>(pvrow_element_coords, …)</p></td>
-<td><p>Calculate view factors from timeseries pvrow element to timeseries PV rows around it.</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">vf_aoi_pvrow_to_gnd</span></code>(ts_pvrows, ts_ground, …)</p></td>
+<td><p>Calculate the view factors between timeseries PV row and ground surfaces while accounting for non-diffuse AOI losses, and assign it to the passed view factor aoi matrix using the surface indices.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">calculate_vf_to_shadow_obstruction_hottel</span></code>(…)</p></td>
-<td><p>Calculate view factors from timeseries pvrow_element to the shadow of a specific timeseries PV row which is casted on the ground.</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">vf_aoi_pvrow_to_pvrow</span></code>(ts_pvrows, …)</p></td>
+<td><p>Calculate the view factors between timeseries PV row surfaces while accounting for AOI losses, and assign values to the passed view factor matrix using the surface indices.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">vf_pvrow_gnd_surf</span></code>(ts_pvrows, ts_ground, …)</p></td>
-<td><p>Calculate the view factors between timeseries PV row and ground surfaces, and assign it to the passed view factor matrix using the surface indices.</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">vf_pvrow_surf_to_gnd_surf_obstruction_hottel</span></code>(…)</p></td>
-<td><p>Calculate view factors from timeseries PV row surface to a timeseries ground surface.</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">vf_pvrow_to_pvrow</span></code>(ts_pvrows, tilted_to_left, …)</p></td>
-<td><p>Calculate the view factors between timeseries PV row surfaces, and assign values to the passed view factor matrix using the surface indices.</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">vf_aoi_pvrow_to_sky</span></code>(ts_pvrows, ts_ground, …)</p></td>
+<td><p>Calculate the view factors between timeseries PV row surface and sky while accounting for AOI losses, and assign values to the passed view factor matrix using the surface indices.</p></td>
 </tr>
 </tbody>
 </table>
@@ -253,7 +263,7 @@ array.</p>
         <a href="pvfactors.irradiance.base.BaseModel.html" class="btn btn-neutral float-right" title="pvfactors.irradiance.base.BaseModel" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="pvfactors.viewfactors.calculator.VFCalculator.html" class="btn btn-neutral float-left" title="pvfactors.viewfactors.calculator.VFCalculator" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="pvfactors.viewfactors.vfmethods.VFTsMethods.html" class="btn btn-neutral float-left" title="pvfactors.viewfactors.vfmethods.VFTsMethods" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

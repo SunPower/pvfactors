@@ -47,6 +47,9 @@ pvfactors.geometry.pvrow.TsPVRow
          ~TsPVRow.centroid
       
       
+         ~TsPVRow.highest_point
+      
+      
          ~TsPVRow.length
       
       

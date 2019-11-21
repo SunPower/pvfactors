@@ -1,4 +1,4 @@
-.. whatsnew:
+.. _whatsnew:
 
 **********
 What's New
@@ -6,6 +6,7 @@ What's New
 
 These are new features and improvements of note in each release.
 
+.. include:: whatsnew/v1.4.0.rst
 .. include:: whatsnew/v1.3.0.rst
 .. include:: whatsnew/v1.2.2.rst
 .. include:: whatsnew/v1.2.1.rst

@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>viewfactors &mdash; pvfactors 1.3.0 documentation</title>
+  <title>viewfactors &mdash; pvfactors 1.4.0 documentation</title>
   
 
   
@@ -66,7 +66,7 @@
             
             
               <div class="version">
-                1.3.0
+                1.4.0
               </div>
             
           
@@ -203,13 +203,13 @@
 </colgroup>
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="generated/pvfactors.viewfactors.calculator.VFCalculator.html#pvfactors.viewfactors.calculator.VFCalculator" title="pvfactors.viewfactors.calculator.VFCalculator"><code class="xref py py-obj docutils literal notranslate"><span class="pre">VFCalculator</span></code></a></p></td>
-<td><p>This calculator class will be used for the calculation of view factors for PV arrays</p></td>
+<td><p>This calculator class will be used for the calculation of view factors for <a class="reference internal" href="generated/pvfactors.geometry.pvarray.OrderedPVArray.html#pvfactors.geometry.pvarray.OrderedPVArray" title="pvfactors.geometry.pvarray.OrderedPVArray"><code class="xref py py-class docutils literal notranslate"><span class="pre">OrderedPVArray</span></code></a>, and it will rely on both <a class="reference internal" href="generated/pvfactors.viewfactors.vfmethods.VFTsMethods.html#pvfactors.viewfactors.vfmethods.VFTsMethods" title="pvfactors.viewfactors.vfmethods.VFTsMethods"><code class="xref py py-class docutils literal notranslate"><span class="pre">VFTsMethods</span></code></a> and <a class="reference internal" href="generated/pvfactors.viewfactors.aoimethods.AOIMethods.html#pvfactors.viewfactors.aoimethods.AOIMethods" title="pvfactors.viewfactors.aoimethods.AOIMethods"><code class="xref py py-class docutils literal notranslate"><span class="pre">AOIMethods</span></code></a></p></td>
 </tr>
 </tbody>
 </table>
 </div>
-<div class="section" id="methods">
-<h2>methods<a class="headerlink" href="#methods" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="timeseries-view-factor-methods">
+<h2>timeseries view factor methods<a class="headerlink" href="#timeseries-view-factor-methods" title="Permalink to this headline">¶</a></h2>
 <p>Module with view factor calculation tools</p>
 <table class="longtable docutils align-default">
 <colgroup>
@@ -217,8 +217,23 @@
 <col style="width: 90%" />
 </colgroup>
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="generated/pvfactors.viewfactors.methods.VFTsMethods.html#pvfactors.viewfactors.methods.VFTsMethods" title="pvfactors.viewfactors.methods.VFTsMethods"><code class="xref py py-obj docutils literal notranslate"><span class="pre">VFTsMethods</span></code></a></p></td>
-<td><p>This class contains all the methods used to calculate timeseries view factors from PV row elements to all the other elements of a PV array.</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/pvfactors.viewfactors.vfmethods.VFTsMethods.html#pvfactors.viewfactors.vfmethods.VFTsMethods" title="pvfactors.viewfactors.vfmethods.VFTsMethods"><code class="xref py py-obj docutils literal notranslate"><span class="pre">VFTsMethods</span></code></a></p></td>
+<td><p>This class contains all the methods used to calculate timeseries view factors for all the surfaces in <a class="reference internal" href="generated/pvfactors.geometry.pvarray.OrderedPVArray.html#pvfactors.geometry.pvarray.OrderedPVArray" title="pvfactors.geometry.pvarray.OrderedPVArray"><code class="xref py py-class docutils literal notranslate"><span class="pre">OrderedPVArray</span></code></a></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="view-factor-aoi-methods">
+<h2>view factor aoi methods<a class="headerlink" href="#view-factor-aoi-methods" title="Permalink to this headline">¶</a></h2>
+<p>Module containing AOI loss calculation methods</p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/pvfactors.viewfactors.aoimethods.AOIMethods.html#pvfactors.viewfactors.aoimethods.AOIMethods" title="pvfactors.viewfactors.aoimethods.AOIMethods"><code class="xref py py-obj docutils literal notranslate"><span class="pre">AOIMethods</span></code></a></p></td>
+<td><p>Class containing methods related to calculating AOI losses for <a class="reference internal" href="generated/pvfactors.geometry.pvarray.OrderedPVArray.html#pvfactors.geometry.pvarray.OrderedPVArray" title="pvfactors.geometry.pvarray.OrderedPVArray"><code class="xref py py-class docutils literal notranslate"><span class="pre">OrderedPVArray</span></code></a> objects.</p></td>
 </tr>
 </tbody>
 </table>

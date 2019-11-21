@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>View Factors &mdash; pvfactors 1.3.0 documentation</title>
+  <title>View Factors &mdash; pvfactors 1.4.0 documentation</title>
   
 
   
@@ -68,7 +68,7 @@
             
             
               <div class="version">
-                1.3.0
+                1.4.0
               </div>
             
           
@@ -101,6 +101,7 @@
 <li class="toctree-l2 current"><a class="current reference internal" href="#">View Factors</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#theory">Theory</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#application">Application</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#adding-non-diffuse-reflection-losses">Adding non-diffuse reflection losses</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="problem_formulation.html">Mathematical Model</a></li>
@@ -261,6 +262,33 @@
 <li><p>View factor of angled planes: <a class="reference external" href="http://www.thermalradiation.net/sectionc/C-5a.html">http://www.thermalradiation.net/sectionc/C-5a.html</a></p></li>
 <li><p>The Hottel method is also widely used in the model</p></li>
 </ul>
+</div>
+<div class="section" id="adding-non-diffuse-reflection-losses">
+<h2>Adding non-diffuse reflection losses<a class="headerlink" href="#adding-non-diffuse-reflection-losses" title="Permalink to this headline">¶</a></h2>
+<p>For the derivation shown above, we assumed that the surfaces were diffuse. But as shown in <a class="footnote-reference brackets" href="#bifacialvf-paper" id="id1">1</a>, it is possible to add an approximation of non-diffuse effects by calculating absorption losses that are function of the angle-of-incidence (AOI) of the light.</p>
+<p>If we’re interested in calculating the <strong>absorbed</strong> irradiance coming from an infinite strip to an infinitesimal surface, we can calculate a view factor derated by AOI losses by starting with the formula derived in <a class="reference external" href="http://www.thermalradiation.net/sectionb/B-71.html">http://www.thermalradiation.net/sectionb/B-71.html</a>.</p>
+<div class="figure align-center" id="id2">
+<a class="reference internal image-reference" href="../_images/AOI_strips.png"><img alt="../_images/AOI_strips.png" src="../_images/AOI_strips.png" style="width: 40%;" /></a>
+<p class="caption"><span class="caption-text">Fig. 1: Schematics illustrating view factor formula from dA1 to infinite strips</span><a class="headerlink" href="#id2" title="Permalink to this image">¶</a></p>
+</div>
+<p>The view factor from the infinitesimal surface <span class="math notranslate nohighlight">\(dA_1\)</span> to the infinite strip <span class="math notranslate nohighlight">\(A_{2,1}\)</span> is equal to:</p>
+<div class="math notranslate nohighlight">
+\[dF_{dA_{1}-A_{2,1}}{\;} = {\frac{1}{2}}{\;}({cos{\theta}_2{\;}-{\;}cos{\theta}_1})\]</div>
+<p>For this small view of the strip, we can assume that a given AOI modifier function (<span class="math notranslate nohighlight">\(f(AOI)\)</span>), which represents reflection losses, is constant. Such that:</p>
+<div class="math notranslate nohighlight">
+\[dF_{dA_{1}-A_{2,1},AOI}{\;} = {\frac{1}{2}}{\;}f(AOI){\;}({cos{\theta}_2{\;}-{\;}cos{\theta}_1})\]</div>
+<p>We can then calculate the view factor derated by AOI losses from the infinitesimal surface <span class="math notranslate nohighlight">\(dA_{1}\)</span> to the whole surface <span class="math notranslate nohighlight">\(A_{2}\)</span> by summing up the values for all the small strips constituting that surface. Such that:</p>
+<div class="math notranslate nohighlight">
+\[dF_{dA_{1}-A_{2},AOI}{\;} = {\sum}_{j=1}^{3}{\;}dF_{dA_{1}-A_{2,j},AOI}\]</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Since this formula was derived for “infinitesimal” surfaces, in practice we can cut up the PV row sides into “small” segments to make this approximation more valid.</p>
+</div>
+<dl class="footnote brackets">
+<dt class="label" id="bifacialvf-paper"><span class="brackets"><a class="fn-backref" href="#id1">1</a></span></dt>
+<dd><p>Marion, B., MacAlpine, S., Deline, C., Asgharzadeh, A., Toor, F., Riley, D., Stein, J. and Hansen, C., 2017, June. A practical irradiance model for bifacial PV modules. In 2017 IEEE 44th Photovoltaic Specialist Conference (PVSC) (pp. 1537-1542). IEEE.</p>
+</dd>
+</dl>
 </div>
 </div>
 

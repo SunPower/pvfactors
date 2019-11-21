@@ -1,0 +1,1214 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Account for AOI reflection losses (in full mode only) &mdash; pvfactors 1.4.0 documentation</title>
+  
+
+  
+  
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+        <script type="text/javascript" src="../_static/language_data.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Run fast simulations" href="Run_fast_simulations.html" />
+    <link rel="prev" title="Run full simulations in parallel" href="Run_full_parallel_simulations.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> pvfactors
+          
+
+          
+            
+            <img src="../_static/logo_small.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.4.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../installation/index.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../concepts/index.html">Main concepts</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Tutorials</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="index.html#getting-started-running-simulations">Getting started: running simulations</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="index.html#details-on-the-full-mode-simulations">Details on the “full mode” simulations</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="PVArray_introduction.html">PV Array geometry introduction</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Create_discretized_pvarray.html">Discretize PV row sides and indexing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Calculate_view_factors.html">Calculate view factors</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Run_full_timeseries_simulations.html">Run full timeseries simulations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Run_full_parallel_simulations.html">Run full simulations in parallel</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Account for AOI reflection losses (in full mode only)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#Get-timeseries-inputs">Get timeseries inputs</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#Prepare-PV-array-parameters">Prepare PV array parameters</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#Default-AOI-loss-behavior">Default AOI loss behavior</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#Use-an-fAOI-function-in-the-irradiance-model">Use an <code class="docutils literal notranslate"><span class="pre">fAOI</span></code> function in the irradiance model</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#Advanced:-use-an-fAOI-function-for-the-(ground-and-array)-reflection-and-isotropic-components">Advanced: use an <code class="docutils literal notranslate"><span class="pre">fAOI</span></code> function for the (ground and array) reflection and isotropic components</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#Doing-all-of-the-above-using-the-“run-functions”">Doing all of the above using the “run functions”</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="index.html#details-on-the-fast-mode-simulations">Details on the “fast mode” simulations</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../theory/index.html">Theory</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../developer/index.html">Developer API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../whatsnew.html">What’s New</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">pvfactors</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="index.html">Tutorials</a> &raquo;</li>
+        
+      <li>Account for AOI reflection losses (in full mode only)</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            
+              <a href="https://github.com/SunPower/pvfactors/blob/tutorials/Account_for_AOI_losses.ipynb" class="fa fa-github"> Edit on GitHub</a>
+            
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  
+<style>
+/* CSS for nbsphinx extension */
+
+/* remove conflicting styling from Sphinx themes */
+div.nbinput,
+div.nbinput div.prompt,
+div.nbinput div.input_area,
+div.nbinput div[class*=highlight],
+div.nbinput div[class*=highlight] pre,
+div.nboutput,
+div.nbinput div.prompt,
+div.nbinput div.output_area,
+div.nboutput div[class*=highlight],
+div.nboutput div[class*=highlight] pre {
+    background: none;
+    border: none;
+    padding: 0 0;
+    margin: 0;
+    box-shadow: none;
+}
+
+/* avoid gaps between output lines */
+div.nboutput div[class*=highlight] pre {
+    line-height: normal;
+}
+
+/* input/output containers */
+div.nbinput,
+div.nboutput {
+    display: -webkit-flex;
+    display: flex;
+    align-items: flex-start;
+    margin: 0;
+    width: 100%;
+}
+@media (max-width: 540px) {
+    div.nbinput,
+    div.nboutput {
+        flex-direction: column;
+    }
+}
+
+/* input container */
+div.nbinput {
+    padding-top: 5px;
+}
+
+/* last container */
+div.nblast {
+    padding-bottom: 5px;
+}
+
+/* input prompt */
+div.nbinput div.prompt pre {
+    color: #307FC1;
+}
+
+/* output prompt */
+div.nboutput div.prompt pre {
+    color: #BF5B3D;
+}
+
+/* all prompts */
+div.nbinput div.prompt,
+div.nboutput div.prompt {
+    min-width: 5ex;
+    padding-top: 0.4em;
+    padding-right: 0.4em;
+    text-align: right;
+    flex: 0;
+}
+@media (max-width: 540px) {
+    div.nbinput div.prompt,
+    div.nboutput div.prompt {
+        text-align: left;
+        padding: 0.4em;
+    }
+    div.nboutput div.prompt.empty {
+        padding: 0;
+    }
+}
+
+/* disable scrollbars on prompts */
+div.nbinput div.prompt pre,
+div.nboutput div.prompt pre {
+    overflow: hidden;
+}
+
+/* input/output area */
+div.nbinput div.input_area,
+div.nboutput div.output_area {
+    padding: 0.4em;
+    -webkit-flex: 1;
+    flex: 1;
+    overflow: auto;
+}
+@media (max-width: 540px) {
+    div.nbinput div.input_area,
+    div.nboutput div.output_area {
+        width: 100%;
+    }
+}
+
+/* input area */
+div.nbinput div.input_area {
+    border: 1px solid #e0e0e0;
+    border-radius: 2px;
+    background: #f5f5f5;
+}
+
+/* override MathJax center alignment in output cells */
+div.nboutput div[class*=MathJax] {
+    text-align: left !important;
+}
+
+/* override sphinx.ext.imgmath center alignment in output cells */
+div.nboutput div.math p {
+    text-align: left;
+}
+
+/* standard error */
+div.nboutput div.output_area.stderr {
+    background: #fdd;
+}
+
+/* ANSI colors */
+.ansi-black-fg { color: #3E424D; }
+.ansi-black-bg { background-color: #3E424D; }
+.ansi-black-intense-fg { color: #282C36; }
+.ansi-black-intense-bg { background-color: #282C36; }
+.ansi-red-fg { color: #E75C58; }
+.ansi-red-bg { background-color: #E75C58; }
+.ansi-red-intense-fg { color: #B22B31; }
+.ansi-red-intense-bg { background-color: #B22B31; }
+.ansi-green-fg { color: #00A250; }
+.ansi-green-bg { background-color: #00A250; }
+.ansi-green-intense-fg { color: #007427; }
+.ansi-green-intense-bg { background-color: #007427; }
+.ansi-yellow-fg { color: #DDB62B; }
+.ansi-yellow-bg { background-color: #DDB62B; }
+.ansi-yellow-intense-fg { color: #B27D12; }
+.ansi-yellow-intense-bg { background-color: #B27D12; }
+.ansi-blue-fg { color: #208FFB; }
+.ansi-blue-bg { background-color: #208FFB; }
+.ansi-blue-intense-fg { color: #0065CA; }
+.ansi-blue-intense-bg { background-color: #0065CA; }
+.ansi-magenta-fg { color: #D160C4; }
+.ansi-magenta-bg { background-color: #D160C4; }
+.ansi-magenta-intense-fg { color: #A03196; }
+.ansi-magenta-intense-bg { background-color: #A03196; }
+.ansi-cyan-fg { color: #60C6C8; }
+.ansi-cyan-bg { background-color: #60C6C8; }
+.ansi-cyan-intense-fg { color: #258F8F; }
+.ansi-cyan-intense-bg { background-color: #258F8F; }
+.ansi-white-fg { color: #C5C1B4; }
+.ansi-white-bg { background-color: #C5C1B4; }
+.ansi-white-intense-fg { color: #A1A6B2; }
+.ansi-white-intense-bg { background-color: #A1A6B2; }
+
+.ansi-default-inverse-fg { color: #FFFFFF; }
+.ansi-default-inverse-bg { background-color: #000000; }
+
+.ansi-bold { font-weight: bold; }
+.ansi-underline { text-decoration: underline; }
+
+/* Some additional styling taken form the Jupyter notebook CSS */
+div.rendered_html table {
+  border: none;
+  border-collapse: collapse;
+  border-spacing: 0;
+  color: black;
+  font-size: 12px;
+  table-layout: fixed;
+}
+div.rendered_html thead {
+  border-bottom: 1px solid black;
+  vertical-align: bottom;
+}
+div.rendered_html tr,
+div.rendered_html th,
+div.rendered_html td {
+  text-align: right;
+  vertical-align: middle;
+  padding: 0.5em 0.5em;
+  line-height: normal;
+  white-space: normal;
+  max-width: none;
+  border: none;
+}
+div.rendered_html th {
+  font-weight: bold;
+}
+div.rendered_html tbody tr:nth-child(odd) {
+  background: #f5f5f5;
+}
+div.rendered_html tbody tr:hover {
+  background: rgba(66, 165, 245, 0.2);
+}
+
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast,
+.nboutput.nblast {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast + .nbinput {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<div class="section" id="Account-for-AOI-reflection-losses-(in-full-mode-only)">
+<h1>Account for AOI reflection losses (in full mode only)<a class="headerlink" href="#Account-for-AOI-reflection-losses-(in-full-mode-only)" title="Permalink to this headline">¶</a></h1>
+<p>In this section, we will learn:</p>
+<ul class="simple">
+<li><p>how <code class="docutils literal notranslate"><span class="pre">pvfactors</span></code> accounts for AOI losses by default</p></li>
+<li><p>how to account for AOI-dependent reflection losses for direct, circumsolar, and horizon irradiance components</p></li>
+<li><p>how to account for AOI-dependent reflection losses for isotropic and reflection irradiance components</p></li>
+<li><p>how to run all of this using the <code class="docutils literal notranslate"><span class="pre">pvfactors</span></code> run functions</p></li>
+</ul>
+<p>Imports and settings</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="c1"># Import external libraries</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="k">import</span> <span class="n">datetime</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
+
+<span class="c1"># Settings</span>
+<span class="o">%</span><span class="k">matplotlib</span> inline
+<span class="n">np</span><span class="o">.</span><span class="n">set_printoptions</span><span class="p">(</span><span class="n">precision</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">300</span><span class="p">)</span>
+<span class="n">warnings</span><span class="o">.</span><span class="n">filterwarnings</span><span class="p">(</span><span class="s1">&#39;ignore&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">style</span><span class="o">.</span><span class="n">use</span><span class="p">(</span><span class="s1">&#39;seaborn-whitegrid&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;font.size&#39;</span><span class="p">:</span> <span class="mi">12</span><span class="p">})</span>
+<span class="c1"># Paths</span>
+<span class="n">LOCAL_DIR</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()</span>
+<span class="n">DATA_DIR</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">LOCAL_DIR</span><span class="p">,</span> <span class="s1">&#39;data&#39;</span><span class="p">)</span>
+<span class="n">filepath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">DATA_DIR</span><span class="p">,</span> <span class="s1">&#39;test_df_inputs_MET_clearsky_tucson.csv&#39;</span><span class="p">)</span>
+
+<span class="n">RUN_FIXED_TILT</span> <span class="o">=</span> <span class="kc">True</span>
+</pre></div>
+</div>
+</div>
+<p>Let’s define a few helper functions that will help clarify the notebook</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="c1"># Helper functions for plotting and simulation</span>
+<span class="k">def</span> <span class="nf">plot_irradiance</span><span class="p">(</span><span class="n">df_report</span><span class="p">):</span>
+    <span class="c1"># Plot irradiance</span>
+    <span class="n">f</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">nrows</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">ncols</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+    <span class="c1"># Plot back surface irradiance</span>
+    <span class="n">df_report</span><span class="p">[[</span><span class="s1">&#39;qinc_back&#39;</span><span class="p">,</span> <span class="s1">&#39;qabs_back&#39;</span><span class="p">]]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">ax</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s1">&#39;Back surface irradiance&#39;</span><span class="p">)</span>
+    <span class="n">ax</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;W/m2&#39;</span><span class="p">)</span>
+    <span class="c1"># Plot front surface irradiance</span>
+    <span class="n">df_report</span><span class="p">[[</span><span class="s1">&#39;qinc_front&#39;</span><span class="p">,</span> <span class="s1">&#39;qabs_front&#39;</span><span class="p">]]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">ax</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s1">&#39;Front surface irradiance&#39;</span><span class="p">)</span>
+    <span class="n">ax</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;W/m2&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+<span class="k">def</span> <span class="nf">plot_aoi_losses</span><span class="p">(</span><span class="n">df_report</span><span class="p">):</span>
+    <span class="c1"># plotting AOI losses</span>
+    <span class="n">f</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mf">5.5</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+    <span class="n">df_report</span><span class="p">[[</span><span class="s1">&#39;aoi_losses_back_%&#39;</span><span class="p">]]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">)</span>
+    <span class="n">df_report</span><span class="p">[[</span><span class="s1">&#39;aoi_losses_front_%&#39;</span><span class="p">]]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">)</span>
+    <span class="c1"># Adjust axes</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;%&#39;</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">([</span><span class="s1">&#39;AOI losses back PV row&#39;</span><span class="p">,</span> <span class="s1">&#39;AOI losses front PV row&#39;</span><span class="p">])</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s1">&#39;AOI losses&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+<span class="c1"># Create a function that will build a simulation report</span>
+<span class="k">def</span> <span class="nf">fn_report</span><span class="p">(</span><span class="n">pvarray</span><span class="p">):</span>
+    <span class="c1"># Get irradiance values</span>
+    <span class="n">report</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;qinc_back&#39;</span><span class="p">:</span> <span class="n">pvarray</span><span class="o">.</span><span class="n">ts_pvrows</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">back</span><span class="o">.</span><span class="n">get_param_weighted</span><span class="p">(</span><span class="s1">&#39;qinc&#39;</span><span class="p">),</span>
+              <span class="s1">&#39;qabs_back&#39;</span><span class="p">:</span> <span class="n">pvarray</span><span class="o">.</span><span class="n">ts_pvrows</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">back</span><span class="o">.</span><span class="n">get_param_weighted</span><span class="p">(</span><span class="s1">&#39;qabs&#39;</span><span class="p">),</span>
+              <span class="s1">&#39;qinc_front&#39;</span><span class="p">:</span> <span class="n">pvarray</span><span class="o">.</span><span class="n">ts_pvrows</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">front</span><span class="o">.</span><span class="n">get_param_weighted</span><span class="p">(</span><span class="s1">&#39;qinc&#39;</span><span class="p">),</span>
+              <span class="s1">&#39;qabs_front&#39;</span><span class="p">:</span> <span class="n">pvarray</span><span class="o">.</span><span class="n">ts_pvrows</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">front</span><span class="o">.</span><span class="n">get_param_weighted</span><span class="p">(</span><span class="s1">&#39;qabs&#39;</span><span class="p">)}</span>
+    <span class="c1"># Calculate AOI losses</span>
+    <span class="n">report</span><span class="p">[</span><span class="s1">&#39;aoi_losses_back_%&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">report</span><span class="p">[</span><span class="s1">&#39;qinc_back&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="n">report</span><span class="p">[</span><span class="s1">&#39;qabs_back&#39;</span><span class="p">])</span> <span class="o">/</span> <span class="n">report</span><span class="p">[</span><span class="s1">&#39;qinc_back&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="mf">100.</span>
+    <span class="n">report</span><span class="p">[</span><span class="s1">&#39;aoi_losses_front_%&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">report</span><span class="p">[</span><span class="s1">&#39;qinc_front&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="n">report</span><span class="p">[</span><span class="s1">&#39;qabs_front&#39;</span><span class="p">])</span> <span class="o">/</span> <span class="n">report</span><span class="p">[</span><span class="s1">&#39;qinc_front&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="mf">100.</span>
+    <span class="c1"># Return report</span>
+    <span class="k">return</span> <span class="n">report</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="Get-timeseries-inputs">
+<h2>Get timeseries inputs<a class="headerlink" href="#Get-timeseries-inputs" title="Permalink to this headline">¶</a></h2>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="k">def</span> <span class="nf">export_data</span><span class="p">(</span><span class="n">fp</span><span class="p">):</span>
+    <span class="n">tz</span> <span class="o">=</span> <span class="s1">&#39;US/Arizona&#39;</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">fp</span><span class="p">,</span> <span class="n">index_col</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">df</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DatetimeIndex</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="p">)</span><span class="o">.</span><span class="n">tz_convert</span><span class="p">(</span><span class="n">tz</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">df</span>
+
+<span class="n">df</span> <span class="o">=</span> <span class="n">export_data</span><span class="p">(</span><span class="n">filepath</span><span class="p">)</span>
+<span class="n">df_inputs</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:</span><span class="mi">48</span><span class="p">,</span> <span class="p">:]</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="c1"># Plot the data</span>
+<span class="n">f</span><span class="p">,</span> <span class="p">(</span><span class="n">ax1</span><span class="p">,</span> <span class="n">ax2</span><span class="p">,</span> <span class="n">ax3</span><span class="p">)</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+<span class="n">df_inputs</span><span class="p">[[</span><span class="s1">&#39;dni&#39;</span><span class="p">,</span> <span class="s1">&#39;dhi&#39;</span><span class="p">]]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax1</span><span class="p">)</span>
+<span class="n">df_inputs</span><span class="p">[[</span><span class="s1">&#39;solar_zenith&#39;</span><span class="p">,</span> <span class="s1">&#39;solar_azimuth&#39;</span><span class="p">]]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax2</span><span class="p">)</span>
+<span class="n">df_inputs</span><span class="p">[[</span><span class="s1">&#39;surface_tilt&#39;</span><span class="p">,</span> <span class="s1">&#39;surface_azimuth&#39;</span><span class="p">]]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax3</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/tutorials_Account_for_AOI_losses_8_0.png" src="../_images/tutorials_Account_for_AOI_losses_8_0.png" />
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="c1"># Use a fixed albedo</span>
+<span class="n">albedo</span> <span class="o">=</span> <span class="mf">0.2</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="Prepare-PV-array-parameters">
+<h2>Prepare PV array parameters<a class="headerlink" href="#Prepare-PV-array-parameters" title="Permalink to this headline">¶</a></h2>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">pvarray_parameters</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;n_pvrows&#39;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>            <span class="c1"># number of pv rows</span>
+    <span class="s1">&#39;pvrow_height&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>        <span class="c1"># height of pvrows (measured at center / torque tube)</span>
+    <span class="s1">&#39;pvrow_width&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>         <span class="c1"># width of pvrows</span>
+    <span class="s1">&#39;axis_azimuth&#39;</span><span class="p">:</span> <span class="mf">0.</span><span class="p">,</span>       <span class="c1"># azimuth angle of rotation axis</span>
+    <span class="s1">&#39;gcr&#39;</span><span class="p">:</span> <span class="mf">0.4</span><span class="p">,</span>               <span class="c1"># ground coverage ratio</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="Default-AOI-loss-behavior">
+<h2>Default AOI loss behavior<a class="headerlink" href="#Default-AOI-loss-behavior" title="Permalink to this headline">¶</a></h2>
+<p>In <code class="docutils literal notranslate"><span class="pre">pvfactors</span></code>:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">qinc</span></code> is the total incident irradiance on a surface, and it does not account for reflection losses</p></li>
+<li><p>but <code class="docutils literal notranslate"><span class="pre">qabs</span></code>, which is the total absorbed irradiance by a surface, does accounts for it.</p></li>
+</ul>
+<p>By default, <code class="docutils literal notranslate"><span class="pre">pvfactors</span></code> assumes that all reflection losses (or AOI losses) are diffuse; i.e. they do not depend on angle of incidence (AOI). Here is an example.</p>
+<p>Let’s run a full mode simulation (reflection equilibrium) and compare the calculated incident and absorbed irradiance on both sides of a PV row in a modeled PV array. We’ll use 3% reflection for PV row front surfaces, and 5% for the back surfaces.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">pvfactors.geometry</span> <span class="k">import</span> <span class="n">OrderedPVArray</span>
+<span class="c1"># Create PV array</span>
+<span class="n">pvarray</span> <span class="o">=</span> <span class="n">OrderedPVArray</span><span class="o">.</span><span class="n">init_from_dict</span><span class="p">(</span><span class="n">pvarray_parameters</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">pvfactors.engine</span> <span class="k">import</span> <span class="n">PVEngine</span>
+<span class="kn">from</span> <span class="nn">pvfactors.irradiance</span> <span class="k">import</span> <span class="n">HybridPerezOrdered</span>
+<span class="c1"># Create irradiance model</span>
+<span class="n">irradiance_model</span> <span class="o">=</span> <span class="n">HybridPerezOrdered</span><span class="p">(</span><span class="n">rho_front</span><span class="o">=</span><span class="mf">0.03</span><span class="p">,</span> <span class="n">rho_back</span><span class="o">=</span><span class="mf">0.05</span><span class="p">)</span>
+<span class="c1"># Create engine</span>
+<span class="n">engine</span> <span class="o">=</span> <span class="n">PVEngine</span><span class="p">(</span><span class="n">pvarray</span><span class="p">,</span> <span class="n">irradiance_model</span><span class="o">=</span><span class="n">irradiance_model</span><span class="p">)</span>
+<span class="c1"># Fit engine to data</span>
+<span class="n">engine</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">df_inputs</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">df_inputs</span><span class="o">.</span><span class="n">dni</span><span class="p">,</span> <span class="n">df_inputs</span><span class="o">.</span><span class="n">dhi</span><span class="p">,</span>
+           <span class="n">df_inputs</span><span class="o">.</span><span class="n">solar_zenith</span><span class="p">,</span> <span class="n">df_inputs</span><span class="o">.</span><span class="n">solar_azimuth</span><span class="p">,</span>
+           <span class="n">df_inputs</span><span class="o">.</span><span class="n">surface_tilt</span><span class="p">,</span> <span class="n">df_inputs</span><span class="o">.</span><span class="n">surface_azimuth</span><span class="p">,</span>
+           <span class="n">albedo</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="c1"># Plot pvarray shapely geometries</span>
+<span class="n">f</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+<span class="n">pvarray</span><span class="o">.</span><span class="n">plot_at_idx</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="n">ax</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;Modeled PV array at </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">df_inputs</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="mi">12</span><span class="p">]))</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/tutorials_Account_for_AOI_losses_16_0.png" src="../_images/tutorials_Account_for_AOI_losses_16_0.png" />
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="c1"># Run full mode simulation</span>
+<span class="n">report</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">run_full_mode</span><span class="p">(</span><span class="n">fn_build_report</span><span class="o">=</span><span class="n">fn_report</span><span class="p">)</span>
+<span class="c1"># Turn report into dataframe</span>
+<span class="n">df_report</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">report</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">df_inputs</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">plot_irradiance</span><span class="p">(</span><span class="n">df_report</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/tutorials_Account_for_AOI_losses_18_0.png" src="../_images/tutorials_Account_for_AOI_losses_18_0.png" />
+</div>
+</div>
+<p>Let’s plot the back AOI losses</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">plot_aoi_losses</span><span class="p">(</span><span class="n">df_report</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/tutorials_Account_for_AOI_losses_20_0.png" src="../_images/tutorials_Account_for_AOI_losses_20_0.png" />
+</div>
+</div>
+<p>As shown above, by default <code class="docutils literal notranslate"><span class="pre">pvfactors</span></code> apply constant values of AOI losses for all the surfaces in the system, and for all the incident irradiance components:</p>
+<ul class="simple">
+<li><p>3% loss for the irradiance incident on front of PV rows, which corresponds to the chosen <code class="docutils literal notranslate"><span class="pre">rho_front</span></code> in the irradiance model</p></li>
+<li><p>5% loss for the irradiance incident on back of PV rows, which corresponds to the chosen <code class="docutils literal notranslate"><span class="pre">rho_back</span></code> in the irradiance model</p></li>
+</ul>
+</div>
+<div class="section" id="Use-an-fAOI-function-in-the-irradiance-model">
+<h2>Use an <code class="docutils literal notranslate"><span class="pre">fAOI</span></code> function in the irradiance model<a class="headerlink" href="#Use-an-fAOI-function-in-the-irradiance-model" title="Permalink to this headline">¶</a></h2>
+<p>The next step that can improve the AOI loss calculation, especially for the PV row front surface that receives a lot of direct light, would be to use reflection losses that would be dependent on the AOI, and that would be applied to all the irradiance model components: direct, circumsolar, and horizon light components.</p>
+<div class="section" id="What-is-an-fAOI-function?">
+<h3>What is an <code class="docutils literal notranslate"><span class="pre">fAOI</span></code> function?<a class="headerlink" href="#What-is-an-fAOI-function?" title="Permalink to this headline">¶</a></h3>
+<p>The <code class="docutils literal notranslate"><span class="pre">fAOI</span></code> function that the users need to provide takes an angle of incidence as input (AOI measured in degrees and against the surface horizontal - from 0 to 180 deg, <strong>not</strong> against the surface normal vector - which would have been from 0 to 90 deg), and it returns a transmission value for the incident light. So it’s effectively a factor that removes reflection losses.</p>
+<p>Let’s see what this looks like. First, let’s create such a function using a <code class="docutils literal notranslate"><span class="pre">pvfactors</span></code> utility function, and then we’ll plot it.</p>
+<p>Given a <a class="reference external" href="https://pvlib-python.readthedocs.io/en/stable/index.html">pvlib</a> module database name, you can create an <code class="docutils literal notranslate"><span class="pre">fAOI</span></code> function as follows using pvfactors.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="c1"># import utility function</span>
+<span class="kn">from</span> <span class="nn">pvfactors.viewfactors.aoimethods</span> <span class="k">import</span> <span class="n">faoi_fn_from_pvlib_sandia</span>
+<span class="c1"># Choose a module name</span>
+<span class="n">module_name</span> <span class="o">=</span> <span class="s1">&#39;SunPower_128_Cell_Module___2009_&#39;</span>
+<span class="c1"># Create an faoi function</span>
+<span class="n">faoi_function</span> <span class="o">=</span> <span class="n">faoi_fn_from_pvlib_sandia</span><span class="p">(</span><span class="n">module_name</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="c1"># Plot faoi function values</span>
+<span class="n">aoi_values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">180</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
+<span class="n">faoi_values</span> <span class="o">=</span> <span class="n">faoi_function</span><span class="p">(</span><span class="n">aoi_values</span><span class="p">)</span>
+
+<span class="n">f</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">()</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">aoi_values</span><span class="p">,</span> <span class="n">faoi_values</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s1">&#39;fAOI values for pvlib</span><span class="se">\&#39;</span><span class="s1">s </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">module_name</span><span class="p">))</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;fAOI values&#39;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;AOI angles measured from &quot;horizontal&quot; [deg]&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/tutorials_Account_for_AOI_losses_28_0.png" src="../_images/tutorials_Account_for_AOI_losses_28_0.png" />
+</div>
+</div>
+<p>As expected, there are less reflection losses for incident light rays normal to the surface than everywhere else.</p>
+</div>
+<div class="section" id="Use-the-fAOI-function">
+<h3>Use the <code class="docutils literal notranslate"><span class="pre">fAOI</span></code> function<a class="headerlink" href="#Use-the-fAOI-function" title="Permalink to this headline">¶</a></h3>
+<p>It’s then easy to use the created <code class="docutils literal notranslate"><span class="pre">fAOI</span></code> function in the irradiance models. It just has to be passed to the model at initialization.</p>
+<p>For this example, we will use the same fAOI function for the front and back surfaces of the PV rows.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="c1"># Create irradiance model with fAOI function</span>
+<span class="n">irradiance_model</span> <span class="o">=</span> <span class="n">HybridPerezOrdered</span><span class="p">(</span><span class="n">faoi_fn_front</span><span class="o">=</span><span class="n">faoi_function</span><span class="p">,</span> <span class="n">faoi_fn_back</span><span class="o">=</span><span class="n">faoi_function</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>Then pass the model to the <code class="docutils literal notranslate"><span class="pre">PVEngine</span></code> and run the simulation as usual.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="c1"># Create engine</span>
+<span class="n">engine</span> <span class="o">=</span> <span class="n">PVEngine</span><span class="p">(</span><span class="n">pvarray</span><span class="p">,</span> <span class="n">irradiance_model</span><span class="o">=</span><span class="n">irradiance_model</span><span class="p">)</span>
+<span class="c1"># Fit engine to data</span>
+<span class="n">engine</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">df_inputs</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">df_inputs</span><span class="o">.</span><span class="n">dni</span><span class="p">,</span> <span class="n">df_inputs</span><span class="o">.</span><span class="n">dhi</span><span class="p">,</span>
+           <span class="n">df_inputs</span><span class="o">.</span><span class="n">solar_zenith</span><span class="p">,</span> <span class="n">df_inputs</span><span class="o">.</span><span class="n">solar_azimuth</span><span class="p">,</span>
+           <span class="n">df_inputs</span><span class="o">.</span><span class="n">surface_tilt</span><span class="p">,</span> <span class="n">df_inputs</span><span class="o">.</span><span class="n">surface_azimuth</span><span class="p">,</span>
+           <span class="n">albedo</span><span class="p">)</span>
+<span class="c1"># Run full mode simulation</span>
+<span class="n">report</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">run_full_mode</span><span class="p">(</span><span class="n">fn_build_report</span><span class="o">=</span><span class="n">fn_report</span><span class="p">)</span>
+<span class="c1"># Turn report into dataframe</span>
+<span class="n">df_report</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">report</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">df_inputs</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>Let’s now see what the irradiance and AOI losses look like.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">plot_irradiance</span><span class="p">(</span><span class="n">df_report</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/tutorials_Account_for_AOI_losses_36_0.png" src="../_images/tutorials_Account_for_AOI_losses_36_0.png" />
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[18]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">plot_aoi_losses</span><span class="p">(</span><span class="n">df_report</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/tutorials_Account_for_AOI_losses_37_0.png" src="../_images/tutorials_Account_for_AOI_losses_37_0.png" />
+</div>
+</div>
+<p>We can now see the changes in AOI losses, which now use the <code class="docutils literal notranslate"><span class="pre">fAOI</span></code> function for the direct, circumsolar, and horizon light components. But it still uses the constant <code class="docutils literal notranslate"><span class="pre">rho_front</span></code> and <code class="docutils literal notranslate"><span class="pre">rho_back</span></code> values for the reflection and isotropic components of the incident light on the surfaces.</p>
+</div>
+</div>
+<div class="section" id="Advanced:-use-an-fAOI-function-for-the-(ground-and-array)-reflection-and-isotropic-components">
+<h2>Advanced: use an <code class="docutils literal notranslate"><span class="pre">fAOI</span></code> function for the (ground and array) reflection and isotropic components<a class="headerlink" href="#Advanced:-use-an-fAOI-function-for-the-(ground-and-array)-reflection-and-isotropic-components" title="Permalink to this headline">¶</a></h2>
+<p>The more advanced use is to apply the <code class="docutils literal notranslate"><span class="pre">fAOI</span></code> losses to the reflection and isotropic component of the light incident on the PV row surfaces.</p>
+<p>In order to do so you simply need to pass the <code class="docutils literal notranslate"><span class="pre">fAOI</span></code> function to the view factor calculator before initializing the <code class="docutils literal notranslate"><span class="pre">PVEngine</span></code>.</p>
+<p>In this case, the simulation workflow will be as follows:</p>
+<ul class="simple">
+<li><p>the <code class="docutils literal notranslate"><span class="pre">PVEngine</span></code> will still calculate the equilibrium of reflections assuming diffuse surfaces and constant reflection losses</p></li>
+<li><p>it will then use the calculated radiosity values and apply the <code class="docutils literal notranslate"><span class="pre">fAOI</span></code> using an integral combining the AOI losses and the view factor integrands, as described in the theory section, and similarly to <a class="reference external" href="https://www.osti.gov/servlets/purl/1364146">Marion, B., et al (2017)</a></p></li>
+</ul>
+<div class="section" id="A-word-of-caution">
+<h3>A word of caution<a class="headerlink" href="#A-word-of-caution" title="Permalink to this headline">¶</a></h3>
+<p>The users should be careful when using <code class="docutils literal notranslate"><span class="pre">fAOI</span></code> losses with the view factor calculator for the following reasons:</p>
+<ul class="simple">
+<li><p>in order to be fully consistent in the <code class="docutils literal notranslate"><span class="pre">PVEngine</span></code> calculations, it is wiser to re-calculate a global hemispherical reflectivity value using the <code class="docutils literal notranslate"><span class="pre">fAOI</span></code> function, which will be used in the reflection equilibrium calculation</p></li>
+<li><p>the method used for accounting <code class="docutils literal notranslate"><span class="pre">fAOI</span></code> losses in reflections is physically valid only if the surfaces are “infinitesimal” because it uses view factor formulas only valid in this case (see <a class="reference external" href="http://www.thermalradiation.net/sectionb/B-71.html">http://www.thermalradiation.net/sectionb/B-71.html</a>). So in order to make it work in <code class="docutils literal notranslate"><span class="pre">pvfactors</span></code>, you’ll need to discretize the PV row sides into smaller segments</p></li>
+<li><p>the method relies on the numerical calculation of an integral, and that calculation will converge only given a sufficient number of integral points (which can be provided to the <code class="docutils literal notranslate"><span class="pre">pvfactors</span></code> view factor calculator). <a class="reference external" href="https://www.osti.gov/servlets/purl/1364146">Marion, B., et al (2017)</a> seems to be using 180 points, but in <code class="docutils literal notranslate"><span class="pre">pvfactors</span></code>’ implementation it doesn’t look like it’s enough for the integral to converge, so we’ll use 1000 integral points in this example</p></li>
+<li><p>the two points above slow down the computation time by an order of magnitude. 8760 simulations that normally take a couple of seconds to run with <code class="docutils literal notranslate"><span class="pre">pvfactors</span></code>’s full mode can then take up to a minute</p></li>
+</ul>
+</div>
+<div class="section" id="Apply-fAOI-losses-to-reflection-terms">
+<h3>Apply <code class="docutils literal notranslate"><span class="pre">fAOI</span></code> losses to reflection terms<a class="headerlink" href="#Apply-fAOI-losses-to-reflection-terms" title="Permalink to this headline">¶</a></h3>
+<p>Discretize the PV row sides of the PV array:</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="c1"># first let&#39;s discretize the PV row sides</span>
+<span class="n">pvarray_parameters</span><span class="o">.</span><span class="n">update</span><span class="p">({</span>
+    <span class="s1">&#39;cut&#39;</span><span class="p">:</span> <span class="p">{</span><span class="mi">1</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;front&#39;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span> <span class="s1">&#39;back&#39;</span><span class="p">:</span> <span class="mi">5</span><span class="p">}}</span>
+<span class="p">})</span>
+<span class="c1"># Create a new pv array</span>
+<span class="n">pvarray</span> <span class="o">=</span> <span class="n">OrderedPVArray</span><span class="o">.</span><span class="n">init_from_dict</span><span class="p">(</span><span class="n">pvarray_parameters</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>Add <code class="docutils literal notranslate"><span class="pre">fAOI</span></code> losses to the view factor calculator, and use 1000 integration points</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[20]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">pvfactors.viewfactors</span> <span class="k">import</span> <span class="n">VFCalculator</span>
+
+<span class="n">vf_calculator</span> <span class="o">=</span> <span class="n">VFCalculator</span><span class="p">(</span><span class="n">faoi_fn_front</span><span class="o">=</span><span class="n">faoi_function</span><span class="p">,</span> <span class="n">faoi_fn_back</span><span class="o">=</span><span class="n">faoi_function</span><span class="p">,</span>
+                             <span class="n">n_aoi_integral_sections</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>Re-calculate global hemispherical reflectivity values based on <code class="docutils literal notranslate"><span class="pre">fAOI</span></code> function</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[21]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="c1"># For back PV row surface</span>
+<span class="n">is_back</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="n">rho_back</span> <span class="o">=</span> <span class="n">vf_calculator</span><span class="o">.</span><span class="n">vf_aoi_methods</span><span class="o">.</span><span class="n">rho_from_faoi_fn</span><span class="p">(</span><span class="n">is_back</span><span class="p">)</span>
+<span class="c1"># For front PV row surface</span>
+<span class="n">is_back</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="n">rho_front</span> <span class="o">=</span> <span class="n">vf_calculator</span><span class="o">.</span><span class="n">vf_aoi_methods</span><span class="o">.</span><span class="n">rho_from_faoi_fn</span><span class="p">(</span><span class="n">is_back</span><span class="p">)</span>
+
+<span class="c1"># Print results</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Reflectivity values for front side: </span><span class="si">{}</span><span class="s1">, and back side: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">rho_front</span><span class="p">,</span> <span class="n">rho_back</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Reflectivity values for front side: 0.029002539185428944, and back side: 0.029002539185428944
+</pre></div></div>
+</div>
+<p>Since we’re using the same <code class="docutils literal notranslate"><span class="pre">fAOI</span></code> function for front and back sides, we now get the same global hemispherical reflectivity values.</p>
+<p>We can now create the irradiance model.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[22]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">irradiance_model</span> <span class="o">=</span> <span class="n">HybridPerezOrdered</span><span class="p">(</span><span class="n">rho_front</span><span class="o">=</span><span class="n">rho_front</span><span class="p">,</span> <span class="n">rho_back</span><span class="o">=</span><span class="n">rho_back</span><span class="p">,</span>
+                                      <span class="n">faoi_fn_front</span><span class="o">=</span><span class="n">faoi_function</span><span class="p">,</span> <span class="n">faoi_fn_back</span><span class="o">=</span><span class="n">faoi_function</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>Simulations can then be run the usual way:</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[23]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="c1"># Create engine</span>
+<span class="n">engine</span> <span class="o">=</span> <span class="n">PVEngine</span><span class="p">(</span><span class="n">pvarray</span><span class="p">,</span> <span class="n">vf_calculator</span><span class="o">=</span><span class="n">vf_calculator</span><span class="p">,</span>
+                  <span class="n">irradiance_model</span><span class="o">=</span><span class="n">irradiance_model</span><span class="p">)</span>
+<span class="c1"># Fit engine to data</span>
+<span class="n">engine</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">df_inputs</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">df_inputs</span><span class="o">.</span><span class="n">dni</span><span class="p">,</span> <span class="n">df_inputs</span><span class="o">.</span><span class="n">dhi</span><span class="p">,</span>
+           <span class="n">df_inputs</span><span class="o">.</span><span class="n">solar_zenith</span><span class="p">,</span> <span class="n">df_inputs</span><span class="o">.</span><span class="n">solar_azimuth</span><span class="p">,</span>
+           <span class="n">df_inputs</span><span class="o">.</span><span class="n">surface_tilt</span><span class="p">,</span> <span class="n">df_inputs</span><span class="o">.</span><span class="n">surface_azimuth</span><span class="p">,</span>
+           <span class="n">albedo</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[24]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="c1"># Plot pvarray shapely geometries</span>
+<span class="n">f</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+<span class="n">ax</span> <span class="o">=</span> <span class="n">pvarray</span><span class="o">.</span><span class="n">plot_at_idx</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="n">ax</span><span class="p">,</span> <span class="n">with_surface_index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;Modeled PV array at </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">df_inputs</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="mi">14</span><span class="p">]))</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/tutorials_Account_for_AOI_losses_54_0.png" src="../_images/tutorials_Account_for_AOI_losses_54_0.png" />
+</div>
+</div>
+<p>Run the simulation:</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[25]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="c1"># Run full mode simulation</span>
+<span class="n">report</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">run_full_mode</span><span class="p">(</span><span class="n">fn_build_report</span><span class="o">=</span><span class="n">fn_report</span><span class="p">)</span>
+<span class="c1"># Turn report into dataframe</span>
+<span class="n">df_report</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">report</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">df_inputs</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>Let’s now see what the irradiance and AOI losses look like.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[26]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">plot_irradiance</span><span class="p">(</span><span class="n">df_report</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/tutorials_Account_for_AOI_losses_58_0.png" src="../_images/tutorials_Account_for_AOI_losses_58_0.png" />
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[27]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">plot_aoi_losses</span><span class="p">(</span><span class="n">df_report</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/tutorials_Account_for_AOI_losses_59_0.png" src="../_images/tutorials_Account_for_AOI_losses_59_0.png" />
+</div>
+</div>
+<p>This is the way to apply <code class="docutils literal notranslate"><span class="pre">fAOI</span></code> losses to all the irradiance components in a <code class="docutils literal notranslate"><span class="pre">pvfactors</span></code> simulation.</p>
+</div>
+</div>
+<div class="section" id="Doing-all-of-the-above-using-the-“run-functions”">
+<h2>Doing all of the above using the “run functions”<a class="headerlink" href="#Doing-all-of-the-above-using-the-“run-functions”" title="Permalink to this headline">¶</a></h2>
+<p>When using the “run functions”, you’ll just need to define the parameters in advance and then pass it to the functions.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[28]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="c1"># Define the parameters for the irradiance model and the view factor calculator</span>
+<span class="n">irradiance_params</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;rho_front&#39;</span><span class="p">:</span> <span class="n">rho_front</span><span class="p">,</span> <span class="s1">&#39;rho_back&#39;</span><span class="p">:</span> <span class="n">rho_back</span><span class="p">,</span>
+                     <span class="s1">&#39;faoi_fn_front&#39;</span><span class="p">:</span> <span class="n">faoi_function</span><span class="p">,</span> <span class="s1">&#39;faoi_fn_back&#39;</span><span class="p">:</span> <span class="n">faoi_function</span><span class="p">}</span>
+
+<span class="n">vf_calculator_params</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;faoi_fn_front&#39;</span><span class="p">:</span> <span class="n">faoi_function</span><span class="p">,</span> <span class="s1">&#39;faoi_fn_back&#39;</span><span class="p">:</span> <span class="n">faoi_function</span><span class="p">,</span>
+                        <span class="s1">&#39;n_aoi_integral_sections&#39;</span><span class="p">:</span> <span class="mi">1000</span><span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="Using-run_timeseries_engine()">
+<h3>Using <code class="docutils literal notranslate"><span class="pre">run_timeseries_engine()</span></code><a class="headerlink" href="#Using-run_timeseries_engine()" title="Permalink to this headline">¶</a></h3>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[29]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">pvfactors.run</span> <span class="k">import</span> <span class="n">run_timeseries_engine</span>
+
+<span class="c1"># run simulations in parallel mode</span>
+<span class="n">report_from_fn</span> <span class="o">=</span> <span class="n">run_timeseries_engine</span><span class="p">(</span><span class="n">fn_report</span><span class="p">,</span> <span class="n">pvarray_parameters</span><span class="p">,</span> <span class="n">df_inputs</span><span class="o">.</span><span class="n">index</span><span class="p">,</span>
+                                       <span class="n">df_inputs</span><span class="o">.</span><span class="n">dni</span><span class="p">,</span> <span class="n">df_inputs</span><span class="o">.</span><span class="n">dhi</span><span class="p">,</span>
+                                       <span class="n">df_inputs</span><span class="o">.</span><span class="n">solar_zenith</span><span class="p">,</span> <span class="n">df_inputs</span><span class="o">.</span><span class="n">solar_azimuth</span><span class="p">,</span>
+                                       <span class="n">df_inputs</span><span class="o">.</span><span class="n">surface_tilt</span><span class="p">,</span> <span class="n">df_inputs</span><span class="o">.</span><span class="n">surface_azimuth</span><span class="p">,</span>
+                                       <span class="n">albedo</span><span class="p">,</span>
+                                       <span class="n">irradiance_model_params</span><span class="o">=</span><span class="n">irradiance_params</span><span class="p">,</span>
+                                       <span class="n">vf_calculator_params</span><span class="o">=</span><span class="n">vf_calculator_params</span><span class="p">)</span>
+
+<span class="c1"># Turn report into dataframe</span>
+<span class="n">df_report_from_fn</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">report_from_fn</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">df_inputs</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[30]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">plot_irradiance</span><span class="p">(</span><span class="n">df_report_from_fn</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/tutorials_Account_for_AOI_losses_66_0.png" src="../_images/tutorials_Account_for_AOI_losses_66_0.png" />
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[31]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">plot_aoi_losses</span><span class="p">(</span><span class="n">df_report_from_fn</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/tutorials_Account_for_AOI_losses_67_0.png" src="../_images/tutorials_Account_for_AOI_losses_67_0.png" />
+</div>
+</div>
+</div>
+<div class="section" id="Using-run_parallel_engine()">
+<h3>Using <code class="docutils literal notranslate"><span class="pre">run_parallel_engine()</span></code><a class="headerlink" href="#Using-run_parallel_engine()" title="Permalink to this headline">¶</a></h3>
+<p>Because of Python’s multiprocessing, and because functions cannot be pickled in Python, the functions need to be wrapped up into classes.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[32]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="k">class</span> <span class="nc">ReportBuilder</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Class for building the reports with multiprocessing&quot;&quot;&quot;</span>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">build</span><span class="p">(</span><span class="n">pvarray</span><span class="p">):</span>
+        <span class="n">pvrow</span> <span class="o">=</span> <span class="n">pvarray</span><span class="o">.</span><span class="n">ts_pvrows</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">report</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;qinc_front&#39;</span><span class="p">:</span> <span class="n">pvrow</span><span class="o">.</span><span class="n">front</span><span class="o">.</span><span class="n">get_param_weighted</span><span class="p">(</span><span class="s1">&#39;qinc&#39;</span><span class="p">),</span>
+                  <span class="s1">&#39;qabs_front&#39;</span><span class="p">:</span> <span class="n">pvrow</span><span class="o">.</span><span class="n">front</span><span class="o">.</span><span class="n">get_param_weighted</span><span class="p">(</span><span class="s1">&#39;qabs&#39;</span><span class="p">),</span>
+                  <span class="s1">&#39;qinc_back&#39;</span><span class="p">:</span> <span class="n">pvrow</span><span class="o">.</span><span class="n">back</span><span class="o">.</span><span class="n">get_param_weighted</span><span class="p">(</span><span class="s1">&#39;qinc&#39;</span><span class="p">),</span>
+                  <span class="s1">&#39;qabs_back&#39;</span><span class="p">:</span> <span class="n">pvrow</span><span class="o">.</span><span class="n">back</span><span class="o">.</span><span class="n">get_param_weighted</span><span class="p">(</span><span class="s1">&#39;qabs&#39;</span><span class="p">)}</span>
+
+        <span class="c1"># Calculate AOI losses</span>
+        <span class="n">report</span><span class="p">[</span><span class="s1">&#39;aoi_losses_back_%&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">report</span><span class="p">[</span><span class="s1">&#39;qinc_back&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="n">report</span><span class="p">[</span><span class="s1">&#39;qabs_back&#39;</span><span class="p">])</span> <span class="o">/</span> <span class="n">report</span><span class="p">[</span><span class="s1">&#39;qinc_back&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="mf">100.</span>
+        <span class="n">report</span><span class="p">[</span><span class="s1">&#39;aoi_losses_front_%&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">report</span><span class="p">[</span><span class="s1">&#39;qinc_front&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="n">report</span><span class="p">[</span><span class="s1">&#39;qabs_front&#39;</span><span class="p">])</span> <span class="o">/</span> <span class="n">report</span><span class="p">[</span><span class="s1">&#39;qinc_front&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="mf">100.</span>
+        <span class="c1"># Return report</span>
+        <span class="k">return</span> <span class="n">report</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">merge</span><span class="p">(</span><span class="n">reports</span><span class="p">):</span>
+        <span class="n">report</span> <span class="o">=</span> <span class="n">reports</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">keys</span> <span class="o">=</span> <span class="n">report</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">other_report</span> <span class="ow">in</span> <span class="n">reports</span><span class="p">[</span><span class="mi">1</span><span class="p">:]:</span>
+            <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">keys</span><span class="p">:</span>
+                <span class="n">report</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">report</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
+                <span class="n">report</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">+=</span> <span class="nb">list</span><span class="p">(</span><span class="n">other_report</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">report</span>
+
+
+<span class="k">class</span> <span class="nc">FaoiClass</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Class for passing the faoi function to engine&quot;&quot;&quot;</span>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">faoi</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">fn</span> <span class="o">=</span> <span class="n">faoi_fn_from_pvlib_sandia</span><span class="p">(</span><span class="n">module_name</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">fn</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>Pass the objects through the dictionaries and run the simulation</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[33]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="c1"># Define the parameters for the irradiance model and the view factor calculator</span>
+<span class="n">irradiance_params</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;rho_front&#39;</span><span class="p">:</span> <span class="n">rho_front</span><span class="p">,</span> <span class="s1">&#39;rho_back&#39;</span><span class="p">:</span> <span class="n">rho_back</span><span class="p">,</span>
+                     <span class="s1">&#39;faoi_fn_front&#39;</span><span class="p">:</span> <span class="n">FaoiClass</span><span class="p">,</span> <span class="s1">&#39;faoi_fn_back&#39;</span><span class="p">:</span> <span class="n">FaoiClass</span><span class="p">}</span>
+
+<span class="n">vf_calculator_params</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;faoi_fn_front&#39;</span><span class="p">:</span> <span class="n">FaoiClass</span><span class="p">,</span> <span class="s1">&#39;faoi_fn_back&#39;</span><span class="p">:</span> <span class="n">FaoiClass</span><span class="p">,</span>
+                        <span class="s1">&#39;n_aoi_integral_sections&#39;</span><span class="p">:</span> <span class="mi">1000</span><span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[34]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">pvfactors.run</span> <span class="k">import</span> <span class="n">run_parallel_engine</span>
+
+<span class="c1"># run simulations in parallel mode</span>
+<span class="n">report_from_fn</span> <span class="o">=</span> <span class="n">run_parallel_engine</span><span class="p">(</span><span class="n">ReportBuilder</span><span class="p">,</span> <span class="n">pvarray_parameters</span><span class="p">,</span> <span class="n">df_inputs</span><span class="o">.</span><span class="n">index</span><span class="p">,</span>
+                                     <span class="n">df_inputs</span><span class="o">.</span><span class="n">dni</span><span class="p">,</span> <span class="n">df_inputs</span><span class="o">.</span><span class="n">dhi</span><span class="p">,</span>
+                                     <span class="n">df_inputs</span><span class="o">.</span><span class="n">solar_zenith</span><span class="p">,</span> <span class="n">df_inputs</span><span class="o">.</span><span class="n">solar_azimuth</span><span class="p">,</span>
+                                     <span class="n">df_inputs</span><span class="o">.</span><span class="n">surface_tilt</span><span class="p">,</span> <span class="n">df_inputs</span><span class="o">.</span><span class="n">surface_azimuth</span><span class="p">,</span>
+                                     <span class="n">albedo</span><span class="p">,</span>
+                                     <span class="n">irradiance_model_params</span><span class="o">=</span><span class="n">irradiance_params</span><span class="p">,</span>
+                                     <span class="n">vf_calculator_params</span><span class="o">=</span><span class="n">vf_calculator_params</span><span class="p">)</span>
+
+<span class="c1"># Turn report into dataframe</span>
+<span class="n">df_report_from_fn</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">report_from_fn</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">df_inputs</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+INFO:pvfactors.run:Parallel calculation elapsed time: 0.731104850769043 sec
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[35]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">plot_irradiance</span><span class="p">(</span><span class="n">df_report_from_fn</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/tutorials_Account_for_AOI_losses_74_0.png" src="../_images/tutorials_Account_for_AOI_losses_74_0.png" />
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[36]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">plot_aoi_losses</span><span class="p">(</span><span class="n">df_report_from_fn</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/tutorials_Account_for_AOI_losses_75_0.png" src="../_images/tutorials_Account_for_AOI_losses_75_0.png" />
+</div>
+</div>
+<p>It’s that easy!</p>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="Run_fast_simulations.html" class="btn btn-neutral float-right" title="Run fast simulations" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="Run_full_parallel_simulations.html" class="btn btn-neutral float-left" title="Run full simulations in parallel" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2016, SunPower Corporation
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

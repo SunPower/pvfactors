@@ -91,5 +91,11 @@ pvfactors.geometry.pvground.TsGround
       
          ~TsGround.shaded_length
       
+      
+         ~TsGround.x_max
+      
+      
+         ~TsGround.x_min
+      
    
    

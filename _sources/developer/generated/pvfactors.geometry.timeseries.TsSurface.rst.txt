@@ -55,5 +55,8 @@ pvfactors.geometry.timeseries.TsSurface
       
          ~TsSurface.lowest_point
       
+      
+         ~TsSurface.u_vector
+      
    
    

@@ -43,6 +43,7 @@ In the "full mode", ``pvfactors`` calculates the equilibrium of reflections betw
    Calculate_view_factors
    Run_full_timeseries_simulations
    Run_full_parallel_simulations
+   Account_for_AOI_losses
 
 
 Details on the "fast mode" simulations

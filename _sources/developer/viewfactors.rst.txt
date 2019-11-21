@@ -19,10 +19,10 @@ calculator
 
    ~pvfactors.viewfactors.calculator.VFCalculator
 
-methods
-^^^^^^^
+timeseries view factor methods
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. automodule:: pvfactors.viewfactors.methods
+.. automodule:: pvfactors.viewfactors.vfmethods
    :no-members:
    :no-inherited-members:
    :noindex:
@@ -31,4 +31,18 @@ methods
    :toctree: generated/
    :nosignatures:
 
-   ~pvfactors.viewfactors.methods.VFTsMethods
+   ~pvfactors.viewfactors.vfmethods.VFTsMethods
+
+view factor aoi methods
+^^^^^^^^^^^^^^^^^^^^^^^
+
+.. automodule:: pvfactors.viewfactors.aoimethods
+   :no-members:
+   :no-inherited-members:
+   :noindex:
+
+.. autosummary::
+   :toctree: generated/
+   :nosignatures:
+
+   ~pvfactors.viewfactors.aoimethods.AOIMethods

@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>pvfactors.irradiance.models.IsotropicOrdered &mdash; pvfactors 1.3.0 documentation</title>
+  <title>pvfactors.irradiance.models.IsotropicOrdered &mdash; pvfactors 1.4.0 documentation</title>
   
 
   
@@ -68,7 +68,7 @@
             
             
               <div class="version">
-                1.3.0
+                1.4.0
               </div>
             
           
@@ -198,14 +198,14 @@
 <h1>pvfactors.irradiance.models.IsotropicOrdered<a class="headerlink" href="#pvfactors-irradiance-models-isotropicordered" title="Permalink to this headline">¶</a></h1>
 <dl class="class">
 <dt id="pvfactors.irradiance.models.IsotropicOrdered">
-<em class="property">class </em><code class="sig-prename descclassname">pvfactors.irradiance.models.</code><code class="sig-name descname">IsotropicOrdered</code><span class="sig-paren">(</span><em class="sig-param">rho_front=0.01</em>, <em class="sig-param">rho_back=0.03</em>, <em class="sig-param">module_transparency=0.0</em>, <em class="sig-param">module_spacing_ratio=0.0</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pvfactors/irradiance/models.html#IsotropicOrdered"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pvfactors.irradiance.models.IsotropicOrdered" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">pvfactors.irradiance.models.</code><code class="sig-name descname">IsotropicOrdered</code><span class="sig-paren">(</span><em class="sig-param">rho_front=0.01</em>, <em class="sig-param">rho_back=0.03</em>, <em class="sig-param">module_transparency=0.0</em>, <em class="sig-param">module_spacing_ratio=0.0</em>, <em class="sig-param">faoi_fn_front=None</em>, <em class="sig-param">faoi_fn_back=None</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pvfactors/irradiance/models.html#IsotropicOrdered"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pvfactors.irradiance.models.IsotropicOrdered" title="Permalink to this definition">¶</a></dt>
 <dd><p>Diffuse isotropic sky model for
 <a class="reference internal" href="pvfactors.geometry.pvarray.OrderedPVArray.html#pvfactors.geometry.pvarray.OrderedPVArray" title="pvfactors.geometry.pvarray.OrderedPVArray"><code class="xref py py-class docutils literal notranslate"><span class="pre">OrderedPVArray</span></code></a>. It will
 calculate the appropriate values for an isotropic sky dome and apply
 it to the PV array.</p>
 <dl class="method">
 <dt id="pvfactors.irradiance.models.IsotropicOrdered.__init__">
-<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param">rho_front=0.01</em>, <em class="sig-param">rho_back=0.03</em>, <em class="sig-param">module_transparency=0.0</em>, <em class="sig-param">module_spacing_ratio=0.0</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pvfactors/irradiance/models.html#IsotropicOrdered.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pvfactors.irradiance.models.IsotropicOrdered.__init__" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param">rho_front=0.01</em>, <em class="sig-param">rho_back=0.03</em>, <em class="sig-param">module_transparency=0.0</em>, <em class="sig-param">module_spacing_ratio=0.0</em>, <em class="sig-param">faoi_fn_front=None</em>, <em class="sig-param">faoi_fn_back=None</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pvfactors/irradiance/models.html#IsotropicOrdered.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pvfactors.irradiance.models.IsotropicOrdered.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><p>Initialize irradiance model values that will be saved later on.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -220,6 +220,16 @@ covered by the space between PV modules over the total area of the
 PV rows, and which determines how much direct light will reach the
 shaded ground through the PV rows
 (Default = 0., no spacing at all)</p></li>
+<li><p><strong>faoi_fn_front</strong> (<em>function</em><em> or </em><em>object</em><em>, </em><em>optional</em>) – Function (or object containing <code class="docutils literal notranslate"><span class="pre">faoi</span></code> method)
+which takes a list (or numpy array) of incidence angles
+measured from the surface horizontal
+(with values from 0 to 180 deg) and returns the fAOI values for
+the front side of PV rows (default = None)</p></li>
+<li><p><strong>faoi_fn_back</strong> (<em>function</em><em> or </em><em>object</em><em>, </em><em>optional</em>) – Function (or object containing <code class="docutils literal notranslate"><span class="pre">faoi</span></code> method)
+which takes a list (or numpy array) of incidence angles
+measured from the surface horizontal
+(with values from 0 to 180 deg) and returns the fAOI values for
+the back side of PV rows (default = None)</p></li>
 </ul>
 </dd>
 </dl>
