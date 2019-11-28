@@ -195,34 +195,38 @@ class PVEngine(object):
         pvarray = self.pvarray
 
         # Get the irradiance modeling matrices
-        # shape = n_surfaces, n_timesteps
+        # shape = n_surfaces + 1, n_timesteps
         irradiance_mat, rho_mat, invrho_mat, _ = \
             self.irradiance.get_full_ts_modeling_vectors(pvarray)
 
         # --- Calculate view factors
-        # shape = n_surfaces, n_surfaces, n_timesteps
+        # shape = n_surfaces + 1, n_surfaces + 1, n_timesteps
         ts_vf_matrix = self.vf_calculator.build_ts_vf_matrix(pvarray)
         pvarray.ts_vf_matrix = ts_vf_matrix
         # Reshape for broadcasting and inverting
-        # shape = n_timesteps, n_surfaces, n_surfaces
+        # shape = n_timesteps, n_surfaces + 1, n_surfaces + 1
         ts_vf_matrix_reshaped = np.moveaxis(ts_vf_matrix, -1, 0)
 
         # --- Solve mathematical problem
-        # Build matrix of inverse reflectivities
-        # shape = n_surfaces, n_surfaces
-        invrho_mat = np.diag(invrho_mat[:, 0])
+        # shape of system = n_timesteps, n_surfaces + 1, n_surfaces + 1
+        shape_system = ts_vf_matrix_reshaped.shape
+        # Build 3d matrix of inverse reflectivities: diagonal for each ts
+        # shape = n_timesteps, n_surfaces + 1, n_surfaces + 1
+        invrho_ts_diag = np.zeros(shape_system)
+        for idx_surf in range(shape_system[1]):
+            invrho_ts_diag[:, idx_surf, idx_surf] = invrho_mat[idx_surf, :]
         # Subtract matrices: will rely on broadcasting
-        # shape = n_timesteps, n_surfaces, n_surfaces
-        a_mat = invrho_mat - ts_vf_matrix_reshaped
+        # shape = n_timesteps, n_surfaces + 1, n_surfaces + 1
+        a_mat = invrho_ts_diag - ts_vf_matrix_reshaped
         # Calculate inverse, requires specific shape
-        # shape = n_timesteps, n_surfaces, n_surfaces
+        # shape = n_timesteps, n_surfaces + 1, n_surfaces + 1
         inv_a_mat = np.linalg.inv(a_mat)
         # Use einstein sum to get final timeseries radiosities
-        # shape = n_surfaces, n_timesteps
+        # shape = n_surfaces + 1, n_timesteps
         q0 = np.einsum('ijk,ki->ji', inv_a_mat, irradiance_mat)
         # Calculate incident irradiance: will rely on broadcasting
-        # shape = n_surfaces, n_timesteps
-        qinc = np.dot(invrho_mat, q0)
+        # shape = n_surfaces + 1, n_timesteps
+        qinc = np.einsum('ijk,ki->ji', invrho_ts_diag, q0)
 
         # --- Derive other irradiance terms
         # shape = n_surfaces, n_timesteps
@@ -230,11 +234,16 @@ class PVEngine(object):
         reflection_mat = qinc[:-1, :] - irradiance_mat[:-1, :] - isotropic_mat
 
         # --- Calculate AOI losses and absorbed irradiance
-        rho_mat = np.tile(rho_mat[:, 0], (rho_mat.shape[0], 1)).T
+        # Create tiled reflection matrix of
+        # shape = n_surfaces + 1, n_surfaces + 1, n_timestamps
+        rho_ts_tiled = np.moveaxis(np.tile(rho_mat.T, (shape_system[1], 1, 1)),
+                                   -1, 0)
+        # Get vf AOI matrix
         # shape [n_surfaces + 1, n_surfaces + 1, n_timestamps]
         vf_aoi_matrix = (self.vf_calculator
-                         .build_ts_vf_aoi_matrix(pvarray, rho_mat))
+                         .build_ts_vf_aoi_matrix(pvarray, rho_ts_tiled))
         pvarray.ts_vf_aoi_matrix = vf_aoi_matrix
+        # Get absorbed irradiance matrix
         # shape [n_surfaces, n_timestamps]
         irradiance_abs_mat = (
             self.irradiance.get_summed_components(pvarray, absorbed=True))
