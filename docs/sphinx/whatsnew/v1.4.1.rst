@@ -1,0 +1,16 @@
+.. _whatsnew_141:
+
+v1.4.1 (November 29, 2019)
+==========================
+
+Fix
+---
+
+The vectorization of the calculations (from v1.3.0) in the PVEngine had removed the ability to account for timeseries albedo values (it was only using the first albedo value). This fix repairs that issue by building the full 3D matrices for the reflectivity values (and the inverse reflectivity values as well).
+
+* PVEngine needs to use timeseries albedo values (#98)
+
+Contributors
+------------
+
+* Marc Anoma (:ghuser:`anomam`)
