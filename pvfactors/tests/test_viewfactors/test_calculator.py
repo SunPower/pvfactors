@@ -86,9 +86,9 @@ def test_vfcalculator_no_aoi_functions(params):
     assert np.sum(vfcalculator.vf_matrix) > 0
     # Compute reflectivity
     rho_mat = np.tile([0.03] * (pvarray.n_ts_surfaces + 1),
-                      (pvarray.n_ts_surfaces + 1, 1)).T
+                      (1, pvarray.n_ts_surfaces + 1, 1)).T
     assert rho_mat.shape == (pvarray.n_ts_surfaces + 1,
-                             pvarray.n_ts_surfaces + 1)
+                             pvarray.n_ts_surfaces + 1, 1)
     vf_aoi_matrix = vfcalculator.build_ts_vf_aoi_matrix(pvarray, rho_mat)
 
     # Check that correct size
