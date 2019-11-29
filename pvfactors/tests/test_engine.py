@@ -624,3 +624,42 @@ def test_engine_w_faoi_fn_in_irradiance_vfcalcs(params, pvmodule_canadian):
     np.testing.assert_almost_equal(
         pvarray.ts_pvrows[1].back.get_param_weighted('qabs'),
         [114.2143503])
+
+
+def test_engine_variable_albedo(params, df_inputs_clearsky_8760):
+    """Run PV engine calcs with variable albedo"""
+
+    irradiance_model = HybridPerezOrdered()
+    pvarray = OrderedPVArray.init_from_dict(params)
+    eng = PVEngine(pvarray, irradiance_model=irradiance_model)
+
+    # Manage timeseries inputs
+    df_inputs = df_inputs_clearsky_8760
+
+    # Get MET data
+    timestamps = df_inputs.index
+    dni = df_inputs.dni.values
+    dhi = df_inputs.dhi.values
+    solar_zenith = df_inputs.solar_zenith.values
+    solar_azimuth = df_inputs.solar_azimuth.values
+    surface_tilt = df_inputs.surface_tilt.values
+    surface_azimuth = df_inputs.surface_azimuth.values
+    albedo = np.linspace(0, 1, num=8760)
+
+    # Fit engine
+    eng.fit(timestamps, dni, dhi, solar_zenith, solar_azimuth,
+            surface_tilt, surface_azimuth, albedo)
+
+    # Run timestep
+    pvarray = eng.run_full_mode(fn_build_report=lambda pvarray: pvarray)
+    # Check the bifacial gain values
+    pvrow = pvarray.ts_pvrows[1]
+    bfg = (np.nansum(pvrow.back.get_param_weighted('qinc'))
+           / np.nansum(pvrow.front.get_param_weighted('qinc'))) * 100.
+    bfg_after_aoi = (np.nansum(pvrow.back.get_param_weighted('qabs'))
+                     / np.nansum(pvrow.front.get_param_weighted('qabs'))
+                     ) * 100.
+    expected_bfg = 16.441664
+    expected_bfg_after_aoi = 16.109509
+    np.testing.assert_allclose(bfg, expected_bfg)
+    np.testing.assert_allclose(bfg_after_aoi, expected_bfg_after_aoi)
