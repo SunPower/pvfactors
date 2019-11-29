@@ -136,7 +136,8 @@ class VFCalculator(object):
             PV array whose timeseries view factor AOI matrix to calculate
         rho_mat : np.ndarray
             2D matrix of reflectivity values for all the surfaces in the
-            PV array + sky. Shape = [n_ts_surfaces + 1, n_ts_surfaces + 1]
+            PV array + sky.
+            Shape = [n_ts_surfaces + 1, n_ts_surfaces + 1, n_timestamps]
 
         Returns
         -------
@@ -161,9 +162,7 @@ class VFCalculator(object):
         if self.vf_aoi_methods is None:
             # The reflection losses will be considered all diffuse.
             faoi_diffuse = 1. - rho_mat
-            # use broadcasting
-            vf_aoi_matrix = faoi_diffuse * np.moveaxis(vf_aoi_matrix, -1, 0)
-            vf_aoi_matrix = np.moveaxis(vf_aoi_matrix, 0, -1)
+            vf_aoi_matrix = faoi_diffuse * vf_aoi_matrix
         else:
             # Calculate vf_aoi between pvrow and ground surfaces
             self.vf_aoi_methods.vf_aoi_pvrow_to_gnd(ts_pvrows, ts_ground,
