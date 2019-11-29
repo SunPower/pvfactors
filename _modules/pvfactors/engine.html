@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>pvfactors.engine &mdash; pvfactors 1.4.0 documentation</title>
+  <title>pvfactors.engine &mdash; pvfactors 1.4.1 documentation</title>
   
 
   
@@ -66,7 +66,7 @@
             
             
               <div class="version">
-                1.4.0
+                1.4.1
               </div>
             
           
@@ -357,34 +357,38 @@
         <span class="n">pvarray</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pvarray</span>
 
         <span class="c1"># Get the irradiance modeling matrices</span>
-        <span class="c1"># shape = n_surfaces, n_timesteps</span>
+        <span class="c1"># shape = n_surfaces + 1, n_timesteps</span>
         <span class="n">irradiance_mat</span><span class="p">,</span> <span class="n">rho_mat</span><span class="p">,</span> <span class="n">invrho_mat</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> \
             <span class="bp">self</span><span class="o">.</span><span class="n">irradiance</span><span class="o">.</span><span class="n">get_full_ts_modeling_vectors</span><span class="p">(</span><span class="n">pvarray</span><span class="p">)</span>
 
         <span class="c1"># --- Calculate view factors</span>
-        <span class="c1"># shape = n_surfaces, n_surfaces, n_timesteps</span>
+        <span class="c1"># shape = n_surfaces + 1, n_surfaces + 1, n_timesteps</span>
         <span class="n">ts_vf_matrix</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vf_calculator</span><span class="o">.</span><span class="n">build_ts_vf_matrix</span><span class="p">(</span><span class="n">pvarray</span><span class="p">)</span>
         <span class="n">pvarray</span><span class="o">.</span><span class="n">ts_vf_matrix</span> <span class="o">=</span> <span class="n">ts_vf_matrix</span>
         <span class="c1"># Reshape for broadcasting and inverting</span>
-        <span class="c1"># shape = n_timesteps, n_surfaces, n_surfaces</span>
+        <span class="c1"># shape = n_timesteps, n_surfaces + 1, n_surfaces + 1</span>
         <span class="n">ts_vf_matrix_reshaped</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">moveaxis</span><span class="p">(</span><span class="n">ts_vf_matrix</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
 
         <span class="c1"># --- Solve mathematical problem</span>
-        <span class="c1"># Build matrix of inverse reflectivities</span>
-        <span class="c1"># shape = n_surfaces, n_surfaces</span>
-        <span class="n">invrho_mat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">invrho_mat</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">])</span>
+        <span class="c1"># shape of system = n_timesteps, n_surfaces + 1, n_surfaces + 1</span>
+        <span class="n">shape_system</span> <span class="o">=</span> <span class="n">ts_vf_matrix_reshaped</span><span class="o">.</span><span class="n">shape</span>
+        <span class="c1"># Build 3d matrix of inverse reflectivities: diagonal for each ts</span>
+        <span class="c1"># shape = n_timesteps, n_surfaces + 1, n_surfaces + 1</span>
+        <span class="n">invrho_ts_diag</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">shape_system</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">idx_surf</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">shape_system</span><span class="p">[</span><span class="mi">1</span><span class="p">]):</span>
+            <span class="n">invrho_ts_diag</span><span class="p">[:,</span> <span class="n">idx_surf</span><span class="p">,</span> <span class="n">idx_surf</span><span class="p">]</span> <span class="o">=</span> <span class="n">invrho_mat</span><span class="p">[</span><span class="n">idx_surf</span><span class="p">,</span> <span class="p">:]</span>
         <span class="c1"># Subtract matrices: will rely on broadcasting</span>
-        <span class="c1"># shape = n_timesteps, n_surfaces, n_surfaces</span>
-        <span class="n">a_mat</span> <span class="o">=</span> <span class="n">invrho_mat</span> <span class="o">-</span> <span class="n">ts_vf_matrix_reshaped</span>
+        <span class="c1"># shape = n_timesteps, n_surfaces + 1, n_surfaces + 1</span>
+        <span class="n">a_mat</span> <span class="o">=</span> <span class="n">invrho_ts_diag</span> <span class="o">-</span> <span class="n">ts_vf_matrix_reshaped</span>
         <span class="c1"># Calculate inverse, requires specific shape</span>
-        <span class="c1"># shape = n_timesteps, n_surfaces, n_surfaces</span>
+        <span class="c1"># shape = n_timesteps, n_surfaces + 1, n_surfaces + 1</span>
         <span class="n">inv_a_mat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">a_mat</span><span class="p">)</span>
         <span class="c1"># Use einstein sum to get final timeseries radiosities</span>
-        <span class="c1"># shape = n_surfaces, n_timesteps</span>
+        <span class="c1"># shape = n_surfaces + 1, n_timesteps</span>
         <span class="n">q0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s1">&#39;ijk,ki-&gt;ji&#39;</span><span class="p">,</span> <span class="n">inv_a_mat</span><span class="p">,</span> <span class="n">irradiance_mat</span><span class="p">)</span>
         <span class="c1"># Calculate incident irradiance: will rely on broadcasting</span>
-        <span class="c1"># shape = n_surfaces, n_timesteps</span>
-        <span class="n">qinc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">invrho_mat</span><span class="p">,</span> <span class="n">q0</span><span class="p">)</span>
+        <span class="c1"># shape = n_surfaces + 1, n_timesteps</span>
+        <span class="n">qinc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s1">&#39;ijk,ki-&gt;ji&#39;</span><span class="p">,</span> <span class="n">invrho_ts_diag</span><span class="p">,</span> <span class="n">q0</span><span class="p">)</span>
 
         <span class="c1"># --- Derive other irradiance terms</span>
         <span class="c1"># shape = n_surfaces, n_timesteps</span>
@@ -392,11 +396,16 @@
         <span class="n">reflection_mat</span> <span class="o">=</span> <span class="n">qinc</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">:]</span> <span class="o">-</span> <span class="n">irradiance_mat</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">:]</span> <span class="o">-</span> <span class="n">isotropic_mat</span>
 
         <span class="c1"># --- Calculate AOI losses and absorbed irradiance</span>
-        <span class="n">rho_mat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">rho_mat</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">(</span><span class="n">rho_mat</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">1</span><span class="p">))</span><span class="o">.</span><span class="n">T</span>
+        <span class="c1"># Create tiled reflection matrix of</span>
+        <span class="c1"># shape = n_surfaces + 1, n_surfaces + 1, n_timestamps</span>
+        <span class="n">rho_ts_tiled</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">moveaxis</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">rho_mat</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="p">(</span><span class="n">shape_system</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)),</span>
+                                   <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="c1"># Get vf AOI matrix</span>
         <span class="c1"># shape [n_surfaces + 1, n_surfaces + 1, n_timestamps]</span>
         <span class="n">vf_aoi_matrix</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vf_calculator</span>
-                         <span class="o">.</span><span class="n">build_ts_vf_aoi_matrix</span><span class="p">(</span><span class="n">pvarray</span><span class="p">,</span> <span class="n">rho_mat</span><span class="p">))</span>
+                         <span class="o">.</span><span class="n">build_ts_vf_aoi_matrix</span><span class="p">(</span><span class="n">pvarray</span><span class="p">,</span> <span class="n">rho_ts_tiled</span><span class="p">))</span>
         <span class="n">pvarray</span><span class="o">.</span><span class="n">ts_vf_aoi_matrix</span> <span class="o">=</span> <span class="n">vf_aoi_matrix</span>
+        <span class="c1"># Get absorbed irradiance matrix</span>
         <span class="c1"># shape [n_surfaces, n_timestamps]</span>
         <span class="n">irradiance_abs_mat</span> <span class="o">=</span> <span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">irradiance</span><span class="o">.</span><span class="n">get_summed_components</span><span class="p">(</span><span class="n">pvarray</span><span class="p">,</span> <span class="n">absorbed</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>

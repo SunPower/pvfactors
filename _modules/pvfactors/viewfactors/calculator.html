@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>pvfactors.viewfactors.calculator &mdash; pvfactors 1.4.0 documentation</title>
+  <title>pvfactors.viewfactors.calculator &mdash; pvfactors 1.4.1 documentation</title>
   
 
   
@@ -66,7 +66,7 @@
             
             
               <div class="version">
-                1.4.0
+                1.4.1
               </div>
             
           
@@ -298,7 +298,8 @@
 <span class="sd">            PV array whose timeseries view factor AOI matrix to calculate</span>
 <span class="sd">        rho_mat : np.ndarray</span>
 <span class="sd">            2D matrix of reflectivity values for all the surfaces in the</span>
-<span class="sd">            PV array + sky. Shape = [n_ts_surfaces + 1, n_ts_surfaces + 1]</span>
+<span class="sd">            PV array + sky.</span>
+<span class="sd">            Shape = [n_ts_surfaces + 1, n_ts_surfaces + 1, n_timestamps]</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
@@ -323,9 +324,7 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">vf_aoi_methods</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="c1"># The reflection losses will be considered all diffuse.</span>
             <span class="n">faoi_diffuse</span> <span class="o">=</span> <span class="mf">1.</span> <span class="o">-</span> <span class="n">rho_mat</span>
-            <span class="c1"># use broadcasting</span>
-            <span class="n">vf_aoi_matrix</span> <span class="o">=</span> <span class="n">faoi_diffuse</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">moveaxis</span><span class="p">(</span><span class="n">vf_aoi_matrix</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
-            <span class="n">vf_aoi_matrix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">moveaxis</span><span class="p">(</span><span class="n">vf_aoi_matrix</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">vf_aoi_matrix</span> <span class="o">=</span> <span class="n">faoi_diffuse</span> <span class="o">*</span> <span class="n">vf_aoi_matrix</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="c1"># Calculate vf_aoi between pvrow and ground surfaces</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">vf_aoi_methods</span><span class="o">.</span><span class="n">vf_aoi_pvrow_to_gnd</span><span class="p">(</span><span class="n">ts_pvrows</span><span class="p">,</span> <span class="n">ts_ground</span><span class="p">,</span>
