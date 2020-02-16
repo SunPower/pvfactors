@@ -338,7 +338,7 @@ class TsSide(object):
                 is_shaded)
             # Create segment
             segment = TsSegment(segment_coords, illum, shaded,
-                                n_vector=n_vector)
+                                n_vector=n_vector, index=i)
             list_segments.append(segment)
 
         return cls(list_segments, n_vector=n_vector)
