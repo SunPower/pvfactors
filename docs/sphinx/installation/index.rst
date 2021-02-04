@@ -23,9 +23,9 @@ try installing conda from conda-forge with:
 
    $ conda install -c conda-forge shapely
 
-Windows users may also be able to resolve the issue by installing wheels from `Cristoph Gohlke`_.
+Windows users may also be able to resolve the issue by installing wheels from `Christoph Gohlke`_.
 
-.. _Cristoph Gohlke: https://www.lfd.uci.edu/~gohlke/pythonlibs/#shapely
+.. _Christoph Gohlke: https://www.lfd.uci.edu/~gohlke/pythonlibs/#shapely
 
 
 pvlib implementation

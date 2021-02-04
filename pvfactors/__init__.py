@@ -14,7 +14,7 @@ except OSError as err:
         "shapely was installed from PyPI using pip. Try reinstalling shapely "
         "from another source like conda-forge with "
         "`conda install -c conda-forge shapely`, or alternatively from "
-        "Cristoph Gohlke's website if you're on Windows: "
+        "Christoph Gohlke's website if you're on Windows: "
         "https://www.lfd.uci.edu/~gohlke/pythonlibs/#shapely"
     )
     err.strerror += "; " + msg
