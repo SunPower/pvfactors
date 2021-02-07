@@ -13,7 +13,7 @@ Enhancements
 Fix
 ---
 
-* TsSegement were missing proper indexing (#102)
+* TsSegement was missing proper indexing (#102)
 * Fix CI: restrict pvlib to <0.8.0 because of API break, reduce test length because of hanging CI (#112)
 
 Contributors
