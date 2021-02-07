@@ -1,0 +1,24 @@
+.. _whatsnew_150:
+
+v1.5.0 (February 7, 2021)
+==========================
+
+Enhancements
+------------
+
+* Add import check for shapely/geos (#110)
+* Drop Python 2.7, 3.5, add Python 3.8 (#112)
+
+
+Fix
+---
+
+* TsSegement were missing proper indexing (#102)
+* Fix CI: restrict pvlib to <0.8.0 because of API break, reduce test length because of hanging CI (#112)
+
+Contributors
+------------
+
+* Thomas Capelle (:ghuser:`tcapelle`)
+* Kevin Anderson (:ghuser:`kanderso-nrel`)
+* Marc Anoma (:ghuser:`anomam`)
