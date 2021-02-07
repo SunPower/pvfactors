@@ -6,6 +6,7 @@ from pvfactors.viewfactors.aoimethods import faoi_fn_from_pvlib_sandia
 from pvfactors.viewfactors.calculator import VFCalculator
 import numpy as np
 import datetime as dt
+import pytest
 
 
 def test_pvengine_float_inputs_iso(params):
@@ -625,7 +626,7 @@ def test_engine_w_faoi_fn_in_irradiance_vfcalcs(params, pvmodule_canadian):
         pvarray.ts_pvrows[1].back.get_param_weighted('qabs'),
         [114.2143503])
 
-
+@pytest.mark.skip("disable test to see if responsible for circleci hanging")
 def test_engine_variable_albedo(params, df_inputs_clearsky_8760):
     """Run PV engine calcs with variable albedo"""
 
