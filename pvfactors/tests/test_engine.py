@@ -626,7 +626,7 @@ def test_engine_w_faoi_fn_in_irradiance_vfcalcs(params, pvmodule_canadian):
         pvarray.ts_pvrows[1].back.get_param_weighted('qabs'),
         [114.2143503])
 
-@pytest.mark.skip("disable test to see if responsible for circleci hanging")
+
 def test_engine_variable_albedo(params, df_inputs_clearsky_8760):
     """Run PV engine calcs with variable albedo"""
 
@@ -645,7 +645,7 @@ def test_engine_variable_albedo(params, df_inputs_clearsky_8760):
     solar_azimuth = df_inputs.solar_azimuth.values
     surface_tilt = df_inputs.surface_tilt.values
     surface_azimuth = df_inputs.surface_azimuth.values
-    albedo = np.linspace(0, 1, num=8760)
+    albedo = np.linspace(0.01, 1, num=8760)
 
     # Fit engine
     eng.fit(timestamps, dni, dhi, solar_zenith, solar_azimuth,
@@ -660,7 +660,7 @@ def test_engine_variable_albedo(params, df_inputs_clearsky_8760):
     bfg_after_aoi = (np.nansum(pvrow.back.get_param_weighted('qabs'))
                      / np.nansum(pvrow.front.get_param_weighted('qabs'))
                      ) * 100.
-    expected_bfg = 16.441664
-    expected_bfg_after_aoi = 16.109509
+    expected_bfg = 16.608263
+    expected_bfg_after_aoi = 16.272742
     np.testing.assert_allclose(bfg, expected_bfg)
     np.testing.assert_allclose(bfg_after_aoi, expected_bfg_after_aoi)

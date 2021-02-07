@@ -38,7 +38,7 @@ jobs:
             - ~/.go_workspace
             - ~/.gradle
             - ~/.cache/bower
-      - run: pytest
+      - run: pytest -s
       - store_test_results:
           path: /tmp/circleci-test-results
       - store_artifacts:
