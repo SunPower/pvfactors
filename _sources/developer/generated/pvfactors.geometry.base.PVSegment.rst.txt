@@ -1,4 +1,4 @@
-pvfactors.geometry.base.PVSegment
+﻿pvfactors.geometry.base.PVSegment
 =================================
 
 .. currentmodule:: pvfactors.geometry.base
@@ -93,6 +93,7 @@ pvfactors.geometry.base.PVSegment
       
       
          ~PVSegment.illum_collection
+      
       
       
       

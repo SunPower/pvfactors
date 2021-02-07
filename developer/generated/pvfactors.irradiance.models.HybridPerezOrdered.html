@@ -1,43 +1,47 @@
 
 
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8">
+  <meta charset="utf-8" />
   
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>pvfactors.irradiance.models.HybridPerezOrdered &mdash; pvfactors 1.4.1 documentation</title>
+  <title>pvfactors.irradiance.models.HybridPerezOrdered &mdash; pvfactors 1.5.0 documentation</title>
   
-
-  
-  
-    <link rel="shortcut icon" href="../../_static/favicon.ico"/>
-  
-  
-  
-
-  
-  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
-  
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
-        <script type="text/javascript" src="../../_static/jquery.js"></script>
-        <script type="text/javascript" src="../../_static/underscore.js"></script>
-        <script type="text/javascript" src="../../_static/doctools.js"></script>
-        <script type="text/javascript" src="../../_static/language_data.js"></script>
-        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
-        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
-    
-    <script type="text/javascript" src="../../_static/js/theme.js"></script>
-
-    
 
   
   <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
   <link rel="stylesheet" href="../../_static/css/custom.css" type="text/css" />
+
+  
+  
+    <link rel="shortcut icon" href="../../_static/favicon.ico"/>
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
     <link rel="next" title="pvfactors.engine.PVEngine" href="pvfactors.engine.PVEngine.html" />
@@ -68,7 +72,7 @@
             
             
               <div class="version">
-                1.4.1
+                1.5.0
               </div>
             
           
@@ -85,6 +89,7 @@
           
         </div>
 
+        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
@@ -104,6 +109,7 @@
             
           
         </div>
+        
       </div>
     </nav>
 
@@ -140,11 +146,13 @@
 
 
 
+
+
 <div role="navigation" aria-label="breadcrumbs navigation">
 
   <ul class="wy-breadcrumbs">
     
-      <li><a href="../../index.html">Docs</a> &raquo;</li>
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
         
           <li><a href="../index.html">Developer API</a> &raquo;</li>
         
@@ -153,7 +161,7 @@
     
       <li class="wy-breadcrumbs-aside">
         
-            
+          
             
               <!-- User defined GitHub URL -->
               <a href="https://github.com/SunPower/pvfactors/" class="fa fa-github"> Edit on GitHub</a>
@@ -175,13 +183,13 @@
 /* CSS overrides for sphinx_rtd_theme */
 
 /* 24px margin */
-.nbinput.nblast,
-.nboutput.nblast {
+.nbinput.nblast.container,
+.nboutput.nblast.container {
     margin-bottom: 19px;  /* padding has already 5px */
 }
 
 /* ... except between code cells! */
-.nblast + .nbinput {
+.nblast.container + .nbinput.container {
     margin-top: -19px;
 }
 
@@ -196,17 +204,17 @@
 </style>
 <div class="section" id="pvfactors-irradiance-models-hybridperezordered">
 <h1>pvfactors.irradiance.models.HybridPerezOrdered<a class="headerlink" href="#pvfactors-irradiance-models-hybridperezordered" title="Permalink to this headline">¶</a></h1>
-<dl class="class">
+<dl class="py class">
 <dt id="pvfactors.irradiance.models.HybridPerezOrdered">
-<em class="property">class </em><code class="sig-prename descclassname">pvfactors.irradiance.models.</code><code class="sig-name descname">HybridPerezOrdered</code><span class="sig-paren">(</span><em class="sig-param">horizon_band_angle=6.5</em>, <em class="sig-param">circumsolar_angle=30.0</em>, <em class="sig-param">circumsolar_model='uniform_disk'</em>, <em class="sig-param">rho_front=0.01</em>, <em class="sig-param">rho_back=0.03</em>, <em class="sig-param">module_transparency=0.0</em>, <em class="sig-param">module_spacing_ratio=0.0</em>, <em class="sig-param">faoi_fn_front=None</em>, <em class="sig-param">faoi_fn_back=None</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pvfactors/irradiance/models.html#HybridPerezOrdered"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pvfactors.irradiance.models.HybridPerezOrdered" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">pvfactors.irradiance.models.</code><code class="sig-name descname">HybridPerezOrdered</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">horizon_band_angle</span><span class="o">=</span><span class="default_value">6.5</span></em>, <em class="sig-param"><span class="n">circumsolar_angle</span><span class="o">=</span><span class="default_value">30.0</span></em>, <em class="sig-param"><span class="n">circumsolar_model</span><span class="o">=</span><span class="default_value">'uniform_disk'</span></em>, <em class="sig-param"><span class="n">rho_front</span><span class="o">=</span><span class="default_value">0.01</span></em>, <em class="sig-param"><span class="n">rho_back</span><span class="o">=</span><span class="default_value">0.03</span></em>, <em class="sig-param"><span class="n">module_transparency</span><span class="o">=</span><span class="default_value">0.0</span></em>, <em class="sig-param"><span class="n">module_spacing_ratio</span><span class="o">=</span><span class="default_value">0.0</span></em>, <em class="sig-param"><span class="n">faoi_fn_front</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">faoi_fn_back</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pvfactors/irradiance/models.html#HybridPerezOrdered"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pvfactors.irradiance.models.HybridPerezOrdered" title="Permalink to this definition">¶</a></dt>
 <dd><p>Model is based off Perez diffuse light model, and
 applied to pvfactors <a class="reference internal" href="pvfactors.geometry.pvarray.OrderedPVArray.html#pvfactors.geometry.pvarray.OrderedPVArray" title="pvfactors.geometry.pvarray.OrderedPVArray"><code class="xref py py-class docutils literal notranslate"><span class="pre">OrderedPVArray</span></code></a>
 objects.
 The model applies direct, circumsolar, and horizon irradiance to the PV
 array surfaces.</p>
-<dl class="method">
+<dl class="py method">
 <dt id="pvfactors.irradiance.models.HybridPerezOrdered.__init__">
-<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param">horizon_band_angle=6.5</em>, <em class="sig-param">circumsolar_angle=30.0</em>, <em class="sig-param">circumsolar_model='uniform_disk'</em>, <em class="sig-param">rho_front=0.01</em>, <em class="sig-param">rho_back=0.03</em>, <em class="sig-param">module_transparency=0.0</em>, <em class="sig-param">module_spacing_ratio=0.0</em>, <em class="sig-param">faoi_fn_front=None</em>, <em class="sig-param">faoi_fn_back=None</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pvfactors/irradiance/models.html#HybridPerezOrdered.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pvfactors.irradiance.models.HybridPerezOrdered.__init__" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">horizon_band_angle</span><span class="o">=</span><span class="default_value">6.5</span></em>, <em class="sig-param"><span class="n">circumsolar_angle</span><span class="o">=</span><span class="default_value">30.0</span></em>, <em class="sig-param"><span class="n">circumsolar_model</span><span class="o">=</span><span class="default_value">'uniform_disk'</span></em>, <em class="sig-param"><span class="n">rho_front</span><span class="o">=</span><span class="default_value">0.01</span></em>, <em class="sig-param"><span class="n">rho_back</span><span class="o">=</span><span class="default_value">0.03</span></em>, <em class="sig-param"><span class="n">module_transparency</span><span class="o">=</span><span class="default_value">0.0</span></em>, <em class="sig-param"><span class="n">module_spacing_ratio</span><span class="o">=</span><span class="default_value">0.0</span></em>, <em class="sig-param"><span class="n">faoi_fn_front</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">faoi_fn_back</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pvfactors/irradiance/models.html#HybridPerezOrdered.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pvfactors.irradiance.models.HybridPerezOrdered.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><p>Initialize irradiance model values that will be saved later on.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -260,8 +268,14 @@ the back side of PV rows (default = None)</p></li>
 <tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_full_ts_modeling_vectors</span></code>(pvarray)</p></td>
 <td><p>Get the modeling vectors used in matrix calculations of the mathematical model, including the sky values.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_ts_modeling_vectors</span></code>(pvarray)</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_summed_components</span></code>(pvarray[, absorbed])</p></td>
+<td><p>Get sum of irradiance components for irradiance model, either absorbed or only incident.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_ts_modeling_vectors</span></code>(pvarray)</p></td>
 <td><p>Get matrices of summed up irradiance values from a PV array, as well as the inverse reflectivity values (the latter need to be named “inv_rho”), and the total perez irradiance values.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">initialize_rho</span></code>(rho_scalar, rho_calculated, …)</p></td>
+<td><p>Initialize reflectivity value: - if a scalar value is passed, use it - otherwise try to use calculated value - else use default value</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">transform</span></code>(pvarray)</p></td>
 <td><p>Apply calculated irradiance values to PV array timeseries geometries: assign values as parameters to timeseries surfaces.</p></td>
@@ -290,16 +304,19 @@ the back side of PV rows (default = None)</p></li>
 <tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">irradiance_comp</span></code></p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">params</span></code></p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">irradiance_comp_absorbed</span></code></p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">pvrow_illum</span></code></p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">params</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">pvrow_illum</span></code></p></td>
 <td><p>Total timeseries irradiance incident on PV row’s front shaded areas and calculated by Perez transposition</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">pvrow_shaded</span></code></p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">pvrow_shaded</span></code></p></td>
 <td><p>Total timeseries irradiance incident on PV row’s front illuminated areas and calculated by Perez transposition</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">sky_luminance</span></code></p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">sky_luminance</span></code></p></td>
 <td><p>Total timeseries isotropic luminance of sky</p></td>
 </tr>
 </tbody>
@@ -313,29 +330,29 @@ the back side of PV rows (default = None)</p></li>
            
           </div>
           <footer>
-  
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-      
-        <a href="pvfactors.engine.PVEngine.html" class="btn btn-neutral float-right" title="pvfactors.engine.PVEngine" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
-      
-      
-        <a href="pvfactors.irradiance.models.IsotropicOrdered.html" class="btn btn-neutral float-left" title="pvfactors.irradiance.models.IsotropicOrdered" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
-      
+        <a href="pvfactors.engine.PVEngine.html" class="btn btn-neutral float-right" title="pvfactors.engine.PVEngine" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="pvfactors.irradiance.models.IsotropicOrdered.html" class="btn btn-neutral float-left" title="pvfactors.irradiance.models.IsotropicOrdered" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
-  
 
   <hr/>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2016, SunPower Corporation
+        &#169; Copyright 2016, SunPower Corporation.
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
-
         </div>
       </div>
 
@@ -343,7 +360,6 @@ the back side of PV rows (default = None)</p></li>
 
   </div>
   
-
 
   <script type="text/javascript">
       jQuery(function () {

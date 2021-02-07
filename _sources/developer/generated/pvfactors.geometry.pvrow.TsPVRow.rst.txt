@@ -1,4 +1,4 @@
-pvfactors.geometry.pvrow.TsPVRow
+﻿pvfactors.geometry.pvrow.TsPVRow
 ================================
 
 .. currentmodule:: pvfactors.geometry.pvrow

@@ -1,4 +1,4 @@
-pvfactors.geometry.timeseries.TsSurface
+﻿pvfactors.geometry.timeseries.TsSurface
 =======================================
 
 .. currentmodule:: pvfactors.geometry.timeseries
@@ -48,6 +48,9 @@ pvfactors.geometry.timeseries.TsSurface
       
       
          ~TsSurface.highest_point
+      
+      
+         ~TsSurface.is_empty
       
       
          ~TsSurface.length

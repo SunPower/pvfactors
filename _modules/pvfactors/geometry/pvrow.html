@@ -1,43 +1,47 @@
 
 
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8">
+  <meta charset="utf-8" />
   
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>pvfactors.geometry.pvrow &mdash; pvfactors 1.4.1 documentation</title>
+  <title>pvfactors.geometry.pvrow &mdash; pvfactors 1.5.0 documentation</title>
   
-
-  
-  
-    <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
-  
-  
-  
-
-  
-  <script type="text/javascript" src="../../../_static/js/modernizr.min.js"></script>
-  
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
-        <script type="text/javascript" src="../../../_static/jquery.js"></script>
-        <script type="text/javascript" src="../../../_static/underscore.js"></script>
-        <script type="text/javascript" src="../../../_static/doctools.js"></script>
-        <script type="text/javascript" src="../../../_static/language_data.js"></script>
-        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
-        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
-    
-    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
-
-    
 
   
   <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
   <link rel="stylesheet" href="../../../_static/css/custom.css" type="text/css" />
+
+  
+  
+    <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" /> 
 </head>
@@ -66,7 +70,7 @@
             
             
               <div class="version">
-                1.4.1
+                1.5.0
               </div>
             
           
@@ -83,6 +87,7 @@
           
         </div>
 
+        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
@@ -102,6 +107,7 @@
             
           
         </div>
+        
       </div>
     </nav>
 
@@ -136,11 +142,13 @@
 
 
 
+
+
 <div role="navigation" aria-label="breadcrumbs navigation">
 
   <ul class="wy-breadcrumbs">
     
-      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
         
           <li><a href="../../index.html">Module code</a> &raquo;</li>
         
@@ -163,13 +171,13 @@
 <span></span><span class="sd">&quot;&quot;&quot;Module will classes related to PV row geometries&quot;&quot;&quot;</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">from</span> <span class="nn">pvfactors.config</span> <span class="k">import</span> <span class="n">COLOR_DIC</span>
-<span class="kn">from</span> <span class="nn">pvfactors.geometry.base</span> <span class="k">import</span> \
+<span class="kn">from</span> <span class="nn">pvfactors.config</span> <span class="kn">import</span> <span class="n">COLOR_DIC</span>
+<span class="kn">from</span> <span class="nn">pvfactors.geometry.base</span> <span class="kn">import</span> \
     <span class="n">BaseSide</span><span class="p">,</span> <span class="n">_coords_from_center_tilt_length</span><span class="p">,</span> <span class="n">PVSegment</span>
-<span class="kn">from</span> <span class="nn">shapely.geometry</span> <span class="k">import</span> <span class="n">GeometryCollection</span><span class="p">,</span> <span class="n">LineString</span>
-<span class="kn">from</span> <span class="nn">pvfactors.geometry.timeseries</span> <span class="k">import</span> \
+<span class="kn">from</span> <span class="nn">shapely.geometry</span> <span class="kn">import</span> <span class="n">GeometryCollection</span><span class="p">,</span> <span class="n">LineString</span>
+<span class="kn">from</span> <span class="nn">pvfactors.geometry.timeseries</span> <span class="kn">import</span> \
     <span class="n">TsShadeCollection</span><span class="p">,</span> <span class="n">TsLineCoords</span><span class="p">,</span> <span class="n">TsSurface</span>
-<span class="kn">from</span> <span class="nn">pvlib.tools</span> <span class="k">import</span> <span class="n">cosd</span><span class="p">,</span> <span class="n">sind</span>
+<span class="kn">from</span> <span class="nn">pvlib.tools</span> <span class="kn">import</span> <span class="n">cosd</span><span class="p">,</span> <span class="n">sind</span>
 
 
 <div class="viewcode-block" id="TsPVRow"><a class="viewcode-back" href="../../../developer/generated/pvfactors.geometry.pvrow.TsPVRow.html#pvfactors.geometry.pvrow.TsPVRow">[docs]</a><span class="k">class</span> <span class="nc">TsPVRow</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
@@ -177,7 +185,7 @@
 <span class="sd">    PV row geometries. The coordinates and attributes (front and back sides)</span>
 <span class="sd">    are all vectorized.&quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="TsPVRow.__init__"><a class="viewcode-back" href="../../../developer/generated/pvfactors.geometry.pvrow.TsPVRow.html#pvfactors.geometry.pvrow.TsPVRow.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ts_front_side</span><span class="p">,</span> <span class="n">ts_back_side</span><span class="p">,</span> <span class="n">xy_center</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<div class="viewcode-block" id="TsPVRow.__init__"><a class="viewcode-back" href="../../../developer/generated/pvfactors.geometry.pvrow.TsPVRow.html#pvfactors.geometry.pvrow.TsPVRow.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ts_front_side</span><span class="p">,</span> <span class="n">ts_back_side</span><span class="p">,</span> <span class="n">xy_center</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                  <span class="n">full_pvrow_coords</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Initialize timeseries PV row with its front and back sides.</span>
 
@@ -390,7 +398,7 @@
 <span class="sd">    BaseSide geometries. The coordinates and attributes (list of segments,</span>
 <span class="sd">    normal vector) are all vectorized.&quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="TsSide.__init__"><a class="viewcode-back" href="../../../developer/generated/pvfactors.geometry.pvrow.TsSide.html#pvfactors.geometry.pvrow.TsSide.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">segments</span><span class="p">,</span> <span class="n">n_vector</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="TsSide.__init__"><a class="viewcode-back" href="../../../developer/generated/pvfactors.geometry.pvrow.TsSide.html#pvfactors.geometry.pvrow.TsSide.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">segments</span><span class="p">,</span> <span class="n">n_vector</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Initialize timeseries side using list of timeseries segments.</span>
 
 <span class="sd">        Parameters</span>
@@ -500,7 +508,7 @@
                 <span class="n">is_shaded</span><span class="p">)</span>
             <span class="c1"># Create segment</span>
             <span class="n">segment</span> <span class="o">=</span> <span class="n">TsSegment</span><span class="p">(</span><span class="n">segment_coords</span><span class="p">,</span> <span class="n">illum</span><span class="p">,</span> <span class="n">shaded</span><span class="p">,</span>
-                                <span class="n">n_vector</span><span class="o">=</span><span class="n">n_vector</span><span class="p">)</span>
+                                <span class="n">n_vector</span><span class="o">=</span><span class="n">n_vector</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">i</span><span class="p">)</span>
             <span class="n">list_segments</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">segment</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">list_segments</span><span class="p">,</span> <span class="n">n_vector</span><span class="o">=</span><span class="n">n_vector</span><span class="p">)</span>
@@ -649,7 +657,7 @@
     <span class="sd">&quot;&quot;&quot;A TsSegment is a timeseries segment that has a timeseries shaded</span>
 <span class="sd">    collection and a timeseries illuminated collection.&quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="TsSegment.__init__"><a class="viewcode-back" href="../../../developer/generated/pvfactors.geometry.pvrow.TsSegment.html#pvfactors.geometry.pvrow.TsSegment.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coords</span><span class="p">,</span> <span class="n">illum_collection</span><span class="p">,</span> <span class="n">shaded_collection</span><span class="p">,</span>
+<div class="viewcode-block" id="TsSegment.__init__"><a class="viewcode-back" href="../../../developer/generated/pvfactors.geometry.pvrow.TsSegment.html#pvfactors.geometry.pvrow.TsSegment.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coords</span><span class="p">,</span> <span class="n">illum_collection</span><span class="p">,</span> <span class="n">shaded_collection</span><span class="p">,</span>
                  <span class="n">index</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">n_vector</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Initialize timeseries segment using segment coordinates and</span>
 <span class="sd">        timeseries illuminated and shaded surfaces.</span>
@@ -821,7 +829,7 @@
 <span class="sd">    constitue one side of a PV row: a PV row side can also be</span>
 <span class="sd">    &quot;discretized&quot; into multiple segments&quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="PVRowSide.__init__"><a class="viewcode-back" href="../../../developer/generated/pvfactors.geometry.pvrow.PVRowSide.html#pvfactors.geometry.pvrow.PVRowSide.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">list_segments</span><span class="o">=</span><span class="p">[]):</span>
+<div class="viewcode-block" id="PVRowSide.__init__"><a class="viewcode-back" href="../../../developer/generated/pvfactors.geometry.pvrow.PVRowSide.html#pvfactors.geometry.pvrow.PVRowSide.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">list_segments</span><span class="o">=</span><span class="p">[]):</span>
         <span class="sd">&quot;&quot;&quot;Initialize PVRowSide using its base class</span>
 <span class="sd">        :py:class:`pvfactors.geometry.base.BaseSide`</span>
 
@@ -836,7 +844,7 @@
 <div class="viewcode-block" id="PVRow"><a class="viewcode-back" href="../../../developer/generated/pvfactors.geometry.pvrow.PVRow.html#pvfactors.geometry.pvrow.PVRow">[docs]</a><span class="k">class</span> <span class="nc">PVRow</span><span class="p">(</span><span class="n">GeometryCollection</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;A PV row is made of two PV row sides, a front and a back one.&quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="PVRow.__init__"><a class="viewcode-back" href="../../../developer/generated/pvfactors.geometry.pvrow.PVRow.html#pvfactors.geometry.pvrow.PVRow.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">front_side</span><span class="o">=</span><span class="n">PVRowSide</span><span class="p">(),</span> <span class="n">back_side</span><span class="o">=</span><span class="n">PVRowSide</span><span class="p">(),</span>
+<div class="viewcode-block" id="PVRow.__init__"><a class="viewcode-back" href="../../../developer/generated/pvfactors.geometry.pvrow.PVRow.html#pvfactors.geometry.pvrow.PVRow.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">front_side</span><span class="o">=</span><span class="n">PVRowSide</span><span class="p">(),</span> <span class="n">back_side</span><span class="o">=</span><span class="n">PVRowSide</span><span class="p">(),</span>
                  <span class="n">index</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">original_linestring</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Initialize PV row.</span>
 
@@ -1024,20 +1032,25 @@
            
           </div>
           <footer>
-  
 
   <hr/>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2016, SunPower Corporation
+        &#169; Copyright 2016, SunPower Corporation.
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
-
         </div>
       </div>
 
@@ -1045,7 +1058,6 @@
 
   </div>
   
-
 
   <script type="text/javascript">
       jQuery(function () {

@@ -1,43 +1,47 @@
 
 
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8">
+  <meta charset="utf-8" />
   
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>What’s New &mdash; pvfactors 1.4.1 documentation</title>
+  <title>What’s New &mdash; pvfactors 1.5.0 documentation</title>
   
-
-  
-  
-    <link rel="shortcut icon" href="_static/favicon.ico"/>
-  
-  
-  
-
-  
-  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
-  
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-        <script type="text/javascript" src="_static/jquery.js"></script>
-        <script type="text/javascript" src="_static/underscore.js"></script>
-        <script type="text/javascript" src="_static/doctools.js"></script>
-        <script type="text/javascript" src="_static/language_data.js"></script>
-        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
-        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
-    
-    <script type="text/javascript" src="_static/js/theme.js"></script>
-
-    
 
   
   <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
   <link rel="stylesheet" href="_static/css/custom.css" type="text/css" />
+
+  
+  
+    <link rel="shortcut icon" href="_static/favicon.ico"/>
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="prev" title="pvfactors.report.ExampleReportBuilder" href="developer/generated/pvfactors.report.ExampleReportBuilder.html" /> 
@@ -67,7 +71,7 @@
             
             
               <div class="version">
-                1.4.1
+                1.5.0
               </div>
             
           
@@ -84,6 +88,7 @@
           
         </div>
 
+        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
@@ -98,79 +103,85 @@
 <li class="toctree-l1"><a class="reference internal" href="theory/index.html">Theory</a></li>
 <li class="toctree-l1"><a class="reference internal" href="developer/index.html">Developer API</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">What’s New</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#v1-4-1-november-29-2019">v1.4.1 (November 29, 2019)</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#v1-5-0-february-7-2021">v1.5.0 (February 7, 2021)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#enhancements">Enhancements</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#fix">Fix</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#contributors">Contributors</a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="#v1-4-1-november-29-2019">v1.4.1 (November 29, 2019)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id1">Fix</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id2">Contributors</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="#v1-4-0-november-21-2019">v1.4.0 (November 21, 2019)</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#enhancements">Enhancements</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#id1">Contributors</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id3">Enhancements</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id4">Contributors</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#v1-3-0-november-6-2019">v1.3.0 (November 6, 2019)</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#id2">Enhancements</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#id3">Contributors</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id5">Enhancements</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id6">Contributors</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#v1-2-2-october-8-2019">v1.2.2 (October 8, 2019)</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#id4">Enhancements</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id7">Enhancements</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#fixes">Fixes</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#id5">Contributors</a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="#v1-2-1-september-13-2019">v1.2.1 (September 13, 2019)</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#id6">Enhancements</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#id7">Fixes</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#id8">Contributors</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#v1-2-0-september-9-2019">v1.2.0 (September 9, 2019)</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#id9">Contributors</a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="#v1-1-0-august-2-2019">v1.1.0 (August 2, 2019)</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#id10">Contributors</a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="#v1-0-3-july-12-2019">v1.0.3 (July 12, 2019)</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#v1-2-1-september-13-2019">v1.2.1 (September 13, 2019)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id9">Enhancements</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id10">Fixes</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#id11">Contributors</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#v1-0-2-july-5-2019">v1.0.2 (July 5, 2019)</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#v1-2-0-september-9-2019">v1.2.0 (September 9, 2019)</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#id12">Contributors</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#v1-0-1-may-14-2019">v1.0.1 (May 14, 2019)</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#v1-1-0-august-2-2019">v1.1.0 (August 2, 2019)</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#id13">Contributors</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#v1-0-0-april-19-2019">v1.0.0 (April 19, 2019)</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#v1-0-3-july-12-2019">v1.0.3 (July 12, 2019)</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#id14">Contributors</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#v0-1-5-december-14-2018">v0.1.5 (December 14, 2018)</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#v1-0-2-july-5-2019">v1.0.2 (July 5, 2019)</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#id15">Contributors</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#v0-1-4-november-22-2018">v0.1.4 (November 22, 2018)</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#v1-0-1-may-14-2019">v1.0.1 (May 14, 2019)</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#id16">Contributors</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#v0-1-3-september-13-2018">v0.1.3 (September 13, 2018)</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#v1-0-0-april-19-2019">v1.0.0 (April 19, 2019)</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#id17">Contributors</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#v0-1-2-september-12-2018">v0.1.2 (September 12, 2018)</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#v0-1-5-december-14-2018">v0.1.5 (December 14, 2018)</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#id18">Contributors</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#v0-1-1-september-6-2018">v0.1.1 (September 6, 2018)</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#v0-1-4-november-22-2018">v0.1.4 (November 22, 2018)</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#id19">Contributors</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#v0-1-0-may-14-2018">v0.1.0 (May 14, 2018)</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#v0-1-3-september-13-2018">v0.1.3 (September 13, 2018)</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#id20">Contributors</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#v0-1-2-september-12-2018">v0.1.2 (September 12, 2018)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id21">Contributors</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#v0-1-1-september-6-2018">v0.1.1 (September 6, 2018)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id22">Contributors</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#v0-1-0-may-14-2018">v0.1.0 (May 14, 2018)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id23">Contributors</a></li>
 </ul>
 </li>
 </ul>
@@ -180,6 +191,7 @@
             
           
         </div>
+        
       </div>
     </nav>
 
@@ -216,18 +228,20 @@
 
 
 
+
+
 <div role="navigation" aria-label="breadcrumbs navigation">
 
   <ul class="wy-breadcrumbs">
     
-      <li><a href="index.html">Docs</a> &raquo;</li>
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
         
       <li>What’s New</li>
     
     
       <li class="wy-breadcrumbs-aside">
         
-            
+          
             
               <!-- User defined GitHub URL -->
               <a href="https://github.com/SunPower/pvfactors/" class="fa fa-github"> Edit on GitHub</a>
@@ -249,13 +263,13 @@
 /* CSS overrides for sphinx_rtd_theme */
 
 /* 24px margin */
-.nbinput.nblast,
-.nboutput.nblast {
+.nbinput.nblast.container,
+.nboutput.nblast.container {
     margin-bottom: 19px;  /* padding has already 5px */
 }
 
 /* ... except between code cells! */
-.nblast + .nbinput {
+.nblast.container + .nbinput.container {
     margin-top: -19px;
 }
 
@@ -271,17 +285,42 @@
 <div class="section" id="what-s-new">
 <span id="whatsnew"></span><h1>What’s New<a class="headerlink" href="#what-s-new" title="Permalink to this headline">¶</a></h1>
 <p>These are new features and improvements of note in each release.</p>
-<div class="section" id="v1-4-1-november-29-2019">
-<span id="whatsnew-141"></span><h2>v1.4.1 (November 29, 2019)<a class="headerlink" href="#v1-4-1-november-29-2019" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="v1-5-0-february-7-2021">
+<span id="whatsnew-150"></span><h2>v1.5.0 (February 7, 2021)<a class="headerlink" href="#v1-5-0-february-7-2021" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="enhancements">
+<h3>Enhancements<a class="headerlink" href="#enhancements" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p>Add import check for shapely/geos (#110)</p></li>
+<li><p>Drop Python 2.7, 3.5, add Python 3.8 (#112)</p></li>
+</ul>
+</div>
 <div class="section" id="fix">
 <h3>Fix<a class="headerlink" href="#fix" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p>TsSegement was missing proper indexing (#102)</p></li>
+<li><p>Fix CI: restrict pvlib to &lt;0.8.0 because of API break, reduce test length because of hanging CI (#112)</p></li>
+</ul>
+</div>
+<div class="section" id="contributors">
+<h3>Contributors<a class="headerlink" href="#contributors" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p>Thomas Capelle (<a class="reference external" href="https://www.github.com/tcapelle">tcapelle</a>)</p></li>
+<li><p>Kevin Anderson (<a class="reference external" href="https://www.github.com/kanderso-nrel">kanderso-nrel</a>)</p></li>
+<li><p>Marc Anoma (<a class="reference external" href="https://www.github.com/anomam">anomam</a>)</p></li>
+</ul>
+</div>
+</div>
+<div class="section" id="v1-4-1-november-29-2019">
+<span id="whatsnew-141"></span><h2>v1.4.1 (November 29, 2019)<a class="headerlink" href="#v1-4-1-november-29-2019" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id1">
+<h3>Fix<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
 <p>The vectorization of the calculations (from v1.3.0) in the PVEngine had removed the ability to account for timeseries albedo values (it was only using the first albedo value). This fix repairs that issue by building the full 3D matrices for the reflectivity values (and the inverse reflectivity values as well).</p>
 <ul class="simple">
 <li><p>PVEngine needs to use timeseries albedo values (#98)</p></li>
 </ul>
 </div>
-<div class="section" id="contributors">
-<h3>Contributors<a class="headerlink" href="#contributors" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id2">
+<h3>Contributors<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li><p>Marc Anoma (<a class="reference external" href="https://www.github.com/anomam">anomam</a>)</p></li>
 </ul>
@@ -289,8 +328,8 @@
 </div>
 <div class="section" id="v1-4-0-november-21-2019">
 <span id="whatsnew-1400"></span><h2>v1.4.0 (November 21, 2019)<a class="headerlink" href="#v1-4-0-november-21-2019" title="Permalink to this headline">¶</a></h2>
-<div class="section" id="enhancements">
-<h3>Enhancements<a class="headerlink" href="#enhancements" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id3">
+<h3>Enhancements<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h3>
 <p>pvfactors can now account for AOI losses by either using constant diffuse losses, are by using an fAOI function that will provide the corresponding loss for each value of angle of incidence.</p>
 <ul class="simple">
 <li><p>Test for continuity of results with direct shading (#91)</p></li>
@@ -301,8 +340,8 @@
 <li><p>Update docs for AOI methods (#96)</p></li>
 </ul>
 </div>
-<div class="section" id="id1">
-<h3>Contributors<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id4">
+<h3>Contributors<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li><p>Marc Anoma (<a class="reference external" href="https://www.github.com/anomam">anomam</a>)</p></li>
 </ul>
@@ -310,8 +349,8 @@
 </div>
 <div class="section" id="v1-3-0-november-6-2019">
 <span id="whatsnew-1300"></span><h2>v1.3.0 (November 6, 2019)<a class="headerlink" href="#v1-3-0-november-6-2019" title="Permalink to this headline">¶</a></h2>
-<div class="section" id="id2">
-<h3>Enhancements<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id5">
+<h3>Enhancements<a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h3>
 <p>pvfactors is now only using timeseries geometries and vectorization for the view factor matrix calculation, even with the full reflection equilibrium mode.
 This resulted in an incredible speed boost, in which 8760 simulations now run in less than 2 seconds when using the full mode (it previously took a couple minutes). So there’s not much reason anymore to use the “fast” mode, which is less accurate and not that faster anymore.
 Lots of package clean up and documentation updates in addition to this.</p>
@@ -326,8 +365,8 @@ Lots of package clean up and documentation updates in addition to this.</p>
 <li><p>Update docs tutorials (#89)</p></li>
 </ul>
 </div>
-<div class="section" id="id3">
-<h3>Contributors<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id6">
+<h3>Contributors<a class="headerlink" href="#id6" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li><p>Marc Anoma (<a class="reference external" href="https://www.github.com/anomam">anomam</a>)</p></li>
 </ul>
@@ -335,8 +374,8 @@ Lots of package clean up and documentation updates in addition to this.</p>
 </div>
 <div class="section" id="v1-2-2-october-8-2019">
 <span id="whatsnew-1220"></span><h2>v1.2.2 (October 8, 2019)<a class="headerlink" href="#v1-2-2-october-8-2019" title="Permalink to this headline">¶</a></h2>
-<div class="section" id="id4">
-<h3>Enhancements<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id7">
+<h3>Enhancements<a class="headerlink" href="#id7" title="Permalink to this headline">¶</a></h3>
 <p>Passing GHI to the irradiance models when using the fast mode should provide more accuracy.</p>
 <ul class="simple">
 <li><p>Add GHI to run functions inputs (#78)</p></li>
@@ -349,8 +388,8 @@ Lots of package clean up and documentation updates in addition to this.</p>
 <li><p>Fix accumulation of pvrows when fitting multiple times (#77)</p></li>
 </ul>
 </div>
-<div class="section" id="id5">
-<h3>Contributors<a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id8">
+<h3>Contributors<a class="headerlink" href="#id8" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li><p>Marc Anoma (<a class="reference external" href="https://www.github.com/anomam">anomam</a>)</p></li>
 </ul>
@@ -358,23 +397,23 @@ Lots of package clean up and documentation updates in addition to this.</p>
 </div>
 <div class="section" id="v1-2-1-september-13-2019">
 <span id="whatsnew-1210"></span><h2>v1.2.1 (September 13, 2019)<a class="headerlink" href="#v1-2-1-september-13-2019" title="Permalink to this headline">¶</a></h2>
-<div class="section" id="id6">
-<h3>Enhancements<a class="headerlink" href="#id6" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id9">
+<h3>Enhancements<a class="headerlink" href="#id9" title="Permalink to this headline">¶</a></h3>
 <p>Added module spacing and transparency inputs to irradiance models, and updated README file to make it clearer.</p>
 <ul class="simple">
 <li><p>Add module transparency and spacing to irradiance models (#72)</p></li>
 <li><p>Use reStructuredText for README and add TOC (#74)</p></li>
 </ul>
 </div>
-<div class="section" id="id7">
-<h3>Fixes<a class="headerlink" href="#id7" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id10">
+<h3>Fixes<a class="headerlink" href="#id10" title="Permalink to this headline">¶</a></h3>
 <p>Fix small issue in irradiance models for fast mode: made sure that shaded surfaces are not getting any Perez circumsolar irradiance, except via module spacing and transparency.</p>
 <ul class="simple">
 <li><p>Fix irradiance models for fast mode shaded surfaces (#73)</p></li>
 </ul>
 </div>
-<div class="section" id="id8">
-<h3>Contributors<a class="headerlink" href="#id8" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id11">
+<h3>Contributors<a class="headerlink" href="#id11" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li><p>Marc Anoma (<a class="reference external" href="https://www.github.com/anomam">anomam</a>)</p></li>
 </ul>
@@ -392,8 +431,8 @@ Lots of package clean up and documentation updates in addition to this.</p>
 <li><p>Update engine and run functions for timeseries fast mode (#69)</p></li>
 <li><p>Update docs for vectorized fast mode (#70)</p></li>
 </ul>
-<div class="section" id="id9">
-<h3>Contributors<a class="headerlink" href="#id9" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id12">
+<h3>Contributors<a class="headerlink" href="#id12" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li><p>Marc Anoma (<a class="reference external" href="https://www.github.com/anomam">anomam</a>)</p></li>
 </ul>
@@ -409,8 +448,8 @@ around 30% faster.</p>
 <li><p>Add common project folders to .gitignore (#61)</p></li>
 <li><p>Tutorial for fast mode (#62)</p></li>
 </ul>
-<div class="section" id="id10">
-<h3>Contributors<a class="headerlink" href="#id10" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id13">
+<h3>Contributors<a class="headerlink" href="#id13" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li><p>Cedric Leroy (<a class="reference external" href="https://www.github.com/cedricleroy">cedricleroy</a>)</p></li>
 <li><p>Marc Anoma (<a class="reference external" href="https://www.github.com/anomam">anomam</a>)</p></li>
@@ -423,8 +462,8 @@ around 30% faster.</p>
 <ul class="simple">
 <li><p>Pass irradiance model params to run functions (#57)</p></li>
 </ul>
-<div class="section" id="id11">
-<h3>Contributors<a class="headerlink" href="#id11" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id14">
+<h3>Contributors<a class="headerlink" href="#id14" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li><p>Marc Anoma (<a class="reference external" href="https://www.github.com/anomam">anomam</a>)</p></li>
 </ul>
@@ -441,8 +480,8 @@ around 30% faster.</p>
 <li><p>Build sphinx docs into CircleCI artifacts (#54)</p></li>
 <li><p>Make engine more robust to bad weather data (#55)</p></li>
 </ul>
-<div class="section" id="id12">
-<h3>Contributors<a class="headerlink" href="#id12" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id15">
+<h3>Contributors<a class="headerlink" href="#id15" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li><p>Marc Anoma (<a class="reference external" href="https://www.github.com/anomam">anomam</a>)</p></li>
 <li><p>Thomas Capelle (<a class="reference external" href="https://www.github.com/tcapelle">tcapelle</a>)</p></li>
@@ -458,8 +497,8 @@ around 30% faster.</p>
 <li><p>Small fixes (#44)</p></li>
 <li><p>Fix “difference” calculation method for linestrings (#47)</p></li>
 </ul>
-<div class="section" id="id13">
-<h3>Contributors<a class="headerlink" href="#id13" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id16">
+<h3>Contributors<a class="headerlink" href="#id16" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li><p>Marc Anoma (<a class="reference external" href="https://www.github.com/anomam">anomam</a>)</p></li>
 </ul>
@@ -484,8 +523,8 @@ The documentation was completely revamped as well, with a new tutorial section c
 <li><p>Update docs for new pvfactors API (#40)</p></li>
 <li><p>Update docstrings (#41)</p></li>
 </ul>
-<div class="section" id="id14">
-<h3>Contributors<a class="headerlink" href="#id14" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id17">
+<h3>Contributors<a class="headerlink" href="#id17" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li><p>Marc Anoma (<a class="reference external" href="https://www.github.com/anomam">anomam</a>)</p></li>
 </ul>
@@ -498,8 +537,8 @@ The documentation was completely revamped as well, with a new tutorial section c
 <li><p>Updates for upcoming pvlib version 6.1 (#24)</p></li>
 <li><p>Small fixes to display long description on PyPI, and docs</p></li>
 </ul>
-<div class="section" id="id15">
-<h3>Contributors<a class="headerlink" href="#id15" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id18">
+<h3>Contributors<a class="headerlink" href="#id18" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li><p>Marc Anoma</p></li>
 </ul>
@@ -513,8 +552,8 @@ Now the only PV array angles needed for simulations are ‘surface_tilt’ and �
 <li><p>Small updates for PyPI upload (#21)</p></li>
 <li><p>Use ‘surface_azimuth’ and ‘surface_tilt’ only, with pvlib convention (#22)</p></li>
 </ul>
-<div class="section" id="id16">
-<h3>Contributors<a class="headerlink" href="#id16" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id19">
+<h3>Contributors<a class="headerlink" href="#id19" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li><p>Marc Anoma</p></li>
 </ul>
@@ -526,8 +565,8 @@ Now the only PV array angles needed for simulations are ‘surface_tilt’ and �
 <ul class="simple">
 <li><p>Make sure that all timestamps are returned in outputs (#17)</p></li>
 </ul>
-<div class="section" id="id17">
-<h3>Contributors<a class="headerlink" href="#id17" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id20">
+<h3>Contributors<a class="headerlink" href="#id20" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li><p>Marc Anoma</p></li>
 </ul>
@@ -541,8 +580,8 @@ Now the only PV array angles needed for simulations are ‘surface_tilt’ and �
 <li><p>Simplify timeseries calculation API (#14)</p></li>
 <li><p>Update docs because of simulation API changes (#15)</p></li>
 </ul>
-<div class="section" id="id18">
-<h3>Contributors<a class="headerlink" href="#id18" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id21">
+<h3>Contributors<a class="headerlink" href="#id21" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li><p>Marc Anoma</p></li>
 </ul>
@@ -558,8 +597,8 @@ Now the only PV array angles needed for simulations are ‘surface_tilt’ and �
 <li><p>Clean up and add Github features (#9)</p></li>
 <li><p>Output all the surface registries calculated for each timestamp in a Perez timeseries simulation (#10)</p></li>
 </ul>
-<div class="section" id="id19">
-<h3>Contributors<a class="headerlink" href="#id19" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id22">
+<h3>Contributors<a class="headerlink" href="#id22" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li><p>Marc Anoma</p></li>
 </ul>
@@ -582,8 +621,8 @@ calculation for the PV industry.</p>
 <li><p>Add continuous integration with CircleCI</p></li>
 <li><p>Add versioneer for “auto-versioning” of package</p></li>
 </ul>
-<div class="section" id="id20">
-<h3>Contributors<a class="headerlink" href="#id20" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id23">
+<h3>Contributors<a class="headerlink" href="#id23" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li><p>Marc Anoma</p></li>
 </ul>
@@ -596,27 +635,28 @@ calculation for the PV industry.</p>
            
           </div>
           <footer>
-  
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-      
-      
-        <a href="developer/generated/pvfactors.report.ExampleReportBuilder.html" class="btn btn-neutral float-left" title="pvfactors.report.ExampleReportBuilder" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
-      
+        <a href="developer/generated/pvfactors.report.ExampleReportBuilder.html" class="btn btn-neutral float-left" title="pvfactors.report.ExampleReportBuilder" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
-  
 
   <hr/>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2016, SunPower Corporation
+        &#169; Copyright 2016, SunPower Corporation.
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
-
         </div>
       </div>
 
@@ -624,7 +664,6 @@ calculation for the PV industry.</p>
 
   </div>
   
-
 
   <script type="text/javascript">
       jQuery(function () {

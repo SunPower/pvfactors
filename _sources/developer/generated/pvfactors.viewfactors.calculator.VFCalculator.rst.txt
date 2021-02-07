@@ -1,4 +1,4 @@
-pvfactors.viewfactors.calculator.VFCalculator
+﻿pvfactors.viewfactors.calculator.VFCalculator
 =============================================
 
 .. currentmodule:: pvfactors.viewfactors.calculator

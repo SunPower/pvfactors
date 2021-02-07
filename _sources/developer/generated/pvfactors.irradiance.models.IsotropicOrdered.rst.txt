@@ -1,4 +1,4 @@
-pvfactors.irradiance.models.IsotropicOrdered
+﻿pvfactors.irradiance.models.IsotropicOrdered
 ============================================
 
 .. currentmodule:: pvfactors.irradiance.models
@@ -17,7 +17,9 @@ pvfactors.irradiance.models.IsotropicOrdered
       ~IsotropicOrdered.fit
       ~IsotropicOrdered.get_full_modeling_vectors
       ~IsotropicOrdered.get_full_ts_modeling_vectors
+      ~IsotropicOrdered.get_summed_components
       ~IsotropicOrdered.get_ts_modeling_vectors
+      ~IsotropicOrdered.initialize_rho
       ~IsotropicOrdered.transform
       ~IsotropicOrdered.update_ts_surface_sky_term
    
@@ -33,6 +35,7 @@ pvfactors.irradiance.models.IsotropicOrdered
       ~IsotropicOrdered.gnd_illum
       ~IsotropicOrdered.gnd_shaded
       ~IsotropicOrdered.irradiance_comp
+      ~IsotropicOrdered.irradiance_comp_absorbed
       ~IsotropicOrdered.params
       ~IsotropicOrdered.pvrow_illum
       ~IsotropicOrdered.pvrow_shaded

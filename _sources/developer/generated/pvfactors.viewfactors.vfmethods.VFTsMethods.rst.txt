@@ -1,4 +1,4 @@
-pvfactors.viewfactors.vfmethods.VFTsMethods
+﻿pvfactors.viewfactors.vfmethods.VFTsMethods
 ===========================================
 
 .. currentmodule:: pvfactors.viewfactors.vfmethods

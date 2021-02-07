@@ -1,4 +1,4 @@
-pvfactors.report.example\_fn\_build\_report
+﻿pvfactors.report.example\_fn\_build\_report
 ===========================================
 
 .. currentmodule:: pvfactors.report

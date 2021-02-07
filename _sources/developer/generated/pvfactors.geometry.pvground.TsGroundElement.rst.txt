@@ -1,4 +1,4 @@
-pvfactors.geometry.pvground.TsGroundElement
+﻿pvfactors.geometry.pvground.TsGroundElement
 ===========================================
 
 .. currentmodule:: pvfactors.geometry.pvground

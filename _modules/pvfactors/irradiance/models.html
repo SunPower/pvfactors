@@ -1,43 +1,47 @@
 
 
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8">
+  <meta charset="utf-8" />
   
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>pvfactors.irradiance.models &mdash; pvfactors 1.4.1 documentation</title>
+  <title>pvfactors.irradiance.models &mdash; pvfactors 1.5.0 documentation</title>
   
-
-  
-  
-    <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
-  
-  
-  
-
-  
-  <script type="text/javascript" src="../../../_static/js/modernizr.min.js"></script>
-  
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
-        <script type="text/javascript" src="../../../_static/jquery.js"></script>
-        <script type="text/javascript" src="../../../_static/underscore.js"></script>
-        <script type="text/javascript" src="../../../_static/doctools.js"></script>
-        <script type="text/javascript" src="../../../_static/language_data.js"></script>
-        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
-        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
-    
-    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
-
-    
 
   
   <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
   <link rel="stylesheet" href="../../../_static/css/custom.css" type="text/css" />
+
+  
+  
+    <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" /> 
 </head>
@@ -66,7 +70,7 @@
             
             
               <div class="version">
-                1.4.1
+                1.5.0
               </div>
             
           
@@ -83,6 +87,7 @@
           
         </div>
 
+        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
@@ -102,6 +107,7 @@
             
           
         </div>
+        
       </div>
     </nav>
 
@@ -136,11 +142,13 @@
 
 
 
+
+
 <div role="navigation" aria-label="breadcrumbs navigation">
 
   <ul class="wy-breadcrumbs">
     
-      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
         
           <li><a href="../../index.html">Module code</a> &raquo;</li>
         
@@ -162,15 +170,15 @@
   <h1>Source code for pvfactors.irradiance.models</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;Module containing irradiance models used with pv array geometries&quot;&quot;&quot;</span>
 
-<span class="kn">from</span> <span class="nn">pvlib.tools</span> <span class="k">import</span> <span class="n">cosd</span>
-<span class="kn">from</span> <span class="nn">pvlib.irradiance</span> <span class="k">import</span> <span class="n">aoi</span> <span class="k">as</span> <span class="n">aoi_function</span>
-<span class="kn">from</span> <span class="nn">pvlib.irradiance</span> <span class="k">import</span> <span class="n">get_total_irradiance</span>
+<span class="kn">from</span> <span class="nn">pvlib.tools</span> <span class="kn">import</span> <span class="n">cosd</span>
+<span class="kn">from</span> <span class="nn">pvlib.irradiance</span> <span class="kn">import</span> <span class="n">aoi</span> <span class="k">as</span> <span class="n">aoi_function</span>
+<span class="kn">from</span> <span class="nn">pvlib.irradiance</span> <span class="kn">import</span> <span class="n">get_total_irradiance</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">from</span> <span class="nn">pvfactors.irradiance.utils</span> <span class="k">import</span> \
+<span class="kn">from</span> <span class="nn">pvfactors.irradiance.utils</span> <span class="kn">import</span> \
     <span class="n">perez_diffuse_luminance</span><span class="p">,</span> <span class="n">calculate_horizon_band_shading</span><span class="p">,</span> \
     <span class="n">calculate_circumsolar_shading</span>
-<span class="kn">from</span> <span class="nn">pvfactors.irradiance.base</span> <span class="k">import</span> <span class="n">BaseModel</span>
-<span class="kn">from</span> <span class="nn">pvfactors.config</span> <span class="k">import</span> \
+<span class="kn">from</span> <span class="nn">pvfactors.irradiance.base</span> <span class="kn">import</span> <span class="n">BaseModel</span>
+<span class="kn">from</span> <span class="nn">pvfactors.config</span> <span class="kn">import</span> \
     <span class="n">DEFAULT_HORIZON_BAND_ANGLE</span><span class="p">,</span> <span class="n">SKY_REFLECTIVITY_DUMMY</span><span class="p">,</span> \
     <span class="n">DEFAULT_CIRCUMSOLAR_ANGLE</span>
 
@@ -187,7 +195,7 @@
     <span class="n">irradiance_comp</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;direct&#39;</span><span class="p">]</span>
     <span class="n">irradiance_comp_absorbed</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;direct_absorbed&#39;</span><span class="p">]</span>
 
-<div class="viewcode-block" id="IsotropicOrdered.__init__"><a class="viewcode-back" href="../../../developer/generated/pvfactors.irradiance.models.IsotropicOrdered.html#pvfactors.irradiance.models.IsotropicOrdered.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rho_front</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span> <span class="n">rho_back</span><span class="o">=</span><span class="mf">0.03</span><span class="p">,</span> <span class="n">module_transparency</span><span class="o">=</span><span class="mf">0.</span><span class="p">,</span>
+<div class="viewcode-block" id="IsotropicOrdered.__init__"><a class="viewcode-back" href="../../../developer/generated/pvfactors.irradiance.models.IsotropicOrdered.html#pvfactors.irradiance.models.IsotropicOrdered.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rho_front</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span> <span class="n">rho_back</span><span class="o">=</span><span class="mf">0.03</span><span class="p">,</span> <span class="n">module_transparency</span><span class="o">=</span><span class="mf">0.</span><span class="p">,</span>
                  <span class="n">module_spacing_ratio</span><span class="o">=</span><span class="mf">0.</span><span class="p">,</span> <span class="n">faoi_fn_front</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                  <span class="n">faoi_fn_back</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Initialize irradiance model values that will be saved later on.</span>
@@ -566,7 +574,7 @@
     <span class="n">irradiance_comp_absorbed</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;direct_absorbed&#39;</span><span class="p">,</span> <span class="s1">&#39;circumsolar_absorbed&#39;</span><span class="p">,</span>
                                 <span class="s1">&#39;horizon_absorbed&#39;</span><span class="p">]</span>
 
-<div class="viewcode-block" id="HybridPerezOrdered.__init__"><a class="viewcode-back" href="../../../developer/generated/pvfactors.irradiance.models.HybridPerezOrdered.html#pvfactors.irradiance.models.HybridPerezOrdered.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">horizon_band_angle</span><span class="o">=</span><span class="n">DEFAULT_HORIZON_BAND_ANGLE</span><span class="p">,</span>
+<div class="viewcode-block" id="HybridPerezOrdered.__init__"><a class="viewcode-back" href="../../../developer/generated/pvfactors.irradiance.models.HybridPerezOrdered.html#pvfactors.irradiance.models.HybridPerezOrdered.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">horizon_band_angle</span><span class="o">=</span><span class="n">DEFAULT_HORIZON_BAND_ANGLE</span><span class="p">,</span>
                  <span class="n">circumsolar_angle</span><span class="o">=</span><span class="n">DEFAULT_CIRCUMSOLAR_ANGLE</span><span class="p">,</span>
                  <span class="n">circumsolar_model</span><span class="o">=</span><span class="s1">&#39;uniform_disk&#39;</span><span class="p">,</span> <span class="n">rho_front</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span>
                  <span class="n">rho_back</span><span class="o">=</span><span class="mf">0.03</span><span class="p">,</span> <span class="n">module_transparency</span><span class="o">=</span><span class="mf">0.</span><span class="p">,</span>
@@ -1238,20 +1246,25 @@
            
           </div>
           <footer>
-  
 
   <hr/>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2016, SunPower Corporation
+        &#169; Copyright 2016, SunPower Corporation.
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
-
         </div>
       </div>
 
@@ -1259,7 +1272,6 @@
 
   </div>
   
-
 
   <script type="text/javascript">
       jQuery(function () {

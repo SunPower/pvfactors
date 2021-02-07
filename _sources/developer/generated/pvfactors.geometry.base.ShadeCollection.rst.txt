@@ -1,4 +1,4 @@
-pvfactors.geometry.base.ShadeCollection
+﻿pvfactors.geometry.base.ShadeCollection
 =======================================
 
 .. currentmodule:: pvfactors.geometry.base
@@ -88,6 +88,7 @@ pvfactors.geometry.base.ShadeCollection
 
    .. autosummary::
    
+      
       
       
       

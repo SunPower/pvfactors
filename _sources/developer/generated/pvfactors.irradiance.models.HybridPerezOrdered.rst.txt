@@ -1,4 +1,4 @@
-pvfactors.irradiance.models.HybridPerezOrdered
+﻿pvfactors.irradiance.models.HybridPerezOrdered
 ==============================================
 
 .. currentmodule:: pvfactors.irradiance.models
@@ -17,7 +17,9 @@ pvfactors.irradiance.models.HybridPerezOrdered
       ~HybridPerezOrdered.fit
       ~HybridPerezOrdered.get_full_modeling_vectors
       ~HybridPerezOrdered.get_full_ts_modeling_vectors
+      ~HybridPerezOrdered.get_summed_components
       ~HybridPerezOrdered.get_ts_modeling_vectors
+      ~HybridPerezOrdered.initialize_rho
       ~HybridPerezOrdered.transform
       ~HybridPerezOrdered.update_ts_surface_sky_term
    
@@ -33,6 +35,7 @@ pvfactors.irradiance.models.HybridPerezOrdered
       ~HybridPerezOrdered.gnd_illum
       ~HybridPerezOrdered.gnd_shaded
       ~HybridPerezOrdered.irradiance_comp
+      ~HybridPerezOrdered.irradiance_comp_absorbed
       ~HybridPerezOrdered.params
       ~HybridPerezOrdered.pvrow_illum
       ~HybridPerezOrdered.pvrow_shaded

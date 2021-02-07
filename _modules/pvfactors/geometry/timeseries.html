@@ -1,43 +1,47 @@
 
 
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8">
+  <meta charset="utf-8" />
   
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>pvfactors.geometry.timeseries &mdash; pvfactors 1.4.1 documentation</title>
+  <title>pvfactors.geometry.timeseries &mdash; pvfactors 1.5.0 documentation</title>
   
-
-  
-  
-    <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
-  
-  
-  
-
-  
-  <script type="text/javascript" src="../../../_static/js/modernizr.min.js"></script>
-  
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
-        <script type="text/javascript" src="../../../_static/jquery.js"></script>
-        <script type="text/javascript" src="../../../_static/underscore.js"></script>
-        <script type="text/javascript" src="../../../_static/doctools.js"></script>
-        <script type="text/javascript" src="../../../_static/language_data.js"></script>
-        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
-        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
-    
-    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
-
-    
 
   
   <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
   <link rel="stylesheet" href="../../../_static/css/custom.css" type="text/css" />
+
+  
+  
+    <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" /> 
 </head>
@@ -66,7 +70,7 @@
             
             
               <div class="version">
-                1.4.1
+                1.5.0
               </div>
             
           
@@ -83,6 +87,7 @@
           
         </div>
 
+        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
@@ -102,6 +107,7 @@
             
           
         </div>
+        
       </div>
     </nav>
 
@@ -136,11 +142,13 @@
 
 
 
+
+
 <div role="navigation" aria-label="breadcrumbs navigation">
 
   <ul class="wy-breadcrumbs">
     
-      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
         
           <li><a href="../../index.html">Module code</a> &raquo;</li>
         
@@ -164,9 +172,9 @@
 <span class="sd">calculations.&quot;&quot;&quot;</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">from</span> <span class="nn">pvfactors.config</span> <span class="k">import</span> <span class="n">DISTANCE_TOLERANCE</span>
-<span class="kn">from</span> <span class="nn">pvfactors.geometry.base</span> <span class="k">import</span> <span class="n">PVSurface</span><span class="p">,</span> <span class="n">ShadeCollection</span>
-<span class="kn">from</span> <span class="nn">shapely.geometry</span> <span class="k">import</span> <span class="n">GeometryCollection</span>
+<span class="kn">from</span> <span class="nn">pvfactors.config</span> <span class="kn">import</span> <span class="n">DISTANCE_TOLERANCE</span>
+<span class="kn">from</span> <span class="nn">pvfactors.geometry.base</span> <span class="kn">import</span> <span class="n">PVSurface</span><span class="p">,</span> <span class="n">ShadeCollection</span>
+<span class="kn">from</span> <span class="nn">shapely.geometry</span> <span class="kn">import</span> <span class="n">GeometryCollection</span>
 
 
 <div class="viewcode-block" id="TsShadeCollection"><a class="viewcode-back" href="../../../developer/generated/pvfactors.geometry.timeseries.TsShadeCollection.html#pvfactors.geometry.timeseries.TsShadeCollection">[docs]</a><span class="k">class</span> <span class="nc">TsShadeCollection</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
@@ -174,7 +182,7 @@
 <span class="sd">    illuminated. This will be used by both ground and PV row</span>
 <span class="sd">    geometries.&quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="TsShadeCollection.__init__"><a class="viewcode-back" href="../../../developer/generated/pvfactors.geometry.timeseries.TsShadeCollection.html#pvfactors.geometry.timeseries.TsShadeCollection.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">list_ts_surfaces</span><span class="p">,</span> <span class="n">shaded</span><span class="p">):</span>
+<div class="viewcode-block" id="TsShadeCollection.__init__"><a class="viewcode-back" href="../../../developer/generated/pvfactors.geometry.timeseries.TsShadeCollection.html#pvfactors.geometry.timeseries.TsShadeCollection.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">list_ts_surfaces</span><span class="p">,</span> <span class="n">shaded</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Initialize using list of surfaces and shading status</span>
 
 <span class="sd">        Parameters</span>
@@ -275,7 +283,7 @@
     <span class="sd">&quot;&quot;&quot;Timeseries surface class: vectorized representation of PV surface</span>
 <span class="sd">    geometries.&quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="TsSurface.__init__"><a class="viewcode-back" href="../../../developer/generated/pvfactors.geometry.timeseries.TsSurface.html#pvfactors.geometry.timeseries.TsSurface.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coords</span><span class="p">,</span> <span class="n">n_vector</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">param_names</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<div class="viewcode-block" id="TsSurface.__init__"><a class="viewcode-back" href="../../../developer/generated/pvfactors.geometry.timeseries.TsSurface.html#pvfactors.geometry.timeseries.TsSurface.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coords</span><span class="p">,</span> <span class="n">n_vector</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">param_names</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                  <span class="n">shaded</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Initialize timeseries surface using timeseries coordinates.</span>
 
@@ -422,7 +430,7 @@
     <span class="sd">&quot;&quot;&quot;Timeseries line coordinates class: will provide a helpful shapely-like</span>
 <span class="sd">    API to invoke timeseries coordinates.&quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="TsLineCoords.__init__"><a class="viewcode-back" href="../../../developer/generated/pvfactors.geometry.timeseries.TsLineCoords.html#pvfactors.geometry.timeseries.TsLineCoords.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">b1_ts_coords</span><span class="p">,</span> <span class="n">b2_ts_coords</span><span class="p">,</span> <span class="n">coords</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="TsLineCoords.__init__"><a class="viewcode-back" href="../../../developer/generated/pvfactors.geometry.timeseries.TsLineCoords.html#pvfactors.geometry.timeseries.TsLineCoords.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">b1_ts_coords</span><span class="p">,</span> <span class="n">b2_ts_coords</span><span class="p">,</span> <span class="n">coords</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Initialize timeseries line coordinates using the timeseries</span>
 <span class="sd">        coordinates of its boundaries.</span>
 
@@ -497,7 +505,7 @@
         <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">is_b1_highest</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">b2</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">b1</span><span class="o">.</span><span class="n">y</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">TsPointCoords</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Use the numpy array representation of the coords&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">as_array</span><span class="p">)</span></div>
 
@@ -506,7 +514,7 @@
     <span class="sd">&quot;&quot;&quot;Timeseries point coordinates: provides a shapely-like API for timeseries</span>
 <span class="sd">    point coordinates.&quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="TsPointCoords.__init__"><a class="viewcode-back" href="../../../developer/generated/pvfactors.geometry.timeseries.TsPointCoords.html#pvfactors.geometry.timeseries.TsPointCoords.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+<div class="viewcode-block" id="TsPointCoords.__init__"><a class="viewcode-back" href="../../../developer/generated/pvfactors.geometry.timeseries.TsPointCoords.html#pvfactors.geometry.timeseries.TsPointCoords.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Initialize timeseries point coordinates using numpy array of coords.</span>
 
 <span class="sd">        Parameters</span>
@@ -545,7 +553,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">coords_array</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:],</span> <span class="n">coords_array</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="p">:])</span>
 
-    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Use the numpy array representation of the point&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">as_array</span><span class="p">)</span></div>
 
@@ -577,20 +585,25 @@
            
           </div>
           <footer>
-  
 
   <hr/>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2016, SunPower Corporation
+        &#169; Copyright 2016, SunPower Corporation.
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
-
         </div>
       </div>
 
@@ -598,7 +611,6 @@
 
   </div>
   
-
 
   <script type="text/javascript">
       jQuery(function () {

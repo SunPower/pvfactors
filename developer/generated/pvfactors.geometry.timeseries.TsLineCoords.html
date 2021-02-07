@@ -1,43 +1,47 @@
 
 
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8">
+  <meta charset="utf-8" />
   
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>pvfactors.geometry.timeseries.TsLineCoords &mdash; pvfactors 1.4.1 documentation</title>
+  <title>pvfactors.geometry.timeseries.TsLineCoords &mdash; pvfactors 1.5.0 documentation</title>
   
-
-  
-  
-    <link rel="shortcut icon" href="../../_static/favicon.ico"/>
-  
-  
-  
-
-  
-  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
-  
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
-        <script type="text/javascript" src="../../_static/jquery.js"></script>
-        <script type="text/javascript" src="../../_static/underscore.js"></script>
-        <script type="text/javascript" src="../../_static/doctools.js"></script>
-        <script type="text/javascript" src="../../_static/language_data.js"></script>
-        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
-        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
-    
-    <script type="text/javascript" src="../../_static/js/theme.js"></script>
-
-    
 
   
   <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
   <link rel="stylesheet" href="../../_static/css/custom.css" type="text/css" />
+
+  
+  
+    <link rel="shortcut icon" href="../../_static/favicon.ico"/>
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
     <link rel="next" title="pvfactors.geometry.timeseries.TsPointCoords" href="pvfactors.geometry.timeseries.TsPointCoords.html" />
@@ -68,7 +72,7 @@
             
             
               <div class="version">
-                1.4.1
+                1.5.0
               </div>
             
           
@@ -85,6 +89,7 @@
           
         </div>
 
+        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
@@ -125,6 +130,7 @@
             
           
         </div>
+        
       </div>
     </nav>
 
@@ -161,11 +167,13 @@
 
 
 
+
+
 <div role="navigation" aria-label="breadcrumbs navigation">
 
   <ul class="wy-breadcrumbs">
     
-      <li><a href="../../index.html">Docs</a> &raquo;</li>
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
         
           <li><a href="../index.html">Developer API</a> &raquo;</li>
         
@@ -174,7 +182,7 @@
     
       <li class="wy-breadcrumbs-aside">
         
-            
+          
             
               <!-- User defined GitHub URL -->
               <a href="https://github.com/SunPower/pvfactors/" class="fa fa-github"> Edit on GitHub</a>
@@ -196,13 +204,13 @@
 /* CSS overrides for sphinx_rtd_theme */
 
 /* 24px margin */
-.nbinput.nblast,
-.nboutput.nblast {
+.nbinput.nblast.container,
+.nboutput.nblast.container {
     margin-bottom: 19px;  /* padding has already 5px */
 }
 
 /* ... except between code cells! */
-.nblast + .nbinput {
+.nblast.container + .nbinput.container {
     margin-top: -19px;
 }
 
@@ -217,14 +225,14 @@
 </style>
 <div class="section" id="pvfactors-geometry-timeseries-tslinecoords">
 <h1>pvfactors.geometry.timeseries.TsLineCoords<a class="headerlink" href="#pvfactors-geometry-timeseries-tslinecoords" title="Permalink to this headline">¶</a></h1>
-<dl class="class">
+<dl class="py class">
 <dt id="pvfactors.geometry.timeseries.TsLineCoords">
-<em class="property">class </em><code class="sig-prename descclassname">pvfactors.geometry.timeseries.</code><code class="sig-name descname">TsLineCoords</code><span class="sig-paren">(</span><em class="sig-param">b1_ts_coords</em>, <em class="sig-param">b2_ts_coords</em>, <em class="sig-param">coords=None</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pvfactors/geometry/timeseries.html#TsLineCoords"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pvfactors.geometry.timeseries.TsLineCoords" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">pvfactors.geometry.timeseries.</code><code class="sig-name descname">TsLineCoords</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">b1_ts_coords</span></em>, <em class="sig-param"><span class="n">b2_ts_coords</span></em>, <em class="sig-param"><span class="n">coords</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pvfactors/geometry/timeseries.html#TsLineCoords"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pvfactors.geometry.timeseries.TsLineCoords" title="Permalink to this definition">¶</a></dt>
 <dd><p>Timeseries line coordinates class: will provide a helpful shapely-like
 API to invoke timeseries coordinates.</p>
-<dl class="method">
+<dl class="py method">
 <dt id="pvfactors.geometry.timeseries.TsLineCoords.__init__">
-<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param">b1_ts_coords</em>, <em class="sig-param">b2_ts_coords</em>, <em class="sig-param">coords=None</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pvfactors/geometry/timeseries.html#TsLineCoords.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pvfactors.geometry.timeseries.TsLineCoords.__init__" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">b1_ts_coords</span></em>, <em class="sig-param"><span class="n">b2_ts_coords</span></em>, <em class="sig-param"><span class="n">coords</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pvfactors/geometry/timeseries.html#TsLineCoords.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pvfactors.geometry.timeseries.TsLineCoords.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><p>Initialize timeseries line coordinates using the timeseries
 coordinates of its boundaries.</p>
 <dl class="field-list simple">
@@ -289,29 +297,29 @@ coordinates of its boundaries.</p>
            
           </div>
           <footer>
-  
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-      
-        <a href="pvfactors.geometry.timeseries.TsPointCoords.html" class="btn btn-neutral float-right" title="pvfactors.geometry.timeseries.TsPointCoords" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
-      
-      
-        <a href="pvfactors.geometry.timeseries.TsSurface.html" class="btn btn-neutral float-left" title="pvfactors.geometry.timeseries.TsSurface" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
-      
+        <a href="pvfactors.geometry.timeseries.TsPointCoords.html" class="btn btn-neutral float-right" title="pvfactors.geometry.timeseries.TsPointCoords" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="pvfactors.geometry.timeseries.TsSurface.html" class="btn btn-neutral float-left" title="pvfactors.geometry.timeseries.TsSurface" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
-  
 
   <hr/>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2016, SunPower Corporation
+        &#169; Copyright 2016, SunPower Corporation.
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
-
         </div>
       </div>
 
@@ -319,7 +327,6 @@ coordinates of its boundaries.</p>
 
   </div>
   
-
 
   <script type="text/javascript">
       jQuery(function () {

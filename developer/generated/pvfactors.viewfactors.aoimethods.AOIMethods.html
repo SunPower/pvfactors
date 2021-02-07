@@ -1,43 +1,47 @@
 
 
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8">
+  <meta charset="utf-8" />
   
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>pvfactors.viewfactors.aoimethods.AOIMethods &mdash; pvfactors 1.4.1 documentation</title>
+  <title>pvfactors.viewfactors.aoimethods.AOIMethods &mdash; pvfactors 1.5.0 documentation</title>
   
-
-  
-  
-    <link rel="shortcut icon" href="../../_static/favicon.ico"/>
-  
-  
-  
-
-  
-  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
-  
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
-        <script type="text/javascript" src="../../_static/jquery.js"></script>
-        <script type="text/javascript" src="../../_static/underscore.js"></script>
-        <script type="text/javascript" src="../../_static/doctools.js"></script>
-        <script type="text/javascript" src="../../_static/language_data.js"></script>
-        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
-        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
-    
-    <script type="text/javascript" src="../../_static/js/theme.js"></script>
-
-    
 
   
   <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
   <link rel="stylesheet" href="../../_static/css/custom.css" type="text/css" />
+
+  
+  
+    <link rel="shortcut icon" href="../../_static/favicon.ico"/>
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
     <link rel="next" title="pvfactors.irradiance.base.BaseModel" href="pvfactors.irradiance.base.BaseModel.html" />
@@ -68,7 +72,7 @@
             
             
               <div class="version">
-                1.4.1
+                1.5.0
               </div>
             
           
@@ -85,6 +89,7 @@
           
         </div>
 
+        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
@@ -104,6 +109,7 @@
             
           
         </div>
+        
       </div>
     </nav>
 
@@ -140,11 +146,13 @@
 
 
 
+
+
 <div role="navigation" aria-label="breadcrumbs navigation">
 
   <ul class="wy-breadcrumbs">
     
-      <li><a href="../../index.html">Docs</a> &raquo;</li>
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
         
           <li><a href="../index.html">Developer API</a> &raquo;</li>
         
@@ -153,7 +161,7 @@
     
       <li class="wy-breadcrumbs-aside">
         
-            
+          
             
               <!-- User defined GitHub URL -->
               <a href="https://github.com/SunPower/pvfactors/" class="fa fa-github"> Edit on GitHub</a>
@@ -175,13 +183,13 @@
 /* CSS overrides for sphinx_rtd_theme */
 
 /* 24px margin */
-.nbinput.nblast,
-.nboutput.nblast {
+.nbinput.nblast.container,
+.nboutput.nblast.container {
     margin-bottom: 19px;  /* padding has already 5px */
 }
 
 /* ... except between code cells! */
-.nblast + .nbinput {
+.nblast.container + .nbinput.container {
     margin-top: -19px;
 }
 
@@ -196,14 +204,14 @@
 </style>
 <div class="section" id="pvfactors-viewfactors-aoimethods-aoimethods">
 <h1>pvfactors.viewfactors.aoimethods.AOIMethods<a class="headerlink" href="#pvfactors-viewfactors-aoimethods-aoimethods" title="Permalink to this headline">¶</a></h1>
-<dl class="class">
+<dl class="py class">
 <dt id="pvfactors.viewfactors.aoimethods.AOIMethods">
-<em class="property">class </em><code class="sig-prename descclassname">pvfactors.viewfactors.aoimethods.</code><code class="sig-name descname">AOIMethods</code><span class="sig-paren">(</span><em class="sig-param">faoi_fn_front</em>, <em class="sig-param">faoi_fn_back</em>, <em class="sig-param">n_integral_sections=300</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pvfactors/viewfactors/aoimethods.html#AOIMethods"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pvfactors.viewfactors.aoimethods.AOIMethods" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">pvfactors.viewfactors.aoimethods.</code><code class="sig-name descname">AOIMethods</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">faoi_fn_front</span></em>, <em class="sig-param"><span class="n">faoi_fn_back</span></em>, <em class="sig-param"><span class="n">n_integral_sections</span><span class="o">=</span><span class="default_value">300</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pvfactors/viewfactors/aoimethods.html#AOIMethods"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pvfactors.viewfactors.aoimethods.AOIMethods" title="Permalink to this definition">¶</a></dt>
 <dd><p>Class containing methods related to calculating AOI losses for
 <a class="reference internal" href="pvfactors.geometry.pvarray.OrderedPVArray.html#pvfactors.geometry.pvarray.OrderedPVArray" title="pvfactors.geometry.pvarray.OrderedPVArray"><code class="xref py py-class docutils literal notranslate"><span class="pre">OrderedPVArray</span></code></a> objects.</p>
-<dl class="method">
+<dl class="py method">
 <dt id="pvfactors.viewfactors.aoimethods.AOIMethods.__init__">
-<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param">faoi_fn_front</em>, <em class="sig-param">faoi_fn_back</em>, <em class="sig-param">n_integral_sections=300</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pvfactors/viewfactors/aoimethods.html#AOIMethods.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pvfactors.viewfactors.aoimethods.AOIMethods.__init__" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">faoi_fn_front</span></em>, <em class="sig-param"><span class="n">faoi_fn_back</span></em>, <em class="sig-param"><span class="n">n_integral_sections</span><span class="o">=</span><span class="default_value">300</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pvfactors/viewfactors/aoimethods.html#AOIMethods.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pvfactors.viewfactors.aoimethods.AOIMethods.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><p>Instantiate class with faoi function and number of sections to use
 to calculate integrals of view factors with faoi losses</p>
 <dl class="field-list simple">
@@ -237,13 +245,16 @@ to use for the fAOI loss integral (default = 300)</p></li>
 <tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">fit</span></code>(n_timestamps)</p></td>
 <td><p>Fit the AOI methods to timeseries inputs: create all the necessary integration attributes.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">vf_aoi_pvrow_to_gnd</span></code>(ts_pvrows, ts_ground, …)</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">rho_from_faoi_fn</span></code>(is_back)</p></td>
+<td><p>Calculate global average reflectivity from faoi function for either side of the PV row (requires calculating view factors)</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">vf_aoi_pvrow_to_gnd</span></code>(ts_pvrows, ts_ground, …)</p></td>
 <td><p>Calculate the view factors between timeseries PV row and ground surfaces while accounting for non-diffuse AOI losses, and assign it to the passed view factor aoi matrix using the surface indices.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">vf_aoi_pvrow_to_pvrow</span></code>(ts_pvrows, …)</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">vf_aoi_pvrow_to_pvrow</span></code>(ts_pvrows, …)</p></td>
 <td><p>Calculate the view factors between timeseries PV row surfaces while accounting for AOI losses, and assign values to the passed view factor matrix using the surface indices.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">vf_aoi_pvrow_to_sky</span></code>(ts_pvrows, ts_ground, …)</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">vf_aoi_pvrow_to_sky</span></code>(ts_pvrows, ts_ground, …)</p></td>
 <td><p>Calculate the view factors between timeseries PV row surface and sky while accounting for AOI losses, and assign values to the passed view factor matrix using the surface indices.</p></td>
 </tr>
 </tbody>
@@ -257,29 +268,29 @@ to use for the fAOI loss integral (default = 300)</p></li>
            
           </div>
           <footer>
-  
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-      
-        <a href="pvfactors.irradiance.base.BaseModel.html" class="btn btn-neutral float-right" title="pvfactors.irradiance.base.BaseModel" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
-      
-      
-        <a href="pvfactors.viewfactors.vfmethods.VFTsMethods.html" class="btn btn-neutral float-left" title="pvfactors.viewfactors.vfmethods.VFTsMethods" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
-      
+        <a href="pvfactors.irradiance.base.BaseModel.html" class="btn btn-neutral float-right" title="pvfactors.irradiance.base.BaseModel" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="pvfactors.viewfactors.vfmethods.VFTsMethods.html" class="btn btn-neutral float-left" title="pvfactors.viewfactors.vfmethods.VFTsMethods" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
-  
 
   <hr/>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2016, SunPower Corporation
+        &#169; Copyright 2016, SunPower Corporation.
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
-
         </div>
       </div>
 
@@ -287,7 +298,6 @@ to use for the fAOI loss integral (default = 300)</p></li>
 
   </div>
   
-
 
   <script type="text/javascript">
       jQuery(function () {

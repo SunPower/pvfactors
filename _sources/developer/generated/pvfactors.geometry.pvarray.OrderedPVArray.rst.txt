@@ -1,4 +1,4 @@
-pvfactors.geometry.pvarray.OrderedPVArray
+﻿pvfactors.geometry.pvarray.OrderedPVArray
 =========================================
 
 .. currentmodule:: pvfactors.geometry.pvarray

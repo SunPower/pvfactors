@@ -1,4 +1,4 @@
-pvfactors.viewfactors.aoimethods.AOIMethods
+﻿pvfactors.viewfactors.aoimethods.AOIMethods
 ===========================================
 
 .. currentmodule:: pvfactors.viewfactors.aoimethods
@@ -15,6 +15,7 @@ pvfactors.viewfactors.aoimethods.AOIMethods
    
       ~AOIMethods.__init__
       ~AOIMethods.fit
+      ~AOIMethods.rho_from_faoi_fn
       ~AOIMethods.vf_aoi_pvrow_to_gnd
       ~AOIMethods.vf_aoi_pvrow_to_pvrow
       ~AOIMethods.vf_aoi_pvrow_to_sky

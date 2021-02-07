@@ -1,4 +1,4 @@
-pvfactors.geometry.pvrow.PVRow
+﻿pvfactors.geometry.pvrow.PVRow
 ==============================
 
 .. currentmodule:: pvfactors.geometry.pvrow
@@ -96,6 +96,7 @@ pvfactors.geometry.pvrow.PVRow
       
       
          ~PVRow.lowest_point
+      
       
       
       

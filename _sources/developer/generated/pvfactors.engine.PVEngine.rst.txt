@@ -1,4 +1,4 @@
-pvfactors.engine.PVEngine
+﻿pvfactors.engine.PVEngine
 =========================
 
 .. currentmodule:: pvfactors.engine
@@ -17,6 +17,7 @@ pvfactors.engine.PVEngine
       ~PVEngine.fit
       ~PVEngine.run_fast_mode
       ~PVEngine.run_full_mode
+      ~PVEngine.with_rho_initialization
    
    
 

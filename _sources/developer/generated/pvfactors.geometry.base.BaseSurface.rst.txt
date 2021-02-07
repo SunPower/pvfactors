@@ -1,4 +1,4 @@
-pvfactors.geometry.base.BaseSurface
+﻿pvfactors.geometry.base.BaseSurface
 ===================================
 
 .. currentmodule:: pvfactors.geometry.base
@@ -67,6 +67,7 @@ pvfactors.geometry.base.BaseSurface
 
    .. autosummary::
    
+      
       
       
       

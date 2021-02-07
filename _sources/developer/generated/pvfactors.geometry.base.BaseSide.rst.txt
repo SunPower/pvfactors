@@ -1,4 +1,4 @@
-pvfactors.geometry.base.BaseSide
+﻿pvfactors.geometry.base.BaseSide
 ================================
 
 .. currentmodule:: pvfactors.geometry.base
@@ -81,6 +81,7 @@ pvfactors.geometry.base.BaseSide
    
       
          ~BaseSide.all_surfaces
+      
       
       
       

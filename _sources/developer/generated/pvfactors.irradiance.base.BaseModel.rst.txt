@@ -1,4 +1,4 @@
-pvfactors.irradiance.base.BaseModel
+﻿pvfactors.irradiance.base.BaseModel
 ===================================
 
 .. currentmodule:: pvfactors.irradiance.base
@@ -16,7 +16,9 @@ pvfactors.irradiance.base.BaseModel
       ~BaseModel.__init__
       ~BaseModel.fit
       ~BaseModel.get_full_modeling_vectors
+      ~BaseModel.get_summed_components
       ~BaseModel.get_ts_modeling_vectors
+      ~BaseModel.initialize_rho
       ~BaseModel.transform
       ~BaseModel.update_ts_surface_sky_term
    

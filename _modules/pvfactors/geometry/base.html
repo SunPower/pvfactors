@@ -1,43 +1,47 @@
 
 
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8">
+  <meta charset="utf-8" />
   
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>pvfactors.geometry.base &mdash; pvfactors 1.4.1 documentation</title>
+  <title>pvfactors.geometry.base &mdash; pvfactors 1.5.0 documentation</title>
   
-
-  
-  
-    <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
-  
-  
-  
-
-  
-  <script type="text/javascript" src="../../../_static/js/modernizr.min.js"></script>
-  
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
-        <script type="text/javascript" src="../../../_static/jquery.js"></script>
-        <script type="text/javascript" src="../../../_static/underscore.js"></script>
-        <script type="text/javascript" src="../../../_static/doctools.js"></script>
-        <script type="text/javascript" src="../../../_static/language_data.js"></script>
-        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
-        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
-    
-    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
-
-    
 
   
   <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
   <link rel="stylesheet" href="../../../_static/css/custom.css" type="text/css" />
+
+  
+  
+    <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" /> 
 </head>
@@ -66,7 +70,7 @@
             
             
               <div class="version">
-                1.4.1
+                1.5.0
               </div>
             
           
@@ -83,6 +87,7 @@
           
         </div>
 
+        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
@@ -102,6 +107,7 @@
             
           
         </div>
+        
       </div>
     </nav>
 
@@ -136,11 +142,13 @@
 
 
 
+
+
 <div role="navigation" aria-label="breadcrumbs navigation">
 
   <ul class="wy-breadcrumbs">
     
-      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
         
           <li><a href="../../index.html">Module code</a> &raquo;</li>
         
@@ -163,17 +171,17 @@
 <span></span><span class="sd">&quot;&quot;&quot;Base classes for pvfactors geometry subpackage.&quot;&quot;&quot;</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">from</span> <span class="nn">pvfactors</span> <span class="k">import</span> <span class="n">PVFactorsError</span>
-<span class="kn">from</span> <span class="nn">pvfactors.config</span> <span class="k">import</span> <span class="p">(</span>
+<span class="kn">from</span> <span class="nn">pvfactors</span> <span class="kn">import</span> <span class="n">PVFactorsError</span>
+<span class="kn">from</span> <span class="nn">pvfactors.config</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">DEFAULT_NORMAL_VEC</span><span class="p">,</span> <span class="n">COLOR_DIC</span><span class="p">,</span> <span class="n">DISTANCE_TOLERANCE</span><span class="p">,</span> <span class="n">PLOT_FONTSIZE</span><span class="p">,</span>
     <span class="n">ALPHA_TEXT</span><span class="p">,</span> <span class="n">MAX_X_GROUND</span><span class="p">)</span>
-<span class="kn">from</span> <span class="nn">pvfactors.geometry.plot</span> <span class="k">import</span> <span class="n">plot_coords</span><span class="p">,</span> <span class="n">plot_bounds</span><span class="p">,</span> <span class="n">plot_line</span>
-<span class="kn">from</span> <span class="nn">pvfactors.geometry.utils</span> <span class="k">import</span> \
+<span class="kn">from</span> <span class="nn">pvfactors.geometry.plot</span> <span class="kn">import</span> <span class="n">plot_coords</span><span class="p">,</span> <span class="n">plot_bounds</span><span class="p">,</span> <span class="n">plot_line</span>
+<span class="kn">from</span> <span class="nn">pvfactors.geometry.utils</span> <span class="kn">import</span> \
     <span class="n">is_collinear</span><span class="p">,</span> <span class="n">check_collinear</span><span class="p">,</span> <span class="n">are_2d_vecs_collinear</span><span class="p">,</span> <span class="n">difference</span><span class="p">,</span> <span class="n">contains</span>
-<span class="kn">from</span> <span class="nn">shapely.geometry</span> <span class="k">import</span> <span class="n">GeometryCollection</span><span class="p">,</span> <span class="n">LineString</span>
-<span class="kn">from</span> <span class="nn">shapely.geometry.collection</span> <span class="k">import</span> <span class="n">geos_geometrycollection_from_py</span>
-<span class="kn">from</span> <span class="nn">shapely.ops</span> <span class="k">import</span> <span class="n">linemerge</span>
-<span class="kn">from</span> <span class="nn">pvlib.tools</span> <span class="k">import</span> <span class="n">cosd</span><span class="p">,</span> <span class="n">sind</span>
+<span class="kn">from</span> <span class="nn">shapely.geometry</span> <span class="kn">import</span> <span class="n">GeometryCollection</span><span class="p">,</span> <span class="n">LineString</span>
+<span class="kn">from</span> <span class="nn">shapely.geometry.collection</span> <span class="kn">import</span> <span class="n">geos_geometrycollection_from_py</span>
+<span class="kn">from</span> <span class="nn">shapely.ops</span> <span class="kn">import</span> <span class="n">linemerge</span>
+<span class="kn">from</span> <span class="nn">pvlib.tools</span> <span class="kn">import</span> <span class="n">cosd</span><span class="p">,</span> <span class="n">sind</span>
 
 
 <span class="k">def</span> <span class="nf">_check_uniform_shading</span><span class="p">(</span><span class="n">list_elements</span><span class="p">):</span>
@@ -327,7 +335,7 @@
 <span class="sd">    So two surfaces could use the same linestring, but have opposite</span>
 <span class="sd">    orientations.&quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="BaseSurface.__init__"><a class="viewcode-back" href="../../../developer/generated/pvfactors.geometry.base.BaseSurface.html#pvfactors.geometry.base.BaseSurface.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coords</span><span class="p">,</span> <span class="n">normal_vector</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<div class="viewcode-block" id="BaseSurface.__init__"><a class="viewcode-back" href="../../../developer/generated/pvfactors.geometry.base.BaseSurface.html#pvfactors.geometry.base.BaseSurface.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coords</span><span class="p">,</span> <span class="n">normal_vector</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                  <span class="n">param_names</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Create a surface using linestring coordinates.</span>
 <span class="sd">        Normal vector can have two directions for a given LineString,</span>
@@ -456,7 +464,7 @@
 <span class="sd">    that PV surfaces have a ``shaded`` attribute.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="PVSurface.__init__"><a class="viewcode-back" href="../../../developer/generated/pvfactors.geometry.base.PVSurface.html#pvfactors.geometry.base.PVSurface.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coords</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">normal_vector</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">shaded</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+<div class="viewcode-block" id="PVSurface.__init__"><a class="viewcode-back" href="../../../developer/generated/pvfactors.geometry.base.PVSurface.html#pvfactors.geometry.base.PVSurface.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coords</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">normal_vector</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">shaded</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                  <span class="n">index</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">param_names</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Initialize PV surface.</span>
 
@@ -489,7 +497,7 @@
 <span class="sd">    objects that all have the same shading status. The PV surfaces are not</span>
 <span class="sd">    necessarily contiguous or collinear.&quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="ShadeCollection.__init__"><a class="viewcode-back" href="../../../developer/generated/pvfactors.geometry.base.ShadeCollection.html#pvfactors.geometry.base.ShadeCollection.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">list_surfaces</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">shaded</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">param_names</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="ShadeCollection.__init__"><a class="viewcode-back" href="../../../developer/generated/pvfactors.geometry.base.ShadeCollection.html#pvfactors.geometry.base.ShadeCollection.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">list_surfaces</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">shaded</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">param_names</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Initialize shade collection.</span>
 
 <span class="sd">        Parameters</span>
@@ -771,7 +779,7 @@
 <span class="sd">    call basic geometrical methods and properties on it, eg call length, etc.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="PVSegment.__init__"><a class="viewcode-back" href="../../../developer/generated/pvfactors.geometry.base.PVSegment.html#pvfactors.geometry.base.PVSegment.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">illum_collection</span><span class="o">=</span><span class="n">ShadeCollection</span><span class="p">(</span><span class="n">shaded</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
+<div class="viewcode-block" id="PVSegment.__init__"><a class="viewcode-back" href="../../../developer/generated/pvfactors.geometry.base.PVSegment.html#pvfactors.geometry.base.PVSegment.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">illum_collection</span><span class="o">=</span><span class="n">ShadeCollection</span><span class="p">(</span><span class="n">shaded</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
                  <span class="n">shaded_collection</span><span class="o">=</span><span class="n">ShadeCollection</span><span class="p">(</span><span class="n">shaded</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span> <span class="n">index</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Initialize PV segment.</span>
 
@@ -1086,7 +1094,7 @@
     <span class="sd">&quot;&quot;&quot;A side represents a fixed collection of PV segments objects that should</span>
 <span class="sd">    all be collinear, with the same normal vector&quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="BaseSide.__init__"><a class="viewcode-back" href="../../../developer/generated/pvfactors.geometry.base.BaseSide.html#pvfactors.geometry.base.BaseSide.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">list_segments</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="BaseSide.__init__"><a class="viewcode-back" href="../../../developer/generated/pvfactors.geometry.base.BaseSide.html#pvfactors.geometry.base.BaseSide.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">list_segments</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Create a side geometry.</span>
 
 <span class="sd">        Parameters</span>
@@ -1298,7 +1306,7 @@
     <span class="n">registry_cols</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;geom&#39;</span><span class="p">,</span> <span class="s1">&#39;line_type&#39;</span><span class="p">,</span> <span class="s1">&#39;pvrow_index&#39;</span><span class="p">,</span> <span class="s1">&#39;side&#39;</span><span class="p">,</span>
                      <span class="s1">&#39;pvsegment_index&#39;</span><span class="p">,</span> <span class="s1">&#39;shaded&#39;</span><span class="p">,</span> <span class="s1">&#39;surface_index&#39;</span><span class="p">]</span>
 
-<div class="viewcode-block" id="BasePVArray.__init__"><a class="viewcode-back" href="../../../developer/generated/pvfactors.geometry.base.BasePVArray.html#pvfactors.geometry.base.BasePVArray.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axis_azimuth</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="BasePVArray.__init__"><a class="viewcode-back" href="../../../developer/generated/pvfactors.geometry.base.BasePVArray.html#pvfactors.geometry.base.BasePVArray.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axis_azimuth</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Initialize Base of PV array.</span>
 
 <span class="sd">        Parameters</span>
@@ -1411,20 +1419,25 @@
            
           </div>
           <footer>
-  
 
   <hr/>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2016, SunPower Corporation
+        &#169; Copyright 2016, SunPower Corporation.
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
-
         </div>
       </div>
 
@@ -1432,7 +1445,6 @@
 
   </div>
   
-
 
   <script type="text/javascript">
       jQuery(function () {

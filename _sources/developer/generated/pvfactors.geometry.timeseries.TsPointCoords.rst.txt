@@ -1,4 +1,4 @@
-pvfactors.geometry.timeseries.TsPointCoords
+﻿pvfactors.geometry.timeseries.TsPointCoords
 ===========================================
 
 .. currentmodule:: pvfactors.geometry.timeseries

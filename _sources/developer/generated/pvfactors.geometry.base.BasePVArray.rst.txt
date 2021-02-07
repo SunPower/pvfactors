@@ -1,4 +1,4 @@
-pvfactors.geometry.base.BasePVArray
+﻿pvfactors.geometry.base.BasePVArray
 ===================================
 
 .. currentmodule:: pvfactors.geometry.base

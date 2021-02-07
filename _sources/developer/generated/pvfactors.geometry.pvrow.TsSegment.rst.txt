@@ -1,4 +1,4 @@
-pvfactors.geometry.pvrow.TsSegment
+﻿pvfactors.geometry.pvrow.TsSegment
 ==================================
 
 .. currentmodule:: pvfactors.geometry.pvrow

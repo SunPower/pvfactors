@@ -1,4 +1,4 @@
-pvfactors.geometry.pvrow.PVRowSide
+﻿pvfactors.geometry.pvrow.PVRowSide
 ==================================
 
 .. currentmodule:: pvfactors.geometry.pvrow
@@ -63,6 +63,7 @@ pvfactors.geometry.pvrow.PVRowSide
 
    .. autosummary::
    
+      
       
       
       
