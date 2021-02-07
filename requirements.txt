@@ -1,4 +1,4 @@
-pvlib>=0.6.0
+pvlib>=0.6.0,<0.8.0
 shapely>=1.6.4.post2
 matplotlib
 future
