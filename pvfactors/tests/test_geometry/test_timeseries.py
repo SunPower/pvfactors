@@ -27,10 +27,9 @@ def test_ts_pvrow():
         cut, df_inputs.shaded_length_front,
         df_inputs.shaded_length_back)
 
-    
-    #check segment index
+    # check segment index
     assert len(ts_pvrow.front.list_segments) == 3
-    assert [s.index for s in ts_pvrow.front.list_segments] == [0,1,2]
+    assert [s.index for s in ts_pvrow.front.list_segments] == [0, 1, 2]
 
     # Check timeseries length of front and back segments
     for seg in ts_pvrow.front.list_segments:
