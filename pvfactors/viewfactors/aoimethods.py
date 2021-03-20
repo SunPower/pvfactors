@@ -681,6 +681,6 @@ def faoi_fn_from_pvlib_sandia(pvmodule_name):
         # Transform the inputs for the SAPM function
         angles = np.where(angles >= 90, angles - 90, 90. - angles)
         # Use pvlib sapm aoi loss method
-        return pvlib.pvsystem.sapm_aoi_loss(angles, pvmodule, upper=1.)
+        return pvlib.iam.sapm(angles, pvmodule, upper=1.)
 
     return fn
