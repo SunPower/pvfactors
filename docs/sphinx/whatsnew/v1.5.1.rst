@@ -1,0 +1,12 @@
+.. _whatsnew_151:
+
+v1.5.1 (DATE XX, 2021)
+======================
+
+Update pvlib dependency from ``pvlib>=0.6.0,<0.8.0`` to ``pvlib>=0.7.0,<0.9.0`` (:ghpull:`116`)
+
+
+Contributors
+------------
+* Marc Anoma (:ghuser:`anomam`)
+* Kevin Anderson (:ghuser:`kanderso-nrel`)
