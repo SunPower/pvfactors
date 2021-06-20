@@ -108,11 +108,3 @@ def test_difference():
     v = LineString([(-2, 0), (1, 0)])
     diff = difference(u, v)
     assert diff.is_empty
-
-
-def test_contains_on_side():
-    """Check that ``contains`` function works on a BaseSide instance"""
-    coords = [(0, 0), (2, 0)]
-    side = BaseSide.from_linestring_coords(coords)
-    point = Point(1, 0)
-    assert contains(side, point)

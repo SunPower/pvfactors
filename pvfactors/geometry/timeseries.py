@@ -3,8 +3,6 @@ calculations."""
 
 import numpy as np
 from pvfactors.config import DISTANCE_TOLERANCE
-from pvfactors.geometry.base import PVSurface, ShadeCollection
-from shapely.geometry import GeometryCollection
 
 
 class TsShadeCollection(object):
@@ -92,21 +90,21 @@ class TsShadeCollection(object):
         for ts_surf in self._list_ts_surfaces:
             ts_surf.params.update(new_dict)
 
-    def at(self, idx):
-        """Generate a ponctual shade collection for the desired index.
+    # def at(self, idx):
+    #     """Generate a ponctual shade collection for the desired index.
 
-        Parameters
-        ----------
-        idx : int
-            Index to use to generate shade collection
+    #     Parameters
+    #     ----------
+    #     idx : int
+    #         Index to use to generate shade collection
 
-        Returns
-        -------
-        collection : :py:class:`~pvfactors.geometry.base.ShadeCollection`
-        """
-        list_surfaces = [ts_surf.at(idx) for ts_surf in self._list_ts_surfaces
-                         if not ts_surf.at(idx).is_empty]
-        return ShadeCollection(list_surfaces, shaded=self.shaded)
+    #     Returns
+    #     -------
+    #     collection : :py:class:`~pvfactors.geometry.base.ShadeCollection`
+    #     """
+    #     list_surfaces = [ts_surf.at(idx) for ts_surf in self._list_ts_surfaces
+    #                      if not ts_surf.at(idx).is_empty]
+    #     return ShadeCollection(list_surfaces, shaded=self.shaded)
 
 
 class TsSurface(object):
@@ -140,52 +138,52 @@ class TsSurface(object):
         self.index = index
         self.shaded = shaded
 
-    def at(self, idx):
-        """Generate a PV segment geometry for the desired index.
+    # def at(self, idx):
+    #     """Generate a PV segment geometry for the desired index.
 
-        Parameters
-        ----------
-        idx : int
-            Index to use to generate PV segment geometry
+    #     Parameters
+    #     ----------
+    #     idx : int
+    #         Index to use to generate PV segment geometry
 
-        Returns
-        -------
-        segment : :py:class:`~pvfactors.geometry.base.PVSurface` \
-        or :py:class:`~shapely.geometry.GeometryCollection`
-            The returned object will be an empty geometry if its length is
-            really small, otherwise it will be a PV surface geometry
-        """
-        if self.length[idx] < DISTANCE_TOLERANCE:
-            # return an empty geometry
-            return GeometryCollection()
-        else:
-            # Get normal vector at idx
-            n_vector = (self.n_vector[:, idx] if self.n_vector is not None
-                        else None)
-            # Get params at idx
-            # TODO: should find faster solution
-            params = _get_params_at_idx(idx, self.params)
-            # Return a pv surface geometry with given params
-            return PVSurface(self.coords.at(idx), shaded=self.shaded,
-                             index=self.index, normal_vector=n_vector,
-                             param_names=self.param_names,
-                             params=params)
+    #     Returns
+    #     -------
+    #     segment : :py:class:`~pvfactors.geometry.base.PVSurface` \
+    #     or :py:class:`~shapely.geometry.GeometryCollection`
+    #         The returned object will be an empty geometry if its length is
+    #         really small, otherwise it will be a PV surface geometry
+    #     """
+    #     if self.length[idx] < DISTANCE_TOLERANCE:
+    #         # return an empty geometry
+    #         return GeometryCollection()
+    #     else:
+    #         # Get normal vector at idx
+    #         n_vector = (self.n_vector[:, idx] if self.n_vector is not None
+    #                     else None)
+    #         # Get params at idx
+    #         # TODO: should find faster solution
+    #         params = _get_params_at_idx(idx, self.params)
+    #         # Return a pv surface geometry with given params
+    #         return PVSurface(self.coords.at(idx), shaded=self.shaded,
+    #                          index=self.index, normal_vector=n_vector,
+    #                          param_names=self.param_names,
+    #                          params=params)
 
-    def plot_at_idx(self, idx, ax, color):
-        """Plot timeseries PV row at a certain index, only if it's not
-        too small.
+    # def plot_at_idx(self, idx, ax, color):
+    #     """Plot timeseries PV row at a certain index, only if it's not
+    #     too small.
 
-        Parameters
-        ----------
-        idx : int
-            Index to use to plot timeseries PV surface
-        ax : :py:class:`matplotlib.pyplot.axes` object
-            Axes for plotting
-        color_shaded : str, optional
-            Color to use for plotting the PV surface
-        """
-        if self.length[idx] > DISTANCE_TOLERANCE:
-            self.at(idx).plot(ax, color=color)
+    #     Parameters
+    #     ----------
+    #     idx : int
+    #         Index to use to plot timeseries PV surface
+    #     ax : :py:class:`matplotlib.pyplot.axes` object
+    #         Axes for plotting
+    #     color_shaded : str, optional
+    #         Color to use for plotting the PV surface
+    #     """
+    #     if self.length[idx] > DISTANCE_TOLERANCE:
+    #         self.at(idx).plot(ax, color=color)
 
     @property
     def b1(self):

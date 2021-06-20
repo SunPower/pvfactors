@@ -1,7 +1,9 @@
 """Base functions used to plot 2D PV geometries"""
 
+import matplotlib.pyplot as plt
 
-def plot_coords(ax, ob):
+
+def plot_coords(ax: plt.Axes, ob):
     """Plot coordinates of shapely objects
 
     Parameters
@@ -21,7 +23,7 @@ def plot_coords(ax, ob):
             ax.plot(x, y, 'o', color='#999999', zorder=1)
 
 
-def plot_bounds(ax, ob):
+def plot_bounds(ax: plt.Axes, ob):
     """Plot boundaries of shapely object
 
     Parameters
@@ -40,7 +42,7 @@ def plot_bounds(ax, ob):
     ax.plot(x, y, 'o', color='#000000', zorder=1)
 
 
-def plot_line(ax, ob, line_color):
+def plot_line(ax: plt.Axes, ob, line_color: str):
     """Plot boundaries of shapely line
 
     Parameters

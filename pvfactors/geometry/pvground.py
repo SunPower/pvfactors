@@ -2,12 +2,9 @@
 from pvfactors import PVFactorsError
 from pvfactors.config import (
     MAX_X_GROUND, MIN_X_GROUND, Y_GROUND, DISTANCE_TOLERANCE, COLOR_DIC)
-from pvfactors.geometry.base import (
-    BaseSide, PVSegment, ShadeCollection, PVSurface)
+
 from pvfactors.geometry.timeseries import (
-    TsShadeCollection, TsLineCoords, TsPointCoords, TsSurface,
-    _get_params_at_idx)
-from shapely.geometry import LineString
+    TsShadeCollection, TsLineCoords, TsPointCoords, TsSurface)
 import numpy as np
 from copy import deepcopy
 
@@ -175,135 +172,135 @@ class TsGround(object):
                    param_names=param_names, flag_overlap=flag_overlap,
                    cut_point_coords=cut_point_coords, y_ground=y_ground)
 
-    def at(self, idx, x_min_max=None, merge_if_flag_overlap=True,
-           with_cut_points=True):
-        """Generate a PV ground geometry for the desired index. This will
-        only return non-point surfaces within the ground bounds, i.e.
-        surfaces that are not points, and which are within x_min and x_max.
+    # def at(self, idx, x_min_max=None, merge_if_flag_overlap=True,
+    #        with_cut_points=True):
+    #     """Generate a PV ground geometry for the desired index. This will
+    #     only return non-point surfaces within the ground bounds, i.e.
+    #     surfaces that are not points, and which are within x_min and x_max.
 
-        Parameters
-        ----------
-        idx : int
-            Index to use to generate PV ground geometry
-        x_min_max : tuple, optional
-            List of minimum and maximum x coordinates for the flat surface [m]
-            (Default = None)
-        merge_if_flag_overlap : bool, optional
-            Decide whether to merge all shadows if they overlap or not
-            (Default = True)
-        with_cut_points :  bool, optional
-            Decide whether to include the saved cut points in the created
-            PV ground geometry (Default = True)
+    #     Parameters
+    #     ----------
+    #     idx : int
+    #         Index to use to generate PV ground geometry
+    #     x_min_max : tuple, optional
+    #         List of minimum and maximum x coordinates for the flat surface [m]
+    #         (Default = None)
+    #     merge_if_flag_overlap : bool, optional
+    #         Decide whether to merge all shadows if they overlap or not
+    #         (Default = True)
+    #     with_cut_points :  bool, optional
+    #         Decide whether to include the saved cut points in the created
+    #         PV ground geometry (Default = True)
 
-        Returns
-        -------
-        pvground : :py:class:`~pvfactors.geometry.pvground.PVGround`
-        """
-        # Get shadow elements that are not points at the given index
-        non_pt_shadow_elements = [
-            shadow_el for shadow_el in self.shadow_elements
-            if shadow_el.coords.length[idx] > DISTANCE_TOLERANCE]
+    #     Returns
+    #     -------
+    #     pvground : :py:class:`~pvfactors.geometry.pvground.PVGround`
+    #     """
+    #     # Get shadow elements that are not points at the given index
+    #     non_pt_shadow_elements = [
+    #         shadow_el for shadow_el in self.shadow_elements
+    #         if shadow_el.coords.length[idx] > DISTANCE_TOLERANCE]
 
-        if with_cut_points:
-            # We want the ground surfaces broken up at the cut points
-            if merge_if_flag_overlap:
-                # We want to merge the shadow surfaces when they overlap
-                list_shadow_surfaces = self._merge_shadow_surfaces(
-                    idx, non_pt_shadow_elements)
-            else:
-                # No need to merge the shadow surfaces
-                list_shadow_surfaces = []
-                for shadow_el in non_pt_shadow_elements:
-                    list_shadow_surfaces += \
-                        shadow_el.non_point_surfaces_at(idx)
-            # Get the illuminated surfaces
-            list_illum_surfaces = []
-            for illum_el in self.illum_elements:
-                list_illum_surfaces += illum_el.non_point_surfaces_at(idx)
-        else:
-            # No need to break up the surfaces at the cut points
-            # We will need to build up new surfaces (since not done by classes)
+    #     if with_cut_points:
+    #         # We want the ground surfaces broken up at the cut points
+    #         if merge_if_flag_overlap:
+    #             # We want to merge the shadow surfaces when they overlap
+    #             list_shadow_surfaces = self._merge_shadow_surfaces(
+    #                 idx, non_pt_shadow_elements)
+    #         else:
+    #             # No need to merge the shadow surfaces
+    #             list_shadow_surfaces = []
+    #             for shadow_el in non_pt_shadow_elements:
+    #                 list_shadow_surfaces += \
+    #                     shadow_el.non_point_surfaces_at(idx)
+    #         # Get the illuminated surfaces
+    #         list_illum_surfaces = []
+    #         for illum_el in self.illum_elements:
+    #             list_illum_surfaces += illum_el.non_point_surfaces_at(idx)
+    #     else:
+    #         # No need to break up the surfaces at the cut points
+    #         # We will need to build up new surfaces (since not done by classes)
 
-            # Get the parameters at the given index
-            illum_params = _get_params_at_idx(idx, self.illum_params)
-            shaded_params = _get_params_at_idx(idx, self.shaded_params)
+    #         # Get the parameters at the given index
+    #         illum_params = _get_params_at_idx(idx, self.illum_params)
+    #         shaded_params = _get_params_at_idx(idx, self.shaded_params)
 
-            if merge_if_flag_overlap and (self.flag_overlap is not None):
-                # We want to merge the shadow surfaces when they overlap
-                is_overlap = self.flag_overlap[idx]
-                if is_overlap and (len(non_pt_shadow_elements) > 1):
-                    coords = [non_pt_shadow_elements[0].b1.at(idx),
-                              non_pt_shadow_elements[-1].b2.at(idx)]
-                    list_shadow_surfaces = [PVSurface(
-                        coords, shaded=True, param_names=self.param_names,
-                        params=shaded_params)]
-                else:
-                    # No overlap for the given index or config
-                    list_shadow_surfaces = [
-                        PVSurface(shadow_el.coords.at(idx),
-                                  shaded=True, params=shaded_params,
-                                  param_names=self.param_names)
-                        for shadow_el in non_pt_shadow_elements
-                        if shadow_el.coords.length[idx]
-                        > DISTANCE_TOLERANCE]
-            else:
-                # No need to merge the shadow surfaces
-                list_shadow_surfaces = [
-                    PVSurface(shadow_el.coords.at(idx),
-                              shaded=True, params=shaded_params,
-                              param_names=self.param_names)
-                    for shadow_el in non_pt_shadow_elements
-                    if shadow_el.coords.length[idx]
-                    > DISTANCE_TOLERANCE]
-            # Get the illuminated surfaces
-            list_illum_surfaces = [PVSurface(illum_el.coords.at(idx),
-                                             shaded=False, params=illum_params,
-                                             param_names=self.param_names)
-                                   for illum_el in self.illum_elements
-                                   if illum_el.coords.length[idx]
-                                   > DISTANCE_TOLERANCE]
+    #         if merge_if_flag_overlap and (self.flag_overlap is not None):
+    #             # We want to merge the shadow surfaces when they overlap
+    #             is_overlap = self.flag_overlap[idx]
+    #             if is_overlap and (len(non_pt_shadow_elements) > 1):
+    #                 coords = [non_pt_shadow_elements[0].b1.at(idx),
+    #                           non_pt_shadow_elements[-1].b2.at(idx)]
+    #                 list_shadow_surfaces = [PVSurface(
+    #                     coords, shaded=True, param_names=self.param_names,
+    #                     params=shaded_params)]
+    #             else:
+    #                 # No overlap for the given index or config
+    #                 list_shadow_surfaces = [
+    #                     PVSurface(shadow_el.coords.at(idx),
+    #                               shaded=True, params=shaded_params,
+    #                               param_names=self.param_names)
+    #                     for shadow_el in non_pt_shadow_elements
+    #                     if shadow_el.coords.length[idx]
+    #                     > DISTANCE_TOLERANCE]
+    #         else:
+    #             # No need to merge the shadow surfaces
+    #             list_shadow_surfaces = [
+    #                 PVSurface(shadow_el.coords.at(idx),
+    #                           shaded=True, params=shaded_params,
+    #                           param_names=self.param_names)
+    #                 for shadow_el in non_pt_shadow_elements
+    #                 if shadow_el.coords.length[idx]
+    #                 > DISTANCE_TOLERANCE]
+    #         # Get the illuminated surfaces
+    #         list_illum_surfaces = [PVSurface(illum_el.coords.at(idx),
+    #                                          shaded=False, params=illum_params,
+    #                                          param_names=self.param_names)
+    #                                for illum_el in self.illum_elements
+    #                                if illum_el.coords.length[idx]
+    #                                > DISTANCE_TOLERANCE]
 
-        # Pass the created lists to the PVGround builder
-        return PVGround.from_lists_surfaces(
-            list_shadow_surfaces, list_illum_surfaces,
-            param_names=self.param_names, y_ground=self.y_ground,
-            x_min_max=x_min_max)
+    #     # Pass the created lists to the PVGround builder
+    #     return PVGround.from_lists_surfaces(
+    #         list_shadow_surfaces, list_illum_surfaces,
+    #         param_names=self.param_names, y_ground=self.y_ground,
+    #         x_min_max=x_min_max)
 
-    def plot_at_idx(self, idx, ax, color_shaded=COLOR_DIC['pvrow_shaded'],
-                    color_illum=COLOR_DIC['pvrow_illum'], x_min_max=None,
-                    merge_if_flag_overlap=True, with_cut_points=True,
-                    with_surface_index=False):
-        """Plot timeseries ground at a certain index.
+    # def plot_at_idx(self, idx, ax, color_shaded=COLOR_DIC['pvrow_shaded'],
+    #                 color_illum=COLOR_DIC['pvrow_illum'], x_min_max=None,
+    #                 merge_if_flag_overlap=True, with_cut_points=True,
+    #                 with_surface_index=False):
+    #     """Plot timeseries ground at a certain index.
 
-        Parameters
-        ----------
-        idx : int
-            Index to use to plot timeseries side
-        ax : :py:class:`matplotlib.pyplot.axes` object
-            Axes for plotting
-        color_shaded : str, optional
-            Color to use for plotting the shaded surfaces (Default =
-            COLOR_DIC['pvrow_shaded'])
-        color_shaded : str, optional
-            Color to use for plotting the illuminated surfaces (Default =
-            COLOR_DIC['pvrow_illum'])
-        x_min_max : tuple, optional
-            List of minimum and maximum x coordinates for the flat surface [m]
-            (Default = None)
-        merge_if_flag_overlap : bool, optional
-            Decide whether to merge all shadows if they overlap or not
-            (Default = True)
-        with_cut_points :  bool, optional
-            Decide whether to include the saved cut points in the created
-            PV ground geometry (Default = True)
-        with_surface_index : bool, optional
-            Plot the surfaces with their index values (Default = False)
-        """
-        pvground = self.at(idx, x_min_max=x_min_max,
-                           merge_if_flag_overlap=merge_if_flag_overlap,
-                           with_cut_points=with_cut_points)
-        pvground.plot(ax, color_shaded=color_shaded, color_illum=color_illum,
-                      with_index=with_surface_index)
+    #     Parameters
+    #     ----------
+    #     idx : int
+    #         Index to use to plot timeseries side
+    #     ax : :py:class:`matplotlib.pyplot.axes` object
+    #         Axes for plotting
+    #     color_shaded : str, optional
+    #         Color to use for plotting the shaded surfaces (Default =
+    #         COLOR_DIC['pvrow_shaded'])
+    #     color_shaded : str, optional
+    #         Color to use for plotting the illuminated surfaces (Default =
+    #         COLOR_DIC['pvrow_illum'])
+    #     x_min_max : tuple, optional
+    #         List of minimum and maximum x coordinates for the flat surface [m]
+    #         (Default = None)
+    #     merge_if_flag_overlap : bool, optional
+    #         Decide whether to merge all shadows if they overlap or not
+    #         (Default = True)
+    #     with_cut_points :  bool, optional
+    #         Decide whether to include the saved cut points in the created
+    #         PV ground geometry (Default = True)
+    #     with_surface_index : bool, optional
+    #         Plot the surfaces with their index values (Default = False)
+    #     """
+    #     pvground = self.at(idx, x_min_max=x_min_max,
+    #                        merge_if_flag_overlap=merge_if_flag_overlap,
+    #                        with_cut_points=with_cut_points)
+    #     pvground.plot(ax, color_shaded=color_shaded, color_illum=color_illum,
+    #                   with_index=with_surface_index)
 
     def update_params(self, new_dict):
         """Update the illuminated parameters with new ones, not only for the
@@ -507,72 +504,72 @@ class TsGround(object):
             length += shadow_el.length
         return length
 
-    def non_point_shaded_surfaces_at(self, idx):
-        """Return a list of shaded surfaces, that are not points
-        at given index
+    # def non_point_shaded_surfaces_at(self, idx):
+    #     """Return a list of shaded surfaces, that are not points
+    #     at given index
 
-        Parameters
-        ----------
-        idx : int
-            Index at which we want the surfaces not to be points
+    #     Parameters
+    #     ----------
+    #     idx : int
+    #         Index at which we want the surfaces not to be points
 
-        Returns
-        -------
-        list of :py:class:`~pvfactors.geometry.base.PVSurface`
-        """
-        list_surfaces = []
-        for shadow_el in self.shadow_elements:
-            list_surfaces += shadow_el.non_point_surfaces_at(0)
-        return list_surfaces
+    #     Returns
+    #     -------
+    #     list of :py:class:`~pvfactors.geometry.base.PVSurface`
+    #     """
+    #     list_surfaces = []
+    #     for shadow_el in self.shadow_elements:
+    #         list_surfaces += shadow_el.non_point_surfaces_at(0)
+    #     return list_surfaces
 
-    def non_point_illum_surfaces_at(self, idx):
-        """Return a list of illuminated surfaces, that are not
-        points at given index
+    # def non_point_illum_surfaces_at(self, idx):
+    #     """Return a list of illuminated surfaces, that are not
+    #     points at given index
 
-        Parameters
-        ----------
-        idx : int
-            Index at which we want the surfaces not to be points
+    #     Parameters
+    #     ----------
+    #     idx : int
+    #         Index at which we want the surfaces not to be points
 
-        Returns
-        -------
-        list of :py:class:`~pvfactors.geometry.base.PVSurface`
-        """
-        list_surfaces = []
-        for illum_el in self.illum_elements:
-            list_surfaces += illum_el.non_point_surfaces_at(0)
-        return list_surfaces
+    #     Returns
+    #     -------
+    #     list of :py:class:`~pvfactors.geometry.base.PVSurface`
+    #     """
+    #     list_surfaces = []
+    #     for illum_el in self.illum_elements:
+    #         list_surfaces += illum_el.non_point_surfaces_at(0)
+    #     return list_surfaces
 
-    def non_point_surfaces_at(self, idx):
-        """Return a list of all surfaces that are not
-        points at given index
+    # def non_point_surfaces_at(self, idx):
+    #     """Return a list of all surfaces that are not
+    #     points at given index
 
-        Parameters
-        ----------
-        idx : int
-            Index at which we want the surfaces not to be points
+    #     Parameters
+    #     ----------
+    #     idx : int
+    #         Index at which we want the surfaces not to be points
 
-        Returns
-        -------
-        list of :py:class:`~pvfactors.geometry.base.PVSurface`
-        """
-        return self.non_point_illum_surfaces_at(idx) \
-            + self.non_point_shaded_surfaces_at(idx)
+    #     Returns
+    #     -------
+    #     list of :py:class:`~pvfactors.geometry.base.PVSurface`
+    #     """
+    #     return self.non_point_illum_surfaces_at(idx) \
+    #         + self.non_point_shaded_surfaces_at(idx)
 
-    def n_non_point_surfaces_at(self, idx):
-        """Return the number of :py:class:`~pvfactors.geometry.base.PVSurface`
-        that are not points at given index
+    # def n_non_point_surfaces_at(self, idx):
+    #     """Return the number of :py:class:`~pvfactors.geometry.base.PVSurface`
+    #     that are not points at given index
 
-        Parameters
-        ----------
-        idx : int
-            Index at which we want the surfaces not to be points
+    #     Parameters
+    #     ----------
+    #     idx : int
+    #         Index at which we want the surfaces not to be points
 
-        Returns
-        -------
-        int
-        """
-        return len(self.non_point_surfaces_at(idx))
+    #     Returns
+    #     -------
+    #     int
+    #     """
+    #     return len(self.non_point_surfaces_at(idx))
 
     @staticmethod
     def _shadow_elements_from_coords_and_cut_pts(
@@ -676,88 +673,88 @@ class TsGround(object):
 
         return list_illum_elements
 
-    def _merge_shadow_surfaces(self, idx, non_pt_shadow_elements):
-        """Merge the shadow surfaces in a list of shadow elements
-        at the shadow boundaries only, at a given index, but keep the shadow
-        surfaces broken up at the cut points.
+    # def _merge_shadow_surfaces(self, idx, non_pt_shadow_elements):
+    #     """Merge the shadow surfaces in a list of shadow elements
+    #     at the shadow boundaries only, at a given index, but keep the shadow
+    #     surfaces broken up at the cut points.
 
-        Parameters
-        ----------
-        idx : int
-            Index at which we want to merge the surfaces
-        non_pt_shadow_elements : \
-        list of :py:class:`~pvfactors.geometry.pvground.TsGroundElement`
-            List of non point shadow elements
+    #     Parameters
+    #     ----------
+    #     idx : int
+    #         Index at which we want to merge the surfaces
+    #     non_pt_shadow_elements : \
+    #     list of :py:class:`~pvfactors.geometry.pvground.TsGroundElement`
+    #         List of non point shadow elements
 
-        Returns
-        -------
-        list_shadow_surfaces : \
-        list of :py:class:`~pvfactors.geometry.base.PVSurface`
-            List of shadow surfaces at a given index
-            (ordered from left to right)
-        """
-        # TODO: check if it would be faster to merge the ground elements first,
-        # and then break it down with the cut points
+    #     Returns
+    #     -------
+    #     list_shadow_surfaces : \
+    #     list of :py:class:`~pvfactors.geometry.base.PVSurface`
+    #         List of shadow surfaces at a given index
+    #         (ordered from left to right)
+    #     """
+    #     # TODO: check if it would be faster to merge the ground elements first,
+    #     # and then break it down with the cut points
 
-        # Decide whether to merge all shadows or not
-        list_shadow_surfaces = []
-        if self.flag_overlap is not None:
-            # Get the overlap flags
-            is_overlap = self.flag_overlap[idx]
-            n_shadow_elements = len(non_pt_shadow_elements)
-            if is_overlap and (n_shadow_elements > 1):
-                # If there's only one shadow, not point in going through this
+    #     # Decide whether to merge all shadows or not
+    #     list_shadow_surfaces = []
+    #     if self.flag_overlap is not None:
+    #         # Get the overlap flags
+    #         is_overlap = self.flag_overlap[idx]
+    #         n_shadow_elements = len(non_pt_shadow_elements)
+    #         if is_overlap and (n_shadow_elements > 1):
+    #             # If there's only one shadow, not point in going through this
 
-                # Now go from left to right and merge shadow surfaces
-                surface_to_merge = None
-                for i_el, shadow_el in enumerate(non_pt_shadow_elements):
-                    surfaces = shadow_el.non_point_surfaces_at(idx)
-                    n_surf = len(surfaces)
-                    for i_surf, surface in enumerate(surfaces):
-                        if i_surf == n_surf - 1:
-                            # last surface, could also be first
-                            if i_surf == 0:
-                                # Need to merge with preceding if exists
-                                if surface_to_merge is not None:
-                                    coords = [surface_to_merge.boundary[0],
-                                              surface.boundary[1]]
-                                    surface = PVSurface(
-                                        coords, shaded=True,
-                                        param_names=self.param_names,
-                                        params=surface.params,
-                                        index=surface.index)
-                            if i_el == n_shadow_elements - 1:
-                                # last surface of last shadow element
-                                list_shadow_surfaces.append(surface)
-                            else:
-                                # keep for merging with next element
-                                surface_to_merge = surface
-                        elif i_surf == 0:
-                            # first surface but definitely not last either
-                            if surface_to_merge is not None:
-                                coords = [surface_to_merge.boundary[0],
-                                          surface.boundary[1]]
-                                list_shadow_surfaces.append(
-                                    PVSurface(coords, shaded=True,
-                                              param_names=self.param_names,
-                                              params=surface.params,
-                                              index=surface.index))
-                            else:
-                                list_shadow_surfaces.append(surface)
-                        else:
-                            # not first nor last surface
-                            list_shadow_surfaces.append(surface)
-            else:
-                # There's no need to merge anything
-                for shadow_el in non_pt_shadow_elements:
-                    list_shadow_surfaces += \
-                        shadow_el.non_point_surfaces_at(idx)
-        else:
-            # There's no need to merge anything
-            for shadow_el in non_pt_shadow_elements:
-                list_shadow_surfaces += shadow_el.non_point_surfaces_at(idx)
+    #             # Now go from left to right and merge shadow surfaces
+    #             surface_to_merge = None
+    #             for i_el, shadow_el in enumerate(non_pt_shadow_elements):
+    #                 surfaces = shadow_el.non_point_surfaces_at(idx)
+    #                 n_surf = len(surfaces)
+    #                 for i_surf, surface in enumerate(surfaces):
+    #                     if i_surf == n_surf - 1:
+    #                         # last surface, could also be first
+    #                         if i_surf == 0:
+    #                             # Need to merge with preceding if exists
+    #                             if surface_to_merge is not None:
+    #                                 coords = [surface_to_merge.boundary[0],
+    #                                           surface.boundary[1]]
+    #                                 surface = PVSurface(
+    #                                     coords, shaded=True,
+    #                                     param_names=self.param_names,
+    #                                     params=surface.params,
+    #                                     index=surface.index)
+    #                         if i_el == n_shadow_elements - 1:
+    #                             # last surface of last shadow element
+    #                             list_shadow_surfaces.append(surface)
+    #                         else:
+    #                             # keep for merging with next element
+    #                             surface_to_merge = surface
+    #                     elif i_surf == 0:
+    #                         # first surface but definitely not last either
+    #                         if surface_to_merge is not None:
+    #                             coords = [surface_to_merge.boundary[0],
+    #                                       surface.boundary[1]]
+    #                             list_shadow_surfaces.append(
+    #                                 PVSurface(coords, shaded=True,
+    #                                           param_names=self.param_names,
+    #                                           params=surface.params,
+    #                                           index=surface.index))
+    #                         else:
+    #                             list_shadow_surfaces.append(surface)
+    #                     else:
+    #                         # not first nor last surface
+    #                         list_shadow_surfaces.append(surface)
+    #         else:
+    #             # There's no need to merge anything
+    #             for shadow_el in non_pt_shadow_elements:
+    #                 list_shadow_surfaces += \
+    #                     shadow_el.non_point_surfaces_at(idx)
+    #     else:
+    #         # There's no need to merge anything
+    #         for shadow_el in non_pt_shadow_elements:
+    #             list_shadow_surfaces += shadow_el.non_point_surfaces_at(idx)
 
-        return list_shadow_surfaces
+    #     return list_shadow_surfaces
 
 
 class TsGroundElement(object):
@@ -986,110 +983,5 @@ class TsGroundElement(object):
         return coords
 
 
-class PVGround(BaseSide):
-    """Class that defines the ground geometry in PV arrays."""
-
-    def __init__(self, list_segments=None, original_linestring=None):
-        """Initialize PV ground geometry.
-
-        Parameters
-        ----------
-        list_segments : list of :py:class:`~pvfactors.geometry.base.PVSegment`, optional
-            List of PV segments that will constitute the ground (Default = [])
-        original_linestring : :py:class:`shapely.geometry.LineString`, optional
-            Full continuous linestring that the ground will be made of
-            (Default = None)
-        """
-        list_segments = list_segments or []
-        self.original_linestring = original_linestring
-        super(PVGround, self).__init__(list_segments)
-
-    @classmethod
-    def as_flat(cls, x_min_max=None, shaded=False, y_ground=Y_GROUND,
-                param_names=None):
-        """Build a horizontal flat ground surface, made of 1 PV segment.
-
-        Parameters
-        ----------
-        x_min_max : tuple, optional
-            List of minimum and maximum x coordinates for the flat surface [m]
-            (Default = None)
-        shaded : bool, optional
-            Shaded status of the created PV surfaces (Default = False)
-        y_ground : float, optional
-            Location of flat ground on y axis in [m] (Default = Y_GROUND)
-        param_names : list of str, optional
-            Names of the surface parameters, eg reflectivity, total incident
-            irradiance, temperature, etc. (Default = [])
-
-        Returns
-        -------
-        PVGround object
-        """
-        param_names = param_names or []
-        # Get ground boundaries
-        if x_min_max is None:
-            x_min, x_max = MIN_X_GROUND, MAX_X_GROUND
-        else:
-            x_min, x_max = x_min_max
-        # Create PV segment for flat ground
-        coords = [(x_min, y_ground), (x_max, y_ground)]
-        seg = PVSegment.from_linestring_coords(coords, shaded=shaded,
-                                               normal_vector=[0., 1.],
-                                               param_names=param_names)
-        return cls(list_segments=[seg], original_linestring=LineString(coords))
-
-    @classmethod
-    def from_lists_surfaces(
-            cls, list_shaded_surfaces, list_illum_surfaces, x_min_max=None,
-            y_ground=Y_GROUND, param_names=None):
-        """Create ground from lists of shaded and illuminated PV surfaces.
-
-        Parameters
-        ----------
-        list_shaded_surfaces : \
-        list of :py:class:`~pvfactors.geometry.base.PVSurface`
-            List of shaded ground PV surfaces
-        list_illum_surfaces : \
-        list of :py:class:`~pvfactors.geometry.base.PVSurface`
-            List of illuminated ground PV surfaces
-        x_min_max : tuple, optional
-            List of minimum and maximum x coordinates for the flat surface [m]
-            (Default = None)
-        y_ground : float, optional
-            Location of flat ground on y axis in [m] (Default = Y_GROUND)
-        param_names : list of str, optional
-            Names of the surface parameters, eg reflectivity, total incident
-            irradiance, temperature, etc. (Default = [])
-
-        Returns
-        -------
-        PVGround object
-        """
-        param_names = param_names or []
-        # Get ground boundaries
-        if x_min_max is None:
-            x_min, x_max = MIN_X_GROUND, MAX_X_GROUND
-        else:
-            x_min, x_max = x_min_max
-        full_extent_coords = [(x_min, y_ground), (x_max, y_ground)]
-
-        # Create the shade collections
-        shaded_collection = ShadeCollection(
-            list_surfaces=list_shaded_surfaces, shaded=True,
-            param_names=param_names)
-        illum_collection = ShadeCollection(
-            list_surfaces=list_illum_surfaces, shaded=False,
-            param_names=param_names)
-
-        # Create the ground segment
-        segment = PVSegment(illum_collection=illum_collection,
-                            shaded_collection=shaded_collection)
-
-        return cls(list_segments=[segment],
-                   original_linestring=LineString(full_extent_coords))
-
-    @property
-    def boundary(self):
-        """Boundaries of the ground's original linestring."""
-        return self.original_linestring.boundary
+class PVGround:
+    pass
