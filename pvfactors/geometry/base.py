@@ -1,17 +1,17 @@
 """Base classes for pvfactors geometry subpackage."""
 
+from collections import namedtuple
 import numpy as np
 from pvfactors import PVFactorsError
 from pvfactors.config import (
-    DEFAULT_NORMAL_VEC, COLOR_DIC, DISTANCE_TOLERANCE, PLOT_FONTSIZE,
+    DEFAULT_NORMAL_VEC, COLOR_DIC, PLOT_FONTSIZE,
     ALPHA_TEXT, MAX_X_GROUND)
 from pvfactors.geometry.plot import plot_coords, plot_bounds, plot_line
 from pvfactors.geometry.utils import \
-    is_collinear, check_collinear, are_2d_vecs_collinear, difference, contains
-from shapely.geometry import GeometryCollection, LineString
-from shapely.geometry.collection import geos_geometrycollection_from_py
-from shapely.ops import linemerge
+    is_collinear, check_collinear, are_2d_vecs_collinear
 from pvlib.tools import cosd, sind
+
+from typing import List, Optional, Tuple
 
 
 def _check_uniform_shading(list_elements):
@@ -159,14 +159,25 @@ def _get_solar_2d_vectors(solar_zenith, solar_azimuth, axis_azimuth):
     return solar_2d_vector
 
 
-class BaseSurface(LineString):
+COORD = Tuple[float, float]
+COORDS = Tuple[COORD, COORD]
+Point = namedtuple("Point", ["x", "y"])
+Boundaries = Tuple[Point, Point]
+
+
+class BaseSurface:
     """Base surfaces will be extensions of :py:class:`LineString` classes,
     but adding an orientation to it (normal vector).
     So two surfaces could use the same linestring, but have opposite
     orientations."""
 
-    def __init__(self, coords, normal_vector=None, index=None,
-                 param_names=None, params=None):
+    boundaries: Boundaries
+    n_vector: np.ndarray
+    length: float
+    index: Optional[int]
+
+    def __init__(self, coords: COORDS, normal_vector: Optional[np.ndarray] = None, index: Optional[int] = None,
+                 ):
         """Create a surface using linestring coordinates.
         Normal vector can have two directions for a given LineString,
         so the user can provide it in order to be specific,
@@ -184,33 +195,23 @@ class BaseSurface(LineString):
             calculated)
         index : int, optional
             Surface index (Default = None)
-        param_names : list of str, optional
-            Names of the surface parameters, eg reflectivity, total incident
-            irradiance, temperature, etc. (Default = None)
-        params : dict, optional
-            Surface float parameters (Default = None)
         """
-
-        param_names = [] if param_names is None else param_names
-        super(BaseSurface, self).__init__(coords)
-        if normal_vector is None:
-            self.n_vector = self._calculate_n_vector()
-        else:
-            self.n_vector = np.array(normal_vector)
+        boundaries: Boundaries = tuple(Point(*c) for c in coords)
+        self.boundaries = boundaries
+        self.n_vector = np.array(normal_vector) or self._calculate_n_vector()
         self.index = index
-        self.param_names = param_names
-        self.params = params if params is not None \
-            else dict.fromkeys(self.param_names)
+        b1, b2 = boundaries
+        self.length = np.sqrt((b2.x - b1.x)**2 + (b2.y - b1.y)**2)
 
     def _calculate_n_vector(self):
         """Calculate normal vector of the surface, if surface is not empty"""
-        if not self.is_empty:
-            b1, b2 = self.boundary
+        if not self.boundaries:
+            return DEFAULT_NORMAL_VEC
+        else:
+            b1, b2 = self.boundaries
             dx = b2.x - b1.x
             dy = b2.y - b1.y
             return np.array([-dy, dx])
-        else:
-            return DEFAULT_NORMAL_VEC
 
     def plot(self, ax, color=None, with_index=False):
         """Plot the surface on the given axes.
@@ -242,50 +243,9 @@ class BaseSurface(LineString):
                         verticalalignment='center',
                         horizontalalignment='center')
 
-    def difference(self, linestring):
-        """Calculate remaining surface after removing part belonging from
-        provided linestring,
-
-        Parameters
-        ----------
-        linestring : :py:class:`shapely.geometry.LineString`
-            Line string to remove from surface
-
-        Returns
-        -------
-        :py:class:`shapely.geometry.LineString`
-           Resulting difference of current surface minus given linestring
-        """
-        return difference(self, linestring)
-
-    def get_param(self, param):
-        """Get parameter value from surface.
-
-        Parameters
-        ----------
-        param : str
-            Surface parameter to return
-
-        Returns
-        -------
-        Parameter value to return
-
-        Raises
-        ------
-        KeyError
-            if parameter name not in the surface parameters
-        """
-        return self.params[param]
-
-    def update_params(self, new_dict):
-        """Update surface parameters.
-
-        Parameters
-        ----------
-        new_dict : dict
-            Parameters to add or update for the surface
-        """
-        self.params.update(new_dict)
+    @property
+    def is_empty(self):
+        return self.boundaries[0] == self.boundaries[1]
 
 
 class PVSurface(BaseSurface):
@@ -293,9 +253,10 @@ class PVSurface(BaseSurface):
     :py:class:`~pvfactors.geometry.base.BaseSurface`. The only difference is
     that PV surfaces have a ``shaded`` attribute.
     """
+    shaded: bool
 
-    def __init__(self, coords=None, normal_vector=None, shaded=False,
-                 index=None, param_names=None, params=None):
+    def __init__(self, coords: COORDS, normal_vector=None, shaded=False,
+                 index: Optional[int] = None):
         """Initialize PV surface.
 
         Parameters
@@ -316,18 +277,16 @@ class PVSurface(BaseSurface):
             Surface float parameters (Default = None)
         """
 
-        param_names = [] if param_names is None else param_names
-        super(PVSurface, self).__init__(coords, normal_vector, index=index,
-                                        param_names=param_names, params=params)
+        super(PVSurface, self).__init__(coords, normal_vector, index=index)
         self.shaded = shaded
 
 
-class ShadeCollection(GeometryCollection):
+class ShadeCollection:
     """A group of :py:class:`~pvfactors.geometry.base.PVSurface`
-    objects that all have the same shading status. The PV surfaces are not
-    necessarily contiguous or collinear."""
+    objects that all have the same shading status. Assumes that all elements are 
+    collinear."""
 
-    def __init__(self, list_surfaces=None, shaded=None, param_names=None):
+    def __init__(self, list_surfaces: Optional[List[PVSurface]] = None, shaded: bool = False):
         """Initialize shade collection.
 
         Parameters
@@ -343,23 +302,17 @@ class ShadeCollection(GeometryCollection):
             irradiance, temperature, etc. (Default = None)
 
         """
-        list_surfaces = [] if list_surfaces is None else list_surfaces
-        param_names = [] if param_names is None else param_names
-        _check_uniform_shading(list_surfaces)
-        self.list_surfaces = list_surfaces
+        self.list_surfaces = list_surfaces or []
         self.shaded = self._get_shading(shaded)
-        self.is_collinear = is_collinear(list_surfaces)
-        self.param_names = param_names
-        super(ShadeCollection, self).__init__(list_surfaces)
+        self.is_collinear = is_collinear(self.list_surfaces)
+        _check_uniform_shading(self.list_surfaces)
 
-    def _get_shading(self, shaded):
+    def _get_shading(self, shaded: bool) -> bool:
         """Get the surface shading from the provided list of pv surfaces.
-
         Parameters
         ----------
         shaded : bool
             Shading flag passed during initialization
-
         Returns
         -------
         bool
@@ -369,195 +322,6 @@ class ShadeCollection(GeometryCollection):
             return self.list_surfaces[0].shaded
         else:
             return shaded
-
-    def plot(self, ax, color=None, with_index=False):
-        """Plot the surfaces in the shade collection.
-
-        Parameters
-        ----------
-        ax : :py:class:`matplotlib.pyplot.axes` object
-            Axes for plotting
-        color : str, optional
-            Color to use for plotting the surface (Default = None)
-        with_index : bool
-            Flag to annotate surfaces with their indices (Default = False)
-        """
-        for surface in self.list_surfaces:
-            surface.plot(ax, color=color, with_index=with_index)
-
-    def add_linestring(self, linestring, normal_vector=None):
-        """Add PV surface to the collection using a linestring
-
-        Parameters
-        ----------
-        linestring : :py:class:`shapely.geometry.LineString`
-            Linestring to use to add a PV surface to the collection
-        normal_vector : list, optional
-            Normal vector to use for the PV surface to create (Default = None,
-            will try to get it from collection)
-        """
-        if normal_vector is None:
-            normal_vector = self.n_vector
-        surf = PVSurface(coords=linestring.coords,
-                         normal_vector=normal_vector, shaded=self.shaded,
-                         param_names=self.param_names)
-        self.add_pvsurface(surf)
-
-    def add_pvsurface(self, pvsurface):
-        """Add PV surface to the collection.
-
-        Parameters
-        ----------
-        pvsurface : :py:class:`~pvfactors.geometry.base.PVSurface`
-            PV Surface to add to collection
-        """
-        self.list_surfaces.append(pvsurface)
-        self.is_collinear = is_collinear(self.list_surfaces)
-        super(ShadeCollection, self).__init__(self.list_surfaces)
-
-    def remove_linestring(self, linestring):
-        """Remove linestring from shade collection.
-        The method will rearrange the PV surfaces to make it work.
-
-        Parameters
-        ----------
-        linestring : :py:class:`shapely.geometry.LineString`
-            Line string to remove from the collection (by differencing)
-        """
-        new_list_surfaces = []
-        for surface in self.list_surfaces:
-            # Need to use buffer for intersects bc of floating point precision
-            # errors in shapely
-            if surface.buffer(DISTANCE_TOLERANCE).intersects(linestring):
-                difference = surface.difference(linestring)
-                # We want to make sure we can iterate on it, as
-                # ``difference`` can be a multi-part geometry or not
-                if not hasattr(difference, '__iter__'):
-                    difference = [difference]
-                for new_geom in difference:
-                    if not new_geom.is_empty:
-                        new_surface = PVSurface(
-                            new_geom.coords, normal_vector=surface.n_vector,
-                            shaded=surface.shaded,
-                            param_names=surface.param_names)
-                        new_list_surfaces.append(new_surface)
-            else:
-                new_list_surfaces.append(surface)
-
-        self.list_surfaces = new_list_surfaces
-        # Force update, even if list is empty
-        self.update_geom_collection(self.list_surfaces)
-
-    def update_geom_collection(self, list_surfaces):
-        """Force update of geometry collection, even if list is empty
-        https://github.com/Toblerity/Shapely/blob/master/shapely/geometry/collection.py#L42
-
-        Parameters
-        ----------
-        list_surfaces : list of :py:class:`~pvfactors.geometry.base.PVSurface`
-            New list of PV surfaces to update the shade collection in place
-        """
-        self._geom, self._ndim = geos_geometrycollection_from_py(list_surfaces)
-
-    def merge_surfaces(self):
-        """Merge all surfaces in the shade collection into one contiguous
-        surface, even if they're not contiguous, by using bounds."""
-        if len(self.list_surfaces) > 1:
-            merged_lines = linemerge(self.list_surfaces)
-            minx, miny, maxx, maxy = merged_lines.bounds
-            surf_1 = self.list_surfaces[0]
-            new_pvsurf = PVSurface(
-                coords=[(minx, miny), (maxx, maxy)],
-                shaded=self.shaded, normal_vector=surf_1.n_vector,
-                param_names=surf_1.param_names)
-            self.list_surfaces = [new_pvsurf]
-            self.update_geom_collection(self.list_surfaces)
-
-    def cut_at_point(self, point):
-        """Cut collection at point if the collection contains it.
-
-        Parameters
-        ----------
-        point : :py:class:`shapely.geometry.Point`
-            Point where to cut collection geometry, if the latter contains the
-            former
-        """
-        for idx, surface in enumerate(self.list_surfaces):
-            if contains(surface, point):
-                # Make sure that not hitting a boundary
-                b1, b2 = surface.boundary
-                not_hitting_b1 = b1.distance(point) > DISTANCE_TOLERANCE
-                not_hitting_b2 = b2.distance(point) > DISTANCE_TOLERANCE
-                if not_hitting_b1 and not_hitting_b2:
-                    coords_1 = [b1, point]
-                    coords_2 = [point, b2]
-                    # TODO: not sure what to do about index yet
-                    new_surf_1 = PVSurface(
-                        coords_1, normal_vector=surface.n_vector,
-                        shaded=surface.shaded,
-                        param_names=surface.param_names)
-                    new_surf_2 = PVSurface(
-                        coords_2, normal_vector=surface.n_vector,
-                        shaded=surface.shaded,
-                        param_names=surface.param_names)
-                    # Now update collection
-                    self.list_surfaces[idx] = new_surf_1
-                    self.list_surfaces.append(new_surf_2)
-                    self.update_geom_collection(self.list_surfaces)
-                    # No need to continue the loop
-                    break
-
-    def get_param_weighted(self, param):
-        """Get the parameter from the collection's surfaces, after weighting
-        by surface length.
-
-        Parameters
-        ----------
-        param: str
-            Surface parameter to return
-
-        Returns
-        -------
-        float
-            Weighted parameter value
-        """
-        value = self.get_param_ww(param) / self.length
-        return value
-
-    def get_param_ww(self, param):
-        """Get the parameter from the collection's surfaces with weight, i.e.
-        after multiplying by the surface lengths.
-
-        Parameters
-        ----------
-        param: str
-            Surface parameter to return
-
-        Returns
-        -------
-        float
-            Parameter value multiplied by weights
-
-        Raises
-        ------
-        KeyError
-            if parameter name not in a surface parameters
-        """
-        value = 0
-        for surf in self.list_surfaces:
-            value += surf.get_param(param) * surf.length
-        return value
-
-    def update_params(self, new_dict):
-        """Update surface parameters in the collection.
-
-        Parameters
-        ----------
-        new_dict : dict
-            Parameters to add or update for the surface
-        """
-        for surf in self.list_surfaces:
-            surf.update_params(new_dict)
 
     @property
     def n_vector(self):
@@ -571,74 +335,45 @@ class ShadeCollection(GeometryCollection):
             return DEFAULT_NORMAL_VEC
 
     @property
-    def n_surfaces(self):
-        """Number of surfaces in collection."""
-        return len(self.list_surfaces)
+    def is_empty(self) -> bool:
+        return len(self.list_surfaces) == 0
 
     @property
-    def surface_indices(self):
-        """Indices of the surfaces in the collection."""
-        return [surf.index for surf in self.list_surfaces]
-
-    @classmethod
-    def from_linestring_coords(cls, coords, shaded, normal_vector=None,
-                               param_names=None):
-        """Create a shade collection with a single PV surface.
-
-        Parameters
-        ----------
-        coords : list
-            List of linestring coordinates for the surface
-        shaded : bool
-            Shading status desired for the collection
-        normal_vector : list, optional
-            Normal vector for the surface (Default = None)
-        param_names : list of str, optional
-            Names of the surface parameters, eg reflectivity, total incident
-            irradiance, temperature, etc. (Default = None)
-        """
-        surf = PVSurface(coords=coords, normal_vector=normal_vector,
-                         shaded=shaded, param_names=param_names)
-        return cls([surf], shaded=shaded, param_names=param_names)
+    def length(self) -> float:
+        length = 0
+        for surface in self.list_surfaces:
+            length += surface.length
+        return length
 
 
-class PVSegment(GeometryCollection):
+class PVSegment:
     """A PV segment will be a collection of 2 collinear and contiguous
     shade collections, a shaded one and an illuminated one. It inherits from
     :py:class:`shapely.geometry.GeometryCollection`  so that users can still
     call basic geometrical methods and properties on it, eg call length, etc.
     """
 
-    def __init__(self, illum_collection=ShadeCollection(shaded=False),
-                 shaded_collection=ShadeCollection(shaded=True), index=None):
+    def __init__(self, illum_collection: Optional[ShadeCollection] = None,
+                 shaded_collection: Optional[ShadeCollection] = None):
         """Initialize PV segment.
 
         Parameters
         ----------
-        illum_collection : \
-        :py:class:`~pvfactors.geometry.base.ShadeCollection`, optional
-            Illuminated collection of the PV segment (Default = empty shade
+        illum_collection : Illuminated collection of the PV segment (Default = empty shade
             collection with no shading)
-        shaded_collection : \
-        :py:class:`~pvfactors.geometry.base.ShadeCollection`, optional
-            Shaded collection of the PV segment (Default = empty shade
+        shaded_collection : Shaded collection of the PV segment (Default = empty shade
             collection with shading)
-        index : int, optional
-            Index of the PV segment (Default = None)
         """
+        shaded_collection = shaded_collection or ShadeCollection(shaded=True)
+        illum_collection = illum_collection or ShadeCollection(shaded=False)
         assert shaded_collection.shaded, "surface should be shaded"
         assert not illum_collection.shaded, "surface should not be shaded"
+        self.illum_collection = illum_collection
+        self.shaded_collection = shaded_collection
         self._check_collinear(illum_collection, shaded_collection)
-        self._shaded_collection = shaded_collection
-        self._illum_collection = illum_collection
-        self.index = index
-        self._all_surfaces = None
-        super(PVSegment, self).__init__([self._shaded_collection,
-                                         self._illum_collection])
 
     def _check_collinear(self, illum_collection, shaded_collection):
         """Check that all the surfaces in the PV segment are collinear.
-
         Parameters
         ----------
         illum_collection :
@@ -647,7 +382,6 @@ class PVSegment(GeometryCollection):
         shaded_collection :
         :py:class:`~pvfactors.geometry.base.ShadeCollection`, optional
             Shaded collection
-
         Raises
         ------
         PVFactorsError
@@ -663,121 +397,6 @@ class PVSegment(GeometryCollection):
             n_vec_shaded = shaded_collection.n_vector
             assert are_2d_vecs_collinear(n_vec_ill, n_vec_shaded)
 
-    def plot(self, ax, color_shaded=COLOR_DIC['pvrow_shaded'],
-             color_illum=COLOR_DIC['pvrow_illum'], with_index=False):
-        """Plot the surfaces in the PV Segment.
-
-        Parameters
-        ----------
-        ax : :py:class:`matplotlib.pyplot.axes` object
-            Axes for plotting
-        color_shaded : str, optional
-            Color to use for plotting the shaded surfaces (Default =
-            COLOR_DIC['pvrow_shaded'])
-        color_shaded : str, optional
-            Color to use for plotting the illuminated surfaces (Default =
-            COLOR_DIC['pvrow_illum'])
-        with_index : bool
-            Flag to annotate surfaces with their indices (Default = False)
-        """
-        self._shaded_collection.plot(ax, color=color_shaded,
-                                     with_index=with_index)
-        self._illum_collection.plot(ax, color=color_illum,
-                                    with_index=with_index)
-
-    def cast_shadow(self, linestring):
-        """Cast shadow on PV segment using linestring: will rearrange the
-        PV surfaces between the shaded and illuminated collections of the
-        segment
-
-        Parameters
-        ----------
-        linestring : :py:class:`shapely.geometry.LineString`
-            Linestring casting a shadow on the PV segment
-        """
-        # Using a buffer may slow things down, but it's quite crucial
-        # in order for shapely to get the intersection accurately see:
-        # https://stackoverflow.com/questions/28028910/how-to-deal-with-rounding-errors-in-shapely
-        intersection = (self._illum_collection.buffer(DISTANCE_TOLERANCE)
-                        .intersection(linestring))
-        if not intersection.is_empty:
-            # Split up only if interesects the illuminated collection
-            # print(intersection)
-            self._shaded_collection.add_linestring(intersection,
-                                                   normal_vector=self.n_vector)
-            # print(self._shaded_collection.length)
-            self._illum_collection.remove_linestring(intersection)
-            # print(self._illum_collection.length)
-            super(PVSegment, self).__init__([self._shaded_collection,
-                                             self._illum_collection])
-
-    def cut_at_point(self, point):
-        """Cut PV segment at point if the segment contains it.
-
-        Parameters
-        ----------
-        point : :py:class:`shapely.geometry.Point`
-            Point where to cut collection geometry, if the latter contains the
-            former
-        """
-        if contains(self, point):
-            if contains(self._illum_collection, point):
-                self._illum_collection.cut_at_point(point)
-            else:
-                self._shaded_collection.cut_at_point(point)
-
-    def get_param_weighted(self, param):
-        """Get the parameter from the segment's surfaces, after weighting
-        by surface length.
-
-        Parameters
-        ----------
-        param: str
-            Surface parameter to return
-
-        Returns
-        -------
-        float
-            Weighted parameter value
-        """
-        value = self.get_param_ww(param) / self.length
-        return value
-
-    def get_param_ww(self, param):
-        """Get the parameter from the segment's surfaces with weight, i.e.
-        after multiplying by the surface lengths.
-
-        Parameters
-        ----------
-        param: str
-            Surface parameter to return
-
-        Returns
-        -------
-        float
-            Parameter value multiplied by weights
-
-        Raises
-        ------
-        KeyError
-            if parameter name not in a surface parameters
-        """
-        value = 0
-        value += self._shaded_collection.get_param_ww(param)
-        value += self._illum_collection.get_param_ww(param)
-        return value
-
-    def update_params(self, new_dict):
-        """Update surface parameters in the collection.
-
-        Parameters
-        ----------
-        new_dict : dict
-            Parameters to add or update for the surfaces
-        """
-        self._shaded_collection.update_params(new_dict)
-        self._illum_collection.update_params(new_dict)
-
     @property
     def n_vector(self):
         """Since shaded and illum surfaces are supposed to be collinear,
@@ -791,140 +410,35 @@ class PVSegment(GeometryCollection):
             return DEFAULT_NORMAL_VEC
 
     @property
-    def n_surfaces(self):
+    def n_surfaces(self) -> int:
         """Number of surfaces in collection."""
         n_surfaces = self._illum_collection.n_surfaces \
             + self._shaded_collection.n_surfaces
         return n_surfaces
 
     @property
-    def surface_indices(self):
+    def surface_indices(self) -> List[int]:
         """Indices of the surfaces in the PV segment."""
         list_indices = []
         list_indices += self._illum_collection.surface_indices
         list_indices += self._shaded_collection.surface_indices
         return list_indices
 
-    @classmethod
-    def from_linestring_coords(cls, coords, shaded=False, normal_vector=None,
-                               index=None, param_names=None):
-        """Create a PV segment with a single PV surface.
-
-        Parameters
-        ----------
-        coords : list
-            List of linestring coordinates for the surface
-        shaded : bool, optional
-            Shading status desired for the resulting PV surface
-            (Default = False)
-        normal_vector : list, optional
-            Normal vector for the surface (Default = None)
-        index : int, optional
-            Index of the segment (Default = None)
-        param_names : list of str, optional
-            Names of the surface parameters, eg reflectivity, total incident
-            irradiance, temperature, etc. (Default = None)
-        """
-        col = ShadeCollection.from_linestring_coords(
-            coords, shaded=shaded, normal_vector=normal_vector,
-            param_names=param_names)
-        # Realized that needed to instantiate other_col, otherwise could
-        # end up with shared collection among different PV segments
-        other_col = ShadeCollection(list_surfaces=[], shaded=not shaded,
-                                    param_names=param_names)
-        if shaded:
-            return cls(illum_collection=other_col,
-                       shaded_collection=col, index=index)
-        else:
-            return cls(illum_collection=col,
-                       shaded_collection=other_col, index=index)
+    @property
+    def shaded_length(self) -> float:
+        """Length of the shaded collection of the PV segment."""
+        return self.shaded_collection.length if self.shaded_collection else 0.0
 
     @property
-    def shaded_collection(self):
-        """Shaded collection of the PV segment"""
-        return self._shaded_collection
-
-    @shaded_collection.setter
-    def shaded_collection(self, new_collection):
-        """Set shaded collection of the PV segment with new one.
-
-        Parameters
-        ----------
-        new_collection : :py:class:`pvfactors.geometry.base.ShadeCollection`
-            New collection to use for update
-        """
-        assert new_collection.shaded, "surface should be shaded"
-        self._shaded_collection = new_collection
-        super(PVSegment, self).__init__([self._shaded_collection,
-                                         self._illum_collection])
-
-    @shaded_collection.deleter
-    def shaded_collection(self):
-        """Delete shaded collection of PV segment and replace with empty one.
-        """
-        self._shaded_collection = ShadeCollection(shaded=True)
-        super(PVSegment, self).__init__([self._shaded_collection,
-                                         self._illum_collection])
-
-    @property
-    def illum_collection(self):
-        """Illuminated collection of the PV segment."""
-        return self._illum_collection
-
-    @illum_collection.setter
-    def illum_collection(self, new_collection):
-        """Set illuminated collection of the PV segment with new one.
-
-        Parameters
-        ----------
-        new_collection : :py:class:`pvfactors.geometry.base.ShadeCollection`
-            New collection to use for update
-        """
-        assert not new_collection.shaded, "surface should not be shaded"
-        self._illum_collection = new_collection
-        super(PVSegment, self).__init__([self._shaded_collection,
-                                         self._illum_collection])
-
-    @illum_collection.deleter
-    def illum_collection(self):
-        """Delete illuminated collection of PV segment and replace with empty
-        one."""
-        self._illum_collection = ShadeCollection(shaded=False)
-        super(PVSegment, self).__init__([self._shaded_collection,
-                                         self._illum_collection])
-
-    @property
-    def shaded_length(self):
-        """Length of the shaded collection of the PV segment.
-
-        Returns
-        -------
-        float
-            Length of the shaded collection
-        """
-        return self._shaded_collection.length
-
-    @property
-    def all_surfaces(self):
-        """List of all the :py:class:`pvfactors.geometry.base.PVSurface`
-
-        Returns
-        -------
-        list of :py:class:`~pvfactors.geometry.base.PVSurface`
-            PV surfaces in the PV segment
-        """
-        if self._all_surfaces is None:
-            self._all_surfaces = []
-            self._all_surfaces += self._illum_collection.list_surfaces
-            self._all_surfaces += self._shaded_collection.list_surfaces
-        return self._all_surfaces
+    def length(self) -> float:
+        return self._illum_collection.length + self._shaded_collection.length
 
 
-class BaseSide(GeometryCollection):
+class BaseSide:
     """A side represents a fixed collection of PV segments objects that should
     all be collinear, with the same normal vector"""
 
-    def __init__(self, list_segments=None):
+    def __init__(self, list_segments: Optional[List] = None):
         """Create a side geometry.
 
         Parameters
@@ -932,54 +446,54 @@ class BaseSide(GeometryCollection):
         list_segments : list of :py:class:`~pvfactors.geometry.base.PVSegment`, optional
             List of PV segments for side (Default = None)
         """
-        list_segments = [] if list_segments is None else list_segments
-        check_collinear(list_segments)
+        list_segments = list_segments or []
+        # check_collinear(list_segments)
         self.list_segments = tuple(list_segments)
         self._all_surfaces = None
-        super(BaseSide, self).__init__(list_segments)
+        # super(BaseSide, self).__init__(list_segments)
 
-    @classmethod
-    def from_linestring_coords(cls, coords, shaded=False, normal_vector=None,
-                               index=None, n_segments=1, param_names=None):
-        """Create a Side with a single PV surface, or multiple discretized
-        identical ones.
+    # @classmethod
+    # def from_linestring_coords(cls, coords, shaded=False, normal_vector=None,
+    #                            index=None, n_segments=1, param_names=None):
+    #     """Create a Side with a single PV surface, or multiple discretized
+    #     identical ones.
 
-        Parameters
-        ----------
-        coords : list
-            List of linestring coordinates for the surface
-        shaded : bool, optional
-            Shading status desired for the resulting PV surface
-            (Default = False)
-        normal_vector : list, optional
-            Normal vector for the surface (Default = None)
-        index : int, optional
-            Index of the segments (Default = None)
-        n_segments : int, optional
-            Number of same-length segments to use (Default = 1)
-        param_names : list of str, optional
-            Names of the surface parameters, eg reflectivity, total incident
-            irradiance, temperature, etc. (Default = None)
-        """
-        if n_segments == 1:
-            list_pvsegments = [PVSegment.from_linestring_coords(
-                coords, shaded=shaded, normal_vector=normal_vector,
-                index=index, param_names=param_names)]
-        else:
-            # Discretize coords and create segments accordingly
-            linestring = LineString(coords)
-            fractions = np.linspace(0., 1., num=n_segments + 1)
-            list_points = [linestring.interpolate(fraction, normalized=True)
-                           for fraction in fractions]
-            list_pvsegments = []
-            for idx in range(n_segments):
-                new_coords = list_points[idx:idx + 2]
-                # TODO: not clear what to do with the index here
-                pvsegment = PVSegment.from_linestring_coords(
-                    new_coords, shaded=shaded, normal_vector=normal_vector,
-                    index=index, param_names=param_names)
-                list_pvsegments.append(pvsegment)
-        return cls(list_segments=list_pvsegments)
+    #     Parameters
+    #     ----------
+    #     coords : list
+    #         List of linestring coordinates for the surface
+    #     shaded : bool, optional
+    #         Shading status desired for the resulting PV surface
+    #         (Default = False)
+    #     normal_vector : list, optional
+    #         Normal vector for the surface (Default = None)
+    #     index : int, optional
+    #         Index of the segments (Default = None)
+    #     n_segments : int, optional
+    #         Number of same-length segments to use (Default = 1)
+    #     param_names : list of str, optional
+    #         Names of the surface parameters, eg reflectivity, total incident
+    #         irradiance, temperature, etc. (Default = None)
+    #     """
+    #     if n_segments == 1:
+    #         list_pvsegments = [PVSegment.from_linestring_coords(
+    #             coords, shaded=shaded, normal_vector=normal_vector,
+    #             index=index, param_names=param_names)]
+    #     else:
+    #         # Discretize coords and create segments accordingly
+    #         linestring = LineString(coords)
+    #         fractions = np.linspace(0., 1., num=n_segments + 1)
+    #         list_points = [linestring.interpolate(fraction, normalized=True)
+    #                        for fraction in fractions]
+    #         list_pvsegments = []
+    #         for idx in range(n_segments):
+    #             new_coords = list_points[idx:idx + 2]
+    #             # TODO: not clear what to do with the index here
+    #             pvsegment = PVSegment.from_linestring_coords(
+    #                 new_coords, shaded=shaded, normal_vector=normal_vector,
+    #                 index=index, param_names=param_names)
+    #             list_pvsegments.append(pvsegment)
+    #     return cls(list_segments=list_pvsegments)
 
     @property
     def n_vector(self):
@@ -1043,90 +557,38 @@ class BaseSide(GeometryCollection):
             segment.plot(ax, color_shaded=color_shaded,
                          color_illum=color_illum, with_index=with_index)
 
-    def cast_shadow(self, linestring):
-        """Cast shadow on Side using linestring: will rearrange the
-        PV surfaces between the shaded and illuminated collections of the
-        segments.
+    # def cast_shadow(self, linestring):
+    #     """Cast shadow on Side using linestring: will rearrange the
+    #     PV surfaces between the shaded and illuminated collections of the
+    #     segments.
 
-        Parameters
-        ----------
-        linestring : :py:class:`shapely.geometry.LineString`
-            Linestring casting a shadow on the Side object
-        """
-        for segment in self.list_segments:
-            segment.cast_shadow(linestring)
+    #     Parameters
+    #     ----------
+    #     linestring : :py:class:`shapely.geometry.LineString`
+    #         Linestring casting a shadow on the Side object
+    #     """
+    #     for segment in self.list_segments:
+    #         segment.cast_shadow(linestring)
 
-    def merge_shaded_areas(self):
-        """Merge shaded areas of all PV segments"""
-        for seg in self.list_segments:
-            seg._shaded_collection.merge_surfaces()
+    # def merge_shaded_areas(self):
+    #     """Merge shaded areas of all PV segments"""
+    #     for seg in self.list_segments:
+    #         seg._shaded_collection.merge_surfaces()
 
-    def cut_at_point(self, point):
-        """Cut Side at point if the side contains it.
+    # def cut_at_point(self, point):
+    #     """Cut Side at point if the side contains it.
 
-        Parameters
-        ----------
-        point : :py:class:`shapely.geometry.Point`
-            Point where to cut side geometry, if the latter contains the
-            former
-        """
-        if contains(self, point):
-            for segment in self.list_segments:
-                # Nothing will happen to the segments that do not contain
-                # the point
-                segment.cut_at_point(point)
-
-    def get_param_weighted(self, param):
-        """Get the parameter from the side's surfaces, after weighting
-        by surface length.
-
-        Parameters
-        ----------
-        param: str
-            Surface parameter to return
-
-        Returns
-        -------
-        float
-            Weighted parameter value
-        """
-        value = self.get_param_ww(param) / self.length
-        return value
-
-    def get_param_ww(self, param):
-        """Get the parameter from the side's surfaces with weight, i.e.
-        after multiplying by the surface lengths.
-
-        Parameters
-        ----------
-        param: str
-            Surface parameter to return
-
-        Returns
-        -------
-        float
-            Parameter value multiplied by weights
-
-        Raises
-        ------
-        KeyError
-            if parameter name not in a surface parameters
-        """
-        value = 0
-        for seg in self.list_segments:
-            value += seg.get_param_ww(param)
-        return value
-
-    def update_params(self, new_dict):
-        """Update surface parameters in the Side.
-
-        Parameters
-        ----------
-        new_dict : dict
-            Parameters to add or update for the surfaces
-        """
-        for seg in self.list_segments:
-            seg.update_params(new_dict)
+    #     Parameters
+    #     ----------
+    #     point : :py:class:`shapely.geometry.Point`
+    #         Point where to cut side geometry, if the latter contains the
+    #         former
+    #     """
+    #     if contains(self, point):
+    #         for segment in self.list_segments:
+    #             # Nothing will happen to the segments that do not contain
+    #             # the point
+    #             segment.cut_at_point(point)
 
 
 class BasePVArray(object):
@@ -1174,55 +636,55 @@ class BasePVArray(object):
         """List of indices of all the timeseries surfaces"""
         return [ts_surf.index for ts_surf in self.all_ts_surfaces]
 
-    def plot_at_idx(self, idx, ax, merge_if_flag_overlap=True,
-                    with_cut_points=True, x_min_max=None,
-                    with_surface_index=False):
-        """Plot all the PV rows and the ground in the PV array at a desired
-        step index. This can be called before transforming the array, and
-        after fitting it.
+    # def plot_at_idx(self, idx, ax, merge_if_flag_overlap=True,
+    #                 with_cut_points=True, x_min_max=None,
+    #                 with_surface_index=False):
+    #     """Plot all the PV rows and the ground in the PV array at a desired
+    #     step index. This can be called before transforming the array, and
+    #     after fitting it.
 
-        Parameters
-        ----------
-        idx : int
-            Selected timestep index for plotting the PV array
-        ax : :py:class:`matplotlib.pyplot.axes` object
-            Axes for plotting the PV array geometries
-        merge_if_flag_overlap : bool, optional
-            Decide whether to merge all shadows if they overlap
-            (Default = True)
-        with_cut_points :  bool, optional
-            Decide whether to include the saved cut points in the created
-            PV ground geometry (Default = True)
-        x_min_max : tuple, optional
-            List of minimum and maximum x coordinates for the flat ground
-            surface [m] (Default = None)
-        with_surface_index : bool, optional
-            Plot the surfaces with their index values (Default = False)
-        """
-        # Plot pv array structures
-        self.ts_ground.plot_at_idx(
-            idx, ax, color_shaded=COLOR_DIC['ground_shaded'],
-            color_illum=COLOR_DIC['ground_illum'],
-            merge_if_flag_overlap=merge_if_flag_overlap,
-            with_cut_points=with_cut_points, x_min_max=x_min_max,
-            with_surface_index=with_surface_index)
+    #     Parameters
+    #     ----------
+    #     idx : int
+    #         Selected timestep index for plotting the PV array
+    #     ax : :py:class:`matplotlib.pyplot.axes` object
+    #         Axes for plotting the PV array geometries
+    #     merge_if_flag_overlap : bool, optional
+    #         Decide whether to merge all shadows if they overlap
+    #         (Default = True)
+    #     with_cut_points :  bool, optional
+    #         Decide whether to include the saved cut points in the created
+    #         PV ground geometry (Default = True)
+    #     x_min_max : tuple, optional
+    #         List of minimum and maximum x coordinates for the flat ground
+    #         surface [m] (Default = None)
+    #     with_surface_index : bool, optional
+    #         Plot the surfaces with their index values (Default = False)
+    #     """
+    #     # Plot pv array structures
+    #     self.ts_ground.plot_at_idx(
+    #         idx, ax, color_shaded=COLOR_DIC['ground_shaded'],
+    #         color_illum=COLOR_DIC['ground_illum'],
+    #         merge_if_flag_overlap=merge_if_flag_overlap,
+    #         with_cut_points=with_cut_points, x_min_max=x_min_max,
+    #         with_surface_index=with_surface_index)
 
-        for ts_pvrow in self.ts_pvrows:
-            ts_pvrow.plot_at_idx(
-                idx, ax, color_shaded=COLOR_DIC['pvrow_shaded'],
-                color_illum=COLOR_DIC['pvrow_illum'],
-                with_surface_index=with_surface_index)
+    #     for ts_pvrow in self.ts_pvrows:
+    #         ts_pvrow.plot_at_idx(
+    #             idx, ax, color_shaded=COLOR_DIC['pvrow_shaded'],
+    #             color_illum=COLOR_DIC['pvrow_illum'],
+    #             with_surface_index=with_surface_index)
 
-        # Plot formatting
-        ax.axis('equal')
-        if self.distance is not None:
-            n_pvrows = self.n_pvrows
-            ax.set_xlim(- 0.5 * self.distance,
-                        (n_pvrows - 0.5) * self.distance)
-        if self.height is not None:
-            ax.set_ylim(- self.height, 2 * self.height)
-        ax.set_xlabel("x [m]", fontsize=PLOT_FONTSIZE)
-        ax.set_ylabel("y [m]", fontsize=PLOT_FONTSIZE)
+    #     # Plot formatting
+    #     ax.axis('equal')
+    #     if self.distance is not None:
+    #         n_pvrows = self.n_pvrows
+    #         ax.set_xlim(- 0.5 * self.distance,
+    #                     (n_pvrows - 0.5) * self.distance)
+    #     if self.height is not None:
+    #         ax.set_ylim(- self.height, 2 * self.height)
+    #     ax.set_xlabel("x [m]", fontsize=PLOT_FONTSIZE)
+    #     ax.set_ylabel("y [m]", fontsize=PLOT_FONTSIZE)
 
     def fit(self, *args, **kwargs):
         """Not implemented."""

@@ -772,7 +772,8 @@ class HybridPerezOrdered(BaseModel):
         """
 
         # Sum up the necessary parameters to form the irradiance vector
-        irradiance_vec, rho_vec, inv_rho_vec, total_perez_vec = self.get_modeling_vectors(pvarray)
+        irradiance_vec, rho_vec, inv_rho_vec, total_perez_vec = self.get_modeling_vectors(
+            pvarray)
         # Add sky values
         irradiance_vec.append(self.isotropic_luminance[idx])
         total_perez_vec.append(self.isotropic_luminance[idx])
@@ -807,7 +808,8 @@ class HybridPerezOrdered(BaseModel):
             and sky. Dimension = [n_surfaces + 1, n_timesteps]
         """
         # Sum up the necessary parameters to form the irradiance vector
-        irradiance_mat, rho_mat, inv_rho_mat, total_perez_mat = self.get_ts_modeling_vectors(pvarray)
+        irradiance_mat, rho_mat, inv_rho_mat, total_perez_mat = self.get_ts_modeling_vectors(
+            pvarray)
         # Add sky values
         irradiance_mat.append(self.isotropic_luminance)
         total_perez_mat.append(self.isotropic_luminance)
@@ -901,49 +903,50 @@ class HybridPerezOrdered(BaseModel):
 
         return shading_pct
 
-    def _calculate_circumsolar_shading_pct(self, surface, idx_neighbor, pvrows,
-                                           solar_2d_vector):
-        """Model method to calculate circumsolar shading on surfaces of
-        the ordered PV array.
-        TODO: This needs to be merged with horizon shading for performance
+    # FIXME: not used anywhere
+    # def _calculate_circumsolar_shading_pct(self, surface, idx_neighbor, pvrows,
+    #                                        solar_2d_vector):
+    #     """Model method to calculate circumsolar shading on surfaces of
+    #     the ordered PV array.
+    #     TODO: This needs to be merged with horizon shading for performance
 
-        Parameters
-        ----------
-        surface : :py:class:`~pvfactors.geometry.base.PVSurface` object
-            PV surface for which some horizon band shading will occur
-        idx_neighbor : int
-            Index of the neighboring PV row (can be ``None``)
-        pvrows : list of :py:class:`~pvfactors.geometry.pvrow.PVRow` objects
-            List of PV rows on which ``idx_neighbor`` will be used
-        solar_2d_vector : list
-            Solar vector in the 2D PV array representation
+    #     Parameters
+    #     ----------
+    #     surface : :py:class:`~pvfactors.geometry.base.PVSurface` object
+    #         PV surface for which some horizon band shading will occur
+    #     idx_neighbor : int
+    #         Index of the neighboring PV row (can be ``None``)
+    #     pvrows : list of :py:class:`~pvfactors.geometry.pvrow.PVRow` objects
+    #         List of PV rows on which ``idx_neighbor`` will be used
+    #     solar_2d_vector : list
+    #         Solar vector in the 2D PV array representation
 
-        Returns
-        -------
-        circ_shading_pct : float
-            Percentage of circumsolar irradiance shaded (from 0 to 100)
-        """
+    #     Returns
+    #     -------
+    #     circ_shading_pct : float
+    #         Percentage of circumsolar irradiance shaded (from 0 to 100)
+    #     """
 
-        # TODO: should be applied to all pvrow surfaces
+    #     # TODO: should be applied to all pvrow surfaces
 
-        if idx_neighbor is not None:
-            # Calculate the solar and circumsolar elevation angles in 2D plane
-            solar_2d_elevation = np.abs(
-                np.arctan(solar_2d_vector[1] / solar_2d_vector[0])
-            ) * 180. / np.pi
-            lower_angle_circumsolar = (solar_2d_elevation -
-                                       self.circumsolar_angle / 2.)
-            centroid = surface.centroid
-            neighbor_point = pvrows[idx_neighbor].highest_point
-            shading_angle = np.abs(np.arctan(
-                (neighbor_point.y - centroid.y) /
-                (neighbor_point.x - centroid.x))) * 180. / np.pi
-            percentage_circ_angle_covered = (shading_angle - lower_angle_circumsolar) \
-                / self.circumsolar_angle * 100.
-            circ_shading_pct = calculate_circumsolar_shading(
-                percentage_circ_angle_covered, model=self.circumsolar_model)
+    #     if idx_neighbor is not None:
+    #         # Calculate the solar and circumsolar elevation angles in 2D plane
+    #         solar_2d_elevation = np.abs(
+    #             np.arctan(solar_2d_vector[1] / solar_2d_vector[0])
+    #         ) * 180. / np.pi
+    #         lower_angle_circumsolar = (solar_2d_elevation -
+    #                                    self.circumsolar_angle / 2.)
+    #         centroid = surface.centroid
+    #         neighbor_point = pvrows[idx_neighbor].highest_point
+    #         shading_angle = np.abs(np.arctan(
+    #             (neighbor_point.y - centroid.y) /
+    #             (neighbor_point.x - centroid.x))) * 180. / np.pi
+    #         percentage_circ_angle_covered = (shading_angle - lower_angle_circumsolar) \
+    #             / self.circumsolar_angle * 100.
+    #         circ_shading_pct = calculate_circumsolar_shading(
+    #             percentage_circ_angle_covered, model=self.circumsolar_model)
 
-        return circ_shading_pct
+    #     return circ_shading_pct
 
     @staticmethod
     def _calculate_luminance_poa_components(

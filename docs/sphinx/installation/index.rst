@@ -15,18 +15,6 @@ The easiest way to install ``pvfactors`` is using pip_:
 
    $ pip install pvfactors
 
-However, installing ``shapely`` from PyPI may not install all the necessary binary dependencies.
-If you run into an error like ``OSError: [WinError 126] The specified module could not be found``,
-try installing conda from conda-forge with:
-
-.. code-block:: shell
-
-   $ conda install -c conda-forge shapely
-
-Windows users may also be able to resolve the issue by installing wheels from `Christoph Gohlke`_.
-
-.. _Christoph Gohlke: https://www.lfd.uci.edu/~gohlke/pythonlibs/#shapely
-
 
 pvlib implementation
 --------------------

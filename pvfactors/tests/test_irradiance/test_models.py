@@ -596,7 +596,8 @@ def test_hybridperez_ordered_back(params_irr):
         100., 100., 33.33333333, 33.33333333,
         100., 100., 33.33333333, 33.33333333,
         100., 100., 33.33333333, 33.33333333]
-    np.testing.assert_array_almost_equal(np.squeeze(invrho_mat), expected_invrho_mat)
+    np.testing.assert_array_almost_equal(
+        np.squeeze(invrho_mat), expected_invrho_mat)
     np.testing.assert_almost_equal(
         pvarray.ts_pvrows[0].front.get_param_weighted('rho'),
         params_irr['rho_front_pvrow'])
@@ -630,22 +631,22 @@ def test_hybridperez_ordered_back(params_irr):
     assert irradiance_mat.shape == (41, 1)
 
 
-def test_hybridperez_circ_shading():
-    """Check that the function works and returns expected outputs"""
-    circumsolar_angle = 30.
-    circumsolar_model = 'uniform_disk'
-    irr_model = HybridPerezOrdered(circumsolar_angle=circumsolar_angle,
-                                   circumsolar_model=circumsolar_model)
+# def test_hybridperez_circ_shading():
+#     """Check that the function works and returns expected outputs"""
+#     circumsolar_angle = 30.
+#     circumsolar_model = 'uniform_disk'
+#     irr_model = HybridPerezOrdered(circumsolar_angle=circumsolar_angle,
+#                                    circumsolar_model=circumsolar_model)
 
-    surf = PVSurface(coords=[(0, -1), (0, 1)])
-    pvrows = [PVRow.from_linestring_coords([(1, -1), (1, 1)])]
-    solar_2d_vector = [1.2, 1]  # <45 deg elevation so should have >50% shading
-    idx_neighbor = 0
+#     surf = PVSurface(coords=[(0, -1), (0, 1)])
+#     pvrows = [PVRow.from_linestring_coords([(1, -1), (1, 1)])]
+#     solar_2d_vector = [1.2, 1]  # <45 deg elevation so should have >50% shading
+#     idx_neighbor = 0
 
-    circ_shading_pct = irr_model._calculate_circumsolar_shading_pct(
-        surf, idx_neighbor, pvrows, solar_2d_vector)
+#     circ_shading_pct = irr_model._calculate_circumsolar_shading_pct(
+#         surf, idx_neighbor, pvrows, solar_2d_vector)
 
-    np.testing.assert_almost_equal(circ_shading_pct, 71.5969299216)
+#     np.testing.assert_almost_equal(circ_shading_pct, 71.5969299216)
 
 
 def test_hybridperez_horizon_shading_ts():
@@ -740,17 +741,17 @@ def test_hybridperez_transform(df_inputs_clearsky_8760):
         np.zeros(n_points),
         pvarray.ts_ground.shaded_params['circumsolar'])
 
-    # Check at a given time idx
-    pvrow = pvarray.ts_pvrows[1].at(7)
-    np.testing.assert_allclose(
-        pvrow.back.list_segments[0]
-        .illum_collection.get_param_weighted('horizon'),
-        expected_middle_back_horizon[7])
-    pvground = pvarray.ts_ground.at(7)
-    np.testing.assert_allclose(
-        pvground.list_segments[0].illum_collection
-        .get_param_weighted('circumsolar'),
-        expected_ground_circ[7])
+    # # Check at a given time idx
+    # pvrow = pvarray.ts_pvrows[1].at(7)
+    # np.testing.assert_allclose(
+    #     pvrow.back.list_segments[0]
+    #     .illum_collection.get_param_weighted('horizon'),
+    #     expected_middle_back_horizon[7])
+    # pvground = pvarray.ts_ground.at(7)
+    # np.testing.assert_allclose(
+    #     pvground.list_segments[0].illum_collection
+    #     .get_param_weighted('circumsolar'),
+    #     expected_ground_circ[7])
 
 
 def test_hybridperez_ordered_transparency_spacing_front(params_irr):
