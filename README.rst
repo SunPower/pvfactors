@@ -100,7 +100,7 @@ The user can then plot the PV array geometry at any given time of the simulation
 
 .. code:: python
 
-   # Plot pvarray shapely geometries
+   # Plot pvarray geometries
    f, ax = plt.subplots(figsize=(10, 5))
    pvarray.plot_at_idx(1, ax)
    plt.show()
@@ -181,7 +181,6 @@ Requirements are included in the ``requirements.txt`` file of the package. Here 
 
 * `numpy <https://pypi.python.org/pypi/numpy>`_
 * `pvlib-python <https://pypi.python.org/pypi/pvlib>`_
-* `shapely <https://pypi.python.org/pypi/Shapely>`_
 
 
 Citing pvfactors

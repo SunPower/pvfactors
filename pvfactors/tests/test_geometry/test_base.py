@@ -4,8 +4,6 @@ from pvfactors import PVFactorsError
 from pvfactors.geometry.base import \
     BaseSide, ShadeCollection, PVSurface, PVSegment, \
     _coords_from_center_tilt_length, _get_solar_2d_vectors
-from shapely.geometry import LineString, Point
-from pvfactors.geometry.utils import projection
 
 
 def test_baseside_normal_vector(pvsegments):

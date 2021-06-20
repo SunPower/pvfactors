@@ -4,11 +4,11 @@ from collections import namedtuple
 import numpy as np
 from pvfactors import PVFactorsError
 from pvfactors.config import (
-    DEFAULT_NORMAL_VEC, COLOR_DIC, DISTANCE_TOLERANCE, PLOT_FONTSIZE,
+    DEFAULT_NORMAL_VEC, COLOR_DIC, PLOT_FONTSIZE,
     ALPHA_TEXT, MAX_X_GROUND)
 from pvfactors.geometry.plot import plot_coords, plot_bounds, plot_line
 from pvfactors.geometry.utils import \
-    is_collinear, check_collinear, are_2d_vecs_collinear, difference, contains
+    is_collinear, check_collinear, are_2d_vecs_collinear
 from pvlib.tools import cosd, sind
 
 from typing import List, Optional, Tuple

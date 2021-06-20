@@ -4,7 +4,7 @@ Developer API
 =============
 
 This is the class and function reference of pvfactors.
-For clarity and simplicity, all inherited methods and attributes have been removed from the class descriptions as there were often too many irrelevant ones coming from base packages like shapely.
+For clarity and simplicity, all inherited methods and attributes have been removed from the class descriptions as there were often too many irrelevant ones coming from base packages.
 
 .. include:: geometry.rst
 
