@@ -555,7 +555,7 @@ def test_check_direct_shading_continuity():
 
     # Check expected outputs: before v1.3.0, expected output is
     # [20.4971271991293, 21.389095477613356], which shows discontinuity
-    expected_out = [20.497127, 20.50229]
+    expected_out = [20.936348, 20.942163]
     np.testing.assert_allclose(out, expected_out)
 
 
