@@ -165,7 +165,7 @@ The users can also create a "report" while running the simulations that will rel
 Installation
 ------------
 
-pvfactors is currently compatible and tested with Python 2 and 3, and is available in `PyPI <https://pypi.org/project/pvfactors/>`_. The easiest way to install pvfactors is to use pip_ as follows:
+pvfactors is currently compatible and tested with 3.6+, and is available in `PyPI <https://pypi.org/project/pvfactors/>`_. The easiest way to install pvfactors is to use pip_ as follows:
 
 .. code:: sh
 
