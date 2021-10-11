@@ -3,10 +3,17 @@
 v1.5.2 (DATE XX, 2021)
 ======================
 
-Enhancements
-------------
+Fixes
+-----
 
-* Update pvlib dependency from ``pvlib>=0.7.0,<0.9.0`` to ``pvlib>=0.7.0,<0.10.0`` (:ghpull:`121`)
+* A small bug in the pvlib-python implementation of the Perez transposition model was
+  discovered and fixed in pvlib v0.9.0.  To ensure the error does not affect pvfactors
+  output moving forward, the pvlib dependency is updated from ``pvlib>=0.7.0,<0.9.0`` to
+  ``pvlib>=0.9.0,<0.10.0``.  This will likely change the results of irradiance simulations.
+  According to the
+  [pvlib release notes](https://pvlib-python.readthedocs.io/en/v0.9.0/whatsnew.html#bug-fixes),
+  the differences are "expected to be small and primarily occur at low irradiance conditions".
+  (:ghpull:`121`)
 
 
 Contributors
