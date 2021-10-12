@@ -554,8 +554,11 @@ def test_check_direct_shading_continuity():
     out = pvarray.ts_pvrows[1].back.get_param_weighted('qinc')
 
     # Check expected outputs: before v1.3.0, expected output is
-    # [20.4971271991293, 21.389095477613356], which shows discontinuity
-    expected_out = [20.497127, 20.50229]
+    # [20.4971271991293, 21.389095477613356], which shows discontinuity.
+    # Update 2021-10-04 for v1.5.2: for pvlib <0.9.0, expected value
+    # was [20.497127, 20.50229]. The values changed slightly because
+    # of a bugfix to the Perez model in pvlib 0.9.0. See pvfactors PR #121.
+    expected_out = [20.936348, 20.942163]
     np.testing.assert_allclose(out, expected_out)
 
 
