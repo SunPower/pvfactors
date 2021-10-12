@@ -3,6 +3,11 @@
 v1.5.2 (DATE XX, 2021)
 ======================
 
+Enhancements
+------------
+
+* Add python 3.9 to test configuration (:ghpull:`122`)
+
 Fixes
 -----
 
