@@ -265,7 +265,7 @@ def _run_serially(args):
     ----------
     args : tuple
         List of arguments where most will be used in
-        :py:function:`~pvfactors.run.run_timeseries_engine`
+        :py:func:`~pvfactors.run.run_timeseries_engine`
 
     Returns
     -------
