@@ -28,6 +28,7 @@
       
       
       
+      
          ~ShadeCollection.cut_at_point
       
       
@@ -55,6 +56,7 @@
       
       
       
+      
          ~ShadeCollection.plot
       
       
@@ -62,8 +64,6 @@
       
       
          ~ShadeCollection.remove_linestring
-      
-      
       
       
       

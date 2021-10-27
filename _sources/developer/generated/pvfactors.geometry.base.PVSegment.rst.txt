@@ -25,6 +25,7 @@
       
       
       
+      
          ~PVSegment.cut_at_point
       
       
@@ -49,9 +50,8 @@
       
       
       
+      
          ~PVSegment.plot
-      
-      
       
       
       

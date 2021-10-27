@@ -1,83 +1,41 @@
-
-
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" />
-  
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  
-  <title>Developer API &mdash; pvfactors 1.5.0 documentation</title>
-  
-
-  
-  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
-
-  
-  
+  <title>Developer API &mdash; pvfactors 1.5.1+0.g3c619d3.dirty documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
     <link rel="shortcut icon" href="../_static/favicon.ico"/>
-  
-
-  
-  
-
-  
-
-  
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
         <script src="../_static/doctools.js"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
-        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
-    
-    <script type="text/javascript" src="../_static/js/theme.js"></script>
-
-    
+    <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="pvfactors.geometry.base.BaseSurface" href="generated/pvfactors.geometry.base.BaseSurface.html" />
     <link rel="prev" title="Mathematical Model" href="../theory/problem_formulation.html" /> 
 </head>
 
-<body class="wy-body-for-nav">
-
-   
+<body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
-    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-          
-
-          
             <a href="../index.html" class="icon icon-home"> pvfactors
-          
-
-          
-            
             <img src="../_static/logo_small.png" class="logo" alt="Logo"/>
-          
           </a>
-
-          
-            
-            
               <div class="version">
-                1.5.0
+                1.5.1
               </div>
-            
-          
-
-          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" />
@@ -85,18 +43,7 @@
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-
-          
-        </div>
-
-        
-        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-          
-            
-            
-              
-            
-            
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../installation/index.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../concepts/index.html">Main concepts</a></li>
@@ -186,76 +133,31 @@
 <li class="toctree-l1"><a class="reference internal" href="../whatsnew.html">What’s New</a></li>
 </ul>
 
-            
-          
         </div>
-        
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" aria-label="top navigation">
-        
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="../index.html">pvfactors</a>
-        
       </nav>
 
-
       <div class="wy-nav-content">
-        
         <div class="rst-content">
-        
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div role="navigation" aria-label="breadcrumbs navigation">
-
+          <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-    
       <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
-        
       <li>Developer API</li>
-    
-    
       <li class="wy-breadcrumbs-aside">
-        
-          
-            
               <!-- User defined GitHub URL -->
               <a href="https://github.com/SunPower/pvfactors/" class="fa fa-github"> Edit on GitHub</a>
-            
-          
-        
       </li>
-    
   </ul>
-
-  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-            
+             
   
 <style>
 /* CSS overrides for sphinx_rtd_theme */
@@ -280,18 +182,18 @@
     text-align: unset;
 }
 </style>
-<div class="section" id="developer-api">
-<span id="id1"></span><h1>Developer API<a class="headerlink" href="#developer-api" title="Permalink to this headline">¶</a></h1>
+<section id="developer-api">
+<span id="id1"></span><h1>Developer API<a class="headerlink" href="#developer-api" title="Permalink to this headline"></a></h1>
 <p>This is the class and function reference of pvfactors.
 For clarity and simplicity, all inherited methods and attributes have been removed from the class descriptions as there were often too many irrelevant ones coming from base packages like shapely.</p>
-<div class="section" id="geometry">
-<span id="geometry-api"></span><h2>geometry<a class="headerlink" href="#geometry" title="Permalink to this headline">¶</a></h2>
+<section id="geometry">
+<span id="geometry-api"></span><h2>geometry<a class="headerlink" href="#geometry" title="Permalink to this headline"></a></h2>
 <p>The geometry sub-package of pvfactors implements multiple classes that make the construction of a 2D geometry for a PV array intuitive and scalable. It is meant to be decoupled from irradiance and view factor calculations so that it can be used independently for other purposes, like visualization for instance. The following schematics summarizes the organization of the classes in this sub-package.</p>
-<div class="figure align-center">
+<figure class="align-center">
 <a class="reference internal image-reference" href="../_images/class_organization.png"><img alt="../_images/class_organization.png" src="../_images/class_organization.png" style="width: 80%;" /></a>
-</div>
-<div class="section" id="base">
-<h3>base<a class="headerlink" href="#base" title="Permalink to this headline">¶</a></h3>
+</figure>
+<section id="base">
+<h3>base<a class="headerlink" href="#base" title="Permalink to this headline"></a></h3>
 <p>Base classes for pvfactors geometry subpackage.</p>
 <table class="longtable docutils align-default">
 <colgroup>
@@ -319,9 +221,9 @@ For clarity and simplicity, all inherited methods and attributes have been remov
 </tr>
 </tbody>
 </table>
-</div>
-<div class="section" id="pvrow">
-<h3>pvrow<a class="headerlink" href="#pvrow" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="pvrow">
+<h3>pvrow<a class="headerlink" href="#pvrow" title="Permalink to this headline"></a></h3>
 <p>Module will classes related to PV row geometries</p>
 <table class="longtable docutils align-default">
 <colgroup>
@@ -346,9 +248,9 @@ For clarity and simplicity, all inherited methods and attributes have been remov
 </tr>
 </tbody>
 </table>
-</div>
-<div class="section" id="pvground">
-<h3>pvground<a class="headerlink" href="#pvground" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="pvground">
+<h3>pvground<a class="headerlink" href="#pvground" title="Permalink to this headline"></a></h3>
 <p>Classes for implementation of ground geometry</p>
 <table class="longtable docutils align-default">
 <colgroup>
@@ -367,9 +269,9 @@ For clarity and simplicity, all inherited methods and attributes have been remov
 </tr>
 </tbody>
 </table>
-</div>
-<div class="section" id="pvarray">
-<h3>pvarray<a class="headerlink" href="#pvarray" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="pvarray">
+<h3>pvarray<a class="headerlink" href="#pvarray" title="Permalink to this headline"></a></h3>
 <p>Module containing PV array classes, which will use PV rows and ground
 geometries.</p>
 <table class="longtable docutils align-default">
@@ -383,9 +285,9 @@ geometries.</p>
 </tr>
 </tbody>
 </table>
-</div>
-<div class="section" id="timeseries">
-<h3>timeseries<a class="headerlink" href="#timeseries" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="timeseries">
+<h3>timeseries<a class="headerlink" href="#timeseries" title="Permalink to this headline"></a></h3>
 <p>Timeseries geometry tools. They allow the vectorization of geometry
 calculations.</p>
 <table class="longtable docutils align-default">
@@ -408,13 +310,13 @@ calculations.</p>
 </tr>
 </tbody>
 </table>
-</div>
-</div>
-<div class="section" id="viewfactors">
-<span id="id2"></span><h2>viewfactors<a class="headerlink" href="#viewfactors" title="Permalink to this headline">¶</a></h2>
+</section>
+</section>
+<section id="viewfactors">
+<span id="id2"></span><h2>viewfactors<a class="headerlink" href="#viewfactors" title="Permalink to this headline"></a></h2>
 <p>The viewfactors sub-package of pvfactors implements the methods used to calculate view factors from pvfactors PV array objects.</p>
-<div class="section" id="calculator">
-<h3>calculator<a class="headerlink" href="#calculator" title="Permalink to this headline">¶</a></h3>
+<section id="calculator">
+<h3>calculator<a class="headerlink" href="#calculator" title="Permalink to this headline"></a></h3>
 <p>Module with classes and functions to calculate views and view factors</p>
 <table class="longtable docutils align-default">
 <colgroup>
@@ -427,9 +329,9 @@ calculations.</p>
 </tr>
 </tbody>
 </table>
-</div>
-<div class="section" id="timeseries-view-factor-methods">
-<h3>timeseries view factor methods<a class="headerlink" href="#timeseries-view-factor-methods" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="timeseries-view-factor-methods">
+<h3>timeseries view factor methods<a class="headerlink" href="#timeseries-view-factor-methods" title="Permalink to this headline"></a></h3>
 <p>Module with view factor calculation tools</p>
 <table class="longtable docutils align-default">
 <colgroup>
@@ -442,9 +344,9 @@ calculations.</p>
 </tr>
 </tbody>
 </table>
-</div>
-<div class="section" id="view-factor-aoi-methods">
-<h3>view factor aoi methods<a class="headerlink" href="#view-factor-aoi-methods" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="view-factor-aoi-methods">
+<h3>view factor aoi methods<a class="headerlink" href="#view-factor-aoi-methods" title="Permalink to this headline"></a></h3>
 <p>Module containing AOI loss calculation methods</p>
 <table class="longtable docutils align-default">
 <colgroup>
@@ -457,13 +359,13 @@ calculations.</p>
 </tr>
 </tbody>
 </table>
-</div>
-</div>
-<div class="section" id="irradiance">
-<span id="irradiance-classes"></span><h2>irradiance<a class="headerlink" href="#irradiance" title="Permalink to this headline">¶</a></h2>
+</section>
+</section>
+<section id="irradiance">
+<span id="irradiance-classes"></span><h2>irradiance<a class="headerlink" href="#irradiance" title="Permalink to this headline"></a></h2>
 <p>The irradiance sub-package of pvfactors implements all irradiance related models and methods that can be applied to pvfactors PV array objects.</p>
-<div class="section" id="id3">
-<h3>base<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h3>
+<section id="id3">
+<h3>base<a class="headerlink" href="#id3" title="Permalink to this headline"></a></h3>
 <p>Module with Base classes for irradiance models</p>
 <table class="longtable docutils align-default">
 <colgroup>
@@ -476,9 +378,9 @@ calculations.</p>
 </tr>
 </tbody>
 </table>
-</div>
-<div class="section" id="models">
-<h3>models<a class="headerlink" href="#models" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="models">
+<h3>models<a class="headerlink" href="#models" title="Permalink to this headline"></a></h3>
 <p>Module containing irradiance models used with pv array geometries</p>
 <table class="longtable docutils align-default">
 <colgroup>
@@ -494,10 +396,10 @@ calculations.</p>
 </tr>
 </tbody>
 </table>
-</div>
-</div>
-<div class="section" id="engine">
-<h2>engine<a class="headerlink" href="#engine" title="Permalink to this headline">¶</a></h2>
+</section>
+</section>
+<section id="engine">
+<h2>engine<a class="headerlink" href="#engine" title="Permalink to this headline"></a></h2>
 <p>This module contains the engine class that will run the complete
 timeseries simulations.</p>
 <table class="longtable docutils align-default">
@@ -511,9 +413,9 @@ timeseries simulations.</p>
 </tr>
 </tbody>
 </table>
-</div>
-<div class="section" id="run">
-<span id="id4"></span><h2>run<a class="headerlink" href="#run" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="run">
+<span id="id4"></span><h2>run<a class="headerlink" href="#run" title="Permalink to this headline"></a></h2>
 <p>Module containing the functions to run engine calculations in normal or
 parallel mode.</p>
 <table class="longtable docutils align-default">
@@ -530,9 +432,9 @@ parallel mode.</p>
 </tr>
 </tbody>
 </table>
-</div>
-<div class="section" id="report">
-<h2>report<a class="headerlink" href="#report" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="report">
+<h2>report<a class="headerlink" href="#report" title="Permalink to this headline"></a></h2>
 <p>Module containing examples of report builder functions and classes.</p>
 <table class="longtable docutils align-default">
 <colgroup>
@@ -548,55 +450,38 @@ parallel mode.</p>
 </tr>
 </tbody>
 </table>
-</div>
-</div>
+</section>
+</section>
 
 
            </div>
-           
           </div>
-          <footer>
-    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-        <a href="generated/pvfactors.geometry.base.BaseSurface.html" class="btn btn-neutral float-right" title="pvfactors.geometry.base.BaseSurface" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="../theory/problem_formulation.html" class="btn btn-neutral float-left" title="Mathematical Model" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="generated/pvfactors.geometry.base.BaseSurface.html" class="btn btn-neutral float-right" title="pvfactors.geometry.base.BaseSurface" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>
-        &#169; Copyright 2016, SunPower Corporation.
-
-    </p>
+    <p>&#169; Copyright 2016, SunPower Corporation.</p>
   </div>
-    
-    
-    
-    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
-    
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
     <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    
-    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
 
 </footer>
         </div>
       </div>
-
     </section>
-
   </div>
-  
-
-  <script type="text/javascript">
+  <script>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-
-  
-  
-    
-   
+  </script> 
 
 </body>
 </html>

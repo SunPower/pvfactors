@@ -1,83 +1,43 @@
-
-
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" />
-  
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  
-  <title>Mathematical Model &mdash; pvfactors 1.5.0 documentation</title>
-  
-
-  
-  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
-
-  
-  
+  <title>Mathematical Model &mdash; pvfactors 1.5.1+0.g3c619d3.dirty documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
     <link rel="shortcut icon" href="../_static/favicon.ico"/>
-  
-
-  
-  
-
-  
-
-  
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
         <script src="../_static/doctools.js"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
-        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
-    
-    <script type="text/javascript" src="../_static/js/theme.js"></script>
-
-    
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+        <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Developer API" href="../developer/index.html" />
     <link rel="prev" title="View Factors" href="view_factors.html" /> 
 </head>
 
-<body class="wy-body-for-nav">
-
-   
+<body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
-    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-          
-
-          
             <a href="../index.html" class="icon icon-home"> pvfactors
-          
-
-          
-            
             <img src="../_static/logo_small.png" class="logo" alt="Logo"/>
-          
           </a>
-
-          
-            
-            
               <div class="version">
-                1.5.0
+                1.5.1
               </div>
-            
-          
-
-          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" />
@@ -85,18 +45,7 @@
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-
-          
-        </div>
-
-        
-        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-          
-            
-            
-              
-            
-            
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../installation/index.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../concepts/index.html">Main concepts</a></li>
@@ -119,78 +68,32 @@
 <li class="toctree-l1"><a class="reference internal" href="../whatsnew.html">What’s New</a></li>
 </ul>
 
-            
-          
         </div>
-        
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" aria-label="top navigation">
-        
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="../index.html">pvfactors</a>
-        
       </nav>
 
-
       <div class="wy-nav-content">
-        
         <div class="rst-content">
-        
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div role="navigation" aria-label="breadcrumbs navigation">
-
+          <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-    
       <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
-        
           <li><a href="index.html">Theory</a> &raquo;</li>
-        
       <li>Mathematical Model</li>
-    
-    
       <li class="wy-breadcrumbs-aside">
-        
-          
-            
               <!-- User defined GitHub URL -->
               <a href="https://github.com/SunPower/pvfactors/" class="fa fa-github"> Edit on GitHub</a>
-            
-          
-        
       </li>
-    
   </ul>
-
-  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-            
+             
   
 <style>
 /* CSS overrides for sphinx_rtd_theme */
@@ -215,22 +118,22 @@
     text-align: unset;
 }
 </style>
-<div class="section" id="mathematical-model">
-<span id="problem-formulation"></span><h1>Mathematical Model<a class="headerlink" href="#mathematical-model" title="Permalink to this headline">¶</a></h1>
+<section id="mathematical-model">
+<span id="problem-formulation"></span><h1>Mathematical Model<a class="headerlink" href="#mathematical-model" title="Permalink to this headline"></a></h1>
 <p>In order to use the view factors as follows, we need to assume that the surfaces considered are diffuse (lambertian). Which means that their optical properties are independent of the angle of the rays (incident, reflected, or emitted).</p>
 <p>The current version of the view factor model only addresses PV rows that are made out of straight lines
 (no “dual-tilt” for instance), with a flat ground. But the PV array can have any azimuth or tilt angle for the simulations. Below is the 2D representation of such a PV array, plotted with <code class="docutils literal notranslate"><span class="pre">pvfactors</span></code>.</p>
-<div class="figure align-center">
+<figure class="align-center">
 <a class="reference internal image-reference" href="../_images/pvarray.png"><img alt="../_images/pvarray.png" src="../_images/pvarray.png" style="width: 80%;" /></a>
-</div>
+</figure>
 <p>The mathematical model used in <code class="docutils literal notranslate"><span class="pre">pvfactors</span></code> simulations is different depending on the simulation type
 that is run.</p>
 <ul class="simple">
 <li><p>in “full simulations”, all of the reflections between the modeled surfaces are taken into account in the calculations, which leads to results that account for the equilibrium of reflections between surfaces.</p></li>
 <li><p>in “fast simulations”, assumptions are made on the reflected irradiance from the environment surrounding the surfaces of interest.</p></li>
 </ul>
-<div class="section" id="full-simulations">
-<span id="full-mode-theory"></span><h2>Full simulations<a class="headerlink" href="#full-simulations" title="Permalink to this headline">¶</a></h2>
+<section id="full-simulations">
+<span id="full-mode-theory"></span><h2>Full simulations<a class="headerlink" href="#full-simulations" title="Permalink to this headline"></a></h2>
 <p>When making some assumptions, it is possible to represent the calculation of irradiance terms on each surface with a linear system. The dimension of this system changes depending on the number of surfaces considered. But we can formulate it for the general case of <code class="docutils literal notranslate"><span class="pre">n</span></code> surfaces.</p>
 <p>For a surface <code class="docutils literal notranslate"><span class="pre">i</span></code> we can write that:</p>
 <div class="math notranslate nohighlight">
@@ -297,9 +200,9 @@ Sky_2\\
 Sky_n\\
 \end{pmatrix}\end{split}\]</div>
 <p>After solving this system and finding all of the radiosities, it is very easy to deduce values of interest like back side or front side incident irradiance.</p>
-</div>
-<div class="section" id="fast-simulations">
-<span id="fast-mode-theory"></span><h2>Fast simulations<a class="headerlink" href="#fast-simulations" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="fast-simulations">
+<span id="fast-mode-theory"></span><h2>Fast simulations<a class="headerlink" href="#fast-simulations" title="Permalink to this headline"></a></h2>
 <p>In the case of fast simulations and when interested in back side surfaces only, we can make additional assumptions that allow us to calculate the incident irradiance on back side surfaces without solving a linear system of equations.</p>
 <p>In the full simulation case, we defined a vector of incident irradiance on all surfaces as follows:</p>
 <div class="math notranslate nohighlight">
@@ -317,8 +220,8 @@ which is the case in <a class="reference internal" href="../developer/generated/
 </ol>
 <div class="math notranslate nohighlight">
 \[\mathbf{q_{inc-back}} ≈ \mathbf{F_{back}} . \mathbf{R} . \mathbf{q_{perez}} + \mathbf{Sky_{back}}\]</div>
-<div class="section" id="example">
-<h3>Example<a class="headerlink" href="#example" title="Permalink to this headline">¶</a></h3>
+<section id="example">
+<h3>Example<a class="headerlink" href="#example" title="Permalink to this headline"></a></h3>
 <p>For instance, if we are interested in back side surfaces with indices <code class="docutils literal notranslate"><span class="pre">3</span></code> and <code class="docutils literal notranslate"><span class="pre">7</span></code>, this will look like this:</p>
 <div class="math notranslate nohighlight">
 \[\begin{split}\begin{pmatrix}
@@ -347,9 +250,9 @@ q_{perez, n}\\
 Sky_3\\
 Sky_7\\
 \end{pmatrix}\end{split}\]</div>
-</div>
-<div class="section" id="grouping-terms">
-<h3>Grouping terms<a class="headerlink" href="#grouping-terms" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="grouping-terms">
+<h3>Grouping terms<a class="headerlink" href="#grouping-terms" title="Permalink to this headline"></a></h3>
 <p>For each back surface element, we can then group reflection terms that have identical reflectivity
 and <span class="math notranslate nohighlight">\(\mathbf{q_{perez}}\)</span> terms into something more intuitive:</p>
 <div class="math notranslate nohighlight">
@@ -367,56 +270,39 @@ and <span class="math notranslate nohighlight">\(\mathbf{q_{perez}}\)</span> ter
 <dd><p>Perez, R., Seals, R., Ineichen, P., Stewart, R. and Menicucci, D., 1987. A new simplified version of the Perez diffuse irradiance model for tilted surfaces. Solar energy, 39(3), pp.221-231.</p>
 </dd>
 </dl>
-</div>
-</div>
-</div>
+</section>
+</section>
+</section>
 
 
            </div>
-           
           </div>
-          <footer>
-    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-        <a href="../developer/index.html" class="btn btn-neutral float-right" title="Developer API" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="view_factors.html" class="btn btn-neutral float-left" title="View Factors" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../developer/index.html" class="btn btn-neutral float-right" title="Developer API" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>
-        &#169; Copyright 2016, SunPower Corporation.
-
-    </p>
+    <p>&#169; Copyright 2016, SunPower Corporation.</p>
   </div>
-    
-    
-    
-    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
-    
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
     <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    
-    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
 
 </footer>
         </div>
       </div>
-
     </section>
-
   </div>
-  
-
-  <script type="text/javascript">
+  <script>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-
-  
-  
-    
-   
+  </script> 
 
 </body>
 </html>

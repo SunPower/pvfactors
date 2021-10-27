@@ -1,83 +1,43 @@
-
-
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" />
-  
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  
-  <title>PV Array geometry introduction &mdash; pvfactors 1.5.0 documentation</title>
-  
-
-  
-  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
-
-  
-  
+  <title>PV Array geometry introduction &mdash; pvfactors 1.5.1+0.g3c619d3.dirty documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
     <link rel="shortcut icon" href="../_static/favicon.ico"/>
-  
-
-  
-  
-
-  
-
-  
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
         <script src="../_static/doctools.js"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
-        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
-    
-    <script type="text/javascript" src="../_static/js/theme.js"></script>
-
-    
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+        <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Discretize PV row sides and indexing" href="Create_discretized_pvarray.html" />
     <link rel="prev" title="Getting started" href="Getting_started.html" /> 
 </head>
 
-<body class="wy-body-for-nav">
-
-   
+<body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
-    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-          
-
-          
             <a href="../index.html" class="icon icon-home"> pvfactors
-          
-
-          
-            
             <img src="../_static/logo_small.png" class="logo" alt="Logo"/>
-          
           </a>
-
-          
-            
-            
               <div class="version">
-                1.5.0
+                1.5.1
               </div>
-            
-          
-
-          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" />
@@ -85,18 +45,7 @@
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-
-          
-        </div>
-
-        
-        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-          
-            
-            
-              
-            
-            
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../installation/index.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../concepts/index.html">Main concepts</a></li>
@@ -125,75 +74,31 @@
 <li class="toctree-l1"><a class="reference internal" href="../whatsnew.html">What’s New</a></li>
 </ul>
 
-            
-          
         </div>
-        
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" aria-label="top navigation">
-        
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="../index.html">pvfactors</a>
-        
       </nav>
 
-
       <div class="wy-nav-content">
-        
         <div class="rst-content">
-        
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div role="navigation" aria-label="breadcrumbs navigation">
-
+          <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-    
       <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
-        
           <li><a href="index.html">Tutorials</a> &raquo;</li>
-        
       <li>PV Array geometry introduction</li>
-    
-    
       <li class="wy-breadcrumbs-aside">
-        
-          
-            
               <a href="https://github.com/SunPower/pvfactors/blob/tutorials/PVArray_introduction.ipynb" class="fa fa-github"> Edit on GitHub</a>
-            
-          
-        
       </li>
-    
   </ul>
-
-  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-            
+             
   
 <style>
 /* CSS for nbsphinx extension */
@@ -464,8 +369,8 @@ div.rendered_html tbody tr:hover {
     text-align: unset;
 }
 </style>
-<div class="section" id="PV-Array-geometry-introduction">
-<h1>PV Array geometry introduction<a class="headerlink" href="#PV-Array-geometry-introduction" title="Permalink to this headline">¶</a></h1>
+<section id="PV-Array-geometry-introduction">
+<h1>PV Array geometry introduction<a class="headerlink" href="#PV-Array-geometry-introduction" title="Permalink to this headline"></a></h1>
 <p>In this section, we will learn how to:</p>
 <ul class="simple">
 <li><p>create a 2D PV array geometry with PV rows at identical heights, tilt angles, and with identical widths</p></li>
@@ -487,8 +392,8 @@ div.rendered_html tbody tr:hover {
 </pre></div>
 </div>
 </div>
-<div class="section" id="Prepare-PV-array-parameters">
-<h2>Prepare PV array parameters<a class="headerlink" href="#Prepare-PV-array-parameters" title="Permalink to this headline">¶</a></h2>
+<section id="Prepare-PV-array-parameters">
+<h2>Prepare PV array parameters<a class="headerlink" href="#Prepare-PV-array-parameters" title="Permalink to this headline"></a></h2>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
@@ -508,9 +413,9 @@ div.rendered_html tbody tr:hover {
 </pre></div>
 </div>
 </div>
-</div>
-<div class="section" id="Create-a-PV-array-and-its-shadows">
-<h2>Create a PV array and its shadows<a class="headerlink" href="#Create-a-PV-array-and-its-shadows" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="Create-a-PV-array-and-its-shadows">
+<h2>Create a PV array and its shadows<a class="headerlink" href="#Create-a-PV-array-and-its-shadows" title="Permalink to this headline"></a></h2>
 <p>Import the <code class="docutils literal notranslate"><span class="pre">OrderedPVArray</span></code> class and create a transformed PV array object using the parameters above</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
@@ -546,9 +451,9 @@ div.rendered_html tbody tr:hover {
 </div>
 <p>As we can see in the plot above: - the blue lines represent the PV rows - the gray lines represent the shadows cast by the PV rows on the ground from direct light - the yellow lines represent the ground areas that don’t get any direct shading - there are additional points on the ground that may seem out of place: but they are called “cut points” and are necessary to calculate view factors. For instance, if you take the cut point located between the second and third shadows (counting from the
 left), it marks the point after which the leftmost PV row’s back side is not able to see the ground anymore</p>
-</div>
-<div class="section" id="Situation-with-direct-shading">
-<h2>Situation with direct shading<a class="headerlink" href="#Situation-with-direct-shading" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="Situation-with-direct-shading">
+<h2>Situation with direct shading<a class="headerlink" href="#Situation-with-direct-shading" title="Permalink to this headline"></a></h2>
 <p>We can also create situations where direct shading happens either on the front or back surface of the PV rows.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
@@ -658,9 +563,9 @@ Shaded length on front surface of rightmost PV row: 0.00 m
 </pre></div></div>
 </div>
 <p>As we can see, the rightmost PV row is not shaded at all.</p>
-</div>
-<div class="section" id="What-are-timeseries-geometries?">
-<h2>What are timeseries geometries?<a class="headerlink" href="#What-are-timeseries-geometries?" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="What-are-timeseries-geometries?">
+<h2>What are timeseries geometries?<a class="headerlink" href="#What-are-timeseries-geometries?" title="Permalink to this headline"></a></h2>
 <p>It is important to note that the two most important attributes of the PV array object are <code class="docutils literal notranslate"><span class="pre">ts_pvrows</span></code> and <code class="docutils literal notranslate"><span class="pre">ts_ground</span></code>. These contain what we call “timeseries geometries”, which are objects that represent the geometry of the PV rows and the ground for all timestamps of the simulation.</p>
 <p>For instance here, we can look at the coordinates of the front illuminated timeseries surface of the leftmost PV row.</p>
 <div class="nbinput nblast docutils container">
@@ -736,55 +641,38 @@ y coords of b1: [0.98068262]
 </pre></div></div>
 </div>
 <p>The <code class="docutils literal notranslate"><span class="pre">x</span></code> and <code class="docutils literal notranslate"><span class="pre">y</span></code> coordinates will be numpy arrays of all the values the coordinates take for all the simulation timestamps, as calculated at <code class="docutils literal notranslate"><span class="pre">fit()</span></code> time of the PV array object. This also explain why we needed to specify the index <code class="docutils literal notranslate"><span class="pre">0</span></code> when plotting the PV array: this was to select the coordinates for the first (and only) timestamp.</p>
-</div>
-</div>
+</section>
+</section>
 
 
            </div>
-           
           </div>
-          <footer>
-    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-        <a href="Create_discretized_pvarray.html" class="btn btn-neutral float-right" title="Discretize PV row sides and indexing" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="Getting_started.html" class="btn btn-neutral float-left" title="Getting started" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="Create_discretized_pvarray.html" class="btn btn-neutral float-right" title="Discretize PV row sides and indexing" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>
-        &#169; Copyright 2016, SunPower Corporation.
-
-    </p>
+    <p>&#169; Copyright 2016, SunPower Corporation.</p>
   </div>
-    
-    
-    
-    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
-    
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
     <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    
-    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
 
 </footer>
         </div>
       </div>
-
     </section>
-
   </div>
-  
-
-  <script type="text/javascript">
+  <script>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-
-  
-  
-    
-   
+  </script> 
 
 </body>
 </html>

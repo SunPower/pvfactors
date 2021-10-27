@@ -1,83 +1,41 @@
-
-
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" />
-  
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  
-  <title>pvfactors.viewfactors.vfmethods.VFTsMethods &mdash; pvfactors 1.5.0 documentation</title>
-  
-
-  
-  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="../../_static/css/custom.css" type="text/css" />
-
-  
-  
+  <title>pvfactors.viewfactors.vfmethods.VFTsMethods &mdash; pvfactors 1.5.1+0.g3c619d3.dirty documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/custom.css" type="text/css" />
     <link rel="shortcut icon" href="../../_static/favicon.ico"/>
-  
-
-  
-  
-
-  
-
-  
   <!--[if lt IE 9]>
     <script src="../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
         <script src="../../_static/jquery.js"></script>
         <script src="../../_static/underscore.js"></script>
         <script src="../../_static/doctools.js"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
-        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
-    
-    <script type="text/javascript" src="../../_static/js/theme.js"></script>
-
-    
+    <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
     <link rel="next" title="pvfactors.viewfactors.aoimethods.AOIMethods" href="pvfactors.viewfactors.aoimethods.AOIMethods.html" />
     <link rel="prev" title="pvfactors.viewfactors.calculator.VFCalculator" href="pvfactors.viewfactors.calculator.VFCalculator.html" /> 
 </head>
 
-<body class="wy-body-for-nav">
-
-   
+<body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
-    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-          
-
-          
             <a href="../../index.html" class="icon icon-home"> pvfactors
-          
-
-          
-            
             <img src="../../_static/logo_small.png" class="logo" alt="Logo"/>
-          
           </a>
-
-          
-            
-            
               <div class="version">
-                1.5.0
+                1.5.1
               </div>
-            
-          
-
-          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" />
@@ -85,99 +43,58 @@
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-
-          
-        </div>
-
-        
-        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-          
-            
-            
-              
-            
-            
-              <ul>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../../installation/index.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../concepts/index.html">Main concepts</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../tutorials/index.html">Tutorials</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../theory/index.html">Theory</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../index.html">Developer API</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">Developer API</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../index.html#geometry">geometry</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../index.html#viewfactors">viewfactors</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../index.html#calculator">calculator</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="../index.html#timeseries-view-factor-methods">timeseries view factor methods</a><ul class="current">
+<li class="toctree-l4 current"><a class="current reference internal" href="#">pvfactors.viewfactors.vfmethods.VFTsMethods</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../index.html#view-factor-aoi-methods">view factor aoi methods</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#irradiance">irradiance</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#engine">engine</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#run">run</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#report">report</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="../../whatsnew.html">What’s New</a></li>
 </ul>
 
-            
-          
         </div>
-        
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" aria-label="top navigation">
-        
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="../../index.html">pvfactors</a>
-        
       </nav>
 
-
       <div class="wy-nav-content">
-        
         <div class="rst-content">
-        
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div role="navigation" aria-label="breadcrumbs navigation">
-
+          <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-    
       <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
-        
           <li><a href="../index.html">Developer API</a> &raquo;</li>
-        
       <li>pvfactors.viewfactors.vfmethods.VFTsMethods</li>
-    
-    
       <li class="wy-breadcrumbs-aside">
-        
-          
-            
               <!-- User defined GitHub URL -->
               <a href="https://github.com/SunPower/pvfactors/" class="fa fa-github"> Edit on GitHub</a>
-            
-          
-        
       </li>
-    
   </ul>
-
-  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-            
+             
   
 <style>
 /* CSS overrides for sphinx_rtd_theme */
@@ -202,19 +119,18 @@
     text-align: unset;
 }
 </style>
-<div class="section" id="pvfactors-viewfactors-vfmethods-vftsmethods">
-<h1>pvfactors.viewfactors.vfmethods.VFTsMethods<a class="headerlink" href="#pvfactors-viewfactors-vfmethods-vftsmethods" title="Permalink to this headline">¶</a></h1>
+<section id="pvfactors-viewfactors-vfmethods-vftsmethods">
+<h1>pvfactors.viewfactors.vfmethods.VFTsMethods<a class="headerlink" href="#pvfactors-viewfactors-vfmethods-vftsmethods" title="Permalink to this headline"></a></h1>
 <dl class="py class">
-<dt id="pvfactors.viewfactors.vfmethods.VFTsMethods">
-<em class="property">class </em><code class="sig-prename descclassname">pvfactors.viewfactors.vfmethods.</code><code class="sig-name descname">VFTsMethods</code><a class="reference internal" href="../../_modules/pvfactors/viewfactors/vfmethods.html#VFTsMethods"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pvfactors.viewfactors.vfmethods.VFTsMethods" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pvfactors.viewfactors.vfmethods.VFTsMethods">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">pvfactors.viewfactors.vfmethods.</span></span><span class="sig-name descname"><span class="pre">VFTsMethods</span></span><a class="reference internal" href="../../_modules/pvfactors/viewfactors/vfmethods.html#VFTsMethods"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pvfactors.viewfactors.vfmethods.VFTsMethods" title="Permalink to this definition"></a></dt>
 <dd><p>This class contains all the methods used to calculate timeseries
 view factors for all the surfaces in
 <a class="reference internal" href="pvfactors.geometry.pvarray.OrderedPVArray.html#pvfactors.geometry.pvarray.OrderedPVArray" title="pvfactors.geometry.pvarray.OrderedPVArray"><code class="xref py py-class docutils literal notranslate"><span class="pre">OrderedPVArray</span></code></a></p>
 <dl class="py method">
-<dt id="pvfactors.viewfactors.vfmethods.VFTsMethods.__init__">
-<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pvfactors.viewfactors.vfmethods.VFTsMethods.__init__" title="Permalink to this definition">¶</a></dt>
-<dd><p>Initialize self.  See help(type(self)) for accurate signature.</p>
-</dd></dl>
+<dt class="sig sig-object py" id="pvfactors.viewfactors.vfmethods.VFTsMethods.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pvfactors.viewfactors.vfmethods.VFTsMethods.__init__" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
 
 <p class="rubric">Methods</p>
 <table class="longtable docutils align-default">
@@ -224,78 +140,61 @@ view factors for all the surfaces in
 </colgroup>
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="#pvfactors.viewfactors.vfmethods.VFTsMethods.__init__" title="pvfactors.viewfactors.vfmethods.VFTsMethods.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>()</p></td>
-<td><p>Initialize self.</p></td>
+<td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">calculate_vf_to_gnd</span></code>(pvrow_element_coords, …)</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">calculate_vf_to_gnd</span></code>(pvrow_element_coords, ...)</p></td>
 <td><p>Calculate view factors from timeseries pvrow_element to the entire ground.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">calculate_vf_to_pvrow</span></code>(pvrow_element_coords, …)</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">calculate_vf_to_pvrow</span></code>(pvrow_element_coords, ...)</p></td>
 <td><p>Calculate view factors from timeseries pvrow element to timeseries PV rows around it.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">calculate_vf_to_shadow_obstruction_hottel</span></code>(…)</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">calculate_vf_to_shadow_obstruction_hottel</span></code>(...)</p></td>
 <td><p>Calculate view factors from timeseries pvrow_element to the shadow of a specific timeseries PV row which is casted on the ground.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">vf_pvrow_gnd_surf</span></code>(ts_pvrows, ts_ground, …)</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">vf_pvrow_gnd_surf</span></code>(ts_pvrows, ts_ground, ...)</p></td>
 <td><p>Calculate the view factors between timeseries PV row and ground surfaces, and assign it to the passed view factor matrix using the surface indices.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">vf_pvrow_surf_to_gnd_surf_obstruction_hottel</span></code>(…)</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">vf_pvrow_surf_to_gnd_surf_obstruction_hottel</span></code>(...)</p></td>
 <td><p>Calculate view factors from timeseries PV row surface to a timeseries ground surface.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">vf_pvrow_to_pvrow</span></code>(ts_pvrows, tilted_to_left, …)</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">vf_pvrow_to_pvrow</span></code>(ts_pvrows, tilted_to_left, ...)</p></td>
 <td><p>Calculate the view factors between timeseries PV row surfaces, and assign values to the passed view factor matrix using the surface indices.</p></td>
 </tr>
 </tbody>
 </table>
 </dd></dl>
 
-</div>
+</section>
 
 
            </div>
-           
           </div>
-          <footer>
-    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-        <a href="pvfactors.viewfactors.aoimethods.AOIMethods.html" class="btn btn-neutral float-right" title="pvfactors.viewfactors.aoimethods.AOIMethods" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="pvfactors.viewfactors.calculator.VFCalculator.html" class="btn btn-neutral float-left" title="pvfactors.viewfactors.calculator.VFCalculator" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="pvfactors.viewfactors.aoimethods.AOIMethods.html" class="btn btn-neutral float-right" title="pvfactors.viewfactors.aoimethods.AOIMethods" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>
-        &#169; Copyright 2016, SunPower Corporation.
-
-    </p>
+    <p>&#169; Copyright 2016, SunPower Corporation.</p>
   </div>
-    
-    
-    
-    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
-    
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
     <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    
-    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
 
 </footer>
         </div>
       </div>
-
     </section>
-
   </div>
-  
-
-  <script type="text/javascript">
+  <script>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-
-  
-  
-    
-   
+  </script> 
 
 </body>
 </html>

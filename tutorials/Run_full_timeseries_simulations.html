@@ -1,83 +1,43 @@
-
-
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" />
-  
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  
-  <title>Run full timeseries simulations &mdash; pvfactors 1.5.0 documentation</title>
-  
-
-  
-  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
-
-  
-  
+  <title>Run full timeseries simulations &mdash; pvfactors 1.5.1+0.g3c619d3.dirty documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
     <link rel="shortcut icon" href="../_static/favicon.ico"/>
-  
-
-  
-  
-
-  
-
-  
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
         <script src="../_static/doctools.js"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
-        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
-    
-    <script type="text/javascript" src="../_static/js/theme.js"></script>
-
-    
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+        <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Run full simulations in parallel" href="Run_full_parallel_simulations.html" />
     <link rel="prev" title="Calculate view factors" href="Calculate_view_factors.html" /> 
 </head>
 
-<body class="wy-body-for-nav">
-
-   
+<body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
-    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-          
-
-          
             <a href="../index.html" class="icon icon-home"> pvfactors
-          
-
-          
-            
             <img src="../_static/logo_small.png" class="logo" alt="Logo"/>
-          
           </a>
-
-          
-            
-            
               <div class="version">
-                1.5.0
+                1.5.1
               </div>
-            
-          
-
-          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" />
@@ -85,18 +45,7 @@
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-
-          
-        </div>
-
-        
-        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-          
-            
-            
-              
-            
-            
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../installation/index.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../concepts/index.html">Main concepts</a></li>
@@ -126,75 +75,31 @@
 <li class="toctree-l1"><a class="reference internal" href="../whatsnew.html">What’s New</a></li>
 </ul>
 
-            
-          
         </div>
-        
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" aria-label="top navigation">
-        
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="../index.html">pvfactors</a>
-        
       </nav>
 
-
       <div class="wy-nav-content">
-        
         <div class="rst-content">
-        
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div role="navigation" aria-label="breadcrumbs navigation">
-
+          <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-    
       <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
-        
           <li><a href="index.html">Tutorials</a> &raquo;</li>
-        
       <li>Run full timeseries simulations</li>
-    
-    
       <li class="wy-breadcrumbs-aside">
-        
-          
-            
               <a href="https://github.com/SunPower/pvfactors/blob/tutorials/Run_full_timeseries_simulations.ipynb" class="fa fa-github"> Edit on GitHub</a>
-            
-          
-        
       </li>
-    
   </ul>
-
-  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-            
+             
   
 <style>
 /* CSS for nbsphinx extension */
@@ -465,8 +370,8 @@ div.rendered_html tbody tr:hover {
     text-align: unset;
 }
 </style>
-<div class="section" id="Run-full-timeseries-simulations">
-<h1>Run full timeseries simulations<a class="headerlink" href="#Run-full-timeseries-simulations" title="Permalink to this headline">¶</a></h1>
+<section id="Run-full-timeseries-simulations">
+<h1>Run full timeseries simulations<a class="headerlink" href="#Run-full-timeseries-simulations" title="Permalink to this headline"></a></h1>
 <p>In this section, we will learn how to:</p>
 <ul class="simple">
 <li><p>run full timeseries simulations using the <code class="docutils literal notranslate"><span class="pre">PVEngine</span></code> class, and visualize some of the results</p></li>
@@ -497,8 +402,8 @@ div.rendered_html tbody tr:hover {
 </pre></div>
 </div>
 </div>
-<div class="section" id="Get-timeseries-inputs">
-<h2>Get timeseries inputs<a class="headerlink" href="#Get-timeseries-inputs" title="Permalink to this headline">¶</a></h2>
+<section id="Get-timeseries-inputs">
+<h2>Get timeseries inputs<a class="headerlink" href="#Get-timeseries-inputs" title="Permalink to this headline"></a></h2>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
@@ -546,9 +451,9 @@ div.rendered_html tbody tr:hover {
 </pre></div>
 </div>
 </div>
-</div>
-<div class="section" id="Prepare-PV-array-parameters">
-<h2>Prepare PV array parameters<a class="headerlink" href="#Prepare-PV-array-parameters" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="Prepare-PV-array-parameters">
+<h2>Prepare PV array parameters<a class="headerlink" href="#Prepare-PV-array-parameters" title="Permalink to this headline"></a></h2>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
@@ -566,9 +471,9 @@ div.rendered_html tbody tr:hover {
 </pre></div>
 </div>
 </div>
-</div>
-<div class="section" id="Run-single-timestep-with-PVEngine-and-inspect-results">
-<h2>Run single timestep with PVEngine and inspect results<a class="headerlink" href="#Run-single-timestep-with-PVEngine-and-inspect-results" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="Run-single-timestep-with-PVEngine-and-inspect-results">
+<h2>Run single timestep with PVEngine and inspect results<a class="headerlink" href="#Run-single-timestep-with-PVEngine-and-inspect-results" title="Permalink to this headline"></a></h2>
 <p>Instantiate the <code class="docutils literal notranslate"><span class="pre">PVEngine</span></code> class and fit it to the data</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
@@ -647,9 +552,9 @@ Isotropic irradiance on back surface of right pv row:
 [  nan   nan   nan   nan   nan   nan   nan 0.076 2.15  3.116 1.697 0.199 0.414 2.627 4.208 2.83  0.066   nan   nan   nan   nan   nan   nan   nan] W/m2
 </pre></div></div>
 </div>
-</div>
-<div class="section" id="Run-multiple-timesteps-with-PVEngine">
-<h2>Run multiple timesteps with PVEngine<a class="headerlink" href="#Run-multiple-timesteps-with-PVEngine" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="Run-multiple-timesteps-with-PVEngine">
+<h2>Run multiple timesteps with PVEngine<a class="headerlink" href="#Run-multiple-timesteps-with-PVEngine" title="Permalink to this headline"></a></h2>
 <p>The users can also obtain a “report” that will look like whatever the users want, and which will rely on the simple geometry API shown above. Here is an example:</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
@@ -857,9 +762,9 @@ Isotropic irradiance on back surface of right pv row:
 <div class="line">We can see in the printed output the new report generated by the simulation run.</div>
 <div class="line">For convenience, we’ve been using dictionaries as the data structure holding the reports, but it could be anything else, like numpy arrays, pandas dataframes, etc.</div>
 </div>
-</div>
-<div class="section" id="Run-one-or-multiple-timesteps-with-the-run_timeseries_engine()-function">
-<h2>Run one or multiple timesteps with the <code class="docutils literal notranslate"><span class="pre">run_timeseries_engine()</span></code> function<a class="headerlink" href="#Run-one-or-multiple-timesteps-with-the-run_timeseries_engine()-function" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="Run-one-or-multiple-timesteps-with-the-run_timeseries_engine()-function">
+<h2>Run one or multiple timesteps with the <code class="docutils literal notranslate"><span class="pre">run_timeseries_engine()</span></code> function<a class="headerlink" href="#Run-one-or-multiple-timesteps-with-the-run_timeseries_engine()-function" title="Permalink to this headline"></a></h2>
 <div class="line-block">
 <div class="line">The same thing can be accomplished using a function from the <code class="docutils literal notranslate"><span class="pre">run.py</span></code> module of the pvfactors package.</div>
 <div class="line">But only the report will be returned.</div>
@@ -903,55 +808,38 @@ Isotropic irradiance on back surface of right pv row:
 </div>
 </div>
 <p>The plot above shows that we get the same results as previously.</p>
-</div>
-</div>
+</section>
+</section>
 
 
            </div>
-           
           </div>
-          <footer>
-    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-        <a href="Run_full_parallel_simulations.html" class="btn btn-neutral float-right" title="Run full simulations in parallel" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="Calculate_view_factors.html" class="btn btn-neutral float-left" title="Calculate view factors" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="Run_full_parallel_simulations.html" class="btn btn-neutral float-right" title="Run full simulations in parallel" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>
-        &#169; Copyright 2016, SunPower Corporation.
-
-    </p>
+    <p>&#169; Copyright 2016, SunPower Corporation.</p>
   </div>
-    
-    
-    
-    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
-    
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
     <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    
-    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
 
 </footer>
         </div>
       </div>
-
     </section>
-
   </div>
-  
-
-  <script type="text/javascript">
+  <script>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-
-  
-  
-    
-   
+  </script> 
 
 </body>
 </html>

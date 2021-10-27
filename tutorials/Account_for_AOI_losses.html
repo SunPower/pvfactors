@@ -1,83 +1,43 @@
-
-
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" />
-  
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  
-  <title>Account for AOI reflection losses (in full mode only) &mdash; pvfactors 1.5.0 documentation</title>
-  
-
-  
-  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
-
-  
-  
+  <title>Account for AOI reflection losses (in full mode only) &mdash; pvfactors 1.5.1+0.g3c619d3.dirty documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
     <link rel="shortcut icon" href="../_static/favicon.ico"/>
-  
-
-  
-  
-
-  
-
-  
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
         <script src="../_static/doctools.js"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
-        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
-    
-    <script type="text/javascript" src="../_static/js/theme.js"></script>
-
-    
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+        <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Run fast simulations" href="Run_fast_simulations.html" />
     <link rel="prev" title="Run full simulations in parallel" href="Run_full_parallel_simulations.html" /> 
 </head>
 
-<body class="wy-body-for-nav">
-
-   
+<body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
-    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-          
-
-          
             <a href="../index.html" class="icon icon-home"> pvfactors
-          
-
-          
-            
             <img src="../_static/logo_small.png" class="logo" alt="Logo"/>
-          
           </a>
-
-          
-            
-            
               <div class="version">
-                1.5.0
+                1.5.1
               </div>
-            
-          
-
-          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" />
@@ -85,18 +45,7 @@
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-
-          
-        </div>
-
-        
-        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-          
-            
-            
-              
-            
-            
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../installation/index.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../concepts/index.html">Main concepts</a></li>
@@ -127,75 +76,31 @@
 <li class="toctree-l1"><a class="reference internal" href="../whatsnew.html">What’s New</a></li>
 </ul>
 
-            
-          
         </div>
-        
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" aria-label="top navigation">
-        
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="../index.html">pvfactors</a>
-        
       </nav>
 
-
       <div class="wy-nav-content">
-        
         <div class="rst-content">
-        
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div role="navigation" aria-label="breadcrumbs navigation">
-
+          <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-    
       <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
-        
           <li><a href="index.html">Tutorials</a> &raquo;</li>
-        
       <li>Account for AOI reflection losses (in full mode only)</li>
-    
-    
       <li class="wy-breadcrumbs-aside">
-        
-          
-            
               <a href="https://github.com/SunPower/pvfactors/blob/tutorials/Account_for_AOI_losses.ipynb" class="fa fa-github"> Edit on GitHub</a>
-            
-          
-        
       </li>
-    
   </ul>
-
-  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-            
+             
   
 <style>
 /* CSS for nbsphinx extension */
@@ -466,8 +371,8 @@ div.rendered_html tbody tr:hover {
     text-align: unset;
 }
 </style>
-<div class="section" id="Account-for-AOI-reflection-losses-(in-full-mode-only)">
-<h1>Account for AOI reflection losses (in full mode only)<a class="headerlink" href="#Account-for-AOI-reflection-losses-(in-full-mode-only)" title="Permalink to this headline">¶</a></h1>
+<section id="Account-for-AOI-reflection-losses-(in-full-mode-only)">
+<h1>Account for AOI reflection losses (in full mode only)<a class="headerlink" href="#Account-for-AOI-reflection-losses-(in-full-mode-only)" title="Permalink to this headline"></a></h1>
 <p>In this section, we will learn:</p>
 <ul class="simple">
 <li><p>how <code class="docutils literal notranslate"><span class="pre">pvfactors</span></code> accounts for AOI losses by default</p></li>
@@ -550,8 +455,8 @@ div.rendered_html tbody tr:hover {
 </pre></div>
 </div>
 </div>
-<div class="section" id="Get-timeseries-inputs">
-<h2>Get timeseries inputs<a class="headerlink" href="#Get-timeseries-inputs" title="Permalink to this headline">¶</a></h2>
+<section id="Get-timeseries-inputs">
+<h2>Get timeseries inputs<a class="headerlink" href="#Get-timeseries-inputs" title="Permalink to this headline"></a></h2>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
@@ -599,9 +504,9 @@ div.rendered_html tbody tr:hover {
 </pre></div>
 </div>
 </div>
-</div>
-<div class="section" id="Prepare-PV-array-parameters">
-<h2>Prepare PV array parameters<a class="headerlink" href="#Prepare-PV-array-parameters" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="Prepare-PV-array-parameters">
+<h2>Prepare PV array parameters<a class="headerlink" href="#Prepare-PV-array-parameters" title="Permalink to this headline"></a></h2>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
@@ -617,9 +522,9 @@ div.rendered_html tbody tr:hover {
 </pre></div>
 </div>
 </div>
-</div>
-<div class="section" id="Default-AOI-loss-behavior">
-<h2>Default AOI loss behavior<a class="headerlink" href="#Default-AOI-loss-behavior" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="Default-AOI-loss-behavior">
+<h2>Default AOI loss behavior<a class="headerlink" href="#Default-AOI-loss-behavior" title="Permalink to this headline"></a></h2>
 <p>In <code class="docutils literal notranslate"><span class="pre">pvfactors</span></code>:</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">qinc</span></code> is the total incident irradiance on a surface, and it does not account for reflection losses</p></li>
@@ -727,12 +632,12 @@ div.rendered_html tbody tr:hover {
 <li><p>3% loss for the irradiance incident on front of PV rows, which corresponds to the chosen <code class="docutils literal notranslate"><span class="pre">rho_front</span></code> in the irradiance model</p></li>
 <li><p>5% loss for the irradiance incident on back of PV rows, which corresponds to the chosen <code class="docutils literal notranslate"><span class="pre">rho_back</span></code> in the irradiance model</p></li>
 </ul>
-</div>
-<div class="section" id="Use-an-fAOI-function-in-the-irradiance-model">
-<h2>Use an <code class="docutils literal notranslate"><span class="pre">fAOI</span></code> function in the irradiance model<a class="headerlink" href="#Use-an-fAOI-function-in-the-irradiance-model" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="Use-an-fAOI-function-in-the-irradiance-model">
+<h2>Use an <code class="docutils literal notranslate"><span class="pre">fAOI</span></code> function in the irradiance model<a class="headerlink" href="#Use-an-fAOI-function-in-the-irradiance-model" title="Permalink to this headline"></a></h2>
 <p>The next step that can improve the AOI loss calculation, especially for the PV row front surface that receives a lot of direct light, would be to use reflection losses that would be dependent on the AOI, and that would be applied to all the irradiance model components: direct, circumsolar, and horizon light components.</p>
-<div class="section" id="What-is-an-fAOI-function?">
-<h3>What is an <code class="docutils literal notranslate"><span class="pre">fAOI</span></code> function?<a class="headerlink" href="#What-is-an-fAOI-function?" title="Permalink to this headline">¶</a></h3>
+<section id="What-is-an-fAOI-function?">
+<h3>What is an <code class="docutils literal notranslate"><span class="pre">fAOI</span></code> function?<a class="headerlink" href="#What-is-an-fAOI-function?" title="Permalink to this headline"></a></h3>
 <p>The <code class="docutils literal notranslate"><span class="pre">fAOI</span></code> function that the users need to provide takes an angle of incidence as input (AOI measured in degrees and against the surface horizontal - from 0 to 180 deg, <strong>not</strong> against the surface normal vector - which would have been from 0 to 90 deg), and it returns a transmission value for the incident light. So it’s effectively a factor that removes reflection losses.</p>
 <p>Let’s see what this looks like. First, let’s create such a function using a <code class="docutils literal notranslate"><span class="pre">pvfactors</span></code> utility function, and then we’ll plot it.</p>
 <p>Given a <a class="reference external" href="https://pvlib-python.readthedocs.io/en/stable/index.html">pvlib</a> module database name, you can create an <code class="docutils literal notranslate"><span class="pre">fAOI</span></code> function as follows using pvfactors.</p>
@@ -776,9 +681,9 @@ div.rendered_html tbody tr:hover {
 </div>
 </div>
 <p>As expected, there are less reflection losses for incident light rays normal to the surface than everywhere else.</p>
-</div>
-<div class="section" id="Use-the-fAOI-function">
-<h3>Use the <code class="docutils literal notranslate"><span class="pre">fAOI</span></code> function<a class="headerlink" href="#Use-the-fAOI-function" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="Use-the-fAOI-function">
+<h3>Use the <code class="docutils literal notranslate"><span class="pre">fAOI</span></code> function<a class="headerlink" href="#Use-the-fAOI-function" title="Permalink to this headline"></a></h3>
 <p>It’s then easy to use the created <code class="docutils literal notranslate"><span class="pre">fAOI</span></code> function in the irradiance models. It just has to be passed to the model at initialization.</p>
 <p>For this example, we will use the same fAOI function for the front and back surfaces of the PV rows.</p>
 <div class="nbinput nblast docutils container">
@@ -845,10 +750,10 @@ div.rendered_html tbody tr:hover {
 </div>
 </div>
 <p>We can now see the changes in AOI losses, which now use the <code class="docutils literal notranslate"><span class="pre">fAOI</span></code> function for the direct, circumsolar, and horizon light components. But it still uses the constant <code class="docutils literal notranslate"><span class="pre">rho_front</span></code> and <code class="docutils literal notranslate"><span class="pre">rho_back</span></code> values for the reflection and isotropic components of the incident light on the surfaces.</p>
-</div>
-</div>
-<div class="section" id="Advanced:-use-an-fAOI-function-for-the-(ground-and-array)-reflection-and-isotropic-components">
-<h2>Advanced: use an <code class="docutils literal notranslate"><span class="pre">fAOI</span></code> function for the (ground and array) reflection and isotropic components<a class="headerlink" href="#Advanced:-use-an-fAOI-function-for-the-(ground-and-array)-reflection-and-isotropic-components" title="Permalink to this headline">¶</a></h2>
+</section>
+</section>
+<section id="Advanced:-use-an-fAOI-function-for-the-(ground-and-array)-reflection-and-isotropic-components">
+<h2>Advanced: use an <code class="docutils literal notranslate"><span class="pre">fAOI</span></code> function for the (ground and array) reflection and isotropic components<a class="headerlink" href="#Advanced:-use-an-fAOI-function-for-the-(ground-and-array)-reflection-and-isotropic-components" title="Permalink to this headline"></a></h2>
 <p>The more advanced use is to apply the <code class="docutils literal notranslate"><span class="pre">fAOI</span></code> losses to the reflection and isotropic component of the light incident on the PV row surfaces.</p>
 <p>In order to do so you simply need to pass the <code class="docutils literal notranslate"><span class="pre">fAOI</span></code> function to the view factor calculator before initializing the <code class="docutils literal notranslate"><span class="pre">PVEngine</span></code>.</p>
 <p>In this case, the simulation workflow will be as follows:</p>
@@ -856,8 +761,8 @@ div.rendered_html tbody tr:hover {
 <li><p>the <code class="docutils literal notranslate"><span class="pre">PVEngine</span></code> will still calculate the equilibrium of reflections assuming diffuse surfaces and constant reflection losses</p></li>
 <li><p>it will then use the calculated radiosity values and apply the <code class="docutils literal notranslate"><span class="pre">fAOI</span></code> using an integral combining the AOI losses and the view factor integrands, as described in the theory section, and similarly to <a class="reference external" href="https://www.osti.gov/servlets/purl/1364146">Marion, B., et al (2017)</a></p></li>
 </ul>
-<div class="section" id="A-word-of-caution">
-<h3>A word of caution<a class="headerlink" href="#A-word-of-caution" title="Permalink to this headline">¶</a></h3>
+<section id="A-word-of-caution">
+<h3>A word of caution<a class="headerlink" href="#A-word-of-caution" title="Permalink to this headline"></a></h3>
 <p>The users should be careful when using <code class="docutils literal notranslate"><span class="pre">fAOI</span></code> losses with the view factor calculator for the following reasons:</p>
 <ul class="simple">
 <li><p>in order to be fully consistent in the <code class="docutils literal notranslate"><span class="pre">PVEngine</span></code> calculations, it is wiser to re-calculate a global hemispherical reflectivity value using the <code class="docutils literal notranslate"><span class="pre">fAOI</span></code> function, which will be used in the reflection equilibrium calculation</p></li>
@@ -865,9 +770,9 @@ div.rendered_html tbody tr:hover {
 <li><p>the method relies on the numerical calculation of an integral, and that calculation will converge only given a sufficient number of integral points (which can be provided to the <code class="docutils literal notranslate"><span class="pre">pvfactors</span></code> view factor calculator). <a class="reference external" href="https://www.osti.gov/servlets/purl/1364146">Marion, B., et al (2017)</a> seems to be using 180 points, but in <code class="docutils literal notranslate"><span class="pre">pvfactors</span></code>’ implementation it doesn’t look like it’s enough for the integral to converge, so we’ll use 1000 integral points in this example</p></li>
 <li><p>the two points above slow down the computation time by an order of magnitude. 8760 simulations that normally take a couple of seconds to run with <code class="docutils literal notranslate"><span class="pre">pvfactors</span></code>’s full mode can then take up to a minute</p></li>
 </ul>
-</div>
-<div class="section" id="Apply-fAOI-losses-to-reflection-terms">
-<h3>Apply <code class="docutils literal notranslate"><span class="pre">fAOI</span></code> losses to reflection terms<a class="headerlink" href="#Apply-fAOI-losses-to-reflection-terms" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="Apply-fAOI-losses-to-reflection-terms">
+<h3>Apply <code class="docutils literal notranslate"><span class="pre">fAOI</span></code> losses to reflection terms<a class="headerlink" href="#Apply-fAOI-losses-to-reflection-terms" title="Permalink to this headline"></a></h3>
 <p>Discretize the PV row sides of the PV array:</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
@@ -1018,10 +923,10 @@ Reflectivity values for front side: 0.029002539185428944, and back side: 0.02900
 </div>
 </div>
 <p>This is the way to apply <code class="docutils literal notranslate"><span class="pre">fAOI</span></code> losses to all the irradiance components in a <code class="docutils literal notranslate"><span class="pre">pvfactors</span></code> simulation.</p>
-</div>
-</div>
-<div class="section" id="Doing-all-of-the-above-using-the-“run-functions”">
-<h2>Doing all of the above using the “run functions”<a class="headerlink" href="#Doing-all-of-the-above-using-the-“run-functions”" title="Permalink to this headline">¶</a></h2>
+</section>
+</section>
+<section id="Doing-all-of-the-above-using-the-“run-functions”">
+<h2>Doing all of the above using the “run functions”<a class="headerlink" href="#Doing-all-of-the-above-using-the-“run-functions”" title="Permalink to this headline"></a></h2>
 <p>When using the “run functions”, you’ll just need to define the parameters in advance and then pass it to the functions.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[28]:
@@ -1037,8 +942,8 @@ Reflectivity values for front side: 0.029002539185428944, and back side: 0.02900
 </pre></div>
 </div>
 </div>
-<div class="section" id="Using-run_timeseries_engine()">
-<h3>Using <code class="docutils literal notranslate"><span class="pre">run_timeseries_engine()</span></code><a class="headerlink" href="#Using-run_timeseries_engine()" title="Permalink to this headline">¶</a></h3>
+<section id="Using-run_timeseries_engine()">
+<h3>Using <code class="docutils literal notranslate"><span class="pre">run_timeseries_engine()</span></code><a class="headerlink" href="#Using-run_timeseries_engine()" title="Permalink to this headline"></a></h3>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[29]:
 </pre></div>
@@ -1092,9 +997,9 @@ Reflectivity values for front side: 0.029002539185428944, and back side: 0.02900
 <img alt="../_images/tutorials_Account_for_AOI_losses_67_0.png" src="../_images/tutorials_Account_for_AOI_losses_67_0.png" />
 </div>
 </div>
-</div>
-<div class="section" id="Using-run_parallel_engine()">
-<h3>Using <code class="docutils literal notranslate"><span class="pre">run_parallel_engine()</span></code><a class="headerlink" href="#Using-run_parallel_engine()" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="Using-run_parallel_engine()">
+<h3>Using <code class="docutils literal notranslate"><span class="pre">run_parallel_engine()</span></code><a class="headerlink" href="#Using-run_parallel_engine()" title="Permalink to this headline"></a></h3>
 <p>Because of Python’s multiprocessing, and because functions cannot be pickled in Python, the functions need to be wrapped up into classes.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[32]:
@@ -1214,56 +1119,39 @@ INFO:pvfactors.run:Parallel calculation elapsed time: 0.731104850769043 sec
 </div>
 </div>
 <p>It’s that easy!</p>
-</div>
-</div>
-</div>
+</section>
+</section>
+</section>
 
 
            </div>
-           
           </div>
-          <footer>
-    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-        <a href="Run_fast_simulations.html" class="btn btn-neutral float-right" title="Run fast simulations" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="Run_full_parallel_simulations.html" class="btn btn-neutral float-left" title="Run full simulations in parallel" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="Run_fast_simulations.html" class="btn btn-neutral float-right" title="Run fast simulations" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>
-        &#169; Copyright 2016, SunPower Corporation.
-
-    </p>
+    <p>&#169; Copyright 2016, SunPower Corporation.</p>
   </div>
-    
-    
-    
-    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
-    
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
     <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    
-    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
 
 </footer>
         </div>
       </div>
-
     </section>
-
   </div>
-  
-
-  <script type="text/javascript">
+  <script>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-
-  
-  
-    
-   
+  </script> 
 
 </body>
 </html>
