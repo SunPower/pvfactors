@@ -7,7 +7,7 @@ Installation
 Install with pip
 ----------------
 
-``pvfactors`` works with both python 2 and 3.
+``pvfactors`` currently supports python 3.6+.
 
 The easiest way to install ``pvfactors`` is using pip_:
 
