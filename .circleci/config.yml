@@ -25,6 +25,7 @@ jobs:
             - v1-dep-{{ .Branch }}-
             - v1-dep-master-
             - v1-dep-
+      - run: sudo apt-get update
       - run: sudo apt-get install -y pandoc
       - run: sudo pip install --progress-bar=off .[testing,docs]
       - run: python setup.py build_sphinx
