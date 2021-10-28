@@ -27,7 +27,10 @@ jobs:
             - v1-dep-
       - run: sudo apt-get update
       - run: sudo apt-get install -y pandoc
-      - run: sudo pip install --progress-bar=off .[testing,docs]
+      - run: |
+          python --version
+          pip --version
+      - run: pip install --progress-bar=off .[testing,docs]
       - run: python setup.py build_sphinx
       - save_cache:
           key: v1-dep-{{ .Branch }}-{{ epoch }}
