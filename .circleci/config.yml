@@ -6,6 +6,7 @@ workflows:
       - test-python-3.6
       - test-python-3.7
       - test-python-3.8
+      - test-python-3.9
 jobs:
   test-python-3.6: &build-template
     working_directory: ~/SunPower/pvfactors
@@ -56,3 +57,7 @@ jobs:
     <<: *build-template
     docker:
       - image: circleci/python:3.8.7
+  test-python-3.9:
+    <<: *build-template
+    docker:
+      - image: circleci/python:3.9.7-buster
