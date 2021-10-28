@@ -27,9 +27,9 @@ jobs:
             - v1-dep-
       - run: sudo apt-get update
       - run: sudo apt-get install -y pandoc
-      - run: |
-          python --version
-          pip --version
+      - run: python --version
+      - run: pip install --upgrade pip setuptools wheel
+      - run: pip --version
       - run: pip install --progress-bar=off .[testing,docs]
       - run: python setup.py build_sphinx
       - save_cache:
