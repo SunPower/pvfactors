@@ -16,7 +16,7 @@ jobs:
       CIRCLE_ARTIFACTS: /tmp/circleci-artifacts
       CIRCLE_TEST_REPORTS: /tmp/circleci-test-results
     docker:
-      - image: circleci/python:3.6.6-stretch
+      - image: cimg/python:3.6.15
     steps:
       - checkout
       - run: mkdir -p $CIRCLE_ARTIFACTS $CIRCLE_TEST_REPORTS
@@ -52,12 +52,12 @@ jobs:
   test-python-3.7:
     <<: *build-template
     docker:
-      - image: circleci/python:3.7.3-stretch
+      - image: cimg/python:3.7.12
   test-python-3.8:
     <<: *build-template
     docker:
-      - image: circleci/python:3.8.7
+      - image: cimg/python:3.8.12
   test-python-3.9:
     <<: *build-template
     docker:
-      - image: circleci/python:3.9.7-buster
+      - image: cimg/python:3.9.6
