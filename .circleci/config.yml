@@ -29,11 +29,11 @@ jobs:
       - run: python setup.py build_sphinx
       - run: pytest --junitxml=$CIRCLE_TEST_REPORTS/junit.xml
       - store_test_results:
-          path: $CIRCLE_TEST_REPORTS
+          path: ${CIRCLE_TEST_REPORTS}
       - store_artifacts:
-          path: $CIRCLE_ARTIFACTS
+          path: ${CIRCLE_ARTIFACTS}
       - store_artifacts:
-          path: $CIRCLE_TEST_REPORTS
+          path: ${CIRCLE_TEST_REPORTS}
       - store_artifacts:
           path: build/sphinx/html
           destination: docs
