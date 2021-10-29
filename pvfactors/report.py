@@ -32,9 +32,8 @@ class ExampleReportBuilder(object):
 
     @staticmethod
     def build(pvarray):
-        """Method that will build the simulation report. Here we're using the
-        previously defined
-        :py:function:`~pvfactors.report.example_fn_build_report`.
+        """Method that will build the simulation report, using
+        :py:func:`~pvfactors.report.example_fn_build_report`.
 
         Parameters
         ----------
