@@ -562,6 +562,44 @@ def test_check_direct_shading_continuity():
     np.testing.assert_allclose(out, expected_out)
 
 
+def test_check_tilt_zero_discontinuity():
+    """
+    Before version 1.5.2, surface_tilt=0 with certain combinations of
+    surface_azimuth and axis_azimuth showed anomolous behavior where
+    the irradiance at zero tilt was significantly different from the
+    irradiance at very small but nonzero tilts.  See GH #125
+    """
+    # expected value calculated for surface_tilt=0.001, so should
+    # not be significantly different from result for surface_tilt=0
+    rear_qinc_expected = 76.10
+
+    timestamps = np.array([dt.datetime(2019, 6, 1, 10)])
+    solar_azimuth = np.array([135])
+    solar_zenith = np.array([45])
+    dni = np.array([200])
+    dhi = np.array([400])
+    albedo = np.array([0.2])
+    surface_tilt = np.array([0.0])
+
+    # the discontinuity did not occur for all combinations of
+    # (surface_azimuth, axis_azimuth), so test all four "primary" pairs:
+    for surface_azimuth in [90, 270]:
+        surface_azimuth = np.array([surface_azimuth])
+        for axis_azimuth in [0, 180]:
+            params = dict(n_pvrows=3, axis_azimuth=axis_azimuth,
+                          pvrow_height=2, pvrow_width=1, gcr=0.4)
+
+            pvarray = OrderedPVArray.init_from_dict(params)
+            eng = PVEngine(pvarray)
+            eng.fit(timestamps, dni, dhi, solar_zenith, solar_azimuth,
+                    surface_tilt, surface_azimuth, albedo)
+
+            # Run simulation and get output
+            eng.run_full_mode()
+            out = pvarray.ts_pvrows[1].back.get_param_weighted('qinc')
+            assert rear_qinc_expected == pytest.approx(out[0], abs=1e-2)
+
+
 def test_create_engine_with_rho_init(params, pvmodule_canadian):
     """Check that can create PV engine with rho initialization
     from faoi functions"""
