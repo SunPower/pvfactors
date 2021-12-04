@@ -597,6 +597,8 @@ def test_check_tilt_zero_discontinuity():
             # Run simulation and get output
             eng.run_full_mode()
             out = pvarray.ts_pvrows[1].back.get_param_weighted('qinc')
+            assert np.all(pvarray.ts_vf_matrix >= 0)
+            assert np.all(pvarray.ts_vf_matrix <= 1)
             assert rear_qinc_expected == pytest.approx(out[0], abs=1e-2)
 
 
