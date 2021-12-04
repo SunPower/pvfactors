@@ -567,7 +567,8 @@ def test_check_tilt_zero_discontinuity():
     Before version 1.5.2, surface_tilt=0 with certain combinations of
     surface_azimuth and axis_azimuth showed anomolous behavior where
     the irradiance at zero tilt was significantly different from the
-    irradiance at very small but nonzero tilts.  See GH #125
+    irradiance at very small but nonzero tilts.  Additionally, the
+    calculated VF matrix could have values outside [0, 1].  See GH #125
     """
     # expected value calculated for surface_tilt=0.001, so should
     # not be significantly different from result for surface_tilt=0
