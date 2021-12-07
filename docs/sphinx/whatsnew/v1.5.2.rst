@@ -16,9 +16,11 @@ Fixes
   output moving forward, the pvlib dependency is updated from ``pvlib>=0.7.0,<0.9.0`` to
   ``pvlib>=0.9.0,<0.10.0``.  This will likely change the results of irradiance simulations.
   According to the
-  [pvlib release notes](https://pvlib-python.readthedocs.io/en/v0.9.0/whatsnew.html#bug-fixes),
+  `pvlib release notes <https://pvlib-python.readthedocs.io/en/v0.9.0/whatsnew.html#bug-fixes>`_,
   the differences are "expected to be small and primarily occur at low irradiance conditions".
   (:ghpull:`121`)
+* Fixed a bug that affected some irradiance simulations when `surface_tilt` is exactly zero.
+  See `GH #125 <https://github.com/SunPower/pvfactors/issues/125>`_ for details. (:ghpull:`128`)
 
 
 Contributors
