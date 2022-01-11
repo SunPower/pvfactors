@@ -652,21 +652,21 @@ def test_engine_w_faoi_fn_in_irradiance_vfcalcs(params, pvmodule_canadian):
     # Run timestep
     pvarray = eng.run_full_mode(fn_build_report=lambda pvarray: pvarray)
     # Checks
-    np.testing.assert_almost_equal(
+    np.testing.assert_allclose(
         pvarray.ts_pvrows[0].front.get_param_weighted('qinc'),
         1110.1164773159298)
-    np.testing.assert_almost_equal(
+    np.testing.assert_allclose(
         pvarray.ts_pvrows[1].front.get_param_weighted('qinc'), 1110.595903991)
-    np.testing.assert_almost_equal(
+    np.testing.assert_allclose(
         pvarray.ts_pvrows[2].front.get_param_weighted('qinc'), 1112.37717553)
-    np.testing.assert_almost_equal(
+    np.testing.assert_allclose(
         pvarray.ts_pvrows[1].back.get_param_weighted('qinc'),
         116.49050349491208)
     # Check absorbed irradiance: calculated using faoi functions
-    np.testing.assert_almost_equal(
+    np.testing.assert_allclose(
         pvarray.ts_pvrows[2].front.get_param_weighted('qabs'),
-        [1109.1180884])
-    np.testing.assert_almost_equal(
+        [1109.1180884], rtol=1e-6)
+    np.testing.assert_allclose(
         pvarray.ts_pvrows[1].back.get_param_weighted('qabs'),
         [114.2143503])
 

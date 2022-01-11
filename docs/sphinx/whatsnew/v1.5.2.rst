@@ -3,10 +3,14 @@
 v1.5.2 (DATE XX, 2021)
 ======================
 
-Enhancements
+Requirements
 ------------
 
 * Add python 3.9 to test configuration (:ghpull:`122`)
+* Set the upper bound on shapely to version 2.0 (not yet released).
+  The shapely dependency may be dropped
+  altogether in a future pvfactors release.  (:ghpull:`130`)
+
 
 Fixes
 -----
