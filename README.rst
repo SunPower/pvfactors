@@ -212,6 +212,17 @@ To install the package in editable mode, you can use:
 
     $ pip install -e .
 
+Releasing
++++++++++
+
+When releasing pvfactors, you will need to run a couple of build commands. First make sure to activate your virtual environment if any, then:
+
+- create a tag on the latest master branch commit using `git tag -a vX.X.X`, and write a tag message. You can then push that tag to Github so that it will appear there.
+- build the documentation by running `make build-docs`. When done running, you should be able to open `build/sphinx/html/index.html`, and confirm that the version displayed is the same as the one from the git tag. You can deploy by copying the content of of the `build/sphinx/html/` folder into the `gh-pages` branch of the repo (make sure to keep the `.nojekyll` file that's already present).
+- build the release files by running `make build-package`. When done running, you should be able to open `dist/` and see both a whl file and and tar file. Make sure that their names include the correct git tag you created. Please confirm that the whl file was built correctly by installing it locally and testing the newly released updates. You can deploy by 1) making a Github release from the tag you created and pushed, and including the files in `dist/` in the release. 2) The last step is to publish a release in PyPI, for which you can use twine and the command `twine upload dist/*`
+
+
+
 
 References
 ----------

@@ -26,8 +26,12 @@ Fixes
 * Fixed a bug that affected some irradiance simulations when `surface_tilt` is exactly zero.
   See `GH #125 <https://github.com/SunPower/pvfactors/issues/125>`_ for details. (:ghpull:`128`)
 
+Maintenance
+-----------
+
+* Add documentation for making new releases (:ghpull:`133`)
 
 Contributors
 ------------
-* Marc Anoma (:ghuser:`anomam`)
 * Kevin Anderson (:ghuser:`kanderso-nrel`)
+* Marc Anoma (:ghuser:`anomam`)
