@@ -122,7 +122,7 @@ def _get_rotation_from_tilt_azimuth(surface_azimuth, axis_azimuth, tilt):
     # Calculate rotation of PV row (signed tilt angle)
     is_pointing_right = ((surface_azimuth - axis_azimuth) % 360.) > 180.
     rotation = np.where(is_pointing_right, tilt, -tilt)
-
+    rotation[tilt == 0] = -0.0  # GH 125
     return rotation
 
 
