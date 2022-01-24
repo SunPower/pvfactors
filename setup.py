@@ -48,7 +48,7 @@ setup(name=DISTNAME,
       extras_require={
           'testing': TESTS_REQUIRES,
           'docs': ['Sphinx~=4.0', 'sphinx_rtd_theme', 'nbsphinx',
-                   'sphinxcontrib-napoleon', 'sphinxcontrib_github_alt',
+                   'sphinxcontrib_github_alt',
                    'ipykernel']
       },
       license=LICENSE
