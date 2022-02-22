@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>pvfactors.geometry.base &mdash; pvfactors 1.5.1+0.g3c619d3.dirty documentation</title>
+  <title>pvfactors.geometry.base &mdash; pvfactors 1.5.1+6.ge0ea9d5 documentation</title>
       <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../../_static/css/custom.css" type="text/css" />
@@ -199,7 +199,7 @@
     <span class="c1"># Calculate rotation of PV row (signed tilt angle)</span>
     <span class="n">is_pointing_right</span> <span class="o">=</span> <span class="p">((</span><span class="n">surface_azimuth</span> <span class="o">-</span> <span class="n">axis_azimuth</span><span class="p">)</span> <span class="o">%</span> <span class="mf">360.</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mf">180.</span>
     <span class="n">rotation</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">is_pointing_right</span><span class="p">,</span> <span class="n">tilt</span><span class="p">,</span> <span class="o">-</span><span class="n">tilt</span><span class="p">)</span>
-
+    <span class="n">rotation</span><span class="p">[</span><span class="n">tilt</span> <span class="o">==</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mf">0.0</span>  <span class="c1"># GH 125</span>
     <span class="k">return</span> <span class="n">rotation</span>
 
 

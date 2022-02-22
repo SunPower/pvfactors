@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Account for AOI reflection losses (in full mode only) &mdash; pvfactors 1.5.1+0.g3c619d3.dirty documentation</title>
+  <title>Account for AOI reflection losses (in full mode only) &mdash; pvfactors 1.5.2 documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
@@ -18,8 +18,8 @@
         <script src="../_static/underscore.js"></script>
         <script src="../_static/doctools.js"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
         <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+        <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -36,7 +36,7 @@
             <img src="../_static/logo_small.png" class="logo" alt="Logo"/>
           </a>
               <div class="version">
-                1.5.1
+                1.5.2
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -311,7 +311,7 @@ div.nboutput.container div.output_area > div[class^='highlight']{
 }
 
 /* hide copybtn icon on prompts (needed for 'sphinx_copybutton') */
-.prompt a.copybtn {
+.prompt .copybtn {
     display: none;
 }
 
@@ -385,8 +385,7 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="c1"># Import external libraries</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Import external libraries</span>
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
@@ -414,8 +413,7 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="c1"># Helper functions for plotting and simulation</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Helper functions for plotting and simulation</span>
 <span class="k">def</span> <span class="nf">plot_irradiance</span><span class="p">(</span><span class="n">df_report</span><span class="p">):</span>
     <span class="c1"># Plot irradiance</span>
     <span class="n">f</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">nrows</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">ncols</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
@@ -461,8 +459,7 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="k">def</span> <span class="nf">export_data</span><span class="p">(</span><span class="n">fp</span><span class="p">):</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">export_data</span><span class="p">(</span><span class="n">fp</span><span class="p">):</span>
     <span class="n">tz</span> <span class="o">=</span> <span class="s1">&#39;US/Arizona&#39;</span>
     <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">fp</span><span class="p">,</span> <span class="n">index_col</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
     <span class="n">df</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DatetimeIndex</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="p">)</span><span class="o">.</span><span class="n">tz_convert</span><span class="p">(</span><span class="n">tz</span><span class="p">)</span>
@@ -477,8 +474,7 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="c1"># Plot the data</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Plot the data</span>
 <span class="n">f</span><span class="p">,</span> <span class="p">(</span><span class="n">ax1</span><span class="p">,</span> <span class="n">ax2</span><span class="p">,</span> <span class="n">ax3</span><span class="p">)</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
 <span class="n">df_inputs</span><span class="p">[[</span><span class="s1">&#39;dni&#39;</span><span class="p">,</span> <span class="s1">&#39;dhi&#39;</span><span class="p">]]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax1</span><span class="p">)</span>
 <span class="n">df_inputs</span><span class="p">[[</span><span class="s1">&#39;solar_zenith&#39;</span><span class="p">,</span> <span class="s1">&#39;solar_azimuth&#39;</span><span class="p">]]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax2</span><span class="p">)</span>
@@ -498,8 +494,7 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="c1"># Use a fixed albedo</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Use a fixed albedo</span>
 <span class="n">albedo</span> <span class="o">=</span> <span class="mf">0.2</span>
 </pre></div>
 </div>
@@ -511,8 +506,7 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">pvarray_parameters</span> <span class="o">=</span> <span class="p">{</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">pvarray_parameters</span> <span class="o">=</span> <span class="p">{</span>
     <span class="s1">&#39;n_pvrows&#39;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>            <span class="c1"># number of pv rows</span>
     <span class="s1">&#39;pvrow_height&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>        <span class="c1"># height of pvrows (measured at center / torque tube)</span>
     <span class="s1">&#39;pvrow_width&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>         <span class="c1"># width of pvrows</span>
@@ -536,8 +530,7 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">pvfactors.geometry</span> <span class="kn">import</span> <span class="n">OrderedPVArray</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pvfactors.geometry</span> <span class="kn">import</span> <span class="n">OrderedPVArray</span>
 <span class="c1"># Create PV array</span>
 <span class="n">pvarray</span> <span class="o">=</span> <span class="n">OrderedPVArray</span><span class="o">.</span><span class="n">init_from_dict</span><span class="p">(</span><span class="n">pvarray_parameters</span><span class="p">)</span>
 </pre></div>
@@ -547,8 +540,7 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">pvfactors.engine</span> <span class="kn">import</span> <span class="n">PVEngine</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pvfactors.engine</span> <span class="kn">import</span> <span class="n">PVEngine</span>
 <span class="kn">from</span> <span class="nn">pvfactors.irradiance</span> <span class="kn">import</span> <span class="n">HybridPerezOrdered</span>
 <span class="c1"># Create irradiance model</span>
 <span class="n">irradiance_model</span> <span class="o">=</span> <span class="n">HybridPerezOrdered</span><span class="p">(</span><span class="n">rho_front</span><span class="o">=</span><span class="mf">0.03</span><span class="p">,</span> <span class="n">rho_back</span><span class="o">=</span><span class="mf">0.05</span><span class="p">)</span>
@@ -566,8 +558,7 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="c1"># Plot pvarray shapely geometries</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Plot pvarray shapely geometries</span>
 <span class="n">f</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
 <span class="n">pvarray</span><span class="o">.</span><span class="n">plot_at_idx</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="n">ax</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;Modeled PV array at </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">df_inputs</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="mi">12</span><span class="p">]))</span>
@@ -586,8 +577,7 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="c1"># Run full mode simulation</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Run full mode simulation</span>
 <span class="n">report</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">run_full_mode</span><span class="p">(</span><span class="n">fn_build_report</span><span class="o">=</span><span class="n">fn_report</span><span class="p">)</span>
 <span class="c1"># Turn report into dataframe</span>
 <span class="n">df_report</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">report</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">df_inputs</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
@@ -598,8 +588,7 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">plot_irradiance</span><span class="p">(</span><span class="n">df_report</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">plot_irradiance</span><span class="p">(</span><span class="n">df_report</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -615,8 +604,7 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">plot_aoi_losses</span><span class="p">(</span><span class="n">df_report</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">plot_aoi_losses</span><span class="p">(</span><span class="n">df_report</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -645,8 +633,7 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="c1"># import utility function</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># import utility function</span>
 <span class="kn">from</span> <span class="nn">pvfactors.viewfactors.aoimethods</span> <span class="kn">import</span> <span class="n">faoi_fn_from_pvlib_sandia</span>
 <span class="c1"># Choose a module name</span>
 <span class="n">module_name</span> <span class="o">=</span> <span class="s1">&#39;SunPower_128_Cell_Module___2009_&#39;</span>
@@ -659,8 +646,7 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="c1"># Plot faoi function values</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Plot faoi function values</span>
 <span class="n">aoi_values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">180</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
 <span class="n">faoi_values</span> <span class="o">=</span> <span class="n">faoi_function</span><span class="p">(</span><span class="n">aoi_values</span><span class="p">)</span>
 
@@ -690,8 +676,7 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="c1"># Create irradiance model with fAOI function</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Create irradiance model with fAOI function</span>
 <span class="n">irradiance_model</span> <span class="o">=</span> <span class="n">HybridPerezOrdered</span><span class="p">(</span><span class="n">faoi_fn_front</span><span class="o">=</span><span class="n">faoi_function</span><span class="p">,</span> <span class="n">faoi_fn_back</span><span class="o">=</span><span class="n">faoi_function</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -701,8 +686,7 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="c1"># Create engine</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Create engine</span>
 <span class="n">engine</span> <span class="o">=</span> <span class="n">PVEngine</span><span class="p">(</span><span class="n">pvarray</span><span class="p">,</span> <span class="n">irradiance_model</span><span class="o">=</span><span class="n">irradiance_model</span><span class="p">)</span>
 <span class="c1"># Fit engine to data</span>
 <span class="n">engine</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">df_inputs</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">df_inputs</span><span class="o">.</span><span class="n">dni</span><span class="p">,</span> <span class="n">df_inputs</span><span class="o">.</span><span class="n">dhi</span><span class="p">,</span>
@@ -721,8 +705,7 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">plot_irradiance</span><span class="p">(</span><span class="n">df_report</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">plot_irradiance</span><span class="p">(</span><span class="n">df_report</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -737,8 +720,7 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[18]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">plot_aoi_losses</span><span class="p">(</span><span class="n">df_report</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">plot_aoi_losses</span><span class="p">(</span><span class="n">df_report</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -778,8 +760,7 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="c1"># first let&#39;s discretize the PV row sides</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># first let&#39;s discretize the PV row sides</span>
 <span class="n">pvarray_parameters</span><span class="o">.</span><span class="n">update</span><span class="p">({</span>
     <span class="s1">&#39;cut&#39;</span><span class="p">:</span> <span class="p">{</span><span class="mi">1</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;front&#39;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span> <span class="s1">&#39;back&#39;</span><span class="p">:</span> <span class="mi">5</span><span class="p">}}</span>
 <span class="p">})</span>
@@ -793,8 +774,7 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[20]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">pvfactors.viewfactors</span> <span class="kn">import</span> <span class="n">VFCalculator</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pvfactors.viewfactors</span> <span class="kn">import</span> <span class="n">VFCalculator</span>
 
 <span class="n">vf_calculator</span> <span class="o">=</span> <span class="n">VFCalculator</span><span class="p">(</span><span class="n">faoi_fn_front</span><span class="o">=</span><span class="n">faoi_function</span><span class="p">,</span> <span class="n">faoi_fn_back</span><span class="o">=</span><span class="n">faoi_function</span><span class="p">,</span>
                              <span class="n">n_aoi_integral_sections</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span>
@@ -806,8 +786,7 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[21]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="c1"># For back PV row surface</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># For back PV row surface</span>
 <span class="n">is_back</span> <span class="o">=</span> <span class="kc">True</span>
 <span class="n">rho_back</span> <span class="o">=</span> <span class="n">vf_calculator</span><span class="o">.</span><span class="n">vf_aoi_methods</span><span class="o">.</span><span class="n">rho_from_faoi_fn</span><span class="p">(</span><span class="n">is_back</span><span class="p">)</span>
 <span class="c1"># For front PV row surface</span>
@@ -833,8 +812,7 @@ Reflectivity values for front side: 0.029002539185428944, and back side: 0.02900
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[22]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">irradiance_model</span> <span class="o">=</span> <span class="n">HybridPerezOrdered</span><span class="p">(</span><span class="n">rho_front</span><span class="o">=</span><span class="n">rho_front</span><span class="p">,</span> <span class="n">rho_back</span><span class="o">=</span><span class="n">rho_back</span><span class="p">,</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">irradiance_model</span> <span class="o">=</span> <span class="n">HybridPerezOrdered</span><span class="p">(</span><span class="n">rho_front</span><span class="o">=</span><span class="n">rho_front</span><span class="p">,</span> <span class="n">rho_back</span><span class="o">=</span><span class="n">rho_back</span><span class="p">,</span>
                                       <span class="n">faoi_fn_front</span><span class="o">=</span><span class="n">faoi_function</span><span class="p">,</span> <span class="n">faoi_fn_back</span><span class="o">=</span><span class="n">faoi_function</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -844,8 +822,7 @@ Reflectivity values for front side: 0.029002539185428944, and back side: 0.02900
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[23]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="c1"># Create engine</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Create engine</span>
 <span class="n">engine</span> <span class="o">=</span> <span class="n">PVEngine</span><span class="p">(</span><span class="n">pvarray</span><span class="p">,</span> <span class="n">vf_calculator</span><span class="o">=</span><span class="n">vf_calculator</span><span class="p">,</span>
                   <span class="n">irradiance_model</span><span class="o">=</span><span class="n">irradiance_model</span><span class="p">)</span>
 <span class="c1"># Fit engine to data</span>
@@ -860,8 +837,7 @@ Reflectivity values for front side: 0.029002539185428944, and back side: 0.02900
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[24]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="c1"># Plot pvarray shapely geometries</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Plot pvarray shapely geometries</span>
 <span class="n">f</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
 <span class="n">ax</span> <span class="o">=</span> <span class="n">pvarray</span><span class="o">.</span><span class="n">plot_at_idx</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="n">ax</span><span class="p">,</span> <span class="n">with_surface_index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;Modeled PV array at </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">df_inputs</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="mi">14</span><span class="p">]))</span>
@@ -881,8 +857,7 @@ Reflectivity values for front side: 0.029002539185428944, and back side: 0.02900
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[25]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="c1"># Run full mode simulation</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Run full mode simulation</span>
 <span class="n">report</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">run_full_mode</span><span class="p">(</span><span class="n">fn_build_report</span><span class="o">=</span><span class="n">fn_report</span><span class="p">)</span>
 <span class="c1"># Turn report into dataframe</span>
 <span class="n">df_report</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">report</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">df_inputs</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
@@ -894,8 +869,7 @@ Reflectivity values for front side: 0.029002539185428944, and back side: 0.02900
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[26]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">plot_irradiance</span><span class="p">(</span><span class="n">df_report</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">plot_irradiance</span><span class="p">(</span><span class="n">df_report</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -910,8 +884,7 @@ Reflectivity values for front side: 0.029002539185428944, and back side: 0.02900
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[27]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">plot_aoi_losses</span><span class="p">(</span><span class="n">df_report</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">plot_aoi_losses</span><span class="p">(</span><span class="n">df_report</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -932,8 +905,7 @@ Reflectivity values for front side: 0.029002539185428944, and back side: 0.02900
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[28]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="c1"># Define the parameters for the irradiance model and the view factor calculator</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Define the parameters for the irradiance model and the view factor calculator</span>
 <span class="n">irradiance_params</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;rho_front&#39;</span><span class="p">:</span> <span class="n">rho_front</span><span class="p">,</span> <span class="s1">&#39;rho_back&#39;</span><span class="p">:</span> <span class="n">rho_back</span><span class="p">,</span>
                      <span class="s1">&#39;faoi_fn_front&#39;</span><span class="p">:</span> <span class="n">faoi_function</span><span class="p">,</span> <span class="s1">&#39;faoi_fn_back&#39;</span><span class="p">:</span> <span class="n">faoi_function</span><span class="p">}</span>
 
@@ -948,8 +920,7 @@ Reflectivity values for front side: 0.029002539185428944, and back side: 0.02900
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[29]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">pvfactors.run</span> <span class="kn">import</span> <span class="n">run_timeseries_engine</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pvfactors.run</span> <span class="kn">import</span> <span class="n">run_timeseries_engine</span>
 
 <span class="c1"># run simulations in parallel mode</span>
 <span class="n">report_from_fn</span> <span class="o">=</span> <span class="n">run_timeseries_engine</span><span class="p">(</span><span class="n">fn_report</span><span class="p">,</span> <span class="n">pvarray_parameters</span><span class="p">,</span> <span class="n">df_inputs</span><span class="o">.</span><span class="n">index</span><span class="p">,</span>
@@ -969,8 +940,7 @@ Reflectivity values for front side: 0.029002539185428944, and back side: 0.02900
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[30]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">plot_irradiance</span><span class="p">(</span><span class="n">df_report_from_fn</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">plot_irradiance</span><span class="p">(</span><span class="n">df_report_from_fn</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -985,8 +955,7 @@ Reflectivity values for front side: 0.029002539185428944, and back side: 0.02900
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[31]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">plot_aoi_losses</span><span class="p">(</span><span class="n">df_report_from_fn</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">plot_aoi_losses</span><span class="p">(</span><span class="n">df_report_from_fn</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -1005,8 +974,7 @@ Reflectivity values for front side: 0.029002539185428944, and back side: 0.02900
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[32]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="k">class</span> <span class="nc">ReportBuilder</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">ReportBuilder</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Class for building the reports with multiprocessing&quot;&quot;&quot;</span>
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">build</span><span class="p">(</span><span class="n">pvarray</span><span class="p">):</span>
@@ -1047,8 +1015,7 @@ Reflectivity values for front side: 0.029002539185428944, and back side: 0.02900
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[33]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="c1"># Define the parameters for the irradiance model and the view factor calculator</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Define the parameters for the irradiance model and the view factor calculator</span>
 <span class="n">irradiance_params</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;rho_front&#39;</span><span class="p">:</span> <span class="n">rho_front</span><span class="p">,</span> <span class="s1">&#39;rho_back&#39;</span><span class="p">:</span> <span class="n">rho_back</span><span class="p">,</span>
                      <span class="s1">&#39;faoi_fn_front&#39;</span><span class="p">:</span> <span class="n">FaoiClass</span><span class="p">,</span> <span class="s1">&#39;faoi_fn_back&#39;</span><span class="p">:</span> <span class="n">FaoiClass</span><span class="p">}</span>
 
@@ -1061,8 +1028,7 @@ Reflectivity values for front side: 0.029002539185428944, and back side: 0.02900
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[34]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">pvfactors.run</span> <span class="kn">import</span> <span class="n">run_parallel_engine</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pvfactors.run</span> <span class="kn">import</span> <span class="n">run_parallel_engine</span>
 
 <span class="c1"># run simulations in parallel mode</span>
 <span class="n">report_from_fn</span> <span class="o">=</span> <span class="n">run_parallel_engine</span><span class="p">(</span><span class="n">ReportBuilder</span><span class="p">,</span> <span class="n">pvarray_parameters</span><span class="p">,</span> <span class="n">df_inputs</span><span class="o">.</span><span class="n">index</span><span class="p">,</span>
@@ -1090,8 +1056,7 @@ INFO:pvfactors.run:Parallel calculation elapsed time: 0.731104850769043 sec
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[35]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">plot_irradiance</span><span class="p">(</span><span class="n">df_report_from_fn</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">plot_irradiance</span><span class="p">(</span><span class="n">df_report_from_fn</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -1106,8 +1071,7 @@ INFO:pvfactors.run:Parallel calculation elapsed time: 0.731104850769043 sec
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[36]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">plot_aoi_losses</span><span class="p">(</span><span class="n">df_report_from_fn</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">plot_aoi_losses</span><span class="p">(</span><span class="n">df_report_from_fn</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>

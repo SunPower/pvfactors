@@ -49,7 +49,7 @@ In the "full mode", ``pvfactors`` calculates the equilibrium of reflections betw
 Details on the "fast mode" simulations
 ======================================
 
-In the "fast mode", ``pvfactors`` assumes that all incident irradiance values for the system are known except for the PV row back surfaces. So since the system to solve is now explicit (no matrix inversion needed), it runs a little bit faster than the full mode, but it is less acurrate.
+In the "fast mode", ``pvfactors`` assumes that all incident irradiance values for the system are known except for the PV row back surfaces. So since the system to solve is now explicit (no matrix inversion needed), it runs a little bit faster than the full mode, but it is less accurate.
 
 .. note::
    Some tests show that for 8760 hourly simulations, the run time is less than 1 second for the fast mode vs. less than 2 seconds for the full mode.

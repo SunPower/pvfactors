@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>pvfactors.irradiance.models.HybridPerezOrdered &mdash; pvfactors 1.5.1+0.g3c619d3.dirty documentation</title>
+  <title>pvfactors.irradiance.models.HybridPerezOrdered &mdash; pvfactors 1.5.2 documentation</title>
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/custom.css" type="text/css" />
@@ -34,7 +34,7 @@
             <img src="../../_static/logo_small.png" class="logo" alt="Logo"/>
           </a>
               <div class="version">
-                1.5.1
+                1.5.2
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
@@ -44,28 +44,12 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <ul class="current">
+              <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../installation/index.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../concepts/index.html">Main concepts</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../tutorials/index.html">Tutorials</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../theory/index.html">Theory</a></li>
-<li class="toctree-l1 current"><a class="reference internal" href="../index.html">Developer API</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="../index.html#geometry">geometry</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../index.html#viewfactors">viewfactors</a></li>
-<li class="toctree-l2 current"><a class="reference internal" href="../index.html#irradiance">irradiance</a><ul class="current">
-<li class="toctree-l3"><a class="reference internal" href="../index.html#id3">base</a></li>
-<li class="toctree-l3 current"><a class="reference internal" href="../index.html#models">models</a><ul class="current">
-<li class="toctree-l4"><a class="reference internal" href="pvfactors.irradiance.models.IsotropicOrdered.html">pvfactors.irradiance.models.IsotropicOrdered</a></li>
-<li class="toctree-l4 current"><a class="current reference internal" href="#">pvfactors.irradiance.models.HybridPerezOrdered</a></li>
-</ul>
-</li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="../index.html#engine">engine</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../index.html#run">run</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../index.html#report">report</a></li>
-</ul>
-</li>
+<li class="toctree-l1"><a class="reference internal" href="../index.html">Developer API</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../whatsnew.html">What’s New</a></li>
 </ul>
 
@@ -123,7 +107,7 @@
 <h1>pvfactors.irradiance.models.HybridPerezOrdered<a class="headerlink" href="#pvfactors-irradiance-models-hybridperezordered" title="Permalink to this headline"></a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="pvfactors.irradiance.models.HybridPerezOrdered">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">pvfactors.irradiance.models.</span></span><span class="sig-name descname"><span class="pre">HybridPerezOrdered</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">horizon_band_angle</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">6.5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">circumsolar_angle</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">30.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">circumsolar_model</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'uniform_disk'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rho_front</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.01</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rho_back</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.03</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module_transparency</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module_spacing_ratio</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">faoi_fn_front</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">faoi_fn_back</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pvfactors/irradiance/models.html#HybridPerezOrdered"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pvfactors.irradiance.models.HybridPerezOrdered" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pvfactors.irradiance.models.</span></span><span class="sig-name descname"><span class="pre">HybridPerezOrdered</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">horizon_band_angle</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">6.5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">circumsolar_angle</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">30.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">circumsolar_model</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'uniform_disk'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rho_front</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.01</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rho_back</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.03</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module_transparency</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module_spacing_ratio</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">faoi_fn_front</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">faoi_fn_back</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pvfactors/irradiance/models.html#HybridPerezOrdered"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pvfactors.irradiance.models.HybridPerezOrdered" title="Permalink to this definition"></a></dt>
 <dd><p>Model is based off Perez diffuse light model, and
 applied to pvfactors <a class="reference internal" href="pvfactors.geometry.pvarray.OrderedPVArray.html#pvfactors.geometry.pvarray.OrderedPVArray" title="pvfactors.geometry.pvarray.OrderedPVArray"><code class="xref py py-class docutils literal notranslate"><span class="pre">OrderedPVArray</span></code></a>
 objects.

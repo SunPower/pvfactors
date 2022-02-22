@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Getting started &mdash; pvfactors 1.5.1+0.g3c619d3.dirty documentation</title>
+  <title>Getting started &mdash; pvfactors 1.5.2 documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
@@ -18,8 +18,8 @@
         <script src="../_static/underscore.js"></script>
         <script src="../_static/doctools.js"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
         <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+        <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -36,7 +36,7 @@
             <img src="../_static/logo_small.png" class="logo" alt="Logo"/>
           </a>
               <div class="version">
-                1.5.1
+                1.5.2
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -305,7 +305,7 @@ div.nboutput.container div.output_area > div[class^='highlight']{
 }
 
 /* hide copybtn icon on prompts (needed for 'sphinx_copybutton') */
-.prompt a.copybtn {
+.prompt .copybtn {
     display: none;
 }
 
@@ -380,8 +380,7 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="c1"># Import external libraries</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Import external libraries</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 <span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
@@ -401,8 +400,7 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">df_inputs</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">df_inputs</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
     <span class="p">{</span><span class="s1">&#39;solar_zenith&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mf">20.</span><span class="p">,</span> <span class="mf">50.</span><span class="p">],</span>
      <span class="s1">&#39;solar_azimuth&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mf">110.</span><span class="p">,</span> <span class="mf">250.</span><span class="p">],</span>
      <span class="s1">&#39;surface_tilt&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mf">10.</span><span class="p">,</span> <span class="mf">20.</span><span class="p">],</span>
@@ -480,8 +478,7 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">pvarray_parameters</span> <span class="o">=</span> <span class="p">{</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">pvarray_parameters</span> <span class="o">=</span> <span class="p">{</span>
     <span class="s1">&#39;n_pvrows&#39;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>            <span class="c1"># number of pv rows</span>
     <span class="s1">&#39;pvrow_height&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>        <span class="c1"># height of pvrows (measured at center / torque tube)</span>
     <span class="s1">&#39;pvrow_width&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>         <span class="c1"># width of pvrows</span>
@@ -499,8 +496,7 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">pvfactors.engine</span> <span class="kn">import</span> <span class="n">PVEngine</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pvfactors.engine</span> <span class="kn">import</span> <span class="n">PVEngine</span>
 <span class="kn">from</span> <span class="nn">pvfactors.geometry</span> <span class="kn">import</span> <span class="n">OrderedPVArray</span>
 
 <span class="c1"># Create an ordered PV array</span>
@@ -520,8 +516,7 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="c1"># Plot pvarray shapely geometries</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Plot pvarray shapely geometries</span>
 <span class="n">f</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
 <span class="n">pvarray</span><span class="o">.</span><span class="n">plot_at_idx</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">ax</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
@@ -543,8 +538,7 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="c1"># Create a function that will build a report from the simulation and return the</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Create a function that will build a report from the simulation and return the</span>
 <span class="c1"># incident irradiance on the back surface of the middle PV row</span>
 <span class="k">def</span> <span class="nf">fn_report</span><span class="p">(</span><span class="n">pvarray</span><span class="p">):</span> <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s1">&#39;qinc_back&#39;</span><span class="p">:</span> <span class="n">pvarray</span><span class="o">.</span><span class="n">ts_pvrows</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">back</span><span class="o">.</span><span class="n">get_param_weighted</span><span class="p">(</span><span class="s1">&#39;qinc&#39;</span><span class="p">)})</span>
 
@@ -557,8 +551,7 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="c1"># Print results (report is defined by report function passed by user)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Print results (report is defined by report function passed by user)</span>
 <span class="n">df_report_full</span> <span class="o">=</span> <span class="n">report</span><span class="o">.</span><span class="n">assign</span><span class="p">(</span><span class="n">timestamps</span><span class="o">=</span><span class="n">df_inputs</span><span class="o">.</span><span class="n">index</span><span class="p">)</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s1">&#39;timestamps&#39;</span><span class="p">)</span>
 
 <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Incident irradiance on back surface of middle PV row: </span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
@@ -626,8 +619,7 @@ Incident irradiance on back surface of middle PV row:
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="c1"># Run the fast mode calculation on the middle PV row: use the same report function as previously</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Run the fast mode calculation on the middle PV row: use the same report function as previously</span>
 <span class="n">df_report_fast</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">run_fast_mode</span><span class="p">(</span><span class="n">fn_build_report</span><span class="o">=</span><span class="n">fn_report</span><span class="p">,</span> <span class="n">pvrow_index</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 
 <span class="c1"># Print the results</span>

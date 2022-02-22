@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Main concepts &mdash; pvfactors 1.5.1+0.g3c619d3.dirty documentation</title>
+  <title>Main concepts &mdash; pvfactors 1.5.2 documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
@@ -34,7 +34,7 @@
             <img src="../_static/logo_small.png" class="logo" alt="Logo"/>
           </a>
               <div class="version">
-                1.5.1
+                1.5.2
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -209,7 +209,7 @@ separated for the different aspects of modeling. The schematics below shows what
 </section>
 <section id="available-models">
 <h3>Available models<a class="headerlink" href="#available-models" title="Permalink to this headline"></a></h3>
-<p><code class="docutils literal notranslate"><span class="pre">pvfactors</span></code> currently provides two irradiance models that can be used interchangeably in the <a class="reference internal" href="../developer/generated/pvfactors.engine.PVEngine.html#pvfactors.engine.PVEngine" title="pvfactors.engine.PVEngine"><code class="xref py py-class docutils literal notranslate"><span class="pre">PVEngine</span></code></a> and with the <a class="reference internal" href="../developer/generated/pvfactors.geometry.pvarray.OrderedPVArray.html#pvfactors.geometry.pvarray.OrderedPVArray" title="pvfactors.geometry.pvarray.OrderedPVArray"><code class="xref py py-class docutils literal notranslate"><span class="pre">OrderedPVArray</span></code></a>, and they are described in more details in the <a class="reference internal" href="../developer/index.html#irradiance-classes"><span class="std std-ref">irradiance developer API</span></a>.</p>
+<p><code class="docutils literal notranslate"><span class="pre">pvfactors</span></code> currently provides two irradiance models that can be used interchangeably in the <a class="reference internal" href="../developer/generated/pvfactors.engine.PVEngine.html#pvfactors.engine.PVEngine" title="pvfactors.engine.PVEngine"><code class="xref py py-class docutils literal notranslate"><span class="pre">PVEngine</span></code></a> and with the <a class="reference internal" href="../developer/generated/pvfactors.geometry.pvarray.OrderedPVArray.html#pvfactors.geometry.pvarray.OrderedPVArray" title="pvfactors.geometry.pvarray.OrderedPVArray"><code class="xref py py-class docutils literal notranslate"><span class="pre">OrderedPVArray</span></code></a>, and they are described in more details in the <a class="reference internal" href="../developer/irradiance.html#irradiance-classes"><span class="std std-ref">irradiance developer API</span></a>.</p>
 <ul class="simple">
 <li><p>the isotropic model <a class="reference internal" href="../developer/generated/pvfactors.irradiance.models.IsotropicOrdered.html#pvfactors.irradiance.models.IsotropicOrdered" title="pvfactors.irradiance.models.IsotropicOrdered"><code class="xref py py-class docutils literal notranslate"><span class="pre">IsotropicOrdered</span></code></a> assumes that all of the diffuse light from the sky dome is isotropic. It is a very intuitive assumption, but it generally leads to less accurate results.</p></li>
 <li><p>the (hybrid) perez model <a class="reference internal" href="../developer/generated/pvfactors.irradiance.models.HybridPerezOrdered.html#pvfactors.irradiance.models.HybridPerezOrdered" title="pvfactors.irradiance.models.HybridPerezOrdered"><code class="xref py py-class docutils literal notranslate"><span class="pre">HybridPerezOrdered</span></code></a> follows <a class="footnote-reference brackets" href="#perez-paper" id="id2">1</a> and assumes that the diffuse light can be broken down into circumsolar, isotropic, and horizon components (see Fig. 3 below). Validation work shows that this model is more accurate for calculating back-side irradiance with <code class="docutils literal notranslate"><span class="pre">pvfactors</span></code>.</p></li>

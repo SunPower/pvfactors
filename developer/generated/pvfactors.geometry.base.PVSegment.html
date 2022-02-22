@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>pvfactors.geometry.base.PVSegment &mdash; pvfactors 1.5.1+0.g3c619d3.dirty documentation</title>
+  <title>pvfactors.geometry.base.PVSegment &mdash; pvfactors 1.5.2 documentation</title>
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/custom.css" type="text/css" />
@@ -34,7 +34,7 @@
             <img src="../../_static/logo_small.png" class="logo" alt="Logo"/>
           </a>
               <div class="version">
-                1.5.1
+                1.5.2
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
@@ -130,14 +130,14 @@
 <h1>pvfactors.geometry.base.PVSegment<a class="headerlink" href="#pvfactors-geometry-base-pvsegment" title="Permalink to this headline"></a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="pvfactors.geometry.base.PVSegment">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">pvfactors.geometry.base.</span></span><span class="sig-name descname"><span class="pre">PVSegment</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">illum_collection=&lt;pvfactors.geometry.base.ShadeCollection</span> <span class="pre">object&gt;</span></em>, <em class="sig-param"><span class="pre">shaded_collection=&lt;pvfactors.geometry.base.ShadeCollection</span> <span class="pre">object&gt;</span></em>, <em class="sig-param"><span class="pre">index=None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pvfactors/geometry/base.html#PVSegment"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pvfactors.geometry.base.PVSegment" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pvfactors.geometry.base.</span></span><span class="sig-name descname"><span class="pre">PVSegment</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">illum_collection=&lt;pvfactors.geometry.base.ShadeCollection</span> <span class="pre">object&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shaded_collection=&lt;pvfactors.geometry.base.ShadeCollection</span> <span class="pre">object&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index=None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pvfactors/geometry/base.html#PVSegment"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pvfactors.geometry.base.PVSegment" title="Permalink to this definition"></a></dt>
 <dd><p>A PV segment will be a collection of 2 collinear and contiguous
 shade collections, a shaded one and an illuminated one. It inherits from
 <code class="xref py py-class docutils literal notranslate"><span class="pre">shapely.geometry.GeometryCollection</span></code>  so that users can still
 call basic geometrical methods and properties on it, eg call length, etc.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="pvfactors.geometry.base.PVSegment.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">illum_collection=&lt;pvfactors.geometry.base.ShadeCollection</span> <span class="pre">object&gt;</span></em>, <em class="sig-param"><span class="pre">shaded_collection=&lt;pvfactors.geometry.base.ShadeCollection</span> <span class="pre">object&gt;</span></em>, <em class="sig-param"><span class="pre">index=None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pvfactors/geometry/base.html#PVSegment.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pvfactors.geometry.base.PVSegment.__init__" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">illum_collection=&lt;pvfactors.geometry.base.ShadeCollection</span> <span class="pre">object&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shaded_collection=&lt;pvfactors.geometry.base.ShadeCollection</span> <span class="pre">object&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index=None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pvfactors/geometry/base.html#PVSegment.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pvfactors.geometry.base.PVSegment.__init__" title="Permalink to this definition"></a></dt>
 <dd><p>Initialize PV segment.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
