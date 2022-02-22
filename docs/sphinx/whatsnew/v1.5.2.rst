@@ -1,7 +1,7 @@
 .. _whatsnew_152:
 
-v1.5.2 (DATE XX, 2021)
-======================
+v1.5.2 (February 22, 2022)
+==========================
 
 Requirements
 ------------
@@ -29,9 +29,11 @@ Fixes
 Maintenance
 -----------
 
+* Update CI including sphinx for documentation (:ghpull:`124`)
 * Add documentation for making new releases (:ghpull:`133`)
 
 Contributors
 ------------
 * Kevin Anderson (:ghuser:`kanderso-nrel`)
 * Marc Anoma (:ghuser:`anomam`)
+* Mark Campanelli (:ghuser:`campanelli-sunpower`)
