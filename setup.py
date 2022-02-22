@@ -28,6 +28,7 @@ CLASSIFIERS = [
     'Programming Language :: Python :: 3.7',
     'Programming Language :: Python :: 3.8',
     'Programming Language :: Python :: 3.9',
+    'Programming Language :: Python :: 3.10',
     'Topic :: Scientific/Engineering',
 ]
 
@@ -47,7 +48,7 @@ setup(name=DISTNAME,
       extras_require={
           'testing': TESTS_REQUIRES,
           'docs': ['Sphinx~=4.0', 'sphinx_rtd_theme', 'nbsphinx',
-                   'sphinxcontrib-napoleon', 'sphinxcontrib_github_alt',
+                   'sphinxcontrib_github_alt',
                    'ipykernel']
       },
       license=LICENSE
