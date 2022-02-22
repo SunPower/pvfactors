@@ -47,7 +47,7 @@ extensions = [
     'sphinx.ext.todo',
     'sphinx.ext.coverage',
     'nbsphinx',
-    'sphinxcontrib.napoleon',
+    'sphinx.ext.napoleon',
     'sphinxcontrib_github_alt'
 ]
 
