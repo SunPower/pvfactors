@@ -228,29 +228,36 @@ class PVEngine(object):
         invrho_ts_diag = np.zeros(shape_system)
         for idx_surf in range(shape_system[1]):
             invrho_ts_diag[:, idx_surf, idx_surf] = invrho_mat[idx_surf, :]
+        del invrho_mat
         # Subtract matrices: will rely on broadcasting
         # shape = n_timesteps, n_surfaces + 1, n_surfaces + 1
         a_mat = invrho_ts_diag - ts_vf_matrix_reshaped
+        del ts_vf_matrix_reshaped
         # solve the linear system a_mat * q0 = irradiance_mat for q0
         q0 = _sparse_solve(a_mat, irradiance_mat)
+        del a_mat
         # Calculate incident irradiance: will rely on broadcasting
         # shape = n_surfaces + 1, n_timesteps
         qinc = np.einsum('ijk,ki->ji', invrho_ts_diag, q0)
+        del invrho_ts_diag
 
         # --- Derive other irradiance terms
         # shape = n_surfaces, n_timesteps
         isotropic_mat = ts_vf_matrix[:-1, -1, :] * irradiance_mat[-1, :]
+        del ts_vf_matrix
         reflection_mat = qinc[:-1, :] - irradiance_mat[:-1, :] - isotropic_mat
-
+        del irradiance_mat
         # --- Calculate AOI losses and absorbed irradiance
         # Create tiled reflection matrix of
         # shape = n_surfaces + 1, n_surfaces + 1, n_timestamps
         rho_ts_tiled = np.moveaxis(np.tile(rho_mat.T, (shape_system[1], 1, 1)),
                                    -1, 0)
+        del rho_mat
         # Get vf AOI matrix
         # shape [n_surfaces + 1, n_surfaces + 1, n_timestamps]
         vf_aoi_matrix = (self.vf_calculator
                          .build_ts_vf_aoi_matrix(pvarray, rho_ts_tiled))
+        del rho_ts_tiled
         pvarray.ts_vf_aoi_matrix = vf_aoi_matrix
         # Get absorbed irradiance matrix
         # shape [n_surfaces, n_timestamps]
@@ -259,6 +266,8 @@ class PVEngine(object):
         # Calculate absorbed irradiance
         qabs = (np.einsum('ijk,jk->ik', vf_aoi_matrix, q0)[:-1, :]
                 + irradiance_abs_mat)
+        del irradiance_abs_mat
+        del vf_aoi_matrix
 
         # --- Update surfaces with values: the lists are ordered by index
         for idx_surf, ts_surface in enumerate(pvarray.all_ts_surfaces):
