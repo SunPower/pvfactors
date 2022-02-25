@@ -2,9 +2,22 @@
 timeseries simulations."""
 
 import numpy as np
+from scipy.sparse import csc_matrix
+from scipy.sparse.linalg import spsolve
 from pvfactors.viewfactors import VFCalculator
 from pvfactors.irradiance import HybridPerezOrdered
 from pvfactors.config import DEFAULT_RHO_FRONT, DEFAULT_RHO_BACK
+
+
+def _sparse_solve(A, b):
+    xs = []
+    for A_slice, b_slice in zip(A, b.T):
+        A_sparse = csc_matrix(A_slice)
+        b_sparse = csc_matrix(b_slice).T
+        x = spsolve(A_sparse, b_sparse)
+        xs.append(x)
+    x = np.stack(xs).T
+    return x
 
 
 class PVEngine(object):
@@ -218,12 +231,8 @@ class PVEngine(object):
         # Subtract matrices: will rely on broadcasting
         # shape = n_timesteps, n_surfaces + 1, n_surfaces + 1
         a_mat = invrho_ts_diag - ts_vf_matrix_reshaped
-        # Calculate inverse, requires specific shape
-        # shape = n_timesteps, n_surfaces + 1, n_surfaces + 1
-        inv_a_mat = np.linalg.inv(a_mat)
-        # Use einstein sum to get final timeseries radiosities
-        # shape = n_surfaces + 1, n_timesteps
-        q0 = np.einsum('ijk,ki->ji', inv_a_mat, irradiance_mat)
+        # solve the linear system a_mat * q0 = irradiance_mat for q0
+        q0 = _sparse_solve(a_mat, irradiance_mat)
         # Calculate incident irradiance: will rely on broadcasting
         # shape = n_surfaces + 1, n_timesteps
         qinc = np.einsum('ijk,ki->ji', invrho_ts_diag, q0)
