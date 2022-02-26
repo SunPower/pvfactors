@@ -1,4 +1,4 @@
-from pvfactors.engine import PVEngine
+from pvfactors.engine import PVEngine, _sparse_solve_3D
 from pvfactors.geometry.pvarray import OrderedPVArray
 from pvfactors.irradiance import IsotropicOrdered, HybridPerezOrdered
 from pvfactors.irradiance.utils import breakup_df_inputs
@@ -709,3 +709,13 @@ def test_engine_variable_albedo(params, df_inputs_clearsky_8760):
     expected_bfg_after_aoi = 14.670709
     np.testing.assert_allclose(bfg, expected_bfg)
     np.testing.assert_allclose(bfg_after_aoi, expected_bfg_after_aoi)
+
+
+def test__sparse_solve_3d():
+    """Verify the sparse solver returns same results as np.linalg.solve"""
+    A = np.random.rand(5, 3, 3)
+    b = np.random.rand(5, 3)
+    x_dense = np.linalg.solve(A, b)
+    x_sparse = _sparse_solve_3D(A, b)
+    assert x_sparse.shape == b.shape
+    np.testing.assert_allclose(x_dense, x_sparse)
