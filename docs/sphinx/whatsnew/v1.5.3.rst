@@ -6,11 +6,16 @@ v1.5.3 (TBD)
 Enhancements
 ------------
 
-* Add python3.10 to test configuration (ghpull:`129`)
+* Add python 3.10 to test configuration (:ghpull:`129`)
+* :py:meth:`pvfactors.engine.PVEngine.run_full_mode` is faster and uses less
+  memory for simulations with large ``n_pvrows`` and many timestamps (:ghpull:`140`)
 
 
 Requirements
 ------------
+
+* ``scipy>=1.2.0`` is now a direct requirement (before now it was only
+  indirectly required through pvlib) (:ghpull:`140`)
 
 
 Bug Fixes

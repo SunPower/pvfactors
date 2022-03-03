@@ -2,9 +2,55 @@
 timeseries simulations."""
 
 import numpy as np
+from scipy.sparse import csc_matrix
+from scipy.sparse.linalg import spsolve
 from pvfactors.viewfactors import VFCalculator
 from pvfactors.irradiance import HybridPerezOrdered
 from pvfactors.config import DEFAULT_RHO_FRONT, DEFAULT_RHO_BACK
+
+
+def _sparse_solve_3D(A: np.ndarray, b: np.ndarray) -> np.ndarray:
+    """
+    Solve the linear system A*x=b for x, where A is sparse (contains mostly
+    zeros).
+
+    For large matrices with many zeros, this is faster and uses less memory
+    than the dense analog `np.linalg.solve`.
+
+    Parameters
+    ----------
+    A : np.ndarray of shape (M, N, N)
+        First dimension is timestamps, second and third are surface dimensions
+    b : np.ndarray of shape (M, N)
+        First dimension is timestamps, second is surfaces
+
+    Returns
+    -------
+    x : np.ndarray of shape (M, N)
+        First dimension is timestamps, second is surfaces
+
+    Notes
+    -----
+    - csc_matrix seemed to be the fastest option of the various
+      sparse matrix formats in scipy.sparse
+    - unfortunately the sparse matrix formats are 2-D only, so
+      iteration across the time dimension is required
+    - scipy 1.8.0 added new sparse arrays (as opposed to sparse matrices);
+      they are 2-D only at time of writing, but in the future if they
+      become N-D then it may make sense to use them here.
+    """
+    if b.size == 0:
+        # prevent ValueError from np.stack call below.
+        # it's empty, so values don't matter -- just shape (and dtype?)
+        return np.zeros_like(b)
+    xs = []
+    for A_slice, b_slice in zip(A, b):
+        A_sparse = csc_matrix(A_slice)
+        b_sparse = csc_matrix(b_slice).T
+        x = spsolve(A_sparse, b_sparse)
+        xs.append(x)
+    x = np.stack(xs)
+    return x
 
 
 class PVEngine(object):
@@ -190,6 +236,14 @@ class PVEngine(object):
         report
             Saved results from the simulation, as specified by user's report
             function. If no function is passed, nothing will be returned.
+
+        Notes
+        -----
+        This function allocates several large arrays, some of which are only
+        needed for part of the function. To reduce peak memory usage, this
+        function uses the `del` statement to allow intermediate arrays to be
+        garbage collected early and the underlying memory to be reused sooner
+        than if the arrays were allowed to go out of scope naturally.
         """
         # Get pvarray
         pvarray = self.pvarray
@@ -215,33 +269,36 @@ class PVEngine(object):
         invrho_ts_diag = np.zeros(shape_system)
         for idx_surf in range(shape_system[1]):
             invrho_ts_diag[:, idx_surf, idx_surf] = invrho_mat[idx_surf, :]
+        del invrho_mat
         # Subtract matrices: will rely on broadcasting
         # shape = n_timesteps, n_surfaces + 1, n_surfaces + 1
         a_mat = invrho_ts_diag - ts_vf_matrix_reshaped
-        # Calculate inverse, requires specific shape
-        # shape = n_timesteps, n_surfaces + 1, n_surfaces + 1
-        inv_a_mat = np.linalg.inv(a_mat)
-        # Use einstein sum to get final timeseries radiosities
-        # shape = n_surfaces + 1, n_timesteps
-        q0 = np.einsum('ijk,ki->ji', inv_a_mat, irradiance_mat)
+        del ts_vf_matrix_reshaped
+        # solve the linear system a_mat * q0 = irradiance_mat for q0
+        q0 = _sparse_solve_3D(a_mat, irradiance_mat.T).T
+        del a_mat
         # Calculate incident irradiance: will rely on broadcasting
         # shape = n_surfaces + 1, n_timesteps
         qinc = np.einsum('ijk,ki->ji', invrho_ts_diag, q0)
+        del invrho_ts_diag
 
         # --- Derive other irradiance terms
         # shape = n_surfaces, n_timesteps
         isotropic_mat = ts_vf_matrix[:-1, -1, :] * irradiance_mat[-1, :]
+        del ts_vf_matrix
         reflection_mat = qinc[:-1, :] - irradiance_mat[:-1, :] - isotropic_mat
-
+        del irradiance_mat
         # --- Calculate AOI losses and absorbed irradiance
         # Create tiled reflection matrix of
         # shape = n_surfaces + 1, n_surfaces + 1, n_timestamps
         rho_ts_tiled = np.moveaxis(np.tile(rho_mat.T, (shape_system[1], 1, 1)),
                                    -1, 0)
+        del rho_mat
         # Get vf AOI matrix
         # shape [n_surfaces + 1, n_surfaces + 1, n_timestamps]
         vf_aoi_matrix = (self.vf_calculator
                          .build_ts_vf_aoi_matrix(pvarray, rho_ts_tiled))
+        del rho_ts_tiled
         pvarray.ts_vf_aoi_matrix = vf_aoi_matrix
         # Get absorbed irradiance matrix
         # shape [n_surfaces, n_timestamps]
@@ -250,6 +307,8 @@ class PVEngine(object):
         # Calculate absorbed irradiance
         qabs = (np.einsum('ijk,jk->ik', vf_aoi_matrix, q0)[:-1, :]
                 + irradiance_abs_mat)
+        del irradiance_abs_mat
+        del vf_aoi_matrix
 
         # --- Update surfaces with values: the lists are ordered by index
         for idx_surf, ts_surface in enumerate(pvarray.all_ts_surfaces):

@@ -1,4 +1,4 @@
-from pvfactors.engine import PVEngine
+from pvfactors.engine import PVEngine, _sparse_solve_3D
 from pvfactors.geometry.pvarray import OrderedPVArray
 from pvfactors.irradiance import IsotropicOrdered, HybridPerezOrdered
 from pvfactors.irradiance.utils import breakup_df_inputs
@@ -709,3 +709,36 @@ def test_engine_variable_albedo(params, df_inputs_clearsky_8760):
     expected_bfg_after_aoi = 14.670709
     np.testing.assert_allclose(bfg, expected_bfg)
     np.testing.assert_allclose(bfg_after_aoi, expected_bfg_after_aoi)
+
+
+def test__sparse_solve_3d():
+    """Verify the sparse solver returns same results as np.linalg.solve"""
+    A = np.random.rand(5, 3, 3)
+    b = np.random.rand(5, 3)
+    x_dense = np.linalg.solve(A, b)
+    x_sparse = _sparse_solve_3D(A, b)
+    assert x_sparse.shape == b.shape
+    np.testing.assert_allclose(x_dense, x_sparse)
+
+
+def test_engine_empty_inputs(params, df_inputs_clearsky_8760):
+    """Empty inputs yields empty outputs"""
+    df_inputs = df_inputs_clearsky_8760.iloc[:0]
+    timestamps = df_inputs.index
+    dni = df_inputs.dni.values
+    dhi = df_inputs.dhi.values
+    solar_zenith = df_inputs.solar_zenith.values
+    solar_azimuth = df_inputs.solar_azimuth.values
+    surface_tilt = df_inputs.surface_tilt.values
+    surface_azimuth = df_inputs.surface_azimuth.values
+
+    # Run engine
+    pvarray = OrderedPVArray.init_from_dict(params)
+    eng = PVEngine(pvarray)
+    eng.fit(timestamps, dni, dhi, solar_zenith, solar_azimuth, surface_tilt,
+            surface_azimuth, params['rho_ground'])
+    qinc = eng.run_full_mode(
+        fn_build_report=lambda pvarray: (pvarray.ts_pvrows[1]
+                                         .back.get_param_weighted('qinc')))
+
+    assert len(qinc) == 0
