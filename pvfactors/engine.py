@@ -39,6 +39,10 @@ def _sparse_solve_3D(A: np.ndarray, b: np.ndarray) -> np.ndarray:
       they are 2-D only at time of writing, but in the future if they
       become N-D then it may make sense to use them here.
     """
+    if b.size == 0:
+        # prevent ValueError from np.stack call below.
+        # it's empty, so values don't matter -- just shape (and dtype?)
+        return np.zeros_like(b)
     xs = []
     for A_slice, b_slice in zip(A, b):
         A_sparse = csc_matrix(A_slice)
